@@ -23,8 +23,8 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpRecoverableException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.NTCredentials;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.util.DateParseException;
@@ -41,10 +41,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Locale;
-import java.util.Date;
-import java.util.TimeZone;
 import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -146,7 +146,7 @@ public class HttpWagon
 
         try
         {
-            InputStream is = new PutInputStream( source, resource, this, getTransferEventSupport()  );
+            InputStream is = new PutInputStream( source, resource, this, getTransferEventSupport() );
 
             putMethod.setRequestBody( is );
         }
@@ -195,7 +195,7 @@ public class HttpWagon
             case HttpStatus.SC_OK:
                 break;
 
-             case HttpStatus.SC_CREATED:
+            case HttpStatus.SC_CREATED:
                 break;
 
             case SC_NULL:
@@ -224,31 +224,32 @@ public class HttpWagon
     }
 
     public void get( String resourceName, File destination )
-       throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         get( resourceName, destination, 0 );
     }
 
-    public boolean getIfNewer( String resourceName, File destination, long timestamp ) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    public boolean getIfNewer( String resourceName, File destination, long timestamp )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         return get( resourceName, destination, timestamp );
     }
 
     /**
-     *
      * @param resourceName
      * @param destination
-     * @param timestamp the timestamp to check against, only downloading if newer. If <code>0</code>, always download
-     * @return
+     * @param timestamp    the timestamp to check against, only downloading if newer. If <code>0</code>, always download
+     * @return <code>true</code> if newer version was downloaded, <code>false</code> otherwise.
      * @throws TransferFailedException
      * @throws ResourceDoesNotExistException
      * @throws AuthorizationException
-     *
-     * @return <code>true</code> if newer version was downloaded, <code>false</code> otherwise.
      */
     public boolean get( String resourceName, File destination, long timestamp )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
+        Resource resource = new Resource( resourceName );
+
+        fireGetInitiated( resource, destination );
 
         boolean retValue = false;
 
@@ -332,8 +333,6 @@ public class HttpWagon
                                                        statusCode );
             }
 
-            Resource resource = new Resource( resourceName );
-
             InputStream is = null;
 
             Header contentLengthHeader = getMethod.getResponseHeader( "Content-Length" );
@@ -348,7 +347,8 @@ public class HttpWagon
                 }
                 catch ( NumberFormatException e )
                 {
-                    fireTransferDebug( "error parsing content length header '" + contentLengthHeader.getValue() + "' " + e );
+                    fireTransferDebug(
+                        "error parsing content length header '" + contentLengthHeader.getValue() + "' " + e );
                 }
             }
 
@@ -388,7 +388,7 @@ public class HttpWagon
                     {
                         boolean deleted = destination.delete();
 
-                        if ( ! deleted )
+                        if ( !deleted )
                         {
                             destination.deleteOnExit();
                         }
