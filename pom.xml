@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>maven</groupId>
   <artifactId>wagon</artifactId>  
-  <version>0.9-SNAPSHOT</version>
+  <version>1.0-alpha-1-SNAPSHOT</version>
   <name>Wagon</name>
   <description>Tools to manage artifacts and deployment</description>
   <shortDescription>Tools to manage artifacts and deployment</shortDescription>
