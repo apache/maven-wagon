@@ -105,10 +105,6 @@ public abstract class AbstractWagon
         {
             transfer( resource, input, output, TransferEvent.REQUEST_GET );
 
-            shutdownStream( input );
-
-            shutdownStream( output );
-
         }
         catch ( IOException e )
         {
@@ -129,6 +125,13 @@ public abstract class AbstractWagon
             throw new TransferFailedException( msg, e );
 
         }
+        finally
+        {
+            shutdownStream( input );
+
+            shutdownStream( output );
+
+        }
 
         fireGetCompleted( resource, destination );
     }
@@ -142,12 +145,6 @@ public abstract class AbstractWagon
         {
             transfer( resource, input, output, TransferEvent.REQUEST_PUT );
 
-            shutdownStream( input );
-
-            if ( closeOutput )
-            {
-                shutdownStream( output );
-            }
         }
         catch ( IOException e )
         {
@@ -157,7 +154,15 @@ public abstract class AbstractWagon
 
             throw new TransferFailedException( msg, e );
         }
+        finally
+        {
+            shutdownStream( input );
 
+            if ( closeOutput )
+            {
+                shutdownStream( output );
+            }
+        }
         firePutCompleted( resource, source );
     }
 
