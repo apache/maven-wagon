@@ -6,7 +6,7 @@
   <groupId>maven</groupId>
   <artifactId>wagon</artifactId>
   <name>Wagon</name>
-  <currentVersion>1.0-beta-1</currentVersion>
+  <currentVersion>0.9-SNAPSHOT</currentVersion>
   <description></description>
   <shortDescription>Tools to manage artifacts and deployment</shortDescription>
   <package>org.apache.maven.wagon</package>
