@@ -194,8 +194,35 @@ public class HttpWagon
     }
 
     public void get( String resourceName, File destination )
+       throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        get( resourceName, destination, 0, false );
+    }
+
+    public boolean getIfNewer( String resourceName, File destination, long timestamp ) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        return get( resourceName, destination, timestamp, true );
+    }
+
+    /**
+     *
+     * @param resourceName
+     * @param destination
+     * @param timestamp
+     * @param newerRequired
+     * @return
+     * @throws TransferFailedException
+     * @throws ResourceDoesNotExistException
+     * @throws AuthorizationException
+     *
+     * @return <code>true</code> if newer version was downloaded, <code>false</code> otherwise.
+     */
+    public boolean get( String resourceName, File destination, long timestamp, boolean newerRequired )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
+
+        boolean retValue = false;
+
         String url = getRepository().getUrl() + "/" + resourceName;
 
         GetMethod getMethod = new GetMethod( url );
@@ -207,7 +234,6 @@ public class HttpWagon
         getMethod.addRequestHeader( "Pragma", "no-cache" );
 
         getMethod.addRequestHeader( "Expires", "0" );
-
 
         int statusCode = SC_NULL;
 
@@ -260,10 +286,6 @@ public class HttpWagon
 
         Resource resource = new Resource( resourceName );
 
-        resource.setLastModified( 0 );
-
-        resource.setContentLength( 0 );
-
         InputStream is = null;
 
         Header contentLengthHeader = getMethod.getResponseHeader( "Content-Length" );
@@ -301,36 +323,47 @@ public class HttpWagon
 
             fireTransferDebug( "last-modified = " + lastModifiedHeader.getValue() + " (" + lastModified + ")" );
         }
-        try
-        {
-            is = getMethod.getResponseBodyAsStream();
 
-            getTransfer( resource, destination, is );
-        }
-        catch ( Exception e )
-        {
-            fireTransferError( resource, e );
+        //@todo have to check how m1 does it
+        boolean isNewer = timestamp < lastModified;
 
-            if ( destination.exists() )
+        if(  ( isNewer && newerRequired )  || ( !newerRequired )  )
+        {
+            retValue = true;
+
+            try
             {
-                boolean deleted = destination.delete();
+                is = getMethod.getResponseBodyAsStream();
 
-                if ( ! deleted )
+                getTransfer( resource, destination, is );
+            }
+            catch ( Exception e )
+            {
+                fireTransferError( resource, e );
+
+                if ( destination.exists() )
                 {
-                    destination.deleteOnExit();
+                    boolean deleted = destination.delete();
+
+                    if ( ! deleted )
+                    {
+                        destination.deleteOnExit();
+                    }
                 }
+
+                String msg = "Error occured while deploying to remote repository:" + getRepository();
+
+                throw new TransferFailedException( msg, e );
+            }
+            finally
+            {
+                shutdownStream( is );
             }
 
-            String msg = "Error occured while deploying to remote repository:" + getRepository();
-
-            throw new TransferFailedException( msg, e );
         }
-        finally
-        {
-            shutdownStream( is );
-        }
-
         getMethod.releaseConnection();
+
+        return retValue;
     }
 
     public int getNumberOfAttempts()
