@@ -127,17 +127,13 @@ public class ScpWagon
                 }
             }
 
-            ProxyInfo proxyInfo = getRepository().getProxyInfo();
-
             if ( proxyInfo != null && proxyInfo.getHost() != null )
             {
                 Proxy proxy;
 
                 int proxyPort = proxyInfo.getPort();
 
-                // HACK:
-                //if port == 1080 we will use SOCKS5 Proxy
-                // otherwise will use HTTP Proxy
+                // HACK: if port == 1080 we will use SOCKS5 Proxy, otherwise will use HTTP Proxy
                 if ( proxyPort == SOCKS5_PROXY_PORT )
                 {
                     proxy = new ProxySOCKS5( proxyInfo.getHost() );
