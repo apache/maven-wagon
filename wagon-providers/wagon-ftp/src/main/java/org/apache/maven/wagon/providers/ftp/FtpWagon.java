@@ -20,18 +20,25 @@ import org.apache.commons.net.ProtocolCommandEvent;
 import org.apache.commons.net.ProtocolCommandListener;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPReply;
 import org.apache.commons.net.ftp.FTPFile;
-import org.apache.maven.wagon.*;
-import org.apache.maven.wagon.resource.Resource;
-import org.apache.maven.wagon.events.TransferListener;
+import org.apache.commons.net.ftp.FTPReply;
+import org.apache.maven.wagon.ConnectionException;
+import org.apache.maven.wagon.InputData;
+import org.apache.maven.wagon.OutputData;
+import org.apache.maven.wagon.PathUtils;
+import org.apache.maven.wagon.ResourceDoesNotExistException;
+import org.apache.maven.wagon.StreamWagon;
+import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.repository.RepositoryPermissions;
+import org.apache.maven.wagon.resource.Resource;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.File;
 
 public class FtpWagon
     extends StreamWagon
@@ -146,10 +153,26 @@ public class FtpWagon
     {
         try
         {
+            // TODO [BP]: verify the order is correct
             ftp.completePendingCommand();
+
+            RepositoryPermissions permissions = repository.getPermissions();
+
+            if ( permissions != null && permissions.getGroup() != null )
+            {
+                // ignore failures
+                ftp.sendSiteCommand( "CHGRP " + permissions.getGroup() );
+            }
+
+            if ( permissions != null && permissions.getFileMode() != null )
+            {
+                // ignore failures
+                ftp.sendSiteCommand( "CHMOD " + permissions.getFileMode() );
+            }
         }
         catch ( IOException e )
         {
+            // TODO: handle
             // michal I am not sure  what error means in that context
             // I think that we will be able to recover or simply we will fail later on
         }
@@ -199,15 +222,38 @@ public class FtpWagon
 
         Resource resource = outputData.getResource();
 
+        RepositoryPermissions permissions = repository.getPermissions();
+
         try
         {
             String[] dirs = PathUtils.dirnames( resource.getName() );
 
             for ( int i = 0; i < dirs.length; i++ )
             {
-                ftp.makeDirectory( dirs[i] );
-
                 boolean dirChanged = ftp.changeWorkingDirectory( dirs[i] );
+
+                if ( !dirChanged )
+                {
+                    // first, try to create it
+                    boolean success = ftp.makeDirectory( dirs[i] );
+
+                    if ( success )
+                    {
+                        if ( permissions != null && permissions.getGroup() != null )
+                        {
+                            // ignore failures
+                            ftp.sendSiteCommand( "CHGRP " + permissions.getGroup() );
+                        }
+
+                        if ( permissions != null && permissions.getDirectoryMode() != null )
+                        {
+                            // ignore failures
+                            ftp.sendSiteCommand( "CHMOD " + permissions.getDirectoryMode() );
+                        }
+
+                        dirChanged = ftp.changeWorkingDirectory( dirs[i] );
+                    }
+                }
 
                 if ( !dirChanged )
                 {
@@ -221,13 +267,16 @@ public class FtpWagon
             // FTP wagon is ready for next requests
             for ( int i = 0; i < dirs.length; i++ )
             {
-                ftp.changeWorkingDirectory( ".." );
+                if ( !ftp.changeWorkingDirectory( ".." ) )
+                {
+                    throw new TransferFailedException( "Unable to return to the base directory" );
+                }
             }
 
 
             os = ftp.storeFileStream( resource.getName() );
 
-            if ( os == null)
+            if ( os == null )
             {
                 String msg = "Cannot transfer resource:  '" +
                         resource + "' Output stream is null. FTP Server response: " +
