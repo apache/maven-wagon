@@ -50,17 +50,12 @@ public class Md5SumObserver implements TransferListener
 
     public void transferCompleted( TransferEvent transferEvent )
     {
-        // here we can do we need to have possibility to transfer to memory:
-        //Wagon wagon = transferEvent.getWagon();
-        //
-        //String resource transferEvent.getResource();
-        //
-        //String md5 = wagon.getToString( resource + ".md5" );
+        
     }
 
     public void transferError( TransferEvent transferEvent )
     {
-        // TODO Auto-generated method stub
+        
         
     }
 
@@ -76,11 +71,45 @@ public class Md5SumObserver implements TransferListener
        
        if ( md5Digester != null )
        {
-           retValue = new String ( md5Digester.digest() );
+           retValue = encode ( md5Digester.digest() );
        }
        
        return retValue;
        
     }
+    
+    /**
+     * Encodes a 128 bit (16 bytes) byte array into a 32 character String.
+     * XXX I think it should at least throw an IllegalArgumentException rather than return null
+     *
+     * @param binaryData Array containing the digest
+     * @return Encoded hex string, or null if encoding failed
+     */
+    protected String encode( byte[] binaryData )
+    {
+        if ( binaryData.length != 16 )
+        {
+            return null;
+        }
+
+        String result = "";
+
+        for ( int i = 0; i < 16; i++ )
+        {
+            String t = Integer.toHexString( binaryData[i] & 0xff );
+
+            if ( t.length() == 1 )
+            {
+                result += ( "0" + t );
+            }
+            else
+            {
+                result += t;
+            }
+        }
+
+        return result;
+    }
+    
     
 }
