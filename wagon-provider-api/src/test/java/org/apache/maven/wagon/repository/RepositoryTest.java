@@ -70,6 +70,8 @@ public class RepositoryTest
 
         repository.setUrl( "http://www.ibiblio.org" );
 
+        assertEquals( "http://www.ibiblio.org", repository.getUrl() );
+
         assertEquals( "http", repository.getProtocol() );
 
         assertEquals( "www.ibiblio.org", repository.getHost() );
@@ -95,5 +97,14 @@ public class RepositoryTest
         repository.setBasedir( "basedir" );
 
         assertEquals( "basedir", repository.getBasedir() );
+
+        repository.setUrl( "http://brett:porter@www.ibiblio.org" );
+
+        assertEquals( "http://www.ibiblio.org", repository.getUrl() );
+
+        repository.setUrl( "http://brett@www.ibiblio.org" );
+
+        assertEquals( "http://www.ibiblio.org", repository.getUrl() );
+
     }
 }

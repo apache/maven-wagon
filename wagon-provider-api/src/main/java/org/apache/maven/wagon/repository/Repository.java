@@ -142,10 +142,19 @@ public class Repository
 
             String password = PathUtils.password( url );
 
+            String userInfo = username;
+
             if ( password != null )
             {
                 authenticationInfo.setPassword( password );
+
+                userInfo += ":" + password;
             }
+
+            userInfo += "@";
+
+            int index = url.indexOf( userInfo );
+            this.url = url.substring( 0, index ) + url.substring( index + userInfo.length() );
         }
     }
 
