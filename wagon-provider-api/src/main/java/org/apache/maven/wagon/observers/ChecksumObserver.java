@@ -19,10 +19,10 @@ package org.apache.maven.wagon.observers;
 
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.WagonUtils;
-import org.apache.maven.wagon.util.FileUtils;
-import org.apache.maven.wagon.util.IoUtils;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferListener;
+import org.apache.maven.wagon.util.FileUtils;
+import org.apache.maven.wagon.util.IoUtils;
 
 import java.io.File;
 import java.io.InputStream;
@@ -176,11 +176,8 @@ public class ChecksumObserver implements TransferListener
         }    
         finally
         {
-            if ( inputStream != null )
-            {
-                 IoUtils.close( inputStream );
-            }            
-            
+            IoUtils.close( inputStream );
+
             transferingMd5 = false;
         }
         
