@@ -17,6 +17,8 @@ package org.apache.maven.wagon;
  * ====================================================================
  */
 
+import org.apache.maven.wagon.resource.Resource;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -42,40 +44,65 @@ public class MockWagon
 
 
 
-    public InputStream getInputStream( String resource )
+    public InputData getInputData( String resource )
         throws TransferFailedException
     {
+
+        InputData inputData = new InputData();
+
+        Resource res = new Resource();
+
+        res.setName( resource );
+
+        inputData.setResource( res );
+
+        InputStream is;
+
         if ( errorInputStream )
         {
-            MockInputStream is = new MockInputStream();
 
-            is.setForcedError( true );
 
-            return is;
+            MockInputStream mockInputStream = new MockInputStream();
+
+            mockInputStream.setForcedError( true );
+
+            is = mockInputStream;
+
+        }
+        else
+        {
+           byte[] buffer = new byte[1024 * 4 * 5];
+
+           is = new ByteArrayInputStream( buffer );
         }
 
-        byte[] buffer = new byte[1024 * 4 * 5];
-
-        ByteArrayInputStream is = new ByteArrayInputStream( buffer );
-
-        return is;
+        inputData.setInputStream( is );
+        
+        return inputData;
     }
 
-    public OutputStream getOutputStream( String resource )
+    public OutputData getOutputData( String resource )
         throws TransferFailedException
     {
+        OutputData outputData = new OutputData();
+
+        OutputStream os;
         if ( errorInputStream )
         {
-            MockOutputStream os = new MockOutputStream();
+            MockOutputStream mockOutputStream = new MockOutputStream();
 
-            os.setForcedError( true );
+            mockOutputStream.setForcedError( true );
 
-            return os;
+            os = mockOutputStream;
+        }
+        else
+        {
+            os = new ByteArrayOutputStream();
         }
 
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        outputData.setOutputStream( os );
 
-        return os;
+        return outputData;
     }
 
     public void openConnection()

@@ -47,8 +47,6 @@ public class Repository
 
     private String protocol;
 
-    private String layout;
-
     private String url;
 
     private ProxyInfo proxyInfo;

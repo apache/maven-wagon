@@ -18,6 +18,7 @@ package org.apache.maven.wagon.events;
  */
 
 import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.resource.Resource;
 
 import java.io.File;
 
@@ -49,7 +50,7 @@ public class TransferEvent extends WagonEvent
     /** Indicates PUT transfer (to the repository)*/
     public final static int REQUEST_PUT = 6;
 
-    private String resource;
+    private Resource resource;
 
     private int eventType;
     
@@ -62,7 +63,7 @@ public class TransferEvent extends WagonEvent
 
     public TransferEvent(
             final Wagon wagon,
-            final String resource,
+            final Resource resource,
             final int eventType,
             final int requestType )
     {
@@ -78,7 +79,7 @@ public class TransferEvent extends WagonEvent
 
     public TransferEvent(
             final Wagon wagon,
-            final String resource,
+            final Resource resource,
             final Exception exception )
     {
         super( wagon );
@@ -96,7 +97,7 @@ public class TransferEvent extends WagonEvent
     /**
      * @return Returns the resource.
      */
-    public String getResource()
+    public Resource getResource()
     {
         return resource;
     }
@@ -189,7 +190,7 @@ public class TransferEvent extends WagonEvent
     /**
      * @param resource The resource to set.
      */
-    public void setResource( final String resource )
+    public void setResource( final Resource resource )
     {
         this.resource = resource;
     }

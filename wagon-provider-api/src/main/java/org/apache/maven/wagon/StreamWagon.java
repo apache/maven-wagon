@@ -23,7 +23,12 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 import java.io.*;
 
 
-
+/**
+ * Base class for wagon which provide stream based API.
+ * 
+ * @author <a href="mailto:michal@codehaus.org">Michal Maczka</a>
+ * @version $Id$
+ */
 public abstract class StreamWagon
     extends AbstractWagon
 {
@@ -31,10 +36,10 @@ public abstract class StreamWagon
     //
     // ----------------------------------------------------------------------
 
-    public abstract InputStream getInputStream( String resource )
+    public abstract InputData getInputData( String resource )
         throws TransferFailedException, ResourceDoesNotExistException;
 
-    public abstract OutputStream getOutputStream( String resource )
+    public abstract OutputData getOutputData( String resource )
         throws TransferFailedException;
 
     public abstract void openConnection()
@@ -50,27 +55,31 @@ public abstract class StreamWagon
     public void get( String resource, File destination )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        InputStream is = getInputStream( resource );
+        InputData inputData = getInputData( resource );
+
+        InputStream is = inputData.getInputStream();
 
         if ( is == null )
         {
             throw new TransferFailedException( getRepository().getUrl() + " - Could not open input stream for resource: '" + resource+ "'" );
         }
 
-        getTransfer( resource, destination, is );
+        getTransfer( inputData.getResource(), destination, is );
     }
 
     // source doesn't exist exception
     public void put( File source, String resource )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        OutputStream os = getOutputStream( resource );
+        OutputData outputData = getOutputData( resource );
+
+        OutputStream os = outputData.getOutputStream( );
 
         if ( os == null )
         {
             throw new TransferFailedException( getRepository().getUrl() + " - Could not open output stream for resource: '" + resource+ "'" );
         }
 
-        putTransfer( resource, source, os, true );
+        putTransfer( outputData.getResource(), source, os, true );
     }
 }

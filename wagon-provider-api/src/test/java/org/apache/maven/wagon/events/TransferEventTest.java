@@ -22,6 +22,7 @@ import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.MockWagon;
+import org.apache.maven.wagon.resource.Resource;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -30,34 +31,32 @@ import org.apache.maven.wagon.MockWagon;
 public class TransferEventTest extends TestCase
 {
 
+    public TransferEventTest( final String name )
+    {
+        super( name );
+    }
+
     /*
-	 * @see TestCase#setUp()
-	 */
+     * @see TestCase#setUp()
+     */
     protected void setUp() throws Exception
     {
         super.setUp();
     }
 
-    /**
-     * Constructor for TransferEventTest.
-     * 
-     * @param arg0 
-     */
-    public TransferEventTest( final String arg0 )
-    {
-        super( arg0 );
-    }
+
 
     /*
-	 * Class to test for void TransferEvent(Wagon, Repository, String, int,
-	 * int)
-	 */
+     * Class to test for void TransferEvent(Wagon, Repository, String, int,
+     * int)
+    */
     public void testTransferEventProperties()
     {
 
         final Wagon wagon = new MockWagon();
 
         final Repository repo = new Repository();
+
         try
         {
             wagon.connect( repo );
@@ -70,29 +69,38 @@ public class TransferEventTest extends TestCase
 
         final Exception exception = new AuthenticationException( "dummy" );
 
+        Resource resource = new Resource();
+
+        resource.setName( "mm" );
+
         TransferEvent event =
                 new TransferEvent(
                         wagon,
-                        "mm",
+                        resource,
                         TransferEvent.TRANSFER_COMPLETED,
                         TransferEvent.REQUEST_GET );
 
         assertEquals( wagon, event.getWagon() );
 
         assertEquals( repo, event.getWagon().getRepository() );
-        assertEquals( "mm", event.getResource() );
+        
+        assertEquals( "mm", event.getResource().getName() );
 
         assertEquals( TransferEvent.TRANSFER_COMPLETED, event.getEventType() );
 
         assertEquals( TransferEvent.REQUEST_GET, event.getRequestType() );
 
-        event = new TransferEvent( wagon,  "mm", exception );
+        Resource res = new Resource();
+
+        res.setName( "mm" );
+
+        event = new TransferEvent( wagon,  res, exception );
 
         assertEquals( wagon, event.getWagon() );
 
         assertEquals( repo, event.getWagon().getRepository() );
 
-        assertEquals( "mm", event.getResource() );
+        assertEquals( "mm", event.getResource().getName() );
 
         assertEquals( TransferEvent.TRANSFER_ERROR, event.getEventType() );
 
@@ -104,9 +112,11 @@ public class TransferEventTest extends TestCase
 
         assertEquals( null, event.getResource() );
 
-        event.setResource( "/foo/baa" );
+        res.setName(  "/foo/baa" );
 
-        assertEquals( "/foo/baa", event.getResource() );
+        event.setResource( res );
+
+        assertEquals( "/foo/baa", event.getResource().getName() );
 
         event.setException( null );
 
@@ -162,6 +172,7 @@ public class TransferEventTest extends TestCase
         }
         catch ( IllegalArgumentException e )
         {
+            //we expect to be here
         }
 
 

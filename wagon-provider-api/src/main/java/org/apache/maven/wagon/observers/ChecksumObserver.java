@@ -141,7 +141,7 @@ public class ChecksumObserver implements TransferListener
         {
             int type = transferEvent.getRequestType();
                                     
-            String resource = transferEvent.getResource();
+            String resource = transferEvent.getResource().getName();
             
             String extension = ( String ) algorithmExtensionMap.get( algorithm );
             

@@ -20,6 +20,7 @@ package org.apache.maven.wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.events.*;
 import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.resource.Resource;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,7 +40,7 @@ public abstract class AbstractWagon
 {
     private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
 
-    protected Repository source;
+    protected Repository repository;
 
     protected SessionEventSupport sessionEventSupport = new SessionEventSupport();
 
@@ -51,22 +52,22 @@ public abstract class AbstractWagon
 
     public Repository getRepository()
     {
-        return source;
+        return repository;
     }
 
     // ----------------------------------------------------------------------
     // Connection
     // ----------------------------------------------------------------------
 
-    public void connect( Repository source ) throws 
+    public void connect( Repository repository ) throws
       ConnectionException, AuthenticationException
     {
-        if ( source == null )
+        if ( repository == null )
         {
             throw new IllegalStateException( "The repository specified cannot be null." );
         }
 
-        this.source = source;
+        this.repository = repository;
 
         fireSessionOpening();
 
@@ -109,7 +110,7 @@ public abstract class AbstractWagon
     // Stream i/o
     // ----------------------------------------------------------------------
 
-    protected void getTransfer( String resource, File destination, InputStream input )
+    protected void getTransfer( Resource resource, File destination, InputStream input )
         throws TransferFailedException
     {
         fireGetStarted( resource, destination );
@@ -134,7 +135,7 @@ public abstract class AbstractWagon
                 }
             }
 
-            String msg = "GET request of: " + resource + " from " + source.getName() + "failed";
+            String msg = "GET request of: " + resource + " from " + repository.getName() + "failed";
 
             throw new TransferFailedException( msg, e );
 
@@ -150,7 +151,7 @@ public abstract class AbstractWagon
         fireGetCompleted( resource, destination );
     }
 
-    protected void putTransfer(String resource, File source, OutputStream output, boolean closeOutput )
+    protected void putTransfer( Resource resource, File source, OutputStream output, boolean closeOutput )
         throws TransferFailedException
     {
         firePutStarted( resource, source );
@@ -165,6 +166,7 @@ public abstract class AbstractWagon
         try
         {
             input = new FileInputStream( source );
+
             transfer( resource, input, output, TransferEvent.REQUEST_PUT );
         }
         catch ( IOException e )
@@ -187,12 +189,12 @@ public abstract class AbstractWagon
         firePutCompleted( resource, source );
     }
 
-    protected void transfer( String resource, InputStream input, OutputStream output, int requestType )
+    protected void transfer( Resource resource, InputStream input, OutputStream output, int requestType )
         throws IOException
     {
         byte[] buffer = new byte[ DEFAULT_BUFFER_SIZE ];
 
-        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_PROGRESS, requestType );
+        TransferEvent transferEvent = new TransferEvent( this, resource , TransferEvent.TRANSFER_PROGRESS, requestType );
 
         while ( true )                                               
         {
@@ -248,7 +250,7 @@ public abstract class AbstractWagon
         transferEventSupport.fireTransferProgress( transferEvent, buffer, n );
     }
 
-    protected void fireGetCompleted( String resource, File localFile )
+    protected void fireGetCompleted( Resource resource, File localFile )
     {
         long timestamp = System.currentTimeMillis();
 
@@ -262,7 +264,7 @@ public abstract class AbstractWagon
         transferEventSupport.fireTransferCompleted( transferEvent );
     }
 
-    protected void fireGetStarted( String resource, File localFile )
+    protected void fireGetStarted( Resource resource, File localFile )
     {
         long timestamp = System.currentTimeMillis();
 
@@ -276,7 +278,7 @@ public abstract class AbstractWagon
         transferEventSupport.fireTransferStarted( transferEvent );
     }
 
-    protected void firePutCompleted( String resource, File localFile )
+    protected void firePutCompleted( Resource resource, File localFile )
     {
         long timestamp = System.currentTimeMillis();
 
@@ -290,7 +292,7 @@ public abstract class AbstractWagon
         transferEventSupport.fireTransferCompleted( transferEvent );
     }
 
-    protected void firePutStarted( String resource, File localFile )
+    protected void firePutStarted( Resource resource, File localFile )
     {
         long timestamp = System.currentTimeMillis();
 
@@ -434,7 +436,7 @@ public abstract class AbstractWagon
         sessionEventSupport.removeSessionListener( listener );
     }
 
-    protected void fireTransferError( String resource, Exception e )
+    protected void fireTransferError( Resource resource, Exception e )
     {
         TransferEvent transferEvent = new TransferEvent( this, resource, e );
 

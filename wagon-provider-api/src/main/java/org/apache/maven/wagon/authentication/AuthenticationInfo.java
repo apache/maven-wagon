@@ -25,6 +25,8 @@ import java.io.Serializable;
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
+ *
+ * @todo michal: I added fileMode,directoryMode as it was uses in test classes. I am not sure why we need them.
  */
 public class AuthenticationInfo implements Serializable
 {
@@ -44,7 +46,11 @@ public class AuthenticationInfo implements Serializable
     /** The absolute path to private key file */
     private String privateKey;
 
-    
+    private String directoryMode;
+
+    private String fileMode;
+
+
     /**
      * Get the passphrase of the private key file. The passphrase is used only
      * when host/protocol supports authentication via exchange of
@@ -149,4 +155,20 @@ public class AuthenticationInfo implements Serializable
         this.userName = userName;
     }
 
+
+    public String getDirectoryMode() {
+        return directoryMode;
+    }
+
+    public void setDirectoryMode(String directoryMode) {
+        this.directoryMode = directoryMode;
+    }
+
+    public String getFileMode() {
+        return fileMode;
+    }
+
+    public void setFileMode(String fileMode) {
+        this.fileMode = fileMode;
+    }
 }
