@@ -65,8 +65,7 @@ public class Repository
     {
 
     }
-
-
+    
     public Repository( String id, String url )
     {
         setId( id );
@@ -74,6 +73,14 @@ public class Repository
         setUrl( url );
     }
 
+    public Repository( String id, String url, AuthenticationInfo authenticationInfo )
+    {
+        setId( id );
+        
+        setUrl( url );
+        
+        this.authenticationInfo = authenticationInfo;
+    }
 
     public String getId()
     {
