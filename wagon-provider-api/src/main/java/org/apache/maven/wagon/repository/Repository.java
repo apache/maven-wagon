@@ -48,6 +48,8 @@ public class Repository
 
     private String url;
 
+    private RepositoryPermissions permissions;
+
     private AuthenticationInfo authenticationInfo;
 
 
@@ -180,5 +182,15 @@ public class Repository
     public String getProtocol()
     {
         return protocol;
+    }
+
+    public RepositoryPermissions getPermissions()
+    {
+        return permissions;
+    }
+
+    public void setPermissions( RepositoryPermissions permissions )
+    {
+        this.permissions = permissions;
     }
 }

@@ -60,19 +60,6 @@ public class AuthenticationInfoTest
         assertEquals( "password", authenticationInfo.getPassword() );
 
 
-        authenticationInfo.setDirectoryMode( "directoryMode" );
-
-        assertEquals( "directoryMode", authenticationInfo.getDirectoryMode() );
-
-        authenticationInfo.setFileMode( "fileMode" );
-
-        assertEquals( "fileMode", authenticationInfo.getFileMode() );
-
-        authenticationInfo.setGroup( "group" );
-
-        assertEquals( "group", authenticationInfo.getGroup() );
-
-
         authenticationInfo.setPassphrase( "passphrase" );
 
         assertEquals( "passphrase", authenticationInfo.getPassphrase() );

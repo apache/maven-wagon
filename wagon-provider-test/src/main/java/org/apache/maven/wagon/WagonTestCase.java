@@ -24,6 +24,7 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.observers.ChecksumObserver;
 import org.apache.maven.wagon.observers.Debug;
 import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.repository.RepositoryPermissions;
 
 import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.util.FileUtils;
@@ -98,6 +99,8 @@ public abstract class WagonTestCase
 
         testRepository.setAuthenticationInfo( getAuthInfo() );
 
+        testRepository.setPermissions( getPermissions() );
+
         // ----------------------------------------------------------------------
         // Create a test local repository.
         // ----------------------------------------------------------------------
@@ -139,6 +142,11 @@ public abstract class WagonTestCase
     protected AuthenticationInfo getAuthInfo()
     {
         return new AuthenticationInfo();
+    }
+
+    protected RepositoryPermissions getPermissions()
+    {
+        return new RepositoryPermissions();
     }
 
     protected Wagon getWagon()

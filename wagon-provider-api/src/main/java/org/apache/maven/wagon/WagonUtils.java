@@ -152,6 +152,8 @@ public class WagonUtils
 
     public static AuthenticationInfo getAuthInfo()
     {
+        // TODO: not used presently?
+
         AuthenticationInfo authInfo = new AuthenticationInfo();
 
         String userName = getUserName();
@@ -169,7 +171,7 @@ public class WagonUtils
 
         // TODO: what about modes?
 
-        authInfo.setGroup( getUserGroup() );
+//        authInfo.setGroup( getUserGroup() );
 
         return authInfo;
     }

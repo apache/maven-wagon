@@ -29,6 +29,7 @@ import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonConstants;
+import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.authentication.AuthenticationException;
@@ -312,15 +313,15 @@ public class ScpWagon
             throw new TransferFailedException( msg, e );
         }
 
-        AuthenticationInfo authInfo = getRepository().getAuthenticationInfo();
+        RepositoryPermissions permissions = getRepository().getPermissions();
 
-        if ( authInfo != null && authInfo.getGroup() != null )
+        if ( permissions != null && permissions.getGroup() != null )
         {
-            String chgrpCmd = "chgrp " + authInfo.getGroup() + " " + basedir + "/" + resourceName + "\n";
+            String chgrpCmd = "chgrp " + permissions.getGroup() + " " + basedir + "/" + resourceName + "\n";
 
             executeCommand( chgrpCmd );
 
-            // Need to change the mode as well.
+            // TODO [BP]: Need to change the mode as well.
 
         }
 
