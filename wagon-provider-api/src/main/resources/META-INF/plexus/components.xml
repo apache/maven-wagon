@@ -1,0 +1,14 @@
+<component-set>
+  <components>
+    <component>
+      <role>org.apache.maven.wagon.manager.WagonManager</role>
+      <implementation>org.apache.maven.wagon.manager.DefaultWagonManager</implementation>
+    </component>
+    <component>
+      <role>org.apache.maven.wagon.Wagon</role>
+      <role-hint>file</role-hint>
+      <implementation>org.apache.maven.wagon.providers.file.FileWagon</implementation>
+      <instantiation-strategy>per-lookup</instantiation-strategy>
+    </component>
+  </components>
+</component-set>

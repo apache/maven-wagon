@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project>
+  <extend>../project.xml</extend>
+  <groupId>maven</groupId>
+  <pomVersion>3</pomVersion>
+  <id>wagon-api</id>
+  <artifactId>wagon-api</artifactId>
+  <type>jar</type>
+  <name>Wagon API</name>
+  <currentVersion>0.9-SNAPSHOT</currentVersion>
+  <organization>
+    <name>Apache Software Foundation</name>
+    <url>http://www.apache.org/</url>
+    <logo>http://maven.apache.org/images/apache-maven-project.png</logo>
+  </organization>
+  <description></description>
+  <shortDescription>Tools to manage artifacts and deployment</shortDescription>
+  <description>
+    Wagon in general utility resource transport framework.
+    The Wagon API defines
+    the interfaces, clasess and their respective roles.
+  </description>
+  <package>org.apache.maven.wagon</package>
+  <inceptionYear>2003</inceptionYear>
+  <url>http://maven.apache.org/wagon/wagon-api</url>
+  <issueTrackingUrl>http://jira.codehaus.org/BrowseProject.jspa?id=10319</issueTrackingUrl>
+  <repository>
+    <connection>scm:cvs:pserver:anoncvs@cvs.apache.org:/home/cvspublic:maven-wagon/wagon-api</connection>
+    <url>http://cvs.apache.org/viewcvs/maven-wagon/wagon-api/</url>
+  </repository>
+
+  <dependencies>
+  </dependencies>
+
+  <developers>
+    <developer>
+      <name>Michal Maczka</name>
+      <id>michal</id>
+      <email>michal@dimatics.com</email>
+      <organization>Dimatics</organization>
+      <roles>
+        <role>Architect</role>
+      </roles>
+    </developer>
+    <developer>
+      <name>Jason van Zyl</name>
+      <id>jvanzyl</id>
+      <email>jason@maven.org</email>
+      <roles>
+        <role>Developer</role>
+      </roles>
+    </developer>
+  </developers>
+
+</project>
