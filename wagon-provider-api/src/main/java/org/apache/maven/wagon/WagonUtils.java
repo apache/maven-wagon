@@ -18,6 +18,7 @@ package org.apache.maven.wagon;
  */
 
 import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.codehaus.plexus.util.FileUtils;
 
 import java.io.File;
@@ -150,5 +151,37 @@ public class WagonUtils
         }
 
     }
+
+    public static AuthenticationInfo getAuthInfo()
+    {
+        AuthenticationInfo authInfo = new AuthenticationInfo();
+
+        String userName = getUserName();
+
+        authInfo.setUserName( userName );
+
+        File privateKey = new File( System.getProperty( "user.home" ), "/.ssh/id_dsa" );
+
+        if ( privateKey.exists() )
+        {
+            authInfo.setPrivateKey( privateKey.getAbsolutePath() );
+
+            authInfo.setPassphrase( "" );
+        }
+
+        authInfo.setGroup( getUserName() );
+
+        return authInfo;
+    }
+
+
+    public static String getUserName()
+    {
+        String userName = System.getProperty( "user.name" );
+
+        return userName;
+    }
+
+
 
 }
