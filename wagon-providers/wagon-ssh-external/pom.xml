@@ -9,4 +9,11 @@
   <artifactId>wagon-ssh-external</artifactId>
   <version>1.0-alpha-2-SNAPSHOT</version>
   <name>Maven Wagon SSH External Provider</name>
+  <dependencies>
+    <dependency>
+      <groupId>plexus</groupId>
+      <artifactId>plexus-utils</artifactId>
+      <version>1.0-alpha-1</version>
+    </dependency>
+  </dependencies>
 </project>
