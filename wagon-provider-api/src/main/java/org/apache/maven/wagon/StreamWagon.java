@@ -29,10 +29,14 @@ import java.io.OutputStream;
 public abstract class StreamWagon
     extends AbstractWagon
 {
-    public abstract InputStream getInputStream( Artifact artifact )
+    // ----------------------------------------------------------------------
+    //
+    // ----------------------------------------------------------------------
+
+    public abstract InputStream getInputStream( String resource )
         throws Exception;
 
-    public abstract OutputStream getOutputStream( Artifact artifact )
+    public abstract OutputStream getOutputStream( String resource )
         throws Exception;
 
     public abstract void openConnection()
@@ -41,12 +45,43 @@ public abstract class StreamWagon
     public abstract void closeConnection()
         throws Exception;
 
-    //!! destination directory doesn't exist exception
+    // ----------------------------------------------------------------------
+    // We take the artifact and create the resource from that so we can
+    // just hand it off to get(String,File) below. So we might get an
+    // Artifact where:
+    //
+    // groupId = maven
+    // artifactId = wagon-api
+    // type = pom
+    // extension = pom
+    // version = 1.0
+    // layout = ${groupId}/{$type}s/${artifactId}-${version}.${extension}
+    //
+    // so the resource ends up looking like:
+    //
+    // maven/poms/wagon-api-1.0.pom
+    //
+    // ----------------------------------------------------------------------
+
     public void get( Artifact artifact, File destination )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        String resource = artifactUrl( artifact );
+        get( artifactPath( artifact ), destination );
+    }
 
+    public void put( File source, Artifact artifact )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        put( source, artifactPath( artifact ) );
+    }
+
+    // ----------------------------------------------------------------------
+    //
+    // ----------------------------------------------------------------------
+
+    public void get( String resource, File destination )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
         if ( !destination.getParentFile().exists() )
         {
             if ( !destination.getParentFile().mkdirs() )
@@ -71,7 +106,7 @@ public abstract class StreamWagon
 
         try
         {
-            is = getInputStream( artifact );
+            is = getInputStream( resource );
         }
         catch ( Exception e )
         {
@@ -82,11 +117,9 @@ public abstract class StreamWagon
     }
 
     // source doesn't exist exception
-    public void put( File source, Artifact artifact )
+    public void put( File source, String resource )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        String resource = artifactUrl( artifact );
-
         if ( !source.exists() )
         {
             throw new TransferFailedException( "Specified source file does not exist: " + source );
@@ -108,7 +141,7 @@ public abstract class StreamWagon
 
         try
         {
-            os = getOutputStream( artifact );
+            os = getOutputStream( resource );
         }
         catch ( Exception e )
         {

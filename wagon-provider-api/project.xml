@@ -8,7 +8,7 @@
   <artifactId>wagon-api</artifactId>
   <type>jar</type>
   <name>Wagon API</name>
-  <currentVersion>0.9-SNAPSHOT</currentVersion>
+  <version>0.9-SNAPSHOT</version>
   <organization>
     <name>Apache Software Foundation</name>
     <url>http://www.apache.org/</url>

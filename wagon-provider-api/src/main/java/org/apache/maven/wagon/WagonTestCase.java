@@ -37,6 +37,16 @@ public abstract class WagonTestCase
 
     protected File destFile;
 
+    protected String resource;
+
+    protected File artifactSourceFile;
+
+    protected File artifactDestFile;
+
+    // ----------------------------------------------------------------------
+    // Constructors
+    // ----------------------------------------------------------------------
+
     public WagonTestCase()
     {
     }
@@ -46,15 +56,34 @@ public abstract class WagonTestCase
         super( name );
     }
 
+    // ----------------------------------------------------------------------
+    // Methods that should be provided by subclasses for proper testing
+    // ----------------------------------------------------------------------
+
+    protected abstract String getTestRepositoryUrl();
+
+    protected abstract String getProtocol();
+
+    // ----------------------------------------------------------------------
+    // 1. Create a local file repository which mimic a users local file
+    //    Repository.
+    //
+    // 2. Create a test repository for the type of wagon we are testing. So,
+    //    for example, for testing the file wagon we might have a test
+    //    repository url of file://${basedir}/target/file-repository.
+    // ----------------------------------------------------------------------
+
     protected void setUp()
         throws Exception
     {
         super.setUp();
 
+        resource = "test-resource.txt";
+
         modelReader = new MavenXpp3Reader();
 
         // ----------------------------------------------------------------------
-        //
+        // Create the test repository for the wagon we are testing.
         // ----------------------------------------------------------------------
 
         testRepository = new Repository();
@@ -64,7 +93,7 @@ public abstract class WagonTestCase
         testRepository.setAuthenticationInfo( getAuthInfo() );
 
         // ----------------------------------------------------------------------
-        //
+        // Create a test local repository.
         // ----------------------------------------------------------------------
 
         localRepositoryPath = new File( basedir, "/target/local-repository" ).getPath();
@@ -86,14 +115,30 @@ public abstract class WagonTestCase
         }
     }
 
-    protected abstract String getTestRepositoryUrl();
+    protected void customizeContext()
+        throws Exception
+    {
+        getContainer().addContextValue( "test.repository", localRepositoryPath );
+    }
+
+    protected void setupFileRoundTripTesting()
+        throws Exception
+    {
+    }
+
+    protected void setupArtifactRoundTripTesting()
+        throws Exception
+    {
+    }
+
+    // ----------------------------------------------------------------------
+    //
+    // ----------------------------------------------------------------------
 
     protected AuthenticationInfo getAuthInfo()
     {
         return new AuthenticationInfo();
     }
-
-    protected abstract String getProtocol();
 
     protected Wagon getWagon()
         throws Exception
@@ -116,7 +161,14 @@ public abstract class WagonTestCase
         System.out.println( "---------------------------------------------------------------------------------------------------------" );
     }
 
-    protected  void put()
+    // ----------------------------------------------------------------------
+    // File <--> File round trip testing
+    // ----------------------------------------------------------------------
+    // We are testing taking a file, our sourcefile, and placing it into the
+    // test repository that we have setup.
+    // ----------------------------------------------------------------------
+
+    protected void putFile()
         throws Exception
     {
         message( "Putting test artifact into test repository " + testRepository );
@@ -127,12 +179,12 @@ public abstract class WagonTestCase
 
         sourceFile = new File( basedir, "project.xml" );
 
-        wagon.put( sourceFile, getTestArtifact() );
+        wagon.put( sourceFile, resource );
 
         wagon.disconnect();
     }
 
-    protected void get()
+    protected void getFile()
         throws Exception
     {
         message( "Getting test artifact from test repository " + testRepository );
@@ -143,21 +195,91 @@ public abstract class WagonTestCase
 
         destFile = File.createTempFile( "wagon", ".tmp" );
 
-        wagon.get( getTestArtifact(), destFile );
+        wagon.get( resource, destFile );
 
         wagon.disconnect();
     }
 
-    public void testRoundTrip()
+    public void testFileRoundTrip()
         throws Exception
     {
-        put();
+        message( "File round trip testing ..." );
 
-        get();
+        setupFileRoundTripTesting();
 
+        putFile();
+
+        getFile();
+
+        compareContents( sourceFile, destFile );
+    }
+
+    // ----------------------------------------------------------------------
+    // File <--> Artifact/Repository round trip testing
+    // ----------------------------------------------------------------------
+    // 1. Place an artifact in the test repository.
+    // 2. Get the same artifact that was just placed in the test repository.
+    // 3. Compare the contents of the file that was place in the test
+    //    repository with the value of the artifact retrieved from the
+    //    test repository, they should be the same.
+    // ----------------------------------------------------------------------
+
+    protected void putArtifact()
+        throws Exception
+    {
+        message( "Putting file into test repository " + testRepository );
+
+        Wagon wagon = getWagon();
+
+        wagon.connect( testRepository );
+
+        artifactSourceFile = new File( basedir, "project.xml" );
+
+        wagon.put( artifactSourceFile, getTestArtifact() );
+
+        wagon.disconnect();
+    }
+
+    protected void getArtifact()
+        throws Exception
+    {
+        message( "Getting test artifact from test repository " + testRepository );
+
+        Wagon wagon = getWagon();
+
+        wagon.connect( testRepository );
+
+        artifactDestFile = File.createTempFile( "wagon", ".tmp" );
+
+        wagon.get( getTestArtifact(), artifactDestFile );
+
+        wagon.disconnect();
+    }
+
+    public void testArtifactRoundTrip()
+        throws Exception
+    {
+        message( "Artifact round trip testing ..." );
+
+        setupArtifactRoundTripTesting();
+
+        putArtifact();                
+
+        getArtifact();
+
+        compareContents( artifactSourceFile, artifactDestFile );
+    }
+
+    protected void compareContents( File sourceFile, File destFile )
+        throws Exception
+    {
         // Now compare the conents of the artifact that was placed in
         // the repository with the contents of the artifact that was
         // retrieved from the repository.
+
+        System.out.println( "sourceFile = " + sourceFile );
+
+        System.out.println( "destFile = " + destFile );
 
         System.out.println( "---------------------------------------------------------------------------------------------------------" );
 
@@ -172,7 +294,6 @@ public abstract class WagonTestCase
         System.out.println( "OK" );
 
         System.out.println( "---------------------------------------------------------------------------------------------------------" );
-
     }
 
     protected Artifact getTestArtifact()
@@ -188,12 +309,9 @@ public abstract class WagonTestCase
         return artifact;
     }
 
-    protected void customizeContext()
-        throws Exception
-    {
-        getContainer().addContextValue( "test.repository", localRepositoryPath );
-    }
-
+    // ----------------------------------------------------------------------
+    //
+    // ----------------------------------------------------------------------
 
     protected Repository createFileRepository( String url )
     {
@@ -222,19 +340,5 @@ public abstract class WagonTestCase
         writer.close();
 
         return f;
-    }
-
-    protected void generateRepositoryArtifact( Artifact artifact, Repository repository, String content )
-        throws IOException
-    {
-        String fileName = repository.getBasedir() + "/" + repository.artifactPath( artifact );
-
-        generateFile( fileName, content );
-    }
-
-    protected String loadString( File file )
-        throws Exception
-    {
-        return FileUtils.fileRead( file );
     }
 }

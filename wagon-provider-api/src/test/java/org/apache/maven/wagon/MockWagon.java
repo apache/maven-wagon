@@ -1,7 +1,5 @@
 package org.apache.maven.wagon;
 
-import org.apache.maven.wagon.artifact.Artifact;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -30,7 +28,7 @@ public class MockWagon
         return new String[]{"mock"};
     }
 
-    public InputStream getInputStream( Artifact artifact )
+    public InputStream getInputStream( String resource )
         throws Exception
     {
         if ( errorInputStream )
@@ -49,7 +47,7 @@ public class MockWagon
         return is;
     }
 
-    public OutputStream getOutputStream( Artifact artifact )
+    public OutputStream getOutputStream( String resource )
         throws Exception
     {
         if ( errorInputStream )
@@ -65,7 +63,6 @@ public class MockWagon
 
         return os;
     }
-
 
     public void openConnection()
     {

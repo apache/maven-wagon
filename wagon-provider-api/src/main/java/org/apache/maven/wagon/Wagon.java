@@ -28,6 +28,20 @@ public interface Wagon
 {
     String ROLE = Wagon.class.getName();
 
+    // ----------------------------------------------------------------------
+    // File/File handling
+    // ----------------------------------------------------------------------
+
+    void get( String source, File destination )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
+
+    void put( File source, String destination )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
+
+    // ----------------------------------------------------------------------
+    // Artifact/File handling
+    // ----------------------------------------------------------------------
+
     void get( Artifact artifact, File destination )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
 
