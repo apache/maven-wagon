@@ -33,53 +33,57 @@ import java.util.Map;
 
 
 /**
- * 
  * TransferListeners which computes MD5 checksum on the fly when files are transfered.
- * 
- * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a> 
- * @version $Id$ 
+ *
+ * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
+ * @version $Id$
  */
-public class ChecksumObserver implements TransferListener
+public class ChecksumObserver
+    implements TransferListener
 {
-    
+
     private String algorithm;
-        
+
     private MessageDigest digester;
-    
+
     private String expectedChecksum;
-    
+
     private String actualChecksum;
-    
+
     private boolean transferingMd5 = false;
-    
-    
+
+
     private static Map algorithmExtensionMap = new HashMap();
-    
+
     static
     {
-       algorithmExtensionMap.put( "MD5", ".md5" );  
-       
-       algorithmExtensionMap.put( "MD2", ".md2" );
-       
-       algorithmExtensionMap.put( "SHA-1", ".sha1" );
-       
+        algorithmExtensionMap.put( "MD5", ".md5" );
+
+        algorithmExtensionMap.put( "MD2", ".md2" );
+
+        algorithmExtensionMap.put( "SHA-1", ".sha1" );
+
     }
-    
-    
+
+
     public ChecksumObserver()
     {
-       this( "MD5" );    
+        this( "MD5" );
     }
-    
+
     /**
-     * 
      * @param algorithm One of the algorithms supported by JDK: MD5, MD2 or SHA-1
      */
     public ChecksumObserver( String algorithm )
     {
-         this.algorithm = algorithm;    
+        this.algorithm = algorithm;
     }
-    
+
+    public void transferInitiated( TransferEvent transferEvent )
+    {
+        // This space left intentionally blank
+    }
+
     /**
      * @see org.apache.maven.wagon.events.TransferListener#transferStarted(org.apache.maven.wagon.events.TransferEvent)
      */
@@ -88,23 +92,22 @@ public class ChecksumObserver implements TransferListener
 
         if ( transferingMd5 )
         {
-             return;
+            return;
         }
-        
+
         expectedChecksum = null;
-        
+
         actualChecksum = null;
-        
-        
+
         try
         {
             digester = MessageDigest.getInstance( algorithm );
         }
-        catch ( NoSuchAlgorithmException e)
+        catch ( NoSuchAlgorithmException e )
         {
-         
+
         }
-        
+
     }
 
     /**
@@ -116,108 +119,106 @@ public class ChecksumObserver implements TransferListener
         {
             digester.update( buffer, 0, length );
         }
-        
+
     }
 
     public void transferCompleted( TransferEvent transferEvent )
     {
-        
+
         if ( digester == null )
-        {        
+        {
             return;
         }
 
         Wagon wagon = transferEvent.getWagon();
-        
-        actualChecksum = encode ( digester.digest() );
-        
+
+        actualChecksum = encode( digester.digest() );
+
         digester = null;
-        
+
         InputStream inputStream = null;
-        
+
         transferingMd5 = true;
-        
+
         try
         {
             int type = transferEvent.getRequestType();
-                                    
+
             String resource = transferEvent.getResource().getName();
-            
-            String extension = ( String ) algorithmExtensionMap.get( algorithm );
-            
-            if ( type  == TransferEvent.REQUEST_GET )
+
+            String extension = (String) algorithmExtensionMap.get( algorithm );
+
+            if ( type == TransferEvent.REQUEST_GET )
             {
-                
+
                 //we will fetch md5 cheksum from server and
                 // read its content into memory
                 File artifactFile = transferEvent.getLocalFile();
-                
+
                 File md5File = new File( artifactFile.getPath() + extension );
-                
-                String  md5Resource = resource + extension;
-                
+
+                String md5Resource = resource + extension;
+
                 wagon.get( md5Resource, md5File );
-               
-                expectedChecksum = FileUtils.fileRead( md5File  ).trim();
+
+                expectedChecksum = FileUtils.fileRead( md5File ).trim();
             }
             else
             {
                 //It's PUT put request we will also put md5 checksum
                 // which was computed on the fly
-                WagonUtils.fromString( resource + extension , wagon, actualChecksum );
-                
-            }            
-            
+                WagonUtils.fromString( resource + extension, wagon, actualChecksum );
+
+            }
+
         }
         catch ( Exception e )
         {
             // TODO: handle differently! No Exception catching....
             e.printStackTrace();
-        }    
+        }
         finally
         {
             IoUtils.close( inputStream );
 
             transferingMd5 = false;
         }
-        
-            
+
     }
 
     public void transferError( TransferEvent transferEvent )
-    { 
-        digester = null;  
+    {
+        digester = null;
     }
 
     public void debug( String message )
     {
-       
-        
+
     }
-    
-    
-    
+
+
     /**
      * Returns the md5 checksum downloaded from the server
-     *   
+     *
      * @return
      */
-    public String getExpectedChecksum() 
-    {       
-       return expectedChecksum;
+    public String getExpectedChecksum()
+    {
+        return expectedChecksum;
     }
-   
-    
+
+
     /**
      * Returns md5 checksum which was computed during transfer
+     *
      * @return
      */
-    public String getActualChecksum() 
-    {       
-       return actualChecksum;
+    public String getActualChecksum()
+    {
+        return actualChecksum;
     }
-    
-    
+
+
     /**
      * Encodes a 128 bit (16 bytes) byte array into a 32 character String.
      * XXX I think it should at least throw an IllegalArgumentException rather than return null
@@ -250,23 +251,19 @@ public class ChecksumObserver implements TransferListener
 
         return retValue.trim();
     }
-    
-    
+
+
     public boolean cheksumIsValid()
     {
         boolean retValue = false;
-        
-        if ( actualChecksum != null && expectedChecksum !=null )
+
+        if ( actualChecksum != null && expectedChecksum != null )
         {
-             retValue = actualChecksum.equals( expectedChecksum );
+            retValue = actualChecksum.equals( expectedChecksum );
         }
-        
+
         return retValue;
     }
 
-   
-    
-    
-    
-    
+
 }

@@ -21,18 +21,33 @@ package org.apache.maven.wagon.events;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  */
-public class MockTransferListener implements TransferListener
+public class MockTransferListener
+    implements TransferListener
 {
 
     private String debugMessage;
+
     private boolean debugCalled;
+
     private TransferEvent transferEvent;
+
     private boolean transferCompletedCalled;
+
     private boolean transferProgressCalled;
+
     private boolean transferStartedCalled;
+
     private int numberOfProgressCalls;
+
     private boolean transferErrorCalled;
 
+    private boolean transferInitiatedCalled;
+
+
+    public boolean isTransferInitiatedCalled()
+    {
+        return transferInitiatedCalled;
+    }
 
     /**
      * @return Returns the debugCalled.
@@ -72,6 +87,12 @@ public class MockTransferListener implements TransferListener
     public boolean isTransferStartedCalled()
     {
         return transferStartedCalled;
+    }
+
+    public void transferInitiated( TransferEvent transferEvent )
+    {
+        this.transferEvent = transferEvent;
+        transferInitiatedCalled = true;
     }
 
     /**
@@ -116,7 +137,7 @@ public class MockTransferListener implements TransferListener
     }
 
     /**
-     * @return 
+     * @return
      */
     public String getDebugMessage()
     {

@@ -32,20 +32,20 @@ public class Debug
     implements SessionListener, TransferListener
 {
     private PrintStream out;
-    
+
     long timestamp;
-    
+
     long transfer;
-    
-    
+
+
     public Debug()
     {
-        this( System.out );    
+        this( System.out );
     }
-    
+
     public Debug( PrintStream out )
     {
-       this.out = out;    
+        this.out = out;
     }
 
     /**
@@ -61,9 +61,7 @@ public class Debug
      */
     public void sessionOpened( final SessionEvent sessionEvent )
     {
-        out.println(
-            sessionEvent.getWagon().getRepository().getUrl() +
-            " - Session: Opened  " );
+        out.println( sessionEvent.getWagon().getRepository().getUrl() + " - Session: Opened  " );
     }
 
     /**
@@ -71,9 +69,7 @@ public class Debug
      */
     public void sessionDisconnecting( final SessionEvent sessionEvent )
     {
-        out.println(
-            sessionEvent.getWagon().getRepository().getUrl() +
-            " - Session: Disconnecting  " );
+        out.println( sessionEvent.getWagon().getRepository().getUrl() + " - Session: Disconnecting  " );
 
     }
 
@@ -82,9 +78,7 @@ public class Debug
      */
     public void sessionDisconnected( final SessionEvent sessionEvent )
     {
-        out.println(
-            sessionEvent.getWagon().getRepository().getUrl() +
-            " - Session: Disconnected" );
+        out.println( sessionEvent.getWagon().getRepository().getUrl() + " - Session: Disconnected" );
     }
 
     /**
@@ -92,9 +86,7 @@ public class Debug
      */
     public void sessionConnectionRefused( final SessionEvent sessionEvent )
     {
-        out.println(
-            sessionEvent.getWagon().getRepository().getUrl() +
-            " - Session: Connection refused" );
+        out.println( sessionEvent.getWagon().getRepository().getUrl() + " - Session: Connection refused" );
 
     }
 
@@ -103,9 +95,7 @@ public class Debug
      */
     public void sessionLoggedIn( final SessionEvent sessionEvent )
     {
-        out.println(
-            sessionEvent.getWagon().getRepository().getUrl() +
-            " - Session: Logged in" );
+        out.println( sessionEvent.getWagon().getRepository().getUrl() + " - Session: Logged in" );
 
     }
 
@@ -114,9 +104,7 @@ public class Debug
      */
     public void sessionLoggedOff( final SessionEvent sessionEvent )
     {
-        out.println(
-            sessionEvent.getWagon().getRepository().getUrl() +
-            " - Session: Logged off" );
+        out.println( sessionEvent.getWagon().getRepository().getUrl() + " - Session: Logged off" );
 
     }
 
@@ -129,35 +117,34 @@ public class Debug
 
     }
 
+    public void transferInitiated( TransferEvent transferEvent )
+    {
+        // This space left intentionally blank
+    }
+
     /**
      * @see TransferListener#transferStarted(TransferEvent)
      */
     public void transferStarted( final TransferEvent transferEvent )
     {
         timestamp = transferEvent.getTimestamp();
-        
+
         transfer = 0;
-        
-        if( transferEvent.getRequestType() == TransferEvent.REQUEST_GET )
+
+        if ( transferEvent.getRequestType() == TransferEvent.REQUEST_GET )
         {
-            final String message = "Downloading: " +
-                transferEvent.getResource().getName() +
-                " from " +
-                transferEvent.getWagon().getRepository().getUrl();
-            
+            final String message = "Downloading: " + transferEvent.getResource().getName() + " from " + transferEvent.getWagon().getRepository().getUrl();
+
             out.println( message );
-            
+
             out.println( "" );
         }
         else
         {
-            final String message = "Uploading: " +
-                transferEvent.getResource().getName() +
-                " to " +
-                transferEvent.getWagon().getRepository().getUrl();
-            
+            final String message = "Uploading: " + transferEvent.getResource().getName() + " to " + transferEvent.getWagon().getRepository().getUrl();
+
             out.println( message );
-            
+
             out.println( "" );
 
         }
@@ -180,16 +167,11 @@ public class Debug
      */
     public void transferCompleted( final TransferEvent transferEvent )
     {
-        final double duration =
-            (double)( transferEvent.getTimestamp() - timestamp ) / 1000;
+        final double duration = (double) ( transferEvent.getTimestamp() - timestamp ) / 1000;
 
         out.println();
-        
-        final String message = "Transfer finished. " +
-            transfer +
-            " bytes copied in " +
-            duration +
-            " seconds";
+
+        final String message = "Transfer finished. " + transfer + " bytes copied in " + duration + " seconds";
 
         out.println( message );
 
