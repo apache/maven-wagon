@@ -17,20 +17,18 @@ package org.apache.maven.wagon;
  * ====================================================================
  */
 
+import java.io.File;
+import java.io.IOException;
+
 import org.apache.maven.wagon.artifact.Artifact;
 import org.apache.maven.wagon.artifact.DefaultArtifact;
-import org.apache.maven.wagon.observers.Debug;
-import org.apache.maven.wagon.observers.ChecksumObserver;
-import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.observers.ChecksumObserver;
+import org.apache.maven.wagon.observers.Debug;
+import org.apache.maven.wagon.repository.Repository;
+
 import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.util.FileUtils;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.io.FileReader;
 
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
@@ -67,8 +65,6 @@ public abstract class WagonTestCase
     // Constructors
     // ----------------------------------------------------------------------
 
-   
-
     public WagonTestCase( String testName )
     {
         super( testName );
@@ -96,7 +92,6 @@ public abstract class WagonTestCase
     protected void setupRepositories()
         throws Exception
     {
-
         resource = "test-resource.txt";
 
         //modelReader = new MavenXpp3Reader();
@@ -121,14 +116,7 @@ public abstract class WagonTestCase
 
         message( "Local repository: " + localRepository );
 
-        File f = new File( localRepositoryPath, "/maven/jars" );
-
-        if ( !f.exists() )
-        {
-            f.mkdirs();
-        }
-
-        f = new File( localRepositoryPath, "/maven/poms" );
+        File f = new File( localRepositoryPath );
 
         if ( !f.exists() )
         {
@@ -191,7 +179,6 @@ public abstract class WagonTestCase
     public void testWagon()
         throws Exception
     {
-        
         setupRepositories();
 
         setupWagonTestingFixtures();
