@@ -211,6 +211,8 @@ public class SftpWagon
 
         Resource resource = new Resource( resourceName );
 
+        fireGetInitiated( resource, destination );
+
         String filename;
         if ( resourceName.lastIndexOf( '/' ) > 0 )
         {
