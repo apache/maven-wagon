@@ -190,6 +190,7 @@ public class Debug
             " bytes copied in " +
             duration +
             " seconds";
+
         out.println( message );
 
     }

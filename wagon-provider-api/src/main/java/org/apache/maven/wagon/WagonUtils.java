@@ -51,8 +51,7 @@ public class WagonUtils
              return retValue;
         }        
         finally
-        {           
-             
+        {                        
              if ( file != null )
              {
                  boolean deleted = file.delete();
