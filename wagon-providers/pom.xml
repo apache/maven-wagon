@@ -3,25 +3,23 @@
 <project>
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>maven</groupId>
+    <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon</artifactId>
-    <version>1.0-alpha-2-SNAPSHOT</version>
+    <version>1.0-alpha-2</version>
   </parent>
-  <groupId>maven</groupId>
   <artifactId>wagon-providers</artifactId>
-  <version>1.0-alpha-2-SNAPSHOT</version>
   <name>Maven Wagon Providers Parent</name>
   <packaging>pom</packaging>
   <dependencies>
     <dependency>
-      <groupId>maven</groupId>
+      <groupId>org.apache.maven.wagon</groupId>
       <artifactId>wagon-provider-api</artifactId>
-      <version>1.0-alpha-2-SNAPSHOT</version>
+      <version>1.0-alpha-2</version>
     </dependency>
     <dependency>
-      <groupId>maven</groupId>
+      <groupId>org.apache.maven.wagon</groupId>
       <artifactId>wagon-provider-test</artifactId>
-      <version>1.0-alpha-2-SNAPSHOT</version>
+      <version>1.0-alpha-2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -1,13 +1,11 @@
 <project>
   <parent>
     <artifactId>wagon-providers</artifactId>
-    <groupId>maven</groupId>
-    <version>1.0-alpha-2-SNAPSHOT</version>
+    <groupId>org.apache.maven.wagon</groupId>
+    <version>1.0-alpha-2</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>maven</groupId>
   <artifactId>wagon-ssh-external</artifactId>
-  <version>1.0-alpha-2-SNAPSHOT</version>
   <name>Maven Wagon SSH External Provider</name>
   <dependencies>
     <dependency>

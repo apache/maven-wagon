@@ -3,13 +3,11 @@
 <project>
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>maven</groupId>
+    <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon-providers</artifactId>
-    <version>1.0-alpha-2-SNAPSHOT</version>
+    <version>1.0-alpha-2</version>
   </parent>
-  <groupId>maven</groupId>
   <artifactId>wagon-ftp</artifactId>
-  <version>1.0-alpha-2-SNAPSHOT</version>
   <name>Maven Wagon FTP Provider</name>
   <dependencies>
     <dependency>

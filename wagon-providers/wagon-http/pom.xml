@@ -1,13 +1,11 @@
 <project>
   <parent>
     <artifactId>wagon-providers</artifactId>
-    <groupId>maven</groupId>
-    <version>1.0-alpha-2-SNAPSHOT</version>
+    <groupId>org.apache.maven.wagon</groupId>
+    <version>1.0-alpha-2</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>maven</groupId>
   <artifactId>wagon-http</artifactId>
-  <version>1.0-alpha-2-SNAPSHOT</version>
   <name>Maven Wagon HTTP Provider</name>
   <dependencies>
     <dependency>
@@ -19,6 +17,7 @@
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging</artifactId>
       <version>1.0.3</version>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>commons-lang</groupId>
