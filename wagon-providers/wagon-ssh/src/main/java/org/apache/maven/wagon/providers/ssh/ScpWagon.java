@@ -528,6 +528,11 @@ public class ScpWagon
         }
     }
 
+    public boolean getIfNewer( String resourceName, File destination, long timestamp )
+    {
+        throw new UnsupportedOperationException( "getIfNewer is scp wagon must be still implemented" );
+    }
+
 // ----------------------------------------------------------------------
 // JSch user info
 // ----------------------------------------------------------------------

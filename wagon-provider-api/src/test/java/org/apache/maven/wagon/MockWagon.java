@@ -18,11 +18,9 @@ package org.apache.maven.wagon;
  */
 
 import org.apache.maven.wagon.resource.Resource;
+import org.apache.maven.wagon.authorization.AuthorizationException;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
@@ -52,8 +50,6 @@ public class MockWagon
 
         if ( errorInputStream )
         {
-
-
             MockInputStream mockInputStream = new MockInputStream();
 
             mockInputStream.setForcedError( true );
@@ -95,6 +91,12 @@ public class MockWagon
         
     }
 
+    public boolean getIfNewer( String resourceName, File destination, long timestamp)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+       return false;
+    }
+
     public void openConnection()
     {
     }
@@ -102,4 +104,6 @@ public class MockWagon
     public void closeConnection()
     {
     }
+
+
 }

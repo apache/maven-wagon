@@ -33,7 +33,41 @@ public interface Wagon
     // File/File handling
     // ----------------------------------------------------------------------
 
-    void get( String source, File destination )
+
+    /**
+     * Downloads specified resource from the repository to given file.
+     *
+     * @param resourceName
+     * @param destination
+     * @throws TransferFailedException
+     * @throws ResourceDoesNotExistException
+     * @throws AuthorizationException
+     */
+    void get( String resourceName, File destination )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
+
+    /**
+     * Downloads specified resource from the repository
+     * if it was modfified since specified date.
+     * The date is measured in milliseconds, between the current time and midnight, January 1, 1970 UTC
+     * and aliged to GMT timezone.
+     *
+     *
+     * @param resourceName
+     * @param destination
+     * @param timestamp
+     * @return
+     * @throws TransferFailedException
+     * @throws ResourceDoesNotExistException
+     * @throws AuthorizationException
+     *
+     * @return <code>true</code> if newer resource has been downloaded, <code>false</code> if resource
+     * in the repository is older or has the same age.
+     *
+     * @todo michal: I have to learn more about timezones!
+     * Specifically how to convert time for UTC to time for GMT and if such conversioin is needed.
+     */
+    boolean getIfNewer( String resourceName, File destination, long timestamp )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
 
     void put( File source, String destination )

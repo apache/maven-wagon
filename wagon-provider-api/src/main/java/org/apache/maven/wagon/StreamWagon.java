@@ -33,6 +33,7 @@ import java.io.*;
 public abstract class StreamWagon
     extends AbstractWagon
 {
+
     // ----------------------------------------------------------------------
     //
     // ----------------------------------------------------------------------
@@ -75,6 +76,43 @@ public abstract class StreamWagon
 
         getTransfer( inputData.getResource(), destination, is );
     }
+
+    public boolean getIfNewer( String resourceName, File destination, long timestamp)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        boolean retValue = false;
+
+        InputData inputData = new InputData( );
+
+        Resource resource = new Resource( resourceName );
+
+        inputData.setResource( resource );
+
+        fillInputData( inputData );
+
+        InputStream is = inputData.getInputStream();
+
+        if ( resource.getLastModified() > timestamp )
+        {
+            retValue = true;
+
+            if ( is == null )
+            {
+                throw new TransferFailedException( getRepository().getUrl() + " - Could not open input stream for resource: '" + resource+ "'" );
+            }
+
+            createParentDirectories( destination );
+
+            getTransfer( inputData.getResource(), destination, is );
+        }
+        else
+        {
+            shutdownStream( is );
+        }
+
+        return retValue;
+    }
+
 
     // source doesn't exist exception
     public void put( File source, String resourceName )
