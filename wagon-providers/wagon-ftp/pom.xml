@@ -15,10 +15,6 @@
     <shortDescription>Provider for FTP protocol for Wagon</shortDescription>
     <package>org.apache.maven.wagon.providers.ftp</package>
     <inceptionYear>2003</inceptionYear>
-    <url>http://maven.apache.org/wagon/wagon-providers/ftp</url>
-    <issueTrackingUrl>http://jira.codehaus.org/BrowseProject.jspa?id=10319</issueTrackingUrl>
-    <siteDirectory>/www/maven.apache.org/wagon/wagon-providers/ftp</siteDirectory>
-
     <developers>
         <developer>
             <name>Michal Maczka</name>
@@ -44,7 +40,7 @@
 
         <dependency>
             <groupId>plexus</groupId>
-            <artifactId>plexus-ftp</artifactId>
+            <artifactId>plexus-ftpd</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
