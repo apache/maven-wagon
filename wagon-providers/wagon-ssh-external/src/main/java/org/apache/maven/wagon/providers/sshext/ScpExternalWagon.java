@@ -62,27 +62,29 @@ public class ScpExternalWagon
 
     /**
      * Plexus style way of configuring command.
-     * @component.configuration
-     *    default="scp"
+     *
+     * @component.configuration default="scp"
      */
     private String scpExecutable = "scp";
 
     /**
      * Plexus style way of configuring command.
-     * @component.configuration
-     *    default="ssh"
+     *
+     * @component.configuration default="ssh"
      */
     private String sshExecutable = "ssh";
 
     /**
      * Plexus style way of configuring  args.
+     *
      * @component.configuration
      */
     private String scpArgs;
 
 
     /**
-     *  Plexus style way of configuring  args.
+     * Plexus style way of configuring  args.
+     *
      * @component.configuration
      */
     private String sshArgs;
@@ -219,7 +221,6 @@ public class ScpExternalWagon
     }
 
 
-
     private void executeScpCommand( File localFile, String remoteFile, boolean put )
         throws TransferFailedException
     {
@@ -306,9 +307,9 @@ public class ScpExternalWagon
     private void postProcessListeners( Resource resource, File source, int requestType )
         throws TransferFailedException
     {
-        byte[] buffer = new byte[ DEFAULT_BUFFER_SIZE ];
+        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
-        TransferEvent transferEvent = new TransferEvent( this, resource , TransferEvent.TRANSFER_PROGRESS, requestType );
+        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_PROGRESS, requestType );
 
         try
         {
@@ -316,11 +317,11 @@ public class ScpExternalWagon
 
             while ( true )
             {
-                int n = input.read( buffer ) ;
+                int n = input.read( buffer );
 
                 if ( n == -1 )
                 {
-                   break;
+                    break;
                 }
 
                 fireTransferProgress( transferEvent, buffer, n );
@@ -361,9 +362,9 @@ public class ScpExternalWagon
     {
         String retValue = sshExecutable;
 
-        if ( annotations.containsKey( SCP_EXECUTABLE_KEY ) );
+        if ( annotations.containsKey( SSH_EXECUTABLE_KEY ) )
         {
-            retValue = ( String ) annotations.get( SCP_EXECUTABLE_KEY ) ;
+            retValue = (String) annotations.get( SSH_EXECUTABLE_KEY );
         }
 
         return retValue;
@@ -373,9 +374,9 @@ public class ScpExternalWagon
     {
         String retValue = scpExecutable;
 
-        if ( annotations.containsKey( SCP_EXECUTABLE_KEY ) );
+        if ( annotations.containsKey( SCP_EXECUTABLE_KEY ) )
         {
-            retValue = ( String ) annotations.get( SCP_EXECUTABLE_KEY ) ;
+            retValue = (String) annotations.get( SCP_EXECUTABLE_KEY );
         }
 
         return retValue;
@@ -387,7 +388,7 @@ public class ScpExternalWagon
 
         if ( annotations.containsKey( SSH_ARGS_KEY ) )
         {
-            retValue = ( String ) annotations.get( SSH_ARGS_KEY );
+            retValue = (String) annotations.get( SSH_ARGS_KEY );
         }
 
         return retValue;
@@ -399,7 +400,7 @@ public class ScpExternalWagon
 
         if ( annotations.containsKey( SCP_ARGS_KEY ) )
         {
-            retValue = ( String ) annotations.get( SCP_ARGS_KEY );
+            retValue = (String) annotations.get( SCP_ARGS_KEY );
         }
 
         return retValue;
