@@ -16,26 +16,30 @@ package org.apache.maven.wagon.providers.http;
  * limitations under the License.
  */
 
-import org.apache.commons.httpclient.*;
-import org.apache.commons.httpclient.util.DateParser;
-import org.apache.commons.httpclient.util.DateParseException;
+import org.apache.commons.httpclient.Credentials;
+import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HostConfiguration;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpRecoverableException;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
+import org.apache.commons.httpclient.util.DateParseException;
+import org.apache.commons.httpclient.util.DateParser;
 import org.apache.commons.lang.StringUtils;
-import org.apache.maven.wagon.*;
-import org.apache.maven.wagon.resource.Resource;
+import org.apache.maven.wagon.AbstractWagon;
+import org.apache.maven.wagon.ResourceDoesNotExistException;
+import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.apache.maven.wagon.proxy.ProxyInfo;
+import org.apache.maven.wagon.resource.Resource;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -79,8 +83,6 @@ public class HttpWagon
         }
 
         HostConfiguration hc = new HostConfiguration();
-
-        ProxyInfo proxyInfo = getRepository().getProxyInfo();
 
         if ( proxyInfo != null )
         {
