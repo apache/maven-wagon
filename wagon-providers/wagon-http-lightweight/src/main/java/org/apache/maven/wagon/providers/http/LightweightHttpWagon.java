@@ -100,7 +100,10 @@ public class LightweightHttpWagon
         {
             System.setProperty( "http.proxyHost", proxyInfo.getHost() );
             System.setProperty( "http.proxyPort", String.valueOf( proxyInfo.getPort() ) );
-            System.setProperty( "http.nonProxyHosts", proxyInfo.getNonProxyHosts() );
+            if ( proxyInfo.getNonProxyHosts() != null )
+            {
+                System.setProperty( "http.nonProxyHosts", proxyInfo.getNonProxyHosts() );
+            }
             if ( proxyInfo.getUserName() != null )
             {
                 Authenticator.setDefault( new Authenticator()
@@ -122,9 +125,18 @@ public class LightweightHttpWagon
     public void closeConnection()
         throws ConnectionException
     {
-        System.setProperty( "http.proxyHost", previousProxyHost );
-        System.setProperty( "http.proxyPort", previousProxyPort );
-        System.setProperty( "http.nonProxyHosts", previousProxyExclusions );
+        if ( previousProxyHost != null )
+        {
+            System.setProperty( "http.proxyHost", previousProxyHost );
+        }
+        if ( previousProxyPort != null )
+        {
+            System.setProperty( "http.proxyPort", previousProxyPort );
+        }
+        if ( previousProxyExclusions != null )
+        {
+            System.setProperty( "http.nonProxyHosts", previousProxyExclusions );
+        }
     }
 }
 
