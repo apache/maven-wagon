@@ -279,7 +279,16 @@ public class ScpWagon
             // send "C0644 filesize filename", where filename should not include '/'
             long filesize = source.length();
 
-            command = "C0644 " + filesize + " " + resourceName;
+            command = "C0644 " + filesize + " ";
+
+            if( resourceName.lastIndexOf( '/' ) > 0 )
+            {
+                command += resourceName.substring( resourceName.lastIndexOf( '/' ) + 1 );
+            }
+            else
+            {
+                command+=resourceName;
+            }
 
             command += "\n";
 
