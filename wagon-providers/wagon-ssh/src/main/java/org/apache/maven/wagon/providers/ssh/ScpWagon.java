@@ -72,7 +72,7 @@ public class ScpWagon
     {
         try
         {
-            AuthenticationInfo authInfo = getRepository().getAuthenticationInfo();
+            final AuthenticationInfo authInfo = getRepository().getAuthenticationInfo();
 
             if ( authInfo == null )
             {
@@ -271,7 +271,7 @@ public class ScpWagon
 
             if ( checkAck( in ) != 0 )
             {
-                throw  new TransferFailedException( "ACK check failed" );
+                throw new TransferFailedException( "ACK check failed" );
             }
 
             // send "C0644 filesize filename", where filename should not include '/'
@@ -287,18 +287,10 @@ public class ScpWagon
 
             if ( checkAck( in ) != 0 )
             {
-                String msg = "Error occured while deploying '"
-                        + resource + "' to remote repository '"
-                        + getRepository().getUrl()
-                        + "' - Wrong ACK ";
-
-                throw new TransferFailedException( msg );
+                throw new TransferFailedException( "ACK check failed" );
             }
 
-            // send a content of lfile
-            FileInputStream fis = new FileInputStream( source );
-
-            putTransfer( resource, source, fis, out, false );
+            putTransfer( resource, source, out, false );
 
             byte[] buf = new byte[ 1024 ];
 
@@ -311,12 +303,7 @@ public class ScpWagon
 
             if ( checkAck( in ) != 0 )
             {
-                String msg = "Error occured while deploying '"
-                        + resource + "' to remote repository '"
-                        + getRepository().getUrl()
-                        + "' - Wrong ACK ";
-
-                throw new TransferFailedException( msg );
+                throw new TransferFailedException( "ACK check failed" );
             }
         }
         catch ( Exception e )
@@ -356,6 +343,8 @@ public class ScpWagon
 
         InputStream in = null;
 
+        createParentDirectories( destination );
+
         LazyFileOutputStream outputStream = new LazyFileOutputStream( destination );
 
         String basedir = getRepository().getBasedir();
@@ -388,6 +377,7 @@ public class ScpWagon
 
             while ( true )
             {
+                // TODO: is this really an ACK, or just an in.read()? If the latter, change checkAck method to not return a value, but throw an exception on non-zero result
                 int c = checkAck( in );
 
                 if ( c != 'C' )
@@ -443,9 +433,7 @@ public class ScpWagon
 
                         outputStream.write( buf, 0, len );
 
-                        transferEvent.setData( buf, len );
-
-                        fireTransferProgress( transferEvent );
+                        fireTransferProgress( transferEvent, buf, len );
 
                         filesize -= len;
 
@@ -481,13 +469,7 @@ public class ScpWagon
 
                 if ( checkAck( in ) != 0 )
                 {
-                    String msg = "Error occured while deploying '"
-                            + resource + "' to remote repository '"
-                            + getRepository().getUrl()
-                            + "' - Wrong ACK ";
-
-                    throw new TransferFailedException( msg );
-
+                    throw new TransferFailedException( "Wrong ACK" );
                 }
                 else
                 {
@@ -538,7 +520,8 @@ public class ScpWagon
 // ----------------------------------------------------------------------
 // JSch user info
 // ----------------------------------------------------------------------
-    public class WagonUserInfo
+// TODO: are the prompt values really right? Is there an alternative to UserInfo?
+    public static class WagonUserInfo
             implements UserInfo
     {
         AuthenticationInfo authInfo;
@@ -575,7 +558,8 @@ public class ScpWagon
 
         public void showMessage( String message )
         {
-            System.out.println( message );
+            // TODO: is this really debug?
+            //fireTransferDebug( message );
         }
     }
 
@@ -608,11 +592,13 @@ public class ScpWagon
 
             if ( b == 1 )
             {
+                // TODO: log (throw exception?)
                 // error
                 System.out.print( sb.toString() );
             }
             if ( b == 2 )
             {
+                // TODO: throw exception
                 // fatal error
                 System.out.print( sb.toString() );
             }

@@ -47,7 +47,7 @@ public class FileWagon
 
         if ( !f.exists() )
         {
-            throw new ResourceDoesNotExistException( "File: "  + f + " does not exists" );
+            throw new ResourceDoesNotExistException( "File: "  + f + " does not exist" );
         }
 
         try
