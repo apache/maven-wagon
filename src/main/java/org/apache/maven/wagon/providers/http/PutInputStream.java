@@ -17,13 +17,13 @@ package org.apache.maven.wagon.providers.http;
  * ====================================================================
  */
 
-import org.apache.maven.wagon.events.TransferEventSupport;
-import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.events.TransferEvent;
+import org.apache.maven.wagon.events.TransferEventSupport;
 import org.apache.maven.wagon.resource.Resource;
 
-import java.io.FileInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -73,10 +73,12 @@ public class PutInputStream extends FileInputStream
     {
         int retValue = super.read(b, off, len);
 
-        event.setTimestamp( System.currentTimeMillis() );
+        if ( retValue > 0 )
+        {
+            event.setTimestamp( System.currentTimeMillis() );
 
-        eventSupport.fireTransferProgress( event, b, retValue );
-
+            eventSupport.fireTransferProgress( event, b, retValue );
+        }
         return retValue;
     }
 
