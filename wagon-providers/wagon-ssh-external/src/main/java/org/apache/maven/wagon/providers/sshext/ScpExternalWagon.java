@@ -36,6 +36,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * SCP deployer using "external" scp program.  To allow for
@@ -51,24 +52,40 @@ public class ScpExternalWagon
 {
     public static int DEFAULT_SSH_PORT = 22;
 
-    public static String COMMAND_KEY = "wagon.scp.executable";
+    public static String SCP_EXECUTABLE_KEY = "wagon.scp.executable";
 
-    public static String ARGS_KEY = "wagon.scp.args";
+    public static String SSH_EXECUTABLE_KEY = "wagon.ssh.executable";
 
+    public static String SCP_ARGS_KEY = "wagon.scp.args";
+
+    public static String SSH_ARGS_KEY = "wagon.ssh.args";
 
     /**
      * Plexus style way of configuring command.
      * @component.configuration
      *    default="scp"
      */
-    private String command = "scp";
+    private String scpExecutable = "scp";
+
+    /**
+     * Plexus style way of configuring command.
+     * @component.configuration
+     *    default="ssh"
+     */
+    private String sshExecutable = "ssh";
+
+    /**
+     * Plexus style way of configuring  args.
+     * @component.configuration
+     */
+    private String scpArgs;
+
 
     /**
      *  Plexus style way of configuring  args.
      * @component.configuration
      */
-    private Strings args;
-
+    private String sshArgs;
 
     // ----------------------------------------------------------------------
     //
@@ -173,17 +190,17 @@ public class ScpExternalWagon
     {
         AuthenticationInfo authenticationInfo = getRepository().getAuthenticationInfo();
 
-        String commandArgs = getArgs( getRepository().getAnnotations() );
+        String args = getSshArgs( getRepository().getAnnotations() );
 
-        String commandExecutable = getExectutable( getRepository().getAnnotations() );
+        String executable = getSshExecutable( getRepository().getAnnotations() );
 
         Commandline cl = new Commandline();
 
-        cl.setExecutable( commandExecutable );
+        cl.setExecutable( executable );
 
-        if ( commandArgs != null )
+        if ( args != null )
         {
-            cl.createArgument().setLine( commandArgs );
+            cl.createArgument().setLine( args );
         }
         String remoteHost = authenticationInfo.getUserName() + "@" + getRepository().getHost();
 
@@ -201,46 +218,24 @@ public class ScpExternalWagon
         }
     }
 
-    private getCommand( Map annotations )
-    {
-        String retValue = command;
 
-        if ( annotations.contains( COMMAND_KEY ) );
-        {
-            retValue = ( String ) annotations.get( COMMAND_KEY ) ;
-        }
-
-        return retValue;
-    }
-
-    private getArgs( Map annotations )
-    {
-        String retValue = args;
-
-        if ( annotation.contains( ARGS_KEY ) )
-        {
-            retValue = ( String ) annotations.get( ARGS_KEY );
-        }
-
-        return retValue;
-    }
 
     private void executeScpCommand( File localFile, String remoteFile, boolean put )
         throws TransferFailedException
     {
         AuthenticationInfo authenticationInfo = getRepository().getAuthenticationInfo();
 
-        String scpArgs = getArgs( getRepository().getAnnotations() );
+        String args = getScpArgs( getRepository().getAnnotations() );
 
-        String spcExecutable = getExectutable( getRepository().getAnnotations() );
+        String executable = getScpExecutable( getRepository().getAnnotations() );
 
         Commandline cl = new Commandline();
 
         cl.setWorkingDirectory( localFile.getParentFile().getAbsolutePath() );
 
-        cl.setExecutable( scpExecutable );
+        cl.setExecutable( executable );
 
-        if ( scpArgs != null )
+        if ( args != null )
         {
             cl.createArgument().setLine( args );
         }
@@ -361,4 +356,53 @@ public class ScpExternalWagon
     {
         throw new UnsupportedOperationException( "getIfNewer is scp wagon must be still implemented" );
     }
+
+    private String getSshExecutable( Map annotations )
+    {
+        String retValue = sshExecutable;
+
+        if ( annotations.containsKey( SCP_EXECUTABLE_KEY ) );
+        {
+            retValue = ( String ) annotations.get( SCP_EXECUTABLE_KEY ) ;
+        }
+
+        return retValue;
+    }
+
+    private String getScpExecutable( Map annotations )
+    {
+        String retValue = scpExecutable;
+
+        if ( annotations.containsKey( SCP_EXECUTABLE_KEY ) );
+        {
+            retValue = ( String ) annotations.get( SCP_EXECUTABLE_KEY ) ;
+        }
+
+        return retValue;
+    }
+
+    private String getSshArgs( Map annotations )
+    {
+        String retValue = sshArgs;
+
+        if ( annotations.containsKey( SSH_ARGS_KEY ) )
+        {
+            retValue = ( String ) annotations.get( SSH_ARGS_KEY );
+        }
+
+        return retValue;
+    }
+
+    private String getScpArgs( Map annotations )
+    {
+        String retValue = scpArgs;
+
+        if ( annotations.containsKey( SCP_ARGS_KEY ) )
+        {
+            retValue = ( String ) annotations.get( SCP_ARGS_KEY );
+        }
+
+        return retValue;
+    }
+
 }
