@@ -19,19 +19,7 @@
         the interfaces, clasess and their respective roles.
     </description>
 
-    <scm>
-        <connection>scm:cvs:pserver:anoncvs@cvs.apache.org:/home/cvspublic:maven-wagon/wagon-api</connection>
-        <developerConnection>scm:cvs:ext:${maven.username}@cvs.apache.org:/home/cvs:maven-wagon/wagon-api</developerConnection>
-        <url>http://cvs.apache.org/viewcvs.cgi/maven-wagon/wagon-api</url>
-    </scm>
-
-    <ciManagement>
-      <nagEmailAddress>mmaczka@interia.pl</nagEmailAddress>
-        <!-- TODO: reinstate this once we are certain the mails work, so we can check list subscription works
-            </>nagEmailAddress>wagon-dev@maven.apache.org</nagEmailAddress>
-        -->
-    </ciManagement>
-
+  
     <package>org.apache.maven.wagon</package>
     <inceptionYear>2003</inceptionYear>
     <url>http://maven.apache.org/wagon/wagon-api</url>
