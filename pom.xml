@@ -3,8 +3,9 @@
 <project>
   <modelVersion>4.0.0</modelVersion>
   <groupId>maven</groupId>
-  <artifactId>wagon</artifactId>  
-  <version>1.0-alpha-1-SNAPSHOT</version>
+  <artifactId>wagon</artifactId>
+  <version>1.0-alpha-1</version>
+  <type>pom</type> 
   <name>Wagon</name>
   <description>Tools to manage artifacts and deployment</description>
   <shortDescription>Tools to manage artifacts and deployment</shortDescription>
