@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+
+<document>
+
+    <properties>
+        <title>Wagon File provider</title>
+        <author email="michal.maczka@dimatics.com">Michal Maczka</author>
+    </properties>
+
+    <body>
+
+        <section name="Wagon SCH provider">
+            <p>
+               This project is an implementation of Wagon provider
+               for <b>scp</b> and <b>sftp</b> protocols
+               using <a href="http://www.jcraft.com/jsch/">JSCH</a>  library
+            </p>
+        </section>
+        <section name="Features">
+            <p>
+               <ul>
+                   <li>
+                      SCP and SFTP protocols are supported.
+                   </li>
+                   <li>
+                      <b>PUT</b> and <b>GET</b>  requests are
+                      are supported for both protocols.
+                   </li>
+                   <li>
+                       SCH Wagon is able to set remote UNIX group
+                       for deployed resource (see: xxx ), but for SFTP protocol
+                       group id should be a positive integer.
+                   </li>
+               </ul>
+            </p>
+        </section>
+    </body>
+</document>

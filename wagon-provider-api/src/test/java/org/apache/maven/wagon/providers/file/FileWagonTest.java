@@ -18,7 +18,6 @@ package org.apache.maven.wagon.providers.file;
  */
 
 
-import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.FileTestUtils;
 
 import java.io.File;

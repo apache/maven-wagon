@@ -5,12 +5,12 @@
   <parent>
     <groupId>maven</groupId>
     <artifactId>wagon</artifactId>
-    <version>1.0-alpha-1-SNAPSHOT</version>
+    <version>1.0-alpha-1</version>
   </parent>
   <groupId>maven</groupId>
   <artifactId>wagon-api</artifactId>
   <name>Wagon API</name>
-  <version>1.0-alpha-1-SNAPSHOT</version>
+  <version>1.0-alpha-1</version>
   <description></description>
   <shortDescription>Tools to manage artifacts and deployment</shortDescription>
   <description>
@@ -26,8 +26,8 @@
     <developer>
       <name>Michal Maczka</name>
       <id>michal</id>
-      <email>michal@dimatics.com</email>
-      <organization>Dimatics</organization>
+      <email>michal@codehaus.org</email>
+      <organization>Codehaus</organization>
       <roles>
         <role>Architect</role>
       </roles>

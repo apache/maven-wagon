@@ -68,8 +68,7 @@ public class LightweightHttpWagon extends StreamWagon
            throw new ResourceDoesNotExistException( e.getMessage() );
         }
         catch ( IOException e )
-        {
-
+       {
             throw new TransferFailedException( e.getMessage() );
         }
 

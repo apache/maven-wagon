@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project
+    name="Wagon FTP provider"
+    href="http://maven.apache.org">
+
+    <title>Wagon</title>
+    <logo href="http://maven.apache.org/maven/images/maven.jsp">Maven</logo>
+    <organizationLogo href="/images/jakarta-logo.gif">Jakarta</organizationLogo>
+    <body>
+        <links>
+            <item name="Maven" href="http://maven.apache.org"/>
+            <item name="Wagon Main" href="http://maven.apache.org/wagon"/>
+            <item name="Jakarta Commons/Net" href="http://jakarta.apache.org/commons/net/"/>
+        </links>
+
+        <menu name="Wagon">
+            <item name="Main" href="/index.html"/>
+            <item name="Status" href="/status.html"/>
+            <item name="News" href="/news.html"/>
+        </menu>
+    </body>
+</project>
+

@@ -16,7 +16,6 @@ package g.apache.maven.wagon.providers.http;
  * limitations under the License.
  */
 
-import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.ConnectionException;
