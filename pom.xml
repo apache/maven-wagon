@@ -25,6 +25,11 @@
     </repository>
   </distributionManagement>
 
+  <scm>
+    <connection>scm:cvs:pserver:anoncvs@cvs.apache.org:/home/cvspublic:maven-wagon</connection>
+    <developerConnection>scm:cvs:ext:${maven.username}@cvs.apache.org:/home/cvs:maven-wagon</developerConnection>
+    <url>http://cvs.apache.org/viewcvs.cgi/maven-wagon</url>
+  </scm>
 
   <mailingLists>
     <mailingList>
