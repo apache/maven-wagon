@@ -17,9 +17,8 @@
   </organization>
   <distributionManagement>
     <repository>
-      <id>central</id>
-      <name>Maven Central Repository at Ibiblio</name>
-      <url>scp://login.ibiblio.org//public/html/maven</url>
+      <id>repo1</id>
+      <url>scp://beaver.codehaus.org/home/projects/maven/repository/ibiblio-v2</url>
     </repository>
   </distributionManagement>
   <scm>
