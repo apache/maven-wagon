@@ -51,6 +51,25 @@ public class ScpExternalWagon
 {
     public static int DEFAULT_SSH_PORT = 22;
 
+    public static String COMMAND_KEY = "wagon.scp.executable";
+
+    public static String ARGS_KEY = "wagon.scp.args";
+
+
+    /**
+     * Plexus style way of configuring command.
+     * @component.configuration
+     *    default="scp"
+     */
+    private String command = "scp";
+
+    /**
+     *  Plexus style way of configuring  args.
+     * @component.configuration
+     */
+    private Strings args;
+
+
     // ----------------------------------------------------------------------
     //
     // ----------------------------------------------------------------------
@@ -154,18 +173,24 @@ public class ScpExternalWagon
     {
         AuthenticationInfo authenticationInfo = getRepository().getAuthenticationInfo();
 
-        String args = /* TODO: getRepository().getSshArgs(); */ null;
-        String executable = /* TODO: getRepository().getSshExe(); */ "ssh";
+        String commandArgs = getArgs( getRepository().getAnnotations() );
+
+        String commandExecutable = getExectutable( getRepository().getAnnotations() );
 
         Commandline cl = new Commandline();
-        cl.setExecutable( executable );
-        if ( args != null )
+
+        cl.setExecutable( commandExecutable );
+
+        if ( commandArgs != null )
         {
-            cl.createArgument().setLine( args );
+            cl.createArgument().setLine( commandArgs );
         }
         String remoteHost = authenticationInfo.getUserName() + "@" + getRepository().getHost();
+
         cl.createArgument().setValue( remoteHost );
+
         cl.createArgument().setValue( command );
+
         try
         {
             CommandLineUtils.executeCommandLine( cl, null, null );
@@ -176,18 +201,46 @@ public class ScpExternalWagon
         }
     }
 
+    private getCommand( Map annotations )
+    {
+        String retValue = command;
+
+        if ( annotations.contains( COMMAND_KEY ) );
+        {
+            retValue = ( String ) annotations.get( COMMAND_KEY ) ;
+        }
+
+        return retValue;
+    }
+
+    private getArgs( Map annotations )
+    {
+        String retValue = args;
+
+        if ( annotation.contains( ARGS_KEY ) )
+        {
+            retValue = ( String ) annotations.get( ARGS_KEY );
+        }
+
+        return retValue;
+    }
+
     private void executeScpCommand( File localFile, String remoteFile, boolean put )
         throws TransferFailedException
     {
         AuthenticationInfo authenticationInfo = getRepository().getAuthenticationInfo();
 
-        String args = /* TODO: getRepository().getScpArgs(); */ null;
-        String executable = /* TODO: getRepository().getScpExe(); */ "scp";
+        String scpArgs = getArgs( getRepository().getAnnotations() );
+
+        String spcExecutable = getExectutable( getRepository().getAnnotations() );
 
         Commandline cl = new Commandline();
+
         cl.setWorkingDirectory( localFile.getParentFile().getAbsolutePath() );
-        cl.setExecutable( executable );
-        if ( args != null )
+
+        cl.setExecutable( scpExecutable );
+
+        if ( scpArgs != null )
         {
             cl.createArgument().setLine( args );
         }
@@ -228,7 +281,9 @@ public class ScpExternalWagon
         String basedir = getRepository().getBasedir();
 
         resourceName = StringUtils.replace( resourceName, "\\", "/" );
+
         String dir = PathUtils.dirname( resourceName );
+
         dir = StringUtils.replace( dir, "\\", "/" );
 
         String mkdirCmd = "mkdir -p " + basedir + "/" + dir + "\n";
