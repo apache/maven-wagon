@@ -17,6 +17,7 @@ package org.apache.maven.wagon;
  * ====================================================================
  */
 
+import java.io.File;
 import java.util.StringTokenizer;
 
 /**
@@ -362,5 +363,25 @@ public class PathUtils
             }
         }
         return null;
+    }
+
+    // TODO: move to plexus-utils or use something appropriate from there
+    public static String toRelative( File basedir, String absolutePath )
+    {
+        String relative;
+
+        absolutePath = absolutePath.replace( '\\', '/' );
+        String basedirPath = basedir.getAbsolutePath().replace( '\\', '/' );
+
+        if ( absolutePath.startsWith( basedirPath ) )
+        {
+            relative = absolutePath.substring( basedirPath.length() + 1 );
+        }
+        else
+        {
+            relative = absolutePath;
+        }
+
+        return relative;
     }
 }
