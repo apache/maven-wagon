@@ -134,6 +134,7 @@ public class FtpWagon
 
             // Use passive mode as default because most of us are
             // behind firewalls these days.
+            // TODO [BP]: make optional based on a flag
             ftp.enterLocalPassiveMode();
 
             boolean dirChanged = ftp.changeWorkingDirectory( getRepository().getBasedir() );

@@ -30,6 +30,7 @@ import java.io.Serializable;
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
+ * @todo [BP] some things are specific to certain wagons (eg key stuff in authInfo, permissions)
  */
 public class Repository
     implements Serializable
@@ -53,7 +54,7 @@ public class Repository
     private AuthenticationInfo authenticationInfo;
 
 
-    public Repository(  )
+    public Repository()
     {
 
     }

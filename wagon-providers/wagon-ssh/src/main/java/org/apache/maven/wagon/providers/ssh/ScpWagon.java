@@ -51,6 +51,8 @@ import java.io.OutputStream;
  * We will first try to use public keys for authentication and if that doesn't
  * work then we fall back to using the login and password
  *
+ * @todo [BP] add compression flag
+ *
  * @version $Id$
  */
 public class ScpWagon
@@ -111,9 +113,7 @@ public class ScpWagon
                 {
                     if ( authInfo.getPassphrase() == null )
                     {
-                        String msg = "Private key provided " + "without passphrase for repo: " + getRepository().getName();
-
-                        throw new AuthenticationException( msg );
+                        authInfo.setPassphrase( "" );
                     }
 
                     fireSessionDebug( "Using private key: " + privateKey );
@@ -180,6 +180,11 @@ public class ScpWagon
         }
 
         File privateKey = new File( privateKeyDirectory, ".ssh/id_dsa" );
+
+        if ( !privateKey.exists() )
+        {
+            privateKey = new File( privateKeyDirectory, ".ssh/id_rsa" );
+        }
 
         return privateKey;
     }
