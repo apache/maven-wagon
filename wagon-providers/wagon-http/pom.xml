@@ -1,4 +1,4 @@
-<model>
+<project>
   <parent>
     <artifactId>wagon-providers</artifactId>
     <groupId>maven</groupId>
@@ -7,66 +7,29 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>maven</groupId>
   <artifactId>wagon-http</artifactId>
-  <packaging>jar</packaging>
-  <name>Wagon HTTP Provider</name>
   <version>1.0-alpha-2-SNAPSHOT</version>
-  <url>http://maven.apache.org/wagon/wagon-providers/wagon-http</url>
-  <inceptionYear>2003</inceptionYear>
-  <developers>
-    <developer>
-      <id>michal</id>
-      <name>Michal Maczka</name>
-      <email>michal.maczka@dimatics.com</email>
-      <organization>Dimatics</organization>
-      <roles>
-        <role>Creator</role>
-        <role>Developer</role>
-        <role>Release Manager</role>
-      </roles>
-    </developer>
-  </developers>
+  <name>Maven Wagon HTTP Provider</name>
   <dependencies>
     <dependency>
       <groupId>commons-httpclient</groupId>
       <artifactId>commons-httpclient</artifactId>
       <version>2.0.2</version>
-      <type>jar</type>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging</artifactId>
       <version>1.0.3</version>
-      <type>jar</type>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
       <version>1.0.1</version>
-      <type>jar</type>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>plexus</groupId>
       <artifactId>plexus-jetty-httpd</artifactId>
       <version>1.0-SNAPSHOT</version>
-      <type>jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>jetty</groupId>
-      <artifactId>jetty</artifactId>
-      <version>4.2.10</version>
-      <type>jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>servletapi</groupId>
-      <artifactId>servletapi</artifactId>
-      <version>2.3</version>
-      <type>jar</type>
       <scope>test</scope>
     </dependency>
   </dependencies>
-</model>
+</project>

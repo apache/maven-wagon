@@ -1,50 +1,36 @@
-<model>
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project>
+  <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>wagon</artifactId>
     <groupId>maven</groupId>
+    <artifactId>wagon</artifactId>
     <version>1.0-alpha-2-SNAPSHOT</version>
   </parent>
-  <modules>
-    <module>wagon-http-lightweight</module>
-    <module>wagon-http</module>
-    <module>wagon-ftp</module>
-    <module>wagon-file</module>
-    <module>wagon-ssh</module>
-    <module>wagon-ssh-external</module>
-  </modules>
-  <modelVersion>4.0.0</modelVersion>
   <groupId>maven</groupId>
   <artifactId>wagon-providers</artifactId>
-  <packaging>pom</packaging>
-  <name>Wagon Providers Parent</name>
   <version>1.0-alpha-2-SNAPSHOT</version>
-  <inceptionYear>2003</inceptionYear>
-  <developers>
-    <developer>
-      <id>michal</id>
-      <name>Michal Maczka</name>
-      <email>michal@codehaus.org</email>
-      <roles>
-        <role>Creator</role>
-        <role>Developer</role>
-        <role>Release Manager</role>
-      </roles>
-    </developer>
-  </developers>
+  <name>Maven Wagon Providers Parent</name>
+  <packaging>pom</packaging>
   <dependencies>
     <dependency>
       <groupId>maven</groupId>
       <artifactId>wagon-provider-api</artifactId>
       <version>1.0-alpha-2-SNAPSHOT</version>
-      <type>jar</type>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>maven</groupId>
       <artifactId>wagon-provider-test</artifactId>
       <version>1.0-alpha-2-SNAPSHOT</version>
-      <type>jar</type>
       <scope>test</scope>
     </dependency>
   </dependencies>
-</model>
+  <modules>
+    <module>wagon-file</module>
+    <module>wagon-ftp</module>
+    <module>wagon-http-lightweight</module>
+    <module>wagon-http</module>
+    <module>wagon-ssh-external</module>
+    <module>wagon-ssh</module>
+  </modules>
+</project>

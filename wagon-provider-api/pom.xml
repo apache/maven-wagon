@@ -1,37 +1,14 @@
-<model>
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project>
+  <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>wagon</artifactId>
     <groupId>maven</groupId>
+    <artifactId>wagon</artifactId>
     <version>1.0-alpha-2-SNAPSHOT</version>
   </parent>
-  <modelVersion>4.0.0</modelVersion>
   <groupId>maven</groupId>
   <artifactId>wagon-provider-api</artifactId>
-  <packaging>jar</packaging>
-  <name>Wagon API</name>
   <version>1.0-alpha-2-SNAPSHOT</version>
-  <description>Wagon in general utility resource transport framework.
-        The Wagon API defines
-        the interfaces, clasess and their respective roles.</description>
-  <url>http://maven.apache.org/wagon/wagon-api</url>
-  <inceptionYear>2003</inceptionYear>
-  <developers>
-    <developer>
-      <id>michal</id>
-      <name>Michal Maczka</name>
-      <email>michal@codehaus.org</email>
-      <organization>Codehaus</organization>
-      <roles>
-        <role>Architect</role>
-      </roles>
-    </developer>
-    <developer>
-      <id>jvanzyl</id>
-      <name>Jason van Zyl</name>
-      <email>jason@maven.org</email>
-      <roles>
-        <role>Developer</role>
-      </roles>
-    </developer>
-  </developers>
-</model>
+  <name>Maven Wagon API</name>
+</project>

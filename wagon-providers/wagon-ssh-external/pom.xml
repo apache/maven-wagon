@@ -1,4 +1,4 @@
-<model>
+<project>
   <parent>
     <artifactId>wagon-providers</artifactId>
     <groupId>maven</groupId>
@@ -7,28 +7,6 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>maven</groupId>
   <artifactId>wagon-ssh-external</artifactId>
-  <packaging>jar</packaging>
-  <name>Wagon SSH External Provider</name>
   <version>1.0-alpha-2-SNAPSHOT</version>
-  <description></description>
-  <inceptionYear>2003</inceptionYear>
-  <developers>
-    <developer>
-      <id>brett</id>
-      <name>Brett Porter</name>
-      <email>brett@apache.org</email>
-      <roles>
-        <role>Developer</role>
-      </roles>
-    </developer>
-  </developers>
-  <dependencies>
-    <dependency>
-      <groupId>plexus</groupId>
-      <artifactId>plexus-utils</artifactId>
-      <version>1.0-alpha-1</version>
-      <type>jar</type>
-      <scope>compile</scope>
-    </dependency>
-  </dependencies>
-</model>
+  <name>Maven Wagon SSH External Provider</name>
+</project>
