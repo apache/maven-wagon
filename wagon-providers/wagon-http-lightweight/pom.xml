@@ -33,11 +33,11 @@
     </developers>
 
     <dependencies>
-        <!-- Testing -->
         <dependency>
             <groupId>plexus</groupId>
             <artifactId>plexus-jetty-httpd</artifactId>
             <version>1.0-SNAPSHOT</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
