@@ -11,6 +11,7 @@
     <artifactId>wagon-providers</artifactId>
     <name>Wagon Providers Parent</name>
     <version>1.0-alpha-2-SNAPSHOT</version>
+    <type>pom</type>
     <shortDescription>Wagon Provider Parent</shortDescription>
     <inceptionYear>2003</inceptionYear>
     <developers>
