@@ -33,10 +33,7 @@
     </scm>
 
     <ciManagement>
-      <nagEmailAddress>brett@apache.org</nagEmailAddress>
-<!-- TODO: reinstate this once we are certain the mails work, so we can check list subscription works
       <nagEmailAddress>wagon-dev@maven.apache.org</nagEmailAddress>
--->
     </ciManagement>
 
     <mailingLists>
