@@ -5,12 +5,12 @@
   <parent>
     <groupId>maven</groupId>
     <artifactId>wagon</artifactId>
-    <version>0.9-SNAPSHOT</version>
+    <version>1.0-alpha-1-SNAPSHOT</version>
   </parent>
   <groupId>maven</groupId>
   <artifactId>wagon-api</artifactId>
   <name>Wagon API</name>
-  <version>0.9-SNAPSHOT</version>
+  <version>1.0-alpha-1-SNAPSHOT</version>
   <description></description>
   <shortDescription>Tools to manage artifacts and deployment</shortDescription>
   <description>

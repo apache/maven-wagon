@@ -17,7 +17,6 @@ package org.apache.maven.wagon;
  * ====================================================================
  */
 
-import org.apache.maven.wagon.artifact.Artifact;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.events.SessionEvent;
 import org.apache.maven.wagon.events.SessionEventSupport;
@@ -223,25 +222,6 @@ public abstract class AbstractWagon
             {
             }
         }
-    }
-
-    // ----------------------------------------------------------------------
-    //
-    // ----------------------------------------------------------------------
-
-    protected String artifactUrl( Artifact artifact )
-    {
-        return source.artifactUrl( artifact );
-    }
-
-    protected String artifactPath( Artifact artifact )
-    {
-        return source.artifactPath( artifact );
-    }
-
-    protected String fullArtifactPath( Artifact artifact )
-    {
-        return source.fullArtifactPath( artifact );
     }
 
     // ----------------------------------------------------------------------

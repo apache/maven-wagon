@@ -18,8 +18,6 @@ package org.apache.maven.wagon;
  */
 
 import junit.framework.TestCase;
-import org.apache.maven.wagon.artifact.Artifact;
-import org.apache.maven.wagon.artifact.DefaultArtifact;
 import org.apache.maven.wagon.events.MockSessionListener;
 import org.apache.maven.wagon.events.MockTransferListener;
 import org.apache.maven.wagon.repository.Repository;
@@ -38,12 +36,12 @@ public class AbstractWagonTest extends TestCase
     
     private MockWagon wagon = null;
     
-    private Artifact artifact;
-    
     private File destination;
     
     private File source;
-    
+
+    private String artifact;
+
     private MockSessionListener sessionListener = null;
     
     private MockTransferListener transferListener = null;
@@ -53,8 +51,6 @@ public class AbstractWagonTest extends TestCase
         super.setUp();
 
         basedir = System.getProperty( "basedir" );
-
-        artifact = new DefaultArtifact( "groupId", "artifactId", "version", "type", "extension" );
 
         destination = new File( basedir, "target/folder/subfolder" );
 

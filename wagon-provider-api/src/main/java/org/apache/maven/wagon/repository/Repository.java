@@ -21,8 +21,6 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.PathUtils;
-import org.apache.maven.wagon.artifact.Artifact;
-import org.codehaus.plexus.util.StringUtils;
 
 import java.io.Serializable;
 
@@ -197,45 +195,5 @@ public class Repository
     public String getProtocol()
     {
         return protocol;
-    }
-
-    public String getLayout()
-    {
-        if ( layout == null )
-        {
-            return "${groupId}/${type}s/${artifactId}-${version}.${type}";
-        }
-
-        return layout;
-    }
-
-    public String artifactPath( Artifact artifact )
-    {
-        return interpolateLayout( artifact.getGroupId(), artifact.getArtifactId(), artifact.getType(), artifact.getVersion() );
-    }
-
-    public String fullArtifactPath( Artifact artifact )
-    {
-        return getBasedir() + "/" + artifactPath( artifact );
-    }
-
-    public String artifactUrl( Artifact artifact )
-    {
-        return getUrl() + "/" + artifactPath( artifact );
-    }
-
-    private String interpolateLayout( String groupId, String artifactId, String type, String version )
-    {
-        String layout = getLayout();
-
-        layout = StringUtils.replace( layout, "${groupId}", groupId );
-
-        layout = StringUtils.replace( layout, "${artifactId}", artifactId );
-
-        layout = StringUtils.replace( layout, "${type}", type );
-
-        layout = StringUtils.replace( layout, "${version}", version );
-
-        return layout;
     }
 }

@@ -17,7 +17,6 @@ package org.apache.maven.wagon;
  * ====================================================================
  */
 
-import org.apache.maven.wagon.artifact.Artifact;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.SessionListener;
@@ -39,23 +38,6 @@ public interface Wagon
 
     void put( File source, String destination )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
-
-    // ----------------------------------------------------------------------
-    // Artifact/File handling
-    // ----------------------------------------------------------------------
-
-    void get( Artifact artifact, File destination )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
-
-    void put( File source, Artifact artifact )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
-
-
-    // ----------------------------------------------------------------------
-    // /Stream handling
-    // ----------------------------------------------------------------------
-
-    
 
     Repository getRepository();
 

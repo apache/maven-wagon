@@ -17,7 +17,6 @@ package org.apache.maven.wagon;
  * ====================================================================
  */
 
-import org.apache.maven.wagon.artifact.Artifact;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 
@@ -47,36 +46,6 @@ public abstract class StreamWagon
 
     public abstract void closeConnection()
         throws ConnectionException;
-
-    // ----------------------------------------------------------------------
-    // We take the artifact and create the resource from that so we can
-    // just hand it off to get(String,File) below. So we might get an
-    // Artifact where:
-    //
-    // groupId = maven
-    // artifactId = wagon-api
-    // type = pom
-    // extension = pom
-    // version = 1.0
-    // layout = ${groupId}/{$type}s/${artifactId}-${version}.${extension}
-    //
-    // so the resource ends up looking like:
-    //
-    // maven/poms/wagon-api-1.0.pom
-    //
-    // ----------------------------------------------------------------------
-
-    public void get( Artifact artifact, File destination )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        get( artifactPath( artifact ), destination );
-    }
-
-    public void put( File source, Artifact artifact )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        put( source, artifactPath( artifact ) );
-    }
 
     // ----------------------------------------------------------------------
     //

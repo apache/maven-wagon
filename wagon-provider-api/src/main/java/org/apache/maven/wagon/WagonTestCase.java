@@ -20,8 +20,6 @@ package org.apache.maven.wagon;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.maven.wagon.artifact.Artifact;
-import org.apache.maven.wagon.artifact.DefaultArtifact;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.observers.ChecksumObserver;
 import org.apache.maven.wagon.observers.Debug;
@@ -44,10 +42,6 @@ public abstract class WagonTestCase
     protected Repository testRepository;
 
     protected String localRepositoryPath;
-
-    //protected MavenXpp3Reader modelReader;
-
-    protected Artifact artifact;
 
     protected File sourceFile;
 
@@ -93,8 +87,6 @@ public abstract class WagonTestCase
         throws Exception
     {
         resource = "test-resource.txt";
-
-        //modelReader = new MavenXpp3Reader();
 
         // ----------------------------------------------------------------------
         // Create the test repository for the wagon we are testing.
@@ -185,8 +177,6 @@ public abstract class WagonTestCase
 
         fileRoundTripTesting();
 
-        artifactRoundTripTesting();
-
         tearDownWagonTestingFixtures();
     }
 
@@ -259,62 +249,6 @@ public abstract class WagonTestCase
         compareContents( sourceFile, destFile );
     }
 
-    // ----------------------------------------------------------------------
-    // File <--> Artifact/Repository round trip testing
-    // ----------------------------------------------------------------------
-    // 1. Place an artifact in the test repository.
-    // 2. Get the same artifact that was just placed in the test repository.
-    // 3. Compare the contents of the file that was place in the test
-    //    repository with the value of the artifact retrieved from the
-    //    test repository, they should be the same.
-    // ----------------------------------------------------------------------
-
-    protected void putArtifact()
-        throws Exception
-    {
-        message( "Putting file into test repository " + testRepository );
-
-        Wagon wagon = getWagon();
-
-        wagon.connect( testRepository );
-
-        artifactSourceFile = new File( basedir, POM );
-
-        wagon.put( artifactSourceFile, getTestArtifact() );
-
-        wagon.disconnect();
-    }
-
-    protected void getArtifact()
-        throws Exception
-    {
-        message( "Getting test artifact from test repository " + testRepository );
-
-        Wagon wagon = getWagon();
-
-        wagon.connect( testRepository );
-
-        artifactDestFile =  FileTestUtils.createUniqueFile( this );
-
-        artifactDestFile.deleteOnExit();
-
-        wagon.get( getTestArtifact(), artifactDestFile );
-
-        wagon.disconnect();
-    }
-
-    protected void artifactRoundTripTesting()
-        throws Exception
-    {
-        message( "Artifact round trip testing ..." );
-
-        putArtifact();                
-
-        getArtifact();
-
-        compareContents( artifactSourceFile, artifactDestFile );
-    }
-
     protected void compareContents( File sourceFile, File destFile )
         throws Exception
     {
@@ -339,19 +273,6 @@ public abstract class WagonTestCase
         System.out.println( "OK" );
 
         System.out.println( "---------------------------------------------------------------------------------------------------------" );
-    }
-
-    protected Artifact getTestArtifact()
-        throws Exception
-    {
-        if ( artifact == null )
-        {
-            //Model model = modelReader.read( new FileReader( new File( basedir, POM ) ) );
-
-            artifact = new DefaultArtifact( "groupId", "artifactId", "1.0", "pom" );
-        }
-
-        return artifact;
     }
 
     // ----------------------------------------------------------------------
