@@ -17,7 +17,8 @@ package org.apache.maven.wagon;
  */
 
 /**
- * The exception is thrown when a connection to repository cannot be estblished.
+ * The exception is thrown when a connection 
+ * to repository cannot be estblished or open connection cannot be closed.
  * 
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$

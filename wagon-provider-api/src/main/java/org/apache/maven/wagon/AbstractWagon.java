@@ -17,6 +17,7 @@ package org.apache.maven.wagon;
  */
 
 import org.apache.maven.wagon.artifact.Artifact;
+import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.events.SessionEvent;
 import org.apache.maven.wagon.events.SessionEventSupport;
 import org.apache.maven.wagon.events.SessionListener;
@@ -28,6 +29,7 @@ import org.apache.maven.wagon.repository.Repository;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
+
 
 /**
  * Implementation of common facilties for Wagon providers.
@@ -59,8 +61,8 @@ public abstract class AbstractWagon
     // Connection
     // ----------------------------------------------------------------------
 
-    public void connect( Repository source )
-        throws Exception
+    public void connect( Repository source ) throws 
+      ConnectionException, AuthenticationException
     {
         if ( source == null )
         {
@@ -77,7 +79,7 @@ public abstract class AbstractWagon
     }
 
     public void disconnect()
-        throws Exception
+        throws ConnectionException
     {
         fireSessionDisconnecting();
 
@@ -85,6 +87,8 @@ public abstract class AbstractWagon
 
         fireSessionDisconnected();
     }
+    
+    protected abstract void closeConnection() throws ConnectionException;
 
     // ----------------------------------------------------------------------
     // Stream i/o

@@ -4,7 +4,6 @@ import org.codehaus.plexus.embed.Embedder;
 import org.apache.maven.wagon.manager.WagonManager;
 import org.apache.maven.wagon.repository.Repository;
 
-import java.util.Locale;
 
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
@@ -40,6 +39,12 @@ public class Conductor
     {
         return wagonManager.getWagon( protocol );
     }
+    
+    public void releaseWagon( Wagon wagon ) throws Exception
+    {
+       wagonManager.releaseWagon( wagon );    
+    }
+    
 
     public void addRepository( Repository repository )
     {

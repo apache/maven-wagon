@@ -29,7 +29,7 @@ public class MockWagon
     }
 
     public InputStream getInputStream( String resource )
-        throws Exception
+        throws TransferFailedException
     {
         if ( errorInputStream )
         {
@@ -48,7 +48,7 @@ public class MockWagon
     }
 
     public OutputStream getOutputStream( String resource )
-        throws Exception
+        throws TransferFailedException
     {
         if ( errorInputStream )
         {

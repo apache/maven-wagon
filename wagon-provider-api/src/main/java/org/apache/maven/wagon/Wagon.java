@@ -17,6 +17,7 @@ package org.apache.maven.wagon;
  */
 
 import org.apache.maven.wagon.artifact.Artifact;
+import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.SessionListener;
 import org.apache.maven.wagon.events.TransferListener;
@@ -48,8 +49,6 @@ public interface Wagon
     void put( File source, Artifact artifact )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
 
-    String[] getSupportedProtocols();
-
     Repository getRepository();
 
     // ----------------------------------------------------------------------
@@ -57,16 +56,15 @@ public interface Wagon
     // ----------------------------------------------------------------------
 
     void connect( Repository source )
-        throws Exception;
+        throws ConnectionException, AuthenticationException;
 
     void openConnection()
-        throws Exception;
+        throws ConnectionException, AuthenticationException;
 
     void disconnect()
-        throws Exception;
+        throws ConnectionException;
 
-    void closeConnection()
-        throws Exception;
+   
 
     // ----------------------------------------------------------------------
     //  Session listener

@@ -16,7 +16,6 @@ package org.apache.maven.wagon.events;
  * limitations under the License.
  */
 
-import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.Wagon;
 
 /***

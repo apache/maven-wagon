@@ -24,8 +24,7 @@ import org.apache.maven.wagon.artifact.Artifact;
 import org.codehaus.plexus.util.StringUtils;
 
 import java.io.Serializable;
-import java.net.URL;
-import java.util.Properties;
+
 
 /**
  * This class is an abstraction of the location from/to resources

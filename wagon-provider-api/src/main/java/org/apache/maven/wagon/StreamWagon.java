@@ -34,16 +34,16 @@ public abstract class StreamWagon
     // ----------------------------------------------------------------------
 
     public abstract InputStream getInputStream( String resource )
-        throws Exception;
+        throws TransferFailedException;
 
     public abstract OutputStream getOutputStream( String resource )
-        throws Exception;
+        throws TransferFailedException;
 
     public abstract void openConnection()
-        throws Exception;
+        throws ConnectionException;
 
     public abstract void closeConnection()
-        throws Exception;
+        throws ConnectionException;
 
     // ----------------------------------------------------------------------
     // We take the artifact and create the resource from that so we can
