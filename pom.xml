@@ -27,7 +27,13 @@
     <url>http://cvs.apache.org/viewcvs.cgi/maven-wagon</url>
   </scm>
   <ciManagement>
-    <nagEmailAddress>wagon-dev@maven.apache.org</nagEmailAddress>
+    <system>wagon-dev@maven.apache.org</system>
+    <notifiers>
+      <notifier>
+        <type>mail</type>
+        <address>wagon-dev@maven.apache.org</address>
+      </notifier>
+    </notifiers>
   </ciManagement>
   <mailingLists>
     <mailingList>
