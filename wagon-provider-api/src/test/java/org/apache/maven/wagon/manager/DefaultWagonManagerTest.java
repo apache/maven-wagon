@@ -28,7 +28,7 @@ import org.codehaus.plexus.PlexusTestCase;
 public class DefaultWagonManagerTest
     extends PlexusTestCase
 {
-    public void testDefaltWagonManager()
+    public void testDefaultWagonManager()
         throws Exception
     {
         WagonManager wagonManager = (WagonManager) lookup( WagonManager.ROLE );
