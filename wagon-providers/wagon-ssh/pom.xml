@@ -13,6 +13,11 @@
   <name>Maven Wagon SSH Provider</name>
   <dependencies>
     <dependency>
+      <groupId>plexus</groupId>
+      <artifactId>plexus-utils</artifactId>
+      <version>1.0-alpha-1</version>
+    </dependency>
+    <dependency>
       <groupId>jsch</groupId>
       <artifactId>jsch</artifactId>
       <version>0.1.14</version>
