@@ -9,7 +9,7 @@
     </parent>
     <groupId>maven</groupId>
     <artifactId>wagon-http-lightweight</artifactId>
-    <name>Wagon Lightweight HTTP provider</name>
+    <name>Wagon Lightweight HTTP Provider</name>
     <version>1.0-alpha-2-SNAPSHOT</version>
     <shortDescription>Wagon Provider for HTTP protocol without any external dependedencies</shortDescription>
     <package>org.apache.maven.wagon.providers.http</package>

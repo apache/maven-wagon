@@ -9,7 +9,7 @@
     </parent>
     <groupId>maven</groupId>
     <artifactId>wagon-http</artifactId>
-    <name>Wagon HTTP provider</name>
+    <name>Wagon HTTP Provider</name>
     <version>1.0-alpha-2-SNAPSHOT</version>
     <shortDescription>Wagon Provider for HTTP/HTTPS protocols based on jakarta-commons-httpclient</shortDescription>
     <package>org.apache.maven.wagon.providers.http</package>

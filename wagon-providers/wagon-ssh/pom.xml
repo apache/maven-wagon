@@ -9,7 +9,7 @@
     </parent>
     <groupId>maven</groupId>
     <artifactId>wagon-ssh</artifactId>
-    <name>Wagon SSH provider</name>
+    <name>Wagon SSH Provider</name>
     <version>1.0-alpha-2-SNAPSHOT</version>
     <description></description>
     <shortDescription>Wagon Provider for protocols from SSH2 family based on JSCH</shortDescription>
