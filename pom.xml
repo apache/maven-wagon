@@ -26,5 +26,15 @@
                 <role>Release Manager</role>
             </roles>
         </developer>
-    </developers>    
+    </developers>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>maven</groupId>
+            <artifactId>wagon-provider-common</artifactId>
+            <version>1.0-alpha-1</version>
+        </dependency>
+        
+    </dependencies>
 </project>
