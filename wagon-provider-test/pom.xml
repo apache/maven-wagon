@@ -9,7 +9,7 @@
     </parent>
     <groupId>maven</groupId>
     <artifactId>wagon-provider-common</artifactId>
-    <name>Wagon HTTP provider</name>
+    <name>Wagon Common provider</name>
     <version>1.0-alpha-2-SNAPSHOT</version>
     <shortDescription>Wagon Provider Parent</shortDescription>
     <inceptionYear>2003</inceptionYear>
