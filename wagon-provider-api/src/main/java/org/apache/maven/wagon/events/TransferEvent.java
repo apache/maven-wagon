@@ -22,76 +22,85 @@ import org.apache.maven.wagon.resource.Resource;
 
 import java.io.File;
 
-/***
+/**
  * TransferEvent is used to notify TransferListeners about progress
  * in transfer of resources form/to the respository
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  */
-public class TransferEvent extends WagonEvent
+public class TransferEvent
+    extends WagonEvent
 {
 
-    /** A transfer was started. */
+    /**
+     * A transfer was attempted, but has not yet commenced.
+     */
+    public static final int TRANSFER_INITIATED = 0;
+
+    /**
+     * A transfer was started.
+     */
     public final static int TRANSFER_STARTED = 1;
 
-    /** A transfer is completed. */
+    /**
+     * A transfer is completed.
+     */
     public final static int TRANSFER_COMPLETED = 2;
 
-    /** A transfer is in progress. */
+    /**
+     * A transfer is in progress.
+     */
     public final static int TRANSFER_PROGRESS = 3;
 
-    /** An error occured during transfer */
+    /**
+     * An error occured during transfer
+     */
     public final static int TRANSFER_ERROR = 4;
 
-    /** Indicates GET transfer  (from the repository) */
+    /**
+     * Indicates GET transfer  (from the repository)
+     */
     public final static int REQUEST_GET = 5;
 
-    /** Indicates PUT transfer (to the repository)*/
+    /**
+     * Indicates PUT transfer (to the repository)
+     */
     public final static int REQUEST_PUT = 6;
 
     private Resource resource;
 
     private int eventType;
-    
+
     private int requestType;
 
     private Exception exception;
 
     private File localFile;
-    
 
-    public TransferEvent(
-            final Wagon wagon,
-            final Resource resource,
-            final int eventType,
-            final int requestType )
+    public TransferEvent( final Wagon wagon, final Resource resource, final int eventType, final int requestType )
     {
         super( wagon );
-     
+
         this.resource = resource;
-        
+
         setEventType( eventType );
-        
+
         setRequestType( requestType );
 
     }
 
-    public TransferEvent(
-            final Wagon wagon,
-            final Resource resource,
-            final Exception exception )
+    public TransferEvent( final Wagon wagon, final Resource resource, final Exception exception )
     {
         super( wagon );
-        
+
         this.resource = resource;
-        
+
         setEventType( TRANSFER_ERROR );
-        
+
         this.exception = exception;
 
     }
-
 
 
     /**
@@ -112,8 +121,9 @@ public class TransferEvent extends WagonEvent
 
     /**
      * Returns the request type.
+     *
      * @return Returns the request type. The Request type is one of
-     * <code>TransferEvent.REQUEST_GET<code> or <code>TransferEvent.REQUEST_PUT<code>
+     *         <code>TransferEvent.REQUEST_GET<code> or <code>TransferEvent.REQUEST_PUT<code>
      */
     public int getRequestType()
     {
@@ -122,9 +132,10 @@ public class TransferEvent extends WagonEvent
 
     /**
      * Sets the request type
+     *
      * @param requestType The requestType to set.
-     *  The Request type value should be either
-     * <code>TransferEvent.REQUEST_GET<code> or <code>TransferEvent.REQUEST_PUT<code>.
+     *                    The Request type value should be either
+     *                    <code>TransferEvent.REQUEST_GET<code> or <code>TransferEvent.REQUEST_PUT<code>.
      * @throws IllegalArgumentException when
      */
     public void setRequestType( final int requestType )
@@ -138,8 +149,7 @@ public class TransferEvent extends WagonEvent
                 break;
 
             default :
-                throw new IllegalArgumentException(
-                        "Illegal request type: " + requestType );
+                throw new IllegalArgumentException( "Illegal request type: " + requestType );
         }
 
         this.requestType = requestType;
@@ -161,6 +171,8 @@ public class TransferEvent extends WagonEvent
         switch ( eventType )
         {
 
+            case TRANSFER_INITIATED:
+                break;
             case TRANSFER_STARTED:
                 break;
             case TRANSFER_COMPLETED:
@@ -170,8 +182,7 @@ public class TransferEvent extends WagonEvent
             case TRANSFER_ERROR:
                 break;
             default :
-                throw new IllegalArgumentException(
-                        "Illegal event type: " + eventType );
+                throw new IllegalArgumentException( "Illegal event type: " + eventType );
         }
 
         this.eventType = eventType;
@@ -179,6 +190,7 @@ public class TransferEvent extends WagonEvent
 
     /**
      * The
+     *
      * @param exception The exception to set.
      */
     public void setException( final Exception exception )
@@ -202,6 +214,7 @@ public class TransferEvent extends WagonEvent
     {
         return localFile;
     }
+
     /**
      * @param localFile The local file to set.
      */

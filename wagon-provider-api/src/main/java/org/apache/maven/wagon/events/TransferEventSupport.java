@@ -24,14 +24,16 @@ import java.util.List;
 /**
  * The class allows registration and removal of event listners of type
  * TransferListener and dispatch of those events to those listeners
- * 
+ *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  */
 public final class TransferEventSupport
 {
 
-    /** registred listeners */
+    /**
+     * registred listeners
+     */
     private final List listeners = new ArrayList();
 
     /**
@@ -42,7 +44,6 @@ public final class TransferEventSupport
      * If listener is <code>null</code>, no exception is thrown and no action is performed
      *
      * @param listener the transfer listener
-     *
      * @see #removeTransferListener(org.apache.maven.wagon.events.TransferListener)
      * @see TransferListener
      */
@@ -51,7 +52,7 @@ public final class TransferEventSupport
         listeners.add( listener );
     }
 
-     /**
+    /**
      * Removes the transfer listener from the collection of listeners so
      * it no longer receives transfer events.
      * <br/>
@@ -60,7 +61,6 @@ public final class TransferEventSupport
      * no exception is thrown and no action is performed
      *
      * @param listener the transfer listener
-     *
      * @see #addTransferListener(TransferListener)
      */
     public void removeTransferListener( final TransferListener listener )
@@ -74,11 +74,9 @@ public final class TransferEventSupport
      * who will be notifed when an transfer event occurs
      *
      * @param listener the transfer listener
-     *
      * @return <code>true<code>
      *         if given listner was added to the collection of listeners
      *         <code>false</code> otherwise
-     *
      * @see org.apache.maven.wagon.events.TransferEvent
      * @see #addTransferListener(TransferListener)
      */
@@ -88,7 +86,7 @@ public final class TransferEventSupport
     }
 
 
-     /**
+    /**
      * Dispatches the given <code>TransferEvent</code>
      * to all registred listeners (calls method {@link TransferListener#transferStarted(TransferEvent)} on all of them}.
      * The Event should be of type {@link TransferEvent#TRANSFER_COMPLETED}
@@ -99,25 +97,25 @@ public final class TransferEventSupport
     {
         for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
         {
-            final TransferListener listener = ( TransferListener ) iter.next();
+            final TransferListener listener = (TransferListener) iter.next();
             listener.transferStarted( transferEvent );
         }
     }
 
     /**
      * Dispatches the given <code>TransferEvent</code>
-     * to all registred listeners (calls method {@link TransferListener#transferProgress(TransferEvent)} on all of them}.
-     * The Event should be of type {@link TransferEvent#TRANSFER_PROGRESS}.
+     * to all registred listeners (calls method {@link TransferListener#transferProgress(TransferEvent, byte[], int)}
+     * on all of them). The Event should be of type {@link TransferEvent#TRANSFER_PROGRESS}.
      *
      * @param transferEvent the TransferEvent which will be dispached to listeners
-     * @param buffer the buffer containing the additional content
-     * @param length the length of the content in the buffer
+     * @param buffer        the buffer containing the additional content
+     * @param length        the length of the content in the buffer
      */
     public void fireTransferProgress( final TransferEvent transferEvent, byte[] buffer, int length )
     {
         for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
         {
-            final TransferListener listener = ( TransferListener ) iter.next();
+            final TransferListener listener = (TransferListener) iter.next();
             listener.transferProgress( transferEvent, buffer, length );
 
         }
@@ -134,7 +132,7 @@ public final class TransferEventSupport
     {
         for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
         {
-            final TransferListener listener = ( TransferListener ) iter.next();
+            final TransferListener listener = (TransferListener) iter.next();
             listener.transferCompleted( transferEvent );
 
         }
@@ -152,13 +150,13 @@ public final class TransferEventSupport
     {
         for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
         {
-            final TransferListener listener = ( TransferListener ) iter.next();
+            final TransferListener listener = (TransferListener) iter.next();
             listener.transferError( transferEvent );
 
         }
     }
 
-     /**
+    /**
      * Dispatches the given debug message
      * to all registred listeners (calls method {@link TransferListener#debug(String)} on all of them.
      *
@@ -169,10 +167,25 @@ public final class TransferEventSupport
 
         for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
         {
-            final TransferListener listener = ( TransferListener ) iter.next();
+            final TransferListener listener = (TransferListener) iter.next();
             listener.debug( message );
 
         }
     }
 
+    /**
+     * Dispatches the given <code>TransferEvent</code>
+     * to all registred listeners (calls method {@link TransferListener#transferInitiated(TransferEvent)} on all of them.
+     * The Event should be of type {@link TransferEvent#TRANSFER_INITIATED}.
+     *
+     * @param transferEvent the TransferEvent which will be dispached to listeners
+     */
+    public void fireTransferInitiated( final TransferEvent transferEvent )
+    {
+        for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
+        {
+            final TransferListener listener = (TransferListener) iter.next();
+            listener.transferInitiated( transferEvent );
+        }
+    }
 }

@@ -51,12 +51,12 @@ import java.io.OutputStream;
  * We will first try to use public keys for authentication and if that doesn't
  * work then we fall back to using the login and password
  *
- * @todo [BP] add compression flag
- *
  * @version $Id$
+ * @todo [BP] add compression flag
  */
 public class ScpWagon
-        extends AbstractWagon implements SshCommandExecutor
+    extends AbstractWagon
+    implements SshCommandExecutor
 {
     public static String EXEC_CHANNEL = "exec";
 
@@ -71,7 +71,7 @@ public class ScpWagon
     // ----------------------------------------------------------------------
 
     public void openConnection()
-            throws AuthenticationException
+        throws AuthenticationException
     {
         try
         {
@@ -122,7 +122,8 @@ public class ScpWagon
                 }
                 else
                 {
-                    String msg = "Private key was not found. You must define a private key or a password for repo: " + getRepository().getName();
+                    String msg = "Private key was not found. You must define a private key or a password for repo: " +
+                        getRepository().getName();
 
                     throw new AuthenticationException( msg );
                 }
@@ -138,14 +139,12 @@ public class ScpWagon
                 if ( proxyPort == SOCKS5_PROXY_PORT )
                 {
                     proxy = new ProxySOCKS5( proxyInfo.getHost() );
-                    ( ( ProxySOCKS5 ) proxy ).setUserPasswd( proxyInfo.getUserName(),
-                            proxyInfo.getPassword() );
+                    ( (ProxySOCKS5) proxy ).setUserPasswd( proxyInfo.getUserName(), proxyInfo.getPassword() );
                 }
                 else
                 {
                     proxy = new ProxyHTTP( proxyInfo.getHost(), proxyPort );
-                    ( ( ProxyHTTP ) proxy ).setUserPasswd( proxyInfo.getUserName(),
-                            proxyInfo.getPassword() );
+                    ( (ProxyHTTP) proxy ).setUserPasswd( proxyInfo.getUserName(), proxyInfo.getPassword() );
                 }
 
                 proxy.connect( session, host, port );
@@ -202,7 +201,7 @@ public class ScpWagon
     }
 
     public void executeCommand( String command )
-            throws TransferFailedException
+        throws TransferFailedException
     {
         ChannelExec channel = null;
 
@@ -210,7 +209,7 @@ public class ScpWagon
         {
             fireTransferDebug( "Executing command: " + command );
 
-            channel = ( ChannelExec ) session.openChannel( EXEC_CHANNEL );
+            channel = (ChannelExec) session.openChannel( EXEC_CHANNEL );
 
             channel.setCommand( command );
 
@@ -230,16 +229,16 @@ public class ScpWagon
     }
 
     public void put( File source, String resourceName )
-            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
 
         String basedir = getRepository().getBasedir();
 
-        resourceName = StringUtils.replace(resourceName, "\\", "/");
-        String dir = PathUtils.dirname( resourceName  );
-        dir = StringUtils.replace(dir, "\\", "/");
+        resourceName = StringUtils.replace( resourceName, "\\", "/" );
+        String dir = PathUtils.dirname( resourceName );
+        dir = StringUtils.replace( dir, "\\", "/" );
 
-        String mkdirCmd = "mkdir -p " + basedir + "/"  + dir  + "\n";
+        String mkdirCmd = "mkdir -p " + basedir + "/" + dir + "\n";
 
         executeCommand( mkdirCmd );
 
@@ -253,11 +252,11 @@ public class ScpWagon
         try
         {
             // exec 'scp -t rfile' remotely
-            String command = "scp -t " + basedir + "/"  + resourceName;
+            String command = "scp -t " + basedir + "/" + resourceName;
 
             fireTransferDebug( "Executing command: " + command );
 
-            channel = ( ChannelExec ) session.openChannel( EXEC_CHANNEL );
+            channel = (ChannelExec) session.openChannel( EXEC_CHANNEL );
 
             channel.setCommand( command );
 
@@ -278,13 +277,13 @@ public class ScpWagon
 
             command = "C0644 " + filesize + " ";
 
-            if( resourceName.lastIndexOf( '/' ) > 0 )
+            if ( resourceName.lastIndexOf( '/' ) > 0 )
             {
                 command += resourceName.substring( resourceName.lastIndexOf( '/' ) + 1 );
             }
             else
             {
-                command+=resourceName;
+                command += resourceName;
             }
 
             command += "\n";
@@ -298,15 +297,14 @@ public class ScpWagon
                 throw new TransferFailedException( "ACK check failed" );
             }
 
-
             Resource resource = new Resource( resourceName );
 
             putTransfer( resource, source, out, false );
 
-            byte[] buf = new byte[ 1024 ];
+            byte[] buf = new byte[1024];
 
             // send '\0'
-            buf[ 0 ] = 0;
+            buf[0] = 0;
 
             out.write( buf, 0, 1 );
 
@@ -319,7 +317,8 @@ public class ScpWagon
         }
         catch ( Exception e )
         {
-            String msg = "Error occured while deploying '" + resourceName + "' to remote repository: " + getRepository().getUrl();
+            String msg = "Error occured while deploying '" + resourceName + "' to remote repository: " +
+                getRepository().getUrl();
 
             throw new TransferFailedException( msg, e );
         }
@@ -347,8 +346,12 @@ public class ScpWagon
     }
 
     public void get( String resourceName, File destination )
-            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
+        Resource resource = new Resource( resourceName );
+
+        fireGetInitiated( resource, destination );
+
         ChannelExec channel = null;
 
         //I/O streams for remote scp
@@ -363,8 +366,6 @@ public class ScpWagon
         String basedir = getRepository().getBasedir();
 
         //@todo get content lenght and last modified
-        Resource resource = new Resource( resourceName );
-
 
         try
         {
@@ -372,7 +373,7 @@ public class ScpWagon
 
             fireTransferDebug( "Executing command: " + cmd );
 
-            channel = ( ChannelExec ) session.openChannel( EXEC_CHANNEL );
+            channel = (ChannelExec) session.openChannel( EXEC_CHANNEL );
 
             channel.setCommand( cmd );
 
@@ -383,10 +384,10 @@ public class ScpWagon
 
             channel.connect();
 
-            byte[] buf = new byte[ 1024 ];
+            byte[] buf = new byte[1024];
 
             // send '\0'
-            buf[ 0 ] = 0;
+            buf[0] = 0;
 
             out.write( buf, 0, 1 );
 
@@ -412,29 +413,28 @@ public class ScpWagon
                 {
                     in.read( buf, 0, 1 );
 
-                    if ( buf[ 0 ] == ' ' )
+                    if ( buf[0] == ' ' )
                     {
                         break;
                     }
 
-                    filesize = filesize * 10 + ( buf[ 0 ] - '0' );
+                    filesize = filesize * 10 + ( buf[0] - '0' );
                 }
 
-                resource.setContentLength(  filesize );
-
+                resource.setContentLength( filesize );
 
                 for ( int i = 0; ; i++ )
                 {
                     in.read( buf, i, 1 );
 
-                    if ( buf[ i ] == ( byte ) 0x0a )
+                    if ( buf[i] == (byte) 0x0a )
                     {
                         break;
                     }
                 }
 
                 // send '\0'
-                buf[ 0 ] = 0;
+                buf[0] = 0;
 
                 out.write( buf, 0, 1 );
 
@@ -442,7 +442,8 @@ public class ScpWagon
 
                 fireGetStarted( resource, destination );
 
-                TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_GET );
+                TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_PROGRESS,
+                                                                 TransferEvent.REQUEST_GET );
 
                 try
                 {
@@ -498,7 +499,7 @@ public class ScpWagon
                 }
 
                 // send '\0'
-                buf[ 0 ] = 0;
+                buf[0] = 0;
 
                 out.write( buf, 0, 1 );
 
@@ -548,7 +549,7 @@ public class ScpWagon
 // ----------------------------------------------------------------------
 // TODO: are the prompt values really right? Is there an alternative to UserInfo?
     public static class WagonUserInfo
-            implements UserInfo
+        implements UserInfo
     {
         AuthenticationInfo authInfo;
 
@@ -589,7 +590,8 @@ public class ScpWagon
         }
     }
 
-    static int checkAck( InputStream in ) throws IOException
+    static int checkAck( InputStream in )
+        throws IOException
     {
         int b = in.read();
         // b may be 0 for success,
@@ -612,7 +614,7 @@ public class ScpWagon
             {
                 c = in.read();
 
-                sb.append( ( char ) c );
+                sb.append( (char) c );
             }
             while ( c != '\n' );
 

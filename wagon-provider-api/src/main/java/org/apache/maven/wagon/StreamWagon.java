@@ -21,12 +21,14 @@ import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.resource.Resource;
 
-import java.io.*;
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 
 /**
  * Base class for wagon which provide stream based API.
- * 
+ *
  * @author <a href="mailto:michal@codehaus.org">Michal Maczka</a>
  * @version $Id$
  */
@@ -57,9 +59,11 @@ public abstract class StreamWagon
     public void get( String resourceName, File destination )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        InputData inputData = new InputData( );
+        InputData inputData = new InputData();
 
         Resource resource = new Resource( resourceName );
+
+        fireGetInitiated( resource, destination );
 
         inputData.setResource( resource );
 
@@ -69,7 +73,8 @@ public abstract class StreamWagon
 
         if ( is == null )
         {
-            throw new TransferFailedException( getRepository().getUrl() + " - Could not open input stream for resource: '" + resource+ "'" );
+            throw new TransferFailedException(
+                getRepository().getUrl() + " - Could not open input stream for resource: '" + resource + "'" );
         }
 
         createParentDirectories( destination );
@@ -77,12 +82,12 @@ public abstract class StreamWagon
         getTransfer( inputData.getResource(), destination, is );
     }
 
-    public boolean getIfNewer( String resourceName, File destination, long timestamp)
-            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    public boolean getIfNewer( String resourceName, File destination, long timestamp )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         boolean retValue = false;
 
-        InputData inputData = new InputData( );
+        InputData inputData = new InputData();
 
         Resource resource = new Resource( resourceName );
 
@@ -98,7 +103,8 @@ public abstract class StreamWagon
 
             if ( is == null )
             {
-                throw new TransferFailedException( getRepository().getUrl() + " - Could not open input stream for resource: '" + resource+ "'" );
+                throw new TransferFailedException(
+                    getRepository().getUrl() + " - Could not open input stream for resource: '" + resource + "'" );
             }
 
             createParentDirectories( destination );
@@ -118,7 +124,7 @@ public abstract class StreamWagon
     public void put( File source, String resourceName )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        OutputData outputData = new OutputData( );
+        OutputData outputData = new OutputData();
 
         Resource resource = new Resource( resourceName );
 
@@ -126,11 +132,12 @@ public abstract class StreamWagon
 
         fillOutputData( outputData );
 
-        OutputStream os = outputData.getOutputStream( );
+        OutputStream os = outputData.getOutputStream();
 
         if ( os == null )
         {
-            throw new TransferFailedException( getRepository().getUrl() + " - Could not open output stream for resource: '" + resource+ "'" );
+            throw new TransferFailedException(
+                getRepository().getUrl() + " - Could not open output stream for resource: '" + resource + "'" );
         }
 
         putTransfer( outputData.getResource(), source, os, true );

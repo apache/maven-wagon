@@ -23,29 +23,33 @@ package org.apache.maven.wagon.events;
  */
 public interface TransferListener
 {
+    /**
+     * @param transferEvent
+     */
+    void transferInitiated( TransferEvent transferEvent );
 
     /**
-     * @param transferEvent 
+     * @param transferEvent
      */
     void transferStarted( TransferEvent transferEvent );
 
     /**
-     * @param transferEvent 
+     * @param transferEvent
      */
     void transferProgress( TransferEvent transferEvent, byte[] buffer, int length );
 
     /**
-     * @param transferEvent 
+     * @param transferEvent
      */
     void transferCompleted( TransferEvent transferEvent );
 
     /**
-     * @param transferEvent 
+     * @param transferEvent
      */
     void transferError( TransferEvent transferEvent );
 
     /**
-     * @param message 
+     * @param message
      */
     void debug( String message );
 

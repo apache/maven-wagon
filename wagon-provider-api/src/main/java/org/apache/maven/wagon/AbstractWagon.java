@@ -38,10 +38,9 @@ import java.io.OutputStream;
 /**
  * Implementation of common facilties for Wagon providers.
  *
- * @todo [BP] The proxy information should probably be validated to match the wagon type
- *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
+ * @todo [BP] The proxy information should probably be validated to match the wagon type
  */
 public abstract class AbstractWagon
     implements Wagon
@@ -102,23 +101,25 @@ public abstract class AbstractWagon
 
         fireSessionDisconnected();
     }
-    
-    protected abstract void closeConnection() throws ConnectionException;
 
-    protected void createParentDirectories( File destination ) 
+    protected abstract void closeConnection()
+        throws ConnectionException;
+
+    protected void createParentDirectories( File destination )
         throws ResourceDoesNotExistException, TransferFailedException
     {
         if ( destination == null )
         {
             throw new ResourceDoesNotExistException( "get: Destination cannot be null" );
         }
-        
+
         File destinationDirectory = destination.getParentFile();
         if ( destinationDirectory != null && !destinationDirectory.exists() )
         {
             if ( !destinationDirectory.mkdirs() )
             {
-                throw new TransferFailedException( "Specified destination directory cannot be created: " + destinationDirectory );
+                throw new TransferFailedException(
+                    "Specified destination directory cannot be created: " + destinationDirectory );
             }
         }
     }
@@ -132,7 +133,7 @@ public abstract class AbstractWagon
     {
         fireGetStarted( resource, destination );
 
-        OutputStream output = new LazyFileOutputStream( destination ); 
+        OutputStream output = new LazyFileOutputStream( destination );
 
         try
         {
@@ -146,7 +147,7 @@ public abstract class AbstractWagon
             {
                 boolean deleted = destination.delete();
 
-                if ( ! deleted )
+                if ( !deleted )
                 {
                     destination.deleteOnExit();
                 }
@@ -209,21 +210,21 @@ public abstract class AbstractWagon
     protected void transfer( Resource resource, InputStream input, OutputStream output, int requestType )
         throws IOException
     {
-        byte[] buffer = new byte[ DEFAULT_BUFFER_SIZE ];
+        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
-        TransferEvent transferEvent = new TransferEvent( this, resource , TransferEvent.TRANSFER_PROGRESS, requestType );
+        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_PROGRESS, requestType );
 
-        while ( true )                                               
+        while ( true )
         {
-            int n = input.read( buffer ) ;
-            
+            int n = input.read( buffer );
+
             if ( n == -1 )
             {
-               break;    
+                break;
             }
-            
+
             fireTransferProgress( transferEvent, buffer, n );
-            
+
             output.write( buffer, 0, n );
         }
     }
@@ -269,13 +270,13 @@ public abstract class AbstractWagon
     {
         long timestamp = System.currentTimeMillis();
 
-        TransferEvent transferEvent =
-            new TransferEvent( this, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_GET );
+        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_COMPLETED,
+                                                         TransferEvent.REQUEST_GET );
 
         transferEvent.setTimestamp( timestamp );
 
         transferEvent.setLocalFile( localFile );
-        
+
         transferEventSupport.fireTransferCompleted( transferEvent );
     }
 
@@ -283,25 +284,39 @@ public abstract class AbstractWagon
     {
         long timestamp = System.currentTimeMillis();
 
-        TransferEvent transferEvent =
-            new TransferEvent( this, resource, TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_GET );
+        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_STARTED,
+                                                         TransferEvent.REQUEST_GET );
 
         transferEvent.setTimestamp( timestamp );
-        
+
         transferEvent.setLocalFile( localFile );
 
         transferEventSupport.fireTransferStarted( transferEvent );
+    }
+
+    protected void fireGetInitiated( Resource resource, File localFile )
+    {
+        long timestamp = System.currentTimeMillis();
+
+        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_INITIATED,
+                                                         TransferEvent.REQUEST_GET );
+
+        transferEvent.setTimestamp( timestamp );
+
+        transferEvent.setLocalFile( localFile );
+
+        transferEventSupport.fireTransferInitiated( transferEvent );
     }
 
     protected void firePutCompleted( Resource resource, File localFile )
     {
         long timestamp = System.currentTimeMillis();
 
-        TransferEvent transferEvent =
-            new TransferEvent( this, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_PUT );
+        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_COMPLETED,
+                                                         TransferEvent.REQUEST_PUT );
 
         transferEvent.setTimestamp( timestamp );
-        
+
         transferEvent.setLocalFile( localFile );
 
         transferEventSupport.fireTransferCompleted( transferEvent );
@@ -311,11 +326,11 @@ public abstract class AbstractWagon
     {
         long timestamp = System.currentTimeMillis();
 
-        TransferEvent transferEvent =
-            new TransferEvent( this, resource, TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_PUT );
+        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_STARTED,
+                                                         TransferEvent.REQUEST_PUT );
 
         transferEvent.setTimestamp( timestamp );
-        
+
         transferEvent.setLocalFile( localFile );
 
         transferEventSupport.fireTransferStarted( transferEvent );
