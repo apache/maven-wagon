@@ -123,7 +123,7 @@ public class ScpWagon
                 }
                 else
                 {
-                    String msg = "You must define a private key or a password for repo: " + getRepository().getName();
+                    String msg = "Private key was not found. You must define a private key or a password for repo: " + getRepository().getName();
 
                     throw new AuthenticationException( msg );
                 }

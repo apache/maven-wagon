@@ -196,6 +196,10 @@ public class Repository
 
     public String getName()
     {
+        if ( name == null )
+        {
+            return getId();
+        }
         return name;
     }
 
