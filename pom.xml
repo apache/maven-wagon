@@ -17,13 +17,13 @@
     <logo>http://maven.apache.org/images/apache-maven-project.png</logo>
   </organization>
 
-  <distributionManagment>
+  <distributionManagement>
     <repository>
       <id>central</id>
       <name>Maven Central Repository at Ibiblio</name>
       <url>scp://login.ibiblio.org//public/html/maven</url>
     </repository>
-  </distributionManagment>
+  </distributionManagement>
 
 
   <mailingLists>
