@@ -17,10 +17,10 @@ package org.apache.maven.wagon;
  * ====================================================================
  */
 
-import java.io.File;
-
 import junit.framework.TestCase;
 import org.apache.maven.wagon.util.FileUtils;
+
+import java.io.File;
 
 /**
  * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a> 
@@ -31,7 +31,7 @@ public class LazyFileOutputStreamTest extends TestCase
 
      public void testFileCreation() throws Exception
      {
-         File file = FileTestUtils.createUniqueFile( this );
+         File file = FileTestUtils.createUniqueFile( getName() );
              
          file.deleteOnExit();
 

@@ -17,8 +17,6 @@ package org.apache.maven.wagon;
  * ====================================================================
  */
 
-import junit.framework.TestCase;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -49,27 +47,12 @@ public class FileTestUtils
     }
 
 
-    public static final File createUniqueFile( final TestCase testCase ) throws IOException
-    {
-
-        return createUniqueFile( testCase.getName() );
-
-    }
-
     public static final File createUniqueDir( final String name ) throws IOException
     {
 
         String filename = name + System.currentTimeMillis();
 
         return createDir( filename );
-
-    }
-
-
-    public static final File createUniqueDir( final TestCase testCase ) throws IOException
-    {
-
-        return createUniqueDir( testCase.getName() );
 
     }
 
@@ -94,13 +77,6 @@ public class FileTestUtils
 
         return retValue;
     }
-
-    public static final File createDir( final TestCase testCase ) throws IOException
-    {
-        return createDir(  testCase.getName() );
-    }
-
-
 
     public static final File getTestOutputDir()
     {
