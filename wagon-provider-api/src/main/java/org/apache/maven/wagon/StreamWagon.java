@@ -85,6 +85,13 @@ public abstract class StreamWagon
     public void get( String resource, File destination )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
+        
+        if ( destination == null )
+        {
+           throw new ResourceDoesNotExistException( "get: Destination cannot be null" );
+        }
+        
+        
         if ( !destination.getParentFile().exists() )
         {
             if ( !destination.getParentFile().mkdirs() )
@@ -101,8 +108,7 @@ public abstract class StreamWagon
         }
         catch ( FileNotFoundException e )
         {
-            // This is taken care of above, if we cannot create the
-            // parent directory then an exception will be thrown above.
+            throw new TransferFailedException( "Cannot write to specified destination: " + destination.getAbsolutePath() );
         }
 
         InputStream is;
@@ -113,7 +119,9 @@ public abstract class StreamWagon
         }
         catch ( Exception e )
         {
-            throw new TransferFailedException( "Cannot create input stream: ", e );
+            String msg = "Cannot create input stream for resource: " + resource;
+            
+            throw new TransferFailedException( msg, e );
         }
 
         getTransfer( resource, is, os );
@@ -136,8 +144,7 @@ public abstract class StreamWagon
         }
         catch ( FileNotFoundException e )
         {
-            // This is taken care of above, if we cannot create the
-            // parent directory then an exception will be thrown above.
+            throw new TransferFailedException( "Cannot read from specified source: " + source.getAbsolutePath() );
         }
 
         OutputStream os;

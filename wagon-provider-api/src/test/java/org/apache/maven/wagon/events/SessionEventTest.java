@@ -48,7 +48,6 @@ import junit.framework.TestCase;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.MockWagon;
 
 /**
