@@ -1,7 +1,7 @@
 package org.apache.maven.wagon.providers.http;
 
 /*
- * Copyright 2001-2004 The Apache Software Foundation.
+ * Copyright 2001-2005 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.apache.commons.httpclient.HttpRecoverableException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.NTCredentials;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.util.DateParseException;
@@ -40,6 +41,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
+import java.util.Date;
+import java.util.TimeZone;
+import java.text.SimpleDateFormat;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -55,6 +60,8 @@ public class HttpWagon
     private HttpClient client = null;
 
     private int numberOfAttempts = DEFAULT_NUMBER_OF_ATTEMPTS;
+
+    private static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone( "GMT" );
 
     public void openConnection()
     {
@@ -80,6 +87,7 @@ public class HttpWagon
             Credentials creds = new UsernamePasswordCredentials( username, password );
 
             client.getState().setCredentials( null, host, creds );
+            client.getState().setAuthenticationPreemptive( true );
         }
 
         HostConfiguration hc = new HostConfiguration();
@@ -92,13 +100,31 @@ public class HttpWagon
 
             String proxyHost = proxyInfo.getHost();
 
-            if ( StringUtils.isNotEmpty( proxyUsername )
-                && StringUtils.isNotEmpty( proxyPassword )
-                && StringUtils.isNotEmpty( proxyHost ) )
-            {
-                Credentials creds = new UsernamePasswordCredentials( username, password );
+            int proxyPort = proxyInfo.getPort();
 
-                client.getState().setProxyCredentials( null, proxyHost, creds );
+            String proxyNtlmHost = proxyInfo.getNtlmHost();
+
+            String proxyNtlmDomain = proxyInfo.getNtlmDomain();
+
+            if ( proxyHost != null )
+            {
+                hc.setProxy( proxyHost, proxyPort );
+
+                if ( proxyUsername != null && proxyPassword != null )
+                {
+                    Credentials creds;
+                    if ( proxyNtlmHost != null || proxyNtlmDomain != null )
+                    {
+                        creds = new NTCredentials( proxyUsername, proxyPassword, proxyNtlmHost, proxyNtlmDomain );
+                    }
+                    else
+                    {
+                        creds = new UsernamePasswordCredentials( proxyUsername, proxyPassword );
+                    }
+
+                    client.getState().setProxyCredentials( null, proxyHost, creds );
+                    client.getState().setAuthenticationPreemptive( true );
+                }
             }
         }
 
@@ -173,7 +199,8 @@ public class HttpWagon
                 break;
 
             case SC_NULL:
-                throw new ResourceDoesNotExistException( "File: " + url + " does not extist" );
+                throw new TransferFailedException( "Failed to transfer file: " + url + " after " + attempt +
+                                                   " attempts" );
 
             case HttpStatus.SC_FORBIDDEN:
                 throw new AuthorizationException( "Access denided to: " + url );
@@ -183,7 +210,8 @@ public class HttpWagon
 
                 //add more entries here
             default :
-                throw new TransferFailedException( "Failed to trasfer file: " + url + ". Return code is: " + statusCode );
+                throw new TransferFailedException( "Failed to transfer file: " + url + ". Return code is: " +
+                                                   statusCode );
         }
 
         putMethod.releaseConnection();
@@ -198,20 +226,19 @@ public class HttpWagon
     public void get( String resourceName, File destination )
        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        get( resourceName, destination, 0, false );
+        get( resourceName, destination, 0 );
     }
 
     public boolean getIfNewer( String resourceName, File destination, long timestamp ) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        return get( resourceName, destination, timestamp, true );
+        return get( resourceName, destination, timestamp );
     }
 
     /**
      *
      * @param resourceName
      * @param destination
-     * @param timestamp
-     * @param newerRequired
+     * @param timestamp the timestamp to check against, only downloading if newer. If <code>0</code>, always download
      * @return
      * @throws TransferFailedException
      * @throws ResourceDoesNotExistException
@@ -219,7 +246,7 @@ public class HttpWagon
      *
      * @return <code>true</code> if newer version was downloaded, <code>false</code> otherwise.
      */
-    public boolean get( String resourceName, File destination, long timestamp, boolean newerRequired )
+    public boolean get( String resourceName, File destination, long timestamp )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
 
@@ -229,143 +256,169 @@ public class HttpWagon
 
         GetMethod getMethod = new GetMethod( url );
 
-        getMethod.addRequestHeader( "Cache-control", "no-cache" );
-
-        getMethod.addRequestHeader( "Cache-store", "no-store" );
-
-        getMethod.addRequestHeader( "Pragma", "no-cache" );
-
-        getMethod.addRequestHeader( "Expires", "0" );
-
-        int statusCode = SC_NULL;
-
-        int attempt = 0;
-
-        // We will retry up to NumberOfAttempts times.
-        while ( ( statusCode == SC_NULL ) && ( attempt < getNumberOfAttempts() ) )
+        try
         {
-            try
+            getMethod.addRequestHeader( "Cache-control", "no-cache" );
+
+            getMethod.addRequestHeader( "Cache-store", "no-store" );
+
+            getMethod.addRequestHeader( "Pragma", "no-cache" );
+
+            getMethod.addRequestHeader( "Expires", "0" );
+
+            if ( timestamp > 0 )
             {
-                // execute the getMethod.
-                statusCode = client.executeMethod( getMethod );
+                SimpleDateFormat fmt = new SimpleDateFormat( "EEE, dd-MMM-yy HH:mm:ss zzz", Locale.US );
+                fmt.setTimeZone( GMT_TIME_ZONE );
+                Header hdr = new Header( "If-Modified-Since", fmt.format( new Date( timestamp ) ) );
+                fireTransferDebug( "sending ==> " + hdr + "(" + timestamp + ")" );
+                getMethod.addRequestHeader( hdr );
             }
-            catch ( HttpRecoverableException e )
+
+            int statusCode = SC_NULL;
+
+            int attempt = 0;
+
+            // We will retry up to NumberOfAttempts times.
+            while ( ( statusCode == SC_NULL ) && ( attempt < getNumberOfAttempts() ) )
             {
-                attempt++;
-
-                continue;
-            }
-            catch ( IOException e )
-            {
-                throw new TransferFailedException( e.getMessage(), e );
-            }
-        }
-
-        fireTransferDebug( url + " - Status code: " + statusCode );
-
-        // Check that we didn't run out of retries.
-        switch ( statusCode )
-        {
-            case HttpStatus.SC_OK:
-                break;
-
-            case SC_NULL:
-                throw new ResourceDoesNotExistException( "File: " + url + " does not extist" );
-
-            case HttpStatus.SC_FORBIDDEN:
-                throw new AuthorizationException( "Access denided to: " + url );
-
-            case HttpStatus.SC_NOT_FOUND:
-                throw new ResourceDoesNotExistException( "File: " + url + " does not exist" );
-
-                //add more entries here
-            default :
-                throw new TransferFailedException( "Failed to trasfer file: "
-                                                   + url
-                                                   + ". Return code is: "
-                                                   + statusCode );
-        }
-
-        Resource resource = new Resource( resourceName );
-
-        InputStream is = null;
-
-        Header contentLengthHeader = getMethod.getResponseHeader( "Content-Length" );
-
-        if ( contentLengthHeader != null )
-        {
-            try
-            {
-                long contentLength = Integer.valueOf( contentLengthHeader.getValue() ).intValue();
-
-                resource.setContentLength( contentLength );
-            }
-            catch ( NumberFormatException e )
-            {
-                fireTransferDebug( "error parsing content length header '" + contentLengthHeader.getValue() + "' " + e );
-            }
-        }
-
-        Header lastModifiedHeader = getMethod.getResponseHeader( "Last-Modified" );
-
-        long lastModified = 0;
-
-        if ( lastModifiedHeader != null )
-        {
-             try
-             {
-                lastModified = DateParser.parseDate( lastModifiedHeader.getValue() ).getTime();
-
-                resource.setLastModified(  lastModified );
-             }
-             catch ( DateParseException e )
-             {
-                fireTransferDebug( "Unable to parse last modified header" );
-             }
-
-            fireTransferDebug( "last-modified = " + lastModifiedHeader.getValue() + " (" + lastModified + ")" );
-        }
-
-        //@todo have to check how m1 does it
-        boolean isNewer = timestamp < lastModified;
-
-        if(  ( isNewer && newerRequired )  || ( !newerRequired )  )
-        {
-            retValue = true;
-
-            try
-            {
-                is = getMethod.getResponseBodyAsStream();
-
-                getTransfer( resource, destination, is );
-            }
-            catch ( Exception e )
-            {
-                fireTransferError( resource, e );
-
-                if ( destination.exists() )
+                try
                 {
-                    boolean deleted = destination.delete();
+                    // execute the getMethod.
+                    statusCode = client.executeMethod( getMethod );
+                }
+                catch ( HttpRecoverableException e )
+                {
+                    attempt++;
 
-                    if ( ! deleted )
-                    {
-                        destination.deleteOnExit();
-                    }
+                    continue;
+                }
+                catch ( IOException e )
+                {
+                    throw new TransferFailedException( e.getMessage(), e );
+                }
+            }
+
+            fireTransferDebug( url + " - Status code: " + statusCode );
+
+            // TODO [BP]: according to httpclient docs, really should swallow the output on error. verify if that is required
+            switch ( statusCode )
+            {
+                case HttpStatus.SC_OK:
+                    break;
+
+                case HttpStatus.SC_NOT_MODIFIED:
+                    return false;
+
+                case SC_NULL:
+                    throw new TransferFailedException( "Failed to transfer file: " + url + " after " + attempt +
+                                                       " attempts" );
+
+                case HttpStatus.SC_FORBIDDEN:
+                    throw new AuthorizationException( "Access denided to: " + url );
+
+                case HttpStatus.SC_UNAUTHORIZED:
+                    throw new AuthorizationException( "Not authorized." );
+
+                case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
+                    throw new AuthorizationException( "Not authorized by proxy." );
+
+                case HttpStatus.SC_NOT_FOUND:
+                    throw new ResourceDoesNotExistException( "File: " + url + " does not exist" );
+
+                    //add more entries here
+                default :
+                    throw new TransferFailedException( "Failed to trasfer file: " + url + ". Return code is: " +
+                                                       statusCode );
+            }
+
+            Resource resource = new Resource( resourceName );
+
+            InputStream is = null;
+
+            Header contentLengthHeader = getMethod.getResponseHeader( "Content-Length" );
+
+            if ( contentLengthHeader != null )
+            {
+                try
+                {
+                    long contentLength = Integer.valueOf( contentLengthHeader.getValue() ).intValue();
+
+                    resource.setContentLength( contentLength );
+                }
+                catch ( NumberFormatException e )
+                {
+                    fireTransferDebug( "error parsing content length header '" + contentLengthHeader.getValue() + "' " + e );
+                }
+            }
+
+            Header lastModifiedHeader = getMethod.getResponseHeader( "Last-Modified" );
+
+            long lastModified = 0;
+
+            if ( lastModifiedHeader != null )
+            {
+                try
+                {
+                    lastModified = DateParser.parseDate( lastModifiedHeader.getValue() ).getTime();
+                }
+                catch ( DateParseException e )
+                {
+                    fireTransferDebug( "Unable to parse last modified header" );
                 }
 
-                String msg = "Error occured while deploying to remote repository:" + getRepository();
-
-                throw new TransferFailedException( msg, e );
+                fireTransferDebug( "last-modified = " + lastModifiedHeader.getValue() + " (" + lastModified + ")" );
             }
-            finally
+
+            if ( timestamp < lastModified )
             {
-                shutdownStream( is );
+                retValue = true;
+
+                try
+                {
+                    is = getMethod.getResponseBodyAsStream();
+
+                    getTransfer( resource, destination, is );
+                }
+                catch ( Exception e )
+                {
+                    fireTransferError( resource, e );
+
+                    if ( destination.exists() )
+                    {
+                        boolean deleted = destination.delete();
+
+                        if ( ! deleted )
+                        {
+                            destination.deleteOnExit();
+                        }
+                    }
+
+                    String msg = "Error occured while deploying to remote repository:" + getRepository();
+
+                    throw new TransferFailedException( msg, e );
+                }
+                finally
+                {
+                    shutdownStream( is );
+                }
+
+                if ( lastModified > 0 )
+                {
+                    resource.setLastModified( lastModified );
+                }
+            }
+            else
+            {
+                fireTransferDebug( "Local file is newer: not downloaded" );
             }
 
+            return retValue;
         }
-        getMethod.releaseConnection();
-
-        return retValue;
+        finally
+        {
+            getMethod.releaseConnection();
+        }
     }
 
     public int getNumberOfAttempts()
