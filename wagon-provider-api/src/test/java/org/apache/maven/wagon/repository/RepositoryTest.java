@@ -20,7 +20,6 @@ package org.apache.maven.wagon.repository;
 import junit.framework.TestCase;
 import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
-import org.apache.maven.wagon.proxy.ProxyInfo;
 
 /**
  * @author <a href="mailto:jvanzyl@maven.org">Jason van Zyl</a>
@@ -54,10 +53,6 @@ public class RepositoryTest
         repository.setAuthenticationInfo( new AuthenticationInfo() );
 
         assertNotNull( repository.getAuthenticationInfo() );
-
-        repository.setProxyInfo( new ProxyInfo() );
-
-        assertNotNull( repository.getProxyInfo() );
 
         repository.setBasedir( "directory" );
 

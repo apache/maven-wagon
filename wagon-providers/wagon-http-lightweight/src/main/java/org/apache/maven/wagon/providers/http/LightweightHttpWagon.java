@@ -23,7 +23,6 @@ import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.StreamWagon;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authentication.AuthenticationException;
-import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 
@@ -95,7 +94,6 @@ public class LightweightHttpWagon
         previousProxyPort = System.getProperty( "http.proxyPort" );
         previousProxyExclusions = System.getProperty( "http.nonProxyHosts" );
 
-        final ProxyInfo proxyInfo = this.getRepository().getProxyInfo();
         if ( proxyInfo != null )
         {
             System.setProperty( "http.proxyHost", proxyInfo.getHost() );

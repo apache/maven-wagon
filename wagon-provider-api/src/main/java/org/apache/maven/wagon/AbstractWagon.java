@@ -18,7 +18,13 @@ package org.apache.maven.wagon;
  */
 
 import org.apache.maven.wagon.authentication.AuthenticationException;
-import org.apache.maven.wagon.events.*;
+import org.apache.maven.wagon.events.SessionEvent;
+import org.apache.maven.wagon.events.SessionEventSupport;
+import org.apache.maven.wagon.events.SessionListener;
+import org.apache.maven.wagon.events.TransferEvent;
+import org.apache.maven.wagon.events.TransferEventSupport;
+import org.apache.maven.wagon.events.TransferListener;
+import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 
@@ -31,6 +37,8 @@ import java.io.OutputStream;
 
 /**
  * Implementation of common facilties for Wagon providers.
+ *
+ * @todo [BP] The proxy information should probably be validated to match the wagon type
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
@@ -46,6 +54,8 @@ public abstract class AbstractWagon
 
     protected TransferEventSupport transferEventSupport = new TransferEventSupport();
 
+    protected ProxyInfo proxyInfo = null;
+
     // ----------------------------------------------------------------------
     // Repository
     // ----------------------------------------------------------------------
@@ -59,8 +69,14 @@ public abstract class AbstractWagon
     // Connection
     // ----------------------------------------------------------------------
 
-    public void connect( Repository repository ) throws
-      ConnectionException, AuthenticationException
+    public void connect( Repository repository )
+        throws ConnectionException, AuthenticationException
+    {
+        connect( repository, null );
+    }
+
+    public void connect( Repository repository, ProxyInfo proxyInfo )
+        throws ConnectionException, AuthenticationException
     {
         if ( repository == null )
         {
@@ -68,6 +84,7 @@ public abstract class AbstractWagon
         }
 
         this.repository = repository;
+        this.proxyInfo = proxyInfo;
 
         fireSessionOpening();
 

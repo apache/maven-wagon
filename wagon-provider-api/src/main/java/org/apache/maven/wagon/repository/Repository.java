@@ -20,7 +20,6 @@ package org.apache.maven.wagon.repository;
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
-import org.apache.maven.wagon.proxy.ProxyInfo;
 
 import java.io.Serializable;
 
@@ -48,8 +47,6 @@ public class Repository
     private String protocol;
 
     private String url;
-
-    private ProxyInfo proxyInfo;
 
     private AuthenticationInfo authenticationInfo;
 
@@ -87,16 +84,6 @@ public class Repository
     public void setAuthenticationInfo( AuthenticationInfo authenticationInfo )
     {
         this.authenticationInfo = authenticationInfo;
-    }
-
-    public ProxyInfo getProxyInfo()
-    {
-        return proxyInfo;
-    }
-
-    public void setProxyInfo( ProxyInfo proxyInfo )
-    {
-        this.proxyInfo = proxyInfo;
     }
 
     public String getBasedir()
