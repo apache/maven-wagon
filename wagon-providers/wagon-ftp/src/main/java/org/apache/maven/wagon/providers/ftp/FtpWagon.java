@@ -27,12 +27,14 @@ import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.StreamWagon;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonConstants;
+import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.File;
 
 public class FtpWagon
     extends StreamWagon
@@ -143,12 +145,44 @@ public class FtpWagon
         }
     }
 
+    protected void firePutCompleted( String s, File file )
+    {
+
+
+        try
+        {
+            ftp.completePendingCommand();
+        }
+        catch ( IOException e )
+        {
+            // michal I am not sure  what error means in that context
+            // I think that we will be able to recover or simply we will fail later on
+        }
+
+         super.firePutCompleted( s, file );
+    }
+
+
+    protected void fireGetCompleted( String resource, File localFile )
+    {
+        try
+        {
+            ftp.completePendingCommand();
+        }
+        catch ( IOException e )
+        {
+            // michal I am not sure  what error means in that context
+            // actually I am not even sure why we have to invoke that command
+            // I think that we will be able to recover or simply we will fail later on
+        }
+        super.fireGetCompleted( resource, localFile );
+    }
+
     public void closeConnection()
         throws ConnectionException
     {
         if ( ftp.isConnected() )
         {
-            
             try
             {
                 // This is a NPE rethink shutting down the streams
@@ -161,11 +195,6 @@ public class FtpWagon
         }
     }
 
-    
-
-    // ----------------------------------------------------------------------
-    //
-    // ----------------------------------------------------------------------
 
     public OutputStream getOutputStream( String resource )
         throws TransferFailedException
@@ -202,15 +231,16 @@ public class FtpWagon
 
             if ( os == null)
             {
-                 fireTransferDebug( "REPLY STRING: " + ftp.getReplyString() );
+                String msg = "Cannot transfer resource:  '" +
+                        resource + "' Output stream is null. FTP Server response: " +
+                        ftp.getReplyString();
 
-                 fireTransferDebug( "REPLY: " + ftp.getReply() );
+                throw new TransferFailedException( msg );
 
-                 fireTransferDebug( "REPLY CODE: " + ftp.getReplyCode() );
             }
-
-            fireTransferDebug( "resource = " + resource );
             
+            fireTransferDebug( "resource = " + resource );
+
         }
         catch ( Exception e )
         {
