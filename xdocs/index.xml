@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+
+<document>
+
+    <properties>
+        <title>Wagon HTTP provider</title>
+        <author email="michal.maczka@dimatics.com">Michal Maczka</author>
+    </properties>
+
+    <body>
+
+        <section name="Wagon File provider">
+            <p>
+               This project is an implementation of Wagon provider
+               for <b>http</b> and <b>https</b> protocols
+            </p>
+        </section>
+        <section name="Featuries">
+           <p>
+              <ul>
+                <li>Only <b>GET</b> request is supported</li>
+              </ul>
+           </p>
+        </section>
+        <section name="TODO">
+           <p>
+              <ul>
+                <li>
+                    Support for proxy servers should match the one offered
+                    by <b>commons-httpclient</b>
+                </li>
+                <li>
+                    If dedicated web application were written,
+                    or generally speaking if some dedicated service were istallled
+                    at the web server with which HttpWagon is communicating it would
+                    be possible to implement PUT request.
+                </li>
+              </ul>
+           </p>
+        </section>
+    </body>
+</document>

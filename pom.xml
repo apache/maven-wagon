@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>maven</groupId>
+        <artifactId>wagon-provider-parent</artifactId>
+        <version>1.0-alpha-1</version>
+    </parent>
+    <groupId>maven</groupId>
+    <artifactId>wagon-http</artifactId>
+    <name>Wagon HTTP provider</name>
+    <version>1.0-alpha-1</version>
+    <shortDescription>Wagon Provider for HTTP/HTTPS protocols based on jakarta-commons-httpclient</shortDescription>
+    <package>org.apache.maven.wagon.providers.http</package>
+    <inceptionYear>2003</inceptionYear>
+    <url>http://maven.apache.org/wagon/wagon-providers/wagon-http</url>
+    <issueTrackingUrl>http://jira.codehaus.org/BrowseProject.jspa?id=10319</issueTrackingUrl>
+    <siteDirectory>/www/maven.apache.org/wagon/wagon-providers/wagon-http</siteDirectory>
+
+    <developers>
+        <developer>
+            <name>Michal Maczka</name>
+            <id>michal</id>
+            <email>michal.maczka@dimatics.com</email>
+            <organization>Dimatics</organization>
+            <roles>
+                <role>Creator</role>
+                <role>Developer</role>
+                <role>Release Manager</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <dependencies>
+        <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+            <version>2.0</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.0.3</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>1.0.1</version>
+            <type>jar</type>
+        </dependency>
+
+
+        
+        <!-- Testing -->
+        <dependency>
+            <groupId>plexus</groupId>
+            <artifactId>plexus-jetty-httpd</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>jetty</groupId>
+            <artifactId>jetty</artifactId>
+            <version>4.2.10</version>
+        </dependency>
+        <dependency>
+            <groupId>servletapi</groupId>
+            <artifactId>servletapi</artifactId>
+            <version>2.3</version>
+        </dependency>
+    </dependencies>
+</project>
