@@ -29,6 +29,11 @@
     <dependencies>
         <dependency>
             <groupId>maven</groupId>
+            <artifactId>wagon-provider-api</artifactId>
+            <version>1.0-alpha-2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>maven</groupId>
             <artifactId>wagon-provider-test</artifactId>
             <version>1.0-alpha-2-SNAPSHOT</version>
             <scope>test</scope>

@@ -226,7 +226,7 @@ public abstract class WagonTestCase
 
         wagon.connect( testRepository );
 
-        destFile =  FileTestUtils.createUniqueFile( this );
+        destFile =  FileTestUtils.createUniqueFile( getName() );
 
         destFile.deleteOnExit();
 
