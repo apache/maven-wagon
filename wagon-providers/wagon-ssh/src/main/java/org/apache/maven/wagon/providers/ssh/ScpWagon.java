@@ -193,7 +193,10 @@ public class ScpWagon
 
     public void closeConnection()
     {
-        session.disconnect();
+        if ( session != null )
+        {
+            session.disconnect();
+        }
     }
 
     public void executeCommand( String command )
