@@ -73,11 +73,9 @@ public abstract class WagonTestCase
     //    repository url of file://${basedir}/target/file-repository.
     // ----------------------------------------------------------------------
 
-    protected void setUp()
+    protected void setupRepositories()
         throws Exception
     {
-        super.setUp();
-
         resource = "test-resource.txt";
 
         modelReader = new MavenXpp3Reader();
@@ -121,12 +119,12 @@ public abstract class WagonTestCase
         getContainer().addContextValue( "test.repository", localRepositoryPath );
     }
 
-    protected void setupFileRoundTripTesting()
+    protected void setupWagonTestingFixtures()
         throws Exception
     {
     }
 
-    protected void setupArtifactRoundTripTesting()
+    protected void tearDownWagonTestingFixtures()
         throws Exception
     {
     }
@@ -159,6 +157,24 @@ public abstract class WagonTestCase
         System.out.println( "---------------------------------------------------------------------------------------------------------" );
         System.out.println( message );
         System.out.println( "---------------------------------------------------------------------------------------------------------" );
+    }
+
+    // ----------------------------------------------------------------------
+    //
+    // ----------------------------------------------------------------------
+
+    public void testWagon()
+        throws Exception
+    {
+        setupRepositories();
+
+        setupWagonTestingFixtures();
+
+        fileRoundTripTesting();
+
+        artifactRoundTripTesting();
+
+        tearDownWagonTestingFixtures();
     }
 
     // ----------------------------------------------------------------------
@@ -200,12 +216,10 @@ public abstract class WagonTestCase
         wagon.disconnect();
     }
 
-    public void testFileRoundTrip()
+    protected void fileRoundTripTesting()
         throws Exception
     {
         message( "File round trip testing ..." );
-
-        setupFileRoundTripTesting();
 
         putFile();
 
@@ -256,12 +270,10 @@ public abstract class WagonTestCase
         wagon.disconnect();
     }
 
-    public void testArtifactRoundTrip()
+    protected void artifactRoundTripTesting()
         throws Exception
     {
         message( "Artifact round trip testing ..." );
-
-        setupArtifactRoundTripTesting();
 
         putArtifact();                
 
