@@ -5,12 +5,12 @@
     <parent>
         <groupId>maven</groupId>
         <artifactId>wagon</artifactId>
-        <version>1.0-alpha-1</version>
+        <version>1.0-alpha-2-SNAPSHOT</version>
     </parent>
     <groupId>maven</groupId>
     <artifactId>wagon-ftp</artifactId>
     <name>Wagon FTP Provider</name>
-    <version>1.0-alpha-1</version>
+    <version>1.0-alpha-2-SNAPSHOT</version>
     <description></description>
     <shortDescription>Provider for FTP protocol for Wagon</shortDescription>
     <package>org.apache.maven.wagon.providers.ftp</package>
@@ -42,7 +42,7 @@
         <dependency>
             <groupId>maven</groupId>
             <artifactId>wagon-provider-common</artifactId>
-            <version>1.0-alpha-1</version>
+            <version>1.0-alpha-2-SNAPSHOT</version>
         </dependency>
 
 

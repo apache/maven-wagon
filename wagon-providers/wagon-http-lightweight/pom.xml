@@ -5,12 +5,12 @@
     <parent>
         <groupId>maven</groupId>
         <artifactId>wagon-provider-parent</artifactId>
-        <version>1.0-alpha-1</version>
+        <version>1.0-alpha-2-SNAPSHOT</version>
     </parent>
     <groupId>maven</groupId>
     <artifactId>wagon-http-lightweight</artifactId>
     <name>Lightweight Wagon HTTP provider</name>
-    <version>1.0-alpha-1</version>
+    <version>1.0-alpha-2-SNAPSHOT</version>
     <shortDescription>Wagon Provider for HTTP protocol without any external dependedencies</shortDescription>
     <package>org.apache.maven.wagon.providers.http</package>
     <inceptionYear>2004</inceptionYear>
@@ -37,7 +37,7 @@
         <dependency>
             <groupId>maven</groupId>
             <artifactId>wagon-provider-common</artifactId>
-            <version>1.0-alpha-1</version>
+            <version>1.0-alpha-2-SNAPSHOT</version>
         </dependency>
 
         <!-- Testing -->

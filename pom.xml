@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>maven</groupId>
     <artifactId>wagon</artifactId>
-    <version>1.0-alpha-1</version>
+    <version>1.0-alpha-2-SNAPSHOT</version>
     <type>pom</type>
     <name>Wagon</name>
     <description>Tools to manage artifacts and deployment</description>
@@ -32,6 +32,13 @@
         <url>http://cvs.apache.org/viewcvs.cgi/maven-wagon</url>
     </scm>
 
+    <ciManagement>
+      <nagEmailAddress>brett@apache.org</nagEmailAddress>
+<!-- TODO: reinstate this once we are certain the mails work, so we can check list subscription works
+      <nagEmailAddress>wagon-dev@maven.apache.org</nagEmailAddress>
+-->
+    </ciManagement>
+
     <mailingLists>
         <mailingList>
             <name>Wagon User List</name>
@@ -55,6 +62,15 @@
             <organization>Codehaus</organization>
             <roles>
                 <role>Architect</role>
+            </roles>
+        </developer>
+        <developer>
+            <name>Brett Porter</name>
+            <id>brett</id>
+            <email>brett@apache.org</email>
+            <timezone>+10</timezone>
+            <roles>
+                <role>Java Developer</role>
             </roles>
         </developer>
     </developers>

@@ -5,12 +5,12 @@
     <parent>
         <groupId>maven</groupId>
         <artifactId>wagon-provider-parent</artifactId>
-        <version>1.0-alpha-1</version>
+        <version>1.0-alpha-2-SNAPSHOT</version>
     </parent>
     <groupId>maven</groupId>
     <artifactId>wagon-file</artifactId>
     <name>Wagon File Provider</name>
-    <version>1.0-alpha-1</version>
+    <version>1.0-alpha-2-SNAPSHOT</version>
     <description></description>
     <shortDescription>Wagon Provider for file protocol</shortDescription>
     <package>org.apache.maven.wagon.providers.file</package>
@@ -33,7 +33,7 @@
         <dependency>
             <groupId>maven</groupId>
             <artifactId>wagon-provider-common</artifactId>
-            <version>1.0-alpha-1</version>
+            <version>1.0-alpha-2-SNAPSHOT</version>
         </dependency>
         
     </dependencies>
