@@ -1,24 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<project>
-  <modelVersion>4.0.0</modelVersion>
+<model>
   <parent>
-    <groupId>maven</groupId>
     <artifactId>wagon-providers</artifactId>
+    <groupId>maven</groupId>
     <version>1.0-alpha-2-SNAPSHOT</version>
   </parent>
+  <modelVersion>4.0.0</modelVersion>
   <groupId>maven</groupId>
   <artifactId>wagon-ssh-external</artifactId>
+  <packaging>jar</packaging>
   <name>Wagon SSH External Provider</name>
   <version>1.0-alpha-2-SNAPSHOT</version>
   <description></description>
-  <shortDescription>Wagon Provider for protocols from SSH2 family based on the command line tools available</shortDescription>
-  <package>org.apache.maven.wagon.providers.sshext</package>
   <inceptionYear>2003</inceptionYear>
   <developers>
     <developer>
-      <name>Brett Porter</name>
       <id>brett</id>
+      <name>Brett Porter</name>
       <email>brett@apache.org</email>
       <roles>
         <role>Developer</role>
@@ -30,6 +27,8 @@
       <groupId>plexus</groupId>
       <artifactId>plexus-utils</artifactId>
       <version>1.0-alpha-1</version>
+      <type>jar</type>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
-</project>
+</model>

@@ -1,93 +1,84 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<project>
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>maven</groupId>
-    <artifactId>wagon</artifactId>
-    <version>1.0-alpha-2-SNAPSHOT</version>
-    <type>pom</type>
-    <name>Wagon</name>
-    <description>Tools to manage artifacts and deployment</description>
-    <shortDescription>Tools to manage artifacts and deployment</shortDescription>
-    <package>org.apache.maven.wagon</package>
-    <inceptionYear>2003</inceptionYear>
-
-    <organization>
-        <name>Apache Software Foundation</name>
-        <url>http://www.apache.org/</url>
-        <logo>http://maven.apache.org/images/apache-maven-project.png</logo>
-    </organization>
-
-    <distributionManagement>
-        <repository>
-            <id>repo1</id>
-            <name>Maven Repository</name>
-            <url>scp://repo1.maven.org/home/projects/maven/repository/ibiblio-v2</url>
-            <username>maven</username>
-        </repository>
-    </distributionManagement>
-
-    <scm>
-        <connection>scm:cvs:pserver:anoncvs@cvs.apache.org:/home/cvspublic:maven-wagon</connection>
-        <developerConnection>scm:cvs:ext:${maven.username}@cvs.apache.org:/home/cvs:maven-wagon</developerConnection>
-        <url>http://cvs.apache.org/viewcvs.cgi/maven-wagon</url>
-    </scm>
-
-    <ciManagement>
-      <nagEmailAddress>wagon-dev@maven.apache.org</nagEmailAddress>
-    </ciManagement>
-
-    <mailingLists>
-        <mailingList>
-            <name>Wagon User List</name>
-            <subscribe>wagon-users-subscribe@maven.apache.org</subscribe>
-            <unsubscribe>wagon-users-unsubscribe@maven.apache.org</unsubscribe>
-            <archive>http://nagoya.apache.org/eyebrowse/SummarizeList?listName=wagon-users@maven.apache.org</archive>
-        </mailingList>
-        <mailingList>
-            <name>Wagon Developer List</name>
-            <subscribe>wagon-dev-subscribe@maven.apache.org</subscribe>
-            <unsubscribe>wagon-dev-unsubscribe@maven.apache.org</unsubscribe>
-            <archive>http://nagoya.apache.org/eyebrowse/SummarizeList?listName=wagon-dev@maven.apache.org</archive>
-        </mailingList>
-    </mailingLists>
-
-    <developers>
-        <developer>
-            <name>Michal Maczka</name>
-            <id>michal</id>
-            <email>michal@codehaus.com</email>
-            <organization>Codehaus</organization>
-            <roles>
-                <role>Architect</role>
-            </roles>
-        </developer>
-        <developer>
-            <name>Brett Porter</name>
-            <id>brett</id>
-            <email>brett@apache.org</email>
-            <timezone>+10</timezone>
-            <roles>
-                <role>Java Developer</role>
-            </roles>
-        </developer>
-    </developers>
-
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://cvs.apache.org/viewcvs.cgi/*checkout*/maven/LICENSE.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>3.8.1</version>
-	    <scope>test</scope>
-        </dependency>
-    </dependencies>
-
-</project>
+<model>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>maven</groupId>
+  <artifactId>wagon</artifactId>
+  <packaging>pom</packaging>
+  <name>Wagon</name>
+  <version>1.0-alpha-2-SNAPSHOT</version>
+  <description>Tools to manage artifacts and deployment</description>
+  <ciManagement>
+    <system>wagon-dev@maven.apache.org</system>
+    <notifiers>
+      <notifier>
+        <type>email</type>
+        <address>wagon-dev@maven.apache.org</address>
+      </notifier>
+    </notifiers>
+  </ciManagement>
+  <inceptionYear>2003</inceptionYear>
+  <mailingLists>
+    <mailingList>
+      <name>Wagon User List</name>
+      <subscribe>wagon-users-subscribe@maven.apache.org</subscribe>
+      <unsubscribe>wagon-users-unsubscribe@maven.apache.org</unsubscribe>
+      <archive>http://nagoya.apache.org/eyebrowse/SummarizeList?listName=wagon-users@maven.apache.org</archive>
+    </mailingList>
+    <mailingList>
+      <name>Wagon Developer List</name>
+      <subscribe>wagon-dev-subscribe@maven.apache.org</subscribe>
+      <unsubscribe>wagon-dev-unsubscribe@maven.apache.org</unsubscribe>
+      <archive>http://nagoya.apache.org/eyebrowse/SummarizeList?listName=wagon-dev@maven.apache.org</archive>
+    </mailingList>
+  </mailingLists>
+  <developers>
+    <developer>
+      <id>michal</id>
+      <name>Michal Maczka</name>
+      <email>michal@codehaus.com</email>
+      <organization>Codehaus</organization>
+      <roles>
+        <role>Architect</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>brett</id>
+      <name>Brett Porter</name>
+      <email>brett@apache.org</email>
+      <roles>
+        <role>Java Developer</role>
+      </roles>
+      <timezone>+10</timezone>
+    </developer>
+  </developers>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <type>jar</type>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://cvs.apache.org/viewcvs.cgi/*checkout*/maven/LICENSE.txt</url>
+    </license>
+  </licenses>
+  <scm>
+    <connection>scm:cvs:pserver:anoncvs@cvs.apache.org:/home/cvspublic:maven-wagon</connection>
+    <developerConnection>scm:cvs:ext:${maven.username}@cvs.apache.org:/home/cvs:maven-wagon</developerConnection>
+    <url>http://cvs.apache.org/viewcvs.cgi/maven-wagon</url>
+  </scm>
+  <organization>
+    <name>Apache Software Foundation</name>
+    <url>http://www.apache.org/</url>
+  </organization>
+  <distributionManagement>
+    <repository>
+      <id>repo1</id>
+      <name>Maven Repository</name>
+      <url>scp://repo1.maven.org/home/projects/maven/repository/ibiblio-v2</url>
+    </repository>
+  </distributionManagement>
+</model>

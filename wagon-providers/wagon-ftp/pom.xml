@@ -1,46 +1,44 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<project>
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>maven</groupId>
-        <artifactId>wagon-providers</artifactId>
-        <version>1.0-alpha-2-SNAPSHOT</version>
-    </parent>
+<model>
+  <parent>
+    <artifactId>wagon-providers</artifactId>
     <groupId>maven</groupId>
-    <artifactId>wagon-ftp</artifactId>
-    <name>Wagon FTP Provider</name>
     <version>1.0-alpha-2-SNAPSHOT</version>
-    <description></description>
-    <shortDescription>Provider for FTP protocol for Wagon</shortDescription>
-    <package>org.apache.maven.wagon.providers.ftp</package>
-    <inceptionYear>2003</inceptionYear>
-    <developers>
-        <developer>
-            <name>Michal Maczka</name>
-            <id>michal</id>
-            <email>michal.maczka@dimatics.com</email>
-            <organization>Dimatics</organization>
-            <roles>
-                <role>Creator</role>
-                <role>Developer</role>
-                <role>Release Manager</role>
-            </roles>
-        </developer>
-    </developers>
-
-    <dependencies>
-        <dependency>
-            <groupId>commons-net</groupId>
-            <artifactId>commons-net</artifactId>
-            <version>1.1.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>plexus</groupId>
-            <artifactId>plexus-ftpd</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-</project>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>maven</groupId>
+  <artifactId>wagon-ftp</artifactId>
+  <packaging>jar</packaging>
+  <name>Wagon FTP Provider</name>
+  <version>1.0-alpha-2-SNAPSHOT</version>
+  <description></description>
+  <inceptionYear>2003</inceptionYear>
+  <developers>
+    <developer>
+      <id>michal</id>
+      <name>Michal Maczka</name>
+      <email>michal.maczka@dimatics.com</email>
+      <organization>Dimatics</organization>
+      <roles>
+        <role>Creator</role>
+        <role>Developer</role>
+        <role>Release Manager</role>
+      </roles>
+    </developer>
+  </developers>
+  <dependencies>
+    <dependency>
+      <groupId>commons-net</groupId>
+      <artifactId>commons-net</artifactId>
+      <version>1.1.0</version>
+      <type>jar</type>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>plexus</groupId>
+      <artifactId>plexus-ftpd</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <type>jar</type>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</model>
