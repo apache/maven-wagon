@@ -20,6 +20,7 @@ package org.apache.maven.wagon.providers.http;
 import org.apache.maven.wagon.events.TransferEventSupport;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.resource.Resource;
 
 import java.io.FileInputStream;
 import java.io.File;
@@ -41,7 +42,7 @@ public class PutInputStream extends FileInputStream
 
     private TransferEvent event;
 
-    public PutInputStream( File file, String resource, Wagon wagon, TransferEventSupport eventSupport ) throws FileNotFoundException
+    public PutInputStream( File file, Resource resource, Wagon wagon, TransferEventSupport eventSupport ) throws FileNotFoundException
     {
         super(file);
 

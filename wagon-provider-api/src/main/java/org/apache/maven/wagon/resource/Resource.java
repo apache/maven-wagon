@@ -37,7 +37,17 @@ public class Resource
 
     private long lastModified;
 
-    private int contentLength = WagonConstants.UNKNOWN_LENGTH;
+    private long contentLength = WagonConstants.UNKNOWN_LENGTH;
+
+    public Resource()
+    {
+
+    }
+
+    public Resource( String name )
+    {
+        this.name  = name;
+    }
 
     public String getName()
     {
@@ -66,12 +76,12 @@ public class Resource
         this.lastModified = lastModified;
     }
 
-    public int getContentLength()
+    public long getContentLength()
     {
         return contentLength;
     }
 
-    public void setContentLength( int contentLength )
+    public void setContentLength( long contentLength )
     {
         this.contentLength = contentLength;
     }

@@ -16,20 +16,14 @@ package org.apache.maven.wagon.providers.http;
  * limitations under the License.
  */
 
-import org.apache.commons.httpclient.Credentials;
-import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpRecoverableException;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.*;
+import org.apache.commons.httpclient.util.DateParser;
+import org.apache.commons.httpclient.util.DateParseException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.lang.StringUtils;
-import org.apache.maven.wagon.AbstractWagon;
-import org.apache.maven.wagon.LazyFileOutputStream;
-import org.apache.maven.wagon.ResourceDoesNotExistException;
-import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.*;
+import org.apache.maven.wagon.resource.Resource;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.proxy.ProxyInfo;
@@ -40,6 +34,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -111,12 +107,14 @@ public class HttpWagon
     }
 
     // put
-    public void put( File source, String resource )
+    public void put( File source, String resourceName )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        String url = getRepository().getUrl() + "/" + resource;
+        String url = getRepository().getUrl() + "/" + resourceName;
 
         PutMethod putMethod = new PutMethod( url );
+
+        Resource resource = new Resource( resourceName );
 
         try
         {
@@ -195,10 +193,10 @@ public class HttpWagon
     {
     }
 
-    public void get( String resource, File destination )
+    public void get( String resourceName, File destination )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        String url = getRepository().getUrl() + "/" + resource;
+        String url = getRepository().getUrl() + "/" + resourceName;
 
         GetMethod getMethod = new GetMethod( url );
 
@@ -260,8 +258,49 @@ public class HttpWagon
                                                    + statusCode );
         }
 
+        Resource resource = new Resource( resourceName );
+
+        resource.setLastModified( 0 );
+
+        resource.setContentLength( 0 );
+
         InputStream is = null;
 
+        Header contentLengthHeader = getMethod.getResponseHeader( "Content-Length" );
+
+        if ( contentLengthHeader != null )
+        {
+            try
+            {
+                long contentLength = Integer.valueOf( contentLengthHeader.getValue() ).intValue();
+
+                resource.setContentLength( contentLength );
+            }
+            catch ( NumberFormatException e )
+            {
+                fireTransferDebug( "error parsing content length header '" + contentLengthHeader.getValue() + "' " + e );
+            }
+        }
+
+        Header lastModifiedHeader = getMethod.getResponseHeader( "Last-Modified" );
+
+        long lastModified = 0;
+
+        if ( lastModifiedHeader != null )
+        {
+             try
+             {
+                lastModified = DateParser.parseDate( lastModifiedHeader.getValue() ).getTime();
+
+                resource.setLastModified(  lastModified );
+             }
+             catch ( DateParseException e )
+             {
+                fireTransferDebug( "Unable to parse last modified header" );
+             }
+
+            fireTransferDebug( "last-modified = " + lastModifiedHeader.getValue() + " (" + lastModified + ")" );
+        }
         try
         {
             is = getMethod.getResponseBodyAsStream();
@@ -270,7 +309,7 @@ public class HttpWagon
         }
         catch ( Exception e )
         {
-            fireTransferError( source.getName(), e );
+            fireTransferError( resource, e );
 
             if ( destination.exists() )
             {
@@ -283,7 +322,6 @@ public class HttpWagon
             }
 
             String msg = "Error occured while deploying to remote repository:" + getRepository();
-
 
             throw new TransferFailedException( msg, e );
         }

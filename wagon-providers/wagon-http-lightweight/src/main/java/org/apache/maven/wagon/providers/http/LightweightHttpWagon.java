@@ -16,10 +16,8 @@ package org.apache.maven.wagon.providers.http;
  * limitations under the License.
  */
 
-import org.apache.maven.wagon.ConnectionException;
-import org.apache.maven.wagon.ResourceDoesNotExistException;
-import org.apache.maven.wagon.StreamWagon;
-import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.*;
+import org.apache.maven.wagon.resource.Resource;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.repository.Repository;
 
@@ -29,6 +27,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -37,11 +36,13 @@ import java.net.URL;
 public class LightweightHttpWagon extends StreamWagon
 {
 
-    public InputStream getInputStream( String resource ) throws TransferFailedException, ResourceDoesNotExistException
+    public void fillInputData( InputData inputData ) throws TransferFailedException, ResourceDoesNotExistException
     {
         Repository repository = getRepository();
 
         String repositoryUrl = repository.getUrl();
+
+        Resource resource = inputData.getResource();
 
         try
         {
@@ -49,14 +50,20 @@ public class LightweightHttpWagon extends StreamWagon
 
             if ( repositoryUrl.endsWith( "/" ) )
             {
-                url = new URL( repositoryUrl + resource );
+                url = new URL( repositoryUrl + resource.getName() );
             }
             else
             {
-                url = new URL( repositoryUrl + "/" + resource );
+                url = new URL( repositoryUrl + "/" + resource.getName() );
             }
 
-            return url.openStream();
+            URLConnection urlConnection = url.openConnection();
+
+            inputData.setInputStream( urlConnection.getInputStream() );
+
+            resource.setLastModified( urlConnection.getLastModified() );
+
+            resource.setContentLength( urlConnection.getContentLength() );
         }
         catch ( MalformedURLException e )
         {
@@ -75,7 +82,7 @@ public class LightweightHttpWagon extends StreamWagon
 
     }
 
-    public OutputStream getOutputStream( String resource ) throws TransferFailedException
+    public void fillOutputData( OutputData outputData ) throws TransferFailedException
     {
         throw new  UnsupportedOperationException( "PUT operation is not supported by Light Weight  HTTP wagon" );
     }

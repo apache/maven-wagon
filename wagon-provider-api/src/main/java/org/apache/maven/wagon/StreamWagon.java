@@ -19,6 +19,7 @@ package org.apache.maven.wagon;
 
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.resource.Resource;
 
 import java.io.*;
 
@@ -36,10 +37,10 @@ public abstract class StreamWagon
     //
     // ----------------------------------------------------------------------
 
-    public abstract InputData getInputData( String resource )
+    public abstract void fillInputData( InputData inputData )
         throws TransferFailedException, ResourceDoesNotExistException;
 
-    public abstract OutputData getOutputData( String resource )
+    public abstract void fillOutputData( OutputData outputData )
         throws TransferFailedException;
 
     public abstract void openConnection()
@@ -52,10 +53,16 @@ public abstract class StreamWagon
     //
     // ----------------------------------------------------------------------
 
-    public void get( String resource, File destination )
+    public void get( String resourceName, File destination )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        InputData inputData = getInputData( resource );
+        InputData inputData = new InputData( );
+
+        Resource resource = new Resource( resourceName );
+
+        inputData.setResource( resource );
+
+        fillInputData( inputData );
 
         InputStream is = inputData.getInputStream();
 
@@ -68,10 +75,16 @@ public abstract class StreamWagon
     }
 
     // source doesn't exist exception
-    public void put( File source, String resource )
+    public void put( File source, String resourceName )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        OutputData outputData = getOutputData( resource );
+        OutputData outputData = new OutputData( );
+
+        Resource resource = new Resource( resourceName );
+
+        outputData.setResource( resource );
+
+        fillOutputData( outputData );
 
         OutputStream os = outputData.getOutputStream( );
 

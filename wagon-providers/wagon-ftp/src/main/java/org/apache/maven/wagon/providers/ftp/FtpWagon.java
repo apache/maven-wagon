@@ -21,12 +21,9 @@ import org.apache.commons.net.ProtocolCommandListener;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
-import org.apache.maven.wagon.ConnectionException;
-import org.apache.maven.wagon.PathUtils;
-import org.apache.maven.wagon.ResourceDoesNotExistException;
-import org.apache.maven.wagon.StreamWagon;
-import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.WagonConstants;
+import org.apache.commons.net.ftp.FTPFile;
+import org.apache.maven.wagon.*;
+import org.apache.maven.wagon.resource.Resource;
 import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
@@ -145,10 +142,8 @@ public class FtpWagon
         }
     }
 
-    protected void firePutCompleted( String s, File file )
+    protected void firePutCompleted( Resource resource, File file )
     {
-
-
         try
         {
             ftp.completePendingCommand();
@@ -159,11 +154,11 @@ public class FtpWagon
             // I think that we will be able to recover or simply we will fail later on
         }
 
-         super.firePutCompleted( s, file );
+         super.firePutCompleted( resource, file );
     }
 
 
-    protected void fireGetCompleted( String resource, File localFile )
+    protected void fireGetCompleted( Resource resource, File localFile )
     {
         try
         {
@@ -196,14 +191,17 @@ public class FtpWagon
     }
 
 
-    public OutputStream getOutputStream( String resource )
+    public void fillOutputData( OutputData outputData )
         throws TransferFailedException
     {
+
         OutputStream os;
+
+        Resource resource = outputData.getResource();
 
         try
         {
-            String[] dirs = PathUtils.dirnames( resource );
+            String[] dirs = PathUtils.dirnames( resource.getName() );
 
             for ( int i = 0; i < dirs.length; i++ )
             {
@@ -227,7 +225,7 @@ public class FtpWagon
             }
 
 
-            os = ftp.storeFileStream( resource );
+            os = ftp.storeFileStream( resource.getName() );
 
             if ( os == null)
             {
@@ -247,21 +245,24 @@ public class FtpWagon
             throw new TransferFailedException( "Cannot transfer: ", e );
         }
 
-        return os;
+        outputData.setOutputStream( os );
+
     }
 
     // ----------------------------------------------------------------------
     //
     // ----------------------------------------------------------------------
 
-    public InputStream getInputStream( String resource )
+    public void fillInputData( InputData inputData )
         throws TransferFailedException, ResourceDoesNotExistException
     {
         InputStream is;
 
+        Resource resource = inputData.getResource();
+
         try
         {
-            String[] dirs = PathUtils.dirnames( resource );
+            String[] dirs = PathUtils.dirnames( resource.getName() );
 
             for ( int i = 0; i < dirs.length; i++ )
             {
@@ -275,7 +276,20 @@ public class FtpWagon
                 }
             }
 
-            is = ftp.retrieveFileStream( PathUtils.filename( resource ) );
+            FTPFile[] ftpFiles= ftp.listFiles( "" );
+
+            long contenetLength = ftpFiles[ 0 ].getSize();
+
+            //@todo check how it works! javadoc of common login says:
+            // Returns the file timestamp. This usually the last modification time.
+            //
+            long lastModified = ftpFiles[ 0 ].getTimestamp().getTimeInMillis();
+
+            resource.setContentLength( contenetLength  );
+
+            resource.setLastModified( lastModified );
+
+            is = ftp.retrieveFileStream( PathUtils.filename( resource.getName() ) );
 
             for ( int i = 0; i < dirs.length; i++ )
             {
@@ -287,7 +301,7 @@ public class FtpWagon
             throw new TransferFailedException( e.getMessage() );
         }
 
-        return is;
+        inputData.setInputStream( is );
     }
 
     

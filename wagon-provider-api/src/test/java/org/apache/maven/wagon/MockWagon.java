@@ -44,17 +44,9 @@ public class MockWagon
 
 
 
-    public InputData getInputData( String resource )
+    public  void fillInputData( InputData inputData )
         throws TransferFailedException
     {
-
-        InputData inputData = new InputData();
-
-        Resource res = new Resource();
-
-        res.setName( resource );
-
-        inputData.setResource( res );
 
         InputStream is;
 
@@ -77,16 +69,15 @@ public class MockWagon
         }
 
         inputData.setInputStream( is );
-        
-        return inputData;
+
     }
 
-    public OutputData getOutputData( String resource )
+    public void fillOutputData( OutputData outputData )
         throws TransferFailedException
     {
-        OutputData outputData = new OutputData();
 
         OutputStream os;
+
         if ( errorInputStream )
         {
             MockOutputStream mockOutputStream = new MockOutputStream();
@@ -101,8 +92,7 @@ public class MockWagon
         }
 
         outputData.setOutputStream( os );
-
-        return outputData;
+        
     }
 
     public void openConnection()

@@ -17,10 +17,8 @@ package org.apache.maven.wagon.providers.file;
  * ====================================================================
  */
 
-import org.apache.maven.wagon.LazyFileOutputStream;
-import org.apache.maven.wagon.StreamWagon;
-import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.ResourceDoesNotExistException;
+import org.apache.maven.wagon.*;
+import org.apache.maven.wagon.resource.Resource;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,34 +37,44 @@ public class FileWagon
 {
 
     // get
-    public InputStream getInputStream( String resource )
+    public void fillInputData( InputData inputData )
             throws TransferFailedException, ResourceDoesNotExistException
     {
 
-        File f = new File( getRepository().getBasedir(), resource );
+        Resource resource = inputData.getResource();
 
-        if ( !f.exists() )
+        File file = new File( getRepository().getBasedir(), resource.getName() );
+
+        if ( !file.exists() )
         {
-            throw new ResourceDoesNotExistException( "File: "  + f + " does not exist" );
+            throw new ResourceDoesNotExistException( "File: "  + file + " does not exist" );
         }
 
         try
         {
-            return new FileInputStream( f );
+            InputStream in = new FileInputStream( file );
+
+            inputData.setInputStream( in );
+
+            resource.setContentLength( file.length() );
+
+            resource.setLastModified( file.lastModified() );
         }
         catch ( FileNotFoundException e)
         {
-            throw new TransferFailedException( "Could not read from file: " + f.getAbsolutePath(), e );
+            throw new TransferFailedException( "Could not read from file: " + file.getAbsolutePath(), e );
         }
     }
 
     // put
-    public OutputStream getOutputStream( String resource ) throws TransferFailedException
+    public void fillOutputData( OutputData outputData ) throws TransferFailedException
     {
 
-        File f = new File( getRepository().getBasedir(), resource );
+        Resource resource = outputData.getResource();
 
-        File dir = f.getParentFile();
+        File file = new File( getRepository().getBasedir(), resource.getName() );
+
+        File dir = file.getParentFile();
 
         if ( dir != null && !dir.exists() )
         {
@@ -74,13 +82,19 @@ public class FileWagon
             if ( !dir.mkdirs() )
             {
                 String msg = "Some of the requied directories do not exist and could not be create. " +
-                		"Requested path:  "  + f.getAbsolutePath();
+                		"Requested path:  "  + file.getAbsolutePath();
 
                 throw new TransferFailedException( msg );
             }
         }
 
-        return new LazyFileOutputStream( f );
+        OutputStream outputStream = new LazyFileOutputStream( file );
+
+        outputData.setOutputStream( outputStream );
+
+        resource.setContentLength( file.length() );
+
+        resource.setLastModified( file.lastModified() );
 
 
     }

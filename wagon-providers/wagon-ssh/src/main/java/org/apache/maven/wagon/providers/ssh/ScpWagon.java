@@ -29,6 +29,7 @@ import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonConstants;
+import org.apache.maven.wagon.resource.Resource;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
@@ -36,7 +37,6 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -227,13 +227,13 @@ public class ScpWagon
         }
     }
 
-    public void put( File source, String resource )
+    public void put( File source, String resourceName )
             throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
 
         String basedir = getRepository().getBasedir();
 
-        String dir = PathUtils.dirname( resource  );
+        String dir = PathUtils.dirname( resourceName  );
 
         if ( dir != null && dir.length() > 0)
         {
@@ -252,7 +252,7 @@ public class ScpWagon
         try
         {
             // exec 'scp -t rfile' remotely
-            String command = "scp -t " + basedir + "/"  + resource;
+            String command = "scp -t " + basedir + "/"  + resourceName;
 
             fireTransferDebug( "Executing command: " + command );
 
@@ -277,7 +277,7 @@ public class ScpWagon
             // send "C0644 filesize filename", where filename should not include '/'
             long filesize = source.length();
 
-            command = "C0644 " + filesize + " " + resource;
+            command = "C0644 " + filesize + " " + resourceName;
 
             command += "\n";
 
@@ -289,6 +289,9 @@ public class ScpWagon
             {
                 throw new TransferFailedException( "ACK check failed" );
             }
+
+
+            Resource resource = new Resource( resourceName );
 
             putTransfer( resource, source, out, false );
 
@@ -308,7 +311,7 @@ public class ScpWagon
         }
         catch ( Exception e )
         {
-            String msg = "Error occured while deploying '" + resource + "' to remote repository: " + getRepository().getUrl();
+            String msg = "Error occured while deploying '" + resourceName + "' to remote repository: " + getRepository().getUrl();
 
             throw new TransferFailedException( msg, e );
         }
@@ -317,7 +320,7 @@ public class ScpWagon
 
         if ( authInfo != null && authInfo.getGroup() != null )
         {
-            String chgrpCmd = "chgrp " + authInfo.getGroup() + " " + basedir + "/" + resource + "\n";
+            String chgrpCmd = "chgrp " + authInfo.getGroup() + " " + basedir + "/" + resourceName + "\n";
 
             executeCommand( chgrpCmd );
 
@@ -333,7 +336,7 @@ public class ScpWagon
         }
     }
 
-    public void get( String resource, File destination )
+    public void get( String resourceName, File destination )
             throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         ChannelExec channel = null;
@@ -349,9 +352,13 @@ public class ScpWagon
 
         String basedir = getRepository().getBasedir();
 
+        //@todo get content lenght and last modified
+        Resource resource = new Resource( resourceName );
+
+
         try
         {
-            String cmd = "scp -f " + basedir + "/" + resource;
+            String cmd = "scp -f " + basedir + "/" + resourceName;
 
             fireTransferDebug( "Executing command: " + cmd );
 
@@ -390,6 +397,7 @@ public class ScpWagon
 
                 int filesize = 0;
 
+                // get file size
                 while ( true )
                 {
                     in.read( buf, 0, 1 );
@@ -401,6 +409,9 @@ public class ScpWagon
 
                     filesize = filesize * 10 + ( buf[ 0 ] - '0' );
                 }
+
+                resource.setContentLength(  filesize );
+
 
                 for ( int i = 0; ; i++ )
                 {
@@ -459,7 +470,7 @@ public class ScpWagon
                         }
                     }
 
-                    String msg = "GET request of: " + resource + " from " + source.getName() + "failed";
+                    String msg = "GET request of: " + resource + " from " + repository.getName() + "failed";
 
                     throw new TransferFailedException( msg, e );
 
@@ -486,7 +497,7 @@ public class ScpWagon
         }
         catch ( Exception e )
         {
-            fireTransferError( source.getName(), e );
+            fireTransferError( resource, e );
 
             if ( destination.exists() )
             {
