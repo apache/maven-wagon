@@ -18,16 +18,16 @@ package org.apache.maven.wagon;
  */
 
 /**
- * This class contains constants used in Wagon API
+ * This class contains constants used in Wagon API.
  * 
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  */
 public final class WagonConstants
 {
-    /** Indicates that port has not been set */
+    /** Indicates that port has not been set. */
     public final static int UNKNOWN_PORT = -1;
 
-    /** Indicates that lenght has not been set */
+    /** Indicates that length has not been set. */
     public final static int UNKNOWN_LENGTH = -1;
 }

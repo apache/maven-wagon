@@ -29,40 +29,30 @@ import org.apache.maven.wagon.util.FileUtils;
 public class LazyFileOutputStreamTest extends TestCase
 {
 
-     public void testFileCreation()
+     public void testFileCreation() throws Exception
      {
-         try
-         {
-             File file = FileTestUtils.createUniqueFile( this );
+         File file = FileTestUtils.createUniqueFile( this );
              
-             file.deleteOnExit();
+         file.deleteOnExit();
 
-             assertFalse( file.exists() );
+         assertFalse( file.exists() );
 
-             LazyFileOutputStream stream = new LazyFileOutputStream( file );
+         LazyFileOutputStream stream = new LazyFileOutputStream( file );
 
-             assertFalse( file.exists() );
+         assertFalse( file.exists() );
 
-             String exptected = "michal";
+         String exptected = "michal";
 
-             stream.write( exptected.getBytes() );
+         stream.write( exptected.getBytes() );
 
-             stream.close();
+         stream.close();
 
-             assertTrue( file.exists() );
+         assertTrue( file.exists() );
 
-             String actual = FileUtils.fileRead( file );
+         String actual = FileUtils.fileRead( file );
 
-             assertEquals( exptected, actual );
+         assertEquals( exptected, actual );
 
-
-         }
-         catch( Exception e )
-         {
-             e.printStackTrace();
-             
-             fail( e.getMessage() );    
-         }
      
      }
      

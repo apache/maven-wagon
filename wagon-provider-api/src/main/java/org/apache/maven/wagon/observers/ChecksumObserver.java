@@ -108,18 +108,13 @@ public class ChecksumObserver implements TransferListener
     }
 
     /**
-     * @see org.apache.maven.wagon.events.TransferListener#transferProgress(org.apache.maven.wagon.events.TransferEvent)
+     * @see org.apache.maven.wagon.events.TransferListener#transferProgress(org.apache.maven.wagon.events.TransferEvent,byte[],int)
      */
-    public void transferProgress( TransferEvent transferEvent )
+    public void transferProgress( TransferEvent transferEvent, byte[] buffer, int length )
     {
         if ( digester != null )
         {
-            byte[] data = transferEvent.getData();
-                                
-            int len = transferEvent.getDataLength();
-
-            digester.update( data, 0, len );
-
+            digester.update( buffer, 0, length );
         }
         
     }
@@ -176,9 +171,7 @@ public class ChecksumObserver implements TransferListener
         }
         catch ( Exception e )
         {
-            //@todo maybe some information should be added to log?
-            // ignore this
-            // e.printStackTrace();
+            // TODO: handle differently!
         }    
         finally
         {

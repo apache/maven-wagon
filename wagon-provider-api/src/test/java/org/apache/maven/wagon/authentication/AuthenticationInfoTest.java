@@ -21,6 +21,7 @@ import junit.framework.TestCase;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
 /**
+ * @todo test defaults
  * @author <a href="mailto:jvanzyl@maven.org">Jason van Zyl</a>
  * @version $Id$
  */
@@ -58,6 +59,14 @@ public class AuthenticationInfoTest
 
         assertEquals( "password", authenticationInfo.getPassword() );
 
+
+        authenticationInfo.setDirectoryMode( "directoryMode" );
+
+        assertEquals( "directoryMode", authenticationInfo.getDirectoryMode() );
+
+        authenticationInfo.setFileMode( "fileMode" );
+
+        assertEquals( "fileMode", authenticationInfo.getFileMode() );
 
         authenticationInfo.setGroup( "group" );
 

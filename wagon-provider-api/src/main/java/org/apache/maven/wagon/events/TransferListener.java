@@ -32,7 +32,7 @@ public interface TransferListener
     /**
      * @param transferEvent 
      */
-    void transferProgress( TransferEvent transferEvent );
+    void transferProgress( TransferEvent transferEvent, byte[] buffer, int length );
 
     /**
      * @param transferEvent 

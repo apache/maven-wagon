@@ -110,13 +110,15 @@ public final class TransferEventSupport
      * The Event should be of type {@link TransferEvent#TRANSFER_PROGRESS}.
      *
      * @param transferEvent the TransferEvent which will be dispached to listeners
+     * @param buffer the buffer containing the additional content
+     * @param length the length of the content in the buffer
      */
-    public void fireTransferProgress( final TransferEvent transferEvent )
+    public void fireTransferProgress( final TransferEvent transferEvent, byte[] buffer, int length )
     {
         for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
         {
             final TransferListener listener = ( TransferListener ) iter.next();
-            listener.transferProgress( transferEvent );
+            listener.transferProgress( transferEvent, buffer, length );
 
         }
     }

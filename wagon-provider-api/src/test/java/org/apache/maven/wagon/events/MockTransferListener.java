@@ -87,7 +87,7 @@ public class MockTransferListener implements TransferListener
     /**
      * @see org.apache.maven.wagon.events.TransferListener#transferProgress(org.apache.maven.wagon.events.TransferEvent)
      */
-    public void transferProgress( final TransferEvent transferEvent )
+    public void transferProgress( final TransferEvent transferEvent, byte[] buffer, int length )
     {
         this.transferEvent = transferEvent;
         transferProgressCalled = true;

@@ -50,67 +50,27 @@ public abstract class StreamWagon
     public void get( String resource, File destination )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        
-        if ( destination == null )
-        {
-           throw new ResourceDoesNotExistException( "get: Destination cannot be null" );
-        }
-        
-        
-        if ( !destination.getParentFile().exists() )
-        {
-            if ( !destination.getParentFile().mkdirs() )
-            {
-                throw new TransferFailedException( "Specified destination directory cannot be created: " + destination.getParentFile() );
-            }
-        }
-
-        LazyFileOutputStream os = null;
-        
-        os = new LazyFileOutputStream( destination );
-        
-
         InputStream is = getInputStream( resource );
 
-        if ( os == null )
+        if ( is == null )
         {
-            throw new TransferFailedException(  getRepository().getUrl() + " - Could not open input stream for resource: '" + resource+ "'"  );
+            throw new TransferFailedException( getRepository().getUrl() + " - Could not open input stream for resource: '" + resource+ "'" );
         }
 
-
-        getTransfer( resource, destination, is, os);
+        getTransfer( resource, destination, is );
     }
 
     // source doesn't exist exception
     public void put( File source, String resource )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        if ( !source.exists() )
-        {
-            throw new TransferFailedException( "Specified source file does not exist: " + source );
-        }
-
-        FileInputStream is = null;
-
-        try
-        {           
-            is = new FileInputStream( source );
-        }
-        catch ( FileNotFoundException e )
-        {
-            throw new TransferFailedException( "Cannot read from specified source: " + source.getAbsolutePath() );
-        }
-
-        OutputStream os;
-
-
-        os = getOutputStream( resource );
+        OutputStream os = getOutputStream( resource );
 
         if ( os == null )
         {
-                throw new TransferFailedException(  getRepository().getUrl() + " - Could not open output stream for resource: '" + resource+ "'"  );
+            throw new TransferFailedException( getRepository().getUrl() + " - Could not open output stream for resource: '" + resource+ "'" );
         }
 
-        putTransfer( resource, source, is, os, true);
+        putTransfer( resource, source, os, true );
     }
 }

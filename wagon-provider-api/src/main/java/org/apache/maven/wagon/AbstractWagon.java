@@ -22,6 +22,7 @@ import org.apache.maven.wagon.events.*;
 import org.apache.maven.wagon.repository.Repository;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -86,19 +87,38 @@ public abstract class AbstractWagon
     
     protected abstract void closeConnection() throws ConnectionException;
 
+    protected void createParentDirectories( File destination ) 
+        throws ResourceDoesNotExistException, TransferFailedException
+    {
+        if ( destination == null )
+        {
+            throw new ResourceDoesNotExistException( "get: Destination cannot be null" );
+        }
+        
+        File destinationDirectory = destination.getParentFile();
+        if ( destinationDirectory != null && !destinationDirectory.exists() )
+        {
+            if ( !destinationDirectory.mkdirs() )
+            {
+                throw new TransferFailedException( "Specified destination directory cannot be created: " + destinationDirectory );
+            }
+        }
+    }
+
     // ----------------------------------------------------------------------
     // Stream i/o
     // ----------------------------------------------------------------------
 
-    protected void getTransfer( String resource, File destination, InputStream input, OutputStream output )
+    protected void getTransfer( String resource, File destination, InputStream input )
         throws TransferFailedException
     {
         fireGetStarted( resource, destination );
 
+        OutputStream output = new LazyFileOutputStream( destination ); 
+
         try
         {
             transfer( resource, input, output, TransferEvent.REQUEST_GET );
-
         }
         catch ( IOException e )
         {
@@ -130,15 +150,22 @@ public abstract class AbstractWagon
         fireGetCompleted( resource, destination );
     }
 
-    protected void putTransfer(String resource, File source, InputStream input, OutputStream output, boolean closeOutput )
+    protected void putTransfer(String resource, File source, OutputStream output, boolean closeOutput )
         throws TransferFailedException
     {
         firePutStarted( resource, source );
 
+        if ( !source.exists() )
+        {
+            throw new TransferFailedException( "Specified source file does not exist: " + source );
+        }
+
+        InputStream input = null;
+
         try
         {
+            input = new FileInputStream( source );
             transfer( resource, input, output, TransferEvent.REQUEST_PUT );
-
         }
         catch ( IOException e )
         {
@@ -178,18 +205,11 @@ public abstract class AbstractWagon
             
             // @todo probably new event should be created!!
             
-            transferEvent.setData( buffer, n );
-
-            fireTransferProgress( transferEvent );
+            fireTransferProgress( transferEvent, buffer, n );
             
             output.write( buffer, 0, n );
-
-            
         }
     }
-
-
-
 
     protected void shutdownStream( InputStream inputStream )
     {
@@ -223,9 +243,9 @@ public abstract class AbstractWagon
     //
     // ----------------------------------------------------------------------
 
-    protected void fireTransferProgress( TransferEvent transferEvent )
+    protected void fireTransferProgress( TransferEvent transferEvent, byte[] buffer, int n )
     {
-        transferEventSupport.fireTransferProgress( transferEvent );
+        transferEventSupport.fireTransferProgress( transferEvent, buffer, n );
     }
 
     protected void fireGetCompleted( String resource, File localFile )

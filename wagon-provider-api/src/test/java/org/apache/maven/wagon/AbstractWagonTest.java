@@ -120,25 +120,15 @@ public class AbstractWagonTest extends TestCase
         assertTrue( sessionListener.isSessionDisconnectedCalled() );
     }
 
-    public void testGetTransferEvents()
+    public void testGetTransferEvents() throws Exception
     {
         wagon.fireTransferDebug( "fetch debug message" );
 
-        try
-        {
-            Repository repository = new Repository();
+        Repository repository = new Repository();
 
-            wagon.connect( repository );
+        wagon.connect( repository );
 
-            wagon.get( artifact, destination );
-        }
-
-        catch ( Exception e )
-        {
-            e.printStackTrace();
-
-            fail( e.getMessage() );
-        }
+        wagon.get( artifact, destination );
 
         assertTrue( transferListener.isTransferStartedCalled() );
 

@@ -164,15 +164,15 @@ public class Debug
     }
 
     /**
-     * @see TransferListener#transferProgress(TransferEvent)
+     * @see TransferListener#transferProgress(TransferEvent,byte[],int)
      */
-    public void transferProgress( final TransferEvent transferEvent )
+    public void transferProgress( final TransferEvent transferEvent, byte[] buffer, int length )
     {
 
         out.print( "#" );
         //String data = new String( transferEvent.getData(),0, transferEvent.getDataLength());
         //out.println(data);
-        transfer += transferEvent.getDataLength();
+        transfer += length;
     }
 
     /**

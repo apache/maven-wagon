@@ -55,14 +55,8 @@ public class TransferEvent extends WagonEvent
     
     private int requestType;
 
-    private byte[] data;
-    
-    private int dataLength;
-
     private Exception exception;
 
-    private long progress;
-    
     private File localFile;
     
 
@@ -199,42 +193,6 @@ public class TransferEvent extends WagonEvent
     {
         this.resource = resource;
     }
-
-    
-
-
-
-    /**
-     *
-     * @param data
-     * @param dataLength
-     */
-    public void setData( final byte[] data, final int dataLength )
-    {
-        this.data = data;
-        
-        this.dataLength = dataLength;
-    }
-
-    /**
-     *
-     * @return
-     */
-    public byte[] getData()
-    {
-        return data;
-    }
-
-    /**
-     *
-     * @return
-     */
-    public int getDataLength()
-    {
-        return dataLength;
-    }
-    
-    
 
     /**
      * @return Returns the local file.

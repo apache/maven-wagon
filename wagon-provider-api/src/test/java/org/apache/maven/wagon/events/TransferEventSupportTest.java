@@ -100,7 +100,8 @@ public class TransferEventSupportTest extends TestCase
 
         final TransferEvent event = getEvent( wagon );
 
-        eventSupport.fireTransferProgress( event );
+        // TODO: should be testing the buffer
+        eventSupport.fireTransferProgress( event, null, 0 );
 
         assertTrue( mock1.isTransferProgressCalled() );
 
