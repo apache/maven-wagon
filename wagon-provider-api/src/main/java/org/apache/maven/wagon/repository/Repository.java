@@ -244,4 +244,18 @@ public class Repository
     {
         this.parameters = parameters;
     }
+   
+    // ========================================================================
+    // id is the unique identifier for Repositories, so let's enforce that.
+    // ========================================================================
+    public boolean equals(Object other)
+    {
+        return ( other == this || ( ( other instanceof Repository ) && ( (Repository) other ).getId().equals( getId() ) ) );
+    }
+   
+    public int hashCode()
+    {
+        return getId().hashCode();
+    }
 }
+
