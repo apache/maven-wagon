@@ -16,6 +16,7 @@ package org.apache.maven.wagon.providers.ssh;
  * limitations under the License.
  */
 
+import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
 /**
