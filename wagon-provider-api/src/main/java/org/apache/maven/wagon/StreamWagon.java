@@ -71,6 +71,8 @@ public abstract class StreamWagon
             throw new TransferFailedException( getRepository().getUrl() + " - Could not open input stream for resource: '" + resource+ "'" );
         }
 
+        createParentDirectories( destination );
+
         getTransfer( inputData.getResource(), destination, is );
     }
 
