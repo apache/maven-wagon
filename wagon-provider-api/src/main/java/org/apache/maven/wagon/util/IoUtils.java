@@ -719,7 +719,10 @@ public final class IoUtils
     {
         try
         {
-            inputStream.close();
+            if ( inputStream != null )
+            {
+                inputStream.close();
+            }
         }
         catch( IOException ex )
         {
