@@ -17,6 +17,7 @@ package org.apache.maven.wagon;
  */
 
 import org.apache.maven.wagon.artifact.Artifact;
+import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 
 import java.io.File;
@@ -26,6 +27,8 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+
+
 public abstract class StreamWagon
     extends AbstractWagon
 {
@@ -34,13 +37,13 @@ public abstract class StreamWagon
     // ----------------------------------------------------------------------
 
     public abstract InputStream getInputStream( String resource )
-        throws TransferFailedException;
+        throws TransferFailedException, ResourceDoesNotExistException;
 
     public abstract OutputStream getOutputStream( String resource )
         throws TransferFailedException;
 
     public abstract void openConnection()
-        throws ConnectionException;
+        throws ConnectionException, AuthenticationException;
 
     public abstract void closeConnection()
         throws ConnectionException;
