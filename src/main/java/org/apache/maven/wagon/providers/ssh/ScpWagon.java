@@ -29,13 +29,12 @@ import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonConstants;
-import org.apache.maven.wagon.repository.RepositoryPermissions;
-import org.apache.maven.wagon.resource.Resource;
-import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.apache.maven.wagon.proxy.ProxyInfo;
+import org.apache.maven.wagon.events.TransferEvent;
+import org.apache.maven.wagon.repository.RepositoryPermissions;
+import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
@@ -269,8 +268,6 @@ public class ScpWagon
 
             channel.connect();
 
-            byte[] tmp = new byte[ 1 ];
-
             if ( checkAck( in ) != 0 )
             {
                 throw new TransferFailedException( "ACK check failed" );
@@ -326,6 +323,15 @@ public class ScpWagon
 
             throw new TransferFailedException( msg, e );
         }
+        finally
+        {
+            if ( channel != null )
+            {
+                shutdownStream( out );
+
+                channel.disconnect();
+            }
+        }
 
         RepositoryPermissions permissions = getRepository().getPermissions();
 
@@ -337,13 +343,6 @@ public class ScpWagon
         if ( permissions != null && permissions.getFileMode() != null )
         {
             executeCommand( "chmod " + permissions.getFileMode() + " " + basedir + "/" + resourceName + "\n" );
-        }
-
-        if ( channel != null )
-        {
-            shutdownStream( out );
-
-            channel.disconnect();
         }
     }
 
@@ -520,7 +519,7 @@ public class ScpWagon
                 }
             }
 
-            String msg = "Error occured while deploying to remote repository:" + getRepository();
+            String msg = "Error occured while downloading from the remote repository:" + getRepository();
 
             throw new TransferFailedException( msg, e );
         }
