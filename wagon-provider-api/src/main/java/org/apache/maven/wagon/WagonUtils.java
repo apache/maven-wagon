@@ -115,21 +115,15 @@ public class WagonUtils
 
         while ( !queue.isEmpty() )
         {
-
             String path = ( String ) queue.removeFirst();
 
-
-            File currentDir = new File ( dir, path);
-
-            System.out.println( "Processing dir: " + currentDir );
+            File currentDir = new File ( dir, path );
 
             File[] files = currentDir.listFiles();
 
             for (int i = 0; i < files.length; i++)
             {
                 File file = files[i];
-
-                System.out.println( "Processing file: " + file );
 
                 String resource;
 
@@ -140,7 +134,6 @@ public class WagonUtils
                 else
                 {
                     resource = file.getName();
-
                 }
 
                 if ( file.isDirectory() )

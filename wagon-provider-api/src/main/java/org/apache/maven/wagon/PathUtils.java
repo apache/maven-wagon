@@ -64,6 +64,7 @@ public class PathUtils
             final int max )
     {
         final StringTokenizer tok;
+
         if ( separator == null )
         {
             // Null separator means we're using StringTokenizer's default
@@ -76,15 +77,19 @@ public class PathUtils
         }
 
         int listSize = tok.countTokens();
+
         if ( max > 0 && listSize > max )
         {
             listSize = max;
         }
 
         final String[] list = new String[listSize];
+
         int i = 0;
+
         int lastTokenBegin;
         int lastTokenEnd = 0;
+
         while ( tok.hasMoreTokens() )
         {
             if ( max > 0 && i == listSize - 1 )
@@ -93,16 +98,23 @@ public class PathUtils
                 // tokens left over in our input, the last list
                 // element gets all remaining text.
                 final String endToken = tok.nextToken();
+
                 lastTokenBegin = str.indexOf( endToken, lastTokenEnd );
+
                 list[i] = str.substring( lastTokenBegin );
+
                 break;
+
             }
             else
             {
                 list[i] = tok.nextToken();
+
                 lastTokenBegin = str.indexOf( list[i], lastTokenEnd );
+
                 lastTokenEnd = lastTokenBegin + list[i].length();
             }
+
             i++;
         }
         return list;
@@ -124,18 +136,23 @@ public class PathUtils
         }
 
         final String protocol = PathUtils.protocol( url );
+
         if ( protocol == null || protocol.equals( "file" ) )
         {
             return "";
         }
+
         String host = url.substring( url.indexOf( "://" ) + 3 ).trim();
 
         int pos = host.indexOf( "/" );
+
         if ( pos > 0 )
         {
             host = host.substring( 0, pos );
         }
+
         pos = host.indexOf( ":" );
+
         if ( pos > 0 )
         {
             host = host.substring( 0, pos );
@@ -158,6 +175,7 @@ public class PathUtils
     {
 
         final int pos = url.indexOf( "://" );
+
         if ( pos == -1 )
         {
             return "";
@@ -174,26 +192,31 @@ public class PathUtils
     {
 
         final String protocol = PathUtils.protocol( url );
+
         if ( protocol == null || protocol.equals( "file" ) )
         {
             return WagonConstants.UNKNOWN_PORT;
         }
         final String host = PathUtils.host( url );
+
         if ( host == null )
         {
             return WagonConstants.UNKNOWN_PORT;
         }
 
         final String prefix = protocol + "://" + host;
+
         final int start = prefix.length();
 
         if ( url.length() > start && url.charAt( start ) == ':' )
         {
             int end = url.indexOf( '/', start );
+
             if ( end == -1 )
             {
                 end = url.length();
             }
+
             return Integer.parseInt( url.substring( start + 1, end ) );
         }
         else
@@ -211,7 +234,9 @@ public class PathUtils
     public static String basedir( final String url )
     {
         final String protocol = PathUtils.protocol( url );
+
         String retValue = null;
+
         if ( protocol.equals( "file" ) )
         {
             retValue = url.substring( protocol.length() + 3 );
@@ -219,8 +244,11 @@ public class PathUtils
         else
         {
             final String host = PathUtils.host( url );
+
             final int port = PathUtils.port( url );
+
             final int pos;
+
             if ( port != WagonConstants.UNKNOWN_PORT )
             {
                 pos = ( protocol + "://" + host + ":" + port + "/" ).length();

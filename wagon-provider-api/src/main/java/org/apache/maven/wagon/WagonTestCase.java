@@ -200,7 +200,7 @@ public abstract class WagonTestCase
     protected void putFile()
         throws Exception
     {
-        message( "Putting test artifact into test repository " + testRepository );
+        message( "Putting test artifact: " + resource + " into test repository " + testRepository );
 
         Wagon wagon = getWagon();
 

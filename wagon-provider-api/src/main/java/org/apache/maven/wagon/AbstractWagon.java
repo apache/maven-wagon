@@ -96,7 +96,7 @@ public abstract class AbstractWagon
     // Stream i/o
     // ----------------------------------------------------------------------
 
-    protected void getTransfer(String resource, File destination, InputStream input, OutputStream output)
+    protected void getTransfer( String resource, File destination, InputStream input, OutputStream output )
         throws TransferFailedException
     {
         fireGetStarted( resource, destination );
@@ -136,7 +136,7 @@ public abstract class AbstractWagon
         fireGetCompleted( resource, destination );
     }
 
-    protected void putTransfer(String resource, File source, InputStream input, OutputStream output, boolean closeOutput)
+    protected void putTransfer(String resource, File source, InputStream input, OutputStream output, boolean closeOutput )
         throws TransferFailedException
     {
         firePutStarted( resource, source );
