@@ -36,6 +36,7 @@ import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.proxy.ProxyInfo;
+import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -235,14 +236,13 @@ public class ScpWagon
 
         String basedir = getRepository().getBasedir();
 
+        resourceName = StringUtils.replace(resourceName, "\\", "/");
         String dir = PathUtils.dirname( resourceName  );
+        dir = StringUtils.replace(dir, "\\", "/");
 
-        if ( dir != null && dir.length() > 0)
-        {
-            String mkdirCmd = "mkdir -p " + basedir + "/"  + dir  + "\n";
+        String mkdirCmd = "mkdir -p " + basedir + "/"  + dir  + "\n";
 
-            executeCommand( mkdirCmd );
-        }
+        executeCommand( mkdirCmd );
 
         ChannelExec channel = null;
 
