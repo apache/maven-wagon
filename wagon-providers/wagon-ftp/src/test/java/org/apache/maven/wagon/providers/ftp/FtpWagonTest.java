@@ -18,6 +18,7 @@ package org.apache.maven.wagon.providers.ftp;
 
 import org.apache.ftpserver.interfaces.FtpServerInterface;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.WagonTestCase;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>

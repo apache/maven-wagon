@@ -202,17 +202,14 @@ public class FtpWagon
 
             if ( os == null)
             {
+                 fireTransferDebug( "REPLY STRING: " + ftp.getReplyString() );
 
-                System.out.println( "REPLY STRING: " + ftp.getReplyString() );
+                 fireTransferDebug( "REPLY: " + ftp.getReply() );
 
-                System.out.println( "REPLY: " + ftp.getReply() );
-
-                System.out.println( "REPLY CODE: " + ftp.getReplyCode() );
-
+                 fireTransferDebug( "REPLY CODE: " + ftp.getReplyCode() );
             }
 
             fireTransferDebug( "resource = " + resource );
-            
             
         }
         catch ( Exception e )
@@ -263,10 +260,6 @@ public class FtpWagon
         return is;
     }
 
-    protected void fireSessionDebug( String message )
-    {
-        super.fireSessionDebug( message );
-    }
     
     public class PrintCommandListener
         implements ProtocolCommandListener
@@ -288,5 +281,10 @@ public class FtpWagon
         {
             wagon.fireSessionDebug( "Reply received: " + event.getMessage() );
         }
+    }
+
+    protected void fireSessionDebug( String msg )
+    {
+        super.fireSessionDebug( msg );
     }
 }

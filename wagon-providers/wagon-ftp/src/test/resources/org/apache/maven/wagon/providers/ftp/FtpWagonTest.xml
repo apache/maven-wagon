@@ -1,119 +1,119 @@
 <plexus>
-  <lifecycle-handler-manager implementation="org.codehaus.plexus.lifecycle.DefaultLifecycleHandlerManager">
-    <default-lifecycle-handler-id>avalon</default-lifecycle-handler-id>
-    <lifecycle-handlers>
-      <lifecycle-handler implementation="org.codehaus.plexus.personality.avalon.AvalonLifecycleHandler">
-        <id>avalon</id>
-        <name>Avalon Lifecycle Handler</name>
-        <begin-segment>
-          <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.LogEnablePhase"/>
-          <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.ContextualizePhase"/>
-          <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.ServicePhase"/>
-          <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.ComposePhase"/>
-          <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.ConfigurePhase"/>
-          <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.InitializePhase"/>
-          <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.StartPhase"/>
-        </begin-segment>
-        <suspend-segment>
-          <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.SuspendPhase"/>
-        </suspend-segment>
-        <resume-segment>
-          <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.ResumePhase"/>
-          <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.RecontextualizePhase"/>
-          <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.ReconfigurePhase"/>
-        </resume-segment>
-        <end-segment>
-          <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.StopPhase"/>
-          <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.DisposePhase"/>
-        </end-segment>
-      </lifecycle-handler>
-    </lifecycle-handlers>
-  </lifecycle-handler-manager>
+    <lifecycle-handler-manager implementation="org.codehaus.plexus.lifecycle.DefaultLifecycleHandlerManager">
+        <default-lifecycle-handler-id>avalon</default-lifecycle-handler-id>
+        <lifecycle-handlers>
+            <lifecycle-handler implementation="org.codehaus.plexus.personality.avalon.AvalonLifecycleHandler">
+                <id>avalon</id>
+                <name>Avalon Lifecycle Handler</name>
+                <begin-segment>
+                    <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.LogEnablePhase"/>
+                    <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.ContextualizePhase"/>
+                    <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.ServicePhase"/>
+                    <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.ComposePhase"/>
+                    <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.ConfigurePhase"/>
+                    <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.InitializePhase"/>
+                    <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.StartPhase"/>
+                </begin-segment>
+                <suspend-segment>
+                    <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.SuspendPhase"/>
+                </suspend-segment>
+                <resume-segment>
+                    <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.ResumePhase"/>
+                    <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.RecontextualizePhase"/>
+                    <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.ReconfigurePhase"/>
+                </resume-segment>
+                <end-segment>
+                    <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.StopPhase"/>
+                    <phase implementation="org.codehaus.plexus.personality.avalon.lifecycle.phase.DisposePhase"/>
+                </end-segment>
+            </lifecycle-handler>
+        </lifecycle-handlers>
+    </lifecycle-handler-manager>
 
-  <components>
-    <component>
-      <role>org.apache.avalon.cornerstone.services.threads.ThreadManager</role>
-      <implementation>org.apache.avalon.cornerstone.blocks.threads.DefaultThreadManager</implementation>
-      <configuration>
-        <thread-group>
-          <name>default</name>
-          <!-- normal priority = 5, max-priority = 10 -->
-          <priority>5</priority>
-          <!-- are threads deamon threads ? -->
-          <is-daemon>false</is-daemon>
-          <max-threads>40</max-threads>
-          <!-- these are ignored at the moment but will be fixed in later revisions -->
-          <min-threads>20</min-threads>
-          <min-spare-threads>20</min-spare-threads>
-        </thread-group>
-      </configuration>
-    </component>
+    <components>
+        <component>
+            <role>org.apache.avalon.cornerstone.services.threads.ThreadManager</role>
+            <implementation>org.apache.avalon.cornerstone.blocks.threads.DefaultThreadManager</implementation>
+            <configuration>
+                <thread-group>
+                    <name>default</name>
+                    <!-- normal priority = 5, max-priority = 10 -->
+                    <priority>5</priority>
+                    <!-- are threads deamon threads ? -->
+                    <is-daemon>false</is-daemon>
+                    <max-threads>40</max-threads>
+                    <!-- these are ignored at the moment but will be fixed in later revisions -->
+                    <min-threads>20</min-threads>
+                    <min-spare-threads>20</min-spare-threads>
+                </thread-group>
+            </configuration>
+        </component>
 
-    <component>
-      <role>org.apache.avalon.cornerstone.services.connection.ConnectionManager</role>
-      <implementation>org.apache.avalon.cornerstone.blocks.connection.DefaultConnectionManager</implementation>
-      <!--
-      <requirements>
-        <requirement>
-          <role>org.apache.avalon.cornerstone.services.threads.ThreadManager</role>
-        </requirement>
-      </requirements>
-      -->
-    </component>
+        <component>
+            <role>org.apache.avalon.cornerstone.services.connection.ConnectionManager</role>
+            <implementation>org.apache.avalon.cornerstone.blocks.connection.DefaultConnectionManager</implementation>
+            <!--
+            <requirements>
+              <requirement>
+                <role>org.apache.avalon.cornerstone.services.threads.ThreadManager</role>
+              </requirement>
+            </requirements>
+            -->
+        </component>
 
-    <component>
-      <role>org.apache.avalon.cornerstone.services.sockets.SocketManager</role>
-      <implementation>org.apache.avalon.cornerstone.blocks.sockets.DefaultSocketManager</implementation>
-      <configuration>
-        <server-sockets>
-          <factory name="plain" class="org.apache.avalon.cornerstone.blocks.sockets.DefaultServerSocketFactory" />
-        </server-sockets>
-        <client-sockets>
-          <factory name="plain" class="org.apache.avalon.cornerstone.blocks.sockets.DefaultSocketFactory" />
-        </client-sockets>
-      </configuration>
-    </component>
+        <component>
+            <role>org.apache.avalon.cornerstone.services.sockets.SocketManager</role>
+            <implementation>org.apache.avalon.cornerstone.blocks.sockets.DefaultSocketManager</implementation>
+            <configuration>
+                <server-sockets>
+                    <factory name="plain" class="org.apache.avalon.cornerstone.blocks.sockets.DefaultServerSocketFactory"/>
+                </server-sockets>
+                <client-sockets>
+                    <factory name="plain" class="org.apache.avalon.cornerstone.blocks.sockets.DefaultSocketFactory"/>
+                </client-sockets>
+            </configuration>
+        </component>
 
-    <component>
-      <role>org.apache.ftpserver.usermanager.UserManagerInterface</role>
-      <implementation>org.apache.ftpserver.usermanager.PropertiesUserManager</implementation>
-      <configuration>
-        <base-directory>${basedir}/target/test-output/</base-directory>
-      </configuration>
-    </component>
-    <component>
-      <role>org.apache.ftpserver.ip.IpRestrictorInterface</role>
-      <implementation>org.apache.ftpserver.ip.FileIpRestrictor</implementation>
-      <configuration>
-        <base-directory>${basedir}/target/test-output/local-repository</base-directory>
-      </configuration>
-    </component>
-    <component>
-      <role>org.apache.ftpserver.interfaces.FtpServerInterface</role>
-      <implementation>org.apache.ftpserver.FtpServerImpl</implementation>
-      <!--
-      <requirements>
-        <requirement>
-          <role>org.apache.avalon.cornerstone.services.sockets.SocketManager</role>
-        </requirement>
-        <requirement>
-          <role>org.apache.avalon.cornerstone.services.connection.ConnectionManager</role>
-        </requirement>
-        <requirement>
-          <role>org.apache.ftpserver.ip.IpRestrictorInterface</role>
-        </requirement>
-        <requirement>
-          <role>org.apache.ftpserver.usermanager.UserManagerInterface</role>
-        </requirement>
-      </requirements>
-      -->
-      <configuration>
-        <server-host>localhost</server-host>
-        <self-host>localhost</self-host>
-        <remote-admin-allowed>false</remote-admin-allowed>
-	    <ftp-port>10023</ftp-port>
-        <default-user-root>${basedir}/target/test-output/local-repository</default-user-root>
-      </configuration>
-    </component>
-  </components>
+        <component>
+            <role>org.apache.ftpserver.usermanager.UserManagerInterface</role>
+            <implementation>org.apache.ftpserver.usermanager.PropertiesUserManager</implementation>
+            <configuration>
+                <base-directory>${basedir}/target/test-output/</base-directory>
+            </configuration>
+        </component>
+        <component>
+            <role>org.apache.ftpserver.ip.IpRestrictorInterface</role>
+            <implementation>org.apache.ftpserver.ip.FileIpRestrictor</implementation>
+            <configuration>
+                <base-directory>${basedir}/target/test-output/local-repository</base-directory>
+            </configuration>
+        </component>
+        <component>
+            <role>org.apache.ftpserver.interfaces.FtpServerInterface</role>
+            <implementation>org.apache.ftpserver.FtpServerImpl</implementation>
+            <!--
+            <requirements>
+              <requirement>
+                <role>org.apache.avalon.cornerstone.services.sockets.SocketManager</role>
+              </requirement>
+              <requirement>
+                <role>org.apache.avalon.cornerstone.services.connection.ConnectionManager</role>
+              </requirement>
+              <requirement>
+                <role>org.apache.ftpserver.ip.IpRestrictorInterface</role>
+              </requirement>
+              <requirement>
+                <role>org.apache.ftpserver.usermanager.UserManagerInterface</role>
+              </requirement>
+            </requirements>
+            -->
+            <configuration>
+                <server-host>localhost</server-host>
+                <self-host>localhost</self-host>
+                <remote-admin-allowed>false</remote-admin-allowed>
+                <ftp-port>10023</ftp-port>
+                <default-user-root>${basedir}/target/test-output/local-repository</default-user-root>
+            </configuration>
+        </component>
+    </components>
 </plexus>
