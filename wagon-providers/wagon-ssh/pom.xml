@@ -28,13 +28,6 @@
         </developer>
     </developers>
     <dependencies>
-
-        <dependency>
-            <groupId>maven</groupId>
-            <artifactId>wagon-provider-common</artifactId>
-            <version>1.0-alpha-2-SNAPSHOT</version>
-        </dependency>
-        
         <dependency>
             <groupId>jsch</groupId>
             <artifactId>jsch</artifactId>

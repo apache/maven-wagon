@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>maven</groupId>
-        <artifactId>wagon-providers</artifactId>
+        <artifactId>wagon</artifactId>
         <version>1.0-alpha-2-SNAPSHOT</version>
     </parent>
     <groupId>maven</groupId>
-    <artifactId>wagon-provider-common</artifactId>
+    <artifactId>wagon-provider-test</artifactId>
     <name>Wagon Common provider</name>
     <version>1.0-alpha-2-SNAPSHOT</version>
     <shortDescription>Wagon Provider Parent</shortDescription>
@@ -33,16 +33,26 @@
     <dependencies>
         <dependency>
             <groupId>maven</groupId>
-            <artifactId>wagon-api</artifactId>
+            <artifactId>wagon-provider-api</artifactId>
             <version>1.0-alpha-2-SNAPSHOT</version>
         </dependency>
 
-        <!-- Testing -->
+        <dependency>
+            <groupId>plexus</groupId>
+            <artifactId>plexus-container-api</artifactId>
+            <version>1.0-alpha-1-SNAPSHOT</version>
+        </dependency>
 
         <dependency>
             <groupId>plexus</groupId>
-            <artifactId>plexus</artifactId>
-            <version>0.16</version>
+            <artifactId>plexus-container-default</artifactId>
+            <version>1.0-alpha-1-SNAPSHOT</version>            
+        </dependency>
+        
+        <dependency>
+            <groupId>plexus</groupId>
+            <artifactId>plexus-utils</artifactId>
+            <version>1.0-alpha-1-SNAPSHOT</version>            
         </dependency>
 
         <dependency>

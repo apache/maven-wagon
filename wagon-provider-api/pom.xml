@@ -8,7 +8,7 @@
         <version>1.0-alpha-2-SNAPSHOT</version>
     </parent>
     <groupId>maven</groupId>
-    <artifactId>wagon-api</artifactId>
+    <artifactId>wagon-provider-api</artifactId>
     <name>Wagon API</name>
     <version>1.0-alpha-2-SNAPSHOT</version>
     <description></description>
