@@ -1,19 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project>
-  <extend>../project.xml</extend>
+  <parent>
+    <groupId>maven</groupId>
+    <artifactId>wagon</artifactId>
+    <version>0.9-SNAPSHOT</version>
+  </parent>
   <groupId>maven</groupId>
-  <pomVersion>3</pomVersion>
-  <id>wagon-api</id>
   <artifactId>wagon-api</artifactId>
-  <type>jar</type>
   <name>Wagon API</name>
   <version>0.9-SNAPSHOT</version>
-  <organization>
-    <name>Apache Software Foundation</name>
-    <url>http://www.apache.org/</url>
-    <logo>http://maven.apache.org/images/apache-maven-project.png</logo>
-  </organization>
   <description></description>
   <shortDescription>Tools to manage artifacts and deployment</shortDescription>
   <description>
@@ -25,14 +21,6 @@
   <inceptionYear>2003</inceptionYear>
   <url>http://maven.apache.org/wagon/wagon-api</url>
   <issueTrackingUrl>http://jira.codehaus.org/BrowseProject.jspa?id=10319</issueTrackingUrl>
-  <repository>
-    <connection>scm:cvs:pserver:anoncvs@cvs.apache.org:/home/cvspublic:maven-wagon/wagon-api</connection>
-    <url>http://cvs.apache.org/viewcvs/maven-wagon/wagon-api/</url>
-  </repository>
-
-  <dependencies>
-  </dependencies>
-
   <developers>
     <developer>
       <name>Michal Maczka</name>
@@ -52,5 +40,4 @@
       </roles>
     </developer>
   </developers>
-
 </project>

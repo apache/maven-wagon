@@ -2,7 +2,6 @@
 
 <project>
   <pomVersion>3</pomVersion>
-  <id>wagon</id>
   <groupId>maven</groupId>
   <artifactId>wagon</artifactId>
   <name>Wagon</name>

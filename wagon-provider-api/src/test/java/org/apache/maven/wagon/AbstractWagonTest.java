@@ -35,11 +35,17 @@ import java.io.OutputStream;
 public class AbstractWagonTest extends TestCase
 {
     private String basedir;
+    
     private MockWagon wagon = null;
+    
     private Artifact artifact;
+    
     private File destination;
+    
     private File source;
+    
     private MockSessionListener sessionListener = null;
+    
     private MockTransferListener transferListener = null;
 
     protected void setUp() throws Exception
@@ -52,7 +58,7 @@ public class AbstractWagonTest extends TestCase
 
         destination = new File( basedir, "target/folder/subfolder" );
 
-        source = new File( basedir, "project.xml" );
+        source = new File( basedir, "pom.xml" );
 
         wagon = new MockWagon();
 

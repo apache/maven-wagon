@@ -39,6 +39,8 @@ import java.io.FileReader;
 public abstract class WagonTestCase
     extends PlexusTestCase
 {
+    protected static String POM = "pom.xml";
+    
     protected Repository localRepository;
 
     protected Repository testRepository;
@@ -217,7 +219,7 @@ public abstract class WagonTestCase
 
         wagon.connect( testRepository );
 
-        sourceFile = new File( basedir, "project.xml" );
+        sourceFile = new File( basedir, POM );
 
         wagon.put( sourceFile, resource );
 
@@ -287,7 +289,7 @@ public abstract class WagonTestCase
 
         wagon.connect( testRepository );
 
-        artifactSourceFile = new File( basedir, "project.xml" );
+        artifactSourceFile = new File( basedir, POM );
 
         wagon.put( artifactSourceFile, getTestArtifact() );
 
@@ -355,7 +357,7 @@ public abstract class WagonTestCase
     {
         if ( artifact == null )
         {
-            //Model model = modelReader.read( new FileReader( new File( basedir, "project.xml" ) ) );
+            //Model model = modelReader.read( new FileReader( new File( basedir, POM ) ) );
 
             artifact = new DefaultArtifact( "groupId", "artifactId", "1.0", "pom" );
         }
