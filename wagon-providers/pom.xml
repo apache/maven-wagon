@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>maven</groupId>
+        <artifactId>wagon</artifactId>
+        <version>1.0-alpha-1</version>
+    </parent>
+    <groupId>maven</groupId>
+    <artifactId>wagon-provider-parent</artifactId>
+    <name>Wagon HTTP provider</name>
+    <version>1.0-alpha-1</version>
+    <shortDescription>Wagon Provider Parent</shortDescription>
+    <inceptionYear>2003</inceptionYear>
+    <url>http://maven.apache.org/wagon/wagon-providers/wagon-provider-parent</url>
+    <issueTrackingUrl>http://jira.codehaus.org/BrowseProject.jspa?id=10319</issueTrackingUrl>
+    <siteDirectory>/www/maven.apache.org/wagon/wagon-providers/wagon-provider-parent</siteDirectory>
+
+    <developers>
+        <developer>
+            <name>Michal Maczka</name>
+            <id>michal</id>
+            <email>michal@codehaus.org</email>
+            <roles>
+                <role>Creator</role>
+                <role>Developer</role>
+                <role>Release Manager</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <dependencies>
+        <dependency>
+            <groupId>maven</groupId>
+            <artifactId>wagon-api</artifactId>
+            <version>1.0-alpha-1</version>
+        </dependency>
+
+        <!-- Testing -->
+
+        <dependency>
+            <groupId>plexus</groupId>
+            <artifactId>plexus</artifactId>
+            <version>0.16</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+        </dependency>
+    </dependencies>
+
+
+</project>

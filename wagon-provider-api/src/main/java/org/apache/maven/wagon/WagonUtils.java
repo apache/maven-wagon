@@ -17,9 +17,9 @@ package org.apache.maven.wagon;
  * ====================================================================
  */
 
-import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
-import org.codehaus.plexus.util.FileUtils;
+import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.util.FileUtils;
 
 import java.io.File;
 import java.io.IOException;

@@ -17,19 +17,19 @@ package org.apache.maven.wagon.observers;
  * ====================================================================
  */
 
+import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.WagonUtils;
+import org.apache.maven.wagon.util.FileUtils;
+import org.apache.maven.wagon.util.IoUtils;
+import org.apache.maven.wagon.events.TransferEvent;
+import org.apache.maven.wagon.events.TransferListener;
+
 import java.io.File;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.WagonUtils;
-import org.apache.maven.wagon.events.TransferEvent;
-import org.apache.maven.wagon.events.TransferListener;
-import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.util.IOUtil;
 
 
 /**
@@ -163,7 +163,7 @@ public class ChecksumObserver implements TransferListener
                 
                 wagon.get( md5Resource, md5File );
                
-                expectedChecksum = FileUtils.fileRead( md5File  ).trim();               
+                expectedChecksum = FileUtils.fileRead( md5File  ).trim();
             }
             else
             {
@@ -184,7 +184,7 @@ public class ChecksumObserver implements TransferListener
         {
             if ( inputStream != null )
             {
-                 IOUtil.close( inputStream );
+                 IoUtils.close( inputStream );
             }            
             
             transferingMd5 = false;

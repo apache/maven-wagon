@@ -18,18 +18,13 @@ package org.apache.maven.wagon;
  */
 
 import org.apache.maven.wagon.authentication.AuthenticationException;
-import org.apache.maven.wagon.events.SessionEvent;
-import org.apache.maven.wagon.events.SessionEventSupport;
-import org.apache.maven.wagon.events.SessionListener;
-import org.apache.maven.wagon.events.TransferEvent;
-import org.apache.maven.wagon.events.TransferEventSupport;
-import org.apache.maven.wagon.events.TransferListener;
+import org.apache.maven.wagon.events.*;
 import org.apache.maven.wagon.repository.Repository;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
 
 
 /**

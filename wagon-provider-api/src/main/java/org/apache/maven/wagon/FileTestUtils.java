@@ -20,9 +20,9 @@ package org.apache.maven.wagon;
 import junit.framework.TestCase;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.io.FileWriter;
 
 /**
  * @author <a href="michal@apache.org>Michal Maczka</a>

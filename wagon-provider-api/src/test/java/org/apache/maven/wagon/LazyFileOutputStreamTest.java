@@ -17,12 +17,10 @@ package org.apache.maven.wagon;
  * ====================================================================
  */
 
-import org.apache.maven.wagon.LazyFileOutputStream;
-import org.codehaus.plexus.util.FileUtils;
-
 import java.io.File;
 
 import junit.framework.TestCase;
+import org.apache.maven.wagon.util.FileUtils;
 
 /**
  * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a> 

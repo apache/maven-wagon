@@ -17,7 +17,7 @@ package org.apache.maven.wagon.providers.http;
  */
 
 import org.apache.maven.wagon.FileTestUtils;
-import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.WagonTestCase;
 import org.codehaus.plexus.jetty.Httpd;
 
 import java.io.File;

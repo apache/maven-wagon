@@ -1,44 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project>
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>maven</groupId>
+        <artifactId>wagon</artifactId>
+        <version>1.0-alpha-1</version>
+    </parent>
     <groupId>maven</groupId>
-    <artifactId>wagon</artifactId>
+    <artifactId>wagon-api</artifactId>
+    <name>Wagon API</name>
     <version>1.0-alpha-1</version>
-  </parent>
-  <groupId>maven</groupId>
-  <artifactId>wagon-api</artifactId>
-  <name>Wagon API</name>
-  <version>1.0-alpha-1</version>
-  <description></description>
-  <shortDescription>Tools to manage artifacts and deployment</shortDescription>
-  <description>
+    <description></description>
+    <shortDescription>Tools to manage artifacts and deployment</shortDescription>
+    <description>
     Wagon in general utility resource transport framework.
     The Wagon API defines
     the interfaces, clasess and their respective roles.
-  </description>
-  <package>org.apache.maven.wagon</package>
-  <inceptionYear>2003</inceptionYear>
-  <url>http://maven.apache.org/wagon/wagon-api</url>
-  <issueTrackingUrl>http://jira.codehaus.org/browse/WAGON</issueTrackingUrl>
-  <developers>
-    <developer>
-      <name>Michal Maczka</name>
-      <id>michal</id>
-      <email>michal@codehaus.org</email>
-      <organization>Codehaus</organization>
-      <roles>
-        <role>Architect</role>
-      </roles>
-    </developer>
-    <developer>
-      <name>Jason van Zyl</name>
-      <id>jvanzyl</id>
-      <email>jason@maven.org</email>
-      <roles>
-        <role>Developer</role>
-      </roles>
-    </developer>
-  </developers>
+    </description>
+    <package>org.apache.maven.wagon</package>
+    <inceptionYear>2003</inceptionYear>
+    <url>http://maven.apache.org/wagon/wagon-api</url>
+    <issueTrackingUrl>http://jira.codehaus.org/browse/WAGON</issueTrackingUrl>
+    <developers>
+        <developer>
+            <name>Michal Maczka</name>
+            <id>michal</id>
+            <email>michal@codehaus.org</email>
+            <organization>Codehaus</organization>
+            <roles>
+                <role>Architect</role>
+            </roles>
+        </developer>
+        <developer>
+            <name>Jason van Zyl</name>
+            <id>jvanzyl</id>
+            <email>jason@maven.org</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </developer>
+    </developers>
 </project>

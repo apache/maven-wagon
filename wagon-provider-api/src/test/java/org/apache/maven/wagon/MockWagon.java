@@ -40,10 +40,7 @@ public class MockWagon
         this.errorInputStream = errorInputStream;
     }
 
-    public String[] getSupportedProtocols()
-    {
-        return new String[]{"mock"};
-    }
+
 
     public InputStream getInputStream( String resource )
         throws TransferFailedException

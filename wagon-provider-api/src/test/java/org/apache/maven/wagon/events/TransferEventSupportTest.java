@@ -19,7 +19,7 @@ package org.apache.maven.wagon.events;
 
 import junit.framework.TestCase;
 import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.providers.file.FileWagon;
+import org.apache.maven.wagon.MockWagon;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -74,7 +74,7 @@ public class TransferEventSupportTest extends TestCase
         final MockTransferListener mock2 = new MockTransferListener();
         eventSupport.addTransferListener( mock2 );
 
-        final Wagon wagon = new FileWagon();
+        final Wagon wagon = new MockWagon();
         final TransferEvent event = getEvent( wagon );
 
         eventSupport.fireTransferStarted( event );
@@ -89,38 +89,50 @@ public class TransferEventSupportTest extends TestCase
     public void testFireTransferProgress()
     {
         final MockTransferListener mock1 = new MockTransferListener();
+
         eventSupport.addTransferListener( mock1 );
 
         final MockTransferListener mock2 = new MockTransferListener();
+
         eventSupport.addTransferListener( mock2 );
 
-        final Wagon wagon = new FileWagon();
+        final Wagon wagon = new MockWagon();
+
         final TransferEvent event = getEvent( wagon );
 
         eventSupport.fireTransferProgress( event );
 
         assertTrue( mock1.isTransferProgressCalled() );
+
         assertTrue( mock2.isTransferProgressCalled() );
+
         assertEquals( event, mock1.getTransferEvent() );
+
         assertEquals( event, mock2.getTransferEvent() );
     }
 
     public void testFireTransferCompleted()
     {
         final MockTransferListener mock1 = new MockTransferListener();
+
         eventSupport.addTransferListener( mock1 );
 
         final MockTransferListener mock2 = new MockTransferListener();
+
         eventSupport.addTransferListener( mock2 );
 
-        final Wagon wagon = new FileWagon();
+        final Wagon wagon = new MockWagon();
+
         final TransferEvent event = getEvent( wagon );
 
         eventSupport.fireTransferCompleted( event );
 
         assertTrue( mock1.isTransferCompletedCalled() );
+
         assertTrue( mock2.isTransferCompletedCalled() );
+
         assertEquals( event, mock1.getTransferEvent() );
+
         assertEquals( event, mock2.getTransferEvent() );
 
     }
@@ -128,19 +140,25 @@ public class TransferEventSupportTest extends TestCase
     public void testFireTransferError()
     {
         final MockTransferListener mock1 = new MockTransferListener();
+
         eventSupport.addTransferListener( mock1 );
 
         final MockTransferListener mock2 = new MockTransferListener();
+
         eventSupport.addTransferListener( mock2 );
 
-        final Wagon wagon = new FileWagon();
+        final Wagon wagon = new MockWagon();
+
         final TransferEvent event = getEvent( wagon );
 
         eventSupport.fireTransferError( event );
 
         assertTrue( mock1.isTransferErrorCalled() );
+
         assertTrue( mock2.isTransferErrorCalled() );
+
         assertEquals( event, mock1.getTransferEvent() );
+
         assertEquals( event, mock2.getTransferEvent() );
 
     }
@@ -148,16 +166,21 @@ public class TransferEventSupportTest extends TestCase
     public void testFireDebug()
     {
         final MockTransferListener mock1 = new MockTransferListener();
+
         eventSupport.addTransferListener( mock1 );
 
         final MockTransferListener mock2 = new MockTransferListener();
+
         eventSupport.addTransferListener( mock2 );
 
         eventSupport.fireDebug( "mm" );
 
         assertTrue( mock1.isDebugCalled() );
+
         assertTrue( mock2.isDebugCalled() );
+
         assertEquals( "mm", mock1.getDebugMessage() );
+
         assertEquals( "mm", mock2.getDebugMessage() );
 
     }

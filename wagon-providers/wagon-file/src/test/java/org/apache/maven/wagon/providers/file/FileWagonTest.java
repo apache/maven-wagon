@@ -19,6 +19,7 @@ package org.apache.maven.wagon.providers.file;
 
 
 import org.apache.maven.wagon.FileTestUtils;
+import org.apache.maven.wagon.WagonTestCase;
 
 import java.io.File;
 import java.io.IOException;

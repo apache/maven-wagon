@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>maven</groupId>
-        <artifactId>wagon-provider-parent</artifactId>
+        <artifactId>wagon</artifactId>
         <version>1.0-alpha-1</version>
     </parent>
     <groupId>maven</groupId>
@@ -37,7 +37,15 @@
         </developer>
     </developers>
 
-    <dependencies>        
+    <dependencies>
+
+        <dependency>
+            <groupId>maven</groupId>
+            <artifactId>wagon-provider-common</artifactId>
+            <version>1.0-alpha-1</version>
+        </dependency>
+
+
         <dependency>
             <groupId>commons-net</groupId>
             <artifactId>commons-net</artifactId>
