@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project>
+  <parent>
+    <groupId>maven</groupId>
+    <artifactId>wagon</artifactId>
+    <version>0.9-SNAPSHOT</version>
+  </parent>
+  <groupId>maven</groupId>
+  <artifactId>wagon-http-lightweight</artifactId>
+  <name>Lightweight Wagon HTTP provider</name>
+  <version>0.9-SNAPSHOT</version>
+  <shortDescription>Wagon Provider for HTTP protocol without any external dependedencies</shortDescription>
+  <package>org.apache.maven.wagon.providers.http</package>
+  <inceptionYear>2004</inceptionYear>
+  <url>http://maven.apache.org/wagon/wagon-providers/http-ligtweight</url>
+  <issueTrackingUrl>http://jira.codehaus.org/BrowseProject.jspa?id=10319</issueTrackingUrl>
+  <siteDirectory>/www/maven.apache.org/wagon/wagon-providers/http-lightweight</siteDirectory>
+
+  <developers>
+    <developer>
+      <name>Michal Maczka</name>
+      <id>michal</id>
+      <email>michal@codehaus.org</email>
+      <organization>Codehaus</organization>
+      <roles>
+        <role>Creator</role>
+        <role>Developer</role>
+        <role>Release Manager</role>
+      </roles>
+    </developer>
+  </developers>
+
+  <dependencies>
+    <dependency>
+      <groupId>maven</groupId>
+      <artifactId>wagon-api</artifactId>
+      <version>0.9-SNAPSHOT</version>
+    </dependency>
+    <!-- Testing -->
+    <dependency>
+      <groupId>plexus</groupId>
+      <artifactId>plexus-jetty-httpd</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>jetty</groupId>
+      <artifactId>jetty</artifactId>
+      <version>4.2.10</version>
+    </dependency>
+    <dependency>
+      <groupId>servletapi</groupId>
+      <artifactId>servletapi</artifactId>
+      <version>2.3</version>
+    </dependency>
+  </dependencies>
+</project>

@@ -1,0 +1,17 @@
+<plexus>
+  <components>
+    <component>
+      <role>org.codehaus.plexus.jetty.Httpd</role>
+      <implementation>org.codehaus.plexus.jetty.DefaultHttpd</implementation>
+      <configuration>
+        <port>10007</port>
+        <contexts>
+          <context>
+            <path>/</path>
+            <document-root>${basedir}/target/http-repository</document-root>
+          </context>
+        </contexts>
+      </configuration>
+    </component>
+  </components>
+</plexus>
