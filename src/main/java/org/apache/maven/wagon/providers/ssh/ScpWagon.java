@@ -92,35 +92,39 @@ public class ScpWagon
 
             session = jsch.getSession( authInfo.getUserName(), host, port );
 
-            File privateKey;
+            // If user don't define a password, he want to use a private key
+            if ( authInfo.getPassword() == null )
+            {
+                File privateKey;
 
-            if ( authInfo.getPrivateKey() != null )
-            {
-                privateKey = new File( authInfo.getPrivateKey() );
-            }
-            else
-            {
-                privateKey = findPrivateKey();
-            }
-
-            if ( privateKey.exists() )
-            {
-                if ( authInfo.getPassphrase() == null )
+                if ( authInfo.getPrivateKey() != null )
                 {
-                    String msg = "Private key provided " + "without passphrase for repo: " + getRepository().getName();
+                    privateKey = new File( authInfo.getPrivateKey() );
+                }
+                else
+                {
+                    privateKey = findPrivateKey();
+                }
+
+                if ( privateKey.exists() )
+                {
+                    if ( authInfo.getPassphrase() == null )
+                    {
+                        String msg = "Private key provided " + "without passphrase for repo: " + getRepository().getName();
+
+                        throw new AuthenticationException( msg );
+                    }
+
+                    fireSessionDebug( "Using private key: " + privateKey );
+
+                    jsch.addIdentity( privateKey.getAbsolutePath(), authInfo.getPassphrase() );
+                }
+                else
+                {
+                    String msg = "You must define a private key or a password for repo: " + getRepository().getName();
 
                     throw new AuthenticationException( msg );
                 }
-
-                fireSessionDebug( "Using private key: " + privateKey );
-
-                jsch.addIdentity( privateKey.getAbsolutePath(), authInfo.getPassphrase() );
-            }
-            else
-            {
-                String msg = "Private key: " + privateKey + " not found ";
-
-                throw new AuthenticationException( msg );
             }
 
             ProxyInfo proxyInfo = getRepository().getProxyInfo();
@@ -264,7 +268,6 @@ public class ScpWagon
 
             if ( checkAck( in ) != 0 )
             {
-
                 throw  new TransferFailedException( "ACK check failed" );
             }
 
@@ -532,7 +535,6 @@ public class ScpWagon
 // ----------------------------------------------------------------------
 // JSch user info
 // ----------------------------------------------------------------------
-
     public class WagonUserInfo
             implements UserInfo
     {
@@ -615,5 +617,4 @@ public class ScpWagon
 
         return b;
     }
-
 }
