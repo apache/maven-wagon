@@ -149,8 +149,6 @@ public class Repository
             sb.append( port );
         }
 
-        sb.append( "/" );
-
         sb.append( basedir );
 
         return sb.toString();

@@ -130,6 +130,20 @@ public class PathUtils
      */
     public static String host( final String url )
     {
+        String authorization = authorization( url );
+        int index = authorization.indexOf( '@' );
+        if ( index >= 0 )
+        {
+            return authorization.substring( index + 1 );
+        }
+        else
+        {
+            return authorization;
+        }
+    }
+
+    private static String authorization( final String url )
+    {
         if ( url == null )
         {
             return "localhost";
@@ -139,7 +153,7 @@ public class PathUtils
 
         if ( protocol == null || protocol.equals( "file" ) )
         {
-            return "";
+            return "localhost";
         }
 
         String host = url.substring( url.indexOf( "://" ) + 3 ).trim();
@@ -151,7 +165,16 @@ public class PathUtils
             host = host.substring( 0, pos );
         }
 
-        pos = host.indexOf( ":" );
+        pos = host.indexOf( '@' );
+
+        if ( pos > 0 )
+        {
+            pos = host.indexOf( ':', pos );
+        }
+        else
+        {
+            pos = host.indexOf( ":" );
+        }
 
         if ( pos > 0 )
         {
@@ -173,8 +196,7 @@ public class PathUtils
      */
     public static String protocol( final String url )
     {
-
-        final int pos = url.indexOf( "://" );
+        final int pos = url.indexOf( ":" );
 
         if ( pos == -1 )
         {
@@ -228,7 +250,7 @@ public class PathUtils
 
     /**
      * @param url 
-     * 
+     * @todo need to URL decode for spaces?
      * @return 
      */
     public static String basedir( final String url )
@@ -239,11 +261,48 @@ public class PathUtils
 
         if ( protocol.equals( "file" ) )
         {
-            retValue = url.substring( protocol.length() + 3 );
+            retValue = url.substring( protocol.length() + 1 );
+            // special case: if omitted // on protocol, keep path as is
+            if ( retValue.startsWith( "//" ) )
+            {
+                retValue = retValue.substring( 2 );
+
+                if ( retValue.length() >= 2 && ( retValue.charAt( 1 ) == '|' || retValue.charAt( 1 ) == ':' ) )
+                {
+                    // special case: if there is a windows drive letter, then keep the original return value
+                    retValue = retValue.charAt( 0 ) + ":" + retValue.substring( 2 );
+                }
+                else
+                {
+                    // Now we expect the host
+                    int index = retValue.indexOf( "/" );
+                    if ( index >= 0 )
+                    {
+                        retValue = retValue.substring( index + 1 );
+                    }
+
+                    // special case: if there is a windows drive letter, then keep the original return value
+                    if ( retValue.length() >= 2 && ( retValue.charAt( 1 ) == '|' || retValue.charAt( 1 ) == ':' ) )
+                    {
+                        retValue = retValue.charAt( 0 ) + ":" + retValue.substring( 2 );
+                    }
+                    else if ( index >= 0 )
+                    {
+                        // leading / was previously stripped
+                        retValue = "/" + retValue;
+                    }
+                }
+            }
+
+            // special case: if there is a windows drive letter using |, switch to :
+            if ( retValue.length() >= 2 && retValue.charAt( 1 ) == '|' )
+            {
+                retValue = retValue.charAt( 0 ) + ":" + retValue.substring( 2 );
+            }
         }
         else
         {
-            final String host = PathUtils.host( url );
+            final String host = PathUtils.authorization( url );
 
             final int port = PathUtils.port( url );
 
@@ -251,12 +310,12 @@ public class PathUtils
 
             if ( port != WagonConstants.UNKNOWN_PORT )
             {
-                pos = ( protocol + "://" + host + ":" + port + "/" ).length();
+                pos = ( protocol + "://" + host + ":" + port ).length();
 
             }
             else
             {
-                pos = ( protocol + "://" + host + "/" ).length();
+                pos = ( protocol + "://" + host ).length();
             }
             if ( url.length() > pos )
             {
@@ -268,9 +327,40 @@ public class PathUtils
 
         if ( retValue == null )
         {
-            retValue = "";
+            retValue = "/";
         }
         return retValue.trim();
     }
 
+    public static String user( String url )
+    {
+        String host = authorization( url );
+        int index = host.indexOf( '@' );
+        if ( index > 0 ) {
+            String userInfo = host.substring( 0, index );
+            index = userInfo.indexOf( ':' );
+            if ( index > 0 ) {
+                return userInfo.substring( 0, index );
+            }
+            else if ( index < 0 )
+            {
+                return userInfo;
+            }
+        }
+        return null;
+    }
+
+    public static String password( String url )
+    {
+        String host = authorization( url );
+        int index = host.indexOf( '@' );
+        if ( index > 0 ) {
+            String userInfo = host.substring( 0, index );
+            index = userInfo.indexOf( ':' );
+            if ( index >= 0 ) {
+                return userInfo.substring( index + 1 );
+            }
+        }
+        return null;
+    }
 }

@@ -74,7 +74,7 @@ public class RepositoryTest
 
         assertEquals( "www.ibiblio.org", repository.getHost() );
 
-        assertEquals( "", repository.getBasedir() );
+        assertEquals( "/", repository.getBasedir() );
 
         assertEquals( WagonConstants.UNKNOWN_PORT, repository.getPort() );
 
@@ -86,7 +86,7 @@ public class RepositoryTest
 
         assertEquals( "www.ibiblio.org", repository.getHost() );
 
-        assertEquals( "maven", repository.getBasedir() );
+        assertEquals( "/maven", repository.getBasedir() );
 
         assertEquals( 100, repository.getPort() );
 

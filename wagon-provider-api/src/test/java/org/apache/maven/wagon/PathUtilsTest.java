@@ -23,7 +23,8 @@ import junit.framework.TestCase;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  */
-public class PathUtilsTest extends TestCase
+public class PathUtilsTest
+    extends TestCase
 {
     public void testFilenameResolving()
     {
@@ -61,9 +62,7 @@ public class PathUtilsTest extends TestCase
 
     public void testHostResolving()
     {
-        assertEquals(
-                "www.codehaus.org",
-                PathUtils.host( "http://www.codehaus.org" ) );
+        assertEquals( "www.codehaus.org", PathUtils.host( "http://www.codehaus.org" ) );
 
         assertEquals( "localhost", PathUtils.host( null ) );
 
@@ -73,15 +72,62 @@ public class PathUtilsTest extends TestCase
     {
         assertEquals( "http", PathUtils.protocol( "http://www.codehause.org" ) );
         assertEquals( "file", PathUtils.protocol( "file:///c:/temp" ) );
+    }
 
+    public void testUserInfo()
+    {
+        String urlWithUsername = "http://brett@www.codehaus.org";
+        assertEquals( "brett", PathUtils.user( urlWithUsername ) );
+        assertNull( PathUtils.password( urlWithUsername ) );
+        assertEquals( "www.codehaus.org", PathUtils.host( urlWithUsername ) );
+        assertEquals( "/", PathUtils.basedir( urlWithUsername ) );
+        String urlWithUsernamePassword = "http://brett:porter@www.codehaus.org";
+        assertEquals( "brett", PathUtils.user( urlWithUsernamePassword ) );
+        assertEquals( "porter", PathUtils.password( urlWithUsernamePassword ) );
+        assertEquals( "www.codehaus.org", PathUtils.host( urlWithUsernamePassword ) );
+        assertEquals( "/", PathUtils.basedir( urlWithUsernamePassword ) );
+    }
+
+    public void testFileBasedir()
+    {
+        // see http://www.mozilla.org/quality/networking/testing/filetests.html
+        
+        // strict forms
+        assertEquals( "c:/temp", PathUtils.basedir( "file:///c|/temp" ) );
+        assertEquals( "localhost", PathUtils.host( "file:///c|/temp" ) );
+        assertEquals( "c:/temp", PathUtils.basedir( "file://localhost/c|/temp" ) );
+        assertEquals( "localhost", PathUtils.host( "file://localhost/c|/temp" ) );
+        assertEquals( "/temp", PathUtils.basedir( "file:///temp" ) );
+        assertEquals( "localhost", PathUtils.host( "file:///temp" ) );
+        assertEquals( "/temp", PathUtils.basedir( "file://localhost/temp" ) );
+        assertEquals( "localhost", PathUtils.host( "file://localhost/temp" ) );
+
+        // strict form, with : for drive separator
+        assertEquals( "c:/temp", PathUtils.basedir( "file:///c:/temp" ) );
+        assertEquals( "localhost", PathUtils.host( "file:///c:/temp" ) );
+        assertEquals( "c:/temp", PathUtils.basedir( "file://localhost/c:/temp" ) );
+        assertEquals( "localhost", PathUtils.host( "file://localhost/c:/temp" ) );
+
+        // convenience forms
+        assertEquals( "c:/temp", PathUtils.basedir( "file://c:/temp" ) );
+        assertEquals( "c:/temp", PathUtils.basedir( "file://c|/temp" ) );
+        assertEquals( "c:/temp", PathUtils.basedir( "file:c:/temp" ) );
+        assertEquals( "c:/temp", PathUtils.basedir( "file:c|/temp" ) );
+        assertEquals( "/temp", PathUtils.basedir( "file:/temp" ) );
+    }
+
+    public void testEmptyBasedir()
+    {
+        assertEquals( "/", PathUtils.basedir( "http://www.codehaus.org:80" ) );
+        assertEquals( "/", PathUtils.basedir( "http://www.codehaus.org" ) );
+        assertEquals( "/", PathUtils.basedir( "http://www.codehaus.org:80/" ) );
+        assertEquals( "/", PathUtils.basedir( "http://www.codehaus.org/" ) );
     }
 
     public void testPortResolving()
     {
         assertEquals( 80, PathUtils.port( "http://www.codehause.org:80/maven" ) );
-        assertEquals(
-                WagonConstants.UNKNOWN_PORT,
-                PathUtils.port( "http://localhost/temp" ) );
+        assertEquals( WagonConstants.UNKNOWN_PORT, PathUtils.port( "http://localhost/temp" ) );
 
         assertEquals( 10, PathUtils.port( "ftp://localhost:10" ) );
 
@@ -89,15 +135,12 @@ public class PathUtilsTest extends TestCase
 
     public void testPortBasedir()
     {
-        assertEquals(
-                "maven",
-                PathUtils.basedir( "http://www.codehause.org:80/maven" ) );
-        assertEquals( "temp", PathUtils.basedir( "http://localhost/temp" ) );
+        assertEquals( "/maven", PathUtils.basedir( "http://www.codehause.org:80/maven" ) );
+        assertEquals( "/temp", PathUtils.basedir( "http://localhost/temp" ) );
 
         assertEquals( "c:/temp", PathUtils.basedir( "file://c:/temp" ) );
-        assertEquals( "", PathUtils.basedir( "http://localhost:80/" ) );
-        assertEquals( "", PathUtils.basedir( "http://localhost/" ) );
-
+        assertEquals( "/", PathUtils.basedir( "http://localhost:80/" ) );
+        assertEquals( "/", PathUtils.basedir( "http://localhost/" ) );
     }
 
 }
