@@ -23,7 +23,6 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -100,16 +99,10 @@ public abstract class StreamWagon
             }
         }
 
-        FileOutputStream os = null;
-
-        try
-        {
-            os = new FileOutputStream( destination );
-        }
-        catch ( FileNotFoundException e )
-        {
-            throw new TransferFailedException( "Cannot write to specified destination: " + destination.getAbsolutePath() );
-        }
+        LazyFileOutputStream os = null;
+        
+        os = new LazyFileOutputStream( destination );
+        
 
         InputStream is;
 

@@ -26,6 +26,11 @@ import org.apache.maven.wagon.WagonTestCase;
 public class FileWagonTest
     extends WagonTestCase
 {
+    public FileWagonTest( String testname )
+    {
+       super ( testname );    
+    }
+    
     protected String getProtocol()
     {
         return "file";

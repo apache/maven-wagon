@@ -47,13 +47,11 @@ public abstract class WagonTestCase
     // Constructors
     // ----------------------------------------------------------------------
 
-    public WagonTestCase()
-    {
-    }
+   
 
-    public WagonTestCase( String name )
+    public WagonTestCase( String testName )
     {
-        super( name );
+        super( testName );
     }
 
     // ----------------------------------------------------------------------
@@ -166,6 +164,7 @@ public abstract class WagonTestCase
     public void testWagon()
         throws Exception
     {
+        
         setupRepositories();
 
         setupWagonTestingFixtures();
