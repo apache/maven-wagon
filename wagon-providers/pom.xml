@@ -13,10 +13,6 @@
     <version>1.0-alpha-2-SNAPSHOT</version>
     <shortDescription>Wagon Provider Parent</shortDescription>
     <inceptionYear>2003</inceptionYear>
-    <url>http://maven.apache.org/wagon/wagon-providers/wagon-provider-parent</url>
-    <issueTrackingUrl>http://jira.codehaus.org/BrowseProject.jspa?id=10319</issueTrackingUrl>
-    <siteDirectory>/www/maven.apache.org/wagon/wagon-providers/wagon-provider-parent</siteDirectory>
-
     <developers>
         <developer>
             <name>Michal Maczka</name>
