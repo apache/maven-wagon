@@ -118,6 +118,10 @@ public class Repository
     {
         this.url = url;
 
+        // TODO [BP]: refactor out the PathUtils URL stuff into a class like java.net.URL, so you only parse once
+        //  can't use URL class as is because it won't recognise our protocols, though perhaps we could attempt to
+        //  register handlers for scp, etc?
+
         this.host = PathUtils.host( url );
 
         this.protocol = PathUtils.protocol( url );
@@ -125,6 +129,24 @@ public class Repository
         this.port = PathUtils.port( url );
 
         this.basedir = PathUtils.basedir( url );
+
+        String username = PathUtils.user( url );
+
+        if ( username != null )
+        {
+            if ( authenticationInfo == null )
+            {
+                authenticationInfo = new AuthenticationInfo();
+            }
+            authenticationInfo.setUserName( username );
+
+            String password = PathUtils.password( url );
+
+            if ( password != null )
+            {
+                authenticationInfo.setPassword( password );
+            }
+        }
     }
 
     public String getUrl()
