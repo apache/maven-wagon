@@ -1,11 +1,11 @@
 package org.apache.maven.wagon;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.codehaus.plexus.util.IOUtil;
+import org.codehaus.plexus.util.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
+
 
 /**
  * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a> 
@@ -14,70 +14,70 @@ import org.codehaus.plexus.util.IOUtil;
 public class WagonUtils
 {
 
-    public static byte[] toByteArray( String resource, Wagon wagon  ) throws IOException, TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    
+    public static String toString( String resource, Wagon wagon  ) throws IOException, TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        InputStream inputStream = null;
+        
+        File file = null;
        
         try
-        {        
-             inputStream = wagon.getInputStream( resource );
+        {                     
+             file = File.createTempFile( "wagon", "tmp" );
+            
+             wagon.get( resource, file );
              
-             byte[] retValue = IOUtil.toByteArray( inputStream );
+             String retValue = FileUtils.fileRead( file );
              
              return retValue;
         }        
         finally
-        {
-             IOUtil.close( inputStream );
+        {           
+             
+             if ( file != null )
+             {
+                 boolean deleted = file.delete();
+                 
+                 if ( ! deleted )
+                 {
+                     file.deleteOnExit();    
+                 }                
+             }
         }
         
          
     }
     
-    public static void fromByteArray( String resource, Wagon wagon, byte[] buffer  ) throws IOException, TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    public static void fromString( String resource, Wagon wagon, String content  ) throws Exception
     {
-        OutputStream outputStream = null;
+        File file = null;
        
         try
-        {        
-             outputStream = wagon.getOutputStream( resource );
-             
-             IOUtil.copy( buffer, outputStream );
-             
-             
+        {     
+            file = File.createTempFile( "wagon", "tmp" );
+            
+            
+            //@todo this methos should trow something more sepcific then java.lang.Exception
+            FileUtils.fileWrite( file.getPath(), content );
+            
+            wagon.put( file, resource );
+                          
         }        
         finally
         {
-             IOUtil.close( outputStream );
+            if ( file != null )
+            {
+                boolean deleted = file.delete();
+                
+                if ( ! deleted )
+                {
+                    file.deleteOnExit();    
+                }
+                
+            }
         }
         
          
     }
-    
-    
-    
-    public static String toString( String resource, Wagon wagon  ) throws IOException, TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-    
-        byte[] buffer = toByteArray( resource, wagon );
         
-        String retValue = new String( buffer );
-        
-        return retValue;
-         
-    }
-    
-    public static void fromString( String resource, Wagon wagon, String  str ) throws IOException, TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-    
-        byte[] buffer = str.getBytes();
-        
-        fromByteArray( resource, wagon, buffer  );
-        
-        
-         
-    }
-    
-    
     
 }

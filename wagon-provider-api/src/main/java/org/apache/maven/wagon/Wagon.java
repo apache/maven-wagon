@@ -24,8 +24,6 @@ import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.repository.Repository;
 
 import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 public interface Wagon
 {
@@ -56,17 +54,6 @@ public interface Wagon
     // /Stream handling
     // ----------------------------------------------------------------------
 
-    /**
-     *  
-     */
-    InputStream getInputStream( String source )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
-
-    /**
-     *  
-     */
-    OutputStream getOutputStream( String source )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
     
 
     Repository getRepository();

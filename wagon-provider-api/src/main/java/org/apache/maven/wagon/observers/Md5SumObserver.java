@@ -82,13 +82,23 @@ public class Md5SumObserver implements TransferListener
             
             if ( type  == TransferEvent.REQUEST_GET )
             {
-                                            
-               expectedMd5 = WagonUtils.toString( resource + ".md5 ", wagon ).trim();               
+                
+                //we will fetch md5 cheksum from server and
+                // read its content into memory
+                File artifactFile = transferEvent.getLocalFile();
+                
+                File md5File = new File( artifactFile.getPath() + ".md5" );
+                
+                String  md5Resource = resource + ".md5";
+                
+                wagon.get( md5Resource, md5File );
+               
+                expectedMd5 = FileUtils.fileRead( md5File  );               
             }
             else
             {
-                //It's PUT put request
-                
+                //It's PUT put request we will also put md5 checksum
+                // which was computed on the fly
                 WagonUtils.fromString( resource + ".md5 ", wagon, actualMd5 );
                 
             }            
@@ -110,9 +120,8 @@ public class Md5SumObserver implements TransferListener
     }
 
     public void transferError( TransferEvent transferEvent )
-    {
-        
-        
+    { 
+        md5Digester = null;  
     }
 
     public void debug( String message )
@@ -190,29 +199,7 @@ public class Md5SumObserver implements TransferListener
         return retValue;
     }
 
-    /**
-     * @param file
-     */
-    public void writeToFile( File file )
-    {
-        // Here I will write to file the expected md5 sum
-        //(the one which was donloaded from the server)
-        if ( expectedMd5 != null )
-        {
-            String path = file.getPath();
-            
-            try
-            {                
-                FileUtils.fileWrite( path , expectedMd5  );
-            }
-            catch( Exception e)
-            {
-               //getLogger().error( "Could not write the value of md5 checkum to file: " + path );
-               
-            }
-        }
-        
-    }
+   
     
     
     

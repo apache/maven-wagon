@@ -2,8 +2,8 @@ package org.apache.maven.wagon;
 
 import org.apache.maven.wagon.artifact.Artifact;
 import org.apache.maven.wagon.artifact.DefaultArtifact;
+import org.apache.maven.wagon.observers.Debug;
 import org.apache.maven.wagon.repository.Repository;
-import org.apache.maven.wagon.events.Debug;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.Model;

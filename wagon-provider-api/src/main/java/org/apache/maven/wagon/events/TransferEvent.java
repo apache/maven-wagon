@@ -18,6 +18,8 @@ package org.apache.maven.wagon.events;
 
 import org.apache.maven.wagon.Wagon;
 
+import java.io.File;
+
 /***
  * TransferEvent is used to notify TransferListeners about progress
  * in transfer of resources form/to the respository
@@ -59,6 +61,9 @@ public class TransferEvent extends WagonEvent
     private Exception exception;
 
     private long progress;
+    
+    private File localFile;
+    
 
     public TransferEvent(
             final Wagon wagon,
@@ -242,5 +247,21 @@ public class TransferEvent extends WagonEvent
     {
         return dataLength;
     }
+    
+    
 
+    /**
+     * @return Returns the local file.
+     */
+    public File getLocalFile()
+    {
+        return localFile;
+    }
+    /**
+     * @param localFile The local file to set.
+     */
+    public void setLocalFile( File localFile )
+    {
+        this.localFile = localFile;
+    }
 }

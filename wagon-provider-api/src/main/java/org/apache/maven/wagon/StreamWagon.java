@@ -117,7 +117,7 @@ public abstract class StreamWagon
             throw new TransferFailedException( msg, e );
         }
 
-        getTransfer( resource, is, os );
+        getTransfer( resource, is, os, destination );
     }
 
     // source doesn't exist exception
@@ -132,7 +132,7 @@ public abstract class StreamWagon
         FileInputStream is = null;
 
         try
-        {
+        {           
             is = new FileInputStream( source );
         }
         catch ( FileNotFoundException e )
@@ -151,6 +151,6 @@ public abstract class StreamWagon
             throw new TransferFailedException( "Cannot create input stream: ", e );
         }
 
-        putTransfer( resource, is, os );
+        putTransfer( resource, is, os, source );
     }
 }

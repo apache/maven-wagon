@@ -26,6 +26,7 @@ import org.apache.maven.wagon.events.TransferEventSupport;
 import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.repository.Repository;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
@@ -94,10 +95,10 @@ public abstract class AbstractWagon
     // Stream i/o
     // ----------------------------------------------------------------------
 
-    protected void getTransfer( String resource, InputStream input, OutputStream output )
+    protected void getTransfer( String resource, InputStream input, OutputStream output, File localFile )
         throws TransferFailedException
     {
-        fireGetStarted( resource );
+        fireGetStarted( resource, localFile );
 
         try
         {
@@ -114,13 +115,13 @@ public abstract class AbstractWagon
             throw new TransferFailedException( msg, e );
         }
 
-        fireGetCompleted( resource );
+        fireGetCompleted( resource, localFile );
     }
 
-    protected void putTransfer( String resource, InputStream input, OutputStream output )
+    protected void putTransfer( String resource, InputStream input, OutputStream output, File localFile )
         throws TransferFailedException
     {
-        firePutStarted( resource );
+        firePutStarted( resource, localFile );
 
         try
         {
@@ -137,7 +138,7 @@ public abstract class AbstractWagon
             throw new TransferFailedException( msg, e );
         }
 
-        firePutCompleted( resource );
+        firePutCompleted( resource, localFile );
     }
 
     protected void transfer( String resource, InputStream input, OutputStream output, int requestType )
@@ -236,7 +237,7 @@ public abstract class AbstractWagon
         transferEventSupport.fireTransferProgress( transferEvent );
     }
 
-    protected void fireGetCompleted( String resource )
+    protected void fireGetCompleted( String resource, File localFile )
     {
         long timestamp = System.currentTimeMillis();
 
@@ -245,10 +246,12 @@ public abstract class AbstractWagon
 
         transferEvent.setTimestamp( timestamp );
 
+        transferEvent.setLocalFile( localFile );
+        
         transferEventSupport.fireTransferCompleted( transferEvent );
     }
 
-    protected void fireGetStarted( String resource )
+    protected void fireGetStarted( String resource, File localFile )
     {
         long timestamp = System.currentTimeMillis();
 
@@ -256,11 +259,13 @@ public abstract class AbstractWagon
             new TransferEvent( this, resource, TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_GET );
 
         transferEvent.setTimestamp( timestamp );
+        
+        transferEvent.setLocalFile( localFile );
 
         transferEventSupport.fireTransferStarted( transferEvent );
     }
 
-    protected void firePutCompleted( String resource )
+    protected void firePutCompleted( String resource, File localFile )
     {
         long timestamp = System.currentTimeMillis();
 
@@ -268,11 +273,13 @@ public abstract class AbstractWagon
             new TransferEvent( this, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_PUT );
 
         transferEvent.setTimestamp( timestamp );
+        
+        transferEvent.setLocalFile( localFile );
 
         transferEventSupport.fireTransferCompleted( transferEvent );
     }
 
-    protected void firePutStarted( String resource )
+    protected void firePutStarted( String resource, File localFile )
     {
         long timestamp = System.currentTimeMillis();
 
@@ -280,6 +287,8 @@ public abstract class AbstractWagon
             new TransferEvent( this, resource, TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_PUT );
 
         transferEvent.setTimestamp( timestamp );
+        
+        transferEvent.setLocalFile( localFile );
 
         transferEventSupport.fireTransferStarted( transferEvent );
     }
