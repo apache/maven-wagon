@@ -176,7 +176,9 @@ public class ChecksumObserver implements TransferListener
         }
         catch ( Exception e )
         {
-            e.printStackTrace();
+            //@todo maybe some information should be added to log?
+            // ignore this
+            // e.printStackTrace();
         }    
         finally
         {
