@@ -18,6 +18,7 @@ package org.apache.maven.wagon.providers.ssh;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Proxy;
 import com.jcraft.jsch.ProxyHTTP;
 import com.jcraft.jsch.ProxySOCKS5;
@@ -506,23 +507,13 @@ public class ScpWagon
                 out.flush();
             }
         }
-        catch ( Exception e )
+        catch ( JSchException e )
         {
-            fireTransferError( resource, e );
-
-            if ( destination.exists() )
-            {
-                boolean deleted = destination.delete();
-
-                if ( !deleted )
-                {
-                    destination.deleteOnExit();
-                }
-            }
-
-            String msg = "Error occured while downloading from the remote repository:" + getRepository();
-
-            throw new TransferFailedException( msg, e );
+            handleException( resource, e, destination );
+        }
+        catch ( IOException e )
+        {
+            handleException( resource, e, destination );
         }
         finally
         {
@@ -537,6 +528,26 @@ public class ScpWagon
 
             shutdownStream( outputStream );
         }
+    }
+
+    private void handleException( Resource resource, Exception e, File destination )
+        throws TransferFailedException
+    {
+        fireTransferError( resource, e );
+
+        if ( destination.exists() )
+        {
+            boolean deleted = destination.delete();
+
+            if ( !deleted )
+            {
+                destination.deleteOnExit();
+            }
+        }
+
+        String msg = "Error occured while downloading from the remote repository:" + getRepository();
+
+        throw new TransferFailedException( msg, e );
     }
 
     public boolean getIfNewer( String resourceName, File destination, long timestamp )
@@ -591,7 +602,7 @@ public class ScpWagon
     }
 
     static int checkAck( InputStream in )
-        throws IOException
+        throws IOException, ResourceDoesNotExistException, TransferFailedException
     {
         int b = in.read();
         // b may be 0 for success,
@@ -618,17 +629,24 @@ public class ScpWagon
             }
             while ( c != '\n' );
 
+            String message = sb.toString();
             if ( b == 1 )
             {
-                // TODO: log (throw exception?)
                 // error
-                System.out.print( sb.toString() );
+                if ( message.endsWith( "No such file or directory\n" ) )
+                {
+                    // TODO: this might be too hokey?
+                    throw new ResourceDoesNotExistException( message );
+                }
+                else
+                {
+                    throw new TransferFailedException( message );
+                }
             }
             if ( b == 2 )
             {
-                // TODO: throw exception
                 // fatal error
-                System.out.print( sb.toString() );
+                throw new TransferFailedException( message );
             }
         }
 
