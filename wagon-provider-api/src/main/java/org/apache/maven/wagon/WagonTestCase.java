@@ -211,6 +211,8 @@ public abstract class WagonTestCase
 
         destFile = File.createTempFile( "wagon", ".tmp" );
 
+        destFile.deleteOnExit();
+
         wagon.get( resource, destFile );
 
         wagon.disconnect();
@@ -264,6 +266,8 @@ public abstract class WagonTestCase
         wagon.connect( testRepository );
 
         artifactDestFile = File.createTempFile( "wagon", ".tmp" );
+
+        artifactDestFile.deleteOnExit();
 
         wagon.get( getTestArtifact(), artifactDestFile );
 
