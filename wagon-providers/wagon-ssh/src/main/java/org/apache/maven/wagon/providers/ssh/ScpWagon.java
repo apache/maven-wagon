@@ -317,12 +317,12 @@ public class ScpWagon
 
         if ( permissions != null && permissions.getGroup() != null )
         {
-            String chgrpCmd = "chgrp " + permissions.getGroup() + " " + basedir + "/" + resourceName + "\n";
+            executeCommand( "chgrp " + permissions.getGroup() + " " + basedir + "/" + resourceName + "\n" );
+        }
 
-            executeCommand( chgrpCmd );
-
-            // TODO [BP]: Need to change the mode as well.
-
+        if ( permissions != null && permissions.getFileMode() != null )
+        {
+            executeCommand( "chmod " + permissions.getFileMode() + " " + basedir + "/" + resourceName + "\n" );
         }
 
         if ( channel != null )
