@@ -34,5 +34,10 @@
             <version>0.1.14</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>plexus</groupId>
+            <artifactId>plexus-utils</artifactId>
+            <version>1.0-alpha-1</version>
+        </dependency>
     </dependencies>
 </project>
