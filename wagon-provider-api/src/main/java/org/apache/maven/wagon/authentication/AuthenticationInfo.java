@@ -21,7 +21,9 @@ import java.io.Serializable;
 
 /**
  * This class holds the set of properties used when instance of the <code>Wagon</code>
- * will use during login opreration
+ * will use during login opreration.
+ *
+ * @todo group, mode and directory mode do not belong here - they are repository info.
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
@@ -37,19 +39,20 @@ public class AuthenticationInfo implements Serializable
     /** Password associated with the login */
     private String password;
 
-    /** Repository group name */
+    /** Repository group name. */
     private String group;
+
+    /** Repository directory mode. Modes can be in either textual (ugo+rx) or octal (755) form. */
+    private String directoryMode;
+
+    /** Repository file mode. Modes can be in either textual (ugo+rx) or octal (644) form. */
+    private String fileMode;
 
     /** Passphrase of the user's private key file */
     private String passphrase;
 
     /** The absolute path to private key file */
     private String privateKey;
-
-    private String directoryMode;
-
-    private String fileMode;
-
 
     /**
      * Get the passphrase of the private key file. The passphrase is used only
@@ -116,6 +119,48 @@ public class AuthenticationInfo implements Serializable
     }
 
     /**
+     * Get the repository directory mode to which an artifact will belong to after
+     * deployment. Not all protolcols permit the changing of the mode.
+     * 
+     * @return mode
+     */
+    public String getDirectoryMode()
+    {
+        return directoryMode;
+    }
+
+    /**
+     * Set the repository directory mode for the deployed artifact.
+     * 
+     * @param directoryMode repository directory mode for deployed artifacts
+     */
+    public void setDirectoryMode( final String directoryMode )
+    {
+        this.directoryMode = directoryMode;
+    }
+
+    /**
+     * Get the repository file mode to which an artifact will belong to after
+     * deployment. Not all protolcols permit the changing of the artifact mode.
+     * 
+     * @return repository group name
+     */
+    public String getFileMode()
+    {
+        return fileMode;
+    }
+
+    /**
+     * Set the repository file mode for the deployed artifact.
+     * 
+     * @param fileMode repository file mode for deployed artifacts
+     */
+    public void setFileMode( final String fileMode )
+    {
+        this.fileMode = fileMode;
+    }
+
+    /**
      * Get the user's password which is used when connecting to the repository.
      * 
      * @return password of user
@@ -153,22 +198,5 @@ public class AuthenticationInfo implements Serializable
     public void setUserName( final String userName )
     {
         this.userName = userName;
-    }
-
-
-    public String getDirectoryMode() {
-        return directoryMode;
-    }
-
-    public void setDirectoryMode(String directoryMode) {
-        this.directoryMode = directoryMode;
-    }
-
-    public String getFileMode() {
-        return fileMode;
-    }
-
-    public void setFileMode(String fileMode) {
-        this.fileMode = fileMode;
     }
 }

@@ -135,7 +135,7 @@ public abstract class AbstractWagon
                 }
             }
 
-            String msg = "GET request of: " + resource + " from " + repository.getName() + "failed";
+            String msg = "GET request of: " + resource.getName() + " from " + repository.getName() + " failed";
 
             throw new TransferFailedException( msg, e );
 
@@ -204,8 +204,6 @@ public abstract class AbstractWagon
             {
                break;    
             }
-            
-            // @todo probably new event should be created!!
             
             fireTransferProgress( transferEvent, buffer, n );
             

@@ -130,7 +130,7 @@ public class LazyFileOutputStream extends OutputStream
      * 
      */
     private void initialize() throws FileNotFoundException
-    {        
+    {
         delegee = new FileOutputStream( file );         
     }
 }

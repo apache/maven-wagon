@@ -171,7 +171,8 @@ public class ChecksumObserver implements TransferListener
         }
         catch ( Exception e )
         {
-            // TODO: handle differently!
+            // TODO: handle differently! No Exception catching....
+            e.printStackTrace();
         }    
         finally
         {
