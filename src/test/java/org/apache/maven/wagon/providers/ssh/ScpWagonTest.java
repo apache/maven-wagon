@@ -62,10 +62,6 @@ public class ScpWagonTest
             authInfo.setPassphrase( "" );
         }
 
-        // TODO: set file mode, directory file mode
-
-        authInfo.setGroup( userName );
-
         return authInfo;
     }
 

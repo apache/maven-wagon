@@ -53,8 +53,6 @@ public class ScpWagonWithSshPrivateKeySearchTest
 
         authInfo.setPassphrase( "" );
 
-        authInfo.setGroup( userName );
-
         return authInfo;
     }
 
