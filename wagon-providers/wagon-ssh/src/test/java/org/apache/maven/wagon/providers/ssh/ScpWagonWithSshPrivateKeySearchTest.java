@@ -37,36 +37,26 @@ public class ScpWagonWithSshPrivateKeySearchTest
         return "scp";
     }
 
-    protected String getTestRepositoryUrl()
+    public String getTestRepositoryUrl()
     {
-        return "scp://beaver.codehaus.org//home/users/" + getUserName() + "/public_html";
+        return TestData.getTestRepositoryUrl();
     }
+
 
     protected AuthenticationInfo getAuthInfo()
     {
         AuthenticationInfo authInfo = new AuthenticationInfo();
 
-        String userName = getUserName();
+        String userName = TestData.getUserName();
 
         authInfo.setUserName( userName );
 
         authInfo.setPassphrase( "" );
 
-        authInfo.setGroup( getUserName() );
+        authInfo.setGroup( userName );
 
         return authInfo;
     }
 
-    private String getUserName()
-    {
 
-        String retValue = System.getProperty( "testuser.name" );
-
-        if ( retValue == null )
-        {
-            retValue = System.getProperty( "user.name" );
-        }
-
-        return retValue;
-    }
 }
