@@ -22,8 +22,7 @@ import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
 import java.io.Serializable;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Properties;
 
 
 /**
@@ -59,7 +58,7 @@ public class Repository
      * Properties influencing wagon behaviour
      * which are very specific to particular wagon.
      */
-    private Map annotations = new HashMap();
+    private Properties parameters = new Properties();
 
 
     public Repository()
@@ -236,18 +235,13 @@ public class Repository
         this.permissions = permissions;
     }
 
-    public Map getAnnotations()
+    public String getParameter( String key )
     {
-        return annotations;
+        return parameters.getProperty( key );
     }
 
-    public void setAnnotations( Map annotations )
+    public void setParameters( Properties parameters )
     {
-        this.annotations = annotations;
-    }
-
-    public void addAnnotation( String key, String value )
-    {
-        annotations.put( key, value );
+        this.parameters = parameters;
     }
 }
