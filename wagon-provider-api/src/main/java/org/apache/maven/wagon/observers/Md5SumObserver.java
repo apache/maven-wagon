@@ -1,5 +1,6 @@
 package org.apache.maven.wagon.observers;
 
+import java.io.File;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -8,6 +9,7 @@ import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.WagonUtils;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferListener;
+import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 
 
@@ -186,6 +188,30 @@ public class Md5SumObserver implements TransferListener
         }
         
         return retValue;
+    }
+
+    /**
+     * @param file
+     */
+    public void writeToFile( File file )
+    {
+        // Here I will write to file the expected md5 sum
+        //(the one which was donloaded from the server)
+        if ( expectedMd5 != null )
+        {
+            String path = file.getPath();
+            
+            try
+            {                
+                FileUtils.fileWrite( path , expectedMd5  );
+            }
+            catch( Exception e)
+            {
+               //getLogger().error( "Could not write the value of md5 checkum to file: " + path );
+               
+            }
+        }
+        
     }
     
     
