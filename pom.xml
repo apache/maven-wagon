@@ -51,8 +51,8 @@
     <developer>
       <name>Michal Maczka</name>
       <id>michal</id>
-      <email>michal@dimatics.com</email>
-      <organization>Dimatics</organization>
+      <email>michal@codehaus.com</email>
+      <organization>Codehaus</organization>
       <roles>
         <role>Architect</role>
       </roles>
@@ -61,24 +61,10 @@
 
   <licenses>
     <license>
-      <name>The Apache Software License, Version 1.1</name>
+      <name>The Apache Software License, Version 2.0</name>
       <url>http://cvs.apache.org/viewcvs.cgi/*checkout*/maven/LICENSE.txt</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
-
-  <dependencies>
-    <dependency>
-      <groupId>plexus</groupId>
-      <artifactId>plexus</artifactId>
-      <version>0.14-SNAPSHOT</version>
-    </dependency>
-    <!-- Testing -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-    </dependency>
-  </dependencies>
 
 </project>
