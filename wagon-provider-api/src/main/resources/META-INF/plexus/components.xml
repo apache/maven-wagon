@@ -1,8 +1,0 @@
-<component-set>
-    <components>
-        <component>
-            <role>org.apache.maven.wagon.manager.WagonManager</role>
-            <implementation>org.apache.maven.wagon.manager.DefaultWagonManager</implementation>
-        </component>        
-    </components>
-</component-set>
