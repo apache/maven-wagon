@@ -118,11 +118,7 @@ public class LazyFileOutputStream extends OutputStream
      * 
      */
     private void initialize() throws FileNotFoundException
-    {
-        
-        System.out.println( "LazyFileOutputStream initialized."   );
-        
-        delegee = new FileOutputStream( file );  
-        
+    {        
+        delegee = new FileOutputStream( file );         
     }
 }

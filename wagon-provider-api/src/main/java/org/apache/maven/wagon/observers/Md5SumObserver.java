@@ -1,10 +1,15 @@
 package org.apache.maven.wagon.observers;
 
+import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.WagonUtils;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferListener;
+import org.codehaus.plexus.util.IOUtil;
+
 
 /**
  * 
@@ -16,6 +21,10 @@ import org.apache.maven.wagon.events.TransferListener;
 public class Md5SumObserver implements TransferListener
 {
     private MessageDigest md5Digester;
+    
+    private String expectedMd5;
+    
+    private String actualMd5;
     
     /**
      * @see org.apache.maven.wagon.events.TransferListener#transferStarted(org.apache.maven.wagon.events.TransferEvent)
@@ -42,7 +51,9 @@ public class Md5SumObserver implements TransferListener
         {
            byte[] data = transferEvent.getData();
            
-           md5Digester.update( data );
+           int len = transferEvent.getDataLength();
+                      
+           md5Digester.update( data, 0, len );
            
         }                
         
@@ -51,6 +62,49 @@ public class Md5SumObserver implements TransferListener
     public void transferCompleted( TransferEvent transferEvent )
     {
         
+        if ( md5Digester == null )
+        {
+            return;
+        }
+        actualMd5 = encode ( md5Digester.digest() );
+        
+        InputStream inputStream = null;
+        
+        try
+        {
+            int type = transferEvent.getRequestType();
+            
+            Wagon wagon = transferEvent.getWagon();
+            
+            String resource = transferEvent.getResource();
+            
+            if ( type  == TransferEvent.REQUEST_GET )
+            {
+                                            
+               expectedMd5 = WagonUtils.toString( resource + ".md5 ", wagon ).trim();               
+            }
+            else
+            {
+                //It's PUT put request
+                
+                WagonUtils.fromString( resource + ".md5 ", wagon, actualMd5 );
+                
+            }            
+            
+        }
+        catch ( Exception e )
+        {
+            // ignore it. Observers should not throw any exceptions
+        }    
+        finally
+        {
+            if ( inputStream != null )
+            {
+                 IOUtil.close( inputStream );
+            }
+        }
+        
+            
     }
 
     public void transferError( TransferEvent transferEvent )
@@ -65,18 +119,28 @@ public class Md5SumObserver implements TransferListener
         
     }
     
-    public String getMd5Sum() 
-    {
-       String retValue = null;
-       
-       if ( md5Digester != null )
-       {
-           retValue = encode ( md5Digester.digest() );
-       }
-       
-       return retValue;
-       
+    
+    
+    /**
+     * Returns the md5 checksum downloaded from the server
+     *   
+     * @return
+     */
+    public String getExpectedMd5Sum() 
+    {       
+       return expectedMd5;
     }
+   
+    
+    /**
+     * Returns md5 checksum which was computed during transfer
+     * @return
+     */
+    public String getActualMd5Sum() 
+    {       
+       return actualMd5;
+    }
+    
     
     /**
      * Encodes a 128 bit (16 bytes) byte array into a 32 character String.
@@ -92,7 +156,7 @@ public class Md5SumObserver implements TransferListener
             return null;
         }
 
-        String result = "";
+        String retValue = "";
 
         for ( int i = 0; i < 16; i++ )
         {
@@ -100,16 +164,31 @@ public class Md5SumObserver implements TransferListener
 
             if ( t.length() == 1 )
             {
-                result += ( "0" + t );
+                retValue += ( "0" + t );
             }
             else
             {
-                result += t;
+                retValue += t;
             }
         }
 
-        return result;
+        return retValue.trim();
     }
+    
+    
+    public boolean cheksumIsValid()
+    {
+        boolean retValue = false;
+        
+        if ( actualMd5 != null && expectedMd5 !=null )
+        {
+             retValue = actualMd5.equals( expectedMd5 );
+        }
+        
+        return retValue;
+    }
+    
+    
     
     
 }

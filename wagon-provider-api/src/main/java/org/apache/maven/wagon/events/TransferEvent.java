@@ -46,13 +46,14 @@ public class TransferEvent extends WagonEvent
     /** Indicates PUT transfer (to the repository)*/
     public final static int REQUEST_PUT = 6;
 
-
     private String resource;
 
     private int eventType;
+    
     private int requestType;
 
     private byte[] data;
+    
     private int dataLength;
 
     private Exception exception;
@@ -66,8 +67,11 @@ public class TransferEvent extends WagonEvent
             final int requestType )
     {
         super( wagon );
+     
         this.resource = resource;
+        
         setEventType( eventType );
+        
         setRequestType( requestType );
 
     }
@@ -78,8 +82,11 @@ public class TransferEvent extends WagonEvent
             final Exception exception )
     {
         super( wagon );
+        
         this.resource = resource;
+        
         setEventType( TRANSFER_ERROR );
+        
         this.exception = exception;
 
     }
@@ -214,6 +221,7 @@ public class TransferEvent extends WagonEvent
     public void setData( final byte[] data, final int dataLength )
     {
         this.data = data;
+        
         this.dataLength = dataLength;
     }
 
