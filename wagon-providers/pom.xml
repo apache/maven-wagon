@@ -4,6 +4,14 @@
     <groupId>maven</groupId>
     <version>1.0-alpha-2-SNAPSHOT</version>
   </parent>
+  <modules>
+    <module>wagon-http-lightweight</module>
+    <module>wagon-http</module>
+    <module>wagon-ftp</module>
+    <module>wagon-file</module>
+    <module>wagon-ssh</module>
+    <module>wagon-ssh-external</module>
+  </modules>
   <modelVersion>4.0.0</modelVersion>
   <groupId>maven</groupId>
   <artifactId>wagon-providers</artifactId>

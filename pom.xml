@@ -5,6 +5,11 @@
   <packaging>pom</packaging>
   <name>Wagon</name>
   <version>1.0-alpha-2-SNAPSHOT</version>
+  <modules>
+    <module>wagon-provider-api</module>
+    <module>wagon-providers</module>
+    <module>wagon-provider-test</module>
+  </modules>
   <description>Tools to manage artifacts and deployment</description>
   <ciManagement>
     <system>wagon-dev@maven.apache.org</system>
