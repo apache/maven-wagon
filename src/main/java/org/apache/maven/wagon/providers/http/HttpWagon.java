@@ -120,7 +120,6 @@ public class HttpWagon
 
         try
         {
-
             InputStream is = new PutInputStream( source, resource, this, getTransferEventSupport()  );
 
             putMethod.setRequestBody( is );
@@ -261,33 +260,13 @@ public class HttpWagon
                                                    + statusCode );
         }
 
-        OutputStream os = null;
-
         InputStream is = null;
-
-        File dir = destination.getParentFile();
-
-        if ( dir != null   && !dir.exists() )
-        {
-
-            if ( ! dir.mkdirs() )
-            {
-                String msg = "Some of the required local directories do not exist and could not be created. " +
-                		"Requested local path:  "  + destination.getAbsolutePath();
-
-                throw new TransferFailedException( msg );
-            }
-
-        }
-
 
         try
         {
-            os = new LazyFileOutputStream( destination );
-
             is = getMethod.getResponseBodyAsStream();
 
-            getTransfer( resource, destination, is, os);
+            getTransfer( resource, destination, is );
         }
         catch ( Exception e )
         {
@@ -311,8 +290,6 @@ public class HttpWagon
         finally
         {
             shutdownStream( is );
-
-            shutdownStream( os );
         }
 
         getMethod.releaseConnection();

@@ -74,9 +74,7 @@ public class PutInputStream extends FileInputStream
 
         event.setTimestamp( System.currentTimeMillis() );
 
-        event.setData( b, retValue );
-
-        eventSupport.fireTransferProgress( event );
+        eventSupport.fireTransferProgress( event, b, retValue );
 
         return retValue;
     }
