@@ -33,7 +33,7 @@ public class AbstractWagonTest extends TestCase
 
         artifact = new DefaultArtifact( "groupId", "artifactId", "version", "type", "extension" );
 
-        destination = new File( basedir, "folder/subfolder" );
+        destination = new File( basedir, "target/folder/subfolder" );
 
         source = new File( basedir, "project.xml" );
 
