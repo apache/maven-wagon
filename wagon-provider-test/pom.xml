@@ -9,7 +9,7 @@
     </parent>
     <groupId>maven</groupId>
     <artifactId>wagon-provider-test</artifactId>
-    <name>Wagon Common provider</name>
+    <name>Wagon Provider Test</name>
     <version>1.0-alpha-2-SNAPSHOT</version>
     <shortDescription>Wagon Provider Parent</shortDescription>
     <inceptionYear>2003</inceptionYear>
