@@ -28,24 +28,33 @@ public class PathUtilsTest extends TestCase
     public void testFilenameResolving()
     {
         assertEquals( "filename", PathUtils.filename( "dir/filename" ) );
+
         assertEquals( "filename", PathUtils.filename( "filename" ) );
+
         assertEquals( "filename", PathUtils.filename( "dir1/dir2/filename" ) );
     }
 
     public void testDirResolving()
     {
         assertEquals( "dir", PathUtils.dirname( "dir/filename" ) );
+
         assertEquals( "", PathUtils.dirname( "filename" ) );
+
         assertEquals( "dir1/dir2", PathUtils.dirname( "dir1/dir2/filename" ) );
     }
 
     public void testDirSpliting()
     {
         final String path = "a/b/c";
+
         final String[] dirs = PathUtils.dirnames( path );
+
         assertNotNull( dirs );
+
         assertEquals( 2, dirs.length );
+
         assertEquals( "a", dirs[0] );
+
         assertEquals( "b", dirs[1] );
 
     }
@@ -55,6 +64,7 @@ public class PathUtilsTest extends TestCase
         assertEquals(
                 "www.codehaus.org",
                 PathUtils.host( "http://www.codehaus.org" ) );
+
         assertEquals( "localhost", PathUtils.host( null ) );
 
     }

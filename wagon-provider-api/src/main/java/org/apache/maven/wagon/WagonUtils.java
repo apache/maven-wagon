@@ -22,6 +22,8 @@ import org.codehaus.plexus.util.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
 
 /**
@@ -94,6 +96,66 @@ public class WagonUtils
         
          
     }
-        
-    
+
+
+    public static void putDirectory( File dir, Wagon wagon,  boolean includeBasdir )
+            throws ResourceDoesNotExistException, TransferFailedException, AuthorizationException
+    {
+
+        LinkedList queue = new LinkedList();
+
+        if ( includeBasdir )
+        {
+            queue.add( dir.getName() );
+        }
+        else
+        {
+           queue.add( "" );
+        }
+
+        while ( !queue.isEmpty() )
+        {
+
+            String path = ( String ) queue.removeFirst();
+
+
+            File currentDir = new File ( dir, path);
+
+            System.out.println( "Processing dir: " + currentDir );
+
+            File[] files = currentDir.listFiles();
+
+            for (int i = 0; i < files.length; i++)
+            {
+                File file = files[i];
+
+                System.out.println( "Processing file: " + file );
+
+                String resource;
+
+                if ( path.length() > 0 )
+                {
+                    resource = path + "/"  + file.getName();
+                }
+                else
+                {
+                    resource = file.getName();
+
+                }
+
+                if ( file.isDirectory() )
+                {
+                    queue.add( resource );
+                }
+                else
+                {
+                    wagon.put(  file, resource );
+                }
+
+            }
+
+        }
+
+    }
+
 }
