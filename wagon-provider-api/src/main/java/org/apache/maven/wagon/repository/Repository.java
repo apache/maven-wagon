@@ -248,6 +248,6 @@ public class Repository
 
     public void addAnnotation( String key, String value )
     {
-        annotations.put( key, value ):
+        annotations.put( key, value );
     }
 }
