@@ -44,6 +44,7 @@ public class AuthenticationInfo implements Serializable
     /** The absolute path to private key file */
     private String privateKey;
 
+    
     /**
      * Get the passphrase of the private key file. The passphrase is used only
      * when host/protocol supports authentication via exchange of

@@ -168,17 +168,25 @@ public class WagonUtils
             authInfo.setPassphrase( "" );
         }
 
-        authInfo.setGroup( getUserName() );
+        authInfo.setGroup( getUserGroup() );
 
         return authInfo;
     }
 
+    private static String getUserGroup()
+    {
+        String retValue = System.getProperty( "user.group" );
+
+        return retValue;
+    }
+
+
 
     public static String getUserName()
     {
-        String userName = System.getProperty( "user.name" );
+        String retValue = System.getProperty( "user.name" );
 
-        return userName;
+        return retValue;
     }
 
 
