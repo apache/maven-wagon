@@ -1,12 +1,28 @@
 package org.apache.maven.wagon;
 
+/* ====================================================================
+ *   Copyright 2001-2004 The Apache Software Foundation.
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ * ====================================================================
+ */
+
 import org.apache.maven.wagon.artifact.Artifact;
 import org.apache.maven.wagon.artifact.DefaultArtifact;
 import org.apache.maven.wagon.observers.Debug;
+import org.apache.maven.wagon.observers.ChecksumObserver;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.apache.maven.model.Model;
 import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.util.FileUtils;
 
@@ -29,7 +45,7 @@ public abstract class WagonTestCase
 
     protected String localRepositoryPath;
 
-    protected MavenXpp3Reader modelReader;
+    //protected MavenXpp3Reader modelReader;
 
     protected Artifact artifact;
 
@@ -43,6 +59,8 @@ public abstract class WagonTestCase
 
     protected File artifactDestFile;
 
+    protected ChecksumObserver checksumObserver;
+
     // ----------------------------------------------------------------------
     // Constructors
     // ----------------------------------------------------------------------
@@ -52,13 +70,15 @@ public abstract class WagonTestCase
     public WagonTestCase( String testName )
     {
         super( testName );
+
+        checksumObserver = new ChecksumObserver();
     }
 
     // ----------------------------------------------------------------------
     // Methods that should be provided by subclasses for proper testing
     // ----------------------------------------------------------------------
 
-    protected abstract String getTestRepositoryUrl();
+    protected abstract String getTestRepositoryUrl() throws IOException;
 
     protected abstract String getProtocol();
 
@@ -74,9 +94,10 @@ public abstract class WagonTestCase
     protected void setupRepositories()
         throws Exception
     {
+
         resource = "test-resource.txt";
 
-        modelReader = new MavenXpp3Reader();
+        //modelReader = new MavenXpp3Reader();
 
         // ----------------------------------------------------------------------
         // Create the test repository for the wagon we are testing.
@@ -92,9 +113,11 @@ public abstract class WagonTestCase
         // Create a test local repository.
         // ----------------------------------------------------------------------
 
-        localRepositoryPath = new File( basedir, "/target/local-repository" ).getPath();
+        localRepositoryPath =  FileTestUtils.createDir( "local-repository" ).getPath();
 
         localRepository = createFileRepository( "file://" + localRepositoryPath );
+
+        message( "Local repository: " + localRepository );
 
         File f = new File( localRepositoryPath, "/maven/jars" );
 
@@ -190,11 +213,15 @@ public abstract class WagonTestCase
 
         Wagon wagon = getWagon();
 
+        wagon.addTransferListener( checksumObserver );
+
         wagon.connect( testRepository );
 
         sourceFile = new File( basedir, "project.xml" );
 
         wagon.put( sourceFile, resource );
+
+        wagon.removeTransferListener( checksumObserver );
 
         wagon.disconnect();
     }
@@ -206,13 +233,17 @@ public abstract class WagonTestCase
 
         Wagon wagon = getWagon();
 
+        wagon.addTransferListener( checksumObserver );
+
         wagon.connect( testRepository );
 
-        destFile = File.createTempFile( "wagon", ".tmp" );
+        destFile =  FileTestUtils.createUniqueFile( this );
 
         destFile.deleteOnExit();
 
         wagon.get( resource, destFile );
+
+        wagon.removeTransferListener( checksumObserver );
 
         wagon.disconnect();
     }
@@ -225,6 +256,14 @@ public abstract class WagonTestCase
         putFile();
 
         getFile();
+
+        System.out.println( "checksumObserver:" + checksumObserver );
+
+        System.out.println( "actual:" + checksumObserver.getActualChecksum() );
+
+        System.out.println( "expected:" + checksumObserver.getExpectedChecksum() );
+
+        assertTrue( checksumObserver.cheksumIsValid() );
 
         compareContents( sourceFile, destFile );
     }
@@ -264,7 +303,7 @@ public abstract class WagonTestCase
 
         wagon.connect( testRepository );
 
-        artifactDestFile = File.createTempFile( "wagon", ".tmp" );
+        artifactDestFile =  FileTestUtils.createUniqueFile( this );
 
         artifactDestFile.deleteOnExit();
 
@@ -316,9 +355,9 @@ public abstract class WagonTestCase
     {
         if ( artifact == null )
         {
-            Model model = modelReader.read( new FileReader( new File( basedir, "project.xml" ) ) );
+            //Model model = modelReader.read( new FileReader( new File( basedir, "project.xml" ) ) );
 
-            artifact = new DefaultArtifact( model.getGroupId(), model.getArtifactId(), model.getVersion(), "pom" );
+            artifact = new DefaultArtifact( "groupId", "artifactId", "1.0", "pom" );
         }
 
         return artifact;
@@ -341,19 +380,4 @@ public abstract class WagonTestCase
         return repository;
     }
 
-    protected File generateFile( String file, String content )
-        throws IOException
-    {
-        File f = new File( file );
-
-        f.getParentFile().mkdirs();
-
-        Writer writer = new FileWriter( f );
-
-        writer.write( content );
-
-        writer.close();
-
-        return f;
-    }
 }

@@ -1,19 +1,20 @@
 package org.apache.maven.wagon;
 
-/*
- * Copyright 2001-2004 The Apache Software Foundation.
+/* ====================================================================
+ *   Copyright 2001-2004 The Apache Software Foundation.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ * ====================================================================
  */
 
 import org.apache.maven.wagon.artifact.Artifact;
@@ -104,20 +105,15 @@ public abstract class StreamWagon
         os = new LazyFileOutputStream( destination );
         
 
-        InputStream is;
+        InputStream is = getInputStream( resource );
 
-        try
+        if ( os == null )
         {
-            is = getInputStream( resource );
-        }
-        catch ( Exception e )
-        {
-            String msg = "Cannot create input stream for resource: " + resource;
-            
-            throw new TransferFailedException( msg, e );
+            throw new TransferFailedException(  getRepository().getUrl() + " - Could not open input stream for resource: '" + resource+ "'"  );
         }
 
-        getTransfer( resource, is, os, destination );
+
+        getTransfer( resource, destination, is, os);
     }
 
     // source doesn't exist exception
@@ -142,15 +138,14 @@ public abstract class StreamWagon
 
         OutputStream os;
 
-        try
+
+        os = getOutputStream( resource );
+
+        if ( os == null )
         {
-            os = getOutputStream( resource );
-        }
-        catch ( Exception e )
-        {
-            throw new TransferFailedException( "Cannot create input stream: ", e );
+                throw new TransferFailedException(  getRepository().getUrl() + " - Could not open output stream for resource: '" + resource+ "'"  );
         }
 
-        putTransfer( resource, is, os, source );
+        putTransfer( resource, source, is, os, true);
     }
 }

@@ -1,5 +1,22 @@
 package org.apache.maven.wagon.observers;
 
+/* ====================================================================
+ *   Copyright 2001-2004 The Apache Software Foundation.
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ * ====================================================================
+ */
+
 import java.io.File;
 import java.io.InputStream;
 import java.security.MessageDigest;
@@ -33,7 +50,7 @@ public class ChecksumObserver implements TransferListener
     
     private String actualChecksum;
     
-    private boolean running = false;
+    private boolean transferingMd5 = false;
     
     
     private static Map algorithmExtensionMap = new HashMap();
@@ -68,11 +85,10 @@ public class ChecksumObserver implements TransferListener
      */
     public void transferStarted( TransferEvent transferEvent )
     {
-        
-        
-        if ( running )
+
+        if ( transferingMd5 )
         {
-           return;    
+             return;
         }
         
         expectedChecksum = null;
@@ -98,13 +114,13 @@ public class ChecksumObserver implements TransferListener
     {
         if ( digester != null )
         {
-           byte[] data = transferEvent.getData();
+            byte[] data = transferEvent.getData();
                                 
-           int len = transferEvent.getDataLength();
-           
-           digester.update( data, 0, len );
-           
-        }                
+            int len = transferEvent.getDataLength();
+
+            digester.update( data, 0, len );
+
+        }
         
     }
 
@@ -115,9 +131,7 @@ public class ChecksumObserver implements TransferListener
         {        
             return;
         }
-        
-        
-            
+
         Wagon wagon = transferEvent.getWagon();
         
         actualChecksum = encode ( digester.digest() );
@@ -126,7 +140,7 @@ public class ChecksumObserver implements TransferListener
         
         InputStream inputStream = null;
         
-        running = true;
+        transferingMd5 = true;
         
         try
         {
@@ -162,7 +176,7 @@ public class ChecksumObserver implements TransferListener
         }
         catch ( Exception e )
         {
-            // ignore it. Observers should not throw any exceptions
+            e.printStackTrace();
         }    
         finally
         {
@@ -171,7 +185,7 @@ public class ChecksumObserver implements TransferListener
                  IOUtil.close( inputStream );
             }            
             
-            running = false;
+            transferingMd5 = false;
         }
         
             

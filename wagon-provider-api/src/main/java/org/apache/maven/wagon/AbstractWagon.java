@@ -1,19 +1,20 @@
 package org.apache.maven.wagon;
 
-/*
- * Copyright 2001-2004 The Apache Software Foundation.
+/* ====================================================================
+ *   Copyright 2001-2004 The Apache Software Foundation.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ * ====================================================================
  */
 
 import org.apache.maven.wagon.artifact.Artifact;
@@ -95,39 +96,58 @@ public abstract class AbstractWagon
     // Stream i/o
     // ----------------------------------------------------------------------
 
-    protected void getTransfer( String resource, InputStream input, OutputStream output, File localFile )
+    protected void getTransfer(String resource, File destination, InputStream input, OutputStream output)
         throws TransferFailedException
     {
-        fireGetStarted( resource, localFile );
+        fireGetStarted( resource, destination );
 
         try
         {
             transfer( resource, input, output, TransferEvent.REQUEST_GET );
 
-            closeGetTransferStreams( input, output );
+            shutdownStream( input );
+
+            shutdownStream( output );
+
         }
         catch ( IOException e )
         {
             fireTransferError( resource, e );
 
+            if ( destination.exists() )
+            {
+                boolean deleted = destination.delete();
+
+                if ( ! deleted )
+                {
+                    destination.deleteOnExit();
+                }
+            }
+
             String msg = "GET request of: " + resource + " from " + source.getName() + "failed";
 
             throw new TransferFailedException( msg, e );
+
         }
 
-        fireGetCompleted( resource, localFile );
+        fireGetCompleted( resource, destination );
     }
 
-    protected void putTransfer( String resource, InputStream input, OutputStream output, File localFile )
+    protected void putTransfer(String resource, File source, InputStream input, OutputStream output, boolean closeOutput)
         throws TransferFailedException
     {
-        firePutStarted( resource, localFile );
+        firePutStarted( resource, source );
 
         try
         {
             transfer( resource, input, output, TransferEvent.REQUEST_PUT );
 
-            closePutTransferStreams( input, output );
+            shutdownStream( input );
+
+            if ( closeOutput )
+            {
+                shutdownStream( output );
+            }
         }
         catch ( IOException e )
         {
@@ -138,7 +158,7 @@ public abstract class AbstractWagon
             throw new TransferFailedException( msg, e );
         }
 
-        firePutCompleted( resource, localFile );
+        firePutCompleted( resource, source );
     }
 
     protected void transfer( String resource, InputStream input, OutputStream output, int requestType )
@@ -169,22 +189,8 @@ public abstract class AbstractWagon
         }
     }
 
-    protected void closeGetTransferStreams( InputStream is, OutputStream os )
-    {
-        closeTransferStreams( is, os );
-    }
 
-    protected void closePutTransferStreams( InputStream is, OutputStream os )
-    {
-        closeTransferStreams( is, os );
-    }
 
-    protected void closeTransferStreams( InputStream is, OutputStream os )
-    {
-        shutdownStream( is );
-
-        shutdownStream( os );
-    }
 
     protected void shutdownStream( InputStream inputStream )
     {
