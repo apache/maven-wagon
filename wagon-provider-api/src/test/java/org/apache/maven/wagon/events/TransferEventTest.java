@@ -126,9 +126,7 @@ public class TransferEventTest extends TestCase
         }
 
 
-        event.setProgress( ( long ) 10 );
-        assertEquals( ( long ) 10, event.getProgress() );
-
+        
     }
 
     public void testConstantValueConflict()

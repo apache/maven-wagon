@@ -199,22 +199,7 @@ public class TransferEvent extends WagonEvent
         this.resource = resource;
     }
 
-    /**
-     * @param progress 
-     */
-    public void setProgress( final long progress )
-    {
-
-        this.progress = progress;
-    }
-
-    /**
-     * @return Returns the progress.
-     */
-    public long getProgress()
-    {
-        return progress;
-    }
+    
 
 
 

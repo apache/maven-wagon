@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.WagonUtils;
@@ -20,26 +22,71 @@ import org.codehaus.plexus.util.IOUtil;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a> 
  * @version $Id$ 
  */
-public class Md5SumObserver implements TransferListener
+public class ChecksumObserver implements TransferListener
 {
-    private MessageDigest md5Digester;
     
-    private String expectedMd5;
+    private String algorithm;
+        
+    private MessageDigest digester;
     
-    private String actualMd5;
+    private String expectedChecksum;
+    
+    private String actualChecksum;
+    
+    private boolean running = false;
+    
+    
+    private static Map algorithmExtensionMap = new HashMap();
+    
+    static
+    {
+       algorithmExtensionMap.put( "MD5", ".md5" );  
+       
+       algorithmExtensionMap.put( "MD2", ".md2" );
+       
+       algorithmExtensionMap.put( "SHA-1", ".sha1" );
+       
+    }
+    
+    
+    public ChecksumObserver()
+    {
+       this( "MD5" );    
+    }
+    
+    /**
+     * 
+     * @param algorithm One of the algorithms supported by JDK: MD5, MD2 or SHA-1
+     */
+    public ChecksumObserver( String algorithm )
+    {
+         this.algorithm = algorithm;    
+    }
     
     /**
      * @see org.apache.maven.wagon.events.TransferListener#transferStarted(org.apache.maven.wagon.events.TransferEvent)
      */
     public void transferStarted( TransferEvent transferEvent )
     {
+        
+        
+        if ( running )
+        {
+           return;    
+        }
+        
+        expectedChecksum = null;
+        
+        actualChecksum = null;
+        
+        
         try
         {
-            md5Digester = MessageDigest.getInstance( "MD5" );
+            digester = MessageDigest.getInstance( algorithm );
         }
         catch ( NoSuchAlgorithmException e)
         {
-           // ignore
+         
         }
         
     }
@@ -49,13 +96,13 @@ public class Md5SumObserver implements TransferListener
      */
     public void transferProgress( TransferEvent transferEvent )
     {
-        if ( md5Digester != null )
+        if ( digester != null )
         {
            byte[] data = transferEvent.getData();
-           
+                                
            int len = transferEvent.getDataLength();
-                      
-           md5Digester.update( data, 0, len );
+           
+           digester.update( data, 0, len );
            
         }                
         
@@ -64,21 +111,30 @@ public class Md5SumObserver implements TransferListener
     public void transferCompleted( TransferEvent transferEvent )
     {
         
-        if ( md5Digester == null )
-        {
+        if ( digester == null )
+        {        
             return;
         }
-        actualMd5 = encode ( md5Digester.digest() );
+        
+        
+            
+        Wagon wagon = transferEvent.getWagon();
+        
+        actualChecksum = encode ( digester.digest() );
+        
+        digester = null;
         
         InputStream inputStream = null;
+        
+        running = true;
         
         try
         {
             int type = transferEvent.getRequestType();
-            
-            Wagon wagon = transferEvent.getWagon();
-            
+                                    
             String resource = transferEvent.getResource();
+            
+            String extension = ( String ) algorithmExtensionMap.get( algorithm );
             
             if ( type  == TransferEvent.REQUEST_GET )
             {
@@ -87,19 +143,19 @@ public class Md5SumObserver implements TransferListener
                 // read its content into memory
                 File artifactFile = transferEvent.getLocalFile();
                 
-                File md5File = new File( artifactFile.getPath() + ".md5" );
+                File md5File = new File( artifactFile.getPath() + extension );
                 
-                String  md5Resource = resource + ".md5";
+                String  md5Resource = resource + extension;
                 
                 wagon.get( md5Resource, md5File );
                
-                expectedMd5 = FileUtils.fileRead( md5File  );               
+                expectedChecksum = FileUtils.fileRead( md5File  ).trim();               
             }
             else
             {
                 //It's PUT put request we will also put md5 checksum
                 // which was computed on the fly
-                WagonUtils.fromString( resource + ".md5 ", wagon, actualMd5 );
+                WagonUtils.fromString( resource + extension , wagon, actualChecksum );
                 
             }            
             
@@ -113,7 +169,9 @@ public class Md5SumObserver implements TransferListener
             if ( inputStream != null )
             {
                  IOUtil.close( inputStream );
-            }
+            }            
+            
+            running = false;
         }
         
             
@@ -121,7 +179,7 @@ public class Md5SumObserver implements TransferListener
 
     public void transferError( TransferEvent transferEvent )
     { 
-        md5Digester = null;  
+        digester = null;  
     }
 
     public void debug( String message )
@@ -137,9 +195,9 @@ public class Md5SumObserver implements TransferListener
      *   
      * @return
      */
-    public String getExpectedMd5Sum() 
+    public String getExpectedChecksum() 
     {       
-       return expectedMd5;
+       return expectedChecksum;
     }
    
     
@@ -147,9 +205,9 @@ public class Md5SumObserver implements TransferListener
      * Returns md5 checksum which was computed during transfer
      * @return
      */
-    public String getActualMd5Sum() 
+    public String getActualChecksum() 
     {       
-       return actualMd5;
+       return actualChecksum;
     }
     
     
@@ -191,9 +249,9 @@ public class Md5SumObserver implements TransferListener
     {
         boolean retValue = false;
         
-        if ( actualMd5 != null && expectedMd5 !=null )
+        if ( actualChecksum != null && expectedChecksum !=null )
         {
-             retValue = actualMd5.equals( expectedMd5 );
+             retValue = actualChecksum.equals( expectedChecksum );
         }
         
         return retValue;

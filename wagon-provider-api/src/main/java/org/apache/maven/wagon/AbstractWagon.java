@@ -144,23 +144,28 @@ public abstract class AbstractWagon
     protected void transfer( String resource, InputStream input, OutputStream output, int requestType )
         throws IOException
     {
-        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
-
-        int n;
+        byte[] buffer = new byte[ DEFAULT_BUFFER_SIZE ];
 
         TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_PROGRESS, requestType );
 
-        while ( -1 != ( n = input.read( buffer ) ) )
+        while ( true )                                               
         {
+            int n = input.read( buffer ) ;
+            
+            if ( n == -1 )
+            {
+               break;    
+            }
+            
             // @todo probably new event should be created!!
-
-            transferEvent.setProgress( n );
-
+            
             transferEvent.setData( buffer, n );
 
+            fireTransferProgress( transferEvent );
+            
             output.write( buffer, 0, n );
 
-            fireTransferProgress( transferEvent );
+            
         }
     }
 

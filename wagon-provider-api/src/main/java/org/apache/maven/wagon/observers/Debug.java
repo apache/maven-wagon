@@ -171,7 +171,7 @@ public class Debug
         out.print( "#" );
         //String data = new String( transferEvent.getData(),0, transferEvent.getDataLength());
         //out.println(data);
-        transfer += transferEvent.getProgress();
+        transfer += transferEvent.getDataLength();
     }
 
     /**
