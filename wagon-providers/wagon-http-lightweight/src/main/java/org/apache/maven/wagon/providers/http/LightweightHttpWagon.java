@@ -40,14 +40,14 @@ import java.net.URLConnection;
  * @version $Id$
  */
 public class LightweightHttpWagon
-extends StreamWagon
+    extends StreamWagon
 {
     private String previousProxyExclusions;
     private String previousProxyHost;
     private String previousProxyPort;
 
     public void fillInputData( InputData inputData )
-    throws TransferFailedException, ResourceDoesNotExistException
+        throws TransferFailedException, ResourceDoesNotExistException
     {
         Repository repository = getRepository();
         String repositoryUrl = repository.getUrl();
@@ -83,40 +83,44 @@ extends StreamWagon
     }
 
     public void fillOutputData( OutputData outputData )
-    throws TransferFailedException
+        throws TransferFailedException
     {
         throw new UnsupportedOperationException( "PUT operation is not supported by Light Weight  HTTP wagon" );
     }
 
     public void openConnection()
-    throws ConnectionException, AuthenticationException
+        throws ConnectionException, AuthenticationException
     {
         previousProxyHost = System.getProperty( "http.proxyHost" );
         previousProxyPort = System.getProperty( "http.proxyPort" );
         previousProxyExclusions = System.getProperty( "http.nonProxyHosts" );
+
         final ProxyInfo proxyInfo = this.getRepository().getProxyInfo();
-        System.setProperty( "http.proxyHost", proxyInfo.getHost() );
-        System.setProperty( "http.proxyPort", String.valueOf( proxyInfo.getPort() ) );
-        System.setProperty( "http.nonProxyHosts", proxyInfo.getNonProxyHosts() );
-        if ( proxyInfo.getUserName() != null )
+        if ( proxyInfo != null )
         {
-            Authenticator.setDefault( new Authenticator()
+            System.setProperty( "http.proxyHost", proxyInfo.getHost() );
+            System.setProperty( "http.proxyPort", String.valueOf( proxyInfo.getPort() ) );
+            System.setProperty( "http.nonProxyHosts", proxyInfo.getNonProxyHosts() );
+            if ( proxyInfo.getUserName() != null )
             {
-                protected PasswordAuthentication getPasswordAuthentication()
+                Authenticator.setDefault( new Authenticator()
                 {
-                    String password = "";
-                    if ( proxyInfo.getPassword() != null )
+                    protected PasswordAuthentication getPasswordAuthentication()
                     {
-                        password = proxyInfo.getPassword();
+                        String password = "";
+                        if ( proxyInfo.getPassword() != null )
+                        {
+                            password = proxyInfo.getPassword();
+                        }
+                        return new PasswordAuthentication( proxyInfo.getUserName(), password.toCharArray() );
                     }
-                    return new PasswordAuthentication( proxyInfo.getUserName(), password.toCharArray() );
-                }
-            } );
+                } );
+            }
         }
     }
 
     public void closeConnection()
-    throws ConnectionException
+        throws ConnectionException
     {
         System.setProperty( "http.proxyHost", previousProxyHost );
         System.setProperty( "http.proxyPort", previousProxyPort );
