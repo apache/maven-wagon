@@ -20,7 +20,7 @@
   <package>org.apache.maven.wagon</package>
   <inceptionYear>2003</inceptionYear>
   <url>http://maven.apache.org/wagon/wagon-api</url>
-  <issueTrackingUrl>http://jira.codehaus.org/BrowseProject.jspa?id=10319</issueTrackingUrl>
+  <issueTrackingUrl>http://jira.codehaus.org/browse/WAGON</issueTrackingUrl>
   <developers>
     <developer>
       <name>Michal Maczka</name>
