@@ -21,7 +21,6 @@ import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.authentication.AuthenticationException;
-import org.apache.maven.wagon.artifact.Artifact;
 import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.plexus.jetty.Httpd;
 import org.codehaus.plexus.PlexusTestCase;
