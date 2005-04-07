@@ -18,7 +18,7 @@
   <distributionManagement>
     <repository>
       <id>repo1</id>
-      <url>scp://beaver.codehaus.org/home/projects/maven/repository/ibiblio-v2</url>
+      <url>scp://beaver.codehaus.org/home/projects/maven/repository-staging/to-ibiblio/maven2</url>
     </repository>
   </distributionManagement>
   <scm>
