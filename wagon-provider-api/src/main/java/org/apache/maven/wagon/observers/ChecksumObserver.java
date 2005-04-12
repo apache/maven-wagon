@@ -1,23 +1,24 @@
 package org.apache.maven.wagon.observers;
 
-/* ====================================================================
- *   Copyright 2001-2004 The Apache Software Foundation.
+/*
+ * Copyright 2001-2005 The Apache Software Foundation.
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- * ====================================================================
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
+import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.WagonException;
 import org.apache.maven.wagon.WagonUtils;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferListener;
@@ -25,12 +26,12 @@ import org.apache.maven.wagon.util.FileUtils;
 import org.apache.maven.wagon.util.IoUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
-
 
 /**
  * TransferListeners which computes MD5 checksum on the fly when files are transfered.
@@ -50,7 +51,7 @@ public class ChecksumObserver
 
     private String actualChecksum;
 
-    private boolean transferingMd5 = false;
+    private boolean transferingChecksum = false;
 
 
     private static Map algorithmExtensionMap = new HashMap();
@@ -77,6 +78,11 @@ public class ChecksumObserver
     public ChecksumObserver( String algorithm )
     {
         this.algorithm = algorithm;
+
+        if ( !algorithmExtensionMap.containsKey( algorithm ) )
+        {
+            throw new IllegalArgumentException( "Unknown checksum algorithm: " + algorithm );
+        }
     }
 
     public void transferInitiated( TransferEvent transferEvent )
@@ -90,7 +96,7 @@ public class ChecksumObserver
     public void transferStarted( TransferEvent transferEvent )
     {
 
-        if ( transferingMd5 )
+        if ( transferingChecksum )
         {
             return;
         }
@@ -124,7 +130,6 @@ public class ChecksumObserver
 
     public void transferCompleted( TransferEvent transferEvent )
     {
-
         if ( digester == null )
         {
             return;
@@ -138,7 +143,7 @@ public class ChecksumObserver
 
         InputStream inputStream = null;
 
-        transferingMd5 = true;
+        transferingChecksum = true;
 
         try
         {
@@ -155,13 +160,13 @@ public class ChecksumObserver
                 // read its content into memory
                 File artifactFile = transferEvent.getLocalFile();
 
-                File md5File = new File( artifactFile.getPath() + extension );
+                File checksumFile = new File( artifactFile.getPath() + extension );
 
                 String md5Resource = resource + extension;
 
-                wagon.get( md5Resource, md5File );
+                wagon.get( md5Resource, checksumFile );
 
-                expectedChecksum = FileUtils.fileRead( md5File ).trim();
+                expectedChecksum = FileUtils.fileRead( checksumFile ).trim();
             }
             else
             {
@@ -172,7 +177,17 @@ public class ChecksumObserver
             }
 
         }
-        catch ( Exception e )
+        catch ( ResourceDoesNotExistException e )
+        {
+            // TODO: handle differently! No Exception catching....
+            e.printStackTrace();
+        }
+        catch ( WagonException e )
+        {
+            // TODO: handle differently! No Exception catching....
+            e.printStackTrace();
+        }
+        catch ( IOException e )
         {
             // TODO: handle differently! No Exception catching....
             e.printStackTrace();
@@ -181,7 +196,7 @@ public class ChecksumObserver
         {
             IoUtils.close( inputStream );
 
-            transferingMd5 = false;
+            transferingChecksum = false;
         }
 
     }
@@ -220,22 +235,22 @@ public class ChecksumObserver
 
 
     /**
-     * Encodes a 128 bit (16 bytes) byte array into a 32 character String.
-     * XXX I think it should at least throw an IllegalArgumentException rather than return null
+     * Encodes a 128 bit or 160-bit byte array into a String.
      *
      * @param binaryData Array containing the digest
      * @return Encoded hex string, or null if encoding failed
      */
     protected String encode( byte[] binaryData )
     {
-        if ( binaryData.length != 16 )
+        if ( binaryData.length != 16 && binaryData.length != 20 )
         {
-            return null;
+            int bitLength = binaryData.length * 8;
+            throw new IllegalArgumentException( "Unrecognised length for binary data: " + bitLength + " bits" );
         }
 
         String retValue = "";
 
-        for ( int i = 0; i < 16; i++ )
+        for ( int i = 0; i < binaryData.length; i++ )
         {
             String t = Integer.toHexString( binaryData[i] & 0xff );
 

@@ -65,7 +65,8 @@ public class WagonUtils
          
     }
     
-    public static void fromString( String resource, Wagon wagon, String content  ) throws Exception
+    public static void fromString( String resource, Wagon wagon, String content  )
+        throws IOException, WagonException
     {
         File file = null;
        
@@ -77,7 +78,6 @@ public class WagonUtils
             FileUtils.fileWrite( file.getPath(), content );
             
             wagon.put( file, resource );
-
         }
         finally
         {
