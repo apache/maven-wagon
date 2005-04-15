@@ -67,7 +67,7 @@ public class LightweightHttpWagon
             }
             URLConnection urlConnection = url.openConnection();
             // TODO: make this configurable
-            urlConnection.setUseCaches( false );
+            urlConnection.setRequestProperty( "Pragma", "no-cache" );
             inputData.setInputStream( urlConnection.getInputStream() );
             resource.setLastModified( urlConnection.getLastModified() );
             resource.setContentLength( urlConnection.getContentLength() );
