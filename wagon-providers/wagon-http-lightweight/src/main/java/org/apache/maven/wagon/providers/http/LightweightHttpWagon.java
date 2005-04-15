@@ -43,7 +43,9 @@ public class LightweightHttpWagon
     extends StreamWagon
 {
     private String previousProxyExclusions;
+
     private String previousProxyHost;
+
     private String previousProxyPort;
 
     public void fillInputData( InputData inputData )
@@ -53,7 +55,7 @@ public class LightweightHttpWagon
         String repositoryUrl = repository.getUrl();
         Resource resource = inputData.getResource();
         try
-              {
+        {
             URL url;
             if ( repositoryUrl.endsWith( "/" ) )
             {
@@ -64,6 +66,8 @@ public class LightweightHttpWagon
                 url = new URL( repositoryUrl + "/" + resource.getName() );
             }
             URLConnection urlConnection = url.openConnection();
+            // TODO: make this configurable
+            urlConnection.setUseCaches( false );
             inputData.setInputStream( urlConnection.getInputStream() );
             resource.setLastModified( urlConnection.getLastModified() );
             resource.setContentLength( urlConnection.getContentLength() );

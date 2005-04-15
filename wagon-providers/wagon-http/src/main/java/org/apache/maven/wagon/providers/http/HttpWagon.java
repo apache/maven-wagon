@@ -259,12 +259,11 @@ public class HttpWagon
 
         try
         {
+            // TODO: make these configurable
+
             getMethod.addRequestHeader( "Cache-control", "no-cache" );
-
             getMethod.addRequestHeader( "Cache-store", "no-store" );
-
             getMethod.addRequestHeader( "Pragma", "no-cache" );
-
             getMethod.addRequestHeader( "Expires", "0" );
 
             if ( timestamp > 0 )
