@@ -1,23 +1,27 @@
 package org.apache.maven.wagon.providers.file;
 
-/* ====================================================================
- *   Copyright 2001-2004 The Apache Software Foundation.
+/*
+ * Copyright 2001-2005 The Apache Software Foundation.
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- * ====================================================================
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-import org.apache.maven.wagon.*;
+import org.apache.maven.wagon.InputData;
+import org.apache.maven.wagon.LazyFileOutputStream;
+import org.apache.maven.wagon.OutputData;
+import org.apache.maven.wagon.ResourceDoesNotExistException;
+import org.apache.maven.wagon.StreamWagon;
+import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.resource.Resource;
 
 import java.io.File;
@@ -38,7 +42,7 @@ public class FileWagon
 
     // get
     public void fillInputData( InputData inputData )
-            throws TransferFailedException, ResourceDoesNotExistException
+        throws TransferFailedException, ResourceDoesNotExistException
     {
 
         Resource resource = inputData.getResource();
@@ -47,7 +51,7 @@ public class FileWagon
 
         if ( !file.exists() )
         {
-            throw new ResourceDoesNotExistException( "File: "  + file + " does not exist" );
+            throw new ResourceDoesNotExistException( "File: " + file + " does not exist" );
         }
 
         try
@@ -60,14 +64,15 @@ public class FileWagon
 
             resource.setLastModified( file.lastModified() );
         }
-        catch ( FileNotFoundException e)
+        catch ( FileNotFoundException e )
         {
             throw new TransferFailedException( "Could not read from file: " + file.getAbsolutePath(), e );
         }
     }
 
     // put
-    public void fillOutputData( OutputData outputData ) throws TransferFailedException
+    public void fillOutputData( OutputData outputData )
+        throws TransferFailedException
     {
 
         Resource resource = outputData.getResource();
@@ -82,7 +87,7 @@ public class FileWagon
             if ( !dir.mkdirs() )
             {
                 String msg = "Some of the requied directories do not exist and could not be create. " +
-                		"Requested path:  "  + file.getAbsolutePath();
+                    "Requested path:  " + file.getAbsolutePath();
 
                 throw new TransferFailedException( msg );
             }
@@ -95,7 +100,6 @@ public class FileWagon
         resource.setContentLength( file.length() );
 
         resource.setLastModified( file.lastModified() );
-
 
     }
 
