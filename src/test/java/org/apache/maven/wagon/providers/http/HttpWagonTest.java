@@ -29,12 +29,6 @@ import java.io.File;
 public class HttpWagonTest
     extends WagonTestCase
 {
-
-    public HttpWagonTest( String testName )
-    {
-        super( testName );
-    }
-
     private Httpd httpd;
 
     protected String getProtocol()
