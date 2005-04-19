@@ -27,13 +27,6 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 public class FtpWagonTest
     extends WagonTestCase
 {
-
-    public FtpWagonTest( String testName )
-    {
-        super( testName );
-
-    }
-
     private FtpServerInterface server;
 
     protected String getProtocol()

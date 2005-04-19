@@ -58,15 +58,12 @@ public abstract class WagonTestCase
     // Constructors
     // ----------------------------------------------------------------------
 
-    public WagonTestCase( String testName )
-    {
-        super( testName );
-    }
-
     protected void setUp()
         throws Exception
     {
         checksumObserver = new ChecksumObserver();
+
+        super.setUp();
     }
     // ----------------------------------------------------------------------
     // Methods that should be provided by subclasses for proper testing

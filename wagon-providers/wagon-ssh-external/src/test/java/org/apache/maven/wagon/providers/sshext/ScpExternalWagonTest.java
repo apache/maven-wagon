@@ -28,11 +28,6 @@ import java.io.File;
 public class ScpExternalWagonTest
     extends WagonTestCase
 {
-    public ScpExternalWagonTest( String testName )
-    {
-        super( testName );
-    }
-
     protected String getProtocol()
     {
         return "scpexe";
