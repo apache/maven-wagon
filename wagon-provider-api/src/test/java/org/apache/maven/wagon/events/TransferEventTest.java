@@ -94,7 +94,7 @@ public class TransferEventTest extends TestCase
 
         res.setName( "mm" );
 
-        event = new TransferEvent( wagon,  res, exception );
+        event = new TransferEvent( wagon,  res, exception, TransferEvent.REQUEST_GET );
 
         assertEquals( wagon, event.getWagon() );
 
@@ -103,6 +103,8 @@ public class TransferEventTest extends TestCase
         assertEquals( "mm", event.getResource().getName() );
 
         assertEquals( TransferEvent.TRANSFER_ERROR, event.getEventType() );
+
+        assertEquals( TransferEvent.REQUEST_GET, event.getRequestType() );
 
         assertEquals( exception, event.getException() );
 
@@ -117,14 +119,6 @@ public class TransferEventTest extends TestCase
         event.setResource( res );
 
         assertEquals( "/foo/baa", event.getResource().getName() );
-
-        event.setException( null );
-
-        assertEquals( null, event.getException() );
-
-        event.setException( exception );
-
-        assertEquals( exception, event.getException() );
 
         event.setTimestamp( timestamp );
 

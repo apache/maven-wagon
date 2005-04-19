@@ -42,10 +42,7 @@ import java.util.Map;
 public class ChecksumObserver
     implements TransferListener
 {
-
-    private String algorithm;
-
-    private MessageDigest digester;
+    private MessageDigest digester = null;
 
     private String expectedChecksum;
 
@@ -53,8 +50,9 @@ public class ChecksumObserver
 
     private boolean transferingChecksum = false;
 
-
     private static Map algorithmExtensionMap = new HashMap();
+
+    private final String extension;
 
     static
     {
@@ -63,11 +61,10 @@ public class ChecksumObserver
         algorithmExtensionMap.put( "MD2", ".md2" );
 
         algorithmExtensionMap.put( "SHA-1", ".sha1" );
-
     }
 
-
     public ChecksumObserver()
+        throws NoSuchAlgorithmException
     {
         this( "MD5" );
     }
@@ -76,13 +73,15 @@ public class ChecksumObserver
      * @param algorithm One of the algorithms supported by JDK: MD5, MD2 or SHA-1
      */
     public ChecksumObserver( String algorithm )
+        throws NoSuchAlgorithmException
     {
-        this.algorithm = algorithm;
-
         if ( !algorithmExtensionMap.containsKey( algorithm ) )
         {
-            throw new IllegalArgumentException( "Unknown checksum algorithm: " + algorithm );
+            throw new NoSuchAlgorithmException( "Checksum algorithm not recognised by this class: " + algorithm );
         }
+
+        digester = MessageDigest.getInstance( algorithm );
+        extension = (String) algorithmExtensionMap.get( algorithm );
     }
 
     public void transferInitiated( TransferEvent transferEvent )
@@ -105,15 +104,7 @@ public class ChecksumObserver
 
         actualChecksum = null;
 
-        try
-        {
-            digester = MessageDigest.getInstance( algorithm );
-        }
-        catch ( NoSuchAlgorithmException e )
-        {
-
-        }
-
+        digester.reset();
     }
 
     /**
@@ -125,7 +116,6 @@ public class ChecksumObserver
         {
             digester.update( buffer, 0, length );
         }
-
     }
 
     public void transferCompleted( TransferEvent transferEvent )
@@ -150,8 +140,6 @@ public class ChecksumObserver
             int type = transferEvent.getRequestType();
 
             String resource = transferEvent.getResource().getName();
-
-            String extension = (String) algorithmExtensionMap.get( algorithm );
 
             if ( type == TransferEvent.REQUEST_GET )
             {
@@ -208,9 +196,8 @@ public class ChecksumObserver
 
     public void debug( String message )
     {
-
+        // left intentionally blank
     }
-
 
     /**
      * Returns the md5 checksum downloaded from the server
@@ -268,7 +255,7 @@ public class ChecksumObserver
     }
 
 
-    public boolean cheksumIsValid()
+    public boolean checksumIsValid()
     {
         boolean retValue = false;
 

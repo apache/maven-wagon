@@ -468,7 +468,7 @@ public class ScpWagon
                 }
                 catch ( IOException e )
                 {
-                    fireTransferError( resource, e );
+                    fireTransferError( resource, e, TransferEvent.REQUEST_GET );
 
                     shutdownStream( outputStream );
 
@@ -509,11 +509,11 @@ public class ScpWagon
         }
         catch ( JSchException e )
         {
-            handleException( resource, e, destination );
+            handleGetException( resource, e, destination );
         }
         catch ( IOException e )
         {
-            handleException( resource, e, destination );
+            handleGetException( resource, e, destination );
         }
         finally
         {
@@ -530,10 +530,10 @@ public class ScpWagon
         }
     }
 
-    private void handleException( Resource resource, Exception e, File destination )
+    private void handleGetException( Resource resource, Exception e, File destination )
         throws TransferFailedException
     {
-        fireTransferError( resource, e );
+        fireTransferError( resource, e, TransferEvent.REQUEST_GET );
 
         if ( destination.exists() )
         {

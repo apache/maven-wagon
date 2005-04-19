@@ -63,10 +63,13 @@ public abstract class WagonTestCase
     public WagonTestCase( String testName )
     {
         super( testName );
-
-        checksumObserver = new ChecksumObserver();
     }
 
+    protected void setUp()
+        throws Exception
+    {
+        checksumObserver = new ChecksumObserver();
+    }
     // ----------------------------------------------------------------------
     // Methods that should be provided by subclasses for proper testing
     // ----------------------------------------------------------------------
@@ -252,7 +255,7 @@ public abstract class WagonTestCase
 
         System.out.println( "expected:" + checksumObserver.getExpectedChecksum() );
 
-        assertTrue( checksumObserver.cheksumIsValid() );
+        assertTrue( checksumObserver.checksumIsValid() );
 
         compareContents( sourceFile, destFile );
     }

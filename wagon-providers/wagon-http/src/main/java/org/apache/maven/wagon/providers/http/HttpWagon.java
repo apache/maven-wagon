@@ -33,6 +33,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.resource.Resource;
@@ -152,7 +153,7 @@ public class HttpWagon
         }
         catch ( FileNotFoundException e )
         {
-            fireTransferError( resource, e );
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
 
             throw new ResourceDoesNotExistException( "Source file does not exist: " + source, e );
         }
@@ -381,7 +382,7 @@ public class HttpWagon
                 }
                 catch ( Exception e )
                 {
-                    fireTransferError( resource, e );
+                    fireTransferError( resource, e, TransferEvent.REQUEST_GET );
 
                     if ( destination.exists() )
                     {

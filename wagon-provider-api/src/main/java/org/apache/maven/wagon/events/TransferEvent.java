@@ -90,18 +90,12 @@ public class TransferEvent
 
     }
 
-    public TransferEvent( final Wagon wagon, final Resource resource, final Exception exception )
+    public TransferEvent( final Wagon wagon, final Resource resource, final Exception exception, final int requestType )
     {
-        super( wagon );
-
-        this.resource = resource;
-
-        setEventType( TRANSFER_ERROR );
+        this( wagon, resource, TRANSFER_ERROR, requestType );
 
         this.exception = exception;
-
     }
-
 
     /**
      * @return Returns the resource.
@@ -187,17 +181,6 @@ public class TransferEvent
 
         this.eventType = eventType;
     }
-
-    /**
-     * The
-     *
-     * @param exception The exception to set.
-     */
-    public void setException( final Exception exception )
-    {
-        this.exception = exception;
-    }
-
 
     /**
      * @param resource The resource to set.

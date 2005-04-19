@@ -249,7 +249,7 @@ public class SftpWagon
         }
         catch ( Exception e )
         {
-            fireTransferError( resource, e );
+            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
 
             if ( destination.exists() )
             {

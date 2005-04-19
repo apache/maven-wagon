@@ -141,7 +141,7 @@ public abstract class AbstractWagon
         }
         catch ( IOException e )
         {
-            fireTransferError( resource, e );
+            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
 
             if ( destination.exists() )
             {
@@ -189,7 +189,7 @@ public abstract class AbstractWagon
         }
         catch ( IOException e )
         {
-            fireTransferError( resource, e );
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
 
             String msg = "PUT request for: " + resource + " to " + source.getName() + "failed";
 
@@ -466,9 +466,9 @@ public abstract class AbstractWagon
         sessionEventSupport.removeSessionListener( listener );
     }
 
-    protected void fireTransferError( Resource resource, Exception e )
+    protected void fireTransferError( Resource resource, Exception e, int requestType )
     {
-        TransferEvent transferEvent = new TransferEvent( this, resource, e );
+        TransferEvent transferEvent = new TransferEvent( this, resource, e, requestType );
 
         transferEventSupport.fireTransferError( transferEvent );
     }
