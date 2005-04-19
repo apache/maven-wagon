@@ -17,9 +17,12 @@ package org.apache.maven.wagon;
  */
 
 import junit.framework.TestCase;
+import org.apache.maven.wagon.authentication.AuthenticationException;
+import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.MockSessionListener;
 import org.apache.maven.wagon.events.MockTransferListener;
 import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.util.IoUtils;
 
 import java.io.File;
 import java.io.InputStream;
@@ -146,6 +149,7 @@ public class AbstractWagonTest
     }
 
     public void testGetError()
+        throws Exception
     {
         MockTransferListener transferListener = new MockTransferListener();
 
@@ -163,8 +167,9 @@ public class AbstractWagonTest
 
             fail( "Transfer error was expected during deploy" );
         }
-        catch ( Exception e )
+        catch ( TransferFailedException expected )
         {
+            assertTrue( true );
         }
 
         assertTrue( transferListener.isTransferStartedCalled() );
@@ -175,21 +180,16 @@ public class AbstractWagonTest
     }
 
     public void testPutTransferEvents()
+        throws ConnectionException, AuthenticationException, ResourceDoesNotExistException, TransferFailedException,
+        AuthorizationException
     {
         wagon.fireTransferDebug( "deploy debug message" );
 
-        try
-        {
-            Repository repository = new Repository();
+        Repository repository = new Repository();
 
-            wagon.connect( repository );
+        wagon.connect( repository );
 
-            wagon.put( source, artifact );
-        }
-        catch ( Exception e )
-        {
-            fail( e.getMessage() );
-        }
+        wagon.put( source, artifact );
 
         assertTrue( transferListener.isTransferStartedCalled() );
 
@@ -237,15 +237,15 @@ public class AbstractWagonTest
 
     public void testStreamShutdown()
     {
-        wagon.shutdownStream( (InputStream) null );
+        IoUtils.close( (InputStream) null );
 
-        wagon.shutdownStream( (OutputStream) null );
+        IoUtils.close( (OutputStream) null );
 
         MockInputStream inputStream = new MockInputStream();
 
         assertFalse( inputStream.isClosed() );
 
-        wagon.shutdownStream( inputStream );
+        IoUtils.close( inputStream );
 
         assertTrue( inputStream.isClosed() );
 
@@ -253,7 +253,7 @@ public class AbstractWagonTest
 
         assertFalse( outputStream.isClosed() );
 
-        wagon.shutdownStream( outputStream );
+        IoUtils.close( outputStream );
 
         assertTrue( outputStream.isClosed() );
     }

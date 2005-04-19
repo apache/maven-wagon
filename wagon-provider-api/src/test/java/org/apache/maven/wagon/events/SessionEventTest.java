@@ -17,6 +17,7 @@ package org.apache.maven.wagon.events;
  */
 
 import junit.framework.TestCase;
+import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.MockWagon;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
@@ -54,18 +55,14 @@ public class SessionEventTest
 	 * int)
 	 */
     public void testSessionEventProperties()
+        throws ConnectionException, AuthenticationException
     {
 
         final Wagon wagon = new MockWagon();
         final Repository repo = new Repository();
-        try
-        {
-            wagon.connect( repo );
-        }
-        catch ( Exception e )
-        {
-            fail( e.getMessage() );
-        }
+
+        wagon.connect( repo );
+
         final long timestamp = System.currentTimeMillis();
         final Exception exception = new AuthenticationException( "dummy" );
 
@@ -126,6 +123,7 @@ public class SessionEventTest
         }
         catch ( IllegalArgumentException e )
         {
+            assertTrue( true );
         }
 
     }

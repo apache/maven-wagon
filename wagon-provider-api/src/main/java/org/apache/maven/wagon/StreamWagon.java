@@ -19,6 +19,7 @@ package org.apache.maven.wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.resource.Resource;
+import org.apache.maven.wagon.util.IoUtils;
 
 import java.io.File;
 import java.io.InputStream;
@@ -112,7 +113,7 @@ public abstract class StreamWagon
         }
         else
         {
-            shutdownStream( is );
+            IoUtils.close( is );
         }
 
         return retValue;

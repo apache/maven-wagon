@@ -37,6 +37,7 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.resource.Resource;
+import org.apache.maven.wagon.util.IoUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -380,7 +381,7 @@ public class HttpWagon
 
                     getTransfer( resource, destination, is );
                 }
-                catch ( Exception e )
+                catch ( IOException e )
                 {
                     fireTransferError( resource, e, TransferEvent.REQUEST_GET );
 
@@ -400,7 +401,7 @@ public class HttpWagon
                 }
                 finally
                 {
-                    shutdownStream( is );
+                    IoUtils.close( is );
                 }
 
                 if ( lastModified > 0 )

@@ -17,6 +17,7 @@ package org.apache.maven.wagon.providers.ssh;
  */
 
 import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 import org.apache.maven.wagon.PathUtils;
@@ -131,7 +132,14 @@ public class SftpWagon
                 channel.cd( ".." );
             }
         }
-        catch ( Exception e )
+        catch ( SftpException e )
+        {
+            String msg = "Error occured while deploying '" + resourceName + "' to remote repository: " +
+                getRepository().getUrl();
+
+            throw new TransferFailedException( msg, e );
+        }
+        catch ( JSchException e )
         {
             String msg = "Error occured while deploying '" + resourceName + "' to remote repository: " +
                 getRepository().getUrl();
@@ -247,25 +255,14 @@ public class SftpWagon
                 channel.cd( ".." );
             }
         }
-        catch ( Exception e )
+        catch ( SftpException e )
         {
-            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-
-            if ( destination.exists() )
-            {
-                boolean deleted = destination.delete();
-
-                if ( !deleted )
-                {
-                    destination.deleteOnExit();
-                }
-            }
-
-            String msg = "Error occured while downloading from the remote repository:" + getRepository();
-
-            throw new TransferFailedException( msg, e );
+            handleGetException( resource, e, destination );
         }
-
+        catch ( JSchException e )
+        {
+            handleGetException( resource, e, destination );
+        }
     }
 
     public boolean getIfNewer( String resourceName, File destination, long timestamp )

@@ -114,7 +114,7 @@ public class FtpWagon
                 }
             }
 
-            throw new AuthenticationException( "Could not connect to server." );
+            throw new AuthenticationException( "Could not connect to server.", e );
         }
 
         try
@@ -147,7 +147,7 @@ public class FtpWagon
         }
         catch ( IOException e )
         {
-            throw new ConnectionException( "Cannot login to remote system" );
+            throw new ConnectionException( "Cannot login to remote system", e );
         }
     }
 
@@ -191,6 +191,7 @@ public class FtpWagon
         }
         catch ( IOException e )
         {
+            // TODO: handle
             // michal I am not sure  what error means in that context
             // actually I am not even sure why we have to invoke that command
             // I think that we will be able to recover or simply we will fail later on
@@ -259,9 +260,7 @@ public class FtpWagon
 
                 if ( !dirChanged )
                 {
-                    String msg = " Resource " + resource + " not found. Directory " + dirs[i] + " does not exist";
-
-                    throw new ResourceDoesNotExistException( msg );
+                    throw new TransferFailedException( "Unable to create directory " + dirs[i] );
                 }
             }
 
@@ -280,8 +279,7 @@ public class FtpWagon
             if ( os == null )
             {
                 String msg = "Cannot transfer resource:  '" + resource +
-                    "' Output stream is null. FTP Server response: " +
-                    ftp.getReplyString();
+                    "' Output stream is null. FTP Server response: " + ftp.getReplyString();
 
                 throw new TransferFailedException( msg );
 
@@ -290,9 +288,9 @@ public class FtpWagon
             fireTransferDebug( "resource = " + resource );
 
         }
-        catch ( Exception e )
+        catch ( IOException e )
         {
-            throw new TransferFailedException( "Cannot transfer: ", e );
+            throw new TransferFailedException( "Error transferring over FTP", e );
         }
 
         outputData.setOutputStream( os );
@@ -346,9 +344,9 @@ public class FtpWagon
                 ftp.changeWorkingDirectory( ".." );
             }
         }
-        catch ( Exception e )
+        catch ( IOException e )
         {
-            throw new TransferFailedException( e.getMessage() );
+            throw new TransferFailedException( "Error transferring file via FTP", e );
         }
 
         inputData.setInputStream( is );

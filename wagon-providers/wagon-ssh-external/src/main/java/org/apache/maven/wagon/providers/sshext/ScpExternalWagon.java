@@ -87,63 +87,54 @@ public class ScpExternalWagon
     public void openConnection()
         throws AuthenticationException
     {
-        try
+        final AuthenticationInfo authInfo = getRepository().getAuthenticationInfo();
+
+        if ( authInfo == null )
         {
-            final AuthenticationInfo authInfo = getRepository().getAuthenticationInfo();
-
-            if ( authInfo == null )
-            {
-                throw new IllegalArgumentException( "Authentication Credentials cannot be null for SSH protocol" );
-            }
-
-            int port = getRepository().getPort();
-
-            if ( port == WagonConstants.UNKNOWN_PORT )
-            {
-                port = DEFAULT_SSH_PORT;
-            }
-
-            // If user don't define a password, he want to use a private key
-            if ( authInfo.getPassword() == null )
-            {
-                File privateKey;
-
-                if ( authInfo.getPrivateKey() != null )
-                {
-                    privateKey = new File( authInfo.getPrivateKey() );
-                }
-                else
-                {
-                    privateKey = findPrivateKey();
-                }
-
-                if ( privateKey.exists() )
-                {
-                    if ( authInfo.getPassphrase() == null )
-                    {
-                        authInfo.setPassphrase( "" );
-                    }
-
-                    fireSessionDebug( "Using private key: " + privateKey );
-
-                    // TODO: do something with it
-                }
-                else
-                {
-                    String msg = "Private key was not found. You must define a private key or a password for repo: " +
-                        getRepository().getName();
-
-                    throw new AuthenticationException( msg );
-                }
-            }
-            // nothing to connect to
+            throw new IllegalArgumentException( "Authentication Credentials cannot be null for SSH protocol" );
         }
-        catch ( Exception e )
+
+        int port = getRepository().getPort();
+
+        if ( port == WagonConstants.UNKNOWN_PORT )
         {
-            fireSessionError( e );
-
-            throw new AuthenticationException( "Cannot connect. Reason: " + e.getMessage(), e );
+            port = DEFAULT_SSH_PORT;
         }
+
+        // If user don't define a password, he want to use a private key
+        if ( authInfo.getPassword() == null )
+        {
+            File privateKey;
+
+            if ( authInfo.getPrivateKey() != null )
+            {
+                privateKey = new File( authInfo.getPrivateKey() );
+            }
+            else
+            {
+                privateKey = findPrivateKey();
+            }
+
+            if ( privateKey.exists() )
+            {
+                if ( authInfo.getPassphrase() == null )
+                {
+                    authInfo.setPassphrase( "" );
+                }
+
+                fireSessionDebug( "Using private key: " + privateKey );
+
+                // TODO: do something with it
+            }
+            else
+            {
+                String msg = "Private key was not found. You must define a private key or a password for repo: " +
+                    getRepository().getName();
+
+                throw new AuthenticationException( msg );
+            }
+        }
+        // nothing to connect to
     }
 
     // ----------------------------------------------------------------------

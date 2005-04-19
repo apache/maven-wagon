@@ -17,6 +17,7 @@ package org.apache.maven.wagon.events;
  */
 
 import junit.framework.TestCase;
+import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.MockWagon;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
@@ -51,20 +52,15 @@ public class TransferEventTest
      * int)
     */
     public void testTransferEventProperties()
+        throws ConnectionException, AuthenticationException
     {
 
         final Wagon wagon = new MockWagon();
 
         final Repository repo = new Repository();
 
-        try
-        {
-            wagon.connect( repo );
-        }
-        catch ( Exception e )
-        {
-            fail( e.getMessage() );
-        }
+        wagon.connect( repo );
+
         final long timestamp = System.currentTimeMillis();
 
         final Exception exception = new AuthenticationException( "dummy" );
@@ -134,6 +130,7 @@ public class TransferEventTest
         }
         catch ( IllegalArgumentException e )
         {
+            assertTrue( true );
         }
 
         event.setEventType( TransferEvent.TRANSFER_COMPLETED );
@@ -160,7 +157,7 @@ public class TransferEventTest
         }
         catch ( IllegalArgumentException e )
         {
-            //we expect to be here
+            assertTrue( true );
         }
 
     }

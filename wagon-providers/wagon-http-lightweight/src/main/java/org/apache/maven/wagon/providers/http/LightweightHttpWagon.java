@@ -74,15 +74,15 @@ public class LightweightHttpWagon
         }
         catch ( MalformedURLException e )
         {
-            throw new ResourceDoesNotExistException( e.getMessage() );
+            throw new ResourceDoesNotExistException( "Invalid repository URL", e );
         }
         catch ( FileNotFoundException e )
         {
-            throw new ResourceDoesNotExistException( e.getMessage() );
+            throw new ResourceDoesNotExistException( "Unable to locate resource in repository", e );
         }
         catch ( IOException e )
         {
-            throw new TransferFailedException( e.getMessage() );
+            throw new TransferFailedException( "Error transferring file", e );
         }
     }
 

@@ -283,10 +283,6 @@ public class FileUtils
             catch ( InterruptedException ignore )
             {
             }
-            catch ( Exception ex )
-            {
-                break;
-            }
         }
         return true;
     }

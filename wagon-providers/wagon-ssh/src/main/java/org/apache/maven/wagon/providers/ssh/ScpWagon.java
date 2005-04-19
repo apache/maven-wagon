@@ -36,6 +36,7 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
+import org.apache.maven.wagon.util.IoUtils;
 import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
@@ -216,7 +217,7 @@ public class ScpWagon
 
             channel.connect();
         }
-        catch ( Exception e )
+        catch ( JSchException e )
         {
             throw new TransferFailedException( "Cannot execute remote command: " + command, e );
         }
@@ -316,7 +317,14 @@ public class ScpWagon
                 throw new TransferFailedException( "ACK check failed" );
             }
         }
-        catch ( Exception e )
+        catch ( IOException e )
+        {
+            String msg = "Error occured while deploying '" + resourceName + "' to remote repository: " +
+                getRepository().getUrl();
+
+            throw new TransferFailedException( msg, e );
+        }
+        catch ( JSchException e )
         {
             String msg = "Error occured while deploying '" + resourceName + "' to remote repository: " +
                 getRepository().getUrl();
@@ -327,7 +335,7 @@ public class ScpWagon
         {
             if ( channel != null )
             {
-                shutdownStream( out );
+                IoUtils.close( out );
 
                 channel.disconnect();
             }
@@ -470,7 +478,7 @@ public class ScpWagon
                 {
                     fireTransferError( resource, e, TransferEvent.REQUEST_GET );
 
-                    shutdownStream( outputStream );
+                    IoUtils.close( outputStream );
 
                     if ( destination.exists() )
                     {
@@ -519,18 +527,18 @@ public class ScpWagon
         {
             if ( out != null )
             {
-                shutdownStream( out );
+                IoUtils.close( out );
             }
             if ( channel != null )
             {
                 channel.disconnect();
             }
 
-            shutdownStream( outputStream );
+            IoUtils.close( outputStream );
         }
     }
 
-    private void handleGetException( Resource resource, Exception e, File destination )
+    protected void handleGetException( Resource resource, Exception e, File destination )
         throws TransferFailedException
     {
         fireTransferError( resource, e, TransferEvent.REQUEST_GET );

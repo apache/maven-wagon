@@ -26,9 +26,11 @@ import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
+import org.apache.maven.wagon.util.IoUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -159,9 +161,9 @@ public abstract class AbstractWagon
         }
         finally
         {
-            shutdownStream( input );
+            IoUtils.close( input );
 
-            shutdownStream( output );
+            IoUtils.close( output );
 
         }
 
@@ -173,11 +175,6 @@ public abstract class AbstractWagon
     {
         firePutStarted( resource, source );
 
-        if ( !source.exists() )
-        {
-            throw new TransferFailedException( "Specified source file does not exist: " + source );
-        }
-
         InputStream input = null;
 
         try
@@ -185,6 +182,10 @@ public abstract class AbstractWagon
             input = new FileInputStream( source );
 
             transfer( resource, input, output, TransferEvent.REQUEST_PUT );
+        }
+        catch ( FileNotFoundException e )
+        {
+            throw new TransferFailedException( "Specified source file does not exist: " + source, e );
         }
         catch ( IOException e )
         {
@@ -196,11 +197,11 @@ public abstract class AbstractWagon
         }
         finally
         {
-            shutdownStream( input );
+            IoUtils.close( input );
 
             if ( closeOutput )
             {
-                shutdownStream( output );
+                IoUtils.close( output );
             }
         }
         firePutCompleted( resource, source );
@@ -225,34 +226,6 @@ public abstract class AbstractWagon
             fireTransferProgress( transferEvent, buffer, n );
 
             output.write( buffer, 0, n );
-        }
-    }
-
-    protected void shutdownStream( InputStream inputStream )
-    {
-        if ( inputStream != null )
-        {
-            try
-            {
-                inputStream.close();
-            }
-            catch ( Exception e )
-            {
-            }
-        }
-    }
-
-    protected void shutdownStream( OutputStream outputStream )
-    {
-        if ( outputStream != null )
-        {
-            try
-            {
-                outputStream.close();
-            }
-            catch ( Exception e )
-            {
-            }
         }
     }
 
