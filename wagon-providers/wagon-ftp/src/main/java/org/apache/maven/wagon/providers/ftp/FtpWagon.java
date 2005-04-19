@@ -1,7 +1,7 @@
 package org.apache.maven.wagon.providers.ftp;
 
 /*
- * Copyright 2001-2004 The Apache Software Foundation.
+ * Copyright 2001-2005 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,7 +141,8 @@ public class FtpWagon
 
             if ( !dirChanged )
             {
-                throw new ConnectionException( "Required directories: '" + getRepository().getBasedir() + "' are missing" );
+                throw new ConnectionException(
+                    "Required directories: '" + getRepository().getBasedir() + "' are missing" );
             }
         }
         catch ( IOException e )
@@ -178,7 +179,7 @@ public class FtpWagon
             // I think that we will be able to recover or simply we will fail later on
         }
 
-         super.firePutCompleted( resource, file );
+        super.firePutCompleted( resource, file );
     }
 
 
@@ -207,7 +208,7 @@ public class FtpWagon
                 // This is a NPE rethink shutting down the streams
                 ftp.disconnect();
             }
-            catch ( IOException e)
+            catch ( IOException e )
             {
                 throw new ConnectionException( "Failed to close connection to FTP repository", e );
             }
@@ -274,19 +275,18 @@ public class FtpWagon
                 }
             }
 
-
             os = ftp.storeFileStream( resource.getName() );
 
             if ( os == null )
             {
-                String msg = "Cannot transfer resource:  '" +
-                        resource + "' Output stream is null. FTP Server response: " +
-                        ftp.getReplyString();
+                String msg = "Cannot transfer resource:  '" + resource +
+                    "' Output stream is null. FTP Server response: " +
+                    ftp.getReplyString();
 
                 throw new TransferFailedException( msg );
 
             }
-            
+
             fireTransferDebug( "resource = " + resource );
 
         }
@@ -326,16 +326,16 @@ public class FtpWagon
                 }
             }
 
-            FTPFile[] ftpFiles= ftp.listFiles( "" );
+            FTPFile[] ftpFiles = ftp.listFiles( "" );
 
-            long contenetLength = ftpFiles[ 0 ].getSize();
+            long contenetLength = ftpFiles[0].getSize();
 
             //@todo check how it works! javadoc of common login says:
             // Returns the file timestamp. This usually the last modification time.
             //
-            long lastModified = ftpFiles[ 0 ].getTimestamp().getTimeInMillis();
+            long lastModified = ftpFiles[0].getTimestamp().getTimeInMillis();
 
-            resource.setContentLength( contenetLength  );
+            resource.setContentLength( contenetLength );
 
             resource.setLastModified( lastModified );
 
@@ -354,7 +354,7 @@ public class FtpWagon
         inputData.setInputStream( is );
     }
 
-    
+
     public class PrintCommandListener
         implements ProtocolCommandListener
     {

@@ -1,4 +1,4 @@
-<component-set>  
+<component-set>
   <components>
     <component>
       <role>org.apache.maven.wagon.Wagon</role>

@@ -1,20 +1,19 @@
 package org.apache.maven.wagon;
 
-/* ====================================================================
- *   Copyright 2001-2004 The Apache Software Foundation.
+/*
+ * Copyright 2001-2005 The Apache Software Foundation.
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- * ====================================================================
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import java.io.File;
@@ -22,7 +21,7 @@ import java.util.StringTokenizer;
 
 /**
  * Various path (URL) manipulation routines
- * 
+ *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  */
@@ -31,7 +30,7 @@ public class PathUtils
     /**
      * Returns the directory path portion of a file specification string.
      * Matches the equally named unix command.
-     * 
+     *
      * @return The directory portion excluding the ending file separator.
      */
     public static String dirname( final String path )
@@ -43,7 +42,7 @@ public class PathUtils
 
     /**
      * Returns the filename portion of a file specification string.
-     * 
+     *
      * @return The filename string with extension.
      */
     public static String filename( final String path )
@@ -59,10 +58,7 @@ public class PathUtils
 
     }
 
-    private static String[] split(
-            final String str,
-            final String separator,
-            final int max )
+    private static String[] split( final String str, final String separator, final int max )
     {
         final StringTokenizer tok;
 
@@ -124,9 +120,8 @@ public class PathUtils
     /**
      * Return the host name (Removes protocol and path from the URL) E.g: for input
      * <code>http://www.codehause.org</code> this method will return <code>www.apache.org</code>
-     * 
+     *
      * @param url the url
-     * 
      * @return the host name
      */
     public static String host( final String url )
@@ -190,9 +185,8 @@ public class PathUtils
      * <br/>
      * E.g: for input
      * <code>http://www.codehause.org</code> this method will return <code>http</code>
-     * 
+     *
      * @param url the url
-     * 
      * @return the host name
      */
     public static String protocol( final String url )
@@ -207,9 +201,8 @@ public class PathUtils
     }
 
     /**
-     * @param url 
-     * 
-     * @return 
+     * @param url
+     * @return
      */
     public static int port( final String url )
     {
@@ -250,9 +243,9 @@ public class PathUtils
     }
 
     /**
-     * @param url 
+     * @param url
+     * @return
      * @todo need to URL decode for spaces?
-     * @return 
      */
     public static String basedir( final String url )
     {
@@ -337,10 +330,12 @@ public class PathUtils
     {
         String host = authorization( url );
         int index = host.indexOf( '@' );
-        if ( index > 0 ) {
+        if ( index > 0 )
+        {
             String userInfo = host.substring( 0, index );
             index = userInfo.indexOf( ':' );
-            if ( index > 0 ) {
+            if ( index > 0 )
+            {
                 return userInfo.substring( 0, index );
             }
             else if ( index < 0 )
@@ -355,10 +350,12 @@ public class PathUtils
     {
         String host = authorization( url );
         int index = host.indexOf( '@' );
-        if ( index > 0 ) {
+        if ( index > 0 )
+        {
             String userInfo = host.substring( 0, index );
             index = userInfo.indexOf( ':' );
-            if ( index >= 0 ) {
+            if ( index >= 0 )
+            {
                 return userInfo.substring( index + 1 );
             }
         }

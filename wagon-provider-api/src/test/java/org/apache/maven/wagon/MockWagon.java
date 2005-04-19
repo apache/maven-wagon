@@ -1,26 +1,28 @@
 package org.apache.maven.wagon;
 
-/* ====================================================================
- *   Copyright 2001-2004 The Apache Software Foundation.
+/*
+ * Copyright 2001-2005 The Apache Software Foundation.
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- * ====================================================================
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-import org.apache.maven.wagon.resource.Resource;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
@@ -41,8 +43,7 @@ public class MockWagon
     }
 
 
-
-    public  void fillInputData( InputData inputData )
+    public void fillInputData( InputData inputData )
         throws TransferFailedException
     {
 
@@ -59,9 +60,9 @@ public class MockWagon
         }
         else
         {
-           byte[] buffer = new byte[1024 * 4 * 5];
+            byte[] buffer = new byte[1024 * 4 * 5];
 
-           is = new ByteArrayInputStream( buffer );
+            is = new ByteArrayInputStream( buffer );
         }
 
         inputData.setInputStream( is );
@@ -88,13 +89,13 @@ public class MockWagon
         }
 
         outputData.setOutputStream( os );
-        
+
     }
 
-    public boolean getIfNewer( String resourceName, File destination, long timestamp)
-            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    public boolean getIfNewer( String resourceName, File destination, long timestamp )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-       return false;
+        return false;
     }
 
     public void openConnection()

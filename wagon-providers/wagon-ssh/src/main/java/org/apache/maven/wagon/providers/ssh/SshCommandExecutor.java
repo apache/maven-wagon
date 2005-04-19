@@ -21,11 +21,11 @@ import org.apache.maven.wagon.Wagon;
 
 /**
  * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a>
- *
  * @version $Id$
- *
  */
-public interface SshCommandExecutor extends Wagon
+public interface SshCommandExecutor
+    extends Wagon
 {
-    void executeCommand( String command ) throws TransferFailedException;
+    void executeCommand( String command )
+        throws TransferFailedException;
 }

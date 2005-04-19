@@ -2,25 +2,26 @@
 
 <document>
 
-    <properties>
-        <title>Wagon API</title>
-        <author email="michal.maczka@dimatics.com">Michal Maczka</author>
-    </properties>
+  <properties>
+    <title>Wagon API</title>
+    <author email="michal.maczka@dimatics.com">Michal Maczka</author>
+  </properties>
 
-    <body>
+  <body>
 
-        <section name="Wagon API">
-            <p>
+    <section name="Wagon API">
+      <p>
                The "Wagon API" project defines a simple API for transfering resources
                (artifacts) to and from repositories. The word repository is used in this contextx as
-               it is commonly used in <a href"http://maven.apache.org/misc/glossary.html">Maven</a>
+               it is commonly used in
+        <a href" http:// maven.apache.org/ misc/ glossary.html">Maven</a>
                And means a storage of artfacts.
                Wagon is a helper project for Maven and it is planned that Wagon will be used in feature
                versions of Maven.
 
-            </p>
-        </section>
+      </p>
+    </section>
 
-    </body>
+  </body>
 </document>
 

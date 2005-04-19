@@ -1,20 +1,19 @@
 package org.apache.maven.wagon.events;
 
-/* ====================================================================
- *   Copyright 2001-2004 The Apache Software Foundation.
+/*
+ * Copyright 2001-2005 The Apache Software Foundation.
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- * ====================================================================
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import java.util.ArrayList;
@@ -29,7 +28,9 @@ import java.util.List;
  */
 public final class SessionEventSupport
 {
-    /** registred listeners */
+    /**
+     * registred listeners
+     */
     private final List listeners = new ArrayList();
 
     /**
@@ -40,7 +41,6 @@ public final class SessionEventSupport
      * If listener is <code>null</code>, no exception is thrown and no action is performed
      *
      * @param listener the transfer listener
-     *
      * @see #removeSessionListener(SessionListener)
      * @see TransferListener
      */
@@ -58,7 +58,6 @@ public final class SessionEventSupport
      * no exception is thrown and no action is performed
      *
      * @param listener the session listener
-     *
      * @see #addSessionListener(org.apache.maven.wagon.events.SessionListener)
      */
     public void removeSessionListener( final SessionListener listener )
@@ -72,11 +71,9 @@ public final class SessionEventSupport
      * who will be notifed when an seesion event occurs
      *
      * @param listener the session listener
-     *
      * @return <code>true<code>
      *         if given listner was added to the collection of listeners
      *         <code>false</code> otherwise
-     *
      * @see org.apache.maven.wagon.events.SessionListener
      * @see #addSessionListener(org.apache.maven.wagon.events.SessionListener)
      */
@@ -96,7 +93,7 @@ public final class SessionEventSupport
     {
         for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
         {
-            final SessionListener listener = ( SessionListener ) iter.next();
+            final SessionListener listener = (SessionListener) iter.next();
             listener.sessionDisconnected( sessionEvent );
         }
     }
@@ -112,7 +109,7 @@ public final class SessionEventSupport
     {
         for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
         {
-            final SessionListener listener = ( SessionListener ) iter.next();
+            final SessionListener listener = (SessionListener) iter.next();
             listener.sessionDisconnecting( sessionEvent );
         }
     }
@@ -128,7 +125,7 @@ public final class SessionEventSupport
     {
         for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
         {
-            final SessionListener listener = ( SessionListener ) iter.next();
+            final SessionListener listener = (SessionListener) iter.next();
             listener.sessionLoggedIn( sessionEvent );
         }
     }
@@ -144,7 +141,7 @@ public final class SessionEventSupport
     {
         for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
         {
-            final SessionListener listener = ( SessionListener ) iter.next();
+            final SessionListener listener = (SessionListener) iter.next();
             listener.sessionLoggedOff( sessionEvent );
         }
     }
@@ -160,7 +157,7 @@ public final class SessionEventSupport
     {
         for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
         {
-            final SessionListener listener = ( SessionListener ) iter.next();
+            final SessionListener listener = (SessionListener) iter.next();
             listener.sessionOpened( sessionEvent );
         }
     }
@@ -176,7 +173,7 @@ public final class SessionEventSupport
     {
         for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
         {
-            final SessionListener listener = ( SessionListener ) iter.next();
+            final SessionListener listener = (SessionListener) iter.next();
             listener.sessionOpening( sessionEvent );
         }
     }
@@ -192,7 +189,7 @@ public final class SessionEventSupport
     {
         for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
         {
-            final SessionListener listener = ( SessionListener ) iter.next();
+            final SessionListener listener = (SessionListener) iter.next();
             listener.sessionConnectionRefused( sessionEvent );
         }
     }
@@ -207,8 +204,7 @@ public final class SessionEventSupport
     {
         for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
         {
-            final SessionListener listener =
-                    ( SessionListener ) iter.next();
+            final SessionListener listener = (SessionListener) iter.next();
             listener.debug( message );
         }
     }
@@ -225,8 +221,7 @@ public final class SessionEventSupport
     {
         for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
         {
-            final SessionListener listener =
-                    ( SessionListener ) iter.next();
+            final SessionListener listener = (SessionListener) iter.next();
             listener.sessionError( sessionEvent );
         }
     }

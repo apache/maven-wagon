@@ -1,61 +1,26 @@
 package org.apache.maven.wagon.util;
 
-/* ====================================================================
- * The Apache Software License, Version 1.1
+/*
+ * Copyright 2001-2005 The Apache Software Foundation.
  *
- * Copyright (c) 2001 The Apache Software Foundation.  All rights
- * reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *
- * 3. The end-user documentation included with the redistribution,
- *    if any, must include the following acknowledgment:
- *       "This product includes software developed by the
- *        Apache Software Foundation (http://www.codehaus.org/)."
- *    Alternately, this acknowledgment may appear in the software itself,
- *    if and wherever such third-party acknowledgments normally appear.
- *
- * 4. The names "Apache" and "Apache Software Foundation" and
- *    "Apache Turbine" must not be used to endorse or promote products
- *    derived from this software without prior written permission. For
- *    written permission, please contact codehaus@codehaus.org.
- *
- * 5. Products derived from this software may not be called "Apache",
- *    "Apache Turbine", nor may "Apache" appear in their name, without
- *    prior written permission of the Apache Software Foundation.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR
- * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- * ====================================================================
- *
- * This software consists of voluntary contributions made by many
- * individuals on behalf of the Apache Software Foundation.  For more
- * information on the Apache Software Foundation, please see
- * <http://www.codehaus.org/>.
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.Random;
@@ -63,23 +28,23 @@ import java.util.Vector;
 
 /**
  * This class provides basic facilities for manipulating files and file paths.
- *
+ * <p/>
  * <h3>Path-related methods</h3>
- *
+ * <p/>
  * <p>Methods exist to retrieve the components of a typical file path. For example
  * <code>/www/hosted/mysite/index.html</code>, can be broken into:
  * <ul>
- *   <li><code>/www/hosted/mysite/</code> -- retrievable through {@link #getPath}</li>
- *   <li><code>index.html</code> -- retrievable through {@link #removePath}</li>
- *   <li><code>/www/hosted/mysite/index</code> -- retrievable through {@link #removeExtension}</li>
- *   <li><code>html</code> -- retrievable through {@link #getExtension}</li>
+ * <li><code>/www/hosted/mysite/</code> -- retrievable through {@link #getPath}</li>
+ * <li><code>index.html</code> -- retrievable through {@link #removePath}</li>
+ * <li><code>/www/hosted/mysite/index</code> -- retrievable through {@link #removeExtension}</li>
+ * <li><code>html</code> -- retrievable through {@link #getExtension}</li>
  * </ul>
  * There are also methods to {@link #catPath concatenate two paths}, {@link #resolveFile resolve a
  * path relative to a File} and {@link #normalize} a path.
  * </p>
- *
+ * <p/>
  * <h3>File-related methods</h3>
- * <p>
+ * <p/>
  * There are methods to  create a {@link #toFile File from a URL}, copy a
  * {@link #copyFileToDirectory File to a directory},
  * copy a {@link #copyFile File to another File},
@@ -87,9 +52,9 @@ import java.util.Vector;
  * as well as methods to {@link #deleteDirectory(File) delete} and {@link #cleanDirectory(File)
  * clean} a directory.
  * </p>
- *
+ * <p/>
  * Common {@link java.io.File} manipulation routines.
- *
+ * <p/>
  * Taken from the commons-util repo.
  * Also code from Alexandria's FileUtils.
  * And from Avalon Excalibur's IO.
@@ -125,7 +90,7 @@ public class FileUtils
      * bytes).
      *
      * @param size The number of bytes.
-     * @return     A human-readable display value (includes units).
+     * @return A human-readable display value (includes units).
      */
     public static String byteCountToDisplaySize( int size )
     {
@@ -154,6 +119,7 @@ public class FileUtils
     /**
      * Returns the directory path portion of a file specification string.
      * Matches the equally named unix command.
+     *
      * @return The directory portion excluding the ending file separator.
      */
     public static String dirname( String filename )
@@ -164,6 +130,7 @@ public class FileUtils
 
     /**
      * Returns the filename portion of a file specification string.
+     *
      * @return The filename string with extension.
      */
     public static String filename( String filename )
@@ -175,6 +142,7 @@ public class FileUtils
     /**
      * Returns the filename portion of a file specification string.
      * Matches the equally named unix command.
+     *
      * @return The filename string without extension.
      */
     public static String basename( String filename )
@@ -189,8 +157,7 @@ public class FileUtils
     public static String basename( String filename, String suffix )
     {
         int i = filename.lastIndexOf( File.separator ) + 1;
-        int lastDot = ( ( suffix != null ) && ( suffix.length() > 0 ) )
-            ? filename.lastIndexOf( suffix ) : -1;
+        int lastDot = ( ( suffix != null ) && ( suffix.length() > 0 ) ) ? filename.lastIndexOf( suffix ) : -1;
 
         if ( lastDot >= 0 )
         {
@@ -266,7 +233,7 @@ public class FileUtils
      * Writes data to a file. The file will be created if it does not exist.
      *
      * @param fileName The name of the file to write.
-     * @param data The content to write to the file.
+     * @param data     The content to write to the file.
      */
     public static void fileWrite( String fileName, String data )
         throws IOException
@@ -291,7 +258,7 @@ public class FileUtils
      * Waits for NFS to propagate a file creation, imposing a timeout.
      *
      * @param fileName The name of the file.
-     * @param seconds The maximum time in seconds to wait.
+     * @param seconds  The maximum time in seconds to wait.
      * @return True if file exists.
      */
     public static boolean waitFor( String fileName, int seconds )
@@ -337,10 +304,10 @@ public class FileUtils
 
     /**
      * Given a directory and an array of extensions return an array of compliant files.
-     *
+     * <p/>
      * TODO Should an ignore list be passed in?
      * TODO Should a recurse flag be passed in?
-     *
+     * <p/>
      * The given extensions should be like "java" and not like ".java"
      */
     public static String[] getFilesFromExtension( String directory, String[] extensions )
@@ -364,7 +331,6 @@ public class FileUtils
 
             if ( currentFile.isDirectory() )
             {
-
 
                 //ignore all CVS directories...
                 if ( currentFile.getName().equals( "CVS" ) )
@@ -422,11 +388,9 @@ public class FileUtils
      * Checks to see if a file is of a particular type(s).
      * Note that if the file does not have an extension, an empty string
      * (&quot;&quot;) is matched for.
-     *
      */
     private static boolean isValidFile( String file, String[] extensions )
     {
-
 
         String extension = extension( file );
         if ( extension == null )
@@ -440,7 +404,9 @@ public class FileUtils
         for ( int i = 0; i < extensions.length; ++i )
         {
             if ( extensions[i].equals( extension ) )
+            {
                 return true;
+            }
         }
 
         return false;
@@ -505,9 +471,10 @@ public class FileUtils
 
     /**
      * Convert from a <code>URL</code> to a <code>File</code>.
+     *
      * @param url File URL.
      * @return The equivalent <code>File</code> object, or <code>null</code> if the URL's protocol
-     * is not <code>file</code>
+     *         is not <code>file</code>
      */
     public static File toFile( final URL url )
     {
@@ -680,20 +647,17 @@ public class FileUtils
      * (and any parent directories) will be created. If a file <code>source</code> in
      * <code>destinationDirectory</code> exists, it will be overwritten.
      *
-     * @param source An existing <code>File</code> to copy.
+     * @param source               An existing <code>File</code> to copy.
      * @param destinationDirectory A directory to copy <code>source</code> into.
-     *
      * @throws java.io.FileNotFoundException if <code>source</code> isn't a normal file.
-     * @throws IllegalArgumentException if <code>destinationDirectory</code> isn't a directory.
-     * @throws IOException if <code>source</code> does not exist, the file in
-     * <code>destinationDirectory</code> cannot be written to, or an IO error occurs during copying.
+     * @throws IllegalArgumentException      if <code>destinationDirectory</code> isn't a directory.
+     * @throws IOException                   if <code>source</code> does not exist, the file in
+     *                                       <code>destinationDirectory</code> cannot be written to, or an IO error occurs during copying.
      */
-    public static void copyFileToDirectory( final String source,
-                                            final String destinationDirectory )
+    public static void copyFileToDirectory( final String source, final String destinationDirectory )
         throws IOException
     {
-        copyFileToDirectory( new File( source ),
-                             new File( destinationDirectory ) );
+        copyFileToDirectory( new File( source ), new File( destinationDirectory ) );
     }
 
     /**
@@ -701,16 +665,14 @@ public class FileUtils
      * (and any parent directories) will be created. If a file <code>source</code> in
      * <code>destinationDirectory</code> exists, it will be overwritten.
      *
-     * @param source An existing <code>File</code> to copy.
+     * @param source               An existing <code>File</code> to copy.
      * @param destinationDirectory A directory to copy <code>source</code> into.
-     *
      * @throws java.io.FileNotFoundException if <code>source</code> isn't a normal file.
-     * @throws IllegalArgumentException if <code>destinationDirectory</code> isn't a directory.
-     * @throws IOException if <code>source</code> does not exist, the file in
-     * <code>destinationDirectory</code> cannot be written to, or an IO error occurs during copying.
+     * @throws IllegalArgumentException      if <code>destinationDirectory</code> isn't a directory.
+     * @throws IOException                   if <code>source</code> does not exist, the file in
+     *                                       <code>destinationDirectory</code> cannot be written to, or an IO error occurs during copying.
      */
-    public static void copyFileToDirectory( final File source,
-                                            final File destinationDirectory )
+    public static void copyFileToDirectory( final File source, final File destinationDirectory )
         throws IOException
     {
         if ( destinationDirectory.exists() && !destinationDirectory.isDirectory() )
@@ -726,15 +688,13 @@ public class FileUtils
      * created if they don't already exist. <code>destination</code> will be overwritten if it
      * already exists.
      *
-     * @param source An existing non-directory <code>File</code> to copy bytes from.
+     * @param source      An existing non-directory <code>File</code> to copy bytes from.
      * @param destination A non-directory <code>File</code> to write bytes to (possibly
-     * overwriting).
-     *
-     * @throws IOException if <code>source</code> does not exist, <code>destination</code> cannot be
-     * written to, or an IO error occurs during copying.
-     *
+     *                    overwriting).
+     * @throws IOException                   if <code>source</code> does not exist, <code>destination</code> cannot be
+     *                                       written to, or an IO error occurs during copying.
      * @throws java.io.FileNotFoundException if <code>destination</code> is a directory
-     * (use {@link #copyFileToDirectory}).
+     *                                       (use {@link #copyFileToDirectory}).
      */
     public static void copyFile( final File source, final File destination )
         throws IOException
@@ -747,8 +707,7 @@ public class FileUtils
         }
 
         //does destinations directory exist ?
-        if ( destination.getParentFile() != null &&
-            !destination.getParentFile().exists() )
+        if ( destination.getParentFile() != null && !destination.getParentFile().exists() )
         {
             destination.getParentFile().mkdirs();
         }
@@ -756,8 +715,7 @@ public class FileUtils
         //make sure we can write to destination
         if ( destination.exists() && !destination.canWrite() )
         {
-            final String message = "Unable to open file " +
-                destination + " for writing.";
+            final String message = "Unable to open file " + destination + " for writing.";
             throw new IOException( message );
         }
 
@@ -773,8 +731,7 @@ public class FileUtils
 
         if ( source.length() != destination.length() )
         {
-            final String message = "Failed to copy full contents from " + source +
-                " to " + destination;
+            final String message = "Failed to copy full contents from " + source + " to " + destination;
             throw new IOException( message );
         }
     }
@@ -784,23 +741,21 @@ public class FileUtils
      * The directories up to <code>destination</code> will be created if they don't already exist.
      * <code>destination</code> will be overwritten if it already exists.
      *
-     * @param source A <code>URL</code> to copy bytes from.
+     * @param source      A <code>URL</code> to copy bytes from.
      * @param destination A non-directory <code>File</code> to write bytes to (possibly
-     * overwriting).
-     *
+     *                    overwriting).
      * @throws IOException if
-     * <ul>
-     *  <li><code>source</code> URL cannot be opened</li>
-     *  <li><code>destination</code> cannot be written to</li>
-     *  <li>an IO error occurs during copying</li>
-     * </ul>
+     *                     <ul>
+     *                     <li><code>source</code> URL cannot be opened</li>
+     *                     <li><code>destination</code> cannot be written to</li>
+     *                     <li>an IO error occurs during copying</li>
+     *                     </ul>
      */
     public static void copyURLToFile( final URL source, final File destination )
         throws IOException
     {
         //does destination directory exist ?
-        if ( destination.getParentFile() != null &&
-            !destination.getParentFile().exists() )
+        if ( destination.getParentFile() != null && !destination.getParentFile().exists() )
         {
             destination.getParentFile().mkdirs();
         }
@@ -808,8 +763,7 @@ public class FileUtils
         //make sure we can write to destination
         if ( destination.exists() && !destination.canWrite() )
         {
-            final String message = "Unable to open file " +
-                destination + " for writing.";
+            final String message = "Unable to open file " + destination + " for writing.";
             throw new IOException( message );
         }
 
@@ -850,9 +804,10 @@ public class FileUtils
         {
             int index = normalized.indexOf( "//" );
             if ( index < 0 )
+            {
                 break;
-            normalized = normalized.substring( 0, index ) +
-                normalized.substring( index + 1 );
+            }
+            normalized = normalized.substring( 0, index ) + normalized.substring( index + 1 );
         }
 
         // Resolve occurrences of "/./" in the normalized path
@@ -860,9 +815,10 @@ public class FileUtils
         {
             int index = normalized.indexOf( "/./" );
             if ( index < 0 )
+            {
                 break;
-            normalized = normalized.substring( 0, index ) +
-                normalized.substring( index + 2 );
+            }
+            normalized = normalized.substring( 0, index ) + normalized.substring( index + 2 );
         }
 
         // Resolve occurrences of "/../" in the normalized path
@@ -870,12 +826,15 @@ public class FileUtils
         {
             int index = normalized.indexOf( "/../" );
             if ( index < 0 )
+            {
                 break;
+            }
             if ( index == 0 )
+            {
                 return null;  // Trying to go outside our context
+            }
             int index2 = normalized.lastIndexOf( '/', index - 1 );
-            normalized = normalized.substring( 0, index2 ) +
-                normalized.substring( index + 3 );
+            normalized = normalized.substring( 0, index2 ) + normalized.substring( index + 3 );
         }
 
         // Return the normalized path that we have completed
@@ -889,7 +848,7 @@ public class FileUtils
      * <code>/a/b/c</code> + <code>d</code> = <code>/a/b/d</code><br />
      * <code>/a/b/c</code> + <code>../d</code> = <code>/a/d</code><br />
      * </p>
-     *
+     * <p/>
      * Thieved from Tomcat sources...
      *
      * @return The concatenated paths, or null if error occurs
@@ -928,7 +887,7 @@ public class FileUtils
      * <code>baseFile</code>, otherwise it is treated as a normal root-relative path.
      *
      * @param baseFile Where to resolve <code>filename</code> from, if <code>filename</code> is
-     * relative.
+     *                 relative.
      * @param filename Absolute or relative file path to resolve.
      * @return The canonical <code>File</code> of <code>filename</code>.
      */
@@ -977,8 +936,7 @@ public class FileUtils
 
         for ( int i = start; i < chars.length; i++ )
         {
-            final boolean doubleSeparator =
-                File.separatorChar == chars[i] && File.separatorChar == chars[i - 1];
+            final boolean doubleSeparator = File.separatorChar == chars[i] && File.separatorChar == chars[i - 1];
 
             if ( !doubleSeparator )
             {
@@ -1025,8 +983,7 @@ public class FileUtils
         {
             if ( !file.delete() )
             {
-                final String message =
-                    "File " + file + " unable to be deleted.";
+                final String message = "File " + file + " unable to be deleted.";
                 throw new IOException( message );
             }
         }
@@ -1154,8 +1111,7 @@ public class FileUtils
         cleanDirectory( directory );
         if ( !directory.delete() )
         {
-            final String message =
-                "Directory " + directory + " unable to be deleted.";
+            final String message = "Directory " + directory + " unable to be deleted.";
             throw new IOException( message );
         }
     }
@@ -1259,17 +1215,15 @@ public class FileUtils
     }
 
 
-
-
-   public static String FS = System.getProperty( "file.separator" );
+    public static String FS = System.getProperty( "file.separator" );
 
     /**
      * Create a temporary file in a given directory.
-     *
+     * <p/>
      * <p>The file denoted by the returned abstract pathname did not
      * exist before this method was invoked, any subsequent invocation
      * of this method will yield a different file name.</p>
-     * <p>
+     * <p/>
      * The filename is prefixNNNNNsuffix where NNNN is a random number
      * </p>
      * <p>This method is different to File.createTempFile of JDK 1.2
@@ -1278,29 +1232,30 @@ public class FileUtils
      * when the parentDir attribute is
      * null.</p>
      *
-     * @param prefix prefix before the random number
-     * @param suffix file extension; include the '.'
+     * @param prefix    prefix before the random number
+     * @param suffix    file extension; include the '.'
      * @param parentDir Directory to create the temporary file in -
-     * java.io.tmpdir used if not specificed
-     *
+     *                  java.io.tmpdir used if not specificed
      * @return a File reference to the new temporary file.
      */
-    public static File createTempFile(String prefix, String suffix, File parentDir) {
+    public static File createTempFile( String prefix, String suffix, File parentDir )
+    {
 
         File result = null;
-        String parent = System.getProperty("java.io.tmpdir");
-        if (parentDir != null) {
+        String parent = System.getProperty( "java.io.tmpdir" );
+        if ( parentDir != null )
+        {
             parent = parentDir.getPath();
         }
-        DecimalFormat fmt = new DecimalFormat("#####");
-        Random rand = new Random(System.currentTimeMillis()
-            +Runtime.getRuntime().freeMemory());
-        synchronized (rand) {
-            do {
-                result = new File(parent,
-                                  prefix + fmt.format(Math.abs(rand.nextInt()))
-                                  + suffix);
-            } while (result.exists());
+        DecimalFormat fmt = new DecimalFormat( "#####" );
+        Random rand = new Random( System.currentTimeMillis() + Runtime.getRuntime().freeMemory() );
+        synchronized ( rand )
+        {
+            do
+            {
+                result = new File( parent, prefix + fmt.format( Math.abs( rand.nextInt() ) ) + suffix );
+            }
+            while ( result.exists() );
         }
         return result;
     }

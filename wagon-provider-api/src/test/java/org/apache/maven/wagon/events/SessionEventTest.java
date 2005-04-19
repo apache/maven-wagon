@@ -1,47 +1,48 @@
 package org.apache.maven.wagon.events;
 
-/* ====================================================================
- *   Copyright 2001-2004 The Apache Software Foundation.
+/*
+ * Copyright 2001-2005 The Apache Software Foundation.
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- * ====================================================================
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import junit.framework.TestCase;
+import org.apache.maven.wagon.MockWagon;
+import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.repository.Repository;
-import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.MockWagon;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  */
-public class SessionEventTest extends TestCase
+public class SessionEventTest
+    extends TestCase
 {
 
     /*
 	 * @see TestCase#setUp()
 	 */
-    protected void setUp() throws Exception
+    protected void setUp()
+        throws Exception
     {
         super.setUp();
     }
 
     /**
      * Constructor for SESSIONEventTest.
-     * 
-     * @param arg0 
+     *
+     * @param arg0
      */
     public SessionEventTest( final String arg0 )
     {
@@ -63,21 +64,17 @@ public class SessionEventTest extends TestCase
         }
         catch ( Exception e )
         {
-          fail( e.getMessage() );
+            fail( e.getMessage() );
         }
         final long timestamp = System.currentTimeMillis();
         final Exception exception = new AuthenticationException( "dummy" );
 
-        SessionEvent event =
-                new SessionEvent(
-                        wagon,
-                        SessionEvent.SESSION_CLOSED );
+        SessionEvent event = new SessionEvent( wagon, SessionEvent.SESSION_CLOSED );
 
         assertEquals( wagon, event.getWagon() );
         assertEquals( repo, event.getWagon().getRepository() );
 
         assertEquals( SessionEvent.SESSION_CLOSED, event.getEventType() );
-
 
         event = new SessionEvent( wagon, exception );
 
@@ -85,9 +82,6 @@ public class SessionEventTest extends TestCase
         assertEquals( repo, event.getWagon().getRepository() );
         assertEquals( SessionEvent.SESSION_ERROR_OCCURRED, event.getEventType() );
         assertEquals( exception, event.getException() );
-
-
-
 
         event.setException( null );
         assertEquals( null, event.getException() );
@@ -125,7 +119,6 @@ public class SessionEventTest extends TestCase
         event.setEventType( SessionEvent.SESSION_CONNECTION_REFUSED );
         assertEquals( SessionEvent.SESSION_CONNECTION_REFUSED, event.getEventType() );
 
-
         try
         {
             event.setEventType( -1 );
@@ -135,30 +128,22 @@ public class SessionEventTest extends TestCase
         {
         }
 
-
     }
 
     public void testConstantValueConflict()
     {
-        final int[] values =
-                {
-                    SessionEvent.SESSION_CLOSED,
-                    SessionEvent.SESSION_DISCONNECTED,
-                    SessionEvent.SESSION_DISCONNECTING,
-                    SessionEvent.SESSION_ERROR_OCCURRED,
-                    SessionEvent.SESSION_LOGGED_IN,
-                    SessionEvent.SESSION_LOGGED_OFF,
-                    SessionEvent.SESSION_OPENED,
-                    SessionEvent.SESSION_OPENING,
-                    SessionEvent.SESSION_CONNECTION_REFUSED};
+        final int[] values = {SessionEvent.SESSION_CLOSED, SessionEvent.SESSION_DISCONNECTED,
+                              SessionEvent.SESSION_DISCONNECTING, SessionEvent.SESSION_ERROR_OCCURRED,
+                              SessionEvent.SESSION_LOGGED_IN, SessionEvent.SESSION_LOGGED_OFF,
+                              SessionEvent.SESSION_OPENED, SessionEvent.SESSION_OPENING,
+                              SessionEvent.SESSION_CONNECTION_REFUSED};
 
         for ( int i = 0; i < values.length; i++ )
         {
             for ( int j = i + 1; j < values.length; j++ )
             {
 
-                final String msg =
-                        "Value confict at [i,j]=[" + i + "," + j + "]";
+                final String msg = "Value confict at [i,j]=[" + i + "," + j + "]";
                 assertTrue( msg, values[i] != values[j] );
             }
         }

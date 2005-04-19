@@ -1,33 +1,31 @@
 package org.apache.maven.wagon;
 
-/* ====================================================================
- *   Copyright 2001-2004 The Apache Software Foundation.
+/*
+ * Copyright 2001-2005 The Apache Software Foundation.
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- * ====================================================================
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
-import java.io.File;
-import java.io.IOException;
 
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.observers.ChecksumObserver;
 import org.apache.maven.wagon.observers.Debug;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
-
 import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.util.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
@@ -74,7 +72,8 @@ public abstract class WagonTestCase
     // Methods that should be provided by subclasses for proper testing
     // ----------------------------------------------------------------------
 
-    protected abstract String getTestRepositoryUrl() throws IOException;
+    protected abstract String getTestRepositoryUrl()
+        throws IOException;
 
     protected abstract String getProtocol();
 
@@ -108,7 +107,7 @@ public abstract class WagonTestCase
         // Create a test local repository.
         // ----------------------------------------------------------------------
 
-        localRepositoryPath =  FileTestUtils.createDir( "local-repository" ).getPath();
+        localRepositoryPath = FileTestUtils.createDir( "local-repository" ).getPath();
 
         localRepository = createFileRepository( "file://" + localRepositoryPath );
 
@@ -168,11 +167,13 @@ public abstract class WagonTestCase
 
     private void message( String message )
     {
-        System.out.println( "---------------------------------------------------------------------------------------------------------" );
+        System.out.println(
+            "---------------------------------------------------------------------------------------------------------" );
 
         System.out.println( message );
 
-        System.out.println( "---------------------------------------------------------------------------------------------------------" );
+        System.out.println(
+            "---------------------------------------------------------------------------------------------------------" );
     }
 
     // ----------------------------------------------------------------------
@@ -229,7 +230,7 @@ public abstract class WagonTestCase
 
         wagon.connect( testRepository );
 
-        destFile =  FileTestUtils.createUniqueFile( getName() );
+        destFile = FileTestUtils.createUniqueFile( getName() );
 
         destFile.deleteOnExit();
 
@@ -271,7 +272,8 @@ public abstract class WagonTestCase
 
         System.out.println( "destFile = " + destFile );
 
-        System.out.println( "---------------------------------------------------------------------------------------------------------" );
+        System.out.println(
+            "---------------------------------------------------------------------------------------------------------" );
 
         System.out.print( "Evaluating and comparing ... " );
 
@@ -283,7 +285,8 @@ public abstract class WagonTestCase
 
         System.out.println( "OK" );
 
-        System.out.println( "---------------------------------------------------------------------------------------------------------" );
+        System.out.println(
+            "---------------------------------------------------------------------------------------------------------" );
     }
 
     // ----------------------------------------------------------------------

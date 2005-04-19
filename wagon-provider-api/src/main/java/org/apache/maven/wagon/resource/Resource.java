@@ -1,24 +1,22 @@
 package org.apache.maven.wagon.resource;
 
-import org.apache.maven.wagon.WagonConstants;
-
-/* ====================================================================
- *   Copyright 2001-2004 The Apache Software Foundation.
+/*
+ * Copyright 2001-2005 The Apache Software Foundation.
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- * ====================================================================
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
+import org.apache.maven.wagon.WagonConstants;
 
 /**
  * Describes resources which can be downloaded from the repository
@@ -32,7 +30,7 @@ import org.apache.maven.wagon.WagonConstants;
  */
 
 public class Resource
- {
+{
     private String name;
 
     private long lastModified;
@@ -46,7 +44,7 @@ public class Resource
 
     public Resource( String name )
     {
-        this.name  = name;
+        this.name = name;
     }
 
     public String getName()
@@ -60,11 +58,11 @@ public class Resource
     }
 
     /**
-     *  Returns the value of the last-modified header field.
-     *  The result is the number of milliseconds since January 1, 1970 GMT.
-     * 
-     *  @return the date the resource  was last modified, or WagonConstants.UNKNOWN_LENGTH
-     * if not known.
+     * Returns the value of the last-modified header field.
+     * The result is the number of milliseconds since January 1, 1970 GMT.
+     *
+     * @return the date the resource  was last modified, or WagonConstants.UNKNOWN_LENGTH
+     *         if not known.
      */
     public long getLastModified()
     {

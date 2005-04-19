@@ -1,32 +1,32 @@
 package org.apache.maven.wagon.events;
 
-/* ====================================================================
- *   Copyright 2001-2004 The Apache Software Foundation.
+/*
+ * Copyright 2001-2005 The Apache Software Foundation.
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- * ====================================================================
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import junit.framework.TestCase;
-import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.MockWagon;
+import org.apache.maven.wagon.Wagon;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id: TransferEventSupportTest.java,v 1.2 2003/11/16 12:41:02 michal
  *          Exp $
  */
-public class TransferEventSupportTest extends TestCase
+public class TransferEventSupportTest
+    extends TestCase
 {
 
     private TransferEventSupport eventSupport;
@@ -34,7 +34,8 @@ public class TransferEventSupportTest extends TestCase
     /**
      * @see junit.framework.TestCase#setUp()
      */
-    protected void setUp() throws Exception
+    protected void setUp()
+        throws Exception
     {
 
         super.setUp();
@@ -188,12 +189,8 @@ public class TransferEventSupportTest extends TestCase
 
     private TransferEvent getEvent( final Wagon wagon )
     {
-        final TransferEvent event =
-                new TransferEvent(
-                        wagon,
-                        null,
-                        TransferEvent.TRANSFER_COMPLETED,
-                        TransferEvent.REQUEST_GET );
+        final TransferEvent event = new TransferEvent( wagon, null, TransferEvent.TRANSFER_COMPLETED,
+                                                       TransferEvent.REQUEST_GET );
         return event;
     }
 

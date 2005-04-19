@@ -16,16 +16,16 @@ package org.apache.maven.wagon.providers.sshext;
  * limitations under the License.
  */
 
-import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.Wagon;
 
 /**
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
- *
  * @version $Id$
- *
  */
-public interface SshCommandExecutor extends Wagon
+public interface SshCommandExecutor
+    extends Wagon
 {
-    void executeCommand( String command ) throws TransferFailedException;
+    void executeCommand( String command )
+        throws TransferFailedException;
 }

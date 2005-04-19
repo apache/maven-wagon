@@ -1,7 +1,7 @@
 package org.apache.maven.wagon.providers.ftp;
 
 /*
- * Copyright 2001-2004 The Apache Software Foundation.
+ * Copyright 2001-2005 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ package org.apache.maven.wagon.providers.ftp;
  */
 
 import org.apache.ftpserver.interfaces.FtpServerInterface;
-import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.WagonTestCase;
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -27,13 +27,13 @@ import org.apache.maven.wagon.WagonTestCase;
 public class FtpWagonTest
     extends WagonTestCase
 {
-    
+
     public FtpWagonTest( String testName )
     {
         super( testName );
-        
+
     }
-    
+
     private FtpServerInterface server;
 
     protected String getProtocol()
@@ -46,8 +46,8 @@ public class FtpWagonTest
     {
         super.setUp();
 
-        server = (FtpServerInterface)lookup( FtpServerInterface.ROLE );
-                
+        server = (FtpServerInterface) lookup( FtpServerInterface.ROLE );
+
     }
 
     protected void tearDownWagonTestingFixtures()
