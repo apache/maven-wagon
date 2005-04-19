@@ -28,11 +28,6 @@ import java.io.File;
 public class SftpWagonTest
     extends WagonTestCase
 {
-    public SftpWagonTest( String testName )
-    {
-        super( testName );
-    }
-
     protected String getProtocol()
     {
         return "sftp";

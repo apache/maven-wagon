@@ -207,7 +207,7 @@ public abstract class WagonTestCase
 
         wagon.connect( testRepository );
 
-        sourceFile = new File( basedir, POM );
+        sourceFile = new File( getBasedir(), POM );
 
         wagon.put( sourceFile, resource );
 

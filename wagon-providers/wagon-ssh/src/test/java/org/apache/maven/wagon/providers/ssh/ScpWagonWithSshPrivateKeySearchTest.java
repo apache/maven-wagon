@@ -26,12 +26,6 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 public class ScpWagonWithSshPrivateKeySearchTest
     extends WagonTestCase
 {
-    public ScpWagonWithSshPrivateKeySearchTest( String testName )
-    {
-        super( testName );
-
-    }
-
     protected String getProtocol()
     {
         return "scp";
