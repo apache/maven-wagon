@@ -52,6 +52,8 @@ public class ChecksumObserver
 
     private final String extension;
 
+    private boolean transferringChecksum = false;
+
     static
     {
         algorithmExtensionMap.put( "MD5", ".md5" );
@@ -92,11 +94,14 @@ public class ChecksumObserver
      */
     public void transferStarted( TransferEvent transferEvent )
     {
-        expectedChecksum = null;
+        if ( !transferringChecksum )
+        {
+            expectedChecksum = null;
 
-        actualChecksum = null;
+            actualChecksum = null;
 
-        digester.reset();
+            digester.reset();
+        }
     }
 
     /**
@@ -104,11 +109,19 @@ public class ChecksumObserver
      */
     public void transferProgress( TransferEvent transferEvent, byte[] buffer, int length )
     {
-        digester.update( buffer, 0, length );
+        if ( !transferringChecksum )
+        {
+            digester.update( buffer, 0, length );
+        }
     }
 
     public void transferCompleted( TransferEvent transferEvent )
     {
+        if ( transferringChecksum )
+        {
+            return;
+        }
+
         Wagon wagon = transferEvent.getWagon();
 
         actualChecksum = encode( digester.digest() );
@@ -118,6 +131,8 @@ public class ChecksumObserver
         String checksumResource = transferEvent.getResource().getName() + extension;
 
         int type = transferEvent.getRequestType();
+
+        transferringChecksum = true;
 
         try
         {
@@ -130,9 +145,7 @@ public class ChecksumObserver
 
                 File checksumFile = new File( artifactFile.getPath() + extension );
 
-                wagon.removeTransferListener( this );
                 wagon.get( checksumResource, checksumFile );
-                wagon.addTransferListener( this );
 
                 expectedChecksum = FileUtils.fileRead( checksumFile ).trim();
             }
@@ -148,9 +161,7 @@ public class ChecksumObserver
                 {
                     FileUtils.fileWrite( file.getPath(), actualChecksum );
 
-                    wagon.removeTransferListener( this );
                     wagon.put( file, checksumResource );
-                    wagon.addTransferListener( this );
                 }
                 finally
                 {
@@ -175,6 +186,7 @@ public class ChecksumObserver
         {
             IoUtils.close( inputStream );
 
+            transferringChecksum = false;
         }
 
     }
