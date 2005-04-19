@@ -173,9 +173,6 @@ public class HttpWagon
                 firePutStarted( resource, source );
 
                 statusCode = client.executeMethod( putMethod );
-
-                firePutCompleted( resource, source );
-
             }
             catch ( HttpRecoverableException e )
             {
