@@ -64,36 +64,6 @@ public class WagonUtils
 
     }
 
-    public static void fromString( String resource, Wagon wagon, String content )
-        throws IOException, WagonException
-    {
-        File file = null;
-
-        try
-        {
-            file = File.createTempFile( "wagon", "tmp" );
-
-            //@todo this method should trow something more specific then java.lang.Exception
-            FileUtils.fileWrite( file.getPath(), content );
-
-            wagon.put( file, resource );
-        }
-        finally
-        {
-            if ( file != null )
-            {
-                boolean deleted = file.delete();
-
-                if ( !deleted )
-                {
-                    file.deleteOnExit();
-                }
-
-            }
-        }
-
-    }
-
 
     public static void putDirectory( File dir, Wagon wagon, boolean includeBasdir )
         throws ResourceDoesNotExistException, TransferFailedException, AuthorizationException

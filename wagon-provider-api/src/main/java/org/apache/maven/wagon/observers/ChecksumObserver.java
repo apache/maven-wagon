@@ -19,7 +19,6 @@ package org.apache.maven.wagon.observers;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.WagonException;
-import org.apache.maven.wagon.WagonUtils;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.resource.Resource;
@@ -48,8 +47,6 @@ public class ChecksumObserver
     private String expectedChecksum;
 
     private String actualChecksum;
-
-    private boolean transferingChecksum = false;
 
     private static Map algorithmExtensionMap = new HashMap();
 
@@ -95,12 +92,6 @@ public class ChecksumObserver
      */
     public void transferStarted( TransferEvent transferEvent )
     {
-
-        if ( transferingChecksum )
-        {
-            return;
-        }
-
         expectedChecksum = null;
 
         actualChecksum = null;
@@ -113,28 +104,16 @@ public class ChecksumObserver
      */
     public void transferProgress( TransferEvent transferEvent, byte[] buffer, int length )
     {
-        if ( digester != null )
-        {
-            digester.update( buffer, 0, length );
-        }
+        digester.update( buffer, 0, length );
     }
 
     public void transferCompleted( TransferEvent transferEvent )
     {
-        if ( digester == null )
-        {
-            return;
-        }
-
         Wagon wagon = transferEvent.getWagon();
 
         actualChecksum = encode( digester.digest() );
 
-        digester = null;
-
         InputStream inputStream = null;
-
-        transferingChecksum = true;
 
         String checksumResource = transferEvent.getResource().getName() + extension;
 
@@ -151,7 +130,9 @@ public class ChecksumObserver
 
                 File checksumFile = new File( artifactFile.getPath() + extension );
 
+                wagon.removeTransferListener( this );
                 wagon.get( checksumResource, checksumFile );
+                wagon.addTransferListener( this );
 
                 expectedChecksum = FileUtils.fileRead( checksumFile ).trim();
             }
@@ -159,8 +140,22 @@ public class ChecksumObserver
             {
                 //It's PUT put request we will also put md5 checksum
                 // which was computed on the fly
-                WagonUtils.fromString( checksumResource, wagon, actualChecksum );
 
+                File file = File.createTempFile( "wagon", "tmp" );
+                file.deleteOnExit();
+
+                try
+                {
+                    FileUtils.fileWrite( file.getPath(), actualChecksum );
+
+                    wagon.removeTransferListener( this );
+                    wagon.put( file, checksumResource );
+                    wagon.addTransferListener( this );
+                }
+                finally
+                {
+                    file.delete();
+                }
             }
 
         }
@@ -180,7 +175,6 @@ public class ChecksumObserver
         {
             IoUtils.close( inputStream );
 
-            transferingChecksum = false;
         }
 
     }
