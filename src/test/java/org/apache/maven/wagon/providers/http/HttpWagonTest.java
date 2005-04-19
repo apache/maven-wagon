@@ -1,7 +1,7 @@
 package org.apache.maven.wagon.providers.http;
 
 /*
- * Copyright 2001-2004 The Apache Software Foundation.
+ * Copyright 2001-2005 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,10 @@ import java.io.File;
 public class HttpWagonTest
     extends WagonTestCase
 {
-    
+
     public HttpWagonTest( String testName )
     {
-        super( testName );       
+        super( testName );
     }
 
     private Httpd httpd;
@@ -56,7 +56,7 @@ public class HttpWagonTest
 
         // File round trip testing
         
-        File file =  FileTestUtils.createUniqueFile( "local-repository", "test-resource.txt" ) ;
+        File file = FileTestUtils.createUniqueFile( "local-repository", "test-resource.txt" );
 
         file.delete();
 
@@ -68,7 +68,7 @@ public class HttpWagonTest
         // default so we must place a dummy artifact in the http repo first before
         // the actual PUT operation.
 
-        File f = new File( FileTestUtils.createDir( "http-repository"),  "test-resource.txt" );
+        File f = new File( FileTestUtils.createDir( "http-repository" ), "test-resource.txt" );
 
         f.delete();
 
