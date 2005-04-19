@@ -1,7 +1,7 @@
 package org.apache.maven.wagon.providers.ssh;
 
 /*
- * Copyright 2001-2004 The Apache Software Foundation.
+ * Copyright 2001-2005 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ public class ScpWagonTest
 {
     public ScpWagonTest( String testName )
     {
-        super( testName );    
+        super( testName );
     }
 
     protected String getProtocol()
@@ -44,7 +44,6 @@ public class ScpWagonTest
     }
 
 
-
     protected AuthenticationInfo getAuthInfo()
     {
         AuthenticationInfo authInfo = new AuthenticationInfo();
@@ -53,7 +52,7 @@ public class ScpWagonTest
 
         authInfo.setUserName( userName );
 
-        File privateKey = TestData.getPrivateKey() ;
+        File privateKey = TestData.getPrivateKey();
 
         if ( privateKey.exists() )
         {

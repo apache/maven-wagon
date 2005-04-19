@@ -30,7 +30,7 @@ public class SftpWagonTest
 {
     public SftpWagonTest( String testName )
     {
-        super( testName );    
+        super( testName );
     }
 
     protected String getProtocol()
@@ -44,7 +44,6 @@ public class SftpWagonTest
     }
 
 
-
     protected AuthenticationInfo getAuthInfo()
     {
         AuthenticationInfo authInfo = new AuthenticationInfo();
@@ -53,7 +52,7 @@ public class SftpWagonTest
 
         authInfo.setUserName( userName );
 
-        File privateKey = TestData.getPrivateKey() ;
+        File privateKey = TestData.getPrivateKey();
 
         if ( privateKey.exists() )
         {
