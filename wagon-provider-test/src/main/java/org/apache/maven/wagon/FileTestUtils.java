@@ -40,12 +40,6 @@ public class FileTestUtils
 
     }
 
-    public static final File createUniqueFile( final String name )
-        throws IOException
-    {
-        return createUniqueFile( name, name );
-    }
-
 
     public static final File createUniqueDir( final String name )
         throws IOException
@@ -74,8 +68,6 @@ public class FileTestUtils
         {
             throw new IOException( "Unable to create the directory for testdata" );
         }
-
-        System.out.println( "Creating directory: " + retValue );
 
         return retValue;
     }

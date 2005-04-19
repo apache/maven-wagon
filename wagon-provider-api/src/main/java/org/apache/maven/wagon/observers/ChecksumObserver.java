@@ -22,6 +22,7 @@ import org.apache.maven.wagon.WagonException;
 import org.apache.maven.wagon.WagonUtils;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferListener;
+import org.apache.maven.wagon.resource.Resource;
 import org.apache.maven.wagon.util.FileUtils;
 import org.apache.maven.wagon.util.IoUtils;
 
@@ -135,12 +136,12 @@ public class ChecksumObserver
 
         transferingChecksum = true;
 
+        String checksumResource = transferEvent.getResource().getName() + extension;
+
+        int type = transferEvent.getRequestType();
+
         try
         {
-            int type = transferEvent.getRequestType();
-
-            String resource = transferEvent.getResource().getName();
-
             if ( type == TransferEvent.REQUEST_GET )
             {
 
@@ -150,9 +151,7 @@ public class ChecksumObserver
 
                 File checksumFile = new File( artifactFile.getPath() + extension );
 
-                String md5Resource = resource + extension;
-
-                wagon.get( md5Resource, checksumFile );
+                wagon.get( checksumResource, checksumFile );
 
                 expectedChecksum = FileUtils.fileRead( checksumFile ).trim();
             }
@@ -160,25 +159,22 @@ public class ChecksumObserver
             {
                 //It's PUT put request we will also put md5 checksum
                 // which was computed on the fly
-                WagonUtils.fromString( resource + extension, wagon, actualChecksum );
+                WagonUtils.fromString( checksumResource, wagon, actualChecksum );
 
             }
 
         }
         catch ( ResourceDoesNotExistException e )
         {
-            // TODO: handle differently! No Exception catching....
-            e.printStackTrace();
+            transferError( new TransferEvent( wagon, new Resource( checksumResource ), e, type ) );
         }
         catch ( WagonException e )
         {
-            // TODO: handle differently! No Exception catching....
-            e.printStackTrace();
+            transferError( new TransferEvent( wagon, new Resource( checksumResource ), e, type ) );
         }
         catch ( IOException e )
         {
-            // TODO: handle differently! No Exception catching....
-            e.printStackTrace();
+            transferError( new TransferEvent( wagon, new Resource( checksumResource ), e, type ) );
         }
         finally
         {
@@ -252,19 +248,6 @@ public class ChecksumObserver
         }
 
         return retValue.trim();
-    }
-
-
-    public boolean checksumIsValid()
-    {
-        boolean retValue = false;
-
-        if ( actualChecksum != null && expectedChecksum != null )
-        {
-            retValue = actualChecksum.equals( expectedChecksum );
-        }
-
-        return retValue;
     }
 
 

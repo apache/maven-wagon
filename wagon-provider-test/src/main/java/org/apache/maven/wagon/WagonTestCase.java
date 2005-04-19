@@ -230,7 +230,7 @@ public abstract class WagonTestCase
 
         wagon.connect( testRepository );
 
-        destFile = FileTestUtils.createUniqueFile( getName() );
+        destFile = FileTestUtils.createUniqueFile( getName(), getName() );
 
         destFile.deleteOnExit();
 
@@ -250,43 +250,20 @@ public abstract class WagonTestCase
 
         getFile();
 
-        System.out.println( "checksumObserver:" + checksumObserver );
+        assertNotNull( "check checksum is not null", checksumObserver.getActualChecksum() );
 
-        System.out.println( "actual:" + checksumObserver.getActualChecksum() );
+        assertEquals( "compare checksums", checksumObserver.getExpectedChecksum(),
+                      checksumObserver.getActualChecksum() );
 
-        System.out.println( "expected:" + checksumObserver.getExpectedChecksum() );
-
-        assertTrue( checksumObserver.checksumIsValid() );
-
-        compareContents( sourceFile, destFile );
-    }
-
-    protected void compareContents( File sourceFile, File destFile )
-        throws Exception
-    {
         // Now compare the conents of the artifact that was placed in
         // the repository with the contents of the artifact that was
         // retrieved from the repository.
-
-        System.out.println( "sourceFile = " + sourceFile );
-
-        System.out.println( "destFile = " + destFile );
-
-        System.out.println(
-            "---------------------------------------------------------------------------------------------------------" );
-
-        System.out.print( "Evaluating and comparing ... " );
 
         String sourceContent = FileUtils.fileRead( sourceFile );
 
         String destContent = FileUtils.fileRead( destFile );
 
         assertEquals( sourceContent, destContent );
-
-        System.out.println( "OK" );
-
-        System.out.println(
-            "---------------------------------------------------------------------------------------------------------" );
     }
 
     // ----------------------------------------------------------------------

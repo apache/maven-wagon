@@ -32,9 +32,9 @@ public class LazyFileOutputStreamTest
     public void testFileCreation()
         throws Exception
     {
-        File file = FileTestUtils.createUniqueFile( getName() );
+        File file = File.createTempFile( getName(), null );
 
-        file.deleteOnExit();
+        file.delete();
 
         assertFalse( file.exists() );
 
@@ -42,9 +42,9 @@ public class LazyFileOutputStreamTest
 
         assertFalse( file.exists() );
 
-        String exptected = "michal";
+        String expected = "michal";
 
-        stream.write( exptected.getBytes() );
+        stream.write( expected.getBytes() );
 
         stream.close();
 
@@ -52,7 +52,7 @@ public class LazyFileOutputStreamTest
 
         String actual = FileUtils.fileRead( file );
 
-        assertEquals( exptected, actual );
+        assertEquals( expected, actual );
 
     }
 
