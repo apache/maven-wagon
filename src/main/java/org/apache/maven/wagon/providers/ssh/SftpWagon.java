@@ -62,6 +62,10 @@ public class SftpWagon
         String dir = PathUtils.dirname( resourceName );
         dir = StringUtils.replace( dir, "\\", "/" );
 
+        Resource resource = new Resource( resourceName );
+
+        firePutInitiated( resource, source );
+
         ChannelSftp channel = null;
 
         String filename;
@@ -83,8 +87,6 @@ public class SftpWagon
             channel.cd( basedir );
 
             mkdirs( channel, dir );
-
-            Resource resource = new Resource( resourceName );
 
             firePutStarted( resource, source );
 
