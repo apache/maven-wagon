@@ -142,9 +142,11 @@ public class HttpWagon
     {
         String url = getRepository().getUrl() + "/" + resourceName;
 
-        PutMethod putMethod = new PutMethod( url );
-
         Resource resource = new Resource( resourceName );
+
+        firePutInitiated( resource, source );
+
+        PutMethod putMethod = new PutMethod( url );
 
         try
         {
