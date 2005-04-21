@@ -96,11 +96,6 @@ public class FileWagon
         OutputStream outputStream = new LazyFileOutputStream( file );
 
         outputData.setOutputStream( outputStream );
-
-        resource.setContentLength( file.length() );
-
-        resource.setLastModified( file.lastModified() );
-
     }
 
     public void openConnection()
