@@ -280,6 +280,20 @@ public abstract class AbstractWagon
         transferEventSupport.fireTransferInitiated( transferEvent );
     }
 
+    protected void firePutInitiated( Resource resource, File localFile )
+    {
+        long timestamp = System.currentTimeMillis();
+
+        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_INITIATED,
+                                                         TransferEvent.REQUEST_PUT );
+
+        transferEvent.setTimestamp( timestamp );
+
+        transferEvent.setLocalFile( localFile );
+
+        transferEventSupport.fireTransferInitiated( transferEvent );
+    }
+
     protected void firePutCompleted( Resource resource, File localFile )
     {
         long timestamp = System.currentTimeMillis();

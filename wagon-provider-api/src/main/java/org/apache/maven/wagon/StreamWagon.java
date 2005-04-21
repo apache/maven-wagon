@@ -128,6 +128,8 @@ public abstract class StreamWagon
 
         Resource resource = new Resource( resourceName );
 
+        firePutInitiated( resource, source );
+
         outputData.setResource( resource );
 
         fillOutputData( outputData );

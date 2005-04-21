@@ -21,8 +21,8 @@ import org.apache.maven.wagon.observers.ChecksumObserver;
 import org.apache.maven.wagon.observers.Debug;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
+import org.apache.maven.wagon.util.FileUtils;
 import org.codehaus.plexus.PlexusTestCase;
-import org.codehaus.plexus.util.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -207,7 +207,8 @@ public abstract class WagonTestCase
 
         wagon.connect( testRepository );
 
-        sourceFile = new File( getBasedir(), POM );
+        sourceFile = new File( FileTestUtils.getTestOutputDir(), "test-resource.txt" );
+        FileUtils.fileWrite( sourceFile.getAbsolutePath(), "test-resource.txt\n" );
 
         wagon.put( sourceFile, resource );
 
@@ -245,12 +246,17 @@ public abstract class WagonTestCase
 
         putFile();
 
+        assertNotNull( "check checksum is not null", checksumObserver.getActualChecksum() );
+
+        assertEquals( "compare checksums", "6b144b7285ffd6b0bc8300da162120b9", checksumObserver.getActualChecksum() );
+
+        checksumObserver = new ChecksumObserver();
+        
         getFile();
 
         assertNotNull( "check checksum is not null", checksumObserver.getActualChecksum() );
 
-        assertEquals( "compare checksums", checksumObserver.getExpectedChecksum(),
-                      checksumObserver.getActualChecksum() );
+        assertEquals( "compare checksums", "6b144b7285ffd6b0bc8300da162120b9", checksumObserver.getActualChecksum() );
 
         // Now compare the conents of the artifact that was placed in
         // the repository with the contents of the artifact that was

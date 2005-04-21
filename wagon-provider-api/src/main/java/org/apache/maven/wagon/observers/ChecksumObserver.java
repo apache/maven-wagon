@@ -16,22 +16,11 @@ package org.apache.maven.wagon.observers;
  * limitations under the License.
  */
 
-import org.apache.maven.wagon.ResourceDoesNotExistException;
-import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.WagonException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferListener;
-import org.apache.maven.wagon.resource.Resource;
-import org.apache.maven.wagon.util.FileUtils;
-import org.apache.maven.wagon.util.IoUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * TransferListeners which computes MD5 checksum on the fly when files are transfered.
@@ -44,24 +33,7 @@ public class ChecksumObserver
 {
     private MessageDigest digester = null;
 
-    private String expectedChecksum;
-
     private String actualChecksum;
-
-    private static Map algorithmExtensionMap = new HashMap();
-
-    private final String extension;
-
-    private boolean transferringChecksum = false;
-
-    static
-    {
-        algorithmExtensionMap.put( "MD5", ".md5" );
-
-        algorithmExtensionMap.put( "MD2", ".md2" );
-
-        algorithmExtensionMap.put( "SHA-1", ".sha1" );
-    }
 
     public ChecksumObserver()
         throws NoSuchAlgorithmException
@@ -75,13 +47,7 @@ public class ChecksumObserver
     public ChecksumObserver( String algorithm )
         throws NoSuchAlgorithmException
     {
-        if ( !algorithmExtensionMap.containsKey( algorithm ) )
-        {
-            throw new NoSuchAlgorithmException( "Checksum algorithm not recognised by this class: " + algorithm );
-        }
-
         digester = MessageDigest.getInstance( algorithm );
-        extension = (String) algorithmExtensionMap.get( algorithm );
     }
 
     public void transferInitiated( TransferEvent transferEvent )
@@ -94,14 +60,10 @@ public class ChecksumObserver
      */
     public void transferStarted( TransferEvent transferEvent )
     {
-        if ( !transferringChecksum )
-        {
-            expectedChecksum = null;
 
-            actualChecksum = null;
+        actualChecksum = null;
 
-            digester.reset();
-        }
+        digester.reset();
     }
 
     /**
@@ -109,108 +71,24 @@ public class ChecksumObserver
      */
     public void transferProgress( TransferEvent transferEvent, byte[] buffer, int length )
     {
-        if ( !transferringChecksum )
-        {
-            digester.update( buffer, 0, length );
-        }
+        digester.update( buffer, 0, length );
     }
 
     public void transferCompleted( TransferEvent transferEvent )
     {
-        if ( transferringChecksum )
-        {
-            return;
-        }
-
-        Wagon wagon = transferEvent.getWagon();
-
         actualChecksum = encode( digester.digest() );
-
-        InputStream inputStream = null;
-
-        String checksumResource = transferEvent.getResource().getName() + extension;
-
-        int type = transferEvent.getRequestType();
-
-        transferringChecksum = true;
-
-        try
-        {
-            if ( type == TransferEvent.REQUEST_GET )
-            {
-
-                //we will fetch md5 cheksum from server and
-                // read its content into memory
-                File artifactFile = transferEvent.getLocalFile();
-
-                File checksumFile = new File( artifactFile.getPath() + extension );
-
-                wagon.get( checksumResource, checksumFile );
-
-                expectedChecksum = FileUtils.fileRead( checksumFile ).trim();
-            }
-            else
-            {
-                //It's PUT put request we will also put md5 checksum
-                // which was computed on the fly
-
-                File file = File.createTempFile( "wagon", "tmp" );
-                file.deleteOnExit();
-
-                try
-                {
-                    FileUtils.fileWrite( file.getPath(), actualChecksum );
-
-                    wagon.put( file, checksumResource );
-                }
-                finally
-                {
-                    file.delete();
-                }
-            }
-
-        }
-        catch ( ResourceDoesNotExistException e )
-        {
-            transferError( new TransferEvent( wagon, new Resource( checksumResource ), e, type ) );
-        }
-        catch ( WagonException e )
-        {
-            transferError( new TransferEvent( wagon, new Resource( checksumResource ), e, type ) );
-        }
-        catch ( IOException e )
-        {
-            transferError( new TransferEvent( wagon, new Resource( checksumResource ), e, type ) );
-        }
-        finally
-        {
-            IoUtils.close( inputStream );
-
-            transferringChecksum = false;
-        }
-
     }
 
     public void transferError( TransferEvent transferEvent )
     {
         digester = null;
+        actualChecksum = null;
     }
 
     public void debug( String message )
     {
         // left intentionally blank
     }
-
-    /**
-     * Returns the md5 checksum downloaded from the server
-     *
-     * @return
-     */
-    public String getExpectedChecksum()
-    {
-        return expectedChecksum;
-    }
-
 
     /**
      * Returns md5 checksum which was computed during transfer
@@ -221,7 +99,6 @@ public class ChecksumObserver
     {
         return actualChecksum;
     }
-
 
     /**
      * Encodes a 128 bit or 160-bit byte array into a String.
