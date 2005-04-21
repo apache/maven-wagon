@@ -241,7 +241,7 @@ public class ScpExternalWagon
     {
         Resource resource = new Resource( resourceName );
 
-        firePutStarted( resource, source );
+        firePutInitiated( resource, source );
 
         if ( !source.exists() )
         {
@@ -259,6 +259,8 @@ public class ScpExternalWagon
         String mkdirCmd = "mkdir -p " + basedir + "/" + dir + "\n";
 
         executeCommand( mkdirCmd );
+
+        firePutStarted( resource, source );
 
         executeScpCommand( source, basedir + "/" + resourceName, true );
 

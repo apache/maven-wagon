@@ -233,12 +233,15 @@ public class ScpWagon
     public void put( File source, String resourceName )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-
         String basedir = getRepository().getBasedir();
 
         resourceName = StringUtils.replace( resourceName, "\\", "/" );
         String dir = PathUtils.dirname( resourceName );
         dir = StringUtils.replace( dir, "\\", "/" );
+
+        Resource resource = new Resource( resourceName );
+
+        firePutInitiated( resource, source );
 
         String mkdirCmd = "mkdir -p " + basedir + "/" + dir + "\n";
 
@@ -298,8 +301,6 @@ public class ScpWagon
             {
                 throw new TransferFailedException( "ACK check failed" );
             }
-
-            Resource resource = new Resource( resourceName );
 
             putTransfer( resource, source, out, false );
 
