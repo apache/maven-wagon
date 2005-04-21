@@ -173,6 +173,10 @@ public abstract class AbstractWagon
     protected void putTransfer( Resource resource, File source, OutputStream output, boolean closeOutput )
         throws TransferFailedException
     {
+        resource.setContentLength( source.length() );
+
+        resource.setLastModified( source.lastModified() );
+
         firePutStarted( resource, source );
 
         InputStream input = null;
