@@ -77,9 +77,7 @@ public class ScpWagon
     {
         try
         {
-            final AuthenticationInfo authInfo = getRepository().getAuthenticationInfo();
-
-            if ( authInfo == null )
+            if ( authenticationInfo == null )
             {
                 throw new IllegalArgumentException( "Authentication Credentials cannot be null for SSH protocol" );
             }
@@ -95,16 +93,16 @@ public class ScpWagon
 
             String host = getRepository().getHost();
 
-            session = jsch.getSession( authInfo.getUserName(), host, port );
+            session = jsch.getSession( authenticationInfo.getUserName(), host, port );
 
             // If user don't define a password, he want to use a private key
-            if ( authInfo.getPassword() == null )
+            if ( authenticationInfo.getPassword() == null )
             {
                 File privateKey;
 
-                if ( authInfo.getPrivateKey() != null )
+                if ( authenticationInfo.getPrivateKey() != null )
                 {
-                    privateKey = new File( authInfo.getPrivateKey() );
+                    privateKey = new File( authenticationInfo.getPrivateKey() );
                 }
                 else
                 {
@@ -113,14 +111,14 @@ public class ScpWagon
 
                 if ( privateKey.exists() )
                 {
-                    if ( authInfo.getPassphrase() == null )
+                    if ( authenticationInfo.getPassphrase() == null )
                     {
-                        authInfo.setPassphrase( "" );
+                        authenticationInfo.setPassphrase( "" );
                     }
 
                     fireSessionDebug( "Using private key: " + privateKey );
 
-                    jsch.addIdentity( privateKey.getAbsolutePath(), authInfo.getPassphrase() );
+                    jsch.addIdentity( privateKey.getAbsolutePath(), authenticationInfo.getPassphrase() );
                 }
                 else
                 {
@@ -153,7 +151,7 @@ public class ScpWagon
             }
 
             // username and password will be given via UserInfo interface.
-            UserInfo ui = new WagonUserInfo( authInfo );
+            UserInfo ui = new WagonUserInfo( authenticationInfo );
 
             session.setUserInfo( ui );
 

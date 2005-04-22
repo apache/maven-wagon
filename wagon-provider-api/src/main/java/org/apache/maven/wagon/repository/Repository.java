@@ -51,14 +51,16 @@ public class Repository
 
     private RepositoryPermissions permissions;
 
-    private AuthenticationInfo authenticationInfo;
-
     /**
      * Properties influencing wagon behaviour
      * which are very specific to particular wagon.
      */
     private Properties parameters = new Properties();
 
+    // Username/password are sometimes encoded in the URL
+    private String username = null;
+
+    private String password = null;
 
     public Repository()
     {
@@ -72,15 +74,6 @@ public class Repository
         setUrl( url );
     }
 
-    public Repository( String id, String url, AuthenticationInfo authenticationInfo )
-    {
-        setId( id );
-
-        setUrl( url );
-
-        this.authenticationInfo = authenticationInfo;
-    }
-
     public String getId()
     {
         return id;
@@ -91,16 +84,6 @@ public class Repository
         this.id = id;
     }
 
-
-    public AuthenticationInfo getAuthenticationInfo()
-    {
-        return authenticationInfo;
-    }
-
-    public void setAuthenticationInfo( AuthenticationInfo authenticationInfo )
-    {
-        this.authenticationInfo = authenticationInfo;
-    }
 
     public String getBasedir()
     {
@@ -144,30 +127,23 @@ public class Repository
         this.basedir = PathUtils.basedir( url );
 
         String username = PathUtils.user( url );
+        this.username = username;
 
         if ( username != null )
         {
-            if ( authenticationInfo == null )
-            {
-                authenticationInfo = new AuthenticationInfo();
-            }
-            authenticationInfo.setUserName( username );
-
             String password = PathUtils.password( url );
-
-            String userInfo = username;
 
             if ( password != null )
             {
-                authenticationInfo.setPassword( password );
+                this.password = password;
 
-                userInfo += ":" + password;
+                username += ":" + password;
             }
 
-            userInfo += "@";
+            username += "@";
 
-            int index = url.indexOf( userInfo );
-            this.url = url.substring( 0, index ) + url.substring( index + userInfo.length() );
+            int index = url.indexOf( username );
+            this.url = url.substring( 0, index ) + url.substring( index + username.length() );
         }
     }
 
@@ -263,6 +239,16 @@ public class Repository
     public int hashCode()
     {
         return getId().hashCode();
+    }
+
+    public String getUsername()
+    {
+        return username;
+    }
+
+    public String getPassword()
+    {
+        return password;
     }
 }
 

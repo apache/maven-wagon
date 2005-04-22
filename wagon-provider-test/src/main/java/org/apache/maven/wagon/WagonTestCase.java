@@ -96,8 +96,6 @@ public abstract class WagonTestCase
 
         testRepository.setUrl( getTestRepositoryUrl() );
 
-        testRepository.setAuthenticationInfo( getAuthInfo() );
-
         testRepository.setPermissions( getPermissions() );
 
         // ----------------------------------------------------------------------
@@ -205,7 +203,7 @@ public abstract class WagonTestCase
 
         wagon.addTransferListener( checksumObserver );
 
-        wagon.connect( testRepository );
+        wagon.connect( testRepository, getAuthInfo() );
 
         sourceFile = new File( FileTestUtils.getTestOutputDir(), "test-resource.txt" );
         FileUtils.fileWrite( sourceFile.getAbsolutePath(), "test-resource.txt\n" );
@@ -226,7 +224,7 @@ public abstract class WagonTestCase
 
         wagon.addTransferListener( checksumObserver );
 
-        wagon.connect( testRepository );
+        wagon.connect( testRepository, getAuthInfo() );
 
         destFile = FileTestUtils.createUniqueFile( getName(), getName() );
 

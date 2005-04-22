@@ -31,7 +31,6 @@ import org.apache.maven.wagon.StreamWagon;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.authentication.AuthenticationException;
-import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 
@@ -48,16 +47,14 @@ public class FtpWagon
     public void openConnection()
         throws ConnectionException, AuthenticationException
     {
-        AuthenticationInfo authInfo = getRepository().getAuthenticationInfo();
-
-        if ( authInfo == null )
+        if ( authenticationInfo == null )
         {
             throw new IllegalArgumentException( "Authentication Credentials cannot be null for FTP protocol" );
         }
 
-        String username = authInfo.getUserName();
+        String username = authenticationInfo.getUserName();
 
-        String password = authInfo.getPassword();
+        String password = authenticationInfo.getPassword();
 
         String host = getRepository().getHost();
 

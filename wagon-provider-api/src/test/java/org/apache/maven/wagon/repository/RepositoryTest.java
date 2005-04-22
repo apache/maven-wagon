@@ -49,10 +49,6 @@ public class RepositoryTest
     {
         Repository repository = new Repository();
 
-        repository.setAuthenticationInfo( new AuthenticationInfo() );
-
-        assertNotNull( repository.getAuthenticationInfo() );
-
         repository.setBasedir( "directory" );
 
         assertEquals( "directory", repository.getBasedir() );

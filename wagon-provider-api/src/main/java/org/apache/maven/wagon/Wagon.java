@@ -17,6 +17,7 @@ package org.apache.maven.wagon;
  */
 
 import org.apache.maven.wagon.authentication.AuthenticationException;
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.SessionListener;
 import org.apache.maven.wagon.events.TransferListener;
@@ -79,6 +80,12 @@ public interface Wagon
         throws ConnectionException, AuthenticationException;
 
     void connect( Repository source, ProxyInfo proxyInfo )
+        throws ConnectionException, AuthenticationException;
+
+    void connect( Repository source, AuthenticationInfo authenticationInfo )
+        throws ConnectionException, AuthenticationException;
+
+    void connect( Repository source, AuthenticationInfo authenticationInfo, ProxyInfo proxyInfo )
         throws ConnectionException, AuthenticationException;
 
     void openConnection()

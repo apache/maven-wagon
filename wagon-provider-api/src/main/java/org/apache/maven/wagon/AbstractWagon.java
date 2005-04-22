@@ -17,6 +17,7 @@ package org.apache.maven.wagon;
  */
 
 import org.apache.maven.wagon.authentication.AuthenticationException;
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.events.SessionEvent;
 import org.apache.maven.wagon.events.SessionEventSupport;
 import org.apache.maven.wagon.events.SessionListener;
@@ -56,6 +57,8 @@ public abstract class AbstractWagon
 
     protected ProxyInfo proxyInfo = null;
 
+    protected AuthenticationInfo authenticationInfo = null;
+
     // ----------------------------------------------------------------------
     // Repository
     // ----------------------------------------------------------------------
@@ -72,10 +75,22 @@ public abstract class AbstractWagon
     public void connect( Repository repository )
         throws ConnectionException, AuthenticationException
     {
-        connect( repository, null );
+        connect( repository, null, null );
     }
 
     public void connect( Repository repository, ProxyInfo proxyInfo )
+        throws ConnectionException, AuthenticationException
+    {
+        connect( repository, null, proxyInfo );
+    }
+
+    public void connect( Repository repository, AuthenticationInfo authenticationInfo )
+        throws ConnectionException, AuthenticationException
+    {
+        connect( repository, authenticationInfo, null );
+    }
+
+    public void connect( Repository repository, AuthenticationInfo authenticationInfo, ProxyInfo proxyInfo )
         throws ConnectionException, AuthenticationException
     {
         if ( repository == null )
@@ -84,6 +99,23 @@ public abstract class AbstractWagon
         }
 
         this.repository = repository;
+
+        if ( authenticationInfo == null )
+        {
+            // Get user/pass that were encoded in the URL.
+            if ( repository.getUsername() != null )
+            {
+                authenticationInfo = new AuthenticationInfo();
+                authenticationInfo.setUserName( repository.getUsername() );
+                if ( repository.getPassword() != null )
+                {
+                    authenticationInfo.setPassword( repository.getPassword() );
+                }
+            }
+        }
+
+        // TODO: Do these needs to be fields, or are they only used in openConnection()?
+        this.authenticationInfo = authenticationInfo;
         this.proxyInfo = proxyInfo;
 
         fireSessionOpening();
