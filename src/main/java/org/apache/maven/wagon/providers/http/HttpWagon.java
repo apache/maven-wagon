@@ -69,17 +69,15 @@ public class HttpWagon
     {
         client = new HttpClient( new MultiThreadedHttpConnectionManager() );
 
-        final AuthenticationInfo authInfo = getRepository().getAuthenticationInfo();
-
         String username = null;
 
         String password = null;
 
-        if ( authInfo != null )
+        if ( authenticationInfo != null )
         {
-            username = authInfo.getUserName();
+            username = authenticationInfo.getUserName();
 
-            password = authInfo.getPassword();
+            password = authenticationInfo.getPassword();
         }
 
         String host = getRepository().getHost();
