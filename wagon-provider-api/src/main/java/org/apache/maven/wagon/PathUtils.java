@@ -239,6 +239,11 @@ public class PathUtils
             url = url.substring( url.indexOf( ":", 4 ) + 1 ).trim();
         }
 
+        if ( url.startsWith( "file:" ) || url.startsWith( "local:" ) )
+        {
+            return WagonConstants.UNKNOWN_PORT;
+        }
+
         // skip over protocol
         url = url.substring( url.indexOf( ":" ) + 1 ).trim();
         if ( url.startsWith( "//" ) )
