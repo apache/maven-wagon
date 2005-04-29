@@ -18,6 +18,7 @@ package org.apache.maven.wagon.providers.scm;
 
 import org.apache.maven.scm.ScmException;
 import org.apache.maven.scm.ScmFileSet;
+import org.apache.maven.scm.ScmResult;
 import org.apache.maven.scm.manager.NoSuchScmProviderException;
 import org.apache.maven.scm.manager.ScmManager;
 import org.apache.maven.scm.provider.svn.repository.SvnScmProviderRepository;
@@ -27,8 +28,8 @@ import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.resource.Resource;
 import org.apache.maven.wagon.util.FileUtils;
 
@@ -130,6 +131,9 @@ public class ScmWagon
 
         String url = getRepository().getUrl() + "/" + resourceName;
 
+        // remove the file
+        url = url.substring( 0, url.lastIndexOf( '/' ) );
+
         ScmRepository scmRepository = getScmRepository( url );
 
         firePutStarted( resource, source );
@@ -137,27 +141,48 @@ public class ScmWagon
         try
         {
             File scmFile = new File( checkoutDirectory, resourceName );
-            scmFile.getParentFile().mkdirs();
-
-            boolean alreadyExists = scmFile.exists();
+            File basedir = scmFile.getParentFile();
 
             if ( !scmFile.equals( source ) )
             {
                 FileUtils.copyFile( source, scmFile );
             }
 
-            if ( alreadyExists )
+            String msg = "Adding " + resourceName + " to repository";
+
+            // TODO: ewwww
+            if ( new File( basedir, ".svn" ).exists() || new File( basedir, "CVS" ).exists() )
             {
-                scmManager.update( scmRepository, new ScmFileSet( checkoutDirectory, resourceName, null ), null );
+                scmManager.update( scmRepository, new ScmFileSet( basedir ), null );
             }
             else
             {
-                scmManager.checkOut( scmRepository, new ScmFileSet( scmFile.getParentFile() ), null );
-                scmManager.add( scmRepository, new ScmFileSet( scmFile.getParentFile(), scmFile ) );
+                File lastOne = mkdirs( basedir, scmRepository );
+                ScmResult result = scmManager.checkOut( scmRepository, new ScmFileSet( basedir ), null );
+                if ( !result.isSuccess() )
+                {
+                    throw new TransferFailedException(
+                        "Unable to checkout area to commit to " + result.getCommandOutput() );
+                }
+
+                if ( lastOne != null )
+                {
+                    result = scmManager.checkIn( scmRepository, new ScmFileSet( lastOne.getParentFile(), lastOne ),
+                                                 null, msg );
+                    if ( !result.isSuccess() )
+                    {
+                        throw new TransferFailedException( "Unable to commit file " + result.getCommandOutput() );
+                    }
+                }
             }
 
-            String msg = "Adding " + resourceName + " to repository";
-            scmManager.checkIn( scmRepository, new ScmFileSet( scmFile.getParentFile(), scmFile ), null, msg );
+            // TODO: detect if it is necessary to add first!
+            scmManager.add( scmRepository, new ScmFileSet( basedir, scmFile ) );
+            ScmResult result = scmManager.checkIn( scmRepository, new ScmFileSet( basedir, scmFile ), null, msg );
+            if ( !result.isSuccess() )
+            {
+                throw new TransferFailedException( "Unable to commit file " + result.getCommandOutput() );
+            }
         }
         catch ( ScmException e )
         {
@@ -171,6 +196,33 @@ public class ScmWagon
         postProcessListeners( resource, source, TransferEvent.REQUEST_PUT );
 
         firePutCompleted( resource, source );
+    }
+
+    private File mkdirs( File basedir, ScmRepository scmRepository )
+        throws ScmException
+    {
+        File lastOne = null;
+
+        if ( !basedir.equals( checkoutDirectory ) )
+        {
+            File parent = basedir.getParentFile();
+
+            // TODO: ewwww
+            if ( !new File( parent, ".svn" ).exists() && !new File( parent, "CVS" ).exists() )
+            {
+                lastOne = mkdirs( parent, scmRepository );
+            }
+
+            basedir.mkdir();
+
+            // TODO: ewwww
+            if ( !new File( basedir, ".svn" ).exists() && !new File( basedir, "CVS" ).exists() )
+            {
+                scmManager.add( scmRepository, new ScmFileSet( parent, basedir ) );
+                lastOne = basedir;
+            }
+        }
+        return lastOne;
     }
 
     public void closeConnection()
@@ -192,6 +244,9 @@ public class ScmWagon
 
         String url = getRepository().getUrl() + "/" + resourceName;
 
+        // remove the file
+        url = url.substring( 0, url.lastIndexOf( '/' ) );
+
         ScmRepository scmRepository = getScmRepository( url );
 
         fireGetStarted( resource, destination );
@@ -205,15 +260,23 @@ public class ScmWagon
         try
         {
             File scmFile = new File( checkoutDirectory, resourceName );
-            scmFile.getParentFile().mkdirs();
+            File basedir = scmFile.getParentFile();
 
-            if ( scmFile.exists() )
+            // TODO: ewwww
+            if ( new File( basedir, ".svn" ).exists() || new File( basedir, "CVS" ).exists() )
             {
-                scmManager.update( scmRepository, new ScmFileSet( checkoutDirectory, resourceName, null ), null );
+                scmManager.update( scmRepository, new ScmFileSet( basedir ), null );
             }
             else
             {
-                scmManager.checkOut( scmRepository, new ScmFileSet( scmFile.getParentFile() ), null );
+                // TODO: this should be checking out a full hierachy (requires the -d equiv)
+                basedir.mkdirs();
+                scmManager.checkOut( scmRepository, new ScmFileSet( basedir ), null );
+            }
+
+            if ( !scmFile.exists() )
+            {
+                throw new ResourceDoesNotExistException( "Unable to find resource " + destination + " after checkout" );
             }
 
             if ( !scmFile.equals( destination ) )
