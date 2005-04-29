@@ -158,17 +158,13 @@ public class ScmWagon
             else
             {
                 File lastOne = mkdirs( basedir, scmRepository );
-                ScmResult result = scmManager.checkOut( scmRepository, new ScmFileSet( basedir ), null );
-                if ( !result.isSuccess() )
-                {
-                    throw new TransferFailedException(
-                        "Unable to checkout area to commit to " + result.getCommandOutput() );
-                }
+                scmManager.checkOut( scmRepository, new ScmFileSet( basedir ), null );
 
                 if ( lastOne != null )
                 {
-                    result = scmManager.checkIn( scmRepository, new ScmFileSet( lastOne.getParentFile(), lastOne ),
-                                                 null, msg );
+                    ScmResult result = scmManager.checkIn( scmRepository,
+                                                           new ScmFileSet( lastOne.getParentFile(), lastOne ), null,
+                                                           msg );
                     if ( !result.isSuccess() )
                     {
                         throw new TransferFailedException( "Unable to commit file " + result.getCommandOutput() );
