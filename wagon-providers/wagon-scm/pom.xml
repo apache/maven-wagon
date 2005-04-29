@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.apache.maven.wagon</groupId>
+    <artifactId>wagon-providers</artifactId>
+    <version>1.0-alpha-3-SNAPSHOT</version>
+  </parent>
+  <artifactId>wagon-scm</artifactId>
+  <name>Maven Wagon SCM-based Provider</name>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.maven.scm</groupId>
+      <artifactId>maven-scm-api</artifactId>
+      <version>1.0-alpha-1-SNAPSHOT</version>
+    </dependency>
+    <!-- TODO: should be dynamically registered? -->
+    <dependency>
+      <groupId>org.apache.maven.scm</groupId>
+      <artifactId>maven-scm-provider-cvs</artifactId>
+      <version>1.0-alpha-1-SNAPSHOT</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.scm</groupId>
+      <artifactId>maven-scm-provider-svn</artifactId>
+      <version>1.0-alpha-1-SNAPSHOT</version>
+      <!-- temporarily required at compile time -->
+    </dependency>
+  </dependencies>
+</project>
