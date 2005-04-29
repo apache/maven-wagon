@@ -10,6 +10,9 @@
           <role>org.apache.maven.scm.manager.ScmManager</role>
         </requirement>
       </requirements>
+      <configuration>
+        <checkoutDirectory>${user.home}/.m2/repository</checkoutDirectory>
+      </configuration>
     </component>
   </components>
 </component-set>

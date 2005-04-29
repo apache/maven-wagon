@@ -274,35 +274,6 @@ public class ScpExternalWagon
         firePutCompleted( resource, source );
     }
 
-    private void postProcessListeners( Resource resource, File source, int requestType )
-        throws TransferFailedException
-    {
-        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
-
-        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_PROGRESS, requestType );
-
-        try
-        {
-            InputStream input = new FileInputStream( source );
-
-            while ( true )
-            {
-                int n = input.read( buffer );
-
-                if ( n == -1 )
-                {
-                    break;
-                }
-
-                fireTransferProgress( transferEvent, buffer, n );
-            }
-        }
-        catch ( IOException e )
-        {
-            throw new TransferFailedException( "Failed to post-process the source file", e );
-        }
-    }
-
     public void get( String resourceName, File destination )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {

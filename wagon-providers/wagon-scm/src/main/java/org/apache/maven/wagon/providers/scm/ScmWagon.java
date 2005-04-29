@@ -16,35 +16,24 @@ package org.apache.maven.wagon.providers.scm;
  * limitations under the License.
  */
 
-import org.apache.commons.httpclient.Credentials;
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpRecoverableException;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.commons.httpclient.NTCredentials;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PutMethod;
-import org.apache.commons.httpclient.util.DateParseException;
-import org.apache.commons.httpclient.util.DateParser;
-import org.apache.commons.lang.StringUtils;
+import org.apache.maven.scm.ScmException;
+import org.apache.maven.scm.ScmFileSet;
 import org.apache.maven.scm.manager.NoSuchScmProviderException;
 import org.apache.maven.scm.manager.ScmManager;
 import org.apache.maven.scm.provider.svn.repository.SvnScmProviderRepository;
 import org.apache.maven.scm.repository.ScmRepository;
 import org.apache.maven.scm.repository.ScmRepositoryException;
-import org.apache.maven.scm.ScmFileSet;
-import org.apache.maven.scm.ScmException;
 import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.resource.Resource;
+import org.apache.maven.wagon.util.FileUtils;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * @author <a href="brett@apache.org">Brett Porter</a>
@@ -54,6 +43,8 @@ public class ScmWagon
     extends AbstractWagon
 {
     private ScmManager scmManager;
+
+    private File checkoutDirectory;
 
     public ScmManager getScmManager()
     {
@@ -65,9 +56,23 @@ public class ScmWagon
         this.scmManager = scmManager;
     }
 
+    public File getCheckoutDirectory()
+    {
+        return checkoutDirectory;
+    }
+
+    public void setCheckoutDirectory( File checkoutDirectory )
+    {
+        this.checkoutDirectory = checkoutDirectory;
+    }
+
     public void openConnection()
         throws ConnectionException
     {
+        if ( !checkoutDirectory.exists() )
+        {
+            checkoutDirectory.mkdirs();
+        }
     }
 
     private ScmRepository getScmRepository( String url )
@@ -87,7 +92,7 @@ public class ScmWagon
         ScmRepository scmRepository;
         try
         {
-            scmRepository = scmManager.makeScmRepository( getRepository().getUrl() );
+            scmRepository = scmManager.makeScmRepository( url );
         }
         catch ( ScmRepositoryException e )
         {
@@ -119,17 +124,51 @@ public class ScmWagon
     public void put( File source, String resourceName )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        String url = getRepository().getUrl() + "/" + resourceName;
-
         Resource resource = new Resource( resourceName );
 
         firePutInitiated( resource, source );
 
+        String url = getRepository().getUrl() + "/" + resourceName;
+
+        ScmRepository scmRepository = getScmRepository( url );
+
         firePutStarted( resource, source );
 
-        // TODO: if not exists, checkout
-        // TODO: put file in place
-        // TODO: commit
+        try
+        {
+            File scmFile = new File( checkoutDirectory, resourceName );
+            scmFile.getParentFile().mkdirs();
+
+            boolean alreadyExists = scmFile.exists();
+
+            if ( !scmFile.equals( source ) )
+            {
+                FileUtils.copyFile( source, scmFile );
+            }
+
+            if ( alreadyExists )
+            {
+                scmManager.update( scmRepository, new ScmFileSet( checkoutDirectory, resourceName, null ), null );
+            }
+            else
+            {
+                scmManager.checkOut( scmRepository, new ScmFileSet( scmFile.getParentFile() ), null );
+                scmManager.add( scmRepository, new ScmFileSet( scmFile.getParentFile(), scmFile ) );
+            }
+
+            String msg = "Adding " + resourceName + " to repository";
+            scmManager.checkIn( scmRepository, new ScmFileSet( scmFile.getParentFile(), scmFile ), null, msg );
+        }
+        catch ( ScmException e )
+        {
+            throw new TransferFailedException( "Error interacting with SCM", e );
+        }
+        catch ( IOException e )
+        {
+            throw new TransferFailedException( "Error interacting with SCM", e );
+        }
+
+        postProcessListeners( resource, source, TransferEvent.REQUEST_PUT );
 
         firePutCompleted( resource, source );
     }
@@ -165,19 +204,33 @@ public class ScmWagon
 
         try
         {
-            if ( destination.exists() )
+            File scmFile = new File( checkoutDirectory, resourceName );
+            scmFile.getParentFile().mkdirs();
+
+            if ( scmFile.exists() )
             {
-                scmManager.update( scmRepository, new ScmFileSet( destination.getParentFile(), destination ), null );
+                scmManager.update( scmRepository, new ScmFileSet( checkoutDirectory, resourceName, null ), null );
             }
             else
             {
-                scmManager.checkOut( scmRepository, new ScmFileSet( destination.getParentFile() ), null );
+                scmManager.checkOut( scmRepository, new ScmFileSet( scmFile.getParentFile() ), null );
+            }
+
+            if ( !scmFile.equals( destination ) )
+            {
+                FileUtils.copyFile( scmFile, destination );
             }
         }
         catch ( ScmException e )
         {
             throw new TransferFailedException( "Error getting file from SCM", e );
         }
+        catch ( IOException e )
+        {
+            throw new TransferFailedException( "Error getting file from SCM", e );
+        }
+
+        postProcessListeners( resource, destination, TransferEvent.REQUEST_GET );
 
         fireGetCompleted( resource, destination );
     }

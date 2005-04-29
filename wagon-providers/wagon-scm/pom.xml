@@ -28,5 +28,11 @@
       <version>1.0-alpha-1-SNAPSHOT</version>
       <!-- temporarily required at compile time -->
     </dependency>
+    <dependency>
+      <groupId>org.apache.maven.scm</groupId>
+      <artifactId>maven-scm-test</artifactId>
+      <version>1.0-alpha-1-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

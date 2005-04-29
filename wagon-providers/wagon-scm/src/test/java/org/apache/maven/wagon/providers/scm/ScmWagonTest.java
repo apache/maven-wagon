@@ -17,8 +17,9 @@ package org.apache.maven.wagon.providers.scm;
  */
 
 
-import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.WagonTestCase;
+import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.util.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,16 +31,46 @@ import java.io.IOException;
 public class ScmWagonTest
     extends WagonTestCase
 {
+    protected void setUp()
+        throws Exception
+    {
+        super.setUp();
+
+        FileUtils.deleteDirectory( getCheckoutDirectory() );
+    }
+
+    protected Wagon getWagon()
+        throws Exception
+    {
+        ScmWagon wagon = (ScmWagon) super.getWagon();
+
+        wagon.setCheckoutDirectory( getCheckoutDirectory() );
+
+        return wagon;
+    }
+
+    private File getCheckoutDirectory()
+    {
+        return getTestFile( "target/test-output/checkout" );
+    }
+
     protected String getProtocol()
     {
-        return "file";
+        return "scm";
     }
 
     protected String getTestRepositoryUrl()
         throws IOException
     {
-        File file = FileTestUtils.createUniqueDir( getName() + ".file-repository." );
+        String repository = getTestFile( "target/test-classes/test-repo" ).getAbsolutePath();
 
-        return "file://" + file.getPath();
+        // TODO: this is a hack for windows
+        if ( repository.indexOf( ":" ) >= 0 )
+        {
+            repository = repository.substring( repository.indexOf( ":" ) + 1 );
+        }
+        repository = repository.replace( '\\', '/' );
+
+        return "scm:cvs:local:" + repository + ":repository";
     }
 }
