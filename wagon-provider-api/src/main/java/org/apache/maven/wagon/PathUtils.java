@@ -152,7 +152,19 @@ public class PathUtils
             return "localhost";
         }
 
-        String host = url.substring( url.indexOf( "://" ) + 3 ).trim();
+        String host = url;
+        if ( protocol.equals( "scm" ) )
+        {
+            // skip over type
+            host = host.substring( host.indexOf( ":", 4 ) + 1 ).trim();
+        }
+
+        // skip over protocol
+        host = host.substring( host.indexOf( ":" ) + 1 ).trim();
+        if ( host.startsWith( "//" ) )
+        {
+            host = host.substring( 2 );
+        }
 
         int pos = host.indexOf( "/" );
 
@@ -204,7 +216,7 @@ public class PathUtils
      * @param url
      * @return
      */
-    public static int port( final String url )
+    public static int port( String url )
     {
 
         final String protocol = PathUtils.protocol( url );
@@ -213,20 +225,38 @@ public class PathUtils
         {
             return WagonConstants.UNKNOWN_PORT;
         }
-        final String host = PathUtils.host( url );
 
-        if ( host == null )
+        final String authorization = PathUtils.authorization( url );
+
+        if ( authorization == null )
         {
             return WagonConstants.UNKNOWN_PORT;
         }
 
-        final String prefix = protocol + "://" + host;
+        if ( protocol.equals( "scm" ) )
+        {
+            // skip over type
+            url = url.substring( url.indexOf( ":", 4 ) + 1 ).trim();
+        }
 
-        final int start = prefix.length();
+        // skip over protocol
+        url = url.substring( url.indexOf( ":" ) + 1 ).trim();
+        if ( url.startsWith( "//" ) )
+        {
+            url = url.substring( 2 );
+        }
+
+        int start = authorization.length();
 
         if ( url.length() > start && url.charAt( start ) == ':' )
         {
             int end = url.indexOf( '/', start );
+
+            if ( end == start + 1 )
+            {
+                // it is :/
+                return WagonConstants.UNKNOWN_PORT;
+            }
 
             if ( end == -1 )
             {
@@ -247,11 +277,21 @@ public class PathUtils
      * @return
      * @todo need to URL decode for spaces?
      */
-    public static String basedir( final String url )
+    public static String basedir( String url )
     {
-        final String protocol = PathUtils.protocol( url );
+        String protocol = PathUtils.protocol( url );
 
         String retValue = null;
+
+        if ( protocol.equals( "scm" ) )
+        {
+            // skip over SCM bits
+            if ( url.startsWith( "scm:svn:" ) )
+            {
+                url = url.substring( url.indexOf( ":", 4 ) + 1 );
+                protocol = PathUtils.protocol( url );
+            }
+        }
 
         if ( protocol.equals( "file" ) )
         {
@@ -296,27 +336,41 @@ public class PathUtils
         }
         else
         {
-            final String host = PathUtils.authorization( url );
+            final String authorization = PathUtils.authorization( url );
 
             final int port = PathUtils.port( url );
 
-            final int pos;
+            int pos;
 
-            if ( port != WagonConstants.UNKNOWN_PORT )
+            if ( protocol.equals( "scm" ) )
             {
-                pos = ( protocol + "://" + host + ":" + port ).length();
-
+                pos = url.indexOf( ":", 4 ) + 1;
+                pos = url.indexOf( ":", pos ) + 1;
             }
             else
             {
-                pos = ( protocol + "://" + host ).length();
+                pos = url.indexOf( "://" ) + 3;
             }
+
+            pos += authorization.length();
+
+            if ( port != WagonConstants.UNKNOWN_PORT )
+            {
+                pos = pos + Integer.toString( port ).length() + 1;
+            }
+
             if ( url.length() > pos )
             {
                 retValue = url.substring( pos );
+                if ( retValue.startsWith( ":" ) )
+                {
+                    // this is for :/ after the host
+                    retValue = retValue.substring( 1 );
+                }
 
+                // one module may be allowed in the path in CVS
+                retValue = retValue.replace( ':', '/' );
             }
-
         }
 
         if ( retValue == null )

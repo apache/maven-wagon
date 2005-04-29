@@ -67,10 +67,19 @@ public class PathUtilsTest
 
     }
 
+    public void testScmHostResolving()
+    {
+        assertEquals( "www.codehaus.org", PathUtils.host( "scm:svn:http://www.codehaus.org" ) );
+        assertEquals( "www.codehaus.org", PathUtils.host( "scm:svn:http://www.codehaus.org/repos/module" ) );
+        assertEquals( "www.codehaus.org", PathUtils.host( "scm:cvs:pserver:anoncvs@www.codehaus.org:/root" ) );
+    }
+
     public void testProtocolResolving()
     {
         assertEquals( "http", PathUtils.protocol( "http://www.codehause.org" ) );
         assertEquals( "file", PathUtils.protocol( "file:///c:/temp" ) );
+        assertEquals( "scm", PathUtils.protocol( "scm:svn:http://localhost/repos/module" ) );
+        assertEquals( "scm", PathUtils.protocol( "scm:cvs:pserver:anoncvs@cvs.apache.org:/home/cvspublic" ) );
     }
 
     public void testUserInfo()
@@ -81,6 +90,34 @@ public class PathUtilsTest
         assertEquals( "www.codehaus.org", PathUtils.host( urlWithUsername ) );
         assertEquals( "/", PathUtils.basedir( urlWithUsername ) );
         String urlWithUsernamePassword = "http://brett:porter@www.codehaus.org";
+        assertEquals( "brett", PathUtils.user( urlWithUsernamePassword ) );
+        assertEquals( "porter", PathUtils.password( urlWithUsernamePassword ) );
+        assertEquals( "www.codehaus.org", PathUtils.host( urlWithUsernamePassword ) );
+        assertEquals( "/", PathUtils.basedir( urlWithUsernamePassword ) );
+    }
+
+    public void testSubversionUserInfo()
+    {
+        String urlWithUsername = "scm:svn:http://brett@www.codehaus.org";
+        assertEquals( "brett", PathUtils.user( urlWithUsername ) );
+        assertNull( PathUtils.password( urlWithUsername ) );
+        assertEquals( "www.codehaus.org", PathUtils.host( urlWithUsername ) );
+        assertEquals( "/", PathUtils.basedir( urlWithUsername ) );
+        String urlWithUsernamePassword = "scm:svn:http://brett:porter@www.codehaus.org";
+        assertEquals( "brett", PathUtils.user( urlWithUsernamePassword ) );
+        assertEquals( "porter", PathUtils.password( urlWithUsernamePassword ) );
+        assertEquals( "www.codehaus.org", PathUtils.host( urlWithUsernamePassword ) );
+        assertEquals( "/", PathUtils.basedir( urlWithUsernamePassword ) );
+    }
+
+    public void testCvsUserInfo()
+    {
+        String urlWithUsername = "scm:cvs:pserver:brett@www.codehaus.org";
+        assertEquals( "brett", PathUtils.user( urlWithUsername ) );
+        assertNull( PathUtils.password( urlWithUsername ) );
+        assertEquals( "www.codehaus.org", PathUtils.host( urlWithUsername ) );
+        assertEquals( "/", PathUtils.basedir( urlWithUsername ) );
+        String urlWithUsernamePassword = "scm:cvs:pserver:brett:porter@www.codehaus.org";
         assertEquals( "brett", PathUtils.user( urlWithUsernamePassword ) );
         assertEquals( "porter", PathUtils.password( urlWithUsernamePassword ) );
         assertEquals( "www.codehaus.org", PathUtils.host( urlWithUsernamePassword ) );
@@ -130,6 +167,24 @@ public class PathUtilsTest
 
         assertEquals( 10, PathUtils.port( "ftp://localhost:10" ) );
 
+    }
+
+    public void testScmPortResolving()
+    {
+        assertEquals( 80, PathUtils.port( "scm:svn:http://www.codehaus.org:80/maven" ) );
+        assertEquals( WagonConstants.UNKNOWN_PORT, PathUtils.port( "scm:cvs:pserver:anoncvs@localhost:/temp:module" ) );
+
+        assertEquals( 2402, PathUtils.port( "scm:cvs:pserver:anoncvs@localhost:2402/temp:module" ) );
+    }
+
+    public void testScmBasedir()
+    {
+        assertEquals( "/maven", PathUtils.basedir( "scm:svn:http://www.codehause.org/maven" ) );
+        assertEquals( "/maven", PathUtils.basedir( "scm:svn:http://www.codehause.org:80/maven" ) );
+        assertEquals( "/maven", PathUtils.basedir( "scm:cvs:pserver:anoncvs@www.codehause.org:80/maven" ) );
+        assertEquals( "/maven", PathUtils.basedir( "scm:cvs:pserver:anoncvs@www.codehause.org:/maven" ) );
+        assertEquals( "/maven/module", PathUtils.basedir( "scm:cvs:pserver:anoncvs@www.codehause.org:80/maven:module" ) );
+        assertEquals( "/maven/module", PathUtils.basedir( "scm:cvs:pserver:anoncvs@www.codehause.org:/maven:module" ) );
     }
 
     public void testPortBasedir()

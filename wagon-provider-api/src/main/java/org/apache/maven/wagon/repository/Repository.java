@@ -118,9 +118,9 @@ public class Repository
         //  can't use URL class as is because it won't recognise our protocols, though perhaps we could attempt to
         //  register handlers for scp, etc?
 
-        this.host = PathUtils.host( url );
-
         this.protocol = PathUtils.protocol( url );
+
+        this.host = PathUtils.host( url );
 
         this.port = PathUtils.port( url );
 
