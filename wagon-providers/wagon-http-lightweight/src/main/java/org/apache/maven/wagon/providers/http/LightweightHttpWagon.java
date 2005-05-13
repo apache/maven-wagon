@@ -108,11 +108,19 @@ public class LightweightHttpWagon
             {
                 System.setProperty( "http.nonProxyHosts", proxyInfo.getNonProxyHosts() );
             }
-            if ( proxyInfo.getUserName() != null )
+        }
+
+        final boolean hasProxy = ( proxyInfo != null && proxyInfo.getUserName() != null );
+        final boolean hasAuthentication = ( authenticationInfo != null && authenticationInfo.getUserName() != null );
+        if ( hasProxy || hasAuthentication )
+        {
+            Authenticator.setDefault( new Authenticator()
             {
-                Authenticator.setDefault( new Authenticator()
+                protected PasswordAuthentication getPasswordAuthentication()
                 {
-                    protected PasswordAuthentication getPasswordAuthentication()
+                    // TODO: ideally use getRequestorType() from JDK1.5 here...
+                    if ( hasProxy && getRequestingHost().equals( proxyInfo.getHost() ) &&
+                        getRequestingPort() == proxyInfo.getPort() )
                     {
                         String password = "";
                         if ( proxyInfo.getPassword() != null )
@@ -121,8 +129,20 @@ public class LightweightHttpWagon
                         }
                         return new PasswordAuthentication( proxyInfo.getUserName(), password.toCharArray() );
                     }
-                } );
-            }
+
+                    if ( hasAuthentication )
+                    {
+                        String password = "";
+                        if ( authenticationInfo.getPassword() != null )
+                        {
+                            password = authenticationInfo.getPassword();
+                        }
+                        return new PasswordAuthentication( authenticationInfo.getUserName(), password.toCharArray() );
+                    }
+
+                    return super.getPasswordAuthentication();
+                }
+            } );
         }
     }
 
