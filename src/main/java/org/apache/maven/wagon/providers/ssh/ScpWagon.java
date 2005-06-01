@@ -344,12 +344,12 @@ public class ScpWagon
 
         if ( permissions != null && permissions.getGroup() != null )
         {
-            executeCommand( "chgrp " + permissions.getGroup() + " " + basedir + "/" + resourceName + "\n" );
+            executeCommand( "chgrp -f " + permissions.getGroup() + " " + basedir + "/" + resourceName + "\n" );
         }
 
         if ( permissions != null && permissions.getFileMode() != null )
         {
-            executeCommand( "chmod " + permissions.getFileMode() + " " + basedir + "/" + resourceName + "\n" );
+            executeCommand( "chmod -f " + permissions.getFileMode() + " " + basedir + "/" + resourceName + "\n" );
         }
     }
 
