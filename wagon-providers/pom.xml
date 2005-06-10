@@ -8,6 +8,7 @@
     <version>1.0-alpha-3</version>
   </parent>
   <artifactId>wagon-providers</artifactId>
+  <version>1.0-alpha-4-SNAPSHOT</version>
   <name>Maven Wagon Providers Parent</name>
   <packaging>pom</packaging>
   <dependencies>
