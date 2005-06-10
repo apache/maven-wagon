@@ -22,7 +22,6 @@ import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.authentication.AuthenticationException;
-import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
@@ -33,9 +32,6 @@ import org.codehaus.plexus.util.cli.CommandLineUtils;
 import org.codehaus.plexus.util.cli.Commandline;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * SCP deployer using "external" scp program.  To allow for
@@ -49,8 +45,6 @@ public class ScpExternalWagon
     extends AbstractWagon
     implements SshCommandExecutor
 {
-    public static int DEFAULT_SSH_PORT = 22;
-
     /**
      * The external SCP command to use - default is <code>scp</code>.
      *
@@ -80,6 +74,10 @@ public class ScpExternalWagon
      */
     private String sshArgs = null;
 
+    private int port;
+
+    private File privateKey;
+
     // ----------------------------------------------------------------------
     //
     // ----------------------------------------------------------------------
@@ -92,12 +90,7 @@ public class ScpExternalWagon
             throw new IllegalArgumentException( "Authentication Credentials cannot be null for SSH protocol" );
         }
 
-        int port = getRepository().getPort();
-
-        if ( port == WagonConstants.UNKNOWN_PORT )
-        {
-            port = DEFAULT_SSH_PORT;
-        }
+        port = getRepository().getPort();
 
         // If user don't define a password, he want to use a private key
         if ( authenticationInfo.getPassword() == null )
@@ -122,14 +115,7 @@ public class ScpExternalWagon
 
                 fireSessionDebug( "Using private key: " + privateKey );
 
-                // TODO: do something with it
-            }
-            else
-            {
-                String msg = "Private key was not found. You must define a private key or a password for repo: " +
-                    getRepository().getName();
-
-                throw new AuthenticationException( msg );
+                this.privateKey = privateKey;
             }
         }
         // nothing to connect to
@@ -174,6 +160,24 @@ public class ScpExternalWagon
 
         cl.setExecutable( sshExecutable );
 
+        if ( privateKey != null )
+        {
+            cl.createArgument().setValue( "-i" );
+            cl.createArgument().setFile( privateKey );
+        }
+
+        if ( port != WagonConstants.UNKNOWN_PORT )
+        {
+            if ( sshExecutable.indexOf( "plink" ) >= 0 )
+            {
+                cl.createArgument().setLine( "-P " + port );
+            }
+            else
+            {
+                cl.createArgument().setLine( "-p " + port );
+            }
+        }
+
         if ( sshArgs != null )
         {
             cl.createArgument().setLine( sshArgs );
@@ -203,6 +207,17 @@ public class ScpExternalWagon
         cl.setWorkingDirectory( localFile.getParentFile().getAbsolutePath() );
 
         cl.setExecutable( scpExecutable );
+
+        if ( privateKey != null )
+        {
+            cl.createArgument().setValue( "-i" );
+            cl.createArgument().setFile( privateKey );
+        }
+
+        if ( port != WagonConstants.UNKNOWN_PORT )
+        {            
+            cl.createArgument().setLine( "-P " + port );
+        }
 
         if ( scpArgs != null )
         {
