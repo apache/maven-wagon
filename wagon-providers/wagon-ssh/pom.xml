@@ -8,6 +8,7 @@
     <version>1.0-alpha-4-SNAPSHOT</version>
   </parent>
   <artifactId>wagon-ssh</artifactId>
+  <version>1.0-alpha-4-SNAPSHOT</version>
   <name>Maven Wagon SSH Provider</name>
   <dependencies>
     <dependency>
