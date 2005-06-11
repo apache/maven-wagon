@@ -83,7 +83,7 @@ public class SftpWagon
 
             channel.cd( basedir );
 
-            mkdirs( channel, dir );
+            mkdirs( channel, resourceName );
 
             firePutStarted( resource, source );
 
@@ -152,10 +152,10 @@ public class SftpWagon
         }
     }
 
-    private void mkdirs( ChannelSftp channel, String dir )
+    private void mkdirs( ChannelSftp channel, String resourceName )
         throws TransferFailedException, SftpException
     {
-        String[] dirs = PathUtils.dirnames( dir );
+        String[] dirs = PathUtils.dirnames( resourceName );
         for ( int i = 0; i < dirs.length; i++ )
         {
             try
@@ -163,7 +163,7 @@ public class SftpWagon
                 SftpATTRS attrs = channel.stat( dirs[i] );
                 if ( ( attrs.getPermissions() & S_IFDIR ) == 0 )
                 {
-                    throw new TransferFailedException( "Remote path is not a directory:" + dir );
+                    throw new TransferFailedException( "Remote path is not a directory:" + PathUtils.dirname( resourceName ) );
                 }
             }
             catch ( SftpException e )
