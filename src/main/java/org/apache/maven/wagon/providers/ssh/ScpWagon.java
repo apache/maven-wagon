@@ -270,7 +270,7 @@ public class ScpWagon
 
             channel.connect();
 
-            if ( checkAck( in ) != 0 )
+            if ( checkAck( in, false ) != 0 )
             {
                 throw new TransferFailedException( "ACK check failed" );
             }
@@ -295,7 +295,7 @@ public class ScpWagon
 
             out.flush();
 
-            if ( checkAck( in ) != 0 )
+            if ( checkAck( in, false ) != 0 )
             {
                 throw new TransferFailedException( "ACK check failed" );
             }
@@ -311,7 +311,7 @@ public class ScpWagon
 
             out.flush();
 
-            if ( checkAck( in ) != 0 )
+            if ( checkAck( in, false ) != 0 )
             {
                 throw new TransferFailedException( "ACK check failed" );
             }
@@ -404,7 +404,7 @@ public class ScpWagon
             while ( true )
             {
                 // TODO: is this really an ACK, or just an in.read()? If the latter, change checkAck method to not return a value, but throw an exception on non-zero result
-                int c = checkAck( in );
+                int c = checkAck( in, true );
 
                 if ( c != 'C' )
                 {
@@ -497,7 +497,7 @@ public class ScpWagon
 
                 fireGetCompleted( resource, destination );
 
-                if ( checkAck( in ) != 0 )
+                if ( checkAck( in, true ) != 0 )
                 {
                     throw new TransferFailedException( "Wrong ACK" );
                 }
@@ -608,7 +608,7 @@ public class ScpWagon
         }
     }
 
-    static int checkAck( InputStream in )
+    static int checkAck( InputStream in, boolean isGet )
         throws IOException, ResourceDoesNotExistException, TransferFailedException
     {
         int b = in.read();
@@ -640,7 +640,7 @@ public class ScpWagon
             if ( b == 1 )
             {
                 // error
-                if ( message.endsWith( "No such file or directory\n" ) )
+                if ( message.endsWith( "No such file or directory\n" ) && isGet )
                 {
                     // TODO: this might be too hokey?
                     throw new ResourceDoesNotExistException( message );
