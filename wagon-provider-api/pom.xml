@@ -9,4 +9,5 @@
   </parent>
   <artifactId>wagon-provider-api</artifactId>
   <name>Maven Wagon API</name>
+  <version>1.0-alpha-4-SNAPSHOT</version>
 </project>

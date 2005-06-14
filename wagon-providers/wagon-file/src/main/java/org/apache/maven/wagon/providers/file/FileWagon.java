@@ -74,24 +74,11 @@ public class FileWagon
     public void fillOutputData( OutputData outputData )
         throws TransferFailedException
     {
-
         Resource resource = outputData.getResource();
 
         File file = new File( getRepository().getBasedir(), resource.getName() );
 
-        File dir = file.getParentFile();
-
-        if ( dir != null && !dir.exists() )
-        {
-
-            if ( !dir.mkdirs() )
-            {
-                String msg = "Some of the requied directories do not exist and could not be create. " +
-                    "Requested path:  " + file.getAbsolutePath();
-
-                throw new TransferFailedException( msg );
-            }
-        }
+        createParentDirectories( file );
 
         OutputStream outputStream = new LazyFileOutputStream( file );
 

@@ -139,13 +139,8 @@ public abstract class AbstractWagon
         throws ConnectionException;
 
     protected void createParentDirectories( File destination )
-        throws ResourceDoesNotExistException, TransferFailedException
+        throws TransferFailedException
     {
-        if ( destination == null )
-        {
-            throw new ResourceDoesNotExistException( "get: Destination cannot be null" );
-        }
-
         File destinationDirectory = destination.getParentFile();
         if ( destinationDirectory != null && !destinationDirectory.exists() )
         {
@@ -164,6 +159,10 @@ public abstract class AbstractWagon
     protected void getTransfer( Resource resource, File destination, InputStream input )
         throws TransferFailedException
     {
+    	// ensure that the destination is created only when we are ready to transfer
+        fireTransferDebug( "attempting to create parent directories for destination: " + destination.getName() );
+        createParentDirectories( destination );
+
         fireGetStarted( resource, destination );
 
         OutputStream output = new LazyFileOutputStream( destination );
