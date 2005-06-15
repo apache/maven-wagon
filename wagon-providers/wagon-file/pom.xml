@@ -5,9 +5,9 @@
   <parent>
     <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon-providers</artifactId>
-    <version>1.0-alpha-4-SNAPSHOT</version>
+    <version>1.0-alpha-4</version>
   </parent>
   <artifactId>wagon-file</artifactId>
+  <version>1.0-alpha-4</version>
   <name>Maven Wagon File Provider</name>
-  <version>1.0-alpha-4-SNAPSHOT</version>
 </project>

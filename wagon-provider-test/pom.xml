@@ -5,15 +5,16 @@
   <parent>
     <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon</artifactId>
-    <version>1.0-alpha-3</version>
+    <version>1.0-alpha-4</version>
   </parent>
   <artifactId>wagon-provider-test</artifactId>
+  <version>1.0-alpha-4</version>
   <name>Maven Wagon Provider Test</name>
   <dependencies>
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>
       <artifactId>wagon-provider-api</artifactId>
-      <version>1.0-alpha-3</version>
+      <version>1.0-alpha-4</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
