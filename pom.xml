@@ -5,10 +5,10 @@
   <parent>
     <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon-providers</artifactId>
-    <version>1.0-alpha-4-SNAPSHOT</version>
+    <version>1.0-alpha-4</version>
   </parent>
   <artifactId>wagon-ssh</artifactId>
-  <version>1.0-alpha-4-SNAPSHOT</version>
+  <version>1.0-alpha-4</version>
   <name>Maven Wagon SSH Provider</name>
   <dependencies>
     <dependency>
