@@ -8,7 +8,6 @@
   <packaging>pom</packaging>
   <name>Maven Wagon</name>
   <description>Tools to manage artifacts and deployment</description>
-  <shortDescription>Tools to manage artifacts and deployment</shortDescription>
   <inceptionYear>2003</inceptionYear>
   <organization>
     <name>Apache Software Foundation</name>
