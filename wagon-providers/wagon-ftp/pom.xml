@@ -8,7 +8,7 @@
     <version>1.0-alpha-4</version>
   </parent>
   <artifactId>wagon-ftp</artifactId>
-  <version>1.0-alpha-4</version>
+  <version>1.0-alpha-5-SNAPSHOT</version>
   <name>Maven Wagon FTP Provider</name>
   <dependencies>
     <dependency>
