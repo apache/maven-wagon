@@ -20,9 +20,9 @@
     </repository>
   </distributionManagement>
   <scm>
-    <connection>scm:cvs:pserver:anoncvs@cvs.apache.org:/home/cvspublic:maven-wagon</connection>
-    <developerConnection>scm:cvs:ext:${maven.username}@cvs.apache.org:/home/cvs:maven-wagon</developerConnection>
-    <url>http://cvs.apache.org/viewcvs.cgi/maven-wagon</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/wagon/trunk/</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/trunk/</developerConnection>
+    <url>http://svn.apache.org/viewcvs.cgi/maven/wagon/</url>
   </scm>
   <ciManagement>
     <system>wagon-dev@maven.apache.org</system>
