@@ -8,7 +8,7 @@
     <version>1.0-alpha-4</version>
   </parent>
   <artifactId>wagon-ssh</artifactId>
-  <version>1.0-alpha-4</version>
+  <version>1.0-alpha-5-SNAPSHOT</version>
   <name>Maven Wagon SSH Provider</name>
   <dependencies>
     <dependency>
@@ -19,7 +19,7 @@
     <dependency>
       <groupId>jsch</groupId>
       <artifactId>jsch</artifactId>
-      <version>0.1.17</version>
+      <version>0.1.21</version>
     </dependency>
   </dependencies>
 </project>
