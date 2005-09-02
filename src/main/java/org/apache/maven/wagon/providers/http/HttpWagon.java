@@ -33,7 +33,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.resource.Resource;
@@ -177,8 +176,6 @@ public class HttpWagon
             catch ( HttpRecoverableException e )
             {
                 attempt++;
-
-                continue;
             }
             catch ( IOException e )
             {
@@ -289,8 +286,6 @@ public class HttpWagon
                 catch ( HttpRecoverableException e )
                 {
                     attempt++;
-
-                    continue;
                 }
                 catch ( IOException e )
                 {
