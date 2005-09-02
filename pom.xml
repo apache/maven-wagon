@@ -1,12 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
 <project>
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>wagon-providers</artifactId>
     <groupId>org.apache.maven.wagon</groupId>
-    <version>1.0-alpha-4</version>
+    <artifactId>wagon-providers</artifactId>
+    <version>1.0-alpha-5-SNAPSHOT</version>
   </parent>
   <artifactId>wagon-http</artifactId>
-  <version>1.0-alpha-4</version>
   <name>Maven Wagon HTTP Provider</name>
   <dependencies>
     <dependency>
