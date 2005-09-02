@@ -5,9 +5,8 @@
   <parent>
     <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon</artifactId>
-    <version>1.0-alpha-4</version>
+    <version>1.0-alpha-5-SNAPSHOT</version>
   </parent>
   <artifactId>wagon-provider-api</artifactId>
-  <version>1.0-alpha-4</version>
   <name>Maven Wagon API</name>
 </project>

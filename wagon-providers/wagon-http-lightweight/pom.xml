@@ -5,16 +5,15 @@
   <parent>
     <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon-providers</artifactId>
-    <version>1.0-alpha-4</version>
+    <version>1.0-alpha-5-SNAPSHOT</version>
   </parent>
   <artifactId>wagon-http-lightweight</artifactId>
-  <version>1.0-alpha-4</version>
   <name>Maven Wagon Lightweight HTTP Provider</name>
   <dependencies>
     <dependency>
       <groupId>plexus</groupId>
       <artifactId>plexus-jetty-httpd</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.0-beta-1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -5,22 +5,19 @@
   <parent>
     <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon</artifactId>
-    <version>1.0-alpha-4</version>
+    <version>1.0-alpha-5-SNAPSHOT</version>
   </parent>
   <artifactId>wagon-providers</artifactId>
-  <version>1.0-alpha-4</version>
   <name>Maven Wagon Providers Parent</name>
   <packaging>pom</packaging>
   <dependencies>
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>
       <artifactId>wagon-provider-api</artifactId>
-      <version>1.0-alpha-4</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>
       <artifactId>wagon-provider-test</artifactId>
-      <version>1.0-alpha-4</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -30,7 +27,9 @@
     <module>wagon-http-lightweight</module>
     <module>wagon-http</module>
     <module>wagon-scm</module>
+    <!--
     <module>wagon-ssh-external</module>
+    -->
     <module>wagon-ssh</module>
   </modules>
 </project>
