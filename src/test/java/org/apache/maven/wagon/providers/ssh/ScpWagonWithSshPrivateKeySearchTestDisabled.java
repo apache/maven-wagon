@@ -23,7 +23,7 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  */
-public class ScpWagonWithSshPrivateKeySearchTest
+public class ScpWagonWithSshPrivateKeySearchTestDisabled
     extends WagonTestCase
 {
     protected String getProtocol()
