@@ -25,7 +25,7 @@ import java.io.File;
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  * @version $Id$
  */
-public class SftpWagonTest
+public class SftpWagonTestDisabled
     extends WagonTestCase
 {
     protected String getProtocol()

@@ -162,13 +162,7 @@ public abstract class WagonTestCase
 
     private void message( String message )
     {
-        System.out.println(
-            "---------------------------------------------------------------------------------------------------------" );
-
         System.out.println( message );
-
-        System.out.println(
-            "---------------------------------------------------------------------------------------------------------" );
     }
 
     // ----------------------------------------------------------------------
@@ -283,5 +277,4 @@ public abstract class WagonTestCase
 
         return repository;
     }
-
 }

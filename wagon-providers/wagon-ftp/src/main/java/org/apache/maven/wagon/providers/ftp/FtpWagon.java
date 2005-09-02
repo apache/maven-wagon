@@ -48,7 +48,7 @@ public class FtpWagon
     public void openConnection()
         throws ConnectionException, AuthenticationException
     {
-        AuthenticationInfo authInfo = getRepository().getAuthenticationInfo();
+        AuthenticationInfo authInfo = getAuthenticationInfo();
 
         if ( authInfo == null )
         {
@@ -119,7 +119,7 @@ public class FtpWagon
 
         try
         {
-            if ( ftp.login( username.trim(), password.trim() ) == false )
+            if ( !ftp.login( username.trim(), password.trim() ) )
             {
                 fireSessionConnectionRefused();
 
@@ -140,8 +140,8 @@ public class FtpWagon
 
             if ( !dirChanged )
             {
-                throw new ConnectionException(
-                    "Required directories: '" + getRepository().getBasedir() + "' are missing" );
+                throw new ConnectionException( "Required directory: '" + getRepository().getBasedir() + "' " +
+                                               "is missing" );
             }
         }
         catch ( IOException e )

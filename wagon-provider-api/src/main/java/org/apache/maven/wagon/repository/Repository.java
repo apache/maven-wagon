@@ -18,11 +18,9 @@ package org.apache.maven.wagon.repository;
 
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.WagonConstants;
-import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
 import java.io.Serializable;
 import java.util.Properties;
-
 
 /**
  * This class is an abstraction of the location from/to resources

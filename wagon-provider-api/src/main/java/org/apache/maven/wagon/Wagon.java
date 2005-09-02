@@ -34,7 +34,6 @@ public interface Wagon
     // File/File handling
     // ----------------------------------------------------------------------
 
-
     /**
      * Downloads specified resource from the repository to given file.
      *
@@ -93,8 +92,6 @@ public interface Wagon
 
     void disconnect()
         throws ConnectionException;
-
-   
 
     // ----------------------------------------------------------------------
     //  Session listener

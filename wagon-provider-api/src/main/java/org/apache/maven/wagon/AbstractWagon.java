@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-
 /**
  * Implementation of common facilties for Wagon providers.
  *
@@ -55,17 +54,27 @@ public abstract class AbstractWagon
 
     protected TransferEventSupport transferEventSupport = new TransferEventSupport();
 
-    protected ProxyInfo proxyInfo = null;
+    protected ProxyInfo proxyInfo;
 
-    protected AuthenticationInfo authenticationInfo = null;
+    protected AuthenticationInfo authenticationInfo;
 
     // ----------------------------------------------------------------------
-    // Repository
+    // Accessors
     // ----------------------------------------------------------------------
 
     public Repository getRepository()
     {
         return repository;
+    }
+
+    public ProxyInfo getProxyInfo()
+    {
+        return proxyInfo;
+    }
+
+    public AuthenticationInfo getAuthenticationInfo()
+    {
+        return authenticationInfo;
     }
 
     // ----------------------------------------------------------------------

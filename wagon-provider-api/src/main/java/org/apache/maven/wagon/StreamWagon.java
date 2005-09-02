@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-
 /**
  * Base class for wagon which provide stream based API.
  *
@@ -35,7 +34,6 @@ import java.io.OutputStream;
 public abstract class StreamWagon
     extends AbstractWagon
 {
-
     // ----------------------------------------------------------------------
     //
     // ----------------------------------------------------------------------
