@@ -63,9 +63,10 @@ public class SftpWagon
 
         firePutInitiated( resource, source );
 
-        ChannelSftp channel = null;
+        ChannelSftp channel;
 
         String filename;
+
         if ( resourceName.lastIndexOf( '/' ) > 0 )
         {
             filename = resourceName.substring( resourceName.lastIndexOf( '/' ) + 1 );
@@ -83,15 +84,15 @@ public class SftpWagon
 
             channel.cd( basedir );
 
-            mkdirs( channel, resourceName );
+            RepositoryPermissions permissions = getRepository().getPermissions();
+
+            mkdirs( channel, resourceName, getDirectoryMode(permissions));
 
             firePutStarted( resource, source );
 
             channel.put( source.getAbsolutePath(), filename );
 
             postProcessListeners( resource, source, TransferEvent.REQUEST_PUT );
-
-            RepositoryPermissions permissions = getRepository().getPermissions();
 
             if ( permissions != null && permissions.getGroup() != null )
             {
@@ -133,15 +134,15 @@ public class SftpWagon
         }
         catch ( SftpException e )
         {
-            String msg = "Error occured while deploying '" + resourceName + "' to remote repository: " +
-                getRepository().getUrl();
+            String msg = "Error occured while deploying '" + resourceName + "' " +
+                         "to remote repository: " + getRepository().getUrl();
 
             throw new TransferFailedException( msg, e );
         }
         catch ( JSchException e )
         {
-            String msg = "Error occured while deploying '" + resourceName + "' to remote repository: " +
-                getRepository().getUrl();
+            String msg = "Error occured while deploying '" + resourceName + "' " +
+                         "to remote repository: " + getRepository().getUrl();
 
             throw new TransferFailedException( msg, e );
         }
@@ -152,7 +153,27 @@ public class SftpWagon
         }
     }
 
-    private void mkdirs( ChannelSftp channel, String resourceName )
+    /**
+     * @param permissions repository's permissions
+     * @return the directory mode for the repository or <code>-1</code> if it
+     *         wasn't set
+     */
+    private int getDirectoryMode( RepositoryPermissions permissions )
+    {
+        try
+        {
+            return Integer.valueOf( permissions.getDirectoryMode(), 8 ).intValue();
+        }
+        catch ( NumberFormatException e )
+        {
+            // TODO: warning level
+            fireTransferDebug( "the file mode must be a numerical mode for SFTP" );
+
+            return -1;
+        }
+    }
+
+    private void mkdirs( ChannelSftp channel, String resourceName, int mode )
         throws TransferFailedException, SftpException
     {
         String[] dirs = PathUtils.dirnames( resourceName );
@@ -170,6 +191,18 @@ public class SftpWagon
             {
                 // doesn't exist, make it and try again
                 channel.mkdir( dirs[i] );
+                if ( mode != -1 )
+                {
+                    try
+                    {
+                        channel.chmod( mode, dirs[i] );
+                    }
+                    catch ( final SftpException e1 )
+                    {
+                        // for some extrange reason we recive this exception,
+                        // even when chmod success
+                    }
+                }
             }
 
             channel.cd( dirs[i] );

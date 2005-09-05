@@ -241,7 +241,20 @@ public class ScpWagon
 
         firePutInitiated( resource, source );
 
-        String mkdirCmd = "mkdir -p " + basedir + "/" + dir + "\n";
+        String umaskCmd = "";
+        if ( getRepository().getPermissions() != null )
+        {
+            final String dirPerms = getRepository().getPermissions().getDirectoryMode();
+            if ( dirPerms != null )
+            {
+                umaskCmd = "umask " + PermissionModeUtils.getUserMaskFor( dirPerms ) + "\n";
+                executeCommand( umaskCmd );
+            }
+        }
+        
+        String mkdirCmd = umaskCmd + "mkdir -p -m " 
+                          + getRepository().getPermissions().getDirectoryMode() 
+                          + " "+ basedir + "/" + dir + "\n";
 
         executeCommand( mkdirCmd );
 
@@ -365,7 +378,7 @@ public class ScpWagon
         //I/O streams for remote scp
         OutputStream out = null;
 
-        InputStream in = null;
+        InputStream in;
 
         createParentDirectories( destination );
 
@@ -650,7 +663,7 @@ public class ScpWagon
                     throw new TransferFailedException( message );
                 }
             }
-            if ( b == 2 )
+            else
             {
                 // fatal error
                 throw new TransferFailedException( message );
