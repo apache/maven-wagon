@@ -26,7 +26,7 @@ public class TestData
 {
     public static String getTestRepositoryUrl()
     {
-        return "scp://beaver.codehaus.org//home/projects/" + getUserName() + "/public_html";
+        return "scp://beaver.codehaus.org/home/projects/" + getUserName() + "/public_html";
     }
 
     public static String getUserName()
