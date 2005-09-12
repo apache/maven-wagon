@@ -160,17 +160,23 @@ public class SftpWagon
      */
     private int getDirectoryMode( RepositoryPermissions permissions )
     {
-        try
+        int ret = -1;
+        
+        if ( permissions != null ) 
         {
-            return Integer.valueOf( permissions.getDirectoryMode(), 8 ).intValue();
+            try
+            {
+                ret = Integer.valueOf( permissions.getDirectoryMode(), 8 ).intValue();
+            }
+            catch ( NumberFormatException e )
+            {
+                // TODO: warning level
+                fireTransferDebug( "the file mode must be a numerical mode for SFTP" );
+                ret = -1;
+            }
         }
-        catch ( NumberFormatException e )
-        {
-            // TODO: warning level
-            fireTransferDebug( "the file mode must be a numerical mode for SFTP" );
-
-            return -1;
-        }
+        
+        return ret;
     }
 
     private void mkdirs( ChannelSftp channel, String resourceName, int mode )
