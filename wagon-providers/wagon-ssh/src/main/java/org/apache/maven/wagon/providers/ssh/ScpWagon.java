@@ -123,7 +123,7 @@ public class ScpWagon
                 else
                 {
                     String msg = "Private key was not found. You must define a private key or a password for repo: " +
-                        getRepository().getName();
+                                 getRepository().getName();
 
                     throw new AuthenticationException( msg );
                 }
@@ -251,10 +251,10 @@ public class ScpWagon
                 executeCommand( umaskCmd );
             }
         }
-        
-        String mkdirCmd = umaskCmd + "mkdir -p -m " 
-                          + getRepository().getPermissions().getDirectoryMode() 
-                          + " "+ basedir + "/" + dir + "\n";
+
+        String mkdirCmd = umaskCmd + "mkdir -p -m "
+                          + getRepository().getPermissions().getDirectoryMode()
+                          + " " + basedir + "/" + dir + "\n";
 
         executeCommand( mkdirCmd );
 
@@ -318,7 +318,7 @@ public class ScpWagon
             byte[] buf = new byte[1024];
 
             // send '\0'
-            buf[0] = 0;
+            buf[ 0 ] = 0;
 
             out.write( buf, 0, 1 );
 
@@ -332,14 +332,14 @@ public class ScpWagon
         catch ( IOException e )
         {
             String msg = "Error occured while deploying '" + resourceName + "' to remote repository: " +
-                getRepository().getUrl();
+                         getRepository().getUrl();
 
             throw new TransferFailedException( msg, e );
         }
         catch ( JSchException e )
         {
             String msg = "Error occured while deploying '" + resourceName + "' to remote repository: " +
-                getRepository().getUrl();
+                         getRepository().getUrl();
 
             throw new TransferFailedException( msg, e );
         }
@@ -408,7 +408,7 @@ public class ScpWagon
             byte[] buf = new byte[1024];
 
             // send '\0'
-            buf[0] = 0;
+            buf[ 0 ] = 0;
 
             out.write( buf, 0, 1 );
 
@@ -425,37 +425,46 @@ public class ScpWagon
                 }
 
                 // read '0644 '
-                in.read( buf, 0, 5 );
+                if ( in.read( buf, 0, 5 ) != 5 )
+                {
+                    throw new TransferFailedException( "Unexpected end of data." );
+                }
 
                 int filesize = 0;
 
                 // get file size
                 while ( true )
                 {
-                    in.read( buf, 0, 1 );
+                    if ( in.read( buf, 0, 1 ) != 1 )
+                    {
+                        throw new TransferFailedException( "Unexpected end of data." );
+                    }
 
-                    if ( buf[0] == ' ' )
+                    if ( buf[ 0 ] == ' ' )
                     {
                         break;
                     }
 
-                    filesize = filesize * 10 + ( buf[0] - '0' );
+                    filesize = filesize * 10 + ( buf[ 0 ] - '0' );
                 }
 
                 resource.setContentLength( filesize );
 
                 for ( int i = 0; ; i++ )
                 {
-                    in.read( buf, i, 1 );
+                    if ( in.read( buf, i, 1 ) != 1 )
+                    {
+                        throw new TransferFailedException( "Unexpected end of data." );
+                    }
 
-                    if ( buf[i] == (byte) 0x0a )
+                    if ( buf[ i ] == (byte) 0x0a )
                     {
                         break;
                     }
                 }
 
                 // send '\0'
-                buf[0] = 0;
+                buf[ 0 ] = 0;
 
                 out.write( buf, 0, 1 );
 
@@ -472,7 +481,10 @@ public class ScpWagon
                     {
                         int len = Math.min( buf.length, filesize );
 
-                        in.read( buf, 0, len );
+                        if ( in.read( buf, 0, len ) != len )
+                        {
+                            throw new TransferFailedException( "Unexpected end of data." );
+                        }
 
                         outputStream.write( buf, 0, len );
 
@@ -520,7 +532,7 @@ public class ScpWagon
                 }
 
                 // send '\0'
-                buf[0] = 0;
+                buf[ 0 ] = 0;
 
                 out.write( buf, 0, 1 );
 
@@ -571,6 +583,7 @@ public class ScpWagon
     }
 
     public boolean getIfNewer( String resourceName, File destination, long timestamp )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         throw new UnsupportedOperationException( "getIfNewer is scp wagon must be still implemented" );
     }
@@ -579,6 +592,7 @@ public class ScpWagon
 // JSch user info
 // ----------------------------------------------------------------------
 // TODO: are the prompt values really right? Is there an alternative to UserInfo?
+
     public static class WagonUserInfo
         implements UserInfo
     {

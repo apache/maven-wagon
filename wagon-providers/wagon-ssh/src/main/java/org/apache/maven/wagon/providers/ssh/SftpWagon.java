@@ -86,7 +86,7 @@ public class SftpWagon
 
             RepositoryPermissions permissions = getRepository().getPermissions();
 
-            mkdirs( channel, resourceName, getDirectoryMode(permissions));
+            mkdirs( channel, resourceName, getDirectoryMode( permissions ) );
 
             firePutStarted( resource, source );
 
@@ -161,8 +161,8 @@ public class SftpWagon
     private int getDirectoryMode( RepositoryPermissions permissions )
     {
         int ret = -1;
-        
-        if ( permissions != null ) 
+
+        if ( permissions != null )
         {
             try
             {
@@ -175,7 +175,7 @@ public class SftpWagon
                 ret = -1;
             }
         }
-        
+
         return ret;
     }
 
@@ -187,21 +187,22 @@ public class SftpWagon
         {
             try
             {
-                SftpATTRS attrs = channel.stat( dirs[i] );
+                SftpATTRS attrs = channel.stat( dirs[ i ] );
                 if ( ( attrs.getPermissions() & S_IFDIR ) == 0 )
                 {
-                    throw new TransferFailedException( "Remote path is not a directory:" + PathUtils.dirname( resourceName ) );
+                    throw new TransferFailedException(
+                        "Remote path is not a directory:" + PathUtils.dirname( resourceName ) );
                 }
             }
             catch ( SftpException e )
             {
                 // doesn't exist, make it and try again
-                channel.mkdir( dirs[i] );
+                channel.mkdir( dirs[ i ] );
                 if ( mode != -1 )
                 {
                     try
                     {
-                        channel.chmod( mode, dirs[i] );
+                        channel.chmod( mode, dirs[ i ] );
                     }
                     catch ( final SftpException e1 )
                     {
@@ -211,13 +212,14 @@ public class SftpWagon
                 }
             }
 
-            channel.cd( dirs[i] );
+            channel.cd( dirs[ i ] );
         }
     }
 
-    public void get( String resourceName, File destination )
+    public boolean getIfNewer( String resourceName, File destination, long timestamp )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
+        boolean bDownloaded = true;
         createParentDirectories( destination );
 
         ChannelSftp channel;
@@ -225,6 +227,12 @@ public class SftpWagon
         resourceName = StringUtils.replace( resourceName, "\\", "/" );
         String dir = PathUtils.dirname( resourceName );
         dir = StringUtils.replace( dir, "\\", "/" );
+
+        // we already setuped the root directory. Ignore beginning /
+        if ( dir.length() > 0 && dir.charAt( 0 ) == '/' )
+        {
+            dir = dir.substring( 1 );
+        }
 
         Resource resource = new Resource( resourceName );
 
@@ -250,18 +258,28 @@ public class SftpWagon
 
             channel.cd( dir );
 
-            fireGetStarted( resource, destination );
-
-            channel.get( filename, destination.getAbsolutePath() );
-
-            postProcessListeners( resource, destination, TransferEvent.REQUEST_GET );
-
-            fireGetCompleted( resource, destination );
-
-            String[] dirs = PathUtils.dirnames( dir );
-            for ( int i = 0; i < dirs.length; i++ )
+            if ( timestamp <= 0 || channel.stat( filename ).getMTime() * 1000L > timestamp )
             {
-                channel.cd( ".." );
+                fireGetStarted( resource, destination );
+
+                channel.get( filename, destination.getAbsolutePath() );
+
+                postProcessListeners( resource, destination, TransferEvent.REQUEST_GET );
+
+                fireGetCompleted( resource, destination );
+
+                String[] dirs = PathUtils.dirnames( dir );
+
+                for ( int i = 0; i < dirs.length; i++ )
+                {
+                    channel.cd( ".." );
+                }
+
+                bDownloaded = true;
+            }
+            else
+            {
+                bDownloaded = false;
             }
         }
         catch ( SftpException e )
@@ -272,10 +290,14 @@ public class SftpWagon
         {
             handleGetException( resource, e, destination );
         }
+
+        return bDownloaded;
     }
 
-    public boolean getIfNewer( String resourceName, File destination, long timestamp )
+
+    public void get( String resourceName, File destination )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        throw new UnsupportedOperationException( "getIfNewer is scp wagon must be still implemented" );
+        getIfNewer( resourceName, destination, 0 );
     }
 }
