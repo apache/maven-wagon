@@ -111,7 +111,6 @@ import java.io.Writer;
  * each row may correspond to up to 4 methods.
  *
  */
-
 public final class IoUtils
 {
     private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
@@ -720,7 +719,10 @@ public final class IoUtils
     {
         try
         {
-            outputStream.close();
+            if ( outputStream != null )
+            {
+                outputStream.close();
+            }
         }
         catch ( IOException ex )
         {
@@ -737,7 +739,10 @@ public final class IoUtils
     {
         try
         {
-            reader.close();
+            if ( reader != null )
+            {
+                reader.close();
+            }
         }
         catch ( IOException ex )
         {
@@ -748,13 +753,16 @@ public final class IoUtils
     /**
      * A IOException ignoring method that simply closes the stream.
      *
-     * @param wrtier The writer to close.
+     * @param writer The writer to close.
      */
     public static void close( Writer writer )
     {
         try
         {
-            writer.close();
+            if ( writer != null )
+            {
+                writer.close();
+            }
         }
         catch ( IOException ex )
         {
