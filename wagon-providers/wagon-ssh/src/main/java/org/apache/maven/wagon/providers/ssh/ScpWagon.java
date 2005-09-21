@@ -242,19 +242,18 @@ public class ScpWagon
         firePutInitiated( resource, source );
 
         String umaskCmd = "";
+
         if ( getRepository().getPermissions() != null )
         {
-            final String dirPerms = getRepository().getPermissions().getDirectoryMode();
+            String dirPerms = getRepository().getPermissions().getDirectoryMode();
+
             if ( dirPerms != null )
             {
                 umaskCmd = "umask " + PermissionModeUtils.getUserMaskFor( dirPerms ) + "\n";
-                executeCommand( umaskCmd );
             }
         }
 
-        String mkdirCmd = umaskCmd + "mkdir -p -m "
-                          + getRepository().getPermissions().getDirectoryMode()
-                          + " " + basedir + "/" + dir + "\n";
+        String mkdirCmd = umaskCmd + "mkdir -p -m " + basedir + "/" + dir + "\n";
 
         executeCommand( mkdirCmd );
 
