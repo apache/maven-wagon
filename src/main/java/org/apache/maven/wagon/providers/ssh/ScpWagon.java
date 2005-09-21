@@ -548,10 +548,8 @@ public class ScpWagon
         }
         finally
         {
-            if ( out != null )
-            {
-                IoUtils.close( out );
-            }
+            IoUtils.close( out );
+
             if ( channel != null )
             {
                 channel.disconnect();
@@ -562,7 +560,7 @@ public class ScpWagon
     }
 
     protected void handleGetException( Resource resource, Exception e, File destination )
-        throws TransferFailedException
+        throws TransferFailedException, ResourceDoesNotExistException
     {
         fireTransferError( resource, e, TransferEvent.REQUEST_GET );
 
@@ -578,7 +576,15 @@ public class ScpWagon
 
         String msg = "Error occured while downloading from the remote repository:" + getRepository();
 
-        throw new TransferFailedException( msg, e );
+        // this sucks....
+        if( e.toString().equals("No such file"))  
+        {
+            throw new ResourceDoesNotExistException( msg, e );
+        }
+        else
+        {
+            throw new TransferFailedException( msg, e );
+        }
     }
 
     public boolean getIfNewer( String resourceName, File destination, long timestamp )
