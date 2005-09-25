@@ -253,7 +253,7 @@ public class ScpWagon
             }
         }
 
-        String mkdirCmd = umaskCmd + "mkdir -p -m " + basedir + "/" + dir + "\n";
+        String mkdirCmd = umaskCmd + "mkdir -p " + basedir + "/" + dir + "\n";
 
         executeCommand( mkdirCmd );
 
