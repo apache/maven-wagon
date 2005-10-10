@@ -339,4 +339,5 @@ public class ScpWagon
     {
         throw new UnsupportedOperationException( "getIfNewer is scp wagon must be still implemented" );
     }
+
 }

@@ -26,16 +26,29 @@ public class TestData
 {
     public static String getTestRepositoryUrl()
     {
-        return "scp://localhost/tmp/home/projects/" + getUserName() + "/public_html";
+        return "scp://" + getHostname() + "/tmp/wagon-ssh-test/" + getUserName();
     }
 
     public static String getUserName()
     {
-        return System.getProperty( "user.name" );
+        return System.getProperty( "test.user", System.getProperty( "user.name" ) );
     }
 
     public static File getPrivateKey()
     {
         return new File( System.getProperty( "user.home" ), "/.ssh/id_dsa" );
+    }
+
+    public static String getHostname()
+    {
+        return System.getProperty( "test.host", "beaver.codehaus.org" );
+    }
+
+    public static String getHostKey()
+    {
+        // beaver.codehaus.org
+        return "AAAAB3NzaC1yc2EAAAABIwAAAIEAwCT2lARY2T3EYjhQW1G4fYDltZgKKdg35esqhqM" +
+            "Z3lUV8QTg26aY1HfotUNJ0qaWsa587KP3zRUtHW4oP+hrOq/XQNsn57LKFFceCoy2vf" +
+            "/t9/Qin24mCW2QsGdyZ/txEhADbGjPkt4/Z9e/KoZGahWoPTjR26G1i1St9IsZPcU=";
     }
 }

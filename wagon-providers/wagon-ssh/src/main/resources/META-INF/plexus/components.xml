@@ -5,17 +5,59 @@
       <role-hint>scp</role-hint>
       <implementation>org.apache.maven.wagon.providers.ssh.ScpWagon</implementation>
       <instantiation-strategy>per-lookup</instantiation-strategy>
+      <requirements>
+        <requirement>
+          <role>org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider</role>
+        </requirement>
+        <requirement>
+          <role>org.apache.maven.wagon.providers.ssh.InteractiveUserInfo</role>
+        </requirement>
+      </requirements>
     </component>
     <component>
       <role>org.apache.maven.wagon.Wagon</role>
       <role-hint>sftp</role-hint>
       <implementation>org.apache.maven.wagon.providers.ssh.SftpWagon</implementation>
       <instantiation-strategy>per-lookup</instantiation-strategy>
+      <requirements>
+        <requirement>
+          <role>org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider</role>
+        </requirement>
+        <requirement>
+          <role>org.apache.maven.wagon.providers.ssh.InteractiveUserInfo</role>
+        </requirement>
+      </requirements>
     </component>
     <component>
       <role>org.apache.maven.wagon.providers.ssh.SshCommandExecutor</role>
       <implementation>org.apache.maven.wagon.providers.ssh.ScpWagon</implementation>
       <instantiation-strategy>per-lookup</instantiation-strategy>
+      <requirements>
+        <requirement>
+          <role>org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider</role>
+        </requirement>
+        <requirement>
+          <role>org.apache.maven.wagon.providers.ssh.InteractiveUserInfo</role>
+        </requirement>
+      </requirements>
+    </component>
+    <component>
+      <role>org.apache.maven.wagon.providers.ssh.InteractiveUserInfo</role>
+      <implementation>org.apache.maven.wagon.providers.ssh.ConsoleInteractiveUserInfo</implementation>
+      <instantiation-strategy>per-lookup</instantiation-strategy>
+      <requirements>
+        <requirement>
+          <role>org.codehaus.plexus.components.inputhandler.InputHandler</role>
+        </requirement>
+      </requirements>
+    </component>
+    <component>
+      <role>org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider</role>
+      <implementation>org.apache.maven.wagon.providers.ssh.knownhost.FileKnownHostsProvider</implementation>
+      <instantiation-strategy>per-lookup</instantiation-strategy>
+      <configuration>
+        <hostKeyChecking>ask</hostKeyChecking>
+      </configuration>
     </component>
   </components>
 </component-set>

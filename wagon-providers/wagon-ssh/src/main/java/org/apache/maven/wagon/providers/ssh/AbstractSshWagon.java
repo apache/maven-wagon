@@ -28,6 +28,7 @@ import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonConstants;
+import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.events.TransferEvent;
@@ -38,6 +39,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Properties;
 
 /**
  * Common SSH operations.
@@ -61,6 +63,12 @@ public abstract class AbstractSshWagon
 
     private static final byte LF = '\n';
 
+    private KnownHostsProvider knownHostsProvider;
+
+    private InteractiveUserInfo interactiveUserInfo;
+
+    private JSch sch;
+
     public void openConnection()
         throws AuthenticationException
     {
@@ -69,7 +77,7 @@ public abstract class AbstractSshWagon
             throw new IllegalArgumentException( "Authentication Credentials cannot be null for SSH protocol" );
         }
 
-        JSch jsch = new JSch();
+        sch = new JSch();
 
         int port = getRepository().getPort();
 
@@ -82,7 +90,7 @@ public abstract class AbstractSshWagon
 
         try
         {
-            session = jsch.getSession( authenticationInfo.getUserName(), host, port );
+            session = sch.getSession( authenticationInfo.getUserName(), host, port );
         }
         catch ( JSchException e )
         {
@@ -116,7 +124,7 @@ public abstract class AbstractSshWagon
 
                 try
                 {
-                    jsch.addIdentity( privateKey.getAbsolutePath(), authenticationInfo.getPassphrase() );
+                    sch.addIdentity( privateKey.getAbsolutePath(), authenticationInfo.getPassphrase() );
                 }
                 catch ( JSchException e )
                 {
@@ -164,8 +172,26 @@ public abstract class AbstractSshWagon
             }
         }
 
+        Properties config = new Properties();
+
         // username and password will be given via UserInfo interface.
-        UserInfo ui = new WagonUserInfo( authenticationInfo );
+        UserInfo ui = new WagonUserInfo( authenticationInfo, interactiveUserInfo );
+
+        if ( knownHostsProvider != null )
+        {
+            try
+            {
+                knownHostsProvider.addConfiguration( config );
+                knownHostsProvider.addKnownHosts( sch, ui );
+            }
+            catch ( JSchException e )
+            {
+                fireSessionError( e );
+                // continue without known_hosts
+            }
+        }
+
+        session.setConfig( config );
 
         session.setUserInfo( ui );
 
@@ -284,10 +310,18 @@ public abstract class AbstractSshWagon
 
     public void closeConnection()
     {
+        if ( knownHostsProvider != null )
+        {
+            knownHostsProvider.storeKnownHosts( sch );
+        }
+
         if ( session != null )
         {
             session.disconnect();
+            session = null;
         }
+        
+        sch = null;
     }
 
     protected void handleGetException( Resource resource, Exception e, File destination )
@@ -326,11 +360,14 @@ public abstract class AbstractSshWagon
     private static class WagonUserInfo
         implements UserInfo
     {
-        private AuthenticationInfo authInfo;
+        private final AuthenticationInfo authInfo;
 
-        WagonUserInfo( AuthenticationInfo authInfo )
+        private final InteractiveUserInfo userInfo;
+
+        WagonUserInfo( AuthenticationInfo authInfo, InteractiveUserInfo userInfo )
         {
             this.authInfo = authInfo;
+            this.userInfo = userInfo;
         }
 
         public String getPassphrase()
@@ -355,13 +392,50 @@ public abstract class AbstractSshWagon
 
         public boolean promptYesNo( String arg0 )
         {
-            return true;
+            if ( userInfo != null )
+            {
+                return userInfo.promptYesNo( arg0 );
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public void showMessage( String message )
         {
-            // TODO: is this really debug?
-            //fireTransferDebug( message );
+            if ( userInfo != null )
+            {
+                userInfo.showMessage( message );
+            }
         }
+    }
+
+    public final KnownHostsProvider getKnownHostsProvider()
+    {
+        return knownHostsProvider;
+    }
+
+    public final void setKnownHostsProvider( KnownHostsProvider knownHostsProvider )
+    {
+        if ( knownHostsProvider == null )
+        {
+            throw new IllegalArgumentException( "knownHostsProvider can't be null" );
+        }
+        this.knownHostsProvider = knownHostsProvider;
+    }
+
+    public InteractiveUserInfo getInteractiveUserInfo()
+    {
+        return interactiveUserInfo;
+    }
+
+    public void setInteractiveUserInfo( InteractiveUserInfo interactiveUserInfo )
+    {
+        if ( interactiveUserInfo == null )
+        {
+            throw new IllegalArgumentException( "interactiveUserInfo can't be null" );
+        }
+        this.interactiveUserInfo = interactiveUserInfo;
     }
 }
