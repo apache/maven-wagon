@@ -25,7 +25,7 @@ import java.io.File;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  */
-public class ScpExternalWagonTestDisabled
+public class ScpExternalWagonTest
     extends WagonTestCase
 {
     protected String getProtocol()
