@@ -28,12 +28,17 @@ import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonConstants;
+import org.apache.maven.wagon.util.IoUtils;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.resource.Resource;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.EOFException;
 
 /**
  * Common SSH operations.
@@ -52,6 +57,10 @@ public abstract class AbstractSshWagon
     protected Session session;
 
     public static final String EXEC_CHANNEL = "exec";
+
+    private static final int LINE_BUFFER_SIZE = 256;
+
+    private static final byte LF = '\n';
 
     public void openConnection()
         throws AuthenticationException
@@ -157,7 +166,7 @@ public abstract class AbstractSshWagon
         }
 
         // username and password will be given via UserInfo interface.
-        UserInfo ui = new ScpWagon.WagonUserInfo( authenticationInfo );
+        UserInfo ui = new WagonUserInfo( authenticationInfo );
 
         session.setUserInfo( ui );
 
@@ -193,31 +202,85 @@ public abstract class AbstractSshWagon
     }
 
     public void executeCommand( String command )
-        throws TransferFailedException
+        throws CommandExecutionException
     {
         ChannelExec channel = null;
 
+        InputStream in = null;
+        InputStream err = null;
+        OutputStream out = null;
         try
         {
             fireTransferDebug( "Executing command: " + command );
 
             channel = (ChannelExec) session.openChannel( EXEC_CHANNEL );
 
-            channel.setCommand( command );
+            channel.setCommand( command + "\n" );
+
+            out = channel.getOutputStream();
+
+            in = channel.getInputStream();
+
+            err = channel.getErrStream();
 
             channel.connect();
+
+            sendEom( out );
+
+            String line = readLine( err );
+
+            if ( line != null )
+            {
+                throw new CommandExecutionException( line );
+            }
         }
         catch ( JSchException e )
         {
-            throw new TransferFailedException( "Cannot execute remote command: " + command, e );
+            throw new CommandExecutionException( "Cannot execute remote command: " + command, e );
+        }
+        catch ( IOException e )
+        {
+            throw new CommandExecutionException( "Cannot execute remote command: " + command, e );
         }
         finally
         {
+            IoUtils.close( out );
+            IoUtils.close( in );
+            IoUtils.close( err );
             if ( channel != null )
             {
                 channel.disconnect();
             }
         }
+    }
+
+    protected String readLine( InputStream in )
+        throws IOException
+    {
+        byte[] buf = new byte[LINE_BUFFER_SIZE];
+
+        String result = null;
+        for ( int i = 0; result == null; i++ )
+        {
+            if ( in.read( buf, i, 1 ) != 1 )
+            {
+                return null;
+            }
+
+            if ( buf[i] == LF )
+            {
+                result = new String( buf, 0, i );
+            }
+        }
+        return result;
+    }
+
+    protected static void sendEom( OutputStream out )
+        throws IOException
+    {
+        out.write( 0 );
+
+        out.flush();
     }
 
     public void closeConnection()
@@ -245,8 +308,7 @@ public abstract class AbstractSshWagon
 
         String msg = "Error occured while downloading from the remote repository:" + getRepository();
 
-        // TODO: this might be too hokey?
-        if ( "No such file".equals( e.getMessage() ) )
+        if ( "No such file".equals( e.toString() ) )
         {
             // SFTP only
             throw new ResourceDoesNotExistException( msg, e );

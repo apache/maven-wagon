@@ -22,15 +22,15 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import java.io.File;
 
 /**
- * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
+ * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  * @version $Id$
  */
-public class ScpWagonTestDisabled
+public class SftpWagonTest
     extends WagonTestCase
 {
     protected String getProtocol()
     {
-        return "scp";
+        return "sftp";
     }
 
     public String getTestRepositoryUrl()
@@ -38,23 +38,11 @@ public class ScpWagonTestDisabled
         return TestData.getTestRepositoryUrl();
     }
 
-
     protected AuthenticationInfo getAuthInfo()
     {
-        AuthenticationInfo authInfo = new AuthenticationInfo();
+        AuthenticationInfo authInfo = super.getAuthInfo();
 
-        String userName = TestData.getUserName();
-
-        authInfo.setUserName( userName );
-
-        File privateKey = TestData.getPrivateKey();
-
-        if ( privateKey.exists() )
-        {
-            authInfo.setPrivateKey( privateKey.getAbsolutePath() );
-
-            authInfo.setPassphrase( "" );
-        }
+        authInfo.setUserName( TestData.getUserName() );
 
         return authInfo;
     }

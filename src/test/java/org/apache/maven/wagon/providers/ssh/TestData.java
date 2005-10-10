@@ -26,26 +26,16 @@ public class TestData
 {
     public static String getTestRepositoryUrl()
     {
-        return "scp://beaver.codehaus.org/home/projects/" + getUserName() + "/public_html";
+        return "scp://localhost/tmp/home/projects/" + getUserName() + "/public_html";
     }
 
     public static String getUserName()
     {
-
-        String retValue = System.getProperty( "testuser.name" );
-
-        if ( retValue == null )
-        {
-            retValue = System.getProperty( "user.name" );
-        }
-
-        return retValue;
+        return System.getProperty( "user.name" );
     }
 
     public static File getPrivateKey()
     {
-        File retValue = new File( System.getProperty( "user.home" ), "/.ssh/id_dsa" );
-
-        return retValue;
+        return new File( System.getProperty( "user.home" ), "/.ssh/id_dsa" );
     }
 }

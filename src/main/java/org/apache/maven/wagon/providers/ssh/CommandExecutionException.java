@@ -16,39 +16,32 @@ package org.apache.maven.wagon.providers.ssh;
  * limitations under the License.
  */
 
-import org.apache.maven.wagon.WagonTestCase;
-import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.WagonException;
 
 /**
- * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
+ * Exception which should be thrown when a command fails to execute on the repository.
+ *
+ * @author <a href="brett@apache.org">Brett Porter</a>
  * @version $Id$
  */
-public class ScpWagonWithSshPrivateKeySearchTestDisabled
-    extends WagonTestCase
+public class CommandExecutionException
+    extends WagonException
 {
-    protected String getProtocol()
+
+    /**
+     * @see org.apache.maven.wagon.WagonException
+     */
+    public CommandExecutionException( String message )
     {
-        return "scp";
+        super( message );
     }
 
-    public String getTestRepositoryUrl()
+    /**
+     * @see org.apache.maven.wagon.WagonException
+     */
+    public CommandExecutionException( String message, Throwable cause )
     {
-        return TestData.getTestRepositoryUrl();
+        super( message, cause );
     }
-
-
-    protected AuthenticationInfo getAuthInfo()
-    {
-        AuthenticationInfo authInfo = new AuthenticationInfo();
-
-        String userName = TestData.getUserName();
-
-        authInfo.setUserName( userName );
-
-        authInfo.setPassphrase( "" );
-
-        return authInfo;
-    }
-
 
 }

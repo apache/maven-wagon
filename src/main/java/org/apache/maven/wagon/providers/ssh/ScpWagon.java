@@ -18,12 +18,10 @@ package org.apache.maven.wagon.providers.ssh;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
-import org.apache.maven.wagon.LazyFileOutputStream;
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.apache.maven.wagon.util.IoUtils;
@@ -33,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.EOFException;
 
 /**
  * A base class for deployers and fetchers using protocols from SSH2 family and
@@ -49,17 +48,11 @@ import java.io.OutputStream;
 public class ScpWagon
     extends AbstractSshWagon
 {
-    private static final byte LF = '\n';
-
     private static final char PATH_SEPARATOR = '/';
 
-    private static final int BUFFER_SIZE = 1024;
-
-    private static final char ACK_CHAR = 'C';
+    private static final char COPY_START_CHAR = 'C';
 
     private static final char ACK_SEPARATOR = ' ';
-
-    private static final char ZERO_CHAR = '0';
 
     public void put( File source, String resourceName )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
@@ -74,41 +67,33 @@ public class ScpWagon
 
         firePutInitiated( resource, source );
 
-        String umaskCmd = "";
-
-        if ( getRepository().getPermissions() != null )
+        try
         {
-            String dirPerms = getRepository().getPermissions().getDirectoryMode();
-
-            if ( dirPerms != null )
+            if ( getRepository().getPermissions() != null )
             {
-                umaskCmd = "umask " + PermissionModeUtils.getUserMaskFor( dirPerms ) + "\n";
+                String dirPerms = getRepository().getPermissions().getDirectoryMode();
+
+                if ( dirPerms != null )
+                {
+                    String umaskCmd = "umask " + PermissionModeUtils.getUserMaskFor( dirPerms );
+                    executeCommand( umaskCmd );
+                }
             }
-        }
 
-        String path = basedir;
-        if ( !basedir.endsWith( "/" ) && !dir.startsWith( "/" ) )
+            String mkdirCmd = "mkdir -p " + getPath( basedir, dir );
+
+            executeCommand( mkdirCmd );
+        }
+        catch ( CommandExecutionException e )
         {
-            path += "/";
+            throw new TransferFailedException( "Error performing commands for file transfer", e );
         }
-        path += dir;
-        String mkdirCmd = umaskCmd + "mkdir -p " + path + "\n";
-
-        executeCommand( mkdirCmd );
 
         ChannelExec channel = null;
 
-        //I/O streams for remote scp
         OutputStream out = null;
 
-        InputStream in;
-
-        path = basedir;
-        if ( !basedir.endsWith( "/" ) && !resourceName.startsWith( "/" ) )
-        {
-            path += "/";
-        }
-        path += resourceName;
+        String path = getPath( basedir, resourceName );
 
         try
         {
@@ -124,14 +109,11 @@ public class ScpWagon
             // get I/O streams for remote scp
             out = channel.getOutputStream();
 
-            in = channel.getInputStream();
+            InputStream in = channel.getInputStream();
 
             channel.connect();
 
-            if ( checkAck( in, false ) != 0 )
-            {
-                throw new TransferFailedException( "ACK check failed" );
-            }
+            checkAck( in );
 
             // send "C0644 filesize filename", where filename should not include '/'
             long filesize = source.length();
@@ -153,26 +135,13 @@ public class ScpWagon
 
             out.flush();
 
-            if ( checkAck( in, false ) != 0 )
-            {
-                throw new TransferFailedException( "ACK check failed" );
-            }
+            checkAck( in );
 
             putTransfer( resource, source, out, false );
 
-            byte[] buf = new byte[BUFFER_SIZE];
+            sendEom( out );
 
-            // send '\0'
-            buf[0] = 0;
-
-            out.write( buf, 0, 1 );
-
-            out.flush();
-
-            if ( checkAck( in, false ) != 0 )
-            {
-                throw new TransferFailedException( "ACK check failed" );
-            }
+            checkAck( in );
         }
         catch ( IOException e )
         {
@@ -198,17 +167,51 @@ public class ScpWagon
             }
         }
 
-        RepositoryPermissions permissions = getRepository().getPermissions();
-
-        if ( permissions != null && permissions.getGroup() != null )
+        try
         {
-            executeCommand( "chgrp -f " + permissions.getGroup() + " " + path + "\n" );
-        }
+            RepositoryPermissions permissions = getRepository().getPermissions();
 
-        if ( permissions != null && permissions.getFileMode() != null )
-        {
-            executeCommand( "chmod -f " + permissions.getFileMode() + " " + path + "\n" );
+            if ( permissions != null && permissions.getGroup() != null )
+            {
+                executeCommand( "chgrp -f " + permissions.getGroup() + " " + path );
+            }
+
+            // TODO: could avoid this by replacing 0644 above
+            if ( permissions != null && permissions.getFileMode() != null )
+            {
+                executeCommand( "chmod -f " + permissions.getFileMode() + " " + path );
+            }
         }
+        catch ( CommandExecutionException e )
+        {
+            throw new TransferFailedException( "Error performing commands for file transfer", e );
+        }
+    }
+
+    private static void checkAck( InputStream in )
+        throws IOException, TransferFailedException
+    {
+        int code = in.read();
+        if ( code == -1 )
+        {
+            throw new TransferFailedException( "Unexpected end of data" );
+        }
+        else if ( code != 0 )
+        {
+            throw new TransferFailedException( "Did receive proper ACK: '" + code + "'" );
+        }
+    }
+
+    private static String getPath( String basedir, String dir )
+    {
+        String path;
+        path = basedir;
+        if ( !basedir.endsWith( "/" ) && !dir.startsWith( "/" ) )
+        {
+            path += "/";
+        }
+        path += dir;
+        return path;
     }
 
     public void get( String resourceName, File destination )
@@ -225,17 +228,12 @@ public class ScpWagon
 
         InputStream in;
 
-        createParentDirectories( destination );
-
-        LazyFileOutputStream outputStream = new LazyFileOutputStream( destination );
-
         String basedir = getRepository().getBasedir();
-
-        //@todo get content lenght and last modified
 
         try
         {
-            String cmd = "scp -f " + basedir + "/" + resourceName;
+            String path = getPath( basedir, resourceName );
+            String cmd = "scp -f " + path;
 
             fireTransferDebug( "Executing command: " + cmd );
 
@@ -250,138 +248,71 @@ public class ScpWagon
 
             channel.connect();
 
-            byte[] buf = new byte[BUFFER_SIZE];
+            sendEom( out );
 
-            // send '\0'
-            buf[0] = 0;
+            int exitCode = in.read();
 
-            out.write( buf, 0, 1 );
+            String line = readLine( in );
 
-            out.flush();
-
-            while ( true )
+            if ( exitCode != COPY_START_CHAR )
             {
-                // TODO: is this really an ACK, or just an in.read()? If the latter, change checkAck method to not return a value, but throw an exception on non-zero result
-                int c = checkAck( in, true );
-
-                if ( c != ACK_CHAR )
+                if ( exitCode == 1 && line.endsWith( "No such file or directory" ) )
                 {
-                    break;
-                }
-
-                // read '0644 '
-                if ( in.read( buf, 0, 5 ) != 5 )
-                {
-                    throw new TransferFailedException( "Unexpected end of data." );
-                }
-
-                int filesize = 0;
-
-                // get file size
-                while ( true )
-                {
-                    if ( in.read( buf, 0, 1 ) != 1 )
-                    {
-                        throw new TransferFailedException( "Unexpected end of data." );
-                    }
-
-                    if ( buf[0] == ACK_SEPARATOR )
-                    {
-                        break;
-                    }
-
-                    filesize = filesize * 10 + ( buf[0] - ZERO_CHAR );
-                }
-
-                resource.setContentLength( filesize );
-
-                for ( int i = 0; ; i++ )
-                {
-                    if ( in.read( buf, i, 1 ) != 1 )
-                    {
-                        throw new TransferFailedException( "Unexpected end of data." );
-                    }
-
-                    if ( buf[i] == LF )
-                    {
-                        break;
-                    }
-                }
-
-                // send '\0'
-                buf[0] = 0;
-
-                out.write( buf, 0, 1 );
-
-                out.flush();
-
-                fireGetStarted( resource, destination );
-
-                TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_PROGRESS,
-                                                                 TransferEvent.REQUEST_GET );
-
-                try
-                {
-                    while ( true )
-                    {
-                        int len = Math.min( buf.length, filesize );
-
-                        if ( in.read( buf, 0, len ) != len )
-                        {
-                            throw new TransferFailedException( "Unexpected end of data." );
-                        }
-
-                        outputStream.write( buf, 0, len );
-
-                        fireTransferProgress( transferEvent, buf, len );
-
-                        filesize -= len;
-
-                        if ( filesize == 0 )
-                        {
-                            break;
-                        }
-                    }
-                }
-                catch ( IOException e )
-                {
-                    fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-
-                    IoUtils.close( outputStream );
-
-                    if ( destination.exists() )
-                    {
-                        boolean deleted = destination.delete();
-
-                        if ( !deleted )
-                        {
-                            destination.deleteOnExit();
-                        }
-                    }
-
-                    String msg = "GET request of: " + resource + " from " + repository.getName() + "failed";
-
-                    throw new TransferFailedException( msg, e );
-
-                }
-
-                fireGetCompleted( resource, destination );
-
-                if ( checkAck( in, true ) != 0 )
-                {
-                    throw new TransferFailedException( "Wrong ACK" );
+                    throw new ResourceDoesNotExistException( line );
                 }
                 else
                 {
-                    fireTransferDebug( "ACK check: OK" );
+                    throw new TransferFailedException( "Exit code: " + exitCode + " - " + line );
                 }
+            }
 
-                // send '\0'
-                buf[0] = 0;
+            if ( line == null )
+            {
+                throw new EOFException( "Unexpected end of data" );
+            }
 
-                out.write( buf, 0, 1 );
+            String perms = line.substring( 0, 4 );
+            fireTransferDebug( "Remote file permissions: " + perms );
 
-                out.flush();
+            if ( line.charAt( 4 ) != ACK_SEPARATOR )
+            {
+                throw new TransferFailedException( "Invalid transfer header: " + line );
+            }
+
+            int index = line.indexOf( ACK_SEPARATOR, 5 );
+            if ( index < 0 )
+            {
+                throw new TransferFailedException( "Invalid transfer header: " + line );
+            }
+
+            int filesize = Integer.valueOf( line.substring( 5, index ) ).intValue();
+            fireTransferDebug( "Remote file size: " + filesize );
+
+            resource.setContentLength( filesize );
+
+            String filename = line.substring( index + 1 );
+            fireTransferDebug( "Remote filename: " + filename );
+
+            sendEom( out );
+
+            getTransfer( resource, destination, in, false, filesize );
+
+            if ( destination.length() != filesize )
+            {
+                throw new TransferFailedException(
+                    "Expected file length: " + filesize + "; received = " + destination.length() );
+            }
+
+            // TODO: we could possibly have received additional files here
+
+            checkAck( in );
+
+            sendEom( out );
+
+            if ( in.read() != -1 )
+            {
+                throw new TransferFailedException(
+                    "End of stream not encountered - server possibly attempted to send multiple files" );
             }
         }
         catch ( JSchException e )
@@ -400,8 +331,6 @@ public class ScpWagon
             {
                 channel.disconnect();
             }
-
-            IoUtils.close( outputStream );
         }
     }
 
@@ -409,57 +338,5 @@ public class ScpWagon
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         throw new UnsupportedOperationException( "getIfNewer is scp wagon must be still implemented" );
-    }
-
-    static int checkAck( InputStream in, boolean isGet )
-        throws IOException, ResourceDoesNotExistException, TransferFailedException
-    {
-        int b = in.read();
-        // b may be 0 for success,
-        //          1 for error,
-        //          2 for fatal error,
-        //         -1
-
-        if ( b == 0 || b == -1 )
-        {
-            return b;
-        }
-
-        if ( b == 1 || b == 2 )
-        {
-            StringBuffer sb = new StringBuffer();
-
-            int c;
-
-            do
-            {
-                c = in.read();
-
-                sb.append( (char) c );
-            }
-            while ( c != LF );
-
-            String message = sb.toString();
-            if ( b == 1 )
-            {
-                // error
-                if ( message.endsWith( "No such file or directory\n" ) && isGet )
-                {
-                    // TODO: this might be too hokey?
-                    throw new ResourceDoesNotExistException( message );
-                }
-                else
-                {
-                    throw new TransferFailedException( message );
-                }
-            }
-            else
-            {
-                // fatal error
-                throw new TransferFailedException( message );
-            }
-        }
-
-        return b;
     }
 }
