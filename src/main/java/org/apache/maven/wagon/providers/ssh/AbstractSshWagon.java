@@ -32,7 +32,7 @@ import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.resource.Resource;
-import org.apache.maven.wagon.util.IoUtils;
+import org.codehaus.plexus.util.IOUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -243,9 +243,9 @@ public abstract class AbstractSshWagon
         }
         finally
         {
-            IoUtils.close( out );
-            IoUtils.close( in );
-            IoUtils.close( err );
+            IOUtil.close( out );
+            IOUtil.close( in );
+            IOUtil.close( err );
             if ( channel != null )
             {
                 channel.disconnect();

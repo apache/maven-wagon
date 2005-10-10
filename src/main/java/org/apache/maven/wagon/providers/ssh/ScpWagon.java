@@ -24,14 +24,14 @@ import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
-import org.apache.maven.wagon.util.IoUtils;
+import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.EOFException;
 
 /**
  * A base class for deployers and fetchers using protocols from SSH2 family and
@@ -161,7 +161,7 @@ public class ScpWagon
         {
             if ( channel != null )
             {
-                IoUtils.close( out );
+                IOUtil.close( out );
 
                 channel.disconnect();
             }
@@ -325,7 +325,7 @@ public class ScpWagon
         }
         finally
         {
-            IoUtils.close( out );
+            IOUtil.close( out );
 
             if ( channel != null )
             {
