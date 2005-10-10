@@ -86,7 +86,13 @@ public class ScpWagon
             }
         }
 
-        String mkdirCmd = umaskCmd + "mkdir -p " + basedir + "/" + dir + "\n";
+        String path = basedir;
+        if ( !basedir.endsWith( "/" ) && !dir.startsWith( "/" ) )
+        {
+            path += "/";
+        }
+        path += dir;
+        String mkdirCmd = umaskCmd + "mkdir -p " + path + "\n";
 
         executeCommand( mkdirCmd );
 
@@ -97,10 +103,17 @@ public class ScpWagon
 
         InputStream in;
 
+        path = basedir;
+        if ( !basedir.endsWith( "/" ) && !resourceName.startsWith( "/" ) )
+        {
+            path += "/";
+        }
+        path += resourceName;
+
         try
         {
             // exec 'scp -t rfile' remotely
-            String command = "scp -t " + basedir + "/" + resourceName;
+            String command = "scp -t " + path;
 
             fireTransferDebug( "Executing command: " + command );
 
@@ -189,12 +202,12 @@ public class ScpWagon
 
         if ( permissions != null && permissions.getGroup() != null )
         {
-            executeCommand( "chgrp -f " + permissions.getGroup() + " " + basedir + "/" + resourceName + "\n" );
+            executeCommand( "chgrp -f " + permissions.getGroup() + " " + path + "\n" );
         }
 
         if ( permissions != null && permissions.getFileMode() != null )
         {
-            executeCommand( "chmod -f " + permissions.getFileMode() + " " + basedir + "/" + resourceName + "\n" );
+            executeCommand( "chmod -f " + permissions.getFileMode() + " " + path + "\n" );
         }
     }
 
