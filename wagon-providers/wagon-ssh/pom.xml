@@ -26,7 +26,7 @@
     </dependency>
     <dependency> 
       <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-input-handler-api</artifactId>
+      <artifactId>plexus-interactivity-api</artifactId>
       <version>1.0-alpha-4-SNAPSHOT</version>
     </dependency>
   </dependencies>
