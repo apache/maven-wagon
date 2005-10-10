@@ -323,20 +323,26 @@ public class FtpWagon
                 }
             }
 
-            FTPFile[] ftpFiles = ftp.listFiles( "" );
+            String filename = PathUtils.filename( resource.getName() );
+            FTPFile[] ftpFiles = ftp.listFiles( filename );
 
-            long contenetLength = ftpFiles[0].getSize();
+            if ( ftpFiles == null )
+            {
+                throw new ResourceDoesNotExistException( "Could not find file: '" + resource + "'" );
+            }
+
+            long contentLength = ftpFiles[0].getSize();
 
             //@todo check how it works! javadoc of common login says:
             // Returns the file timestamp. This usually the last modification time.
             //
             long lastModified = ftpFiles[0].getTimestamp().getTimeInMillis();
 
-            resource.setContentLength( contenetLength );
+            resource.setContentLength( contentLength );
 
             resource.setLastModified( lastModified );
 
-            is = ftp.retrieveFileStream( PathUtils.filename( resource.getName() ) );
+            is = ftp.retrieveFileStream( filename );
 
             for ( int i = 0; i < dirs.length; i++ )
             {

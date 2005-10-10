@@ -14,6 +14,10 @@
     <url>http://www.apache.org/</url>
   </organization>
   <distributionManagement>
+    <snapshotRepository>
+      <id>snapshots</id>
+      <url>scp://beaver.codehaus.org/home/projects/maven/repository-staging/snapshots/maven2</url>
+    </snapshotRepository>
     <repository>
       <id>repo1</id>
       <url>scp://beaver.codehaus.org/home/projects/maven/repository-staging/to-ibiblio/maven2</url>
@@ -107,14 +111,14 @@
         <version>3.8.1</version>
       </dependency>
       <dependency>
-        <groupId>plexus</groupId>
+        <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-container-default</artifactId>
-        <version>1.0-alpha-3</version>
+        <version>1.0-alpha-8-SNAPSHOT</version>
       </dependency>
       <dependency>
-        <groupId>plexus</groupId>
+        <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-utils</artifactId>
-        <version>1.0.2-SNAPSHOT</version>
+        <version>1.0.4-SNAPSHOT</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

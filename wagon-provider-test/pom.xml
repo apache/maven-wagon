@@ -19,7 +19,7 @@
       <artifactId>junit</artifactId>
     </dependency>
     <dependency>
-      <groupId>plexus</groupId>
+      <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-container-default</artifactId>
     </dependency>
   </dependencies>

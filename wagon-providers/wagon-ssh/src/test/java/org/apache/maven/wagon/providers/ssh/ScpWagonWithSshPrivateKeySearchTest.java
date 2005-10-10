@@ -16,18 +16,37 @@ package org.apache.maven.wagon.providers.ssh;
  * limitations under the License.
  */
 
-import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.WagonTestCase;
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
 /**
- * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a>
+ * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  */
-public interface SshCommandExecutor
-    extends Wagon
+public class ScpWagonWithSshPrivateKeySearchTest
+    extends WagonTestCase
 {
-    String ROLE = SshCommandExecutor.class.getName();
+    protected String getProtocol()
+    {
+        return "scp";
+    }
 
-    void executeCommand( String command )
-        throws CommandExecutionException;
+    public String getTestRepositoryUrl()
+    {
+        return TestData.getTestRepositoryUrl();
+    }
+
+
+    protected AuthenticationInfo getAuthInfo()
+    {
+        AuthenticationInfo authInfo = super.getAuthInfo();
+
+        authInfo.setUserName( TestData.getUserName() );
+
+        authInfo.setPassphrase( "" );
+
+        return authInfo;
+    }
+
+
 }

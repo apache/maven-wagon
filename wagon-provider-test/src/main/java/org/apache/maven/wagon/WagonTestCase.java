@@ -181,6 +181,45 @@ public abstract class WagonTestCase
         tearDownWagonTestingFixtures();
     }
 
+    public void testFailedGet()
+        throws Exception
+    {
+        setupRepositories();
+
+        setupWagonTestingFixtures();
+
+        message( "Getting test artifact from test repository " + testRepository );
+
+        Wagon wagon = getWagon();
+
+        wagon.addTransferListener( checksumObserver );
+
+        wagon.connect( testRepository, getAuthInfo() );
+
+        destFile = FileTestUtils.createUniqueFile( getName(), getName() );
+
+        destFile.deleteOnExit();
+
+        try
+        {
+            wagon.get( "fubar.txt", destFile );
+            fail( "File was found when it sohuldn't have been" );
+        }
+        catch ( ResourceDoesNotExistException e )
+        {
+            // expected
+            assertTrue( true );
+        }
+        finally
+        {
+            wagon.removeTransferListener( checksumObserver );
+
+            wagon.disconnect();
+
+            tearDownWagonTestingFixtures();
+        }
+    }
+
     // ----------------------------------------------------------------------
     // File <--> File round trip testing
     // ----------------------------------------------------------------------
@@ -243,7 +282,7 @@ public abstract class WagonTestCase
         assertEquals( "compare checksums", "6b144b7285ffd6b0bc8300da162120b9", checksumObserver.getActualChecksum() );
 
         checksumObserver = new ChecksumObserver();
-        
+
         getFile();
 
         assertNotNull( "check checksum is not null", checksumObserver.getActualChecksum() );

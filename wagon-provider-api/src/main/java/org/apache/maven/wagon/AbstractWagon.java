@@ -168,7 +168,14 @@ public abstract class AbstractWagon
     protected void getTransfer( Resource resource, File destination, InputStream input )
         throws TransferFailedException
     {
-    	// ensure that the destination is created only when we are ready to transfer
+        getTransfer( resource, destination, input, true, Integer.MAX_VALUE );
+    }
+
+    protected void getTransfer( Resource resource, File destination, InputStream input, boolean closeInput,
+                                int maxSize )
+        throws TransferFailedException
+    {
+        // ensure that the destination is created only when we are ready to transfer
         fireTransferDebug( "attempting to create parent directories for destination: " + destination.getName() );
         createParentDirectories( destination );
 
@@ -178,7 +185,7 @@ public abstract class AbstractWagon
 
         try
         {
-            transfer( resource, input, output, TransferEvent.REQUEST_GET );
+            transfer( resource, input, output, TransferEvent.REQUEST_GET, maxSize );
         }
         catch ( IOException e )
         {
@@ -201,10 +208,12 @@ public abstract class AbstractWagon
         }
         finally
         {
-            IoUtils.close( input );
+            if ( closeInput )
+            {
+                IoUtils.close( input );
+            }
 
             IoUtils.close( output );
-
         }
 
         fireGetCompleted( resource, destination );
@@ -254,13 +263,20 @@ public abstract class AbstractWagon
     protected void transfer( Resource resource, InputStream input, OutputStream output, int requestType )
         throws IOException
     {
+        transfer( resource, input, output, requestType, Integer.MAX_VALUE );
+    }
+
+    protected void transfer( Resource resource, InputStream input, OutputStream output, int requestType, int maxSize )
+        throws IOException
+    {
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
         TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_PROGRESS, requestType );
 
-        while ( true )
+        int remaining = maxSize;
+        while ( remaining > 0 )
         {
-            int n = input.read( buffer );
+            int n = input.read( buffer, 0, Math.min( buffer.length, remaining ) );
 
             if ( n == -1 )
             {
@@ -270,6 +286,8 @@ public abstract class AbstractWagon
             fireTransferProgress( transferEvent, buffer, n );
 
             output.write( buffer, 0, n );
+
+            remaining -= n;
         }
     }
 

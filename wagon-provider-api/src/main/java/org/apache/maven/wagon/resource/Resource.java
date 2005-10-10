@@ -83,4 +83,9 @@ public class Resource
     {
         this.contentLength = contentLength;
     }
+
+    public String toString()
+    {
+        return name;
+    }
 }
