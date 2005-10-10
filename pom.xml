@@ -25,12 +25,10 @@
       <version>1.3</version>
     </dependency>
     <dependency> 
-      <!-- used by org.apache.maven.wagon.providers.ssh.InteractiveUserInfo -->
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-input-handler-api</artifactId>
-      <version>1.0-alpha-3</version>
+      <version>1.0-alpha-4-SNAPSHOT</version>
     </dependency>
-
   </dependencies>
   <build>
     <plugins>

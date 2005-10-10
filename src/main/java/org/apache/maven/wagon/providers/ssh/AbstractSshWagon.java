@@ -23,15 +23,18 @@ import com.jcraft.jsch.Proxy;
 import com.jcraft.jsch.ProxyHTTP;
 import com.jcraft.jsch.ProxySOCKS5;
 import com.jcraft.jsch.Session;
+import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
 import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonConstants;
-import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.events.TransferEvent;
+import org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo;
+import org.apache.maven.wagon.providers.ssh.interactive.UserInfoUIKeyboardInteractiveProxy;
+import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
 
@@ -43,6 +46,8 @@ import java.util.Properties;
 
 /**
  * Common SSH operations.
+ *
+ * @todo cache pass[words|phases]
  *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  * @version $Id$
@@ -67,6 +72,8 @@ public abstract class AbstractSshWagon
 
     private InteractiveUserInfo interactiveUserInfo;
 
+    private UIKeyboardInteractive uIKeyboardInteractive;
+
     private JSch sch;
 
     public void openConnection()
@@ -74,7 +81,8 @@ public abstract class AbstractSshWagon
     {
         if ( authenticationInfo == null )
         {
-            throw new IllegalArgumentException( "Authentication Credentials cannot be null for SSH protocol" );
+            authenticationInfo = new AuthenticationInfo();
+            authenticationInfo.setUserName( System.getProperty( "user.name" ) );
         }
 
         sch = new JSch();
@@ -133,13 +141,6 @@ public abstract class AbstractSshWagon
                     throw new AuthenticationException( "Cannot connect. Reason: " + e.getMessage(), e );
                 }
             }
-            else
-            {
-                String msg = "Private key was not found. You must define a private key or a password for repo: " +
-                    getRepository().getName();
-
-                throw new AuthenticationException( msg );
-            }
         }
 
         if ( proxyInfo != null && proxyInfo.getHost() != null )
@@ -176,6 +177,11 @@ public abstract class AbstractSshWagon
 
         // username and password will be given via UserInfo interface.
         UserInfo ui = new WagonUserInfo( authenticationInfo, interactiveUserInfo );
+
+        if ( uIKeyboardInteractive != null )
+        {
+            ui = new UserInfoUIKeyboardInteractiveProxy( ui, uIKeyboardInteractive );
+        }
 
         if ( knownHostsProvider != null )
         {
@@ -312,7 +318,10 @@ public abstract class AbstractSshWagon
     {
         if ( knownHostsProvider != null )
         {
-            knownHostsProvider.storeKnownHosts( sch );
+            if ( sch != null )
+            {
+                knownHostsProvider.storeKnownHosts( sch );
+            }
         }
 
         if ( session != null )
@@ -320,7 +329,7 @@ public abstract class AbstractSshWagon
             session.disconnect();
             session = null;
         }
-        
+
         sch = null;
     }
 
@@ -352,42 +361,54 @@ public abstract class AbstractSshWagon
         }
     }
 
-    // ----------------------------------------------------------------------
-    // JSch user info
-    // ----------------------------------------------------------------------
-    // TODO: are the prompt values really right? Is there an alternative to UserInfo?
-
-    private static class WagonUserInfo
+    private class WagonUserInfo
         implements UserInfo
     {
-        private final AuthenticationInfo authInfo;
-
         private final InteractiveUserInfo userInfo;
+
+        private String password;
+
+        private String passphrase;
+
+        private String username;
 
         WagonUserInfo( AuthenticationInfo authInfo, InteractiveUserInfo userInfo )
         {
-            this.authInfo = authInfo;
             this.userInfo = userInfo;
+
+            this.username = authInfo.getUserName();
+
+            this.password = authInfo.getPassword();
+
+            this.passphrase = authInfo.getPassphrase();
         }
 
         public String getPassphrase()
         {
-            return authInfo.getPassphrase();
+            return passphrase;
         }
 
         public String getPassword()
         {
-            return authInfo.getPassword();
+            return password;
         }
 
         public boolean promptPassphrase( String arg0 )
         {
-            return true;
+            if ( passphrase == null && userInfo != null )
+            {
+                passphrase = userInfo.promptPassphrase( arg0 );
+            }
+            return passphrase != null;
         }
 
         public boolean promptPassword( String arg0 )
         {
-            return true;
+            if ( password == null && userInfo != null )
+            {
+                password = userInfo.promptPassword( arg0 );
+            }
+            return password != null;
         }
 
         public boolean promptYesNo( String arg0 )

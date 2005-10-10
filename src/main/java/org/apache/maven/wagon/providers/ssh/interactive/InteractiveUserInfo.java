@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.ssh;
+package org.apache.maven.wagon.providers.ssh.interactive;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
@@ -32,4 +32,10 @@ public interface InteractiveUserInfo
 
     /*** @see com.jcraft.jsch.UserInfo#showMessage(java.lang.String) */
     void showMessage( String message );
+
+    /** @see com.jcraft.jsch.UserInfo#promptPassword(String) */
+    String promptPassword( String message );
+
+    /** @see com.jcraft.jsch.UserInfo#promptPassphrase(String) */
+    String promptPassphrase( String message );
 }
