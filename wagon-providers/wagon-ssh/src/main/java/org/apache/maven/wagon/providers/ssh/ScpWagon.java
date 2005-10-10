@@ -17,21 +17,11 @@ package org.apache.maven.wagon.providers.ssh;
  */
 
 import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Proxy;
-import com.jcraft.jsch.ProxyHTTP;
-import com.jcraft.jsch.ProxySOCKS5;
-import com.jcraft.jsch.Session;
-import com.jcraft.jsch.UserInfo;
-import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.LazyFileOutputStream;
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.WagonConstants;
-import org.apache.maven.wagon.authentication.AuthenticationException;
-import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
@@ -57,176 +47,19 @@ import java.io.OutputStream;
  * @todo [BP] add compression flag
  */
 public class ScpWagon
-    extends AbstractWagon
-    implements SshCommandExecutor
+    extends AbstractSshWagon
 {
-    public static String EXEC_CHANNEL = "exec";
+    private static final byte LF = '\n';
 
-    public static int DEFAULT_SSH_PORT = 22;
+    private static final char PATH_SEPARATOR = '/';
 
-    public static int SOCKS5_PROXY_PORT = 1080;
+    private static final int BUFFER_SIZE = 1024;
 
-    protected Session session = null;
+    private static final char ACK_CHAR = 'C';
 
-    // ----------------------------------------------------------------------
-    //
-    // ----------------------------------------------------------------------
+    private static final char ACK_SEPARATOR = ' ';
 
-    public void openConnection()
-        throws AuthenticationException
-    {
-        try
-        {
-            if ( authenticationInfo == null )
-            {
-                throw new IllegalArgumentException( "Authentication Credentials cannot be null for SSH protocol" );
-            }
-
-            JSch jsch = new JSch();
-
-            int port = getRepository().getPort();
-
-            if ( port == WagonConstants.UNKNOWN_PORT )
-            {
-                port = DEFAULT_SSH_PORT;
-            }
-
-            String host = getRepository().getHost();
-
-            session = jsch.getSession( authenticationInfo.getUserName(), host, port );
-
-            // If user don't define a password, he want to use a private key
-            if ( authenticationInfo.getPassword() == null )
-            {
-                File privateKey;
-
-                if ( authenticationInfo.getPrivateKey() != null )
-                {
-                    privateKey = new File( authenticationInfo.getPrivateKey() );
-                }
-                else
-                {
-                    privateKey = findPrivateKey();
-                }
-
-                if ( privateKey.exists() )
-                {
-                    if ( authenticationInfo.getPassphrase() == null )
-                    {
-                        authenticationInfo.setPassphrase( "" );
-                    }
-
-                    fireSessionDebug( "Using private key: " + privateKey );
-
-                    jsch.addIdentity( privateKey.getAbsolutePath(), authenticationInfo.getPassphrase() );
-                }
-                else
-                {
-                    String msg = "Private key was not found. You must define a private key or a password for repo: " +
-                                 getRepository().getName();
-
-                    throw new AuthenticationException( msg );
-                }
-            }
-
-            if ( proxyInfo != null && proxyInfo.getHost() != null )
-            {
-                Proxy proxy;
-
-                int proxyPort = proxyInfo.getPort();
-
-                // HACK: if port == 1080 we will use SOCKS5 Proxy, otherwise will use HTTP Proxy
-                if ( proxyPort == SOCKS5_PROXY_PORT )
-                {
-                    proxy = new ProxySOCKS5( proxyInfo.getHost() );
-                    ( (ProxySOCKS5) proxy ).setUserPasswd( proxyInfo.getUserName(), proxyInfo.getPassword() );
-                }
-                else
-                {
-                    proxy = new ProxyHTTP( proxyInfo.getHost(), proxyPort );
-                    ( (ProxyHTTP) proxy ).setUserPasswd( proxyInfo.getUserName(), proxyInfo.getPassword() );
-                }
-
-                proxy.connect( session, host, port );
-            }
-
-            // username and password will be given via UserInfo interface.
-            UserInfo ui = new WagonUserInfo( authenticationInfo );
-
-            session.setUserInfo( ui );
-
-            session.connect();
-        }
-        catch ( Exception e )
-        {
-            fireSessionError( e );
-
-            throw new AuthenticationException( "Cannot connect. Reason: " + e.getMessage(), e );
-        }
-    }
-
-    // ----------------------------------------------------------------------
-    //
-    // ----------------------------------------------------------------------
-
-    private File findPrivateKey()
-    {
-        String privateKeyDirectory = System.getProperty( "wagon.privateKeyDirectory" );
-
-        if ( privateKeyDirectory == null )
-        {
-            privateKeyDirectory = System.getProperty( "user.home" );
-        }
-
-        File privateKey = new File( privateKeyDirectory, ".ssh/id_dsa" );
-
-        if ( !privateKey.exists() )
-        {
-            privateKey = new File( privateKeyDirectory, ".ssh/id_rsa" );
-        }
-
-        return privateKey;
-    }
-
-    // ----------------------------------------------------------------------
-    //
-    // ----------------------------------------------------------------------
-
-    public void closeConnection()
-    {
-        if ( session != null )
-        {
-            session.disconnect();
-        }
-    }
-
-    public void executeCommand( String command )
-        throws TransferFailedException
-    {
-        ChannelExec channel = null;
-
-        try
-        {
-            fireTransferDebug( "Executing command: " + command );
-
-            channel = (ChannelExec) session.openChannel( EXEC_CHANNEL );
-
-            channel.setCommand( command );
-
-            channel.connect();
-        }
-        catch ( JSchException e )
-        {
-            throw new TransferFailedException( "Cannot execute remote command: " + command, e );
-        }
-        finally
-        {
-            if ( channel != null )
-            {
-                channel.disconnect();
-            }
-        }
-    }
+    private static final char ZERO_CHAR = '0';
 
     public void put( File source, String resourceName )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
@@ -292,9 +125,9 @@ public class ScpWagon
 
             command = "C0644 " + filesize + " ";
 
-            if ( resourceName.lastIndexOf( '/' ) > 0 )
+            if ( resourceName.lastIndexOf( PATH_SEPARATOR ) > 0 )
             {
-                command += resourceName.substring( resourceName.lastIndexOf( '/' ) + 1 );
+                command += resourceName.substring( resourceName.lastIndexOf( PATH_SEPARATOR ) + 1 );
             }
             else
             {
@@ -314,10 +147,10 @@ public class ScpWagon
 
             putTransfer( resource, source, out, false );
 
-            byte[] buf = new byte[1024];
+            byte[] buf = new byte[BUFFER_SIZE];
 
             // send '\0'
-            buf[ 0 ] = 0;
+            buf[0] = 0;
 
             out.write( buf, 0, 1 );
 
@@ -331,14 +164,14 @@ public class ScpWagon
         catch ( IOException e )
         {
             String msg = "Error occured while deploying '" + resourceName + "' to remote repository: " +
-                         getRepository().getUrl();
+                getRepository().getUrl();
 
             throw new TransferFailedException( msg, e );
         }
         catch ( JSchException e )
         {
             String msg = "Error occured while deploying '" + resourceName + "' to remote repository: " +
-                         getRepository().getUrl();
+                getRepository().getUrl();
 
             throw new TransferFailedException( msg, e );
         }
@@ -404,10 +237,10 @@ public class ScpWagon
 
             channel.connect();
 
-            byte[] buf = new byte[1024];
+            byte[] buf = new byte[BUFFER_SIZE];
 
             // send '\0'
-            buf[ 0 ] = 0;
+            buf[0] = 0;
 
             out.write( buf, 0, 1 );
 
@@ -418,7 +251,7 @@ public class ScpWagon
                 // TODO: is this really an ACK, or just an in.read()? If the latter, change checkAck method to not return a value, but throw an exception on non-zero result
                 int c = checkAck( in, true );
 
-                if ( c != 'C' )
+                if ( c != ACK_CHAR )
                 {
                     break;
                 }
@@ -439,12 +272,12 @@ public class ScpWagon
                         throw new TransferFailedException( "Unexpected end of data." );
                     }
 
-                    if ( buf[ 0 ] == ' ' )
+                    if ( buf[0] == ACK_SEPARATOR )
                     {
                         break;
                     }
 
-                    filesize = filesize * 10 + ( buf[ 0 ] - '0' );
+                    filesize = filesize * 10 + ( buf[0] - ZERO_CHAR );
                 }
 
                 resource.setContentLength( filesize );
@@ -456,14 +289,14 @@ public class ScpWagon
                         throw new TransferFailedException( "Unexpected end of data." );
                     }
 
-                    if ( buf[ i ] == (byte) 0x0a )
+                    if ( buf[i] == LF )
                     {
                         break;
                     }
                 }
 
                 // send '\0'
-                buf[ 0 ] = 0;
+                buf[0] = 0;
 
                 out.write( buf, 0, 1 );
 
@@ -531,7 +364,7 @@ public class ScpWagon
                 }
 
                 // send '\0'
-                buf[ 0 ] = 0;
+                buf[0] = 0;
 
                 out.write( buf, 0, 1 );
 
@@ -559,85 +392,10 @@ public class ScpWagon
         }
     }
 
-    protected void handleGetException( Resource resource, Exception e, File destination )
-        throws TransferFailedException, ResourceDoesNotExistException
-    {
-        fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-
-        if ( destination.exists() )
-        {
-            boolean deleted = destination.delete();
-
-            if ( !deleted )
-            {
-                destination.deleteOnExit();
-            }
-        }
-
-        String msg = "Error occured while downloading from the remote repository:" + getRepository();
-
-        // this sucks....
-        if( e.toString().equals("No such file"))  
-        {
-            throw new ResourceDoesNotExistException( msg, e );
-        }
-        else
-        {
-            throw new TransferFailedException( msg, e );
-        }
-    }
-
     public boolean getIfNewer( String resourceName, File destination, long timestamp )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         throw new UnsupportedOperationException( "getIfNewer is scp wagon must be still implemented" );
-    }
-
-// ----------------------------------------------------------------------
-// JSch user info
-// ----------------------------------------------------------------------
-// TODO: are the prompt values really right? Is there an alternative to UserInfo?
-
-    public static class WagonUserInfo
-        implements UserInfo
-    {
-        AuthenticationInfo authInfo;
-
-        WagonUserInfo( AuthenticationInfo authInfo )
-        {
-            this.authInfo = authInfo;
-        }
-
-        public String getPassphrase()
-        {
-            return authInfo.getPassphrase();
-        }
-
-        public String getPassword()
-        {
-            return authInfo.getPassword();
-        }
-
-        public boolean promptPassphrase( String arg0 )
-        {
-            return true;
-        }
-
-        public boolean promptPassword( String arg0 )
-        {
-            return true;
-        }
-
-        public boolean promptYesNo( String arg0 )
-        {
-            return true;
-        }
-
-        public void showMessage( String message )
-        {
-            // TODO: is this really debug?
-            //fireTransferDebug( message );
-        }
     }
 
     static int checkAck( InputStream in, boolean isGet )
@@ -666,7 +424,7 @@ public class ScpWagon
 
                 sb.append( (char) c );
             }
-            while ( c != '\n' );
+            while ( c != LF );
 
             String message = sb.toString();
             if ( b == 1 )
