@@ -28,17 +28,16 @@ import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonConstants;
-import org.apache.maven.wagon.util.IoUtils;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.resource.Resource;
+import org.apache.maven.wagon.util.IoUtils;
 
 import java.io.File;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.EOFException;
 
 /**
  * Common SSH operations.
@@ -306,7 +305,7 @@ public abstract class AbstractSshWagon
             }
         }
 
-        String msg = "Error occured while downloading from the remote repository:" + getRepository();
+        String msg = "Error occured while downloading '" + resource + "' from the remote repository:" + getRepository();
 
         if ( "No such file".equals( e.toString() ) )
         {
