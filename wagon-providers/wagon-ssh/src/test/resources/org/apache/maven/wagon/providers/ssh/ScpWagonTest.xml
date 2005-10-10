@@ -1,8 +1,8 @@
 <component-set>
   <components>
     <component>
-      <role>org.apache.maven.wagon.providers.ssh.InteractiveUserInfo</role>
-      <implementation>org.apache.maven.wagon.providers.ssh.NullInteractiveUserInfo</implementation>
+      <role>org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo</role>
+      <implementation>org.apache.maven.wagon.providers.ssh.interactive.NullInteractiveUserInfo</implementation>
       <instantiation-strategy>per-lookup</instantiation-strategy>
     </component>
     <component>

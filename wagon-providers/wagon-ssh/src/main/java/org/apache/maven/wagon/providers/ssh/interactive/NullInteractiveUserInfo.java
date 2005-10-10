@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.ssh;
+package org.apache.maven.wagon.providers.ssh.interactive;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
@@ -16,7 +16,7 @@ package org.apache.maven.wagon.providers.ssh;
  * limitations under the License.
  */
 
-import org.apache.maven.wagon.providers.ssh.InteractiveUserInfo;
+import org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo;
 
 /**
  * Dummy Implementation for <code>InteractiveUserInfo</code>, nice for
@@ -24,7 +24,7 @@ import org.apache.maven.wagon.providers.ssh.InteractiveUserInfo;
  *
  * @author Juan F. Codagnone
  * @since Sep 12, 2005
- * @see org.apache.maven.wagon.providers.ssh.InteractiveUserInfo
+ * @see org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo
  */
 public class NullInteractiveUserInfo
     implements InteractiveUserInfo
@@ -37,7 +37,7 @@ public class NullInteractiveUserInfo
         this( false ); // the safest value
     }
 
-    /** 
+    /**
      * Creates a <code>NullInteractiveUserInfo</code> with a hardcoded 
      * prompYesNo result
      * 
@@ -58,5 +58,15 @@ public class NullInteractiveUserInfo
     public void showMessage( final String message )
     {
         // nothing to do
+    }
+
+    public String promptPassword( String message )
+    {
+        return null;
+    }
+
+    public String promptPassphrase( String message )
+    {
+        return null;
     }
 }
