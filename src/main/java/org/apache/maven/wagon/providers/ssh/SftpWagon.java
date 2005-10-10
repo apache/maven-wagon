@@ -39,12 +39,15 @@ import java.io.File;
  * @todo [BP] add compression flag
  */
 public class SftpWagon
-    extends ScpWagon
-    implements SshCommandExecutor
+    extends AbstractSshWagon
 {
     private static final String SFTP_CHANNEL = "sftp";
 
     private static final int S_IFDIR = 0x4000;
+
+    private static final char PATH_SEPARATOR = '/';
+
+    private static final long MILLIS_PER_SEC = 1000L;
 
     // ----------------------------------------------------------------------
     //
@@ -67,9 +70,9 @@ public class SftpWagon
 
         String filename;
 
-        if ( resourceName.lastIndexOf( '/' ) > 0 )
+        if ( resourceName.lastIndexOf( PATH_SEPARATOR ) > 0 )
         {
-            filename = resourceName.substring( resourceName.lastIndexOf( '/' ) + 1 );
+            filename = resourceName.substring( resourceName.lastIndexOf( PATH_SEPARATOR ) + 1 );
         }
         else
         {
@@ -96,10 +99,9 @@ public class SftpWagon
 
             if ( permissions != null && permissions.getGroup() != null )
             {
-                int group;
                 try
                 {
-                    group = Integer.valueOf( permissions.getGroup() ).intValue();
+                    int group = Integer.valueOf( permissions.getGroup() ).intValue();
                     channel.chgrp( group, filename );
                 }
                 catch ( NumberFormatException e )
@@ -111,10 +113,9 @@ public class SftpWagon
 
             if ( permissions != null && permissions.getFileMode() != null )
             {
-                int mode;
                 try
                 {
-                    mode = Integer.valueOf( permissions.getFileMode() ).intValue();
+                    int mode = Integer.valueOf( permissions.getFileMode() ).intValue();
                     channel.chmod( mode, filename );
                 }
                 catch ( NumberFormatException e )
@@ -134,15 +135,15 @@ public class SftpWagon
         }
         catch ( SftpException e )
         {
-            String msg = "Error occured while deploying '" + resourceName + "' " +
-                         "to remote repository: " + getRepository().getUrl();
+            String msg = "Error occured while deploying '" + resourceName + "' " + "to remote repository: " +
+                getRepository().getUrl();
 
             throw new TransferFailedException( msg, e );
         }
         catch ( JSchException e )
         {
-            String msg = "Error occured while deploying '" + resourceName + "' " +
-                         "to remote repository: " + getRepository().getUrl();
+            String msg = "Error occured while deploying '" + resourceName + "' " + "to remote repository: " +
+                getRepository().getUrl();
 
             throw new TransferFailedException( msg, e );
         }
@@ -187,7 +188,7 @@ public class SftpWagon
         {
             try
             {
-                SftpATTRS attrs = channel.stat( dirs[ i ] );
+                SftpATTRS attrs = channel.stat( dirs[i] );
                 if ( ( attrs.getPermissions() & S_IFDIR ) == 0 )
                 {
                     throw new TransferFailedException(
@@ -197,12 +198,12 @@ public class SftpWagon
             catch ( SftpException e )
             {
                 // doesn't exist, make it and try again
-                channel.mkdir( dirs[ i ] );
+                channel.mkdir( dirs[i] );
                 if ( mode != -1 )
                 {
                     try
                     {
-                        channel.chmod( mode, dirs[ i ] );
+                        channel.chmod( mode, dirs[i] );
                     }
                     catch ( final SftpException e1 )
                     {
@@ -212,7 +213,7 @@ public class SftpWagon
                 }
             }
 
-            channel.cd( dirs[ i ] );
+            channel.cd( dirs[i] );
         }
     }
 
@@ -229,7 +230,7 @@ public class SftpWagon
         dir = StringUtils.replace( dir, "\\", "/" );
 
         // we already setuped the root directory. Ignore beginning /
-        if ( dir.length() > 0 && dir.charAt( 0 ) == '/' )
+        if ( dir.length() > 0 && dir.charAt( 0 ) == PATH_SEPARATOR )
         {
             dir = dir.substring( 1 );
         }
@@ -239,9 +240,9 @@ public class SftpWagon
         fireGetInitiated( resource, destination );
 
         String filename;
-        if ( resourceName.lastIndexOf( '/' ) > 0 )
+        if ( resourceName.lastIndexOf( PATH_SEPARATOR ) > 0 )
         {
-            filename = resourceName.substring( resourceName.lastIndexOf( '/' ) + 1 );
+            filename = resourceName.substring( resourceName.lastIndexOf( PATH_SEPARATOR ) + 1 );
         }
         else
         {
@@ -258,7 +259,7 @@ public class SftpWagon
 
             channel.cd( dir );
 
-            if ( timestamp <= 0 || channel.stat( filename ).getMTime() * 1000L > timestamp )
+            if ( timestamp <= 0 || channel.stat( filename ).getMTime() * MILLIS_PER_SEC > timestamp )
             {
                 fireGetStarted( resource, destination );
 
