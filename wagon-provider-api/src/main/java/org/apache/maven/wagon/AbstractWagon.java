@@ -27,7 +27,7 @@ import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.apache.maven.wagon.util.IoUtils;
+import org.codehaus.plexus.util.IOUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -210,10 +210,10 @@ public abstract class AbstractWagon
         {
             if ( closeInput )
             {
-                IoUtils.close( input );
+                IOUtil.close( input );
             }
 
-            IoUtils.close( output );
+            IOUtil.close( output );
         }
 
         fireGetCompleted( resource, destination );
@@ -250,11 +250,11 @@ public abstract class AbstractWagon
         }
         finally
         {
-            IoUtils.close( input );
+            IOUtil.close( input );
 
             if ( closeOutput )
             {
-                IoUtils.close( output );
+                IOUtil.close( output );
             }
         }
         firePutCompleted( resource, source );

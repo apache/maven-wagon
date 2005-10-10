@@ -17,9 +17,9 @@ package org.apache.maven.wagon.providers.scm;
  */
 
 
-import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.util.FileUtils;
+import org.apache.maven.wagon.WagonTestCase;
+import org.codehaus.plexus.util.FileUtils;
 
 import java.io.File;
 import java.io.IOException;

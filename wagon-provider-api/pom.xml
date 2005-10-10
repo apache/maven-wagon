@@ -9,4 +9,10 @@
   </parent>
   <artifactId>wagon-provider-api</artifactId>
   <name>Maven Wagon API</name>
+  <dependencies>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-utils</artifactId>
+    </dependency>
+  </dependencies>
 </project>

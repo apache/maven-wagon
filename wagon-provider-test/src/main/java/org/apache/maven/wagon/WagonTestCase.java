@@ -21,8 +21,8 @@ import org.apache.maven.wagon.observers.ChecksumObserver;
 import org.apache.maven.wagon.observers.Debug;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
-import org.apache.maven.wagon.util.FileUtils;
 import org.codehaus.plexus.PlexusTestCase;
+import org.codehaus.plexus.util.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
