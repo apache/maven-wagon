@@ -29,14 +29,14 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.util.DateParseException;
 import org.apache.commons.httpclient.util.DateParser;
-import org.apache.commons.lang.StringUtils;
 import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.resource.Resource;
-import org.apache.maven.wagon.util.IoUtils;
+import org.codehaus.plexus.util.IOUtil;
+import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -54,11 +54,11 @@ import java.util.TimeZone;
 public class HttpWagon
     extends AbstractWagon
 {
-    private final static int DEFAULT_NUMBER_OF_ATTEMPTS = 3;
+    private static final int DEFAULT_NUMBER_OF_ATTEMPTS = 3;
 
-    private final static int SC_NULL = -1;
+    private static final int SC_NULL = -1;
 
-    private HttpClient client = null;
+    private HttpClient client;
 
     private int numberOfAttempts = DEFAULT_NUMBER_OF_ATTEMPTS;
 
@@ -165,7 +165,7 @@ public class HttpWagon
         fireTransferDebug( "about to execute client for put" );
 
         // We will retry up to NumberOfAttempts times.
-        while ( ( statusCode == SC_NULL ) && ( attempt < getNumberOfAttempts() ) )
+        while ( statusCode == SC_NULL && attempt < getNumberOfAttempts() )
         {
             try
             {
@@ -195,8 +195,8 @@ public class HttpWagon
                 break;
 
             case SC_NULL:
-                throw new TransferFailedException( "Failed to transfer file: " + url + " after " + attempt +
-                                                   " attempts" );
+                throw new TransferFailedException(
+                    "Failed to transfer file: " + url + " after " + attempt + " attempts" );
 
             case HttpStatus.SC_FORBIDDEN:
                 throw new AuthorizationException( "Access denided to: " + url );
@@ -206,8 +206,8 @@ public class HttpWagon
 
                 //add more entries here
             default :
-                throw new TransferFailedException( "Failed to transfer file: " + url + ". Return code is: " +
-                                                   statusCode );
+                throw new TransferFailedException(
+                    "Failed to transfer file: " + url + ". Return code is: " + statusCode );
         }
 
         putMethod.releaseConnection();
@@ -234,7 +234,7 @@ public class HttpWagon
     /**
      * @param resourceName
      * @param destination
-     * @param timestamp    the timestamp to check against, only downloading if newer. If <code>0</code>, always download
+     * @param timestamp the timestamp to check against, only downloading if newer. If <code>0</code>, always download
      * @return <code>true</code> if newer version was downloaded, <code>false</code> otherwise.
      * @throws TransferFailedException
      * @throws ResourceDoesNotExistException
@@ -276,7 +276,7 @@ public class HttpWagon
             int attempt = 0;
 
             // We will retry up to NumberOfAttempts times.
-            while ( ( statusCode == SC_NULL ) && ( attempt < getNumberOfAttempts() ) )
+            while ( statusCode == SC_NULL && attempt < getNumberOfAttempts() )
             {
                 try
                 {
@@ -305,8 +305,8 @@ public class HttpWagon
                     return false;
 
                 case SC_NULL:
-                    throw new TransferFailedException( "Failed to transfer file: " + url + " after " + attempt +
-                                                       " attempts" );
+                    throw new TransferFailedException(
+                        "Failed to transfer file: " + url + " after " + attempt + " attempts" );
 
                 case HttpStatus.SC_FORBIDDEN:
                     throw new AuthorizationException( "Access denided to: " + url );
@@ -322,8 +322,8 @@ public class HttpWagon
 
                     //add more entries here
                 default :
-                    throw new TransferFailedException( "Failed to trasfer file: " + url + ". Return code is: " +
-                                                       statusCode );
+                    throw new TransferFailedException(
+                        "Failed to trasfer file: " + url + ". Return code is: " + statusCode );
             }
 
             InputStream is = null;
@@ -393,7 +393,7 @@ public class HttpWagon
                 }
                 finally
                 {
-                    IoUtils.close( is );
+                    IOUtil.close( is );
                 }
 
                 if ( lastModified > 0 )
