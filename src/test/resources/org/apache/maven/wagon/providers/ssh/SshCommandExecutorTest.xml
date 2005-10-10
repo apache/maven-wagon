@@ -1,0 +1,17 @@
+<component-set>
+  <components>
+    <component>
+      <role>org.apache.maven.wagon.providers.ssh.InteractiveUserInfo</role>
+      <implementation>org.apache.maven.wagon.providers.ssh.NullInteractiveUserInfo</implementation>
+      <instantiation-strategy>per-lookup</instantiation-strategy>
+    </component>
+    <component>
+      <role>org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider</role>
+      <implementation>org.apache.maven.wagon.providers.ssh.knownhost.NullKnownHostProvider</implementation>
+      <instantiation-strategy>per-lookup</instantiation-strategy>
+      <configuration>
+        <hostKeyChecking>no</hostKeyChecking>
+      </configuration>
+    </component>
+  </components>
+</component-set>

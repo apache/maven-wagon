@@ -19,6 +19,18 @@
       <artifactId>jsch</artifactId>
       <version>0.1.21</version>
     </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.3</version>
+    </dependency>
+    <dependency> 
+      <!-- used by org.apache.maven.wagon.providers.ssh.InteractiveUserInfo -->
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-input-handler-api</artifactId>
+      <version>1.0-alpha-3</version>
+    </dependency>
+
   </dependencies>
   <build>
     <plugins>
@@ -30,6 +42,7 @@
             <exclude>**/ScpWagon*Test.*</exclude>
             <exclude>**/SftpWagonTest.*</exclude>
             <exclude>**/SshCommandExecutorTest.*</exclude>
+            <exclude>**/knownhost/**</exclude>
           </excludes>
         </configuration>
       </plugin>
