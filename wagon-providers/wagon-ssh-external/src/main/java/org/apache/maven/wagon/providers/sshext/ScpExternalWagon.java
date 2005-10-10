@@ -200,7 +200,7 @@ public class ScpExternalWagon
 
 
     private void executeScpCommand( File localFile, String remoteFile, boolean put )
-        throws TransferFailedException
+        throws TransferFailedException, ResourceDoesNotExistException
     {
         Commandline cl = new Commandline();
 
@@ -215,7 +215,7 @@ public class ScpExternalWagon
         }
 
         if ( port != WagonConstants.UNKNOWN_PORT )
-        {            
+        {
             cl.createArgument().setLine( "-P " + port );
         }
 
@@ -237,7 +237,19 @@ public class ScpExternalWagon
         }
         try
         {
-            CommandLineUtils.executeCommandLine( cl, null, null );
+            CommandLineUtils.StringStreamConsumer err = new CommandLineUtils.StringStreamConsumer();
+            int exitCode = CommandLineUtils.executeCommandLine( cl, null, err );
+            if ( exitCode != 0 )
+            {
+                if ( !put && err.getOutput().trim().endsWith( "No such file or directory" ) )
+                {
+                    throw new ResourceDoesNotExistException( err.getOutput() );
+                }
+                else
+                {
+                    throw new TransferFailedException( "Exit code: " + exitCode + " - " + err.getOutput() );
+                }
+            }
         }
         catch ( CommandLineException e )
         {
