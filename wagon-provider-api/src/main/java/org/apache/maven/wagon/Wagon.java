@@ -117,4 +117,8 @@ public interface Wagon
     void removeTransferListener( TransferListener listener );
 
     boolean hasTransferListener( TransferListener listener );
+
+    boolean isInteractive();
+
+    void setInteractive( boolean interactive );
 }

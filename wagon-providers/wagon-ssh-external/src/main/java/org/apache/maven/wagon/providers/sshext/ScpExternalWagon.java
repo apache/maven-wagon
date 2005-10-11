@@ -190,6 +190,17 @@ public class ScpExternalWagon
             }
         }
 
+        // should check interactive flag, but scpexe never works in interactive mode right now due to i/o streams
+        if ( sshExecutable.indexOf( "plink" ) >= 0 )
+        {
+            cl.createArgument().setValue( "-batch" );
+        }
+        else
+        {
+            cl.createArgument().setValue( "-o" );
+            cl.createArgument().setValue( "BatchMode yes" );
+        }
+
         if ( sshArgs != null )
         {
             cl.createArgument().setLine( sshArgs );
@@ -234,6 +245,17 @@ public class ScpExternalWagon
         if ( port != WagonConstants.UNKNOWN_PORT )
         {
             cl.createArgument().setLine( "-P " + port );
+        }
+
+        // should check interactive flag, but scpexe never works in interactive mode right now due to i/o streams
+        if ( sshExecutable.indexOf( "pscp" ) >= 0 )
+        {
+            cl.createArgument().setValue( "-batch" );
+        }
+        else
+        {
+            cl.createArgument().setValue( "-o" );
+            cl.createArgument().setValue( "BatchMode yes" );
         }
 
         if ( scpArgs != null )

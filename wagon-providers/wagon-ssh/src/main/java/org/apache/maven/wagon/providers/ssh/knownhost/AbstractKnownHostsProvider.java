@@ -42,6 +42,11 @@ public abstract class AbstractKnownHostsProvider
         this.hostKeyChecking = hostKeyChecking;
     }
 
+    public String getHostKeyChecking()
+    {
+        return hostKeyChecking;
+    }
+
     public void storeKnownHosts( JSch sch )
     {
     }

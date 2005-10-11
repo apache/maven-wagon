@@ -63,6 +63,8 @@ public abstract class AbstractWagon
 
     protected AuthenticationInfo authenticationInfo;
 
+    protected boolean interactive = true;
+
     // ----------------------------------------------------------------------
     // Accessors
     // ----------------------------------------------------------------------
@@ -654,5 +656,15 @@ public abstract class AbstractWagon
         }
         path += dir;
         return path;
+    }
+
+    public boolean isInteractive()
+    {
+        return interactive;
+    }
+
+    public void setInteractive( boolean interactive )
+    {
+        this.interactive = interactive;
     }
 }

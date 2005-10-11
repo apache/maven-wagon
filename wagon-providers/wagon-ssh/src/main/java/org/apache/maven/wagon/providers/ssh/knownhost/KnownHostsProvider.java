@@ -16,14 +16,11 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
  * limitations under the License.
  */
 
-import org.apache.maven.wagon.TransferFailedException;
-
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.UserInfo;
 
 import java.util.Properties;
-import java.io.IOException;
 
 /**
  * Provides a way to add Known Hosts fingerprints to the JSch transport
@@ -48,4 +45,8 @@ public interface KnownHostsProvider
     void addConfiguration( Properties config );
 
     void storeKnownHosts( JSch sch );
+
+    void setHostKeyChecking( String hostKeyChecking );
+
+    String getHostKeyChecking();
 }

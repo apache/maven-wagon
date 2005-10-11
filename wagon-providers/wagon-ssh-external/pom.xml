@@ -23,6 +23,7 @@
         <configuration>
           <excludes>
             <exclude>**/ScpExternalWagon*Test.*</exclude>
+            <exclude>**/SshCommandExecutorTest.*</exclude>
           </excludes>
         </configuration>
       </plugin>
