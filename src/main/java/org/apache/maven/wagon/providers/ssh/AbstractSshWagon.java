@@ -31,26 +31,34 @@ import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo;
 import org.apache.maven.wagon.providers.ssh.interactive.UserInfoUIKeyboardInteractiveProxy;
 import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
+import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
+import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
+import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Properties;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Common SSH operations.
  *
- * @todo cache pass[words|phases]
- *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  * @version $Id$
+ * @todo cache pass[words|phases]
  */
 public abstract class AbstractSshWagon
     extends AbstractWagon
@@ -361,6 +369,18 @@ public abstract class AbstractSshWagon
         }
     }
 
+    protected static String getPath( String basedir, String dir )
+    {
+        String path;
+        path = basedir;
+        if ( !basedir.endsWith( "/" ) && !dir.startsWith( "/" ) )
+        {
+            path += "/";
+        }
+        path += dir;
+        return path;
+    }
+
     private class WagonUserInfo
         implements UserInfo
     {
@@ -458,5 +478,130 @@ public abstract class AbstractSshWagon
             throw new IllegalArgumentException( "interactiveUserInfo can't be null" );
         }
         this.interactiveUserInfo = interactiveUserInfo;
+    }
+
+    public void putDirectory( File sourceDirectory, String destinationDirectory )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        String basedir = getRepository().getBasedir();
+
+        destinationDirectory = StringUtils.replace( destinationDirectory, "\\", "/" );
+
+        String path = getPath( basedir, destinationDirectory );
+        try
+        {
+            if ( getRepository().getPermissions() != null )
+            {
+                String dirPerms = getRepository().getPermissions().getDirectoryMode();
+
+                if ( dirPerms != null )
+                {
+                    String umaskCmd = "umask " + PermissionModeUtils.getUserMaskFor( dirPerms );
+                    executeCommand( umaskCmd );
+                }
+            }
+
+            String mkdirCmd = "mkdir -p " + path;
+
+            executeCommand( mkdirCmd );
+        }
+        catch ( CommandExecutionException e )
+        {
+            throw new TransferFailedException( "Error performing commands for file transfer", e );
+        }
+
+        File zipFile;
+        try
+        {
+            zipFile = File.createTempFile( "wagon", ".zip" );
+            zipFile.deleteOnExit();
+
+            List files = FileUtils.getFileNames( sourceDirectory, "**/**", "", false );
+
+            createZip( files, zipFile, sourceDirectory );
+        }
+        catch ( IOException e )
+        {
+            throw new TransferFailedException( "Unable to create ZIP archive of directory", e );
+        }
+
+        put( zipFile, getPath( destinationDirectory, zipFile.getName() ) );
+
+        try
+        {
+            executeCommand( "cd " + path + "; unzip -o " + zipFile.getName() + "; rm -f " + zipFile.getName() );
+
+            zipFile.delete();
+
+            RepositoryPermissions permissions = getRepository().getPermissions();
+
+            if ( permissions != null && permissions.getGroup() != null )
+            {
+                executeCommand( "chgrp -Rf " + permissions.getGroup() + " " + path );
+            }
+
+            if ( permissions != null && permissions.getFileMode() != null )
+            {
+                executeCommand( "chmod -Rf " + permissions.getFileMode() + " " + path );
+            }
+        }
+        catch ( CommandExecutionException e )
+        {
+            throw new TransferFailedException( "Error performing commands for file transfer", e );
+        }
+    }
+
+    public void createZip( List files, File zipName, File basedir )
+        throws IOException
+    {
+        ZipOutputStream zos = new ZipOutputStream( new FileOutputStream( zipName ) );
+
+        try
+        {
+            for ( int i = 0; i < files.size(); i++ )
+            {
+                String file = (String) files.get( i );
+
+                file = file.replace( '\\', '/' );
+
+                writeZipEntry( zos, new File( basedir, file ), file );
+            }
+        }
+        finally
+        {
+            IOUtil.close( zos );
+        }
+    }
+
+    private void writeZipEntry( ZipOutputStream jar, File source, String entryName )
+        throws IOException
+    {
+        byte[] buffer = new byte[1024];
+
+        int bytesRead;
+
+        FileInputStream is = new FileInputStream( source );
+
+        try
+        {
+            ZipEntry entry = new ZipEntry( entryName );
+
+            jar.putNextEntry( entry );
+
+            while ( ( bytesRead = is.read( buffer ) ) != -1 )
+            {
+                jar.write( buffer, 0, bytesRead );
+            }
+        }
+
+        finally
+        {
+            is.close();
+        }
+    }
+
+    public boolean supportsDirectoryCopy()
+    {
+        return true;
     }
 }
