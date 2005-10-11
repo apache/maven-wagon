@@ -202,18 +202,6 @@ public class ScpWagon
         }
     }
 
-    private static String getPath( String basedir, String dir )
-    {
-        String path;
-        path = basedir;
-        if ( !basedir.endsWith( "/" ) && !dir.startsWith( "/" ) )
-        {
-            path += "/";
-        }
-        path += dir;
-        return path;
-    }
-
     public void get( String resourceName, File destination )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {

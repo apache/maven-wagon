@@ -22,13 +22,17 @@ import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.StreamWagon;
 import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.resource.Resource;
+import org.codehaus.plexus.util.StringUtils;
+import org.codehaus.plexus.util.FileUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.IOException;
 
 /**
  * Wagon Provider for Local File System
@@ -91,5 +95,30 @@ public class FileWagon
 
     public void closeConnection()
     {
+    }
+
+    public boolean supportsDirectoryCopy()
+    {
+        return true;
+    }
+
+    public void putDirectory( File sourceDirectory, String destinationDirectory )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        String basedir = getRepository().getBasedir();
+
+        destinationDirectory = StringUtils.replace( destinationDirectory, "\\", "/" );
+
+        File path = new File( basedir, destinationDirectory );
+        path.mkdirs();
+
+        try
+        {
+            FileUtils.copyDirectoryStructure( sourceDirectory, path );
+        }
+        catch ( IOException e )
+        {
+            throw new TransferFailedException( "Error copying directory structure", e );
+        }
     }
 }

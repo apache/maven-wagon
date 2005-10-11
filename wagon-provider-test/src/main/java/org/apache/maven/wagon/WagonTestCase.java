@@ -181,6 +181,50 @@ public abstract class WagonTestCase
         tearDownWagonTestingFixtures();
     }
 
+    public void testWagonPutDirectory()
+        throws Exception
+    {
+        setupRepositories();
+
+        setupWagonTestingFixtures();
+
+        Wagon wagon = getWagon();
+
+        if ( wagon.supportsDirectoryCopy() )
+        {
+            sourceFile = new File( FileTestUtils.getTestOutputDir(), "directory-copy" );
+            writeTestFile( "test-resource-1.txt" );
+            writeTestFile( "a/test-resource-2.txt" );
+            writeTestFile( "a/b/test-resource-3.txt" );
+            writeTestFile( "c/test-resource-4.txt" );
+
+            wagon.connect( testRepository, getAuthInfo() );
+
+            wagon.putDirectory( sourceFile, "directory-copy" );
+
+            destFile = FileTestUtils.createUniqueFile( getName(), getName() );
+
+            destFile.deleteOnExit();
+
+            wagon.get( "directory-copy/test-resource-1.txt", destFile );
+            wagon.get( "directory-copy/a/test-resource-2.txt", destFile );
+            wagon.get( "directory-copy/a/b/test-resource-3.txt", destFile );
+            wagon.get( "directory-copy/c/test-resource-4.txt", destFile );
+
+            wagon.disconnect();
+        }
+
+        tearDownWagonTestingFixtures();
+    }
+
+    private void writeTestFile( String child )
+        throws IOException
+    {
+        File dir = new File( sourceFile, child );
+        dir.getParentFile().mkdirs();
+        FileUtils.fileWrite( dir.getAbsolutePath(), child );
+    }
+
     public void testFailedGet()
         throws Exception
     {

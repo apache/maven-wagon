@@ -27,6 +27,7 @@ import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
+import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.codehaus.plexus.util.IOUtil;
 
 import java.io.File;
@@ -573,5 +574,16 @@ public abstract class AbstractWagon
         {
             throw new TransferFailedException( "Failed to post-process the source file", e );
         }
+    }
+
+    public void putDirectory( File sourceDirectory, String destinationDirectory )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        throw new TransferFailedException( "directory copy not supported for " + getClass().getName() );
+    }
+
+    public boolean supportsDirectoryCopy()
+    {
+        return false;
     }
 }
