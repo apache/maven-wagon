@@ -21,17 +21,23 @@ import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonConstants;
+import org.apache.maven.wagon.CommandExecutor;
+import org.apache.maven.wagon.CommandExecutionException;
+import org.apache.maven.wagon.PermissionModeUtils;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.StringUtils;
+import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.cli.CommandLineException;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
 import org.codehaus.plexus.util.cli.Commandline;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * SCP deployer using "external" scp program.  To allow for
@@ -43,7 +49,7 @@ import java.io.File;
  */
 public class ScpExternalWagon
     extends AbstractWagon
-    implements SshCommandExecutor
+    implements CommandExecutor
 {
     /**
      * The external SCP command to use - default is <code>scp</code>.
@@ -154,7 +160,7 @@ public class ScpExternalWagon
     }
 
     public void executeCommand( String command )
-        throws TransferFailedException
+        throws CommandExecutionException
     {
         Commandline cl = new Commandline();
 
@@ -190,11 +196,16 @@ public class ScpExternalWagon
 
         try
         {
-            CommandLineUtils.executeCommandLine( cl, null, null );
+            CommandLineUtils.StringStreamConsumer err = new CommandLineUtils.StringStreamConsumer();
+            int exitCode = CommandLineUtils.executeCommandLine( cl, null, err );
+            if ( exitCode != 0 )
+            {
+                throw new CommandExecutionException( "Exit code " + exitCode + " - " + err.getOutput() );
+            }
         }
         catch ( CommandLineException e )
         {
-            throw new TransferFailedException( "Error executing command line", e );
+            throw new CommandExecutionException( "Error executing command line", e );
         }
     }
 
@@ -279,7 +290,14 @@ public class ScpExternalWagon
 
         String mkdirCmd = "mkdir -p " + basedir + "/" + dir + "\n";
 
-        executeCommand( mkdirCmd );
+        try
+        {
+            executeCommand( mkdirCmd );
+        }
+        catch ( CommandExecutionException e )
+        {
+            throw new TransferFailedException( "Error executing command for transfer", e );
+        }
 
         firePutStarted( resource, source );
 
@@ -287,16 +305,23 @@ public class ScpExternalWagon
 
         postProcessListeners( resource, source, TransferEvent.REQUEST_PUT );
 
-        RepositoryPermissions permissions = getRepository().getPermissions();
-
-        if ( permissions != null && permissions.getGroup() != null )
+        try
         {
-            executeCommand( "chgrp -f " + permissions.getGroup() + " " + basedir + "/" + resourceName + "\n" );
+            RepositoryPermissions permissions = getRepository().getPermissions();
+
+            if ( permissions != null && permissions.getGroup() != null )
+            {
+                executeCommand( "chgrp -f " + permissions.getGroup() + " " + basedir + "/" + resourceName + "\n" );
+            }
+
+            if ( permissions != null && permissions.getFileMode() != null )
+            {
+                executeCommand( "chmod -f " + permissions.getFileMode() + " " + basedir + "/" + resourceName + "\n" );
+            }
         }
-
-        if ( permissions != null && permissions.getFileMode() != null )
+        catch ( CommandExecutionException e )
         {
-            executeCommand( "chmod -f " + permissions.getFileMode() + " " + basedir + "/" + resourceName + "\n" );
+            throw new TransferFailedException( "Error executing command for transfer", e );
         }
         firePutCompleted( resource, source );
     }
@@ -373,4 +398,79 @@ public class ScpExternalWagon
         this.sshArgs = sshArgs;
     }
 
+    public void putDirectory( File sourceDirectory, String destinationDirectory )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        String basedir = getRepository().getBasedir();
+
+        destinationDirectory = StringUtils.replace( destinationDirectory, "\\", "/" );
+
+        String path = getPath( basedir, destinationDirectory );
+        try
+        {
+            if ( getRepository().getPermissions() != null )
+            {
+                String dirPerms = getRepository().getPermissions().getDirectoryMode();
+
+                if ( dirPerms != null )
+                {
+                    String umaskCmd = "umask " + PermissionModeUtils.getUserMaskFor( dirPerms );
+                    executeCommand( umaskCmd );
+                }
+            }
+
+            String mkdirCmd = "mkdir -p " + path;
+
+            executeCommand( mkdirCmd );
+        }
+        catch ( CommandExecutionException e )
+        {
+            throw new TransferFailedException( "Error performing commands for file transfer", e );
+        }
+
+        File zipFile;
+        try
+        {
+            zipFile = File.createTempFile( "wagon", ".zip" );
+            zipFile.deleteOnExit();
+
+            List files = FileUtils.getFileNames( sourceDirectory, "**/**", "", false );
+
+            createZip( files, zipFile, sourceDirectory );
+        }
+        catch ( IOException e )
+        {
+            throw new TransferFailedException( "Unable to create ZIP archive of directory", e );
+        }
+
+        put( zipFile, getPath( destinationDirectory, zipFile.getName() ) );
+
+        try
+        {
+            executeCommand( "cd " + path + "; unzip -o " + zipFile.getName() + "; rm -f " + zipFile.getName() );
+
+            zipFile.delete();
+
+            RepositoryPermissions permissions = getRepository().getPermissions();
+
+            if ( permissions != null && permissions.getGroup() != null )
+            {
+                executeCommand( "chgrp -Rf " + permissions.getGroup() + " " + path );
+            }
+
+            if ( permissions != null && permissions.getFileMode() != null )
+            {
+                executeCommand( "chmod -Rf " + permissions.getFileMode() + " " + path );
+            }
+        }
+        catch ( CommandExecutionException e )
+        {
+            throw new TransferFailedException( "Error performing commands for file transfer", e );
+        }
+    }
+
+    public boolean supportsDirectoryCopy()
+    {
+        return true;
+    }
 }

@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.ssh;
+package org.apache.maven.wagon;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
@@ -15,8 +15,6 @@ package org.apache.maven.wagon.providers.ssh;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import org.apache.maven.wagon.WagonException;
 
 /**
  * Exception which should be thrown when a command fails to execute on the repository.

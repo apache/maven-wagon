@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.ssh;
+package org.apache.maven.wagon;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
@@ -17,6 +17,7 @@ package org.apache.maven.wagon.providers.ssh;
  */
 
 import junit.framework.TestCase;
+import org.apache.maven.wagon.PermissionModeUtils;
 
 /**
  * Unit test for PermissionModeUtils class

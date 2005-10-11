@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.ssh;
+package org.apache.maven.wagon;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.

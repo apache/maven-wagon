@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.ssh;
+package org.apache.maven.wagon;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
@@ -16,17 +16,17 @@ package org.apache.maven.wagon.providers.ssh;
  * limitations under the License.
  */
 
-import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.CommandExecutionException;
 
 /**
- * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a>
+ * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  * @version $Id$
  */
-public interface SshCommandExecutor
+public interface CommandExecutor
     extends Wagon
 {
-    String ROLE = SshCommandExecutor.class.getName();
+    String ROLE = CommandExecutor.class.getName();
 
     void executeCommand( String command )
         throws CommandExecutionException;

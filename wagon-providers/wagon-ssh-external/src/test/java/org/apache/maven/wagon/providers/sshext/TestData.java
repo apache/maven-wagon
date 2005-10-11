@@ -32,7 +32,7 @@ public class TestData
     public static String getUserName()
     {
 
-        String retValue = System.getProperty( "testuser.name" );
+        String retValue = System.getProperty( "test.user" );
 
         if ( retValue == null )
         {

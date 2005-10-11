@@ -16,9 +16,8 @@ package org.apache.maven.wagon.providers.ssh;
  * limitations under the License.
  */
 
-import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.CommandExecutorTestCase;
 import org.apache.maven.wagon.repository.Repository;
-import org.codehaus.plexus.PlexusTestCase;
 
 /**
  * Test the command executor.
@@ -27,54 +26,11 @@ import org.codehaus.plexus.PlexusTestCase;
  * @version $Id$
  */
 public class SshCommandExecutorTest
-    extends PlexusTestCase
+    extends CommandExecutorTestCase
 {
-    public void testErrorInCommandExecuted()
-        throws Exception
+
+    protected Repository getTestRepository()
     {
-        SshCommandExecutor exec = (SshCommandExecutor) lookup( SshCommandExecutor.ROLE );
-
-        Repository repository = new Repository( "test", "scp://localhost/" );
-
-        AuthenticationInfo authenticationInfo = new AuthenticationInfo();
-        authenticationInfo.setUserName( System.getProperty( "user.name" ) );
-
-        exec.connect( repository, authenticationInfo );
-
-        try
-        {
-            exec.executeCommand( "fail" );
-            fail( "Command should have failed" );
-        }
-        catch ( CommandExecutionException e )
-        {
-            assertTrue( e.getMessage().endsWith( "fail: command not found" ) );
-        }
-        finally
-        {
-            exec.disconnect();
-        }
-    }
-
-    public void testExecuteSuccessfulCommand()
-        throws Exception
-    {
-        SshCommandExecutor exec = (SshCommandExecutor) lookup( SshCommandExecutor.ROLE );
-
-        Repository repository = new Repository( "test", "scp://localhost/" );
-
-        AuthenticationInfo authenticationInfo = new AuthenticationInfo();
-        authenticationInfo.setUserName( System.getProperty( "user.name" ) );
-
-        exec.connect( repository, authenticationInfo );
-
-        try
-        {
-            exec.executeCommand( "ls" );
-        }
-        finally
-        {
-            exec.disconnect();
-        }
+        return new Repository( "test", "scp://localhost/" );
     }
 }

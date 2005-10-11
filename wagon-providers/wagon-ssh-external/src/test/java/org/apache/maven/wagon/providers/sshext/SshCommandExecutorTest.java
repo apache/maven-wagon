@@ -16,16 +16,21 @@ package org.apache.maven.wagon.providers.sshext;
  * limitations under the License.
  */
 
-import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.CommandExecutorTestCase;
+import org.apache.maven.wagon.repository.Repository;
 
 /**
+ * Test the command executor.
+ *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  * @version $Id$
  */
-public interface SshCommandExecutor
-    extends Wagon
+public class SshCommandExecutorTest
+    extends CommandExecutorTestCase
 {
-    void executeCommand( String command )
-        throws TransferFailedException;
+
+    protected Repository getTestRepository()
+    {
+        return new Repository( "test", "scp://localhost/" );
+    }
 }

@@ -36,6 +36,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.FileOutputStream;
+import java.util.List;
+import java.util.zip.ZipOutputStream;
+import java.util.zip.ZipEntry;
 
 /**
  * Implementation of common facilties for Wagon providers.
@@ -585,5 +589,66 @@ public abstract class AbstractWagon
     public boolean supportsDirectoryCopy()
     {
         return false;
+    }
+
+    public void createZip( List files, File zipName, File basedir )
+        throws IOException
+    {
+        ZipOutputStream zos = new ZipOutputStream( new FileOutputStream( zipName ) );
+
+        try
+        {
+            for ( int i = 0; i < files.size(); i++ )
+            {
+                String file = (String) files.get( i );
+
+                file = file.replace( '\\', '/' );
+
+                writeZipEntry( zos, new File( basedir, file ), file );
+            }
+        }
+        finally
+        {
+            IOUtil.close( zos );
+        }
+    }
+
+    private void writeZipEntry( ZipOutputStream jar, File source, String entryName )
+        throws IOException
+    {
+        byte[] buffer = new byte[1024];
+
+        int bytesRead;
+
+        FileInputStream is = new FileInputStream( source );
+
+        try
+        {
+            ZipEntry entry = new ZipEntry( entryName );
+
+            jar.putNextEntry( entry );
+
+            while ( ( bytesRead = is.read( buffer ) ) != -1 )
+            {
+                jar.write( buffer, 0, bytesRead );
+            }
+        }
+
+        finally
+        {
+            is.close();
+        }
+    }
+
+    protected static String getPath( String basedir, String dir )
+    {
+        String path;
+        path = basedir;
+        if ( !basedir.endsWith( "/" ) && !dir.startsWith( "/" ) )
+        {
+            path += "/";
+        }
+        path += dir;
+        return path;
     }
 }
