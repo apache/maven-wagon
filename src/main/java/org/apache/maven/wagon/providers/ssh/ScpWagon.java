@@ -21,6 +21,8 @@ import com.jcraft.jsch.JSchException;
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.CommandExecutionException;
+import org.apache.maven.wagon.PermissionModeUtils;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;

@@ -35,7 +35,7 @@
       </requirements>
     </component>
     <component>
-      <role>org.apache.maven.wagon.providers.ssh.SshCommandExecutor</role>
+      <role>org.apache.maven.wagon.CommandExecutor</role>
       <implementation>org.apache.maven.wagon.providers.ssh.ScpWagon</implementation>
       <instantiation-strategy>per-lookup</instantiation-strategy>
       <requirements>

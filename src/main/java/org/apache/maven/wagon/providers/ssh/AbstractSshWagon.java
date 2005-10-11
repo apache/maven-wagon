@@ -29,6 +29,9 @@ import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonConstants;
+import org.apache.maven.wagon.CommandExecutionException;
+import org.apache.maven.wagon.CommandExecutor;
+import org.apache.maven.wagon.PermissionModeUtils;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
@@ -43,15 +46,11 @@ import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Properties;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 /**
  * Common SSH operations.
@@ -62,7 +61,7 @@ import java.util.zip.ZipOutputStream;
  */
 public abstract class AbstractSshWagon
     extends AbstractWagon
-    implements SshCommandExecutor
+    implements CommandExecutor
 {
     public static final int DEFAULT_SSH_PORT = 22;
 
@@ -369,19 +368,7 @@ public abstract class AbstractSshWagon
         }
     }
 
-    protected static String getPath( String basedir, String dir )
-    {
-        String path;
-        path = basedir;
-        if ( !basedir.endsWith( "/" ) && !dir.startsWith( "/" ) )
-        {
-            path += "/";
-        }
-        path += dir;
-        return path;
-    }
-
-    private class WagonUserInfo
+    private static class WagonUserInfo
         implements UserInfo
     {
         private final InteractiveUserInfo userInfo;
@@ -390,13 +377,9 @@ public abstract class AbstractSshWagon
 
         private String passphrase;
 
-        private String username;
-
         WagonUserInfo( AuthenticationInfo authInfo, InteractiveUserInfo userInfo )
         {
             this.userInfo = userInfo;
-
-            this.username = authInfo.getUserName();
 
             this.password = authInfo.getPassword();
 
@@ -548,55 +531,6 @@ public abstract class AbstractSshWagon
         catch ( CommandExecutionException e )
         {
             throw new TransferFailedException( "Error performing commands for file transfer", e );
-        }
-    }
-
-    public void createZip( List files, File zipName, File basedir )
-        throws IOException
-    {
-        ZipOutputStream zos = new ZipOutputStream( new FileOutputStream( zipName ) );
-
-        try
-        {
-            for ( int i = 0; i < files.size(); i++ )
-            {
-                String file = (String) files.get( i );
-
-                file = file.replace( '\\', '/' );
-
-                writeZipEntry( zos, new File( basedir, file ), file );
-            }
-        }
-        finally
-        {
-            IOUtil.close( zos );
-        }
-    }
-
-    private void writeZipEntry( ZipOutputStream jar, File source, String entryName )
-        throws IOException
-    {
-        byte[] buffer = new byte[1024];
-
-        int bytesRead;
-
-        FileInputStream is = new FileInputStream( source );
-
-        try
-        {
-            ZipEntry entry = new ZipEntry( entryName );
-
-            jar.putNextEntry( entry );
-
-            while ( ( bytesRead = is.read( buffer ) ) != -1 )
-            {
-                jar.write( buffer, 0, bytesRead );
-            }
-        }
-
-        finally
-        {
-            is.close();
         }
     }
 
