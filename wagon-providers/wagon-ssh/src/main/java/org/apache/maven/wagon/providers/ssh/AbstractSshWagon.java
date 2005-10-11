@@ -190,12 +190,6 @@ public abstract class AbstractSshWagon
         {
             interactiveUserInfo = new NullInteractiveUserInfo();
             uIKeyboardInteractive = null;
-/*
-            if ( knownHostsProvider != null && "ask".equals( knownHostsProvider.getHostKeyChecking() ) )
-            {
-                knownHostsProvider.setHostKeyChecking( "yes" );
-            }
-*/
         }
 
         // username and password will be given via UserInfo interface.
