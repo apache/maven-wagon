@@ -19,11 +19,6 @@
       <artifactId>jsch</artifactId>
       <version>0.1.21</version>
     </dependency>
-    <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>1.3</version>
-    </dependency>
     <dependency> 
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-interactivity-api</artifactId>

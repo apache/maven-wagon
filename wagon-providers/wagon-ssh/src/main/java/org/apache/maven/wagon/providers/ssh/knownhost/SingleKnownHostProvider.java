@@ -19,7 +19,7 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
 import com.jcraft.jsch.HostKeyRepository;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.UserInfo;
-import org.apache.commons.codec.binary.Base64;
+import org.codehaus.plexus.util.Base64;
 
 /**
  * Simple <code>KnownHostsProvider</code> with known wired values
