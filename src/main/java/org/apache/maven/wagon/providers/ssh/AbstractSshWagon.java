@@ -38,6 +38,7 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo;
 import org.apache.maven.wagon.providers.ssh.interactive.UserInfoUIKeyboardInteractiveProxy;
+import org.apache.maven.wagon.providers.ssh.interactive.NullInteractiveUserInfo;
 import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
@@ -81,8 +82,6 @@ public abstract class AbstractSshWagon
 
     private UIKeyboardInteractive uIKeyboardInteractive;
 
-    private JSch sch;
-
     public void openConnection()
         throws AuthenticationException
     {
@@ -96,7 +95,7 @@ public abstract class AbstractSshWagon
             authenticationInfo.setUserName( System.getProperty( "user.name" ) );
         }
 
-        sch = new JSch();
+        JSch sch = new JSch();
 
         int port = getRepository().getPort();
 
@@ -185,6 +184,19 @@ public abstract class AbstractSshWagon
         }
 
         Properties config = new Properties();
+        config.setProperty( "BatchMode", interactive ? "no" : "yes" );
+
+        if ( !interactive )
+        {
+            interactiveUserInfo = new NullInteractiveUserInfo();
+            uIKeyboardInteractive = null;
+/*
+            if ( knownHostsProvider != null && "ask".equals( knownHostsProvider.getHostKeyChecking() ) )
+            {
+                knownHostsProvider.setHostKeyChecking( "yes" );
+            }
+*/
+        }
 
         // username and password will be given via UserInfo interface.
         UserInfo ui = new WagonUserInfo( authenticationInfo, interactiveUserInfo );
@@ -215,6 +227,11 @@ public abstract class AbstractSshWagon
         try
         {
             session.connect();
+
+            if ( knownHostsProvider != null )
+            {
+                knownHostsProvider.storeKnownHosts( sch );
+            }
         }
         catch ( JSchException e )
         {
@@ -327,21 +344,11 @@ public abstract class AbstractSshWagon
 
     public void closeConnection()
     {
-        if ( knownHostsProvider != null )
-        {
-            if ( sch != null )
-            {
-                knownHostsProvider.storeKnownHosts( sch );
-            }
-        }
-
         if ( session != null )
         {
             session.disconnect();
             session = null;
         }
-
-        sch = null;
     }
 
     protected void handleGetException( Resource resource, Exception e, File destination )
