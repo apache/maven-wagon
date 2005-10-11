@@ -259,7 +259,10 @@ public class SftpWagon
 
             channel.cd( dir );
 
-            if ( timestamp <= 0 || channel.stat( filename ).getMTime() * MILLIS_PER_SEC > timestamp )
+            // This must be called first to ensure that if the file doesn't exist it throws an exception
+            SftpATTRS attrs = channel.stat( filename );
+
+            if ( timestamp <= 0 || attrs.getMTime() * MILLIS_PER_SEC > timestamp )
             {
                 fireGetStarted( resource, destination );
 
