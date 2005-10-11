@@ -25,6 +25,7 @@ import org.apache.maven.wagon.CommandExecutor;
 import org.apache.maven.wagon.CommandExecutionException;
 import org.apache.maven.wagon.PermissionModeUtils;
 import org.apache.maven.wagon.authentication.AuthenticationException;
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
@@ -93,7 +94,8 @@ public class ScpExternalWagon
     {
         if ( authenticationInfo == null )
         {
-            throw new IllegalArgumentException( "Authentication Credentials cannot be null for SSH protocol" );
+            authenticationInfo = new AuthenticationInfo();
+            authenticationInfo.setUserName( System.getProperty( "user.name" ) );
         }
 
         port = getRepository().getPort();
