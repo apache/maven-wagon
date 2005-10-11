@@ -18,6 +18,7 @@ package org.apache.maven.wagon;
 
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.SessionEvent;
 import org.apache.maven.wagon.events.SessionEventSupport;
 import org.apache.maven.wagon.events.SessionListener;
@@ -27,19 +28,18 @@ import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.codehaus.plexus.util.IOUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.FileOutputStream;
 import java.util.List;
-import java.util.zip.ZipOutputStream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Implementation of common facilties for Wagon providers.
@@ -116,12 +116,16 @@ public abstract class AbstractWagon
 
         if ( authenticationInfo == null )
         {
+            authenticationInfo = new AuthenticationInfo();
+        }
+
+        if ( authenticationInfo.getUserName() == null )
+        {
             // Get user/pass that were encoded in the URL.
             if ( repository.getUsername() != null )
             {
-                authenticationInfo = new AuthenticationInfo();
                 authenticationInfo.setUserName( repository.getUsername() );
-                if ( repository.getPassword() != null )
+                if ( repository.getPassword() != null && authenticationInfo.getPassword() == null )
                 {
                     authenticationInfo.setPassword( repository.getPassword() );
                 }

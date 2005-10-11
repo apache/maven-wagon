@@ -17,21 +17,21 @@ package org.apache.maven.wagon.providers.sshext;
  */
 
 import org.apache.maven.wagon.AbstractWagon;
+import org.apache.maven.wagon.CommandExecutionException;
+import org.apache.maven.wagon.CommandExecutor;
 import org.apache.maven.wagon.PathUtils;
+import org.apache.maven.wagon.PermissionModeUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonConstants;
-import org.apache.maven.wagon.CommandExecutor;
-import org.apache.maven.wagon.CommandExecutionException;
-import org.apache.maven.wagon.PermissionModeUtils;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.FileUtils;
+import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.cli.CommandLineException;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
 import org.codehaus.plexus.util.cli.Commandline;
@@ -95,6 +95,10 @@ public class ScpExternalWagon
         if ( authenticationInfo == null )
         {
             authenticationInfo = new AuthenticationInfo();
+        }
+
+        if ( authenticationInfo.getUserName() == null )
+        {
             authenticationInfo.setUserName( System.getProperty( "user.name" ) );
         }
 
