@@ -23,31 +23,46 @@ import com.jcraft.jsch.Proxy;
 import com.jcraft.jsch.ProxyHTTP;
 import com.jcraft.jsch.ProxySOCKS5;
 import com.jcraft.jsch.Session;
+import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
 import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonConstants;
+import org.apache.maven.wagon.CommandExecutionException;
+import org.apache.maven.wagon.CommandExecutor;
+import org.apache.maven.wagon.PermissionModeUtils;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
+import org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo;
+import org.apache.maven.wagon.providers.ssh.interactive.UserInfoUIKeyboardInteractiveProxy;
+import org.apache.maven.wagon.providers.ssh.interactive.NullInteractiveUserInfo;
+import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
+import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
-import org.apache.maven.wagon.util.IoUtils;
+import org.codehaus.plexus.util.FileUtils;
+import org.codehaus.plexus.util.IOUtil;
+import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * Common SSH operations.
  *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  * @version $Id$
+ * @todo cache pass[words|phases]
  */
 public abstract class AbstractSshWagon
     extends AbstractWagon
-    implements SshCommandExecutor
+    implements CommandExecutor
 {
     public static final int DEFAULT_SSH_PORT = 22;
 
@@ -61,15 +76,26 @@ public abstract class AbstractSshWagon
 
     private static final byte LF = '\n';
 
+    private KnownHostsProvider knownHostsProvider;
+
+    private InteractiveUserInfo interactiveUserInfo;
+
+    private UIKeyboardInteractive uIKeyboardInteractive;
+
     public void openConnection()
         throws AuthenticationException
     {
         if ( authenticationInfo == null )
         {
-            throw new IllegalArgumentException( "Authentication Credentials cannot be null for SSH protocol" );
+            authenticationInfo = new AuthenticationInfo();
         }
 
-        JSch jsch = new JSch();
+        if ( authenticationInfo.getUserName() == null )
+        {
+            authenticationInfo.setUserName( System.getProperty( "user.name" ) );
+        }
+
+        JSch sch = new JSch();
 
         int port = getRepository().getPort();
 
@@ -82,7 +108,7 @@ public abstract class AbstractSshWagon
 
         try
         {
-            session = jsch.getSession( authenticationInfo.getUserName(), host, port );
+            session = sch.getSession( authenticationInfo.getUserName(), host, port );
         }
         catch ( JSchException e )
         {
@@ -116,7 +142,7 @@ public abstract class AbstractSshWagon
 
                 try
                 {
-                    jsch.addIdentity( privateKey.getAbsolutePath(), authenticationInfo.getPassphrase() );
+                    sch.addIdentity( privateKey.getAbsolutePath(), authenticationInfo.getPassphrase() );
                 }
                 catch ( JSchException e )
                 {
@@ -124,13 +150,6 @@ public abstract class AbstractSshWagon
 
                     throw new AuthenticationException( "Cannot connect. Reason: " + e.getMessage(), e );
                 }
-            }
-            else
-            {
-                String msg = "Private key was not found. You must define a private key or a password for repo: " +
-                    getRepository().getName();
-
-                throw new AuthenticationException( msg );
             }
         }
 
@@ -164,14 +183,49 @@ public abstract class AbstractSshWagon
             }
         }
 
+        Properties config = new Properties();
+        config.setProperty( "BatchMode", interactive ? "no" : "yes" );
+
+        if ( !interactive )
+        {
+            interactiveUserInfo = new NullInteractiveUserInfo();
+            uIKeyboardInteractive = null;
+        }
+
         // username and password will be given via UserInfo interface.
-        UserInfo ui = new WagonUserInfo( authenticationInfo );
+        UserInfo ui = new WagonUserInfo( authenticationInfo, interactiveUserInfo );
+
+        if ( uIKeyboardInteractive != null )
+        {
+            ui = new UserInfoUIKeyboardInteractiveProxy( ui, uIKeyboardInteractive );
+        }
+
+        if ( knownHostsProvider != null )
+        {
+            try
+            {
+                knownHostsProvider.addConfiguration( config );
+                knownHostsProvider.addKnownHosts( sch, ui );
+            }
+            catch ( JSchException e )
+            {
+                fireSessionError( e );
+                // continue without known_hosts
+            }
+        }
+
+        session.setConfig( config );
 
         session.setUserInfo( ui );
 
         try
         {
             session.connect();
+
+            if ( knownHostsProvider != null )
+            {
+                knownHostsProvider.storeKnownHosts( sch );
+            }
         }
         catch ( JSchException e )
         {
@@ -243,9 +297,9 @@ public abstract class AbstractSshWagon
         }
         finally
         {
-            IoUtils.close( out );
-            IoUtils.close( in );
-            IoUtils.close( err );
+            IOUtil.close( out );
+            IOUtil.close( in );
+            IOUtil.close( err );
             if ( channel != null )
             {
                 channel.disconnect();
@@ -287,6 +341,7 @@ public abstract class AbstractSshWagon
         if ( session != null )
         {
             session.disconnect();
+            session = null;
         }
     }
 
@@ -318,50 +373,174 @@ public abstract class AbstractSshWagon
         }
     }
 
-    // ----------------------------------------------------------------------
-    // JSch user info
-    // ----------------------------------------------------------------------
-    // TODO: are the prompt values really right? Is there an alternative to UserInfo?
-
     private static class WagonUserInfo
         implements UserInfo
     {
-        private AuthenticationInfo authInfo;
+        private final InteractiveUserInfo userInfo;
 
-        WagonUserInfo( AuthenticationInfo authInfo )
+        private String password;
+
+        private String passphrase;
+
+        WagonUserInfo( AuthenticationInfo authInfo, InteractiveUserInfo userInfo )
         {
-            this.authInfo = authInfo;
+            this.userInfo = userInfo;
+
+            this.password = authInfo.getPassword();
+
+            this.passphrase = authInfo.getPassphrase();
         }
 
         public String getPassphrase()
         {
-            return authInfo.getPassphrase();
+            return passphrase;
         }
 
         public String getPassword()
         {
-            return authInfo.getPassword();
+            return password;
         }
 
         public boolean promptPassphrase( String arg0 )
         {
-            return true;
+            if ( passphrase == null && userInfo != null )
+            {
+                passphrase = userInfo.promptPassphrase( arg0 );
+            }
+            return passphrase != null;
         }
 
         public boolean promptPassword( String arg0 )
         {
-            return true;
+            if ( password == null && userInfo != null )
+            {
+                password = userInfo.promptPassword( arg0 );
+            }
+            return password != null;
         }
 
         public boolean promptYesNo( String arg0 )
         {
-            return true;
+            if ( userInfo != null )
+            {
+                return userInfo.promptYesNo( arg0 );
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public void showMessage( String message )
         {
-            // TODO: is this really debug?
-            //fireTransferDebug( message );
+            if ( userInfo != null )
+            {
+                userInfo.showMessage( message );
+            }
         }
+    }
+
+    public final KnownHostsProvider getKnownHostsProvider()
+    {
+        return knownHostsProvider;
+    }
+
+    public final void setKnownHostsProvider( KnownHostsProvider knownHostsProvider )
+    {
+        if ( knownHostsProvider == null )
+        {
+            throw new IllegalArgumentException( "knownHostsProvider can't be null" );
+        }
+        this.knownHostsProvider = knownHostsProvider;
+    }
+
+    public InteractiveUserInfo getInteractiveUserInfo()
+    {
+        return interactiveUserInfo;
+    }
+
+    public void setInteractiveUserInfo( InteractiveUserInfo interactiveUserInfo )
+    {
+        if ( interactiveUserInfo == null )
+        {
+            throw new IllegalArgumentException( "interactiveUserInfo can't be null" );
+        }
+        this.interactiveUserInfo = interactiveUserInfo;
+    }
+
+    public void putDirectory( File sourceDirectory, String destinationDirectory )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        String basedir = getRepository().getBasedir();
+
+        destinationDirectory = StringUtils.replace( destinationDirectory, "\\", "/" );
+
+        String path = getPath( basedir, destinationDirectory );
+        try
+        {
+            if ( getRepository().getPermissions() != null )
+            {
+                String dirPerms = getRepository().getPermissions().getDirectoryMode();
+
+                if ( dirPerms != null )
+                {
+                    String umaskCmd = "umask " + PermissionModeUtils.getUserMaskFor( dirPerms );
+                    executeCommand( umaskCmd );
+                }
+            }
+
+            String mkdirCmd = "mkdir -p " + path;
+
+            executeCommand( mkdirCmd );
+        }
+        catch ( CommandExecutionException e )
+        {
+            throw new TransferFailedException( "Error performing commands for file transfer", e );
+        }
+
+        File zipFile;
+        try
+        {
+            zipFile = File.createTempFile( "wagon", ".zip" );
+            zipFile.deleteOnExit();
+
+            List files = FileUtils.getFileNames( sourceDirectory, "**/**", "", false );
+
+            createZip( files, zipFile, sourceDirectory );
+        }
+        catch ( IOException e )
+        {
+            throw new TransferFailedException( "Unable to create ZIP archive of directory", e );
+        }
+
+        put( zipFile, getPath( destinationDirectory, zipFile.getName() ) );
+
+        try
+        {
+            executeCommand( "cd " + path + "; unzip -o " + zipFile.getName() + "; rm -f " + zipFile.getName() );
+
+            zipFile.delete();
+
+            RepositoryPermissions permissions = getRepository().getPermissions();
+
+            if ( permissions != null && permissions.getGroup() != null )
+            {
+                executeCommand( "chgrp -Rf " + permissions.getGroup() + " " + path );
+            }
+
+            if ( permissions != null && permissions.getFileMode() != null )
+            {
+                executeCommand( "chmod -Rf " + permissions.getFileMode() + " " + path );
+            }
+        }
+        catch ( CommandExecutionException e )
+        {
+            throw new TransferFailedException( "Error performing commands for file transfer", e );
+        }
+    }
+
+    public boolean supportsDirectoryCopy()
+    {
+        return true;
     }
 }

@@ -15,9 +15,14 @@
       <artifactId>plexus-utils</artifactId>
     </dependency>
     <dependency>
-      <groupId>jsch</groupId>
+      <groupId>com.jcraft</groupId>
       <artifactId>jsch</artifactId>
-      <version>0.1.21</version>
+      <version>0.1.23</version>
+    </dependency>
+    <dependency> 
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-interactivity-api</artifactId>
+      <version>1.0-alpha-4</version>
     </dependency>
   </dependencies>
   <build>
@@ -30,6 +35,7 @@
             <exclude>**/ScpWagon*Test.*</exclude>
             <exclude>**/SftpWagonTest.*</exclude>
             <exclude>**/SshCommandExecutorTest.*</exclude>
+            <exclude>**/knownhost/**</exclude>
           </excludes>
         </configuration>
       </plugin>

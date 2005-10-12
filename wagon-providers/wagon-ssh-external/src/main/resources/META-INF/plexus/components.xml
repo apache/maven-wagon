@@ -8,7 +8,7 @@
     </component>
     <!-- TODO: maybe this should be in the API if it is a required interface? -->
     <component>
-      <role>org.apache.maven.wagon.providers.sshext.SshCommandExecutor</role>
+      <role>org.apache.maven.wagon.CommandExecutor</role>
       <implementation>org.apache.maven.wagon.providers.sshext.ScpExternalWagon</implementation>
       <instantiation-strategy>per-lookup</instantiation-strategy>
     </component>

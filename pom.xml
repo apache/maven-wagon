@@ -113,12 +113,12 @@
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-container-default</artifactId>
-        <version>1.0-alpha-8-SNAPSHOT</version>
+        <version>1.0-alpha-8</version>
       </dependency>
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-utils</artifactId>
-        <version>1.0.4-SNAPSHOT</version>
+        <version>1.0.4</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

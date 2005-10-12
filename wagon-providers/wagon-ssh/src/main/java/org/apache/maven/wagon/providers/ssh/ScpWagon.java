@@ -21,17 +21,19 @@ import com.jcraft.jsch.JSchException;
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.CommandExecutionException;
+import org.apache.maven.wagon.PermissionModeUtils;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
-import org.apache.maven.wagon.util.IoUtils;
+import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.EOFException;
 
 /**
  * A base class for deployers and fetchers using protocols from SSH2 family and
@@ -161,7 +163,7 @@ public class ScpWagon
         {
             if ( channel != null )
             {
-                IoUtils.close( out );
+                IOUtil.close( out );
 
                 channel.disconnect();
             }
@@ -200,18 +202,6 @@ public class ScpWagon
         {
             throw new TransferFailedException( "Did receive proper ACK: '" + code + "'" );
         }
-    }
-
-    private static String getPath( String basedir, String dir )
-    {
-        String path;
-        path = basedir;
-        if ( !basedir.endsWith( "/" ) && !dir.startsWith( "/" ) )
-        {
-            path += "/";
-        }
-        path += dir;
-        return path;
     }
 
     public void get( String resourceName, File destination )
@@ -325,7 +315,7 @@ public class ScpWagon
         }
         finally
         {
-            IoUtils.close( out );
+            IOUtil.close( out );
 
             if ( channel != null )
             {
@@ -339,4 +329,5 @@ public class ScpWagon
     {
         throw new UnsupportedOperationException( "getIfNewer is scp wagon must be still implemented" );
     }
+
 }

@@ -60,7 +60,6 @@ public class ChecksumObserver
      */
     public void transferStarted( TransferEvent transferEvent )
     {
-
         actualChecksum = null;
 
         digester.reset();

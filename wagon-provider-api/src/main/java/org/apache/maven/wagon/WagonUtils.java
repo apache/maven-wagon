@@ -1,5 +1,13 @@
 package org.apache.maven.wagon;
 
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.codehaus.plexus.util.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.LinkedList;
+
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
  *
@@ -15,14 +23,6 @@ package org.apache.maven.wagon;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import org.apache.maven.wagon.authentication.AuthenticationInfo;
-import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.apache.maven.wagon.util.FileUtils;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.LinkedList;
 
 
 /**

@@ -18,6 +18,7 @@ package org.apache.maven.wagon;
 
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.SessionEvent;
 import org.apache.maven.wagon.events.SessionEventSupport;
 import org.apache.maven.wagon.events.SessionListener;
@@ -27,14 +28,18 @@ import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.apache.maven.wagon.util.IoUtils;
+import org.codehaus.plexus.util.IOUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Implementation of common facilties for Wagon providers.
@@ -57,6 +62,8 @@ public abstract class AbstractWagon
     protected ProxyInfo proxyInfo;
 
     protected AuthenticationInfo authenticationInfo;
+
+    protected boolean interactive = true;
 
     // ----------------------------------------------------------------------
     // Accessors
@@ -111,12 +118,16 @@ public abstract class AbstractWagon
 
         if ( authenticationInfo == null )
         {
+            authenticationInfo = new AuthenticationInfo();
+        }
+
+        if ( authenticationInfo.getUserName() == null )
+        {
             // Get user/pass that were encoded in the URL.
             if ( repository.getUsername() != null )
             {
-                authenticationInfo = new AuthenticationInfo();
                 authenticationInfo.setUserName( repository.getUsername() );
-                if ( repository.getPassword() != null )
+                if ( repository.getPassword() != null && authenticationInfo.getPassword() == null )
                 {
                     authenticationInfo.setPassword( repository.getPassword() );
                 }
@@ -210,10 +221,10 @@ public abstract class AbstractWagon
         {
             if ( closeInput )
             {
-                IoUtils.close( input );
+                IOUtil.close( input );
             }
 
-            IoUtils.close( output );
+            IOUtil.close( output );
         }
 
         fireGetCompleted( resource, destination );
@@ -250,11 +261,11 @@ public abstract class AbstractWagon
         }
         finally
         {
-            IoUtils.close( input );
+            IOUtil.close( input );
 
             if ( closeOutput )
             {
-                IoUtils.close( output );
+                IOUtil.close( output );
             }
         }
         firePutCompleted( resource, source );
@@ -573,5 +584,87 @@ public abstract class AbstractWagon
         {
             throw new TransferFailedException( "Failed to post-process the source file", e );
         }
+    }
+
+    public void putDirectory( File sourceDirectory, String destinationDirectory )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        throw new TransferFailedException( "directory copy not supported for " + getClass().getName() );
+    }
+
+    public boolean supportsDirectoryCopy()
+    {
+        return false;
+    }
+
+    public void createZip( List files, File zipName, File basedir )
+        throws IOException
+    {
+        ZipOutputStream zos = new ZipOutputStream( new FileOutputStream( zipName ) );
+
+        try
+        {
+            for ( int i = 0; i < files.size(); i++ )
+            {
+                String file = (String) files.get( i );
+
+                file = file.replace( '\\', '/' );
+
+                writeZipEntry( zos, new File( basedir, file ), file );
+            }
+        }
+        finally
+        {
+            IOUtil.close( zos );
+        }
+    }
+
+    private void writeZipEntry( ZipOutputStream jar, File source, String entryName )
+        throws IOException
+    {
+        byte[] buffer = new byte[1024];
+
+        int bytesRead;
+
+        FileInputStream is = new FileInputStream( source );
+
+        try
+        {
+            ZipEntry entry = new ZipEntry( entryName );
+
+            jar.putNextEntry( entry );
+
+            while ( ( bytesRead = is.read( buffer ) ) != -1 )
+            {
+                jar.write( buffer, 0, bytesRead );
+            }
+        }
+
+        finally
+        {
+            is.close();
+        }
+    }
+
+    protected static String getPath( String basedir, String dir )
+    {
+        String path;
+        path = basedir;
+        if ( !basedir.endsWith( "/" ) && !dir.startsWith( "/" ) )
+        {
+            path += "/";
+        }
+        path += dir;
+        return path;
+    }
+
+    public boolean isInteractive()
+    {
+        return interactive;
+    }
+
+    public void setInteractive( boolean interactive )
+    {
+        this.interactive = interactive;
     }
 }

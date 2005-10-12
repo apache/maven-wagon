@@ -17,7 +17,7 @@ package org.apache.maven.wagon;
  */
 
 import junit.framework.TestCase;
-import org.apache.maven.wagon.util.FileUtils;
+import org.codehaus.plexus.util.FileUtils;
 
 import java.io.File;
 

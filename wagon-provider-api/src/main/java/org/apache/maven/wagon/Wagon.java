@@ -69,6 +69,11 @@ public interface Wagon
     void put( File source, String destination )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
 
+    void putDirectory( File sourceDirectory, String destinationDirectory )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
+
+    boolean supportsDirectoryCopy();
+
     Repository getRepository();
 
     // ----------------------------------------------------------------------
@@ -112,4 +117,8 @@ public interface Wagon
     void removeTransferListener( TransferListener listener );
 
     boolean hasTransferListener( TransferListener listener );
+
+    boolean isInteractive();
+
+    void setInteractive( boolean interactive );
 }

@@ -22,7 +22,7 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.MockSessionListener;
 import org.apache.maven.wagon.events.MockTransferListener;
 import org.apache.maven.wagon.repository.Repository;
-import org.apache.maven.wagon.util.IoUtils;
+import org.codehaus.plexus.util.IOUtil;
 
 import java.io.File;
 import java.io.InputStream;
@@ -237,15 +237,15 @@ public class AbstractWagonTest
 
     public void testStreamShutdown()
     {
-        IoUtils.close( (InputStream) null );
+        IOUtil.close( (InputStream) null );
 
-        IoUtils.close( (OutputStream) null );
+        IOUtil.close( (OutputStream) null );
 
         MockInputStream inputStream = new MockInputStream();
 
         assertFalse( inputStream.isClosed() );
 
-        IoUtils.close( inputStream );
+        IOUtil.close( inputStream );
 
         assertTrue( inputStream.isClosed() );
 
@@ -253,7 +253,7 @@ public class AbstractWagonTest
 
         assertFalse( outputStream.isClosed() );
 
-        IoUtils.close( outputStream );
+        IOUtil.close( outputStream );
 
         assertTrue( outputStream.isClosed() );
     }
