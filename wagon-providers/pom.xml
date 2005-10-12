@@ -2,13 +2,13 @@
   <parent>
     <artifactId>wagon</artifactId>
     <groupId>org.apache.maven.wagon</groupId>
-    <version>1.0-alpha-5</version>
+    <version>1.0-alpha-6-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>wagon-providers</artifactId>
   <packaging>pom</packaging>
   <name>Maven Wagon Providers Parent</name>
-  <version>1.0-alpha-5</version>
+  <version>1.0-alpha-6-SNAPSHOT</version>
   <modules>
     <module>wagon-file</module>
     <module>wagon-ftp</module>
@@ -22,11 +22,13 @@
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>
       <artifactId>wagon-provider-test</artifactId>
+      <version>1.0-alpha-6-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>
       <artifactId>wagon-provider-api</artifactId>
+      <version>1.0-alpha-6-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>
