@@ -1,26 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
 <project>
-  <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon</artifactId>
-    <version>1.0-alpha-5-SNAPSHOT</version>
+    <groupId>org.apache.maven.wagon</groupId>
+    <version>1.0-alpha-5</version>
   </parent>
+  <modelVersion>4.0.0</modelVersion>
   <artifactId>wagon-providers</artifactId>
-  <name>Maven Wagon Providers Parent</name>
   <packaging>pom</packaging>
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.maven.wagon</groupId>
-      <artifactId>wagon-provider-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.wagon</groupId>
-      <artifactId>wagon-provider-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+  <name>Maven Wagon Providers Parent</name>
+  <version>1.0-alpha-5</version>
   <modules>
     <module>wagon-file</module>
     <module>wagon-ftp</module>
@@ -30,4 +18,15 @@
     <module>wagon-ssh-external</module>
     <module>wagon-ssh</module>
   </modules>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.maven.wagon</groupId>
+      <artifactId>wagon-provider-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.wagon</groupId>
+      <artifactId>wagon-provider-api</artifactId>
+    </dependency>
+  </dependencies>
 </project>
