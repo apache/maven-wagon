@@ -1,14 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
 <project>
-  <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon-providers</artifactId>
-    <version>1.0-alpha-5-SNAPSHOT</version>
+    <groupId>org.apache.maven.wagon</groupId>
+    <version>1.0-alpha-5</version>
   </parent>
+  <modelVersion>4.0.0</modelVersion>
   <artifactId>wagon-scm</artifactId>
   <name>Maven Wagon SCM-based Provider</name>
+  <version>1.0-alpha-5</version>
   <dependencies>
     <dependency>
       <groupId>org.apache.maven.scm</groupId>
@@ -16,16 +15,21 @@
       <version>1.0-alpha-1</version>
       <exclusions>
         <exclusion>
-          <groupId>plexus</groupId>
           <artifactId>plexus-container-default</artifactId>
+          <groupId>plexus</groupId>
         </exclusion>
         <exclusion>
-          <groupId>plexus</groupId>
           <artifactId>plexus-utils</artifactId>
+          <groupId>plexus</groupId>
         </exclusion>
       </exclusions>
     </dependency>
-    <!-- TODO: should be dynamically registered? -->
+    <dependency>
+      <groupId>org.apache.maven.scm</groupId>
+      <artifactId>maven-scm-test</artifactId>
+      <version>1.0-alpha-1</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.apache.maven.scm</groupId>
       <artifactId>maven-scm-provider-cvs</artifactId>
@@ -36,13 +40,6 @@
       <groupId>org.apache.maven.scm</groupId>
       <artifactId>maven-scm-provider-svn</artifactId>
       <version>1.0-alpha-1</version>
-      <!-- temporarily required at compile time -->
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.scm</groupId>
-      <artifactId>maven-scm-test</artifactId>
-      <version>1.0-alpha-1</version>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>
