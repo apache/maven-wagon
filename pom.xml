@@ -6,6 +6,10 @@
   <name>Maven Wagon</name>
   <version>1.0-alpha-6-SNAPSHOT</version>
   <description>Tools to manage artifacts and deployment</description>
+  <issueManagement>
+    <system>jira</system>
+    <url>http://jira.codehaus.org/browse/WAGON</url>
+  </issueManagement>            
   <ciManagement>
     <system>wagon-dev@maven.apache.org</system>
     <notifiers>
