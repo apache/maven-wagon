@@ -8,6 +8,7 @@
   <bannerRight>
     <src>http://maven.apache.org/maven2/images/maven-logo-2.gif</src>
   </bannerRight>
+  <body>
     <links>
       <item name="Apache" href="http://www.apache.org/"/>
       <item name="Maven 1.x" href="http://maven.apache.org/maven-1.x"/>
