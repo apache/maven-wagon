@@ -12,9 +12,9 @@
     <section name="Wagon API">
       <p>
                The "Wagon API" project defines a simple API for transfering resources
-               (artifacts) to and from repositories. The word repository is used in this contextx as
+               (artifacts) to and from repositories. The word repository is used in this context as
                it is commonly used in
-        <a href" http:// maven.apache.org/ misc/ glossary.html">Maven</a>
+        <a href="http://maven.apache.org/maven-1.x/reference/glossary.html">Maven</a>
                And means a storage of artfacts.
                Wagon is a helper project for Maven and it is planned that Wagon will be used in feature
                versions of Maven.
