@@ -248,7 +248,7 @@ public class ScpExternalWagon
         }
 
         // should check interactive flag, but scpexe never works in interactive mode right now due to i/o streams
-        if ( sshExecutable.indexOf( "pscp" ) >= 0 )
+        if ( scpExecutable.indexOf( "pscp" ) >= 0 )
         {
             cl.createArgument().setValue( "-batch" );
         }
