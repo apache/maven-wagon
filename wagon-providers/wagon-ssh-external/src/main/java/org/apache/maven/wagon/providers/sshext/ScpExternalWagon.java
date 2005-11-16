@@ -211,6 +211,8 @@ public class ScpExternalWagon
 
         cl.createArgument().setValue( command );
 
+	fireSessionDebug( "Executing command: " + cl.toString() );
+
         try
         {
             CommandLineUtils.StringStreamConsumer err = new CommandLineUtils.StringStreamConsumer();
@@ -274,6 +276,9 @@ public class ScpExternalWagon
             cl.createArgument().setValue( qualifiedRemoteFile );
             cl.createArgument().setValue( localFile.getName() );
         }
+
+	fireSessionDebug( "Executing command: " + cl.toString() );
+
         try
         {
             CommandLineUtils.StringStreamConsumer err = new CommandLineUtils.StringStreamConsumer();
