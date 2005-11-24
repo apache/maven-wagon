@@ -23,13 +23,16 @@ import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.StreamWagon;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authentication.AuthenticationException;
+import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.Authenticator;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.URL;
@@ -47,6 +50,8 @@ public class LightweightHttpWagon
     private String previousProxyHost;
 
     private String previousProxyPort;
+    
+    private HttpURLConnection putConnection;
 
     public void fillInputData( InputData inputData )
         throws TransferFailedException, ResourceDoesNotExistException
@@ -89,8 +94,52 @@ public class LightweightHttpWagon
     public void fillOutputData( OutputData outputData )
         throws TransferFailedException
     {
-        throw new UnsupportedOperationException( "PUT operation is not supported by Light Weight  HTTP wagon" );
+        Repository repository = getRepository();
+        String repositoryUrl = repository.getUrl();
+        
+        Resource resource = outputData.getResource();
+        try
+        {
+            URL url;
+            if ( repositoryUrl.endsWith( "/" ) )
+            {
+                url = new URL( repositoryUrl + resource.getName() );
+            }
+            else
+            {
+                url = new URL( repositoryUrl + "/" + resource.getName() );
+            }
+            putConnection = (HttpURLConnection) url.openConnection();
+            
+            putConnection.setRequestMethod("PUT");
+            putConnection.setDoOutput(true);
+            outputData.setOutputStream(putConnection.getOutputStream());
+        }
+        catch ( IOException e )
+        {
+            throw new TransferFailedException( "Error transferring file", e );
+        }
     }
+    
+    
+    public void put( File source, String resourceName )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        super.put( source, resourceName );
+        
+        try
+        {
+            if ( putConnection.getResponseCode() != HttpURLConnection.HTTP_OK )
+            {
+                throw new TransferFailedException("Unable to transfer file. HttpURLConnection returned the response code: " + putConnection.getResponseCode() );
+            }
+        }
+        catch ( IOException e )
+        {
+            throw new TransferFailedException("Error transferring file", e);
+        }
+    }
+    
 
     public void openConnection()
         throws ConnectionException, AuthenticationException
@@ -149,6 +198,10 @@ public class LightweightHttpWagon
     public void closeConnection()
         throws ConnectionException
     {
+        if ( putConnection != null )
+        {
+            putConnection.disconnect();
+        }
         if ( previousProxyHost != null )
         {
             System.setProperty( "http.proxyHost", previousProxyHost );

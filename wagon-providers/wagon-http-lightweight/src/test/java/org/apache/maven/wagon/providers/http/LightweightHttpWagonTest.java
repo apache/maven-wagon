@@ -72,12 +72,7 @@ public class LightweightHttpWagonTest
 
         httpd = (Httpd) lookup( Httpd.ROLE );
     }
-
-    protected void fileRoundTripTesting()
-    {
-        // skip - PUT not supported
-    }
-
+    
     protected void tearDownWagonTestingFixtures()
         throws Exception
     {
