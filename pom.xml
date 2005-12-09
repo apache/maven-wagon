@@ -9,7 +9,7 @@
   <issueManagement>
     <system>jira</system>
     <url>http://jira.codehaus.org/browse/WAGON</url>
-  </issueManagement>            
+  </issueManagement>
   <ciManagement>
     <system>wagon-dev@maven.apache.org</system>
     <notifiers>
@@ -93,6 +93,7 @@
     <module>wagon-provider-api</module>
     <module>wagon-provider-test</module>
     <module>wagon-providers</module>
+    <module>wagon-openpgp</module>
   </modules>
   <dependencies>
     <dependency>

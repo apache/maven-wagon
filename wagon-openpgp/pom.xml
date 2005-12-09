@@ -1,0 +1,48 @@
+<project>
+  <parent>
+    <artifactId>wagon</artifactId>
+    <groupId>org.apache.maven.wagon</groupId>
+    <version>1.0-alpha-6-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>wagon-openpgp</artifactId>
+  <name>Maven Wagon OpenPGP Integration</name>
+  <version>1.0-alpha-6-SNAPSHOT</version>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.maven.wagon</groupId>
+      <artifactId>wagon-provider-api</artifactId>
+      <version>1.0-alpha-6-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.wagon</groupId>
+      <artifactId>wagon-provider-test</artifactId>
+      <version>1.0-alpha-6-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.wagon</groupId>
+      <artifactId>wagon-file</artifactId>
+      <version>1.0-alpha-6-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-container-default</artifactId>
+      <version>1.0-alpha-8</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-openpgp</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+  <!-- Until commons-pgp has a release -->
+  <repositories>
+    <repository>
+      <id>apache.snapshots</id>
+      <url>http://cvs.apache.org/maven-snapshot-repository</url>
+    </repository>
+  </repositories>
+</project>
