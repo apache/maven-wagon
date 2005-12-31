@@ -43,8 +43,6 @@ import java.io.IOException;
 public class FileWagon
     extends StreamWagon
 {
-
-    // get
     public void fillInputData( InputData inputData )
         throws TransferFailedException, ResourceDoesNotExistException
     {
@@ -74,7 +72,6 @@ public class FileWagon
         }
     }
 
-    // put
     public void fillOutputData( OutputData outputData )
         throws TransferFailedException
     {
@@ -110,7 +107,11 @@ public class FileWagon
         destinationDirectory = StringUtils.replace( destinationDirectory, "\\", "/" );
 
         File path = new File( basedir, destinationDirectory );
-        path.mkdirs();
+
+        if ( !path.mkdirs() )
+        {
+            throw new TransferFailedException( "Could not make directory '" + path.getAbsolutePath() + "'." );
+        }
 
         try
         {
