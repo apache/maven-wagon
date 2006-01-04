@@ -14,7 +14,9 @@
     <module>wagon-ftp</module>
     <module>wagon-http-lightweight</module>
     <module>wagon-http</module>
-    <module>wagon-scm</module>
+    <!-- out of date
+        <module>wagon-scm</module>
+    -->
     <module>wagon-ssh-external</module>
     <module>wagon-ssh</module>
   </modules>
