@@ -102,6 +102,8 @@ public class ScpWagon
 
         String path = getPath( basedir, resourceName );
 
+        RepositoryPermissions permissions = getRepository().getPermissions();
+
         try
         {
             // exec 'scp -t rfile' remotely
@@ -125,7 +127,21 @@ public class ScpWagon
             // send "C0644 filesize filename", where filename should not include '/'
             long filesize = source.length();
 
-            command = "C0644 " + filesize + " ";
+            String mode = "644";
+            if ( permissions != null && permissions.getFileMode() != null )
+            {
+                if ( permissions.getFileMode().matches( "/[0-9]{3}/" ) )
+                {
+                    mode = permissions.getFileMode();
+                }
+                else
+                {
+                    // TODO: as warning
+                    fireSessionDebug( "Not using non-octal permissions: " + mode );
+                }
+            }
+
+            command = "C0" + mode + " " + filesize + " ";
 
             if ( resourceName.lastIndexOf( PATH_SEPARATOR ) > 0 )
             {
@@ -176,17 +192,9 @@ public class ScpWagon
 
         try
         {
-            RepositoryPermissions permissions = getRepository().getPermissions();
-
             if ( permissions != null && permissions.getGroup() != null )
             {
                 executeCommand( "chgrp -f " + permissions.getGroup() + " " + path );
-            }
-
-            // TODO: could avoid this by replacing 0644 above
-            if ( permissions != null && permissions.getFileMode() != null )
-            {
-                executeCommand( "chmod -f " + permissions.getFileMode() + " " + path );
             }
         }
         catch ( CommandExecutionException e )
