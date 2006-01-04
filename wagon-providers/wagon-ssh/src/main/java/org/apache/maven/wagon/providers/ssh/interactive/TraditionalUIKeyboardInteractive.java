@@ -52,7 +52,7 @@ public class TraditionalUIKeyboardInteractive
         String[] ret;
 
         if ( prompt.length == echo.length && prompt.length == 1 && !echo[0] &&
-            prompt[0].toLowerCase().contains( "password" ) )
+            prompt[0].toLowerCase().indexOf( "password" ) > -1 )
         {
 
             ret = new String[1];
