@@ -347,10 +347,12 @@ public class ScpExternalWagon
                 executeCommand( "chgrp -f " + permissions.getGroup() + " " + basedir + "/" + resourceName + "\n" );
             }
 
+            String fileMode = "644";
             if ( permissions != null && permissions.getFileMode() != null )
             {
-                executeCommand( "chmod -f " + permissions.getFileMode() + " " + basedir + "/" + resourceName + "\n" );
+                fileMode = permissions.getFileMode();
             }
+            executeCommand( "chmod -f " + fileMode + " " + basedir + "/" + resourceName + "\n" );
         }
         catch ( CommandExecutionException e )
         {
