@@ -130,7 +130,7 @@ public class ScpWagon
             String mode = "644";
             if ( permissions != null && permissions.getFileMode() != null )
             {
-                if ( permissions.getFileMode().matches( "/[0-9]{3}/" ) )
+                if ( permissions.getFileMode().matches( "[0-9]{3}" ) )
                 {
                     mode = permissions.getFileMode();
                 }
