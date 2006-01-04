@@ -85,11 +85,14 @@ public class SftpWagon
 
             channel.connect();
 
-            channel.cd( basedir );
-
             RepositoryPermissions permissions = getRepository().getPermissions();
 
-            mkdirs( channel, resourceName, getDirectoryMode( permissions ) );
+            int directoryMode = getDirectoryMode( permissions );
+            mkdir( channel, basedir, directoryMode );
+
+            channel.cd( basedir );
+
+            mkdirs( channel, resourceName, directoryMode );
 
             firePutStarted( resource, source );
 
@@ -115,7 +118,7 @@ public class SftpWagon
             {
                 try
                 {
-                    int mode = Integer.valueOf( permissions.getFileMode() ).intValue();
+                    int mode = getOctalMode( permissions.getFileMode() );
                     channel.chmod( mode, filename );
                 }
                 catch ( NumberFormatException e )
@@ -165,18 +168,25 @@ public class SftpWagon
 
         if ( permissions != null )
         {
-            try
-            {
-                ret = Integer.valueOf( permissions.getDirectoryMode(), 8 ).intValue();
-            }
-            catch ( NumberFormatException e )
-            {
-                // TODO: warning level
-                fireTransferDebug( "the file mode must be a numerical mode for SFTP" );
-                ret = -1;
-            }
+            ret = getOctalMode( permissions.getDirectoryMode() );
         }
 
+        return ret;
+    }
+
+    private int getOctalMode( String mode )
+    {
+        int ret;
+        try
+        {
+            ret = Integer.valueOf( mode, 8 ).intValue();
+        }
+        catch ( NumberFormatException e )
+        {
+            // TODO: warning level
+            fireTransferDebug( "the file mode must be a numerical mode for SFTP" );
+            ret = -1;
+        }
         return ret;
     }
 
@@ -186,34 +196,39 @@ public class SftpWagon
         String[] dirs = PathUtils.dirnames( resourceName );
         for ( int i = 0; i < dirs.length; i++ )
         {
-            try
-            {
-                SftpATTRS attrs = channel.stat( dirs[i] );
-                if ( ( attrs.getPermissions() & S_IFDIR ) == 0 )
-                {
-                    throw new TransferFailedException(
-                        "Remote path is not a directory:" + PathUtils.dirname( resourceName ) );
-                }
-            }
-            catch ( SftpException e )
-            {
-                // doesn't exist, make it and try again
-                channel.mkdir( dirs[i] );
-                if ( mode != -1 )
-                {
-                    try
-                    {
-                        channel.chmod( mode, dirs[i] );
-                    }
-                    catch ( final SftpException e1 )
-                    {
-                        // for some extrange reason we recive this exception,
-                        // even when chmod success
-                    }
-                }
-            }
+            mkdir( channel, dirs[i], mode );
 
             channel.cd( dirs[i] );
+        }
+    }
+
+    private void mkdir( ChannelSftp channel, String dir, int mode )
+        throws TransferFailedException, SftpException
+    {
+        try
+        {
+            SftpATTRS attrs = channel.stat( dir );
+            if ( ( attrs.getPermissions() & S_IFDIR ) == 0 )
+            {
+                throw new TransferFailedException( "Remote path is not a directory:" + dir );
+            }
+        }
+        catch ( SftpException e )
+        {
+            // doesn't exist, make it and try again
+            channel.mkdir( dir );
+            if ( mode != -1 )
+            {
+                try
+                {
+                    channel.chmod( mode, dir );
+                }
+                catch ( final SftpException e1 )
+                {
+                    // for some extrange reason we recive this exception,
+                    // even when chmod success
+                }
+            }
         }
     }
 
@@ -260,7 +275,22 @@ public class SftpWagon
             channel.cd( dir );
 
             // This must be called first to ensure that if the file doesn't exist it throws an exception
-            SftpATTRS attrs = channel.stat( filename );
+            SftpATTRS attrs;
+            try
+            {
+                attrs = channel.stat( filename );
+            }
+            catch ( SftpException e )
+            {
+                if ( "No such file".equals( e.toString() ) )
+                {
+                    throw new ResourceDoesNotExistException( e.toString(), e );
+                }
+                else
+                {
+                    throw e;
+                }
+            }
 
             if ( timestamp <= 0 || attrs.getMTime() * MILLIS_PER_SEC > timestamp )
             {
