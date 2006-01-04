@@ -26,19 +26,19 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
 import org.apache.maven.wagon.AbstractWagon;
-import org.apache.maven.wagon.ResourceDoesNotExistException;
-import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.CommandExecutionException;
 import org.apache.maven.wagon.CommandExecutor;
 import org.apache.maven.wagon.PermissionModeUtils;
+import org.apache.maven.wagon.ResourceDoesNotExistException;
+import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo;
-import org.apache.maven.wagon.providers.ssh.interactive.UserInfoUIKeyboardInteractiveProxy;
 import org.apache.maven.wagon.providers.ssh.interactive.NullInteractiveUserInfo;
+import org.apache.maven.wagon.providers.ssh.interactive.UserInfoUIKeyboardInteractiveProxy;
 import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
@@ -362,15 +362,7 @@ public abstract class AbstractSshWagon
 
         String msg = "Error occured while downloading '" + resource + "' from the remote repository:" + getRepository();
 
-        if ( "No such file".equals( e.toString() ) )
-        {
-            // SFTP only
-            throw new ResourceDoesNotExistException( msg, e );
-        }
-        else
-        {
-            throw new TransferFailedException( msg, e );
-        }
+        throw new TransferFailedException( msg, e );
     }
 
     private static class WagonUserInfo
