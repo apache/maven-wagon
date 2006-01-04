@@ -211,7 +211,7 @@ public class ScpExternalWagon
 
         cl.createArgument().setValue( command );
 
-	fireSessionDebug( "Executing command: " + cl.toString() );
+        fireSessionDebug( "Executing command: " + cl.toString() );
 
         try
         {
@@ -264,8 +264,8 @@ public class ScpExternalWagon
         {
             cl.createArgument().setLine( scpArgs );
         }
-        String qualifiedRemoteFile = authenticationInfo.getUserName() + "@" + getRepository().getHost() + ":" +
-            remoteFile;
+        String qualifiedRemoteFile =
+            authenticationInfo.getUserName() + "@" + getRepository().getHost() + ":" + remoteFile;
         if ( put )
         {
             cl.createArgument().setValue( localFile.getName() );
@@ -277,7 +277,7 @@ public class ScpExternalWagon
             cl.createArgument().setValue( localFile.getName() );
         }
 
-	fireSessionDebug( "Executing command: " + cl.toString() );
+        fireSessionDebug( "Executing command: " + cl.toString() );
 
         try
         {
@@ -285,7 +285,7 @@ public class ScpExternalWagon
             int exitCode = CommandLineUtils.executeCommandLine( cl, null, err );
             if ( exitCode != 0 )
             {
-                if ( !put && err.getOutput().trim().endsWith( "No such file or directory" ) )
+                if ( !put && err.getOutput().trim().toLowerCase().endsWith( "no such file or directory" ) )
                 {
                     throw new ResourceDoesNotExistException( err.getOutput() );
                 }
