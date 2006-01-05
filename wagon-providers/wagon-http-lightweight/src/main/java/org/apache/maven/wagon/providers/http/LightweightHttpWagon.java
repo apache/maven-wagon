@@ -50,8 +50,15 @@ public class LightweightHttpWagon
     private String previousProxyHost;
 
     private String previousProxyPort;
-    
+
     private HttpURLConnection putConnection;
+
+    /**
+     * Whether to use any proxy cache or not.
+     *
+     * @component.configuration default="false"
+     */
+    private boolean useCache;
 
     public void fillInputData( InputData inputData )
         throws TransferFailedException, ResourceDoesNotExistException
@@ -71,8 +78,10 @@ public class LightweightHttpWagon
                 url = new URL( repositoryUrl + "/" + resource.getName() );
             }
             URLConnection urlConnection = url.openConnection();
-            // TODO: make this configurable
-            urlConnection.setRequestProperty( "Pragma", "no-cache" );
+            if ( !useCache )
+            {
+                urlConnection.setRequestProperty( "Pragma", "no-cache" );
+            }
             inputData.setInputStream( urlConnection.getInputStream() );
             resource.setLastModified( urlConnection.getLastModified() );
             resource.setContentLength( urlConnection.getContentLength() );
@@ -96,7 +105,7 @@ public class LightweightHttpWagon
     {
         Repository repository = getRepository();
         String repositoryUrl = repository.getUrl();
-        
+
         Resource resource = outputData.getResource();
         try
         {
@@ -110,36 +119,38 @@ public class LightweightHttpWagon
                 url = new URL( repositoryUrl + "/" + resource.getName() );
             }
             putConnection = (HttpURLConnection) url.openConnection();
-            
-            putConnection.setRequestMethod("PUT");
-            putConnection.setDoOutput(true);
-            outputData.setOutputStream(putConnection.getOutputStream());
+
+            putConnection.setRequestMethod( "PUT" );
+            putConnection.setDoOutput( true );
+            outputData.setOutputStream( putConnection.getOutputStream() );
         }
         catch ( IOException e )
         {
             throw new TransferFailedException( "Error transferring file", e );
         }
     }
-    
-    
+
+
     public void put( File source, String resourceName )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         super.put( source, resourceName );
-        
+
         try
         {
             if ( putConnection.getResponseCode() != HttpURLConnection.HTTP_OK )
             {
-                throw new TransferFailedException("Unable to transfer file. HttpURLConnection returned the response code: " + putConnection.getResponseCode() );
+                throw new TransferFailedException(
+                    "Unable to transfer file. HttpURLConnection returned the response code: " +
+                        putConnection.getResponseCode() );
             }
         }
         catch ( IOException e )
         {
-            throw new TransferFailedException("Error transferring file", e);
+            throw new TransferFailedException( "Error transferring file", e );
         }
     }
-    
+
 
     public void openConnection()
         throws ConnectionException, AuthenticationException
