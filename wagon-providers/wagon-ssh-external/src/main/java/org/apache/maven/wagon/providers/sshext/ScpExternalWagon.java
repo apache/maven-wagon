@@ -85,6 +85,8 @@ public class ScpExternalWagon
 
     private File privateKey;
 
+    private String password;
+
     // ----------------------------------------------------------------------
     //
     // ----------------------------------------------------------------------
@@ -130,6 +132,10 @@ public class ScpExternalWagon
                 this.privateKey = privateKey;
             }
         }
+        else
+        {
+            this.password = authenticationInfo.getPassword();
+        }
         // nothing to connect to
     }
 
@@ -168,19 +174,13 @@ public class ScpExternalWagon
     public void executeCommand( String command )
         throws CommandExecutionException
     {
-        Commandline cl = new Commandline();
+        boolean putty = sshExecutable.indexOf( "plink" ) >= 0;
 
-        cl.setExecutable( sshExecutable );
-
-        if ( privateKey != null )
-        {
-            cl.createArgument().setValue( "-i" );
-            cl.createArgument().setFile( privateKey );
-        }
+        Commandline cl = createBaseCommandLine( putty, sshExecutable );
 
         if ( port != WagonConstants.UNKNOWN_PORT )
         {
-            if ( sshExecutable.indexOf( "plink" ) >= 0 )
+            if ( putty )
             {
                 cl.createArgument().setLine( "-P " + port );
             }
@@ -188,17 +188,6 @@ public class ScpExternalWagon
             {
                 cl.createArgument().setLine( "-p " + port );
             }
-        }
-
-        // should check interactive flag, but scpexe never works in interactive mode right now due to i/o streams
-        if ( sshExecutable.indexOf( "plink" ) >= 0 )
-        {
-            cl.createArgument().setValue( "-batch" );
-        }
-        else
-        {
-            cl.createArgument().setValue( "-o" );
-            cl.createArgument().setValue( "BatchMode yes" );
         }
 
         if ( sshArgs != null )
@@ -228,15 +217,11 @@ public class ScpExternalWagon
         }
     }
 
-
-    private void executeScpCommand( File localFile, String remoteFile, boolean put )
-        throws TransferFailedException, ResourceDoesNotExistException
+    private Commandline createBaseCommandLine( boolean putty, String executable )
     {
         Commandline cl = new Commandline();
 
-        cl.setWorkingDirectory( localFile.getParentFile().getAbsolutePath() );
-
-        cl.setExecutable( scpExecutable );
+        cl.setExecutable( executable );
 
         if ( privateKey != null )
         {
@@ -244,13 +229,14 @@ public class ScpExternalWagon
             cl.createArgument().setFile( privateKey );
         }
 
-        if ( port != WagonConstants.UNKNOWN_PORT )
+        if ( putty && password != null )
         {
-            cl.createArgument().setLine( "-P " + port );
+            cl.createArgument().setValue( "-pw" );
+            cl.createArgument().setValue( password );
         }
 
         // should check interactive flag, but scpexe never works in interactive mode right now due to i/o streams
-        if ( scpExecutable.indexOf( "pscp" ) >= 0 )
+        if ( putty )
         {
             cl.createArgument().setValue( "-batch" );
         }
@@ -258,6 +244,23 @@ public class ScpExternalWagon
         {
             cl.createArgument().setValue( "-o" );
             cl.createArgument().setValue( "BatchMode yes" );
+        }
+        return cl;
+    }
+
+
+    private void executeScpCommand( File localFile, String remoteFile, boolean put )
+        throws TransferFailedException, ResourceDoesNotExistException
+    {
+        boolean putty = scpExecutable.indexOf( "pscp" ) >= 0;
+
+        Commandline cl = createBaseCommandLine( putty, scpExecutable );
+
+        cl.setWorkingDirectory( localFile.getParentFile().getAbsolutePath() );
+
+        if ( port != WagonConstants.UNKNOWN_PORT )
+        {
+            cl.createArgument().setLine( "-P " + port );
         }
 
         if ( scpArgs != null )
