@@ -71,15 +71,14 @@ public class ScpExternalWagon
      *
      * @component.configuration
      */
-    private String scpArgs = null;
-
+    private String scpArgs;
 
     /**
      * Arguments to pass to the SSH command.
      *
      * @component.configuration
      */
-    private String sshArgs = null;
+    private String sshArgs;
 
     private int port;
 
@@ -304,10 +303,10 @@ public class ScpExternalWagon
         }
     }
 
-    public void put( File source, String resourceName )
+    public void put( File source, String destination )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        Resource resource = new Resource( resourceName );
+        Resource resource = new Resource( destination );
 
         firePutInitiated( resource, source );
 
@@ -318,7 +317,7 @@ public class ScpExternalWagon
 
         String basedir = getRepository().getBasedir();
 
-        resourceName = StringUtils.replace( resourceName, "\\", "/" );
+        String resourceName = StringUtils.replace( destination, "\\", "/" );
 
         String dir = PathUtils.dirname( resourceName );
 
@@ -369,15 +368,15 @@ public class ScpExternalWagon
     {
         String basedir = getRepository().getBasedir();
 
-        resourceName = StringUtils.replace( resourceName, "\\", "/" );
+        String path = StringUtils.replace( resourceName, "\\", "/" );
 
         createParentDirectories( destination );
 
-        Resource resource = new Resource( resourceName );
+        Resource resource = new Resource( path );
 
         fireGetStarted( resource, destination );
 
-        executeScpCommand( destination, basedir + "/" + resourceName, false );
+        executeScpCommand( destination, basedir + "/" + path, false );
 
         postProcessListeners( resource, destination, TransferEvent.REQUEST_GET );
 
@@ -441,9 +440,9 @@ public class ScpExternalWagon
     {
         String basedir = getRepository().getBasedir();
 
-        destinationDirectory = StringUtils.replace( destinationDirectory, "\\", "/" );
+        String dir = StringUtils.replace( destinationDirectory, "\\", "/" );
 
-        String path = getPath( basedir, destinationDirectory );
+        String path = getPath( basedir, dir );
         try
         {
             if ( getRepository().getPermissions() != null )
@@ -481,7 +480,7 @@ public class ScpExternalWagon
             throw new TransferFailedException( "Unable to create ZIP archive of directory", e );
         }
 
-        put( zipFile, getPath( destinationDirectory, zipFile.getName() ) );
+        put( zipFile, getPath( dir, zipFile.getName() ) );
 
         try
         {
