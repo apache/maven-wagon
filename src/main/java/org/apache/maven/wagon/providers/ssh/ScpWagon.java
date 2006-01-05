@@ -56,6 +56,8 @@ public class ScpWagon
 
     private static final char ACK_SEPARATOR = ' ';
 
+    private static final String END_OF_FILES_MSG = "E\n";
+
     public void put( File source, String resourceName )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
@@ -106,7 +108,7 @@ public class ScpWagon
 
         try
         {
-            // exec 'scp -t rfile' remotely
+            // exec 'scp -t -d rfile' remotely
             String command = "scp -t " + path;
 
             fireTransferDebug( "Executing command: " + command );
@@ -165,6 +167,10 @@ public class ScpWagon
             sendEom( out );
 
             checkAck( in );
+
+            // This came from SCPClient in Ganymede SSH2. It is sent after all files.
+            out.write( END_OF_FILES_MSG.getBytes() );
+            out.flush();
         }
         catch ( IOException e )
         {
@@ -203,7 +209,7 @@ public class ScpWagon
         }
     }
 
-    private static void checkAck( InputStream in )
+    private void checkAck( InputStream in )
         throws IOException, TransferFailedException
     {
         int code = in.read();
@@ -211,9 +217,19 @@ public class ScpWagon
         {
             throw new TransferFailedException( "Unexpected end of data" );
         }
+        else if ( code == 1 )
+        {
+            String line = readLine( in );
+
+            throw new TransferFailedException( "SCP terminated with error: '" + line + "'" );
+        }
+        else if ( code == 2 )
+        {
+            throw new TransferFailedException( "SCP terminated with error (code: " + code + ")" );
+        }
         else if ( code != 0 )
         {
-            throw new TransferFailedException( "Did receive proper ACK: '" + code + "'" );
+            throw new TransferFailedException( "SCP terminated with unknown error code" );
         }
     }
 
@@ -255,6 +271,13 @@ public class ScpWagon
 
             int exitCode = in.read();
 
+            if ( exitCode == 'P' )
+            {
+                // ignore modification times
+
+                exitCode = in.read();
+            }
+
             String line = readLine( in );
 
             if ( exitCode != COPY_START_CHAR )
@@ -277,7 +300,7 @@ public class ScpWagon
             String perms = line.substring( 0, 4 );
             fireTransferDebug( "Remote file permissions: " + perms );
 
-            if ( line.charAt( 4 ) != ACK_SEPARATOR )
+            if ( line.charAt( 4 ) != ACK_SEPARATOR && line.charAt( 5 ) != ACK_SEPARATOR )
             {
                 throw new TransferFailedException( "Invalid transfer header: " + line );
             }
@@ -311,12 +334,6 @@ public class ScpWagon
             checkAck( in );
 
             sendEom( out );
-
-            if ( in.read() != -1 )
-            {
-                throw new TransferFailedException(
-                    "End of stream not encountered - server possibly attempted to send multiple files" );
-            }
         }
         catch ( JSchException e )
         {

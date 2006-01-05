@@ -46,10 +46,13 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -72,7 +75,7 @@ public abstract class AbstractSshWagon
 
     public static final String EXEC_CHANNEL = "exec";
 
-    private static final int LINE_BUFFER_SIZE = 256;
+    private static final int LINE_BUFFER_SIZE = 8192;
 
     private static final byte LF = '\n';
 
@@ -81,6 +84,8 @@ public abstract class AbstractSshWagon
     private InteractiveUserInfo interactiveUserInfo;
 
     private UIKeyboardInteractive uIKeyboardInteractive;
+
+    private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
     public void openConnection()
         throws AuthenticationException
@@ -278,17 +283,34 @@ public abstract class AbstractSshWagon
 
             channel.connect();
 
-            sendEom( out );
+            BufferedReader r = new BufferedReader( new InputStreamReader( err ) );
 
-            String line = readLine( err );
+            List output = null;
 
-            if ( line != null )
+            while ( true )
             {
-                // ignore this error
+                String line = r.readLine();
+                if ( line == null )
+                {
+                    break;
+                }
+
+                if ( output == null )
+                {
+                    output = new ArrayList();
+                }
+
+                // ignore this error. TODO: output a warning
                 if ( !line.startsWith( "Could not chdir to home directory" ) )
                 {
-                    throw new CommandExecutionException( line );
+                    output.add( line );
                 }
+            }
+
+            if ( output != null && !output.isEmpty() )
+            {
+                throw new CommandExecutionException(
+                    "Exit code: " + channel.getExitStatus() + " - " + StringUtils.join( output.iterator(), "\n" ) );
             }
         }
         catch ( JSchException e )
@@ -314,22 +336,30 @@ public abstract class AbstractSshWagon
     protected String readLine( InputStream in )
         throws IOException
     {
-        byte[] buf = new byte[LINE_BUFFER_SIZE];
+        StringBuffer sb = new StringBuffer();
 
-        String result = null;
-        for ( int i = 0; result == null; i++ )
+        while ( true )
         {
-            if ( in.read( buf, i, 1 ) != 1 )
+            if ( sb.length() > LINE_BUFFER_SIZE )
             {
-                return null;
+                throw new IOException( "Remote server sent a too long line" );
             }
 
-            if ( buf[i] == LF )
+            int c = in.read();
+
+            if ( c < 0 )
             {
-                result = new String( buf, 0, i );
+                throw new IOException( "Remote connection terminated unexpectedly." );
             }
+
+            if ( c == LF )
+            {
+                break;
+            }
+
+            sb.append( (char) c );
         }
-        return result;
+        return sb.toString();
     }
 
     protected static void sendEom( OutputStream out )
