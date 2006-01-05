@@ -284,7 +284,11 @@ public abstract class AbstractSshWagon
 
             if ( line != null )
             {
-                throw new CommandExecutionException( line );
+                // ignore this error
+                if ( !line.startsWith( "Could not chdir to home directory" ) )
+                {
+                    throw new CommandExecutionException( line );
+                }
             }
         }
         catch ( JSchException e )
