@@ -140,8 +140,8 @@ public class FtpWagon
 
             if ( !dirChanged )
             {
-                throw new ConnectionException( "Required directory: '" + getRepository().getBasedir() + "' " +
-                                               "is missing" );
+                throw new ConnectionException(
+                    "Required directory: '" + getRepository().getBasedir() + "' " + "is missing" );
             }
         }
         catch ( IOException e )
@@ -326,7 +326,7 @@ public class FtpWagon
             String filename = PathUtils.filename( resource.getName() );
             FTPFile[] ftpFiles = ftp.listFiles( filename );
 
-            if ( ftpFiles == null )
+            if ( ftpFiles == null || ftpFiles.length <= 0 )
             {
                 throw new ResourceDoesNotExistException( "Could not find file: '" + resource + "'" );
             }
@@ -346,7 +346,10 @@ public class FtpWagon
 
             for ( int i = 0; i < dirs.length; i++ )
             {
-                ftp.changeWorkingDirectory( ".." );
+                if ( !ftp.changeWorkingDirectory( ".." ) )
+                {
+                    throw new TransferFailedException( "Error changing directory to .." );
+                }
             }
         }
         catch ( IOException e )
