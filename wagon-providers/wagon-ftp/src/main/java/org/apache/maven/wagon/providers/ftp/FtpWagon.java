@@ -55,6 +55,11 @@ public class FtpWagon
             throw new IllegalArgumentException( "Authentication Credentials cannot be null for FTP protocol" );
         }
 
+        if ( authInfo.getUserName() == null )
+        {
+            authInfo.setUserName( System.getProperty( "user.name" ) );
+        }
+
         String username = authInfo.getUserName();
 
         String password = authInfo.getPassword();
@@ -135,14 +140,6 @@ public class FtpWagon
             // behind firewalls these days.
             // TODO [BP]: make optional based on a flag
             ftp.enterLocalPassiveMode();
-
-            boolean dirChanged = ftp.changeWorkingDirectory( getRepository().getBasedir() );
-
-            if ( !dirChanged )
-            {
-                throw new ConnectionException(
-                    "Required directory: '" + getRepository().getBasedir() + "' " + "is missing" );
-            }
         }
         catch ( IOException e )
         {
@@ -219,7 +216,6 @@ public class FtpWagon
     public void fillOutputData( OutputData outputData )
         throws TransferFailedException
     {
-
         OutputStream os;
 
         Resource resource = outputData.getResource();
@@ -228,6 +224,12 @@ public class FtpWagon
 
         try
         {
+            if ( !ftp.changeWorkingDirectory( getRepository().getBasedir() ) )
+            {
+                throw new TransferFailedException(
+                    "Required directory: '" + getRepository().getBasedir() + "' " + "is missing" );
+            }
+
             String[] dirs = PathUtils.dirnames( resource.getName() );
 
             for ( int i = 0; i < dirs.length; i++ )
@@ -265,12 +267,9 @@ public class FtpWagon
 
             // we come back to orginal basedir so
             // FTP wagon is ready for next requests
-            for ( int i = 0; i < dirs.length; i++ )
+            if ( !ftp.changeWorkingDirectory( getRepository().getBasedir() ) )
             {
-                if ( !ftp.changeWorkingDirectory( ".." ) )
-                {
-                    throw new TransferFailedException( "Unable to return to the base directory" );
-                }
+                throw new TransferFailedException( "Unable to return to the base directory" );
             }
 
             os = ftp.storeFileStream( resource.getName() );
@@ -309,6 +308,12 @@ public class FtpWagon
 
         try
         {
+            if ( !ftp.changeWorkingDirectory( getRepository().getBasedir() ) )
+            {
+                throw new TransferFailedException(
+                    "Required directory: '" + getRepository().getBasedir() + "' " + "is missing" );
+            }
+
             String[] dirs = PathUtils.dirnames( resource.getName() );
 
             for ( int i = 0; i < dirs.length; i++ )
@@ -343,14 +348,6 @@ public class FtpWagon
             resource.setLastModified( lastModified );
 
             is = ftp.retrieveFileStream( filename );
-
-            for ( int i = 0; i < dirs.length; i++ )
-            {
-                if ( !ftp.changeWorkingDirectory( ".." ) )
-                {
-                    throw new TransferFailedException( "Error changing directory to .." );
-                }
-            }
         }
         catch ( IOException e )
         {
