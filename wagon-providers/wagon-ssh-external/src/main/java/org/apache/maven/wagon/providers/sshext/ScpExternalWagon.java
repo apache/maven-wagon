@@ -86,6 +86,8 @@ public class ScpExternalWagon
 
     private String password;
 
+    private static final int SSH_FATAL_EXIT_CODE = 255;
+
     // ----------------------------------------------------------------------
     //
     // ----------------------------------------------------------------------
@@ -170,7 +172,7 @@ public class ScpExternalWagon
         // nothing to disconnect
     }
 
-    public void executeCommand( String command )
+    public void executeCommand( String command, boolean ignoreFailures )
         throws CommandExecutionException
     {
         boolean putty = sshExecutable.indexOf( "plink" ) >= 0;
@@ -203,11 +205,17 @@ public class ScpExternalWagon
 
         try
         {
+            CommandLineUtils.StringStreamConsumer out = new CommandLineUtils.StringStreamConsumer();
             CommandLineUtils.StringStreamConsumer err = new CommandLineUtils.StringStreamConsumer();
-            int exitCode = CommandLineUtils.executeCommandLine( cl, null, err );
+            int exitCode = CommandLineUtils.executeCommandLine( cl, out, err );
+            fireSessionDebug( out.getOutput() );
+            fireSessionDebug( err.getOutput() );
             if ( exitCode != 0 )
             {
-                throw new CommandExecutionException( "Exit code " + exitCode + " - " + err.getOutput() );
+                if ( !ignoreFailures || exitCode == SSH_FATAL_EXIT_CODE )
+                {
+                    throw new CommandExecutionException( "Exit code " + exitCode + " - " + err.getOutput() );
+                }
             }
         }
         catch ( CommandLineException e )
@@ -346,7 +354,8 @@ public class ScpExternalWagon
 
             if ( permissions != null && permissions.getGroup() != null )
             {
-                executeCommand( "chgrp -f " + permissions.getGroup() + " " + basedir + "/" + resourceName + "\n" );
+                executeCommand( "chgrp -f " + permissions.getGroup() + " " + basedir + "/" + resourceName + "\n",
+                                true );
             }
 
             String fileMode = "644";
@@ -354,13 +363,19 @@ public class ScpExternalWagon
             {
                 fileMode = permissions.getFileMode();
             }
-            executeCommand( "chmod -f " + fileMode + " " + basedir + "/" + resourceName + "\n" );
+            executeCommand( "chmod -f " + fileMode + " " + basedir + "/" + resourceName + "\n", true );
         }
         catch ( CommandExecutionException e )
         {
             throw new TransferFailedException( "Error executing command for transfer", e );
         }
         firePutCompleted( resource, source );
+    }
+
+    public void executeCommand( String command )
+        throws CommandExecutionException
+    {
+        executeCommand( command, false );
     }
 
     public void get( String resourceName, File destination )
