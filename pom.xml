@@ -4,7 +4,7 @@
   <artifactId>wagon</artifactId>
   <packaging>pom</packaging>
   <name>Maven Wagon</name>
-  <version>1.0-alpha-6</version>
+  <version>1.0-alpha-7-SNAPSHOT</version>
   <description>Tools to manage artifacts and deployment</description>
   <issueManagement>
     <system>jira</system>
@@ -69,9 +69,9 @@
     </license>
   </licenses>
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/wagon/tags/wagon-1.0-alpha-6</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/tags/wagon-1.0-alpha-6</developerConnection>
-    <url>http://svn.apache.org/viewcvs.cgi/maven/wagon/tags/wagon-1.0-alpha-6</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/wagon/trunk/</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/trunk/</developerConnection>
+    <url>http://svn.apache.org/viewcvs.cgi/maven/wagon/</url>
   </scm>
   <organization>
     <name>Apache Software Foundation</name>

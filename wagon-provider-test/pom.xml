@@ -2,12 +2,12 @@
   <parent>
     <artifactId>wagon</artifactId>
     <groupId>org.apache.maven.wagon</groupId>
-    <version>1.0-alpha-6</version>
+    <version>1.0-alpha-7-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>wagon-provider-test</artifactId>
   <name>Maven Wagon Provider Test</name>
-  <version>1.0-alpha-6</version>
+  <version>1.0-alpha-7-SNAPSHOT</version>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -16,7 +16,7 @@
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>
       <artifactId>wagon-provider-api</artifactId>
-      <version>1.0-alpha-6</version>
+      <version>1.0-alpha-7-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
