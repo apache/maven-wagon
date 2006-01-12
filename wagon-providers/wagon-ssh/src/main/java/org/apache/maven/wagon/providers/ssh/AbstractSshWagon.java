@@ -300,8 +300,9 @@ public abstract class AbstractSshWagon
                     output = new ArrayList();
                 }
 
+                // TODO: I think we need to deal with exit codes instead, but IIRC there are some cases of errors that don't have exit codes
                 // ignore this error. TODO: output a warning
-                if ( !line.startsWith( "Could not chdir to home directory" ) )
+                if ( !line.startsWith( "Could not chdir to home directory" ) && !line.endsWith( "ttyname: Operation not supported" ) )
                 {
                     output.add( line );
                 }
