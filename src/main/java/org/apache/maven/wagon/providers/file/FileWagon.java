@@ -108,7 +108,9 @@ public class FileWagon
 
         File path = new File( basedir, destinationDirectory );
 
-        if ( !path.mkdirs() )
+        boolean result = path.mkdirs();
+
+        if ( !path.exists() || !path.isDirectory() )
         {
             throw new TransferFailedException( "Could not make directory '" + path.getAbsolutePath() + "'." );
         }
