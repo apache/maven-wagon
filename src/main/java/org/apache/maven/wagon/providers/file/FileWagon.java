@@ -106,10 +106,19 @@ public class FileWagon
 
         destinationDirectory = StringUtils.replace( destinationDirectory, "\\", "/" );
 
-        File path = new File( basedir, destinationDirectory );
+        File path;
 
-        boolean result = path.mkdirs();
+        if ( destinationDirectory.equals( "." ) )
+        {
+            path = new File( basedir );
+        }
+        else
+        {
+            path = new File( basedir, destinationDirectory );
+        }
 
+        path.mkdirs();
+ 
         if ( !path.exists() || !path.isDirectory() )
         {
             throw new TransferFailedException( "Could not make directory '" + path.getAbsolutePath() + "'." );
