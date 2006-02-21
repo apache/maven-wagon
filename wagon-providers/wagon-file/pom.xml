@@ -7,5 +7,5 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>wagon-file</artifactId>
   <name>Maven Wagon File Provider</name>
-  <version>1.0-alpha-7</version>
+  <version>1.0-alpha-8-SNAPSHOT</version>
 </project>
