@@ -307,6 +307,17 @@ public abstract class AbstractSshWagon
                     output.add( line );
                 }
             }
+            
+            // drain the output stream.
+            // we'll save this for the 1.0-alpha-8 line, so we can test it more. the -q arg in the
+            // unzip command should keep us until then...
+//            int avail = in.available();
+//            byte[] trashcan = new byte[1024];
+//            
+//            while( ( avail = in.available() ) > 0 )
+//            {
+//                in.read( trashcan, 0, avail );
+//            }
 
             if ( output != null && !output.isEmpty() )
             {
@@ -544,7 +555,7 @@ public abstract class AbstractSshWagon
 
         try
         {
-            executeCommand( "cd " + path + "; unzip -o " + zipFile.getName() + "; rm -f " + zipFile.getName() );
+            executeCommand( "cd " + path + "; unzip -q -o " + zipFile.getName() + "; rm -f " + zipFile.getName() );
 
             zipFile.delete();
 
