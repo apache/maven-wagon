@@ -88,10 +88,11 @@ public class SftpWagon
             RepositoryPermissions permissions = getRepository().getPermissions();
 
             int directoryMode = getDirectoryMode( permissions );
-            mkdir( channel, basedir, directoryMode );
+            
+            mkdirs( channel, basedir, directoryMode );
 
             channel.cd( basedir );
-
+            
             mkdirs( channel, resourceName, directoryMode );
 
             firePutStarted( resource, source );
@@ -270,14 +271,32 @@ public class SftpWagon
 
             channel.connect();
 
-            channel.cd( repository.getBasedir() );
-
-            channel.cd( dir );
-
+            try
+            {
+                channel.cd( repository.getBasedir() );
+            }
+            catch ( SftpException e )
+            {
+                if ( "No such file".equals( e.toString() ) )
+                {
+                    throw new ResourceDoesNotExistException( "Repository base directory is missing for: " + repository.getId(), e );
+                }
+                else
+                {
+                    throw e;
+                }
+            }
+            
             // This must be called first to ensure that if the file doesn't exist it throws an exception
             SftpATTRS attrs;
             try
             {
+                String basedir = repository.getBasedir();
+                
+                channel.cd( repository.getBasedir() );
+                
+                channel.cd( dir );
+                
                 attrs = channel.stat( filename );
             }
             catch ( SftpException e )
