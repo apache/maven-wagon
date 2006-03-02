@@ -50,7 +50,7 @@ public class LightweightHttpWagonTest
 
         // File round trip testing
         
-        File file = FileTestUtils.createUniqueFile( "local-repository", "test-resource.txt" );
+        File file = FileTestUtils.createUniqueFile( "local-repository", "test-resource" );
 
         file.delete();
 
@@ -62,7 +62,7 @@ public class LightweightHttpWagonTest
         // default so we must place a dummy artifact in the http repo first before
         // the actual PUT operation.
 
-        File f = new File( FileTestUtils.createDir( "http-repository" ), "test-resource.txt" );
+        File f = new File( FileTestUtils.createDir( "http-repository" ), "test-resource" );
 
         f.delete();
 

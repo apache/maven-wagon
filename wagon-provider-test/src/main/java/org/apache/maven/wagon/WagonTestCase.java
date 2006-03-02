@@ -86,7 +86,7 @@ public abstract class WagonTestCase
     protected void setupRepositories()
         throws Exception
     {
-        resource = "test-resource.txt";
+        resource = "test-resource";
 
         // ----------------------------------------------------------------------
         // Create the test repository for the wagon we are testing.
