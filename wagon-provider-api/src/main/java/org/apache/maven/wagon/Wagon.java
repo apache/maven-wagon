@@ -66,12 +66,32 @@ public interface Wagon
     boolean getIfNewer( String resourceName, File destination, long timestamp )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
 
+    /**
+     * Copy a file from local system to remote
+     * @param source the local file
+     * @param destination the remote destination
+     * @throws TransferFailedException
+     * @throws ResourceDoesNotExistException
+     * @throws AuthorizationException
+     */
     void put( File source, String destination )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
 
+    /**
+     * Copy a directory from local system to remote
+     * @param sourceDirectory the local directory
+     * @param destinationDirectory the remote destination
+     * @throws TransferFailedException
+     * @throws ResourceDoesNotExistException
+     * @throws AuthorizationException
+     */
     void putDirectory( File sourceDirectory, String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
 
+    /**
+     * 
+     * @return whether if this wagon supports directory operations
+     */
     boolean supportsDirectoryCopy();
 
     Repository getRepository();
