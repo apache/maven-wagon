@@ -16,16 +16,20 @@ package org.apache.maven.wagon;
  * limitations under the License.
  */
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.observers.ChecksumObserver;
 import org.apache.maven.wagon.observers.Debug;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.util.FileUtils;
-
-import java.io.File;
-import java.io.IOException;
 
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
@@ -193,6 +197,9 @@ public abstract class WagonTestCase
         if ( wagon.supportsDirectoryCopy() )
         {
             sourceFile = new File( FileTestUtils.getTestOutputDir(), "directory-copy" );
+            
+            FileUtils.deleteDirectory( sourceFile );
+            
             writeTestFile( "test-resource-1.txt" );
             writeTestFile( "a/test-resource-2.txt" );
             writeTestFile( "a/b/test-resource-3.txt" );
@@ -215,6 +222,134 @@ public abstract class WagonTestCase
         }
 
         tearDownWagonTestingFixtures();
+    }
+
+    /**
+     * Test that when putting a directory that already exists new files get also copied
+     * @since 1.0-alpha-7
+     * @throws Exception
+     */
+    public void testWagonPutDirectoryWhenDirectoryAlreadyExists()
+        throws Exception
+    {
+        
+        final String dirName =  "directory-copy-existing";
+
+        final String resourceToCreate = "test-resource-1.txt";
+
+        final String[] resources = {
+            "a/test-resource-2.txt",
+            "a/b/test-resource-3.txt",
+            "c/test-resource-4.txt" };
+        
+        setupRepositories();
+
+        setupWagonTestingFixtures();
+
+        Wagon wagon = getWagon();
+
+        if ( wagon.supportsDirectoryCopy() )
+        {
+            sourceFile = new File( FileTestUtils.getTestOutputDir(), dirName );
+
+            FileUtils.deleteDirectory( sourceFile );
+
+            createDirectory( wagon, resourceToCreate , resources, dirName );
+
+            wagon.connect( testRepository, getAuthInfo() );
+
+            for ( int i = 0; i < resources.length; i++ )
+            {
+                writeTestFile( resources[i] );
+            }
+
+            wagon.connect( testRepository, getAuthInfo() );
+
+            wagon.putDirectory( sourceFile, dirName );
+
+            List resourceNames = new ArrayList( resources.length + 1 );
+
+            resourceNames.add( dirName + "/" + resourceToCreate );
+            for ( int i = 0; i < resources.length; i++ )
+            {
+                resourceNames.add( dirName + "/" + resources[i] );
+            }
+
+            assertResourcesAreInRemoteSide( wagon, resourceNames );
+
+            wagon.disconnect();
+        }
+
+        tearDownWagonTestingFixtures();
+    }
+
+    /**
+     * Create a directory with a resource and check that the other ones don't exist 
+     * @param wagon
+     * @param resourceToCreate name of the resource to be created
+     * @param resourcesNotPresent names of the resources that we'll check don't exist
+     * @param dirName directory name to create
+     * @throws Exception
+     */
+    protected void createDirectory( Wagon wagon, String resourceToCreate, String[] resourcesNotPresent, String dirName )
+        throws Exception
+    {
+        writeTestFile( resourceToCreate );
+
+        wagon.connect( testRepository, getAuthInfo() );
+
+        wagon.putDirectory( sourceFile, dirName );
+
+        for ( int i = 0; i < resourcesNotPresent.length; i++ )
+        {
+            assertNotExists( wagon, dirName + "/" + resourcesNotPresent[i] );
+        }
+
+        wagon.disconnect();
+    }
+    
+    protected void assertResourcesAreInRemoteSide( Wagon wagon, List resourceNames )
+        throws IOException, TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        Iterator iter = resourceNames.iterator();
+        while ( iter.hasNext() )
+        {
+            String resourceName = (String) iter.next();
+
+            destFile = FileTestUtils.createUniqueFile( getName(), resourceName );
+
+            destFile.deleteOnExit();
+
+            wagon.get( resourceName, destFile );
+        }
+    }
+
+    /**
+     * Assert that a resource does not exist in the remote wagon system
+     * @since 1.0-alpha-7
+     * @param wagon wagon to get the resource from
+     * @param resourceName name of the resource
+     * @throws IOException if a temp file can't be created
+     * @throws AuthorizationException 
+     * @throws TransferFailedException 
+     */
+    protected void assertNotExists( Wagon wagon, String resourceName )
+        throws IOException, TransferFailedException, AuthorizationException
+    {
+        File tmpFile = File.createTempFile( "wagon", null );
+        try
+        {
+            wagon.get( resourceName, tmpFile );
+            fail( "Resource exists: " + resourceName );
+        }
+        catch ( ResourceDoesNotExistException e )
+        {
+            // ok
+        }
+        finally
+        {
+            tmpFile.delete();
+        }
     }
 
     private void writeTestFile( String child )
@@ -282,7 +417,7 @@ public abstract class WagonTestCase
 
         wagon.connect( testRepository, getAuthInfo() );
 
-        sourceFile = new File( FileTestUtils.getTestOutputDir(), "test-resource.txt" );
+        sourceFile = new File( FileTestUtils.getTestOutputDir(), "test-resource" );
         FileUtils.fileWrite( sourceFile.getAbsolutePath(), "test-resource.txt\n" );
 
         wagon.put( sourceFile, resource );
