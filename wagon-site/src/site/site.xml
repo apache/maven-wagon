@@ -18,12 +18,14 @@
       <item name="Wagon" href="http://maven.apache.org/wagon"/>
       <item name="JXR" href="http://maven.apache.org/jxr"/>
     </links>
-    <!--
-    <menu name="Quick Links">
-      <item name="Features" href="/maven-features.html"/>
-      <item name="Download" href="/download.html"/>
+    <menu name="Providers">
+      <item name="File" href="/wagon-file/"/>
+      <item name="FTP"  href="/wagon-ftp/"/>
+      <item name="HTTP" href="/wagon-http/"/>
+      <item name="HTTP lightweight" href="/wagon-http-lightweight/"/>
+      <item name="SSH"  href="/wagon-ssh/"/>
+      <item name="SSH external" href="/wagon-ssh-external/"/>
     </menu>
-    -->
 
     ${reports}
   </body>
