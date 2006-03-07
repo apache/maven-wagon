@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.maven.wagon</groupId>
   <artifactId>wagon</artifactId>
@@ -6,6 +7,8 @@
   <name>Maven Wagon</name>
   <version>1.0-alpha-7-SNAPSHOT</version>
   <description>Tools to manage artifacts and deployment</description>
+  <url>http://maven.apache.org/wagon</url>
+
   <issueManagement>
     <system>jira</system>
     <url>http://jira.codehaus.org/browse/WAGON</url>
@@ -86,42 +89,6 @@
             <tagBase>https://svn.apache.org/repos/asf/maven/wagon/tags</tagBase>
           </configuration>
         </plugin>
-        <plugin>
-          <artifactId>maven-release-plugin</artifactId>
-          <configuration>
-            <tagBase>https://svn.apache.org/repos/asf/maven/wagon/tags</tagBase>
-          </configuration>
-        </plugin>
-        <plugin>
-          <artifactId>maven-release-plugin</artifactId>
-          <configuration>
-            <tagBase>https://svn.apache.org/repos/asf/maven/wagon/tags</tagBase>
-          </configuration>
-        </plugin>
-        <plugin>
-          <artifactId>maven-release-plugin</artifactId>
-          <configuration>
-            <tagBase>https://svn.apache.org/repos/asf/maven/wagon/tags</tagBase>
-          </configuration>
-        </plugin>
-        <plugin>
-          <artifactId>maven-release-plugin</artifactId>
-          <configuration>
-            <tagBase>https://svn.apache.org/repos/asf/maven/wagon/tags</tagBase>
-          </configuration>
-        </plugin>
-        <plugin>
-          <artifactId>maven-release-plugin</artifactId>
-          <configuration>
-            <tagBase>https://svn.apache.org/repos/asf/maven/wagon/tags</tagBase>
-          </configuration>
-        </plugin>
-        <plugin>
-          <artifactId>maven-release-plugin</artifactId>
-          <configuration>
-            <tagBase>https://svn.apache.org/repos/asf/maven/wagon/tags</tagBase>
-          </configuration>
-        </plugin>
       </plugins>
     </pluginManagement>
   </build>
@@ -142,12 +109,12 @@
       <dependency>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-provider-api</artifactId>
-        <version>1.0-alpha-6</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-provider-test</artifactId>
-        <version>1.0-alpha-6</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>junit</groupId>
@@ -172,8 +139,13 @@
       <url>scp://beaver.codehaus.org/home/projects/maven/repository-staging/to-ibiblio/maven2</url>
     </repository>
     <snapshotRepository>
-      <id>snapshots</id>
-      <url>scp://beaver.codehaus.org/home/projects/maven/repository-staging/snapshots/maven2</url>
+      <id>apache.snapshots</id>
+      <name>Apache Development Repository</name>
+      <url>scp://minotaur.apache.org/www/cvs.apache.org/maven-snapshot-repository</url>
     </snapshotRepository>
+    <site>
+      <id>website</id>
+      <url>scp://minotaur.apache.org/www/maven.apache.org/wagon/ref/${project.version}/</url>
+    </site>
   </distributionManagement>
 </project>
