@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>maven-parent</artifactId>
+    <groupId>org.apache.maven</groupId>
+    <version>1</version>
+    <relativePath>../pom/maven/pom.xml</relativePath>
+  </parent>
   <groupId>org.apache.maven.wagon</groupId>
   <artifactId>wagon</artifactId>
   <packaging>pom</packaging>
@@ -13,14 +19,6 @@
     <system>jira</system>
     <url>http://jira.codehaus.org/browse/WAGON</url>
   </issueManagement>
-  <ciManagement>
-    <system>wagon-dev@maven.apache.org</system>
-    <notifiers>
-      <notifier>
-        <address>wagon-dev@maven.apache.org</address>
-      </notifier>
-    </notifiers>
-  </ciManagement>
   <inceptionYear>2003</inceptionYear>
   <mailingLists>
     <mailingList>
@@ -40,46 +38,18 @@
     <developer>
       <id>michal</id>
       <name>Michal Maczka</name>
-      <email>michal@codehaus.com</email>
+      <email>michal@codehaus.org</email>
       <organization>Codehaus</organization>
       <roles>
         <role>Developer</role>
       </roles>
     </developer>
-    <developer>
-      <id>brett</id>
-      <name>Brett Porter</name>
-      <email>brett@apache.org</email>
-      <roles>
-        <role>Developer</role>
-      </roles>
-      <timezone>+10</timezone>
-    </developer>
-    <developer>
-      <id>jvanzyl</id>
-      <name>Jason van Zyl</name>
-      <email>jason@maven.org</email>
-      <roles>
-        <role>Developer</role>
-      </roles>
-    </developer>
   </developers>
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
   <scm>
     <connection>scm:svn:http://svn.apache.org/repos/asf/maven/wagon/trunk/</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/trunk/</developerConnection>
     <url>http://svn.apache.org/viewcvs.cgi/maven/wagon/</url>
   </scm>
-  <organization>
-    <name>Apache Software Foundation</name>
-    <url>http://www.apache.org/</url>
-  </organization>
   <build>
     <pluginManagement>
       <plugins>
@@ -134,15 +104,6 @@
     </dependencies>
   </dependencyManagement>
   <distributionManagement>
-    <repository>
-      <id>repo1</id>
-      <url>scp://beaver.codehaus.org/home/projects/maven/repository-staging/to-ibiblio/maven2</url>
-    </repository>
-    <snapshotRepository>
-      <id>apache.snapshots</id>
-      <name>Apache Development Repository</name>
-      <url>scp://minotaur.apache.org/www/cvs.apache.org/maven-snapshot-repository</url>
-    </snapshotRepository>
     <site>
       <id>website</id>
       <url>scp://minotaur.apache.org/www/maven.apache.org/wagon/ref/${project.version}/</url>
