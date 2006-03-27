@@ -44,10 +44,6 @@ public class LightweightHttpWagonTest
     protected void setupWagonTestingFixtures()
         throws Exception
     {
-        // For a PUT the artifact must exist already which is how a PUT works by
-        // default so we must place a dummy artifact in the http repo first before
-        // the actual PUT operation.
-
         // File round trip testing
         
         File file = FileTestUtils.createUniqueFile( "local-repository", "test-resource" );
@@ -56,19 +52,11 @@ public class LightweightHttpWagonTest
 
         file.getParentFile().mkdirs();
 
-        FileTestUtils.generateFile( file.getAbsolutePath(), "file-dummy" );
-
-        // For a PUT the artifact must exist already which is how a PUT works by
-        // default so we must place a dummy artifact in the http repo first before
-        // the actual PUT operation.
-
         File f = new File( FileTestUtils.createDir( "http-repository" ), "test-resource" );
 
         f.delete();
 
         f.getParentFile().mkdirs();
-
-        FileTestUtils.generateFile( f.getAbsolutePath(), "artifact-dummy" );
 
         httpd = (Httpd) lookup( Httpd.ROLE );
     }

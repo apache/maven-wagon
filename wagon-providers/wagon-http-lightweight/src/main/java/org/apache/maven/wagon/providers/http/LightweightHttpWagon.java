@@ -138,11 +138,30 @@ public class LightweightHttpWagon
 
         try
         {
-            if ( putConnection.getResponseCode() != HttpURLConnection.HTTP_OK )
+            String url = getRepository().getUrl() + "/" + resourceName;
+            int statusCode = putConnection.getResponseCode();
+
+            switch ( statusCode )
             {
-                throw new TransferFailedException(
-                    "Unable to transfer file. HttpURLConnection returned the response code: " +
-                        putConnection.getResponseCode() );
+                case HttpURLConnection.HTTP_OK:
+                    break;
+
+                case HttpURLConnection.HTTP_CREATED:
+                    break;
+
+                case HttpURLConnection.HTTP_NO_CONTENT:
+                    break;
+
+                case HttpURLConnection.HTTP_FORBIDDEN:
+                    throw new AuthorizationException( "Access denided to: " + url );
+
+                case HttpURLConnection.HTTP_NOT_FOUND:
+                    throw new ResourceDoesNotExistException( "File: " + url + " does not exist" );
+
+                //add more entries here
+                default :
+                    throw new TransferFailedException(
+                        "Failed to transfer file: " + url + ". Return code is: " + statusCode );
             }
         }
         catch ( IOException e )
