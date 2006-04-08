@@ -331,7 +331,23 @@ public class ScpExternalWagon
 
         dir = StringUtils.replace( dir, "\\", "/" );
 
+        String umaskCmd = null;
+        if ( getRepository().getPermissions() != null )
+        {
+            String dirPerms = getRepository().getPermissions().getDirectoryMode();
+
+            if ( dirPerms != null )
+            {
+                umaskCmd = "umask " + PermissionModeUtils.getUserMaskFor( dirPerms );
+            }
+        }
+
         String mkdirCmd = "mkdir -p " + basedir + "/" + dir + "\n";
+
+        if ( umaskCmd != null )
+        {
+            mkdirCmd = umaskCmd + "; " + mkdirCmd;
+        }
 
         try
         {
