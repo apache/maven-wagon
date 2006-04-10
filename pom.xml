@@ -17,6 +17,12 @@
     Wagon that gets and puts artifacts through webdav protocol
   </description>
 
+  <scm>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/maven/sandbox/wagon-webdav/</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/sandbox/wagon-webdav/</developerConnection>
+    <url>http://svn.apache.org/viewcvs.cgi/maven/sandbox/wagon-webdav/</url>
+  </scm>
+
   <contributors>
     <contributor>
       <name>Henry Isidro</name>
