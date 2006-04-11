@@ -35,7 +35,7 @@ public class WebDavWagonTest
     protected String getTestRepositoryUrl()
         throws IOException
     {
-        return "dav:http://localhost:10007/dav";
+        return "dav:http://localhost:10007/dav/newfolder/folder2";
     }
 
     protected String getProtocol()
