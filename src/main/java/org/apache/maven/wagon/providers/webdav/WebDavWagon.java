@@ -132,6 +132,10 @@ public class WebDavWagon
                     throw new ConnectionException( "Connection Exception: " + ioe.getMessage() );
                 }
             }
+            else
+            {
+                throw new ConnectionException( "Connection Exception: " + HttpStatus.getStatusText( he.getReasonCode() ) );
+            }
         }
         catch ( URIException urie )
         {
@@ -152,7 +156,10 @@ public class WebDavWagon
     {
         try
         {
-            wdresource.close();
+            if ( wdresource != null )
+            {
+                wdresource.close();
+            }
         }
         catch ( IOException ioe )
         {
