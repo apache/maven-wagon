@@ -72,7 +72,6 @@ public class PutInputStream
 
         if ( retValue > 0 )
         {
-            System.out.println("read():" + new String(b, off, len));
             event.setTimestamp( System.currentTimeMillis() );
 
             eventSupport.fireTransferProgress( event, b, retValue );
