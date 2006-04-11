@@ -97,6 +97,7 @@ public class WebDavWagon
     /**
      * Opens a connection via web-dav resource
      * @throws AuthenticationException 
+     * @throws ConnectionException
      */
     public void openConnection()
         throws AuthenticationException, ConnectionException
@@ -134,7 +135,8 @@ public class WebDavWagon
             }
             else
             {
-                throw new ConnectionException( "Connection Exception: " + HttpStatus.getStatusText( he.getReasonCode() ) );
+                throw new ConnectionException( "Connection Exception: " + url + " " + he.getReasonCode() + " "
+                    + HttpStatus.getStatusText( he.getReasonCode() ) );
             }
         }
         catch ( URIException urie )
@@ -292,7 +294,7 @@ public class WebDavWagon
                     if ( !success )
                     {
                         throw new TransferFailedException( "Failed to transfer file: " + dest + ". Return code is: "
-                            + statusCode );
+                            + statusCode + " " + HttpStatus.getStatusText( statusCode ) );
                     }
             }
         }
