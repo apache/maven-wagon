@@ -112,6 +112,7 @@ public class WebDavWagon
         {
             httpURL = urlToHttpURL( url );
 
+            CorrectedWebdavResource.setDefaultAction( CorrectedWebdavResource.NOACTION );
             wdresource = new CorrectedWebdavResource( httpURL );
         }
         catch ( HttpException he )
@@ -225,11 +226,9 @@ public class WebDavWagon
             }
 
             wdresource.setPath( oldpath );
-        }
-        // if dest resource path does not exist, create it
-        catch ( HttpException e )
-        {
-            if ( e.getReasonCode() == HttpStatus.SC_NOT_FOUND )
+
+            // if dest resource path does not exist, create it
+            if ( !wdresource.exists() )
             {
                 // mkcolMethod() cannot create a directory heirarchy at once,
                 // it has to create each directory one at a time
@@ -251,11 +250,6 @@ public class WebDavWagon
                     throw new TransferFailedException( "Failed to create destination WebDAV collection (directory): "
                         + relpath );
                 }
-            }
-            else
-            {
-                throw new TransferFailedException( "Failed to create destination WebDAV collection (directory): "
-                    + relpath );
             }
         }
         catch ( IOException e )
