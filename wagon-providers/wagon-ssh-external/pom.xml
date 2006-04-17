@@ -1,4 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <artifactId>wagon-providers</artifactId>
     <groupId>org.apache.maven.wagon</groupId>
@@ -6,8 +9,11 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>wagon-ssh-external</artifactId>
-  <name>Maven Wagon SSH External Provider</name>
   <version>1.0-alpha-7-SNAPSHOT</version>
+  <name>Maven Wagon SSH External Provider</name>
+  <description>
+    Wagon that gets and puts artifacts using SSH protocol with a preinstalled SSH client
+  </description>
   <build>
     <plugins>
       <plugin>

@@ -1,0 +1,20 @@
+ ------
+ Maven Wagon File
+ ------
+ Carlos Sanchez
+ ------
+ 16 April 2006
+ ------
+
+Maven Wagon File
+
+ This project is an implementation of Wagon provider for File system access.
+ 
+ It enables Maven to use remote repositories stored in local file system and to store Maven sites there also.
+
+
+Features
+
+ * Deploy files and directories to local file system
+ 
+ * Get files from local file system

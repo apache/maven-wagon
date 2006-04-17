@@ -1,0 +1,11 @@
+ ------
+ Maven Wagon API
+ ------
+ Carlos Sanchez
+ ------
+ 16 April 2006
+ ------
+
+Maven Wagon API
+
+ Maven Wagon API that defines the contract between different Wagon implementations

@@ -11,12 +11,14 @@ Maven Wagon
  Maven Wagon is a transport abstraction that is used in Maven's artifact and
  repository handling code. Currently wagon has the following providers:
  
- * File
+ * {{{wagon-file/}File}}
  
- * HTTP
+ * {{{wagon-http/}HTTP}}
  
- * FTP
+ * {{{wagon-ftp/}FTP}}
  
- * SSH/SCP
+ * {{{wagon-ssh/}SSH/SCP}}
  
- * SCM (in progress)
+ * {{{wagon-scm/}SCM}} (in progress)
+
+ * {{{wagon-webdav/}WebDAV}} (in progress)
