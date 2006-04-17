@@ -1,0 +1,19 @@
+ ------
+ Maven Wagon HTTP
+ ------
+ Carlos Sanchez
+ ------
+ 16 April 2006
+ ------
+
+Maven Wagon HTTP
+
+ This project is an implementation of Wagon provider for HTTP access.
+ It uses {{{http://jakarta.apache.org/commons/httpclient/}commons-httpclient}} as lower lever layer.
+ 
+ It enables Maven to use remote repositories stored in HTTP servers. It doesn't allow deployment.
+
+
+Features
+
+ * Get files from HTTP Server
