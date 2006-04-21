@@ -291,8 +291,6 @@ public class SftpWagon
             SftpATTRS attrs;
             try
             {
-                String basedir = repository.getBasedir();
-                
                 channel.cd( repository.getBasedir() );
                 
                 channel.cd( dir );
