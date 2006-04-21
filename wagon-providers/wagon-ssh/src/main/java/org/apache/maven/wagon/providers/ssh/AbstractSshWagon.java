@@ -1,7 +1,7 @@
 package org.apache.maven.wagon.providers.ssh;
 
 /*
- * Copyright 2001-2005 The Apache Software Foundation.
+ * Copyright 2001-2006 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,16 +176,11 @@ public abstract class AbstractSshWagon
                 ( (ProxyHTTP) proxy ).setUserPasswd( proxyInfo.getUserName(), proxyInfo.getPassword() );
             }
 
-            try
-            {
-                proxy.connect( session, host, port );
-            }
-            catch ( Exception e )
-            {
-                fireSessionError( e );
-
-                throw new AuthenticationException( "Cannot connect. Reason: " + e.getMessage(), e );
-            }
+            session.setProxy( proxy );
+        }
+        else
+        {
+            session.setProxy( null );
         }
 
         Properties config = new Properties();
