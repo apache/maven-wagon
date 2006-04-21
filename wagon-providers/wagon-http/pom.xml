@@ -5,11 +5,10 @@
   <parent>
     <artifactId>wagon-providers</artifactId>
     <groupId>org.apache.maven.wagon</groupId>
-    <version>1.0-alpha-7-SNAPSHOT</version>
+    <version>1.0-beta-1-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>wagon-http</artifactId>
-  <version>1.0-alpha-7-SNAPSHOT</version>
   <name>Maven Wagon HTTP Provider</name>
   <description>
     Wagon that gets and puts artifacts through http using Apache commons-httpclient
@@ -20,6 +19,12 @@
       <artifactId>plexus-jetty-httpd</artifactId>
       <version>1.0-beta-1</version>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>plexus-container-default</artifactId>
+          <groupId>plexus</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>commons-logging</groupId>

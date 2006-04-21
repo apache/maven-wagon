@@ -5,11 +5,10 @@
   <parent>
     <artifactId>wagon</artifactId>
     <groupId>org.apache.maven.wagon</groupId>
-    <version>1.0-alpha-7-SNAPSHOT</version>
+    <version>1.0-beta-1-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>wagon-provider-test</artifactId>
-  <version>1.0-alpha-7-SNAPSHOT</version>
   <name>Maven Wagon Provider Test</name>
   <description>Suite of tests for Wagon implementations</description>
   <dependencies>

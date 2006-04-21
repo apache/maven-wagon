@@ -3,13 +3,12 @@
   <parent>
     <artifactId>wagon</artifactId>
     <groupId>org.apache.maven.wagon</groupId>
-    <version>1.0-alpha-7-SNAPSHOT</version>
+    <version>1.0-beta-1-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>wagon-providers</artifactId>
   <packaging>pom</packaging>
   <name>Maven Wagon Providers Parent</name>
-  <version>1.0-alpha-7-SNAPSHOT</version>
   <modules>
     <module>wagon-file</module>
     <module>wagon-ftp</module>
