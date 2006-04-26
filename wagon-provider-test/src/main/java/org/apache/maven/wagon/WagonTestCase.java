@@ -226,7 +226,7 @@ public abstract class WagonTestCase
 
     /**
      * Test that when putting a directory that already exists new files get also copied
-     * @since 1.0-alpha-7
+     * @since 1.0-beta-1
      * @throws Exception
      */
     public void testWagonPutDirectoryWhenDirectoryAlreadyExists()
@@ -326,7 +326,7 @@ public abstract class WagonTestCase
 
     /**
      * Assert that a resource does not exist in the remote wagon system
-     * @since 1.0-alpha-7
+     * @since 1.0-beta-1
      * @param wagon wagon to get the resource from
      * @param resourceName name of the resource
      * @throws IOException if a temp file can't be created
@@ -495,4 +495,5 @@ public abstract class WagonTestCase
 
         return repository;
     }
+    
 }
