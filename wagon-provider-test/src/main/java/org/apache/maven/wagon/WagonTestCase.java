@@ -73,9 +73,20 @@ public abstract class WagonTestCase
     // Methods that should be provided by subclasses for proper testing
     // ----------------------------------------------------------------------
 
+    /**
+     * URL of the repository. For a complete test it should point to a non existing folder so
+     * we also check for the creation of new folders in the remote site.
+     * 
+     * return the URL of the repository as specified by Wagon syntax
+     */
     protected abstract String getTestRepositoryUrl()
         throws IOException;
 
+    /**
+     * Protocol id of the Wagon to use, eg. <code>scp</code>, <code>ftp</code>
+     * 
+     * @return the protocol id
+     */
     protected abstract String getProtocol();
 
     // ----------------------------------------------------------------------
