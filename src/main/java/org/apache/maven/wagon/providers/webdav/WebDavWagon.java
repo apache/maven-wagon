@@ -96,6 +96,7 @@ public class WebDavWagon
 
     /**
      * Opens a connection via web-dav resource
+     * 
      * @throws AuthenticationException 
      * @throws ConnectionException
      */
@@ -152,6 +153,7 @@ public class WebDavWagon
 
     /**
      * Closes the connection
+     * 
      * @throws ConnectionException 
      */
     public void closeConnection()
@@ -176,7 +178,6 @@ public class WebDavWagon
 
     /**
      * Puts a file into the remote repository
-     *
      *
      * @param source the file to transfer
      * @param resourceName the name of the resource
@@ -357,6 +358,8 @@ public class WebDavWagon
     }
 
     /**
+     * Get a file from remote server
+     * 
      * @param resourceName
      * @param destination
      * @param timestamp the timestamp to check against, only downloading if newer. If <code>0</code>, always download
@@ -423,7 +426,7 @@ public class WebDavWagon
                     return false;
 
                 case HttpStatus.SC_FORBIDDEN:
-                    throw new AuthorizationException( "Access denided to: " + url );
+                    throw new AuthorizationException( "Access denied to: " + url );
 
                 case HttpStatus.SC_UNAUTHORIZED:
                     throw new AuthorizationException( "Not authorized." );
@@ -485,5 +488,76 @@ public class WebDavWagon
         {
             return url;
         }
+    }
+    
+    /**
+     * This wagon supports directory copying
+     * 
+     * @return <code>true</code> always
+     */
+    public boolean supportsDirectoryCopy()
+    {
+        return true;
+    }
+    
+    /**
+     * Copy a directory from local system to remote webdav server
+     * 
+     * @param sourceDirectory the local directory
+     * @param destinationDirectory the remote destination
+     * @throws TransferFailedException
+     * @throws ResourceDoesNotExistException
+     * @throws AuthorizationException
+     */
+    public void putDirectory( File sourceDirectory, String destinationDirectory ) 
+    	throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+    	String createPath = repository.getBasedir() + "/" + destinationDirectory;
+    	
+    	
+    	try
+    	{
+    		wdresource.mkcolMethod( createPath );    		
+    	}
+    	catch (IOException e)
+    	{
+    		throw new TransferFailedException( "Failed to create remote directory: " + createPath + " : "
+                + e.getMessage(), e );
+    	}
+    	
+    	try
+    	{
+    		wdresource.setPath( repository.getBasedir() );
+    	}
+    	catch (IOException e)
+    	{
+    		throw new TransferFailedException( "An error occurred while preparing to copy to remote repository: "
+                + e.getMessage(), e );
+    	}
+    	
+    	File [] list_files = sourceDirectory.listFiles();
+
+        for(int i=0; i<list_files.length; i++)
+    	{
+    		if ( list_files[i].isDirectory() )
+    		{
+    			putDirectory( list_files[i], destinationDirectory + "/" + list_files[i].getName() );
+    		}
+    		else
+    		{
+	    		String target = createPath + "/" + list_files[i].getName();
+	    		
+	    		try
+	        	{
+	        		wdresource.putMethod( target, list_files[i] );
+	        	}
+	    		catch( IOException e )
+	    		{
+                    throw new TransferFailedException( "Failed to upload to remote repository: " + target + " : "
+                        + e.getMessage(), e );
+	    		}
+    		}
+    	}
+    	
     }
 }
