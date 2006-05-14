@@ -16,6 +16,7 @@
     <module>wagon-http</module>
     <module>wagon-ssh-external</module>
     <module>wagon-ssh</module>
+    <module>wagon-webdav</module>
   </modules>
   <dependencies>
     <dependency>
