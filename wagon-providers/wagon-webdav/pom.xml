@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>wagon-webdav</artifactId>
-  <version>1.0-alpha-6</version>
+  <version>1.0-alpha-7-SNAPSHOT</version>
   <name>Maven Wagon WebDav Provider</name>
   <description>
     Wagon that gets and puts artifacts through webdav protocol
@@ -43,11 +43,4 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/tags/wagon-webdav-1.0-alpha-6</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/tags/wagon-webdav-1.0-alpha-6</developerConnection>
-    <url>https://svn.apache.org/repos/asf/maven/wagon/tags/wagon-webdav-1.0-alpha-6</url>
-  </scm>
 </project>
