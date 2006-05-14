@@ -7,21 +7,16 @@
   <parent>
     <artifactId>wagon-providers</artifactId>
     <groupId>org.apache.maven.wagon</groupId>
-    <version>1.0-beta-1-SNAPSHOT</version>
+    <version>1.0-alpha-6</version>
     <relativePath>../../wagon/pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>wagon-webdav</artifactId>
+  <version>1.0-alpha-6-SNAPSHOT</version>
   <name>Maven Wagon WebDav Provider</name>
   <description>
     Wagon that gets and puts artifacts through webdav protocol
   </description>
-
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/maven/sandbox/wagon-webdav/</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/sandbox/wagon-webdav/</developerConnection>
-    <url>http://svn.apache.org/viewcvs.cgi/maven/sandbox/wagon-webdav/</url>
-  </scm>
 
   <contributors>
     <contributor>
