@@ -112,34 +112,23 @@ public class WebDavWagon
         try
         {
             httpURL = urlToHttpURL( url );
+            
+            if ( authenticationInfo != null )
+            {
+                String userName = authenticationInfo.getUserName();
+                String password = authenticationInfo.getPassword();
+
+                if ( userName != null && password != null )
+                    httpURL.setUserinfo( userName, password );
+            }
 
             CorrectedWebdavResource.setDefaultAction( CorrectedWebdavResource.NOACTION );
             wdresource = new CorrectedWebdavResource( httpURL );
         }
         catch ( HttpException he )
         {
-            if ( he.getReasonCode() == HttpStatus.SC_UNAUTHORIZED )
-            {
-                try
-                {
-                    httpURL.setUserinfo( authenticationInfo.getUserName(), authenticationInfo.getPassword() );
-
-                    wdresource = new CorrectedWebdavResource( httpURL );
-                }
-                catch ( URIException urie )
-                {
-                    throw new AuthenticationException( "Authentication Exception: " + urie.getReason() );
-                }
-                catch ( IOException ioe )
-                {
-                    throw new ConnectionException( "Connection Exception: " + ioe.getMessage() );
-                }
-            }
-            else
-            {
-                throw new ConnectionException( "Connection Exception: " + url + " " + he.getReasonCode() + " "
-                    + HttpStatus.getStatusText( he.getReasonCode() ) );
-            }
+            throw new ConnectionException( "Connection Exception: " + url + " " + he.getReasonCode() + " "
+                + HttpStatus.getStatusText( he.getReasonCode() ) );
         }
         catch ( URIException urie )
         {
@@ -438,7 +427,7 @@ public class WebDavWagon
                     throw new ResourceDoesNotExistException( "File: " + url + " does not exist" );
 
                 default:
-                    throw new TransferFailedException( "Failed to trasfer file: " + url + ". Return code is: "
+                    throw new TransferFailedException( "Failed to transfer file: " + url + ". Return code is: "
                                                        + statusCode );
             }                
         }
@@ -471,7 +460,7 @@ public class WebDavWagon
                 throw new ResourceDoesNotExistException( "File: " + url + " does not exist" );
 
             default:
-                throw new TransferFailedException( "Failed to trasfer file: " + url + ". Return code is: "
+                throw new TransferFailedException( "Failed to transfer file: " + url + ". Return code is: "
                     + statusCode );
         }
         

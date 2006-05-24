@@ -18,6 +18,8 @@ package org.apache.maven.wagon.providers.webdav;
 
 import java.util.List;
 
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
+
 /**
  * Context
  * 
@@ -26,7 +28,9 @@ import java.util.List;
 public class Context
 {
     private String id;
-    
+
+    private AuthenticationInfo authenticationInfo;
+
     private List servlets;
 
     public String getId()
@@ -34,10 +38,13 @@ public class Context
         return id;
     }
 
+    public AuthenticationInfo getAuthenticationInfo()
+    {
+        return authenticationInfo;
+    }
+
     public List getServlets()
     {
         return servlets;
     }
-    
-    
 }

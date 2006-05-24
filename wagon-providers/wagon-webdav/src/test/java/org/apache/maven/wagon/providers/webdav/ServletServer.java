@@ -21,12 +21,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Startable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.StartingException;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.StoppingException;
+import org.mortbay.http.BasicAuthenticator;
+import org.mortbay.http.HashUserRealm;
+import org.mortbay.http.SecurityConstraint;
 import org.mortbay.http.SocketListener;
+import org.mortbay.http.handler.SecurityHandler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletHttpContext;
@@ -83,6 +88,18 @@ public class ServletServer
     private void initContext( Context wdc, ServletHttpContext context )
         throws ClassNotFoundException, InstantiationException, IllegalAccessException
     {
+        AuthenticationInfo authenticationInfo = wdc.getAuthenticationInfo();
+        if ( authenticationInfo != null )
+        {
+            HashUserRealm userRealm = new HashUserRealm( "basic" );
+            userRealm.put( authenticationInfo.getUserName(), authenticationInfo.getPassword() );
+            context.getHttpServer().addRealm( userRealm );
+
+            context.setAuthenticator( new BasicAuthenticator() );
+            context.addSecurityConstraint( "/*", new SecurityConstraint( "any", SecurityConstraint.ANY_ROLE ) );
+            context.addHandler( new SecurityHandler() );
+        }
+
         Iterator itpaths = wdc.getServlets().iterator();
         while ( itpaths.hasNext() )
         {

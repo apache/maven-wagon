@@ -1,0 +1,37 @@
+<plexus>
+  <components>
+    <component>
+      <role>org.apache.maven.wagon.providers.webdav.ServletServer</role>
+      <implementation>org.apache.maven.wagon.providers.webdav.ServletServer</implementation>
+      <configuration>
+        <port>10007</port>
+        <contexts>
+          <context>
+            <id>/authdav</id>
+            <authenticationInfo>
+            	<userName>userName</userName>
+            	<password>password</password>
+            </authenticationInfo>
+            <servlets>
+              <servlet>
+                <id>LOCALREPO</id>
+                <path>/*</path>
+                <servlet>it.could.webdav.DAVServlet</servlet>
+                <parameters>
+                  <property>
+                    <name>rootPath</name>
+                    <value>${basedir}/target/test-output/authdav-repository</value>
+                  </property>
+                  <property>
+                    <name>xmlOnly</name>
+                    <value>false</value>
+                  </property>
+                </parameters>
+              </servlet>
+            </servlets>
+          </context>
+        </contexts>
+      </configuration>
+    </component>
+  </components>
+</plexus>
