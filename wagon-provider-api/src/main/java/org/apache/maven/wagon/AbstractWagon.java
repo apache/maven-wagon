@@ -233,10 +233,6 @@ public abstract class AbstractWagon
     protected void putTransfer( Resource resource, File source, OutputStream output, boolean closeOutput )
         throws TransferFailedException
     {
-        resource.setContentLength( source.length() );
-
-        resource.setLastModified( source.lastModified() );
-
         firePutStarted( resource, source );
 
         transfer( resource, source, output, closeOutput );
@@ -258,6 +254,10 @@ public abstract class AbstractWagon
     protected void transfer( Resource resource, File source, OutputStream output, boolean closeOutput )
         throws TransferFailedException
     {
+        resource.setContentLength( source.length() );
+
+        resource.setLastModified( source.lastModified() );
+
         InputStream input = null;
 
         try
