@@ -239,6 +239,25 @@ public abstract class AbstractWagon
 
         firePutStarted( resource, source );
 
+        transfer( resource, source, output, closeOutput );
+
+        firePutCompleted( resource, source );
+    }
+
+    /**
+     * Write from {@link File} to {@link OutputStream}
+     * 
+     * @since 1.0-beta-1
+     * 
+     * @param resource resource to transfer
+     * @param source file to read from
+     * @param output output stream
+     * @param closeOutput whether the output stream should be closed or not
+     * @throws TransferFailedException
+     */
+    protected void transfer( Resource resource, File source, OutputStream output, boolean closeOutput )
+        throws TransferFailedException
+    {
         InputStream input = null;
 
         try
@@ -268,15 +287,35 @@ public abstract class AbstractWagon
                 IOUtil.close( output );
             }
         }
-        firePutCompleted( resource, source );
     }
 
+    /**
+     * Write from {@link InputStream} to {@link OutputStream}.
+     * Equivalent to {@link #transfer(Resource, InputStream, OutputStream, int, int)} with a maxSize equal to {@link Integer#MAX_VALUE}
+     * 
+     * @param resource resource to transfer
+     * @param input input stream
+     * @param output output stream
+     * @param requestType one of {@link TransferEvent#REQUEST_GET} or {@link TransferEvent#REQUEST_PUT}
+     * @throws IOException
+     */
     protected void transfer( Resource resource, InputStream input, OutputStream output, int requestType )
         throws IOException
     {
         transfer( resource, input, output, requestType, Integer.MAX_VALUE );
     }
 
+    /**
+     * Write from {@link InputStream} to {@link OutputStream}.
+     * Equivalent to {@link #transfer(Resource, InputStream, OutputStream, int, int)} with a maxSize equal to {@link Integer#MAX_VALUE}
+     * 
+     * @param resource resource to transfer
+     * @param input input stream
+     * @param output output stream
+     * @param requestType one of {@link TransferEvent#REQUEST_GET} or {@link TransferEvent#REQUEST_PUT}
+     * @param maxSize size of the buffer
+     * @throws IOException
+     */
     protected void transfer( Resource resource, InputStream input, OutputStream output, int requestType, int maxSize )
         throws IOException
     {
