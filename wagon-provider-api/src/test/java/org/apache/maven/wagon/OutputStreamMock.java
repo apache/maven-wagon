@@ -1,7 +1,7 @@
 package org.apache.maven.wagon;
 
 /*
- * Copyright 2001-2005 The Apache Software Foundation.
+ * Copyright 2001-2006 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,11 @@ package org.apache.maven.wagon;
 import java.io.IOException;
 import java.io.OutputStream;
 
-
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  */
-public class MockOutputStream
+public class OutputStreamMock
     extends OutputStream
 {
 

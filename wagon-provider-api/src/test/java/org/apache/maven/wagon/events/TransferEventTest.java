@@ -1,7 +1,7 @@
 package org.apache.maven.wagon.events;
 
 /*
- * Copyright 2001-2005 The Apache Software Foundation.
+ * Copyright 2001-2006 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.apache.maven.wagon.events;
 
 import junit.framework.TestCase;
 import org.apache.maven.wagon.ConnectionException;
-import org.apache.maven.wagon.MockWagon;
+import org.apache.maven.wagon.WagonMock;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.repository.Repository;
@@ -55,7 +55,7 @@ public class TransferEventTest
         throws ConnectionException, AuthenticationException
     {
 
-        final Wagon wagon = new MockWagon();
+        final Wagon wagon = new WagonMock();
 
         final Repository repo = new Repository();
 

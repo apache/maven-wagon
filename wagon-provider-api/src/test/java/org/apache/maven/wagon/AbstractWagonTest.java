@@ -1,7 +1,7 @@
 package org.apache.maven.wagon;
 
 /*
- * Copyright 2001-2005 The Apache Software Foundation.
+ * Copyright 2001-2006 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.apache.maven.wagon;
 import junit.framework.TestCase;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.apache.maven.wagon.events.MockSessionListener;
-import org.apache.maven.wagon.events.MockTransferListener;
+import org.apache.maven.wagon.events.SessionListenerMock;
+import org.apache.maven.wagon.events.TransferListenerMock;
 import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.plexus.util.IOUtil;
 
@@ -37,7 +37,7 @@ public class AbstractWagonTest
 {
     private String basedir;
 
-    private MockWagon wagon = null;
+    private WagonMock wagon = null;
 
     private File destination;
 
@@ -45,9 +45,9 @@ public class AbstractWagonTest
 
     private String artifact;
 
-    private MockSessionListener sessionListener = null;
+    private SessionListenerMock sessionListener = null;
 
-    private MockTransferListener transferListener = null;
+    private TransferListenerMock transferListener = null;
 
     protected void setUp()
         throws Exception
@@ -60,13 +60,13 @@ public class AbstractWagonTest
 
         source = new File( basedir, "pom.xml" );
 
-        wagon = new MockWagon();
+        wagon = new WagonMock();
 
-        sessionListener = new MockSessionListener();
+        sessionListener = new SessionListenerMock();
 
         wagon.addSessionListener( sessionListener );
 
-        transferListener = new MockTransferListener();
+        transferListener = new TransferListenerMock();
 
         wagon.addTransferListener( transferListener );
 
@@ -151,13 +151,13 @@ public class AbstractWagonTest
     public void testGetError()
         throws Exception
     {
-        MockTransferListener transferListener = new MockTransferListener();
+        TransferListenerMock transferListener = new TransferListenerMock();
 
         try
         {
             Repository repository = new Repository();
 
-            MockWagon wagon = new MockWagon( true );
+            WagonMock wagon = new WagonMock( true );
 
             wagon.addTransferListener( transferListener );
 
@@ -241,7 +241,7 @@ public class AbstractWagonTest
 
         IOUtil.close( (OutputStream) null );
 
-        MockInputStream inputStream = new MockInputStream();
+        InputStreamMock inputStream = new InputStreamMock();
 
         assertFalse( inputStream.isClosed() );
 
@@ -249,7 +249,7 @@ public class AbstractWagonTest
 
         assertTrue( inputStream.isClosed() );
 
-        MockOutputStream outputStream = new MockOutputStream();
+        OutputStreamMock outputStream = new OutputStreamMock();
 
         assertFalse( outputStream.isClosed() );
 

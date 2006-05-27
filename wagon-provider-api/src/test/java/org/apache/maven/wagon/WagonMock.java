@@ -1,7 +1,7 @@
 package org.apache.maven.wagon;
 
 /*
- * Copyright 2001-2005 The Apache Software Foundation.
+ * Copyright 2001-2006 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,16 +28,16 @@ import java.io.OutputStream;
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
  * @version $Id$
  */
-public class MockWagon
+public class WagonMock
     extends StreamWagon
 {
     private boolean errorInputStream;
 
-    public MockWagon()
+    public WagonMock()
     {
     }
 
-    public MockWagon( boolean errorInputStream )
+    public WagonMock( boolean errorInputStream )
     {
         this.errorInputStream = errorInputStream;
     }
@@ -51,7 +51,7 @@ public class MockWagon
 
         if ( errorInputStream )
         {
-            MockInputStream mockInputStream = new MockInputStream();
+            InputStreamMock mockInputStream = new InputStreamMock();
 
             mockInputStream.setForcedError( true );
 
@@ -77,7 +77,7 @@ public class MockWagon
 
         if ( errorInputStream )
         {
-            MockOutputStream mockOutputStream = new MockOutputStream();
+            OutputStreamMock mockOutputStream = new OutputStreamMock();
 
             mockOutputStream.setForcedError( true );
 

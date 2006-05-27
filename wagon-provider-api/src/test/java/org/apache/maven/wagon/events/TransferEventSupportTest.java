@@ -1,7 +1,7 @@
 package org.apache.maven.wagon.events;
 
 /*
- * Copyright 2001-2005 The Apache Software Foundation.
+ * Copyright 2001-2006 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package org.apache.maven.wagon.events;
  */
 
 import junit.framework.TestCase;
-import org.apache.maven.wagon.MockWagon;
+import org.apache.maven.wagon.WagonMock;
 import org.apache.maven.wagon.Wagon;
 
 /**
@@ -45,11 +45,11 @@ public class TransferEventSupportTest
 
     public void testTransferListenerRegistration()
     {
-        final MockTransferListener mock1 = new MockTransferListener();
+        final TransferListenerMock mock1 = new TransferListenerMock();
         eventSupport.addTransferListener( mock1 );
 
         assertTrue( eventSupport.hasTransferListener( mock1 ) );
-        final MockTransferListener mock2 = new MockTransferListener();
+        final TransferListenerMock mock2 = new TransferListenerMock();
 
         assertFalse( eventSupport.hasTransferListener( mock2 ) );
 
@@ -69,13 +69,13 @@ public class TransferEventSupportTest
 
     public void testFireTransferStarted()
     {
-        final MockTransferListener mock1 = new MockTransferListener();
+        final TransferListenerMock mock1 = new TransferListenerMock();
         eventSupport.addTransferListener( mock1 );
 
-        final MockTransferListener mock2 = new MockTransferListener();
+        final TransferListenerMock mock2 = new TransferListenerMock();
         eventSupport.addTransferListener( mock2 );
 
-        final Wagon wagon = new MockWagon();
+        final Wagon wagon = new WagonMock();
         final TransferEvent event = getEvent( wagon );
 
         eventSupport.fireTransferStarted( event );
@@ -89,15 +89,15 @@ public class TransferEventSupportTest
 
     public void testFireTransferProgress()
     {
-        final MockTransferListener mock1 = new MockTransferListener();
+        final TransferListenerMock mock1 = new TransferListenerMock();
 
         eventSupport.addTransferListener( mock1 );
 
-        final MockTransferListener mock2 = new MockTransferListener();
+        final TransferListenerMock mock2 = new TransferListenerMock();
 
         eventSupport.addTransferListener( mock2 );
 
-        final Wagon wagon = new MockWagon();
+        final Wagon wagon = new WagonMock();
 
         final TransferEvent event = getEvent( wagon );
 
@@ -115,15 +115,15 @@ public class TransferEventSupportTest
 
     public void testFireTransferCompleted()
     {
-        final MockTransferListener mock1 = new MockTransferListener();
+        final TransferListenerMock mock1 = new TransferListenerMock();
 
         eventSupport.addTransferListener( mock1 );
 
-        final MockTransferListener mock2 = new MockTransferListener();
+        final TransferListenerMock mock2 = new TransferListenerMock();
 
         eventSupport.addTransferListener( mock2 );
 
-        final Wagon wagon = new MockWagon();
+        final Wagon wagon = new WagonMock();
 
         final TransferEvent event = getEvent( wagon );
 
@@ -141,15 +141,15 @@ public class TransferEventSupportTest
 
     public void testFireTransferError()
     {
-        final MockTransferListener mock1 = new MockTransferListener();
+        final TransferListenerMock mock1 = new TransferListenerMock();
 
         eventSupport.addTransferListener( mock1 );
 
-        final MockTransferListener mock2 = new MockTransferListener();
+        final TransferListenerMock mock2 = new TransferListenerMock();
 
         eventSupport.addTransferListener( mock2 );
 
-        final Wagon wagon = new MockWagon();
+        final Wagon wagon = new WagonMock();
 
         final TransferEvent event = getEvent( wagon );
 
@@ -167,11 +167,11 @@ public class TransferEventSupportTest
 
     public void testFireDebug()
     {
-        final MockTransferListener mock1 = new MockTransferListener();
+        final TransferListenerMock mock1 = new TransferListenerMock();
 
         eventSupport.addTransferListener( mock1 );
 
-        final MockTransferListener mock2 = new MockTransferListener();
+        final TransferListenerMock mock2 = new TransferListenerMock();
 
         eventSupport.addTransferListener( mock2 );
 

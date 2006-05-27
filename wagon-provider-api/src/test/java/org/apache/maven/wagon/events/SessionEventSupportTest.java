@@ -1,7 +1,7 @@
 package org.apache.maven.wagon.events;
 
 /*
- * Copyright 2001-2005 The Apache Software Foundation.
+ * Copyright 2001-2006 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package org.apache.maven.wagon.events;
  */
 
 import junit.framework.TestCase;
-import org.apache.maven.wagon.MockWagon;
+import org.apache.maven.wagon.WagonMock;
 import org.apache.maven.wagon.Wagon;
 
 /**
@@ -44,13 +44,13 @@ public class SessionEventSupportTest
 
     public void testSessionListenerRegistration()
     {
-        final MockSessionListener mock1 = new MockSessionListener();
+        final SessionListenerMock mock1 = new SessionListenerMock();
 
         eventSupport.addSessionListener( mock1 );
 
         assertTrue( eventSupport.hasSessionListener( mock1 ) );
 
-        final MockSessionListener mock2 = new MockSessionListener();
+        final SessionListenerMock mock2 = new SessionListenerMock();
 
         assertFalse( eventSupport.hasSessionListener( mock2 ) );
 
@@ -74,15 +74,15 @@ public class SessionEventSupportTest
     public void testFireSessionDisconnected()
     {
 
-        final MockSessionListener mock1 = new MockSessionListener();
+        final SessionListenerMock mock1 = new SessionListenerMock();
 
         eventSupport.addSessionListener( mock1 );
 
-        final MockSessionListener mock2 = new MockSessionListener();
+        final SessionListenerMock mock2 = new SessionListenerMock();
 
         eventSupport.addSessionListener( mock2 );
 
-        final Wagon wagon = new MockWagon();
+        final Wagon wagon = new WagonMock();
 
         final SessionEvent event = new SessionEvent( wagon, 1 );
 
@@ -100,15 +100,15 @@ public class SessionEventSupportTest
 
     public void testFireSessionDisconneting()
     {
-        final MockSessionListener mock1 = new MockSessionListener();
+        final SessionListenerMock mock1 = new SessionListenerMock();
 
         eventSupport.addSessionListener( mock1 );
 
-        final MockSessionListener mock2 = new MockSessionListener();
+        final SessionListenerMock mock2 = new SessionListenerMock();
 
         eventSupport.addSessionListener( mock2 );
 
-        final Wagon wagon = new MockWagon();
+        final Wagon wagon = new WagonMock();
 
         final SessionEvent event = new SessionEvent( wagon, 1 );
 
@@ -125,15 +125,15 @@ public class SessionEventSupportTest
 
     public void testFireSessionLoggedIn()
     {
-        final MockSessionListener mock1 = new MockSessionListener();
+        final SessionListenerMock mock1 = new SessionListenerMock();
 
         eventSupport.addSessionListener( mock1 );
 
-        final MockSessionListener mock2 = new MockSessionListener();
+        final SessionListenerMock mock2 = new SessionListenerMock();
 
         eventSupport.addSessionListener( mock2 );
 
-        final Wagon wagon = new MockWagon();
+        final Wagon wagon = new WagonMock();
 
         final SessionEvent event = new SessionEvent( wagon, 1 );
 
@@ -151,15 +151,15 @@ public class SessionEventSupportTest
 
     public void testFireSessionLoggedOff()
     {
-        final MockSessionListener mock1 = new MockSessionListener();
+        final SessionListenerMock mock1 = new SessionListenerMock();
 
         eventSupport.addSessionListener( mock1 );
 
-        final MockSessionListener mock2 = new MockSessionListener();
+        final SessionListenerMock mock2 = new SessionListenerMock();
 
         eventSupport.addSessionListener( mock2 );
 
-        final Wagon wagon = new MockWagon();
+        final Wagon wagon = new WagonMock();
 
         final SessionEvent event = new SessionEvent( wagon, 1 );
 
@@ -177,15 +177,15 @@ public class SessionEventSupportTest
     public void testFireSessionOpened()
     {
 
-        final MockSessionListener mock1 = new MockSessionListener();
+        final SessionListenerMock mock1 = new SessionListenerMock();
 
         eventSupport.addSessionListener( mock1 );
 
-        final MockSessionListener mock2 = new MockSessionListener();
+        final SessionListenerMock mock2 = new SessionListenerMock();
 
         eventSupport.addSessionListener( mock2 );
 
-        final Wagon wagon = new MockWagon();
+        final Wagon wagon = new WagonMock();
 
         final SessionEvent event = new SessionEvent( wagon, 1 );
 
@@ -204,15 +204,15 @@ public class SessionEventSupportTest
     public void testFireSessionOpenning()
     {
 
-        final MockSessionListener mock1 = new MockSessionListener();
+        final SessionListenerMock mock1 = new SessionListenerMock();
 
         eventSupport.addSessionListener( mock1 );
 
-        final MockSessionListener mock2 = new MockSessionListener();
+        final SessionListenerMock mock2 = new SessionListenerMock();
 
         eventSupport.addSessionListener( mock2 );
 
-        final Wagon wagon = new MockWagon();
+        final Wagon wagon = new WagonMock();
 
         final SessionEvent event = new SessionEvent( wagon, 1 );
 
@@ -230,15 +230,15 @@ public class SessionEventSupportTest
 
     public void testFireSessionRefused()
     {
-        final MockSessionListener mock1 = new MockSessionListener();
+        final SessionListenerMock mock1 = new SessionListenerMock();
 
         eventSupport.addSessionListener( mock1 );
 
-        final MockSessionListener mock2 = new MockSessionListener();
+        final SessionListenerMock mock2 = new SessionListenerMock();
 
         eventSupport.addSessionListener( mock2 );
 
-        final Wagon wagon = new MockWagon();
+        final Wagon wagon = new WagonMock();
 
         final SessionEvent event = new SessionEvent( wagon, 1 );
 
@@ -255,11 +255,11 @@ public class SessionEventSupportTest
 
     public void testFireDebug()
     {
-        final MockSessionListener mock1 = new MockSessionListener();
+        final SessionListenerMock mock1 = new SessionListenerMock();
 
         eventSupport.addSessionListener( mock1 );
 
-        final MockSessionListener mock2 = new MockSessionListener();
+        final SessionListenerMock mock2 = new SessionListenerMock();
 
         eventSupport.addSessionListener( mock2 );
 
