@@ -33,6 +33,8 @@ import java.util.Properties;
 public class Repository
     implements Serializable
 {
+    private static final long serialVersionUID = 1312227676322136247L;
+
     private String id;
 
     private String name;
@@ -248,5 +250,10 @@ public class Repository
     {
         return password;
     }
-}
 
+    public void setProtocol( String protocol )
+    {
+        this.protocol = protocol;
+    }
+
+}
