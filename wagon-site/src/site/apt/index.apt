@@ -19,6 +19,6 @@ Maven Wagon
  
  * {{{wagon-ssh/}SSH/SCP}}
  
- * {{{wagon-scm/}SCM}} (in progress)
+ * {{{wagon-webdav/}WebDAV}}
 
- * {{{wagon-webdav/}WebDAV}} (in progress)
+ * {{{wagon-scm/}SCM}} (in progress)
