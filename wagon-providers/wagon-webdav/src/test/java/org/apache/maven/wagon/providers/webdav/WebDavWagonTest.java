@@ -46,6 +46,11 @@ public class WebDavWagonTest
     protected void setupWagonTestingFixtures()
         throws Exception
     {
+        if ( System.getProperty( "basedir" ) == null )
+        {
+            fail( "System property 'basedir' must be set for the web server to run properly" );
+        }
+
         File file = FileTestUtils.createUniqueFile( "dav-repository", "test-resource" );
 
         file.delete();
