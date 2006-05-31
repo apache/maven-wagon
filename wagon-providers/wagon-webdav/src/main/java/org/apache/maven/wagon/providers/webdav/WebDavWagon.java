@@ -220,7 +220,7 @@ public class WebDavWagon
             // if dest resource path does not exist, create it
             if ( !wdresource.exists() )
             {
-                // mkcolMethod() cannot create a directory heirarchy at once,
+                // mkcolMethod() cannot create a directory hierarchy at once,
                 // it has to create each directory one at a time
                 try
                 {
