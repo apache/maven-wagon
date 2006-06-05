@@ -27,4 +27,11 @@
     <url>http://svn.apache.org/viewcvs.cgi/maven/wagon/trunk/</url>
   </scm>
 
+  <distributionManagement>
+    <site>
+      <id>website</id>
+      <url>scp://minotaur.apache.org/www/maven.apache.org/wagon/</url>
+    </site>
+  </distributionManagement>
+
 </project>

@@ -1,0 +1,21 @@
+ ------
+ Maven Wagon HTTP
+ ------
+ Carlos Sanchez
+ ------
+ 04 June 2006
+ ------
+
+Maven Wagon FTP
+
+ This project is an implementation of Wagon provider for FTP access.
+ It uses {{{http://jakarta.apache.org/commons/net/}commons-net}} as lower level layer.
+
+ It enables Maven to use remote repositories stored in FTP servers. It doesn't allow deployment of directories.
+
+
+Features
+
+ * Get files from FTP Server
+
+ * Deploy files to FTP server
