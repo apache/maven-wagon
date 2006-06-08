@@ -13,6 +13,12 @@
   <description>
     Wagon that gets and puts artifacts using SSH protocol with a preinstalled SSH client
   </description>
+
+  <issueManagement>
+    <system>jira</system>
+    <url>http://jira.codehaus.org/browse/WAGONSSH</url>
+  </issueManagement>
+
   <build>
     <plugins>
       <plugin>

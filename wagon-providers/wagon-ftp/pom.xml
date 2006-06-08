@@ -13,6 +13,12 @@
   <description>
     Wagon that gets and puts artifacts from and to remote server using FTP protocol
   </description>
+
+  <issueManagement>
+    <system>jira</system>
+    <url>http://jira.codehaus.org/browse/WAGONFTP</url>
+  </issueManagement>
+
   <dependencies>
     <dependency>
       <groupId>commons-net</groupId>
