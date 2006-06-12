@@ -128,7 +128,7 @@ public class WebDavWagon
         catch ( HttpException he )
         {
             throw new ConnectionException( "Connection Exception: " + url + " " + he.getReasonCode() + " "
-                + HttpStatus.getStatusText( he.getReasonCode() ) );
+                + HttpStatus.getStatusText( he.getReasonCode() ), he );
         }
         catch ( URIException urie )
         {
@@ -157,7 +157,7 @@ public class WebDavWagon
         }
         catch ( IOException ioe )
         {
-            throw new ConnectionException( "Connection Exception: " + ioe.getMessage() );
+            throw new ConnectionException( "Connection Exception: " + ioe.getMessage(), ioe );
         }
         finally
         {
@@ -238,13 +238,13 @@ public class WebDavWagon
                 catch ( IOException ioe )
                 {
                     throw new TransferFailedException( "Failed to create destination WebDAV collection (directory): "
-                        + relpath );
+                        + relpath, ioe );
                 }
             }
         }
         catch ( IOException e )
         {
-            throw new TransferFailedException( "Failed to create destination WebDAV collection (directory): " + relpath );
+            throw new TransferFailedException( "Failed to create destination WebDAV collection (directory): " + relpath, e );
         }
 
         try
@@ -428,7 +428,7 @@ public class WebDavWagon
 
                 default:
                     throw new TransferFailedException( "Failed to transfer file: " + url + ". Return code is: "
-                                                       + statusCode );
+                                                       + statusCode, e );
             }                
         }
         finally
