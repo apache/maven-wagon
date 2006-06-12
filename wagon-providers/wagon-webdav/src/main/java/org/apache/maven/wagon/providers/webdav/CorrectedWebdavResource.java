@@ -123,11 +123,11 @@ public class CorrectedWebdavResource
      * Execute the PUT method for the given path.
      *
      * @param path the server relative path to put the data
-     * @param is The input stream.
+     * @param inputStream The input stream.
      * @throws IOException
      * @return true if the method is succeeded.
      */
-    public boolean putMethod( String path, InputStream is, int contentLength )
+    public boolean putMethod( String path, InputStream inputStream, int contentLength )
         throws IOException
     {
 
@@ -139,7 +139,7 @@ public class CorrectedWebdavResource
             method.setRequestHeader( "Content-Type", getGetContentType() );
         }
         method.setRequestContentLength( contentLength );
-        method.setRequestBody( is );
+        method.setRequestBody( inputStream );
         generateTransactionHeader( method );
         generateAdditionalHeaders( method );
         int statusCode = client.executeMethod( method );

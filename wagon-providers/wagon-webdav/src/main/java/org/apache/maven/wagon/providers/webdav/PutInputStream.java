@@ -51,30 +51,30 @@ public class PutInputStream
         event.setLocalFile( file );
     }
 
-    public int read( byte b[] )
+    public int read( byte buffer[] )
         throws IOException
     {
-        return read( b, 0, b.length );
+        return read( buffer, 0, buffer.length );
     }
 
     public int read()
         throws IOException
     {
-        byte b[] = new byte[1];
+        byte buffer[] = new byte[1];
 
-        return read( b );
+        return read( buffer );
     }
 
-    public int read( byte b[], int off, int len )
+    public int read( byte buffer[], int offset, int length )
         throws IOException
     {
-        int retValue = super.read( b, off, len );
+        int retValue = super.read( buffer, offset, length );
 
         if ( retValue > 0 )
         {
             event.setTimestamp( System.currentTimeMillis() );
 
-            eventSupport.fireTransferProgress( event, b, retValue );
+            eventSupport.fireTransferProgress( event, buffer, retValue );
         }
         return retValue;
     }

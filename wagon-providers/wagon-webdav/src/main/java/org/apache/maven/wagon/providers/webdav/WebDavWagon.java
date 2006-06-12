@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -57,18 +58,23 @@ import org.codehaus.plexus.util.StringUtils;
  * 
  * @author <a href="mailto:hisidro@exist.com">Henry Isidro</a>
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
+ * @author <a href="mailto:carlos@apache.org">Carlos Sanchez</a>
  */
 public class WebDavWagon
     extends AbstractWagon
 {
-    private static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone( "GMT" );
-
-    private CorrectedWebdavResource wdresource;
+    private static final TimeZone TIMESTAMP_TIME_ZONE = TimeZone.getTimeZone( "GMT" );
 
     private static String wagonVersion;
 
+    private DateFormat dateFormat = new SimpleDateFormat( "EEE, dd-MMM-yy HH:mm:ss zzz", Locale.US );
+
+    private CorrectedWebdavResource webdavResource;
+
     public WebDavWagon()
     {
+        dateFormat.setTimeZone( TIMESTAMP_TIME_ZONE );
+
         if ( wagonVersion == null )
         {
             URL pomUrl = this.getClass()
@@ -125,7 +131,7 @@ public class WebDavWagon
             }
 
             CorrectedWebdavResource.setDefaultAction( CorrectedWebdavResource.NOACTION );
-            wdresource = new CorrectedWebdavResource( httpURL );
+            webdavResource = new CorrectedWebdavResource( httpURL );
         }
         catch ( HttpException he )
         {
@@ -152,9 +158,9 @@ public class WebDavWagon
     {
         try
         {
-            if ( wdresource != null )
+            if ( webdavResource != null )
             {
-                wdresource.close();
+                webdavResource.close();
             }
         }
         catch ( IOException ioe )
@@ -163,7 +169,7 @@ public class WebDavWagon
         }
         finally
         {
-            wdresource = null;
+            webdavResource = null;
         }
     }
 
@@ -200,7 +206,7 @@ public class WebDavWagon
         }
 
         firePutInitiated( resource, source );
-        String oldpath = wdresource.getPath();
+        String oldpath = webdavResource.getPath();
 
         String relpath = getPath( basedir, dir );
 
@@ -208,18 +214,18 @@ public class WebDavWagon
         {
             // Test if dest resource path exist.
             String cdpath = checkUri( relpath + "/" );
-            wdresource.setPath( cdpath );
+            webdavResource.setPath( cdpath );
 
-            if ( wdresource.exists() && !wdresource.isCollection() )
+            if ( webdavResource.exists() && !webdavResource.isCollection() )
             {
                 throw new TransferFailedException(
                     "Destination path exists and is not a WebDAV collection (directory): " + cdpath );
             }
 
-            wdresource.setPath( oldpath );
+            webdavResource.setPath( oldpath );
 
             // if dest resource path does not exist, create it
-            if ( !wdresource.exists() )
+            if ( !webdavResource.exists() )
             {
                 // mkcolMethod() cannot create a directory hierarchy at once,
                 // it has to create each directory one at a time
@@ -232,9 +238,9 @@ public class WebDavWagon
                     for ( int count = 1; count < dirs.length; count++ )
                     {
                         createDir = createDir + "/" + dirs[count];
-                        wdresource.mkcolMethod( createDir );
+                        webdavResource.mkcolMethod( createDir );
                     }
-                    wdresource.setPath( oldpath );
+                    webdavResource.setPath( oldpath );
                 }
                 catch ( IOException ioe )
                 {
@@ -255,8 +261,8 @@ public class WebDavWagon
             firePutStarted( resource, source );
 
             InputStream is = new PutInputStream( source, resource, this, getTransferEventSupport() );
-            boolean success = wdresource.putMethod( dest, is, (int) source.length() );
-            int statusCode = wdresource.getStatusCode();
+            boolean success = webdavResource.putMethod( dest, is, (int) source.length() );
+            int statusCode = webdavResource.getStatusCode();
             
             switch ( statusCode )
             {
@@ -329,14 +335,14 @@ public class WebDavWagon
         throws IOException
     {
 
-        if ( wdresource == null )
+        if ( webdavResource == null )
         {
             throw new IOException( "Not connected yet." );
         }
 
         if ( uri == null )
         {
-            uri = wdresource.getPath();
+            uri = webdavResource.getPath();
         }
 
         return FileUtils.normalize( uri );
@@ -375,26 +381,24 @@ public class WebDavWagon
 
         String url = getRepository().getUrl() + "/" + resourceName;
 
-        wdresource.addRequestHeader( "X-wagon-provider", "wagon-webdav" );
-        wdresource.addRequestHeader( "X-wagon-version", wagonVersion );
+        webdavResource.addRequestHeader( "X-wagon-provider", "wagon-webdav" );
+        webdavResource.addRequestHeader( "X-wagon-version", wagonVersion );
 
-        wdresource.addRequestHeader( "Cache-control", "no-cache" );
-        wdresource.addRequestHeader( "Cache-store", "no-store" );
-        wdresource.addRequestHeader( "Pragma", "no-cache" );
-        wdresource.addRequestHeader( "Expires", "0" );
+        webdavResource.addRequestHeader( "Cache-control", "no-cache" );
+        webdavResource.addRequestHeader( "Cache-store", "no-store" );
+        webdavResource.addRequestHeader( "Pragma", "no-cache" );
+        webdavResource.addRequestHeader( "Expires", "0" );
 
         if ( timestamp > 0 )
         {
-            SimpleDateFormat fmt = new SimpleDateFormat( "EEE, dd-MMM-yy HH:mm:ss zzz", Locale.US );
-            fmt.setTimeZone( GMT_TIME_ZONE );
-            wdresource.addRequestHeader( "If-Modified-Since", fmt.format( new Date( timestamp ) ) );
+            webdavResource.addRequestHeader( "If-Modified-Since", dateFormat.format( new Date( timestamp ) ) );
         }
 
         InputStream is = null;
         OutputStream output = new LazyFileOutputStream( destination ); 
         try
         {
-            is = wdresource.getMethodData( url );
+            is = webdavResource.getMethodData( url );
             getTransfer( resource, destination, is );
         }
         catch ( HttpException e )
@@ -417,7 +421,7 @@ public class WebDavWagon
                 }
             }
 
-            int statusCode = wdresource.getStatusCode();
+            int statusCode = webdavResource.getStatusCode();
             switch ( statusCode )
             {
                 case HttpStatus.SC_NOT_MODIFIED:
@@ -446,7 +450,7 @@ public class WebDavWagon
             IOUtil.close( output );
         }
 
-        int statusCode = wdresource.getStatusCode();
+        int statusCode = webdavResource.getStatusCode();
 
         switch ( statusCode )
         {
@@ -515,7 +519,7 @@ public class WebDavWagon
 
         try
         {
-            wdresource.mkcolMethod( createPath );
+            webdavResource.mkcolMethod( createPath );
         }
         catch ( IOException e )
         {
@@ -525,7 +529,7 @@ public class WebDavWagon
 
         try
         {
-            wdresource.setPath( repository.getBasedir() );
+            webdavResource.setPath( repository.getBasedir() );
         }
         catch ( IOException e )
         {
@@ -547,7 +551,7 @@ public class WebDavWagon
 
                 try
                 {
-                    wdresource.putMethod( target, listFiles[i] );
+                    webdavResource.putMethod( target, listFiles[i] );
                 }
                 catch ( IOException e )
                 {
