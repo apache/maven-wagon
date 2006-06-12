@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.HttpURL;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
@@ -44,12 +44,22 @@ public class CorrectedWebdavResource
     /**
      * Map of additional headers
      */
-    protected Map headers = new HashMap();
+    private Map headers = new HashMap();
 
     public CorrectedWebdavResource( HttpURL url )
-        throws HttpException, IOException
+        throws IOException
     {
         super( url );
+    }
+
+    public void setHeaders( Map headers )
+    {
+        this.headers = headers;
+    }
+
+    public Map getHeaders()
+    {
+        return headers;
     }
 
     /**
@@ -58,10 +68,11 @@ public class CorrectedWebdavResource
      */
     protected void generateAdditionalHeaders( HttpMethod method )
     {
-        for ( Iterator iterator = headers.keySet().iterator(); iterator.hasNext(); )
+        Iterator iterator = getHeaders().keySet().iterator();
+        while ( iterator.hasNext() )
         {
             String header = (String) iterator.next();
-            method.setRequestHeader( header, (String) headers.get( header ) );
+            method.setRequestHeader( header, (String) getHeaders().get( header ) );
         }
     }
 
@@ -69,12 +80,11 @@ public class CorrectedWebdavResource
      * Get InputStream for the GET method for the given path.
      *
      * @param path the server relative path of the resource to get
+     * @throws IOException
      * @return InputStream
-     * @exception HttpException
-     * @exception IOException
      */
     public InputStream getMethodData( String path )
-        throws HttpException, IOException
+        throws IOException
     {
 
         setClient();
@@ -88,10 +98,14 @@ public class CorrectedWebdavResource
         int statusCode = method.getStatusLine().getStatusCode();
         setStatusCode( statusCode );
 
-        if ( statusCode >= 200 && statusCode < 300 )
+        if ( isHttpSuccess( statusCode ) )
+        {
             return method.getResponseBodyAsStream();
+        }
         else
+        {
             throw new IOException( "Couldn't get file" );
+        }
     }
 
     /**
@@ -102,7 +116,7 @@ public class CorrectedWebdavResource
      */
     public void addRequestHeader( String header, String value )
     {
-        headers.put( header, value );
+        getHeaders().put( header, value );
     }
 
     /**
@@ -110,19 +124,20 @@ public class CorrectedWebdavResource
      *
      * @param path the server relative path to put the data
      * @param is The input stream.
+     * @throws IOException
      * @return true if the method is succeeded.
-     * @exception HttpException
-     * @exception IOException
      */
     public boolean putMethod( String path, InputStream is, int contentLength )
-        throws HttpException, IOException
+        throws IOException
     {
 
         setClient();
         PutMethod method = new PutMethod( URIUtil.encodePathQuery( path ) );
         generateIfHeader( method );
         if ( getGetContentType() != null && !getGetContentType().equals( "" ) )
+        {
             method.setRequestHeader( "Content-Type", getGetContentType() );
+        }
         method.setRequestContentLength( contentLength );
         method.setRequestBody( is );
         generateTransactionHeader( method );
@@ -130,7 +145,17 @@ public class CorrectedWebdavResource
         int statusCode = client.executeMethod( method );
 
         setStatusCode( statusCode );
-        return ( statusCode >= 200 && statusCode < 300 ) ? true : false;
+        return isHttpSuccess( statusCode );
+    }
+
+    /**
+     * Check if the http status code passed as argument is a success 
+     * @param statusCode
+     * @return true if code represents a HTTP success
+     */
+    private boolean isHttpSuccess( int statusCode )
+    {
+        return ( statusCode >= HttpStatus.SC_OK && statusCode < HttpStatus.SC_MULTIPLE_CHOICES );
     }
 
 }

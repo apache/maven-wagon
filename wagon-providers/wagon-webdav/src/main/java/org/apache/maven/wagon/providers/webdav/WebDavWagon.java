@@ -65,17 +65,17 @@ public class WebDavWagon
 
     private CorrectedWebdavResource wdresource;
 
-    private static String WAGON_VERSION;
+    private static String wagonVersion;
 
     public WebDavWagon()
     {
-        if ( WAGON_VERSION == null )
+        if ( wagonVersion == null )
         {
             URL pomUrl = this.getClass()
                 .getResource( "/META-INF/maven/org.apache.maven.wagon/wagon-webdav/pom.properties" );
             if ( pomUrl == null )
             {
-                WAGON_VERSION = "";
+                wagonVersion = "";
             }
             else
             {
@@ -83,12 +83,12 @@ public class WebDavWagon
                 try
                 {
                     props.load( pomUrl.openStream() );
-                    WAGON_VERSION = props.getProperty( "version" );
-                    System.out.println( "WAGON_VERSION: " + WAGON_VERSION );
+                    wagonVersion = props.getProperty( "version" );
+                    System.out.println( "WAGON_VERSION: " + wagonVersion );
                 }
                 catch ( IOException e )
                 {
-                    WAGON_VERSION = "";
+                    wagonVersion = "";
                 }
             }
         }
@@ -119,7 +119,9 @@ public class WebDavWagon
                 String password = authenticationInfo.getPassword();
 
                 if ( userName != null && password != null )
+                {
                     httpURL.setUserinfo( userName, password );
+                }
             }
 
             CorrectedWebdavResource.setDefaultAction( CorrectedWebdavResource.NOACTION );
@@ -211,8 +213,7 @@ public class WebDavWagon
             if ( wdresource.exists() && !wdresource.isCollection() )
             {
                 throw new TransferFailedException(
-                                                   "Destination path exists and is not a WebDAV collection (directory): "
-                                                       + cdpath );
+                    "Destination path exists and is not a WebDAV collection (directory): " + cdpath );
             }
 
             wdresource.setPath( oldpath );
@@ -225,13 +226,13 @@ public class WebDavWagon
                 try
                 {
                     String[] dirs = relpath.split( "/" );
-                    String create_dir = "";
+                    String createDir = "";
 
                     // start at 1 because first element of dirs[] from split() is ""
                     for ( int count = 1; count < dirs.length; count++ )
                     {
-                        create_dir = create_dir + "/" + dirs[count];
-                        wdresource.mkcolMethod( create_dir );
+                        createDir = createDir + "/" + dirs[count];
+                        wdresource.mkcolMethod( createDir );
                     }
                     wdresource.setPath( oldpath );
                 }
@@ -244,7 +245,8 @@ public class WebDavWagon
         }
         catch ( IOException e )
         {
-            throw new TransferFailedException( "Failed to create destination WebDAV collection (directory): " + relpath, e );
+            throw new TransferFailedException(
+                "Failed to create destination WebDAV collection (directory): " + relpath, e );
         }
 
         try
@@ -307,7 +309,14 @@ public class WebDavWagon
     private HttpURL urlToHttpURL( String url )
         throws URIException
     {
-        return url.startsWith( "https" ) ? new HttpsURL( url ) : new HttpURL( url );
+        if ( url.startsWith( "https" ) )
+        {
+            return new HttpsURL( url );
+        }
+        else
+        {
+            return new HttpURL( url );
+        }
     }
 
     /**
@@ -367,7 +376,7 @@ public class WebDavWagon
         String url = getRepository().getUrl() + "/" + resourceName;
 
         wdresource.addRequestHeader( "X-wagon-provider", "wagon-webdav" );
-        wdresource.addRequestHeader( "X-wagon-version", WAGON_VERSION );
+        wdresource.addRequestHeader( "X-wagon-version", wagonVersion );
 
         wdresource.addRequestHeader( "Cache-control", "no-cache" );
         wdresource.addRequestHeader( "Cache-store", "no-store" );
@@ -469,9 +478,10 @@ public class WebDavWagon
     private String getURL( Repository repository )
     {
         String url = repository.getUrl();
-        if ( url.startsWith( "dav:" ) )
+        String s = "dav:";
+        if ( url.startsWith( s ) )
         {
-            return url.substring( 4 );
+            return url.substring( s.length() );
         }
         else
         {
@@ -499,54 +509,53 @@ public class WebDavWagon
      * @throws AuthorizationException
      */
     public void putDirectory( File sourceDirectory, String destinationDirectory ) 
-    	throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-    	String createPath = repository.getBasedir() + "/" + destinationDirectory;
-    	
-    	
-    	try
-    	{
-    		wdresource.mkcolMethod( createPath );    		
-    	}
-    	catch (IOException e)
-    	{
-    		throw new TransferFailedException( "Failed to create remote directory: " + createPath + " : "
-                + e.getMessage(), e );
-    	}
-    	
-    	try
-    	{
-    		wdresource.setPath( repository.getBasedir() );
-    	}
-    	catch (IOException e)
-    	{
-    		throw new TransferFailedException( "An error occurred while preparing to copy to remote repository: "
-                + e.getMessage(), e );
-    	}
-    	
-    	File [] list_files = sourceDirectory.listFiles();
+        String createPath = repository.getBasedir() + "/" + destinationDirectory;
 
-        for(int i=0; i<list_files.length; i++)
-    	{
-    		if ( list_files[i].isDirectory() )
-    		{
-    			putDirectory( list_files[i], destinationDirectory + "/" + list_files[i].getName() );
-    		}
-    		else
-    		{
-	    		String target = createPath + "/" + list_files[i].getName();
-	    		
-	    		try
-	        	{
-	        		wdresource.putMethod( target, list_files[i] );
-	        	}
-	    		catch( IOException e )
-	    		{
+        try
+        {
+            wdresource.mkcolMethod( createPath );
+        }
+        catch ( IOException e )
+        {
+            throw new TransferFailedException( "Failed to create remote directory: " + createPath + " : "
+                + e.getMessage(), e );
+        }
+
+        try
+        {
+            wdresource.setPath( repository.getBasedir() );
+        }
+        catch ( IOException e )
+        {
+            throw new TransferFailedException( "An error occurred while preparing to copy to remote repository: "
+                + e.getMessage(), e );
+        }
+        
+        File [] listFiles = sourceDirectory.listFiles();
+
+        for ( int i = 0; i < listFiles.length; i++ )
+        {
+            if ( listFiles[i].isDirectory() )
+            {
+                putDirectory( listFiles[i], destinationDirectory + "/" + listFiles[i].getName() );
+            }
+            else
+            {
+                String target = createPath + "/" + listFiles[i].getName();
+
+                try
+                {
+                    wdresource.putMethod( target, listFiles[i] );
+                }
+                catch ( IOException e )
+                {
                     throw new TransferFailedException( "Failed to upload to remote repository: " + target + " : "
                         + e.getMessage(), e );
-	    		}
-    		}
-    	}
-    	
+                }
+            }
+        }
+
     }
 }
