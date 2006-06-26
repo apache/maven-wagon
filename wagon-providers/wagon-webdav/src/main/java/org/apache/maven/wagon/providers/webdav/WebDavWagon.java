@@ -232,12 +232,12 @@ public class WebDavWagon
                 try
                 {
                     String[] dirs = relpath.split( "/" );
-                    String createDir = "";
+                    String createDir = "/";
 
                     // start at 1 because first element of dirs[] from split() is ""
                     for ( int count = 1; count < dirs.length; count++ )
                     {
-                        createDir = createDir + "/" + dirs[count];
+                        createDir = createDir + dirs[count] + "/";
                         webdavResource.mkcolMethod( createDir );
                     }
                     webdavResource.setPath( oldpath );
@@ -515,7 +515,7 @@ public class WebDavWagon
     public void putDirectory( File sourceDirectory, String destinationDirectory ) 
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        String createPath = repository.getBasedir() + "/" + destinationDirectory;
+        String createPath = repository.getBasedir() + "/" + destinationDirectory + "/";
 
         try
         {
@@ -547,12 +547,12 @@ public class WebDavWagon
             }
             else
             {
-                String target = createPath + "/" + listFiles[i].getName();
+                String target = createPath + listFiles[i].getName();
 
                 try
                 {
                     webdavResource.putMethod( target, listFiles[i] );
-                }
+                    }
                 catch ( IOException e )
                 {
                     throw new TransferFailedException( "Failed to upload to remote repository: " + target + " : "
