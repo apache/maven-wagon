@@ -215,6 +215,7 @@ public abstract class WagonTestCase
             writeTestFile( "a/test-resource-2.txt" );
             writeTestFile( "a/b/test-resource-3.txt" );
             writeTestFile( "c/test-resource-4.txt" );
+            writeTestFile( "d/e/f/test-resource-5.txt" );
 
             wagon.connect( testRepository, getAuthInfo() );
 
@@ -228,10 +229,58 @@ public abstract class WagonTestCase
             wagon.get( "directory-copy/a/test-resource-2.txt", destFile );
             wagon.get( "directory-copy/a/b/test-resource-3.txt", destFile );
             wagon.get( "directory-copy/c/test-resource-4.txt", destFile );
+            wagon.get( "directory-copy/d/e/f/test-resource-5.txt", destFile);
 
             wagon.disconnect();
         }
 
+        tearDownWagonTestingFixtures();
+    }
+    
+    /**
+     * Test for putting a directory with a destination that multiple directories deep,
+     * all of which haven't been created.
+     * @since 1.0-beta-2
+     * @throws Exception
+     */
+    public void testWagonPutDirectoryDeepDestination()
+        throws Exception
+    {
+        setupRepositories();
+    
+        setupWagonTestingFixtures();
+    
+        Wagon wagon = getWagon();
+    
+        if ( wagon.supportsDirectoryCopy() )
+        {
+            sourceFile = new File( FileTestUtils.getTestOutputDir(), "deep0/deep1/deep2" );
+            
+            FileUtils.deleteDirectory( sourceFile );
+            
+            writeTestFile( "test-resource-1.txt" );
+            writeTestFile( "a/test-resource-2.txt" );
+            writeTestFile( "a/b/test-resource-3.txt" );
+            writeTestFile( "c/test-resource-4.txt" );
+            writeTestFile( "d/e/f/test-resource-5.txt" );
+    
+            wagon.connect( testRepository, getAuthInfo() );
+    
+            wagon.putDirectory( sourceFile, "deep0/deep1/deep2" );
+    
+            destFile = FileTestUtils.createUniqueFile( getName(), getName() );
+    
+            destFile.deleteOnExit();
+    
+            wagon.get( "deep0/deep1/deep2/test-resource-1.txt", destFile );
+            wagon.get( "deep0/deep1/deep2/a/test-resource-2.txt", destFile );
+            wagon.get( "deep0/deep1/deep2/a/b/test-resource-3.txt", destFile );
+            wagon.get( "deep0/deep1/deep2/c/test-resource-4.txt", destFile );
+            wagon.get( "deep0/deep1/deep2/d/e/f/test-resource-5.txt", destFile);
+    
+            wagon.disconnect();
+        }
+    
         tearDownWagonTestingFixtures();
     }
 

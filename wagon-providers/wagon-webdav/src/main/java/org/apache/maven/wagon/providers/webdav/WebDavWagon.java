@@ -515,27 +515,6 @@ public class WebDavWagon
     public void putDirectory( File sourceDirectory, String destinationDirectory ) 
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        String createPath = repository.getBasedir() + "/" + destinationDirectory + "/";
-
-        try
-        {
-            webdavResource.mkcolMethod( createPath );
-        }
-        catch ( IOException e )
-        {
-            throw new TransferFailedException( "Failed to create remote directory: " + createPath + " : "
-                + e.getMessage(), e );
-        }
-
-        try
-        {
-            webdavResource.setPath( repository.getBasedir() );
-        }
-        catch ( IOException e )
-        {
-            throw new TransferFailedException( "An error occurred while preparing to copy to remote repository: "
-                + e.getMessage(), e );
-        }
         
         File [] listFiles = sourceDirectory.listFiles();
 
@@ -547,17 +526,9 @@ public class WebDavWagon
             }
             else
             {
-                String target = createPath + listFiles[i].getName();
-
-                try
-                {
-                    webdavResource.putMethod( target, listFiles[i] );
-                    }
-                catch ( IOException e )
-                {
-                    throw new TransferFailedException( "Failed to upload to remote repository: " + target + " : "
-                        + e.getMessage(), e );
-                }
+                String target = destinationDirectory + "/" + listFiles[i].getName();
+                
+                put( listFiles[i], target );
             }
         }
 
