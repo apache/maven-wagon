@@ -1,7 +1,7 @@
 package org.apache.maven.wagon.providers.http;
 
 /*
- * Copyright 2001-2005 The Apache Software Foundation.
+ * Copyright 2001-2006 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,15 @@ public class HttpWagonTest
         FileTestUtils.generateFile( f.getAbsolutePath(), "artifact-dummy" );
 
         httpd = (Httpd) lookup( Httpd.ROLE );
+    }
+
+    public void testWagonGetFileList()
+        throws Exception
+    {
+        File f = new File( FileTestUtils.createDir( "http-repository" ), "file-list" );
+        f.mkdirs();
+
+        super.testWagonGetFileList();
     }
 
     protected void tearDownWagonTestingFixtures()

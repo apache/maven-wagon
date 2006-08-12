@@ -1,7 +1,7 @@
 package org.apache.maven.wagon.providers.file;
 
 /*
- * Copyright 2001-2005 The Apache Software Foundation.
+ * Copyright 2001-2006 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Wagon Provider for Local File System
@@ -102,20 +104,7 @@ public class FileWagon
     public void putDirectory( File sourceDirectory, String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        String basedir = getRepository().getBasedir();
-
-        destinationDirectory = StringUtils.replace( destinationDirectory, "\\", "/" );
-
-        File path;
-
-        if ( destinationDirectory.equals( "." ) )
-        {
-            path = new File( basedir );
-        }
-        else
-        {
-            path = new File( basedir, destinationDirectory );
-        }
+        File path = resolveDestinationPath( destinationDirectory );
 
         path.mkdirs();
  
@@ -132,5 +121,53 @@ public class FileWagon
         {
             throw new TransferFailedException( "Error copying directory structure", e );
         }
+    }
+    
+    private File resolveDestinationPath(String destinationPath)
+    {
+        String basedir = getRepository().getBasedir();
+        
+        destinationPath = StringUtils.replace( destinationPath, "\\", "/" );
+
+        File path;
+
+        if ( destinationPath.equals( "." ) )
+        {
+            path = new File( basedir );
+        }
+        else
+        {
+            path = new File( basedir, destinationPath );
+        }
+        
+        return path;
+    }
+
+    public List getFileList( String destinationDirectory )
+        throws ResourceDoesNotExistException, AuthorizationException
+    {
+        File path = resolveDestinationPath( destinationDirectory );
+
+        if ( !path.exists() )
+        {
+            throw new ResourceDoesNotExistException( "Directory does not exist: " + destinationDirectory );
+        }
+
+        if ( !path.isDirectory() )
+        {
+            throw new ResourceDoesNotExistException( "Path is not a directory: " + destinationDirectory );
+        }
+
+        String files[] = path.list();
+
+        return Arrays.asList( files );
+    }
+
+    public boolean resourceExists( String resourceName )
+        throws TransferFailedException, AuthorizationException
+    {
+        File file = resolveDestinationPath( resourceName );
+
+        return file.exists();
     }
 }

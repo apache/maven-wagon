@@ -16,15 +16,17 @@ package org.apache.maven.wagon.providers.ssh;
  * limitations under the License.
  */
 
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Proxy;
-import com.jcraft.jsch.ProxyHTTP;
-import com.jcraft.jsch.ProxySOCKS5;
-import com.jcraft.jsch.Session;
-import com.jcraft.jsch.UIKeyboardInteractive;
-import com.jcraft.jsch.UserInfo;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
 import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.CommandExecutionException;
 import org.apache.maven.wagon.CommandExecutor;
@@ -46,15 +48,15 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Proxy;
+import com.jcraft.jsch.ProxyHTTP;
+import com.jcraft.jsch.ProxySOCKS5;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.UIKeyboardInteractive;
+import com.jcraft.jsch.UserInfo;
 
 /**
  * Common SSH operations.
@@ -85,6 +87,12 @@ public abstract class AbstractSshWagon
 
     private UIKeyboardInteractive uIKeyboardInteractive;
 
+    class Streams
+    {
+        String out = "";
+        String err = "";
+    }
+    
     public void openConnection()
         throws AuthenticationException
     {
@@ -251,8 +259,8 @@ public abstract class AbstractSshWagon
 
         return privateKey;
     }
-
-    public void executeCommand( String command )
+    
+    public Streams executeCommand( String command, boolean ignoreFailures )
         throws CommandExecutionException
     {
         ChannelExec channel = null;
@@ -280,6 +288,8 @@ public abstract class AbstractSshWagon
 
             List output = null;
 
+            Streams streams = new Streams();
+            
             while ( true )
             {
                 String line = r.readLine();
@@ -298,7 +308,20 @@ public abstract class AbstractSshWagon
                 if ( !line.startsWith( "Could not chdir to home directory" ) && !line.endsWith( "ttyname: Operation not supported" ) )
                 {
                     output.add( line );
+                    streams.err += line + "\n";
                 }
+            }
+            
+            r = new BufferedReader( new InputStreamReader( in ));
+            while(true)
+            {
+                String line = r.readLine();
+                if(line == null)
+                {
+                    break;
+                }
+                
+                streams.out += line + "\n";
             }
             
             // drain the output stream.
@@ -311,12 +334,14 @@ public abstract class AbstractSshWagon
 //            {
 //                in.read( trashcan, 0, avail );
 //            }
-
+            
             if ( output != null && !output.isEmpty() )
             {
                 throw new CommandExecutionException(
                     "Exit code: " + channel.getExitStatus() + " - " + StringUtils.join( output.iterator(), "\n" ) );
             }
+            
+            return streams;
         }
         catch ( JSchException e )
         {
@@ -336,6 +361,12 @@ public abstract class AbstractSshWagon
                 channel.disconnect();
             }
         }
+    }
+
+    public void executeCommand( String command )
+        throws CommandExecutionException
+    {
+        executeCommand( command, false );
     }
 
     protected String readLine( InputStream in )
@@ -573,5 +604,61 @@ public abstract class AbstractSshWagon
     public boolean supportsDirectoryCopy()
     {
         return true;
+    }
+
+    public List getFileList( String destinationDirectory )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        try
+        {
+            String path = getPath( getRepository().getBasedir(), destinationDirectory );
+            Streams streams = executeCommand( "ls -la " + path, true );
+            
+            BufferedReader br = new BufferedReader(new StringReader(streams.out));
+            
+            List ret = new ArrayList();
+            String line = br.readLine();
+            
+            while(line != null)
+            {
+                String parts[] = StringUtils.split( line, " " );
+                if(parts.length >= 8)
+                {
+                    ret.add(parts[8]);
+                }
+                
+                line = br.readLine();
+            }
+            
+            return ret;
+        }
+        catch ( CommandExecutionException e )
+        {
+            throw new TransferFailedException( "Error performing file listing.", e);
+        }
+        catch ( IOException e )
+        {
+            throw new TransferFailedException( "Error parsing file listing.", e);
+        }
+    }
+
+    public boolean resourceExists( String resourceName )
+        throws TransferFailedException, AuthorizationException
+    {
+        try
+        {
+            String path = getPath( getRepository().getBasedir(), resourceName );
+            executeCommand( "ls " + path );
+
+            // Parsing of output not really needed.  As a failed ls results in a
+            // CommandExectionException on the 'ls' command.
+
+            return true;
+        }
+        catch ( CommandExecutionException e )
+        {
+            // Error?  Then the 'ls' command failed.  No such file found.
+            return false;
+        }
     }
 }

@@ -1,7 +1,7 @@
 package org.apache.maven.wagon.providers.http;
 
 /*
- * Copyright 2001-2005 The Apache Software Foundation.
+ * Copyright 2001-2006 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,16 @@ package org.apache.maven.wagon.providers.http;
  * limitations under the License.
  */
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
@@ -26,6 +36,7 @@ import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.NTCredentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.util.DateParseException;
 import org.apache.commons.httpclient.util.DateParser;
@@ -35,17 +46,9 @@ import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.resource.Resource;
+import org.apache.maven.wagon.shared.http.HtmlFileListParser;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -199,7 +202,7 @@ public class HttpWagon
                     "Failed to transfer file: " + url + " after " + attempt + " attempts" );
 
             case HttpStatus.SC_FORBIDDEN:
-                throw new AuthorizationException( "Access denided to: " + url );
+                throw new AuthorizationException( "Access denied to: " + url );
 
             case HttpStatus.SC_NOT_FOUND:
                 throw new ResourceDoesNotExistException( "File: " + url + " does not exist" );
@@ -422,5 +425,159 @@ public class HttpWagon
     public void setNumberOfAttempts( int numberOfAttempts )
     {
         this.numberOfAttempts = numberOfAttempts;
+    }
+
+    public List getFileList( String destinationDirectory )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException 
+    {
+        if ( !destinationDirectory.endsWith( "/" ) )
+        {
+            destinationDirectory += "/";
+        }
+
+        String url = getRepository().getUrl() + "/" + destinationDirectory;
+
+        GetMethod getMethod = new GetMethod( url );
+
+        try
+        {
+            // TODO: make these configurable
+
+            getMethod.addRequestHeader( "Cache-control", "no-cache" );
+            getMethod.addRequestHeader( "Cache-store", "no-store" );
+            getMethod.addRequestHeader( "Pragma", "no-cache" );
+            getMethod.addRequestHeader( "Expires", "0" );
+
+            int statusCode = SC_NULL;
+
+            int attempt = 0;
+
+            // We will retry up to NumberOfAttempts times.
+            while ( statusCode == SC_NULL && attempt < getNumberOfAttempts() )
+            {
+                try
+                {
+                    // execute the getMethod.
+                    statusCode = client.executeMethod( getMethod );
+                }
+                catch ( HttpRecoverableException e )
+                {
+                    attempt++;
+                }
+                catch ( IOException e )
+                {
+                    throw new TransferFailedException( e.getMessage(), e );
+                }
+            }
+
+            fireTransferDebug( url + " - Status code: " + statusCode );
+
+            // TODO [BP]: according to httpclient docs, really should swallow the output on error. verify if that is required
+            switch ( statusCode )
+            {
+                case HttpStatus.SC_OK:
+                    break;
+
+                case SC_NULL:
+                    throw new TransferFailedException(
+                        "Failed to transfer file: " + url + " after " + attempt + " attempts" );
+
+                case HttpStatus.SC_FORBIDDEN:
+                    throw new AuthorizationException( "Access denied to: " + url );
+
+                case HttpStatus.SC_UNAUTHORIZED:
+                    throw new AuthorizationException( "Not authorized." );
+
+                case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
+                    throw new AuthorizationException( "Not authorized by proxy." );
+
+                case HttpStatus.SC_NOT_FOUND:
+                    throw new ResourceDoesNotExistException( "File: " + url + " does not exist" );
+
+                    //add more entries here
+                default :
+                    throw new TransferFailedException(
+                        "Failed to trasfer file: " + url + ". Return code is: " + statusCode );
+            }
+
+            InputStream is = null;
+            
+            is = getMethod.getResponseBodyAsStream();
+
+            return HtmlFileListParser.parseFileList( url, is );
+        }
+        catch ( IOException e )
+        {
+            throw new TransferFailedException( "Could not read response body.", e );
+        }
+        finally
+        {
+            getMethod.releaseConnection();
+        }
+    }
+
+    public boolean resourceExists( String resourceName )
+        throws TransferFailedException, AuthorizationException
+    {
+        String url = getRepository().getUrl() + "/" + resourceName;
+        
+        HeadMethod headMethod = new HeadMethod( url );
+        
+        int statusCode = SC_NULL;
+        int attempt = 0;
+        
+        try
+        {
+            while ( statusCode == SC_NULL && attempt < getNumberOfAttempts() )
+            {
+                try
+                {
+                    // execute the getMethod.
+                    statusCode = client.executeMethod( headMethod );
+                }
+                catch ( HttpRecoverableException e )
+                {
+                    attempt++;
+                }
+                catch ( IOException e )
+                {
+                    throw new TransferFailedException( e.getMessage(), e );
+                }
+            }
+
+            switch ( statusCode )
+            {
+                case HttpStatus.SC_OK:
+                    return true;
+
+                case HttpStatus.SC_NOT_MODIFIED:
+                    return true;
+
+                case SC_NULL:
+                    throw new TransferFailedException( "Failed to transfer file: " + url + " after " + attempt
+                        + " attempts" );
+
+                case HttpStatus.SC_FORBIDDEN:
+                    throw new AuthorizationException( "Access denided to: " + url );
+
+                case HttpStatus.SC_UNAUTHORIZED:
+                    throw new AuthorizationException( "Not authorized." );
+
+                case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
+                    throw new AuthorizationException( "Not authorized by proxy." );
+
+                case HttpStatus.SC_NOT_FOUND:
+                    return false;
+
+                    //add more entries here
+                default:
+                    throw new TransferFailedException( "Failed to trasfer file: " + url + ". Return code is: "
+                        + statusCode );
+            }
+        }
+        finally
+        {
+            headMethod.releaseConnection();
+        }
     }
 }

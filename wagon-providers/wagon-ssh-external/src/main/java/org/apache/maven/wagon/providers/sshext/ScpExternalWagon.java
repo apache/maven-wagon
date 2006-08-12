@@ -1,7 +1,7 @@
 package org.apache.maven.wagon.providers.sshext;
 
 /*
- * Copyright 2001-2005 The Apache Software Foundation.
+ * Copyright 2001-2006 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,15 @@ package org.apache.maven.wagon.providers.sshext;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.CommandExecutionException;
@@ -35,10 +44,6 @@ import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.cli.CommandLineException;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
 import org.codehaus.plexus.util.cli.Commandline;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
 
 /**
  * SCP deployer using "external" scp program.  To allow for
@@ -87,6 +92,12 @@ public class ScpExternalWagon
     private String password;
 
     private static final int SSH_FATAL_EXIT_CODE = 255;
+    
+    class Streams
+    {
+        String out;
+        String err;
+    }
 
     // ----------------------------------------------------------------------
     //
@@ -172,7 +183,7 @@ public class ScpExternalWagon
         // nothing to disconnect
     }
 
-    public void executeCommand( String command, boolean ignoreFailures )
+    public Streams executeCommand( String command, boolean ignoreFailures )
         throws CommandExecutionException
     {
         boolean putty = sshExecutable.indexOf( "plink" ) >= 0;
@@ -208,8 +219,11 @@ public class ScpExternalWagon
             CommandLineUtils.StringStreamConsumer out = new CommandLineUtils.StringStreamConsumer();
             CommandLineUtils.StringStreamConsumer err = new CommandLineUtils.StringStreamConsumer();
             int exitCode = CommandLineUtils.executeCommandLine( cl, out, err );
-            fireSessionDebug( out.getOutput() );
-            fireSessionDebug( err.getOutput() );
+            Streams streams = new Streams();
+            streams.out = out.getOutput();
+            streams.err = err.getOutput();
+            fireSessionDebug( streams.out );
+            fireSessionDebug( streams.err );
             if ( exitCode != 0 )
             {
                 if ( !ignoreFailures || exitCode == SSH_FATAL_EXIT_CODE )
@@ -217,6 +231,7 @@ public class ScpExternalWagon
                     throw new CommandExecutionException( "Exit code " + exitCode + " - " + err.getOutput() );
                 }
             }
+            return streams;
         }
         catch ( CommandLineException e )
         {
@@ -540,5 +555,77 @@ public class ScpExternalWagon
     public boolean supportsDirectoryCopy()
     {
         return true;
+    }
+
+    public List getFileList( String destinationDirectory )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        try
+        {
+            String path = getPath( getRepository().getBasedir(), destinationDirectory );
+            Streams streams = executeCommand( "ls -la " + path, true );
+            
+            BufferedReader br = new BufferedReader(new StringReader(streams.out));
+            
+            List ret = new ArrayList();
+            String line = br.readLine();
+            
+            while(line != null)
+            {
+                String parts[] = StringUtils.split( line, " " );
+                if(parts.length >= 8)
+                {
+                    ret.add(parts[8]);
+                }
+                
+                line = br.readLine();
+            }
+            
+            return ret;
+        }
+        catch ( CommandExecutionException e )
+        {
+            throw new TransferFailedException( "Error performing file listing.", e);
+        }
+        catch ( IOException e )
+        {
+            throw new TransferFailedException( "Error parsing file listing.", e);
+        }
+    }
+
+    public boolean resourceExists( String resourceName )
+        throws TransferFailedException, AuthorizationException
+    {
+        try
+        {
+            String path = getPath( getRepository().getBasedir(), resourceName );
+            Streams streams = executeCommand( "ls " + path, true );
+            
+            BufferedReader br = new BufferedReader(new StringReader(streams.err));
+            Pattern pat = Pattern.compile( "No such file or directory" );
+            
+            String line = br.readLine();
+            
+            while(line != null)
+            {
+                Matcher mat = pat.matcher( line );
+                if(mat.find())
+                {
+                    return false;
+                }
+                
+                line = br.readLine();
+            }
+            
+            return true;
+        }
+        catch ( CommandExecutionException e )
+        {
+            throw new TransferFailedException( "Error performing file listing.", e);
+        }
+        catch ( IOException e )
+        {
+            throw new TransferFailedException( "Error parsing file listing.", e);
+        }
     }
 }

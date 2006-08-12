@@ -1,7 +1,7 @@
 package org.apache.maven.wagon.providers.ftp;
 
 /*
- * Copyright 2001-2005 The Apache Software Foundation.
+ * Copyright 2001-2006 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,13 @@ package org.apache.maven.wagon.providers.ftp;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.net.ProtocolCommandEvent;
 import org.apache.commons.net.ProtocolCommandListener;
@@ -32,13 +39,9 @@ import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 public class FtpWagon
     extends StreamWagon
@@ -308,25 +311,7 @@ public class FtpWagon
 
         try
         {
-            if ( !ftp.changeWorkingDirectory( getRepository().getBasedir() ) )
-            {
-                throw new TransferFailedException(
-                    "Required directory: '" + getRepository().getBasedir() + "' " + "is missing" );
-            }
-
-            String[] dirs = PathUtils.dirnames( resource.getName() );
-
-            for ( int i = 0; i < dirs.length; i++ )
-            {
-                boolean dirChanged = ftp.changeWorkingDirectory( dirs[i] );
-
-                if ( !dirChanged )
-                {
-                    String msg = "Resource " + resource + " not found. Directory " + dirs[i] + " does not exist";
-
-                    throw new ResourceDoesNotExistException( msg );
-                }
-            }
+            ftpChangeDirectory( resource );
 
             String filename = PathUtils.filename( resource.getName() );
             FTPFile[] ftpFiles = ftp.listFiles( filename );
@@ -357,6 +342,30 @@ public class FtpWagon
         inputData.setInputStream( is );
     }
 
+    private void ftpChangeDirectory( Resource resource )
+        throws IOException, TransferFailedException, ResourceDoesNotExistException
+    {
+        if ( !ftp.changeWorkingDirectory( getRepository().getBasedir() ) )
+        {
+            throw new TransferFailedException(
+                "Required directory: '" + getRepository().getBasedir() + "' " + "is missing" );
+        }
+
+        String[] dirs = PathUtils.dirnames( resource.getName() );
+
+        for ( int i = 0; i < dirs.length; i++ )
+        {
+            boolean dirChanged = ftp.changeWorkingDirectory( dirs[i] );
+
+            if ( !dirChanged )
+            {
+                String msg = "Resource " + resource + " not found. Directory " + dirs[i] + " does not exist";
+
+                throw new ResourceDoesNotExistException( msg );
+            }
+        }
+    }
+
 
     public class PrintCommandListener
         implements ProtocolCommandListener
@@ -383,5 +392,59 @@ public class FtpWagon
     protected void fireSessionDebug( String msg )
     {
         super.fireSessionDebug( msg );
+    }
+
+    public List getFileList( String destinationDirectory )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        Resource resource = new Resource(destinationDirectory);
+        
+        try 
+        {
+            ftpChangeDirectory( resource );
+    
+            String filename = PathUtils.filename( resource.getName() );
+            FTPFile[] ftpFiles = ftp.listFiles( filename );
+    
+            if ( ftpFiles == null || ftpFiles.length <= 0 )
+            {
+                throw new ResourceDoesNotExistException( "Could not find file: '" + resource + "'" );
+            }
+            
+            List ret = new ArrayList();
+            for(int i=0; i<ftpFiles.length; i++)
+            {
+                ret.add(ftpFiles[i].getName());
+            }
+            
+            return ret;
+        } catch(IOException e)
+        {
+            throw new TransferFailedException( "Error transferring file via FTP", e );
+        }
+    }
+
+    public boolean resourceExists( String resourceName )
+        throws TransferFailedException, AuthorizationException
+    {
+        Resource resource = new Resource( resourceName );
+
+        try
+        {
+            ftpChangeDirectory( resource );
+
+            String filename = PathUtils.filename( resource.getName() );
+            int status = ftp.stat( filename );
+
+            return ( ( status == FTPReply.FILE_STATUS ) || ( status == FTPReply.FILE_STATUS_OK ) || ( status == FTPReply.SYSTEM_STATUS ) );
+        }
+        catch ( IOException e )
+        {
+            throw new TransferFailedException( "Error transferring file via FTP", e );
+        }
+        catch ( ResourceDoesNotExistException e )
+        {
+            return false;
+        }
     }
 }

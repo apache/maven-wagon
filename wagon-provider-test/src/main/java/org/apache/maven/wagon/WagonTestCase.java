@@ -1,7 +1,7 @@
 package org.apache.maven.wagon;
 
 /*
- * Copyright 2001-2005 The Apache Software Foundation.
+ * Copyright 2001-2006 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -458,6 +458,138 @@ public abstract class WagonTestCase
             tearDownWagonTestingFixtures();
         }
     }
+    
+    /**
+     * Test {@link Wagon#getFileList(String)}.
+     * 
+     * @since 1.0-beta-2
+     * @throws Exception
+     */
+    public void testWagonGetFileList()
+        throws Exception
+    {
+        setupRepositories();
+
+        setupWagonTestingFixtures();
+
+        String dirName = "file-list";
+
+        String filenames[] = new String[] {
+            "test-resource.txt",
+            "test-resource-b.txt",
+            "test-resource.pom",
+            "more-resources.dat" };
+
+        for ( int i = 0; i < filenames.length; i++ )
+        {
+            putFile( dirName + "/" + filenames[i], dirName + "/" + filenames[i], filenames[i] + "\n" );
+        }
+
+        Wagon wagon = getWagon();
+
+        wagon.connect( testRepository, getAuthInfo() );
+
+        List list = wagon.getFileList( dirName );
+        assertNotNull( "file list should not be null.", list );
+        assertTrue( "file list should contain 4 or more items (actually contains " + list.size() + " elements).", list
+            .size() >= 4 );
+
+        for ( int i = 0; i < filenames.length; i++ )
+        {
+            assertTrue( "Filename '" + filenames[i] + "' should be in list.", list.contains( filenames[i] ) );
+        }
+
+        wagon.disconnect();
+
+        tearDownWagonTestingFixtures();
+    }
+    
+    /**
+     * Test {@link Wagon#getFileList(String)} when the directory does not exist.
+     * 
+     * @since 1.0-beta-2
+     * @throws Exception
+     */
+    public void testWagonGetFileListWhenDirectoryDoesNotExist()
+        throws Exception
+    {
+        setupRepositories();
+
+        setupWagonTestingFixtures();
+
+        String dirName = "file-list-unexisting";
+
+        Wagon wagon = getWagon();
+
+        wagon.connect( testRepository, getAuthInfo() );
+
+        try
+        {
+            wagon.getFileList( dirName );
+            fail( "getFileList on unexisting directory must throw ResourceDoesNotExistException" );
+        }
+        catch ( ResourceDoesNotExistException e )
+        {
+            // expected
+        }
+        finally
+        {
+            wagon.disconnect();
+
+            tearDownWagonTestingFixtures();
+        }
+    }
+
+    /**
+     * Test for an existing resource.
+     * 
+     * @since 1.0-beta-2
+     * @throws Exception
+     */
+    public void testWagonResourceExists()
+        throws Exception
+    {
+        setupRepositories();
+
+        setupWagonTestingFixtures();
+
+        Wagon wagon = getWagon();
+
+        putFile();
+        
+        wagon.connect( testRepository, getAuthInfo() );
+
+        assertTrue( sourceFile.getName() + " does not exist", wagon.resourceExists( sourceFile.getName() ) );
+
+        wagon.disconnect();
+
+        tearDownWagonTestingFixtures();
+    }
+    
+    /**
+     * Test for an invalid resource.
+     * 
+     * @since 1.0-beta-2
+     * @throws Exception
+     */
+    public void testWagonResourceNotExists()
+        throws Exception
+    {
+        setupRepositories();
+
+        setupWagonTestingFixtures();
+
+        Wagon wagon = getWagon();
+
+        wagon.connect( testRepository, getAuthInfo() );
+
+        assertFalse( wagon.resourceExists( "a/bad/resource/name/that/should/not/exist.txt" ) );
+
+        wagon.disconnect();
+
+        tearDownWagonTestingFixtures();
+    }
+    
 
     // ----------------------------------------------------------------------
     // File <--> File round trip testing
@@ -465,11 +597,11 @@ public abstract class WagonTestCase
     // We are testing taking a file, our sourcefile, and placing it into the
     // test repository that we have setup.
     // ----------------------------------------------------------------------
-
-    protected void putFile()
+    
+    protected void putFile(String resourceName, String testFileName, String content)
         throws Exception
     {
-        message( "Putting test artifact: " + resource + " into test repository " + testRepository );
+        message( "Putting test artifact: " + resourceName + " into test repository " + testRepository );
 
         Wagon wagon = getWagon();
 
@@ -477,14 +609,21 @@ public abstract class WagonTestCase
 
         wagon.connect( testRepository, getAuthInfo() );
 
-        sourceFile = new File( FileTestUtils.getTestOutputDir(), "test-resource" );
-        FileUtils.fileWrite( sourceFile.getAbsolutePath(), "test-resource.txt\n" );
+        sourceFile = new File( FileTestUtils.getTestOutputDir(), testFileName );
+        sourceFile.getParentFile().mkdirs();
+        FileUtils.fileWrite( sourceFile.getAbsolutePath(), content );
 
-        wagon.put( sourceFile, resource );
+        wagon.put( sourceFile, resourceName );
 
         wagon.removeTransferListener( checksumObserver );
 
-        wagon.disconnect();
+        wagon.disconnect();        
+    }
+
+    protected void putFile()
+        throws Exception
+    {
+        putFile( resource, "test-resource", "test-resource.txt\n" );
     }
 
     protected void getFile()

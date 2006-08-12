@@ -1,7 +1,7 @@
 package org.apache.maven.wagon;
 
 /*
- * Copyright 2001-2005 The Apache Software Foundation.
+ * Copyright 2001-2006 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 
 import java.io.File;
+import java.util.List;
 
 public interface Wagon
 {
@@ -87,6 +88,44 @@ public interface Wagon
      */
     void putDirectory( File sourceDirectory, String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
+    
+    /**
+     * Check if a remote resource exists
+     * 
+     * @param resourceName
+     * @return whether the resource exists or not 
+     * @throws TransferFailedException if there's an error trying to access the remote side
+     * @throws AuthorizationException if not authorized to verify the existence of the resource
+     */
+    boolean resourceExists( String resourceName )
+        throws TransferFailedException, AuthorizationException;
+    
+    /**
+     * <p>
+     * Returns a {@link List} of strings naming the files and directories in the directory denoted by
+     * this abstract pathname.
+     * </p>
+     * <p>
+     * If this abstract pathname does not denote a directory, or does not exist, then this method throws
+     * {@link ResourceDoesNotExistException}.
+     * Otherwise a {@link List} of strings is returned, one for each file or directory in the directory.
+     * Names denoting the directory itself and the directory's parent directory are not included in
+     * the result. Each string is a file name rather than a complete path.
+     * </p>
+     * <p>
+     * There is no guarantee that the name strings in the resulting list will appear in any specific
+     * order; they are not, in particular, guaranteed to appear in alphabetical order.
+     * </p> 
+     * 
+     * @param destinationDirectory directory to list contents of
+     * @return A {@link List} of strings naming the files and directories in the directory denoted by
+     * this abstract pathname. The {@link List} will be empty if the directory is empty.
+     * @throws TransferFailedException if there's an error trying to access the remote side
+     * @throws ResourceDoesNotExistException if destinationDirectory does not exist or is not a directory
+     * @throws AuthorizationException if not authorized to list the contents of the directory
+     */
+    List getFileList( String destinationDirectory )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException; 
 
     /**
      * 

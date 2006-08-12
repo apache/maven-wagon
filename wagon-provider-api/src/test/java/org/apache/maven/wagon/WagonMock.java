@@ -16,13 +16,15 @@ package org.apache.maven.wagon;
  * limitations under the License.
  */
 
-import org.apache.maven.wagon.authorization.AuthorizationException;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.maven.wagon.authorization.AuthorizationException;
 
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
@@ -106,5 +108,16 @@ public class WagonMock
     {
     }
 
+    public List getFileList( String destinationDirectory )
+        throws TransferFailedException, AuthorizationException
+    {
+        return Collections.EMPTY_LIST;
+    }
+
+    public boolean resourceExists( String resourceName )
+        throws AuthorizationException
+    {
+        return false;
+    }
 
 }

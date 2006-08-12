@@ -1,7 +1,7 @@
 package org.apache.maven.wagon.providers.ssh;
 
 /*
- * Copyright 2001-2005 The Apache Software Foundation.
+ * Copyright 2001-2006 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,12 @@ package org.apache.maven.wagon.providers.ssh;
  * limitations under the License.
  */
 
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSchException;
+import java.io.EOFException;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import org.apache.maven.wagon.CommandExecutionException;
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.PermissionModeUtils;
@@ -29,15 +33,12 @@ import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 
-import java.io.EOFException;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.JSchException;
 
 /**
  * A base class for deployers and fetchers using protocols from SSH2 family and
- * JSch library for underlining implmenetation
+ * JSch library for underlying implementation
  * <p/>
  * This is responsible for authentification stage of the process.
  * <p/>
@@ -357,7 +358,8 @@ public class ScpWagon
     public boolean getIfNewer( String resourceName, File destination, long timestamp )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        throw new UnsupportedOperationException( "getIfNewer is scp wagon must be still implemented" );
+        // TODO Implement ScpWagon.getIfNewer()
+        throw new UnsupportedOperationException( "getIfNewer in scp wagon is not implemented" );
     }
 
 }

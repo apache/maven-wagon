@@ -1,7 +1,7 @@
 package org.apache.maven.wagon.providers.http;
 
 /*
- * Copyright 2001-2005 The Apache Software Foundation.
+ * Copyright 2001-2006 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,18 @@ package org.apache.maven.wagon.providers.http;
  * limitations under the License.
  */
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.Authenticator;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.PasswordAuthentication;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.List;
+
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.OutputData;
@@ -25,18 +37,8 @@ import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.proxy.ProxyInfo;
-import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.Authenticator;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.PasswordAuthentication;
-import java.net.URL;
-import java.net.URLConnection;
+import org.apache.maven.wagon.shared.http.HtmlFileListParser;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -63,20 +65,10 @@ public class LightweightHttpWagon
     public void fillInputData( InputData inputData )
         throws TransferFailedException, ResourceDoesNotExistException
     {
-        Repository repository = getRepository();
-        String repositoryUrl = repository.getUrl();
         Resource resource = inputData.getResource();
         try
         {
-            URL url;
-            if ( repositoryUrl.endsWith( "/" ) )
-            {
-                url = new URL( repositoryUrl + resource.getName() );
-            }
-            else
-            {
-                url = new URL( repositoryUrl + "/" + resource.getName() );
-            }
+            URL url = resolveResourceURL( resource );
             URLConnection urlConnection = url.openConnection();
             if ( !useCache )
             {
@@ -103,21 +95,10 @@ public class LightweightHttpWagon
     public void fillOutputData( OutputData outputData )
         throws TransferFailedException
     {
-        Repository repository = getRepository();
-        String repositoryUrl = repository.getUrl();
-
         Resource resource = outputData.getResource();
         try
         {
-            URL url;
-            if ( repositoryUrl.endsWith( "/" ) )
-            {
-                url = new URL( repositoryUrl + resource.getName() );
-            }
-            else
-            {
-                url = new URL( repositoryUrl + "/" + resource.getName() );
-            }
+            URL url = resolveResourceURL( resource );
             putConnection = (HttpURLConnection) url.openConnection();
 
             putConnection.setRequestMethod( "PUT" );
@@ -128,6 +109,23 @@ public class LightweightHttpWagon
         {
             throw new TransferFailedException( "Error transferring file", e );
         }
+    }
+
+    private URL resolveResourceURL( Resource resource )
+        throws MalformedURLException
+    {
+        String repositoryUrl = getRepository().getUrl();
+        
+        URL url;
+        if ( repositoryUrl.endsWith( "/" ) )
+        {
+            url = new URL( repositoryUrl + resource.getName() );
+        }
+        else
+        {
+            url = new URL( repositoryUrl + "/" + resource.getName() );
+        }
+        return url;
     }
 
 
@@ -153,7 +151,7 @@ public class LightweightHttpWagon
                     break;
 
                 case HttpURLConnection.HTTP_FORBIDDEN:
-                    throw new AuthorizationException( "Access denided to: " + url );
+                    throw new AuthorizationException( "Access denied to: " + url );
 
                 case HttpURLConnection.HTTP_NOT_FOUND:
                     throw new ResourceDoesNotExistException( "File: " + url + " does not exist" );
@@ -244,6 +242,68 @@ public class LightweightHttpWagon
         {
             System.setProperty( "http.nonProxyHosts", previousProxyExclusions );
         }
+    }
+
+    public List getFileList( String destinationDirectory )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        InputData inputData = new InputData();
+
+        if ( !destinationDirectory.endsWith( "/" ) )
+        {
+            destinationDirectory += "/";
+        }
+
+        String url = getRepository().getUrl() + "/" + destinationDirectory;
+
+        Resource resource = new Resource( destinationDirectory );
+
+        inputData.setResource( resource );
+
+        fillInputData( inputData );
+
+        InputStream is = inputData.getInputStream();
+
+        if ( is == null )
+        {
+            throw new TransferFailedException( url + " - Could not open input stream for resource: '" + resource + "'" );
+        }
+
+        return HtmlFileListParser.parseFileList( url, is );
+    }
+
+    public boolean resourceExists( String resourceName )
+        throws TransferFailedException, AuthorizationException
+    {
+        HttpURLConnection headConnection;
+        
+        try
+        {
+            URL url = resolveResourceURL( new Resource(resourceName) );
+            headConnection = (HttpURLConnection) url.openConnection();
+    
+            headConnection.setRequestMethod( "HEAD" );
+            headConnection.setDoOutput( true );
+            
+            int statusCode = headConnection.getResponseCode();
+
+            switch ( statusCode )
+            {
+                case HttpURLConnection.HTTP_OK:
+                    return true;
+
+                case HttpURLConnection.HTTP_FORBIDDEN:
+                    throw new AuthorizationException( "Access denided to: " + url );
+
+                case HttpURLConnection.HTTP_NOT_FOUND:
+                    return false;
+            }
+        } catch ( IOException e )
+        {
+            throw new TransferFailedException( "Error transferring file", e );
+        }
+        
+        return false;
     }
 }
 

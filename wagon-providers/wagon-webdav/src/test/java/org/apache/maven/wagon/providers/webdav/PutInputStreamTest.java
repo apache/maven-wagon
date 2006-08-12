@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
+import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -138,6 +140,18 @@ public class PutInputStreamTest
             throws ConnectionException, AuthenticationException
         {
 
+        }
+
+        public List getFileList( String destinationDirectory )
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+        {
+            return Collections.EMPTY_LIST;
+        }
+
+        public boolean resourceExists( String resourceName )
+            throws TransferFailedException, AuthorizationException
+        {
+            return false;
         }
     }
 }

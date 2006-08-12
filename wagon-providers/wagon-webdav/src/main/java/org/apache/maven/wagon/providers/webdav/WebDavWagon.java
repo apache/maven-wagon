@@ -24,7 +24,10 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.TimeZone;
@@ -45,6 +48,8 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
+import org.apache.webdav.lib.WebdavResource;
+import org.apache.webdav.lib.methods.DepthSupport;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
@@ -532,5 +537,101 @@ public class WebDavWagon
             }
         }
 
+    }
+
+    public List getFileList( String destinationDirectory )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        webdavResource.addRequestHeader( "X-wagon-provider", "wagon-webdav" );
+        webdavResource.addRequestHeader( "X-wagon-version", wagonVersion );
+
+        webdavResource.addRequestHeader( "Cache-control", "no-cache" );
+        webdavResource.addRequestHeader( "Cache-store", "no-store" );
+        webdavResource.addRequestHeader( "Pragma", "no-cache" );
+        webdavResource.addRequestHeader( "Expires", "0" );
+
+        String basedir = repository.getBasedir();
+
+        if ( !destinationDirectory.endsWith( "/" ) )
+        {
+            destinationDirectory += "/";
+        }
+
+        String cleanDestDir = StringUtils.replace( destinationDirectory, "\\", "/" );
+        String dir = PathUtils.dirname( cleanDestDir );
+        dir = StringUtils.replace( dir, "\\", "/" );
+
+        String oldpath = webdavResource.getPath();
+        String relpath = getPath( basedir, dir );
+
+        try
+        {
+            // Test if dest resource path exist.
+            String cdpath = checkUri( relpath + "/" );
+            webdavResource.setPath( cdpath );
+
+            try
+            {
+                webdavResource.setProperties( WebdavResource.NAME, DepthSupport.DEPTH_0 );
+
+                /* seems this is not needed as Webdav client causes a 404 error in webdavResource.setProperties */
+                if ( !webdavResource.exists() )
+                {
+                    throw new ResourceDoesNotExistException( "Destination directory does not exist: " + cdpath );
+                }
+
+                if ( !webdavResource.isCollection() )
+                {
+                    throw new ResourceDoesNotExistException( "Destination path exists but is not a "
+                        + "WebDAV collection (directory): " + cdpath );
+                }
+
+                String[] entries = webdavResource.list();
+
+                List filelist = new ArrayList();
+                if ( entries != null )
+                {
+                    filelist.addAll( Arrays.asList( entries ) );
+                }
+
+                return filelist;
+            }
+            catch ( HttpException e )
+            {
+                if ( e.getReasonCode() == HttpStatus.SC_NOT_FOUND )
+                {
+                    throw new ResourceDoesNotExistException( "Destination directory does not exist: " + cdpath, e );
+                }
+                else
+                {
+                    throw new TransferFailedException( "Unable to obtain file list from WebDAV collection, "
+                        + "HTTP error: " + HttpStatus.getStatusText( e.getReasonCode() ), e );
+                }
+            }
+            finally
+            {
+                webdavResource.setPath( oldpath );
+            }
+
+        }
+        catch ( IOException e )
+        {
+            throw new TransferFailedException( "Unable to obtain file list from WebDAV collection.", e );
+        }
+    }
+
+    public boolean resourceExists( String resourceName )
+        throws TransferFailedException, AuthorizationException 
+    {
+        try
+        {
+            String parentDirectory = PathUtils.dirname( resourceName );
+            List entries = getFileList( parentDirectory );
+            return entries.contains( resourceName );
+        }
+        catch ( ResourceDoesNotExistException e )
+        {
+            return false;
+        }
     }
 }
