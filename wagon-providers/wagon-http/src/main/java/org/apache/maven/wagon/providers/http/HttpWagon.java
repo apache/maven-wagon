@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.Header;
@@ -264,6 +265,7 @@ public class HttpWagon
             getMethod.addRequestHeader( "Cache-store", "no-store" );
             getMethod.addRequestHeader( "Pragma", "no-cache" );
             getMethod.addRequestHeader( "Expires", "0" );
+            getMethod.addRequestHeader( "Accept-Encoding", "gzip" );
 
             if ( timestamp > 0 )
             {
@@ -312,7 +314,7 @@ public class HttpWagon
                         "Failed to transfer file: " + url + " after " + attempt + " attempts" );
 
                 case HttpStatus.SC_FORBIDDEN:
-                    throw new AuthorizationException( "Access denided to: " + url );
+                    throw new AuthorizationException( "Access denied to: " + url );
 
                 case HttpStatus.SC_UNAUTHORIZED:
                     throw new AuthorizationException( "Not authorized." );
@@ -326,7 +328,7 @@ public class HttpWagon
                     //add more entries here
                 default :
                     throw new TransferFailedException(
-                        "Failed to trasfer file: " + url + ". Return code is: " + statusCode );
+                        "Failed to transfer file: " + url + ". Return code is: " + statusCode );
             }
 
             InputStream is = null;
@@ -369,10 +371,17 @@ public class HttpWagon
             if ( timestamp < lastModified )
             {
                 retValue = true;
+                
+                Header contentEncoding = getMethod.getResponseHeader( "Content-Encoding" );
+                boolean isGZipped = contentEncoding == null ? false : "gzip".equalsIgnoreCase(contentEncoding.getValue());
 
                 try
                 {
                     is = getMethod.getResponseBodyAsStream();
+                    if (isGZipped)
+                    {
+                        is = new GZIPInputStream( is );
+                    }
 
                     getTransfer( resource, destination, is );
                 }
@@ -390,7 +399,7 @@ public class HttpWagon
                         }
                     }
 
-                    String msg = "Error occured while deploying to remote repository:" + getRepository();
+                    String msg = "Error occurred while deploying to remote repository:" + getRepository();
 
                     throw new TransferFailedException( msg, e );
                 }
@@ -497,7 +506,7 @@ public class HttpWagon
                     //add more entries here
                 default :
                     throw new TransferFailedException(
-                        "Failed to trasfer file: " + url + ". Return code is: " + statusCode );
+                        "Failed to transfer file: " + url + ". Return code is: " + statusCode );
             }
 
             InputStream is = null;
@@ -558,7 +567,7 @@ public class HttpWagon
                         + " attempts" );
 
                 case HttpStatus.SC_FORBIDDEN:
-                    throw new AuthorizationException( "Access denided to: " + url );
+                    throw new AuthorizationException( "Access denied to: " + url );
 
                 case HttpStatus.SC_UNAUTHORIZED:
                     throw new AuthorizationException( "Not authorized." );
@@ -571,7 +580,7 @@ public class HttpWagon
 
                     //add more entries here
                 default:
-                    throw new TransferFailedException( "Failed to trasfer file: " + url + ". Return code is: "
+                    throw new TransferFailedException( "Failed to transfer file: " + url + ". Return code is: "
                         + statusCode );
             }
         }

@@ -27,6 +27,7 @@ import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.InputData;
@@ -70,11 +71,19 @@ public class LightweightHttpWagon
         {
             URL url = resolveResourceURL( resource );
             URLConnection urlConnection = url.openConnection();
+            urlConnection.setRequestProperty( "Accept-Encoding", "gzip" );
             if ( !useCache )
             {
                 urlConnection.setRequestProperty( "Pragma", "no-cache" );
             }
-            inputData.setInputStream( urlConnection.getInputStream() );
+            InputStream is = urlConnection.getInputStream();
+            String contentEncoding = urlConnection.getHeaderField( "Content-Encoding" );
+            boolean isGZipped = contentEncoding == null ? false : "gzip".equalsIgnoreCase(contentEncoding);
+            if (isGZipped)
+            {
+                is = new GZIPInputStream( is );
+            }
+            inputData.setInputStream( is );
             resource.setLastModified( urlConnection.getLastModified() );
             resource.setContentLength( urlConnection.getContentLength() );
         }

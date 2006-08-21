@@ -21,7 +21,9 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.HttpURL;
@@ -100,6 +102,13 @@ public class CorrectedWebdavResource
 
         if ( isHttpSuccess( statusCode ) )
         {
+            Header contentEncoding = method.getResponseHeader( "Content-Encoding" );
+            boolean isGZipped = contentEncoding == null ? false : "gzip".equalsIgnoreCase(contentEncoding.getValue());
+            
+            if (isGZipped)
+            {
+                return new GZIPInputStream(method.getResponseBodyAsStream());
+            }
             return method.getResponseBodyAsStream();
         }
         else

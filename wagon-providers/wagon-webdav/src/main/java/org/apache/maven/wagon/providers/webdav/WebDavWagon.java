@@ -278,7 +278,7 @@ public class WebDavWagon
                     break;
 
                 case HttpStatus.SC_FORBIDDEN:
-                    throw new AuthorizationException( "Access denided to: " + dest );
+                    throw new AuthorizationException( "Access denied to: " + dest );
 
                 case HttpStatus.SC_NOT_FOUND:
                     throw new ResourceDoesNotExistException( "File: " + dest + " does not exist" );
@@ -313,7 +313,7 @@ public class WebDavWagon
     /**
      * Converts a String url to an HttpURL
      *
-     * @param url String url to conver to an HttpURL
+     * @param url String url to convert to an HttpURL
      * @return an HttpURL object created from the String url
      * @throws URIException
      */
@@ -393,6 +393,7 @@ public class WebDavWagon
         webdavResource.addRequestHeader( "Cache-store", "no-store" );
         webdavResource.addRequestHeader( "Pragma", "no-cache" );
         webdavResource.addRequestHeader( "Expires", "0" );
+        webdavResource.addRequestHeader( "Accept-Encoding", "gzip" );
 
         if ( timestamp > 0 )
         {
@@ -466,7 +467,7 @@ public class WebDavWagon
                 return false;
 
             case HttpStatus.SC_FORBIDDEN:
-                throw new AuthorizationException( "Access denided to: " + url );
+                throw new AuthorizationException( "Access denied to: " + url );
 
             case HttpStatus.SC_UNAUTHORIZED:
                 throw new AuthorizationException( "Not authorized." );
