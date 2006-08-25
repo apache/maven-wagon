@@ -368,7 +368,8 @@ public class HttpWagon
                 fireTransferDebug( "last-modified = " + lastModifiedHeader.getValue() + " (" + lastModified + ")" );
             }
 
-            if ( timestamp < lastModified )
+            // always get if timestamp is 0 (ie, target doesn't exist), otherwise only if older than the remote file
+            if ( timestamp == 0 || timestamp < lastModified )
             {
                 retValue = true;
                 
