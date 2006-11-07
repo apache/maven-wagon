@@ -25,13 +25,19 @@
       <name>Maven Wagon User List</name>
       <subscribe>wagon-users-subscribe@maven.apache.org</subscribe>
       <unsubscribe>wagon-users-unsubscribe@maven.apache.org</unsubscribe>
-      <archive>http://nagoya.apache.org/eyebrowse/SummarizeList?listName=wagon-users@maven.apache.org</archive>
+      <archive>http://mail-archives.apache.org/mod_mbox/maven-wagon-users/</archive>
     </mailingList>
     <mailingList>
       <name>Maven Wagon Developer List</name>
       <subscribe>wagon-dev-subscribe@maven.apache.org</subscribe>
       <unsubscribe>wagon-dev-unsubscribe@maven.apache.org</unsubscribe>
-      <archive>http://nagoya.apache.org/eyebrowse/SummarizeList?listName=wagon-dev@maven.apache.org</archive>
+      <archive>http://mail-archives.apache.org/mod_mbox/maven-wagon-dev/</archive>
+    </mailingList>
+    <mailingList>
+      <name>Maven Commits List</name>
+      <subscribe>wagon-commits-subscribe@maven.apache.org</subscribe>
+      <unsubscribe>wagon-commits-unsubscribe@maven.apache.org</unsubscribe>
+      <archive>http://mail-archives.apache.org/mod_mbox/maven-wagon-commits/</archive>
     </mailingList>
   </mailingLists>
   <developers>
