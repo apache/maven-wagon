@@ -20,6 +20,7 @@
     <module>wagon-ssh-common</module>
     <module>wagon-ssh-common-test</module>
     <module>wagon-ssh</module>
+    <module>wagon-ssh-ganymed</module>
     <module>wagon-webdav</module>
   </modules>
   <dependencies>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <artifactId>wagon-providers</artifactId>
+    <groupId>org.apache.maven.wagon</groupId>
+    <version>1.0-beta-2-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>wagon-ssh-ganymed</artifactId>
+  <name>Maven Wagon Ganymed SSH Provider</name>
+
+  <issueManagement>
+    <system>jira</system>
+    <url>http://jira.codehaus.org/browse/WAGONSSH</url>
+  </issueManagement>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!-- These require an ssh server on localhost -->
+          <excludes>
+            <!--
+                        <exclude>**/ScpWagon*Test.*</exclude>
+                        <exclude>**/SshCommandExecutorTest.*</exclude>
+            -->
+            <!-- Don't pass yet -->
+            <exclude>**/KnownHostsProviderTest.*</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <!-- TODO: push common code into a common place -->
+  <dependencies>
+    <dependency>
+      <groupId>ch.ethz.ganymed</groupId>
+      <artifactId>ganymed-ssh2</artifactId>
+      <version>build210</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-utils</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.wagon</groupId>
+      <artifactId>wagon-ssh-common</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.wagon</groupId>
+      <artifactId>wagon-ssh-common-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>
