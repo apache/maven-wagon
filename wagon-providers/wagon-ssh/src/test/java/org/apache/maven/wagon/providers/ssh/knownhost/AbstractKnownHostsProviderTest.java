@@ -16,12 +16,11 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
  * limitations under the License.
  */
 
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
-import junit.framework.TestCase;
-import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
+import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.providers.ssh.AbstractSshWagon;
 import org.apache.maven.wagon.providers.ssh.TestData;
+import org.apache.maven.wagon.repository.Repository;
+import org.codehaus.plexus.PlexusTestCase;
 
 /**
  * Generic Unit test for <code>KnownHostsProvider</code>
@@ -31,15 +30,17 @@ import org.apache.maven.wagon.providers.ssh.TestData;
  * @since Sep 12, 2005
  */
 public abstract class AbstractKnownHostsProviderTest
-    extends TestCase
+    extends PlexusTestCase
 {
     protected KnownHostsProvider okHostsProvider;
 
     protected KnownHostsProvider failHostsProvider;
 
-    protected final String user = TestData.getUserName();
+    protected KnownHostsProvider changedHostsProvider;
 
-    protected String host;
+    private AbstractSshWagon wagon;
+
+    private Repository source;
 
     /**
      * tests what happens if the remote host has a different key than the one
@@ -50,18 +51,39 @@ public abstract class AbstractKnownHostsProviderTest
     public void testIncorrectKey()
         throws Exception
     {
-        final JSch sch = new JSch();
+        wagon.setKnownHostsProvider( failHostsProvider );
 
-        failHostsProvider.addKnownHosts( sch, null );
         try
         {
-            sch.getSession( user, host ).connect();
+            wagon.connect( source );
 
             fail( "Should not have successfully connected - host is not known" );
         }
-        catch ( JSchException e )
+        catch ( UnknownHostException e )
         {
-            assertTrue( e.getMessage().startsWith( "UnknownHostKey:" ) );
+            // ok
+        }
+    }
+
+    /**
+     * tests what happens if the remote host has changed since being recorded.
+     *
+     * @throws Exception on error
+     */
+    public void testChangedKey()
+        throws Exception
+    {
+        wagon.setKnownHostsProvider( changedHostsProvider );
+
+        try
+        {
+            wagon.connect( source );
+
+            fail( "Should not have successfully connected - host is changed" );
+        }
+        catch ( KnownHostChangedException e )
+        {
+            // ok
         }
     }
 
@@ -73,20 +95,19 @@ public abstract class AbstractKnownHostsProviderTest
     public void testCorrectKey()
         throws Exception
     {
-        final JSch sch = new JSch();
-        sch.addIdentity( TestData.getPrivateKey().getAbsolutePath(), "" );
+        wagon.setKnownHostsProvider( okHostsProvider );
 
-        okHostsProvider.addKnownHosts( sch, null );
+        wagon.connect( source );
+    }
 
-        final Session session = sch.getSession( user, host );
+    protected void setUp()
+        throws Exception
+    {
+        super.setUp();
+        source =
+            new Repository( "test", "scp://" + TestData.getUserName() + "@" + TestData.getHostname() + "/tmp/foo" );
 
-        try
-        {
-            session.connect();
-        }
-        catch ( JSchException e )
-        {
-            assertFalse( e.getMessage().indexOf( "UnknownHostKey") >= 0 );
-        }
+        wagon = (AbstractSshWagon) lookup( Wagon.ROLE, "scp" );
+        wagon.setInteractive( false );
     }
 }

@@ -1,7 +1,7 @@
 package org.apache.maven.wagon.providers.ssh.knownhost;
 
 /*
- * Copyright 2001-2005 The Apache Software Foundation.
+ * Copyright 2001-2006 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,16 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
  * limitations under the License.
  */
 
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.UserInfo;
-import org.apache.maven.wagon.TransferFailedException;
-
-import java.util.Properties;
+import org.apache.maven.wagon.authentication.AuthenticationException;
 
 /**
- * Dummy <code>KnownHostsProvider</code>
- *
- * @author Juan F. Codagnone
- * @since Sep 12, 2005
+ * Exception related to known_host check failures.
  */
-public final class NullKnownHostProvider
-    extends AbstractKnownHostsProvider
+public class UnknownHostException
+    extends AuthenticationException
 {
+    public UnknownHostException( String host, Throwable cause )
+    {
+        super( "The host was not known and was not accepted by the configuration: " + host, cause );
+    }
 }

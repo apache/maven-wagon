@@ -31,34 +31,10 @@ public class SingleKnownHostProvider
     extends AbstractKnownHostsProvider
 {
     /**
-     * the host ...
-     */
-    private String host;
-
-    /**
-     * the key ...
-     */
-    private String key;
-
-    public SingleKnownHostProvider()
-    {
-    }
-
-    /**
      * Creates the SingleKnownHostProvider.
      */
     public SingleKnownHostProvider( String host, String key )
     {
-        this.host = host;
-        this.key = key;
-    }
-
-    /**
-     * @see KnownHostsProvider#addKnownHosts(com.jcraft.jsch.JSch, UserInfo)
-     */
-    public void addKnownHosts( JSch sch, UserInfo userInfo )
-    {
-        HostKeyRepository hkr = sch.getHostKeyRepository();
-        hkr.add( host, Base64.decodeBase64( key.getBytes() ), userInfo );
+        this.contents = host + " ssh-rsa " + key + "\n";
     }
 }

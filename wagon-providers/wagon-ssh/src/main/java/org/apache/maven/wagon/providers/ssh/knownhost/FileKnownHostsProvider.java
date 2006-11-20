@@ -2,7 +2,6 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
 
 import com.jcraft.jsch.HostKey;
 import com.jcraft.jsch.HostKeyRepository;
-import com.jcraft.jsch.JSch;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -13,6 +12,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 
 import org.codehaus.plexus.util.IOUtil;
+import org.codehaus.plexus.util.FileUtils;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
@@ -66,32 +66,11 @@ public class FileKnownHostsProvider
         this( new File( System.getProperty( "user.home" ), ".ssh/known_hosts" ) );
     }
 
-    public void storeKnownHosts( JSch sch )
+    public void storeKnownHosts( String contents )
+        throws IOException
     {
-        PrintWriter w = null;
-        try
-        {
-            w = new PrintWriter( new FileWriter( file ) );
-
-            HostKeyRepository hkr = sch.getHostKeyRepository();
-            HostKey[] keys = hkr.getHostKey();
-
-            for ( int i = 0; i < keys.length; i++ )
-            {
-                HostKey key = keys[i];
-                w.println( key.getHost() + " " + key.getType() + " " + key.getKey() );
-            }
-        }
-        catch ( IOException e )
-        {
-            // TODO: log it
-        }
-        finally
-        {
-            IOUtil.close( w );
-        }
-
-        super.storeKnownHosts( sch );
+        file.getParentFile().mkdirs();
+        FileUtils.fileWrite( file.getAbsolutePath(), contents );
     }
 
     public File getFile()

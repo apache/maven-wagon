@@ -35,10 +35,6 @@ import java.io.IOException;
 public class StreamKnownHostsProvider
     extends AbstractKnownHostsProvider
 {
-    /**
-     * the known hosts, in the openssh format
-     */
-    private final String contents;
 
     public StreamKnownHostsProvider( InputStream stream )
         throws IOException
@@ -53,14 +49,5 @@ public class StreamKnownHostsProvider
         {
             IOUtil.close( stream );
         }
-    }
-
-    /**
-     * @see KnownHostsProvider#addKnownHosts(com.jcraft.jsch.JSch, UserInfo)
-     */
-    public void addKnownHosts( JSch sch, UserInfo userInfo )
-        throws JSchException
-    {
-        sch.setKnownHosts( new StringInputStream( contents ) );
     }
 }

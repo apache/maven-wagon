@@ -17,6 +17,8 @@ package org.apache.maven.wagon.providers.ssh;
  */
 
 import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.HostKey;
+import com.jcraft.jsch.HostKeyRepository;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Proxy;
@@ -40,10 +42,13 @@ import org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo;
 import org.apache.maven.wagon.providers.ssh.interactive.NullInteractiveUserInfo;
 import org.apache.maven.wagon.providers.ssh.interactive.UserInfoUIKeyboardInteractiveProxy;
 import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
+import org.apache.maven.wagon.providers.ssh.knownhost.UnknownHostException;
+import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostChangedException;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
+import org.codehaus.plexus.util.StringInputStream;
 import org.codehaus.plexus.util.StringUtils;
 
 import java.io.BufferedReader;
@@ -52,7 +57,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -140,21 +147,16 @@ public abstract class AbstractSshWagon
             }
         }
 
-        Properties config = new Properties();
-        config.setProperty( "BatchMode", interactive ? "no" : "yes" );
-
         if ( !interactive )
         {
             interactiveUserInfo = new NullInteractiveUserInfo();
             uIKeyboardInteractive = null;
         }
 
-        knownHostsProvider.addConfiguration( config );
-
-        initJsch( privateKey, host, port, config );
+        initJsch( privateKey, host, port );
     }
 
-    private void initJsch( File privateKey, String host, int port, Properties config )
+    private void initJsch( File privateKey, String host, int port )
         throws AuthenticationException
     {
         JSch sch = new JSch();
@@ -217,37 +219,80 @@ public abstract class AbstractSshWagon
             ui = new UserInfoUIKeyboardInteractiveProxy( ui, uIKeyboardInteractive );
         }
 
+        Properties config = new Properties();
         if ( knownHostsProvider != null )
         {
             try
             {
-                knownHostsProvider.addKnownHosts( sch, ui );
+                String contents = knownHostsProvider.getContents();
+                if ( contents != null )
+                {
+                    sch.setKnownHosts( new StringInputStream( contents ) );
+                }
             }
             catch ( JSchException e )
             {
                 fireSessionError( e );
                 // continue without known_hosts
             }
+            config.setProperty( "StrictHostKeyChecking", knownHostsProvider.getHostKeyChecking() );
         }
+
+        config.setProperty( "BatchMode", interactive ? "no" : "yes" );
 
         session.setConfig( config );
 
         session.setUserInfo( ui );
 
+        StringWriter stringWriter = new StringWriter();
         try
         {
             session.connect();
 
             if ( knownHostsProvider != null )
             {
-                knownHostsProvider.storeKnownHosts( sch );
+                PrintWriter w = new PrintWriter( stringWriter );
+
+                HostKeyRepository hkr = sch.getHostKeyRepository();
+                HostKey[] keys = hkr.getHostKey();
+
+                for ( int i = 0; i < keys.length; i++ )
+                {
+                    HostKey key = keys[i];
+                    w.println( key.getHost() + " " + key.getType() + " " + key.getKey() );
+                }
             }
         }
         catch ( JSchException e )
         {
             fireSessionError( e );
 
-            throw new AuthenticationException( "Cannot connect. Reason: " + e.getMessage(), e );
+            if ( e.getMessage().startsWith( "UnknownHostKey:" ) || e.getMessage().startsWith( "reject HostKey:") )
+            {
+                throw new UnknownHostException( host, e );
+            }
+            else if ( e.getMessage().indexOf( "HostKey has been changed" ) >= 0 )
+            {
+                throw new KnownHostChangedException( host, e );
+            }
+            else
+            {
+                throw new AuthenticationException( "Cannot connect. Reason: " + e.getMessage(), e );
+            }
+        }
+
+        try
+        {
+            knownHostsProvider.storeKnownHosts( stringWriter.toString() );
+        }
+        catch ( IOException e )
+        {
+            closeConnection();
+
+            fireSessionError( e );
+
+            throw new AuthenticationException(
+                "Connection aborted - failed to write to known_hosts. Reason: " + e.getMessage(), e );
         }
     }
 

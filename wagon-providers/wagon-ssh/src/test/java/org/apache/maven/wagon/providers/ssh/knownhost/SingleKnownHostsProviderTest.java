@@ -1,7 +1,5 @@
 package org.apache.maven.wagon.providers.ssh.knownhost;
 
-import org.apache.maven.wagon.providers.ssh.TestData;
-
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
  *
@@ -18,6 +16,8 @@ import org.apache.maven.wagon.providers.ssh.TestData;
  * limitations under the License.
  */
 
+import org.apache.maven.wagon.providers.ssh.TestData;
+
 /**
  * Unit test for <code>SingleKnownHostProvider</code>
  *
@@ -28,17 +28,18 @@ import org.apache.maven.wagon.providers.ssh.TestData;
 public class SingleKnownHostsProviderTest
     extends AbstractKnownHostsProviderTest
 {
-    private final String correctKey = TestData.getHostKey();
+    private final String CORRECT_KEY = TestData.getHostKey();
 
-    private final String incorrectKey = "thisisawrongkey=";
+    private static final String CHANGED_KEY =
+        "AAAAB3NzaC1yc2EAAAABIwAAAQEA8VLKkfHl2CNqW+m0603z07dyweWzzdVGQlMPUX4z1264E7M/h+6lPKiOo+u49CL7eQVA+FtWTZoJ3oBAMABcKnHx41TnSpQUkbdR6rzyC6IG1lXiVtEjG2w7DUnxpCtVo5PaQuJobwoXv5NNL3vx03THPgcDJquLPWvGnDWhnXoEh3/6c7rprwT+PrjZ6LIT35ZCUGajoehhF151oNbFMQHllfR6EAiZIP0z0nIVI+Jiv6g+XZapumVPVYjdOfxvLKQope1H9HJamT3bDIm8mkebUB10DzQJYxFt4/0wiNH3L4jsIFn+CiW1/IQm5yyff1CUO87OqVbtp9BlaXZNmw==";
 
     protected void setUp()
         throws Exception
     {
         super.setUp();
 
-        this.host = TestData.getHostname();
-        this.okHostsProvider = new SingleKnownHostProvider( host, correctKey );
-        this.failHostsProvider = new SingleKnownHostProvider( host, incorrectKey );
+        this.okHostsProvider = new SingleKnownHostProvider( TestData.getHostname(), CORRECT_KEY );
+        this.failHostsProvider = new SingleKnownHostProvider( "beaver.codehaus.org", CORRECT_KEY );
+        this.changedHostsProvider = new SingleKnownHostProvider( TestData.getHostname(), CHANGED_KEY );
     }
 }

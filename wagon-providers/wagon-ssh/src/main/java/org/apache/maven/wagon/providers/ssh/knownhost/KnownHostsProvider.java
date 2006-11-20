@@ -21,6 +21,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.UserInfo;
 
 import java.util.Properties;
+import java.io.IOException;
 
 /**
  * Provides a way to add Known Hosts fingerprints to the JSch transport
@@ -32,21 +33,12 @@ public interface KnownHostsProvider
 {
     String ROLE = KnownHostsProvider.class.getName();
 
-    String HOST_KEY_CHECKING = "StrictHostKeyChecking";
-
-    /**
-     * Adds to the session all the known hosts
-     * 
-     * @param sch JSch transport
-     */
-    void addKnownHosts( JSch sch, UserInfo userInfo )
-        throws JSchException;
-
-    void addConfiguration( Properties config );
-
-    void storeKnownHosts( JSch sch );
+    void storeKnownHosts( String contents )
+        throws IOException;
 
     void setHostKeyChecking( String hostKeyChecking );
 
     String getHostKeyChecking();
+
+    String getContents();
 }

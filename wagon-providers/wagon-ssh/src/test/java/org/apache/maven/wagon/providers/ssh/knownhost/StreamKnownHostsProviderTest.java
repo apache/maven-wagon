@@ -16,8 +16,11 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
  * limitations under the License.
  */
 
-import java.io.InputStream;
+import org.apache.maven.wagon.providers.ssh.TestData;
+import org.codehaus.plexus.util.StringInputStream;
+
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Unit test for <code>StreamKnownHostsProviderTest</code>
@@ -34,9 +37,10 @@ public class StreamKnownHostsProviderTest
     {
         super.setUp();
 
-        host = "beaver.codehaus.org";
-        okHostsProvider = getProvider( "ok.knownhosts" );
+        okHostsProvider = new StreamKnownHostsProvider(
+            new StringInputStream( TestData.getHostname() + " ssh-rsa " + TestData.getHostKey() + "\n" ) );
         failHostsProvider = getProvider( "fail.knownhosts" );
+        changedHostsProvider = getProvider( "changed.knownhosts" );
     }
 
     private StreamKnownHostsProvider getProvider( String s )

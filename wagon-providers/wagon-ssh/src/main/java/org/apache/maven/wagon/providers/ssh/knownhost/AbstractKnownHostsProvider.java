@@ -16,9 +16,6 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
  * limitations under the License.
  */
 
-import com.jcraft.jsch.JSch;
-
-import java.util.Properties;
 import java.io.IOException;
 
 /**
@@ -30,12 +27,15 @@ import java.io.IOException;
 public abstract class AbstractKnownHostsProvider
     implements KnownHostsProvider
 {
-    private String hostKeyChecking;
+    /**
+     * Valid values are ask, yes, no.
+     */
+    private String hostKeyChecking = "yes";
 
-    public void addConfiguration( Properties config )
-    {
-        config.setProperty( HOST_KEY_CHECKING, hostKeyChecking );
-    }
+    /**
+     * the known hosts, in the openssh format
+     */
+    protected String contents;
 
     public void setHostKeyChecking( String hostKeyChecking )
     {
@@ -47,7 +47,13 @@ public abstract class AbstractKnownHostsProvider
         return hostKeyChecking;
     }
 
-    public void storeKnownHosts( JSch sch )
+    public String getContents()
+    {
+        return contents;
+    }
+
+    public void storeKnownHosts( String contents )
+        throws IOException
     {
     }
 }
