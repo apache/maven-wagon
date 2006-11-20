@@ -3,7 +3,7 @@
     <component>
       <role>org.apache.maven.wagon.Wagon</role>
       <role-hint>scp</role-hint>
-      <implementation>org.apache.maven.wagon.providers.ssh.ScpWagon</implementation>
+      <implementation>org.apache.maven.wagon.providers.ssh.jsch.ScpWagon</implementation>
       <instantiation-strategy>per-lookup</instantiation-strategy>
       <requirements>
         <requirement>
@@ -21,7 +21,7 @@
     <component>
       <role>org.apache.maven.wagon.Wagon</role>
       <role-hint>sftp</role-hint>
-      <implementation>org.apache.maven.wagon.providers.ssh.SftpWagon</implementation>
+      <implementation>org.apache.maven.wagon.providers.ssh.jsch.SftpWagon</implementation>
       <instantiation-strategy>per-lookup</instantiation-strategy>
       <requirements>
         <requirement>
@@ -38,7 +38,7 @@
     </component>
     <component>
       <role>org.apache.maven.wagon.CommandExecutor</role>
-      <implementation>org.apache.maven.wagon.providers.ssh.ScpWagon</implementation>
+      <implementation>org.apache.maven.wagon.providers.ssh.jsch.ScpWagon</implementation>
       <instantiation-strategy>per-lookup</instantiation-strategy>
       <requirements>
         <requirement>
@@ -55,7 +55,8 @@
     </component>
     <component>
       <role>com.jcraft.jsch.UIKeyboardInteractive</role>
-      <implementation>org.apache.maven.wagon.providers.ssh.interactive.PrompterUIKeyboardInteractive</implementation>
+      <implementation>org.apache.maven.wagon.providers.ssh.jsch.interactive.PrompterUIKeyboardInteractive
+      </implementation>
       <requirements>
         <requirement>
           <role>org.codehaus.plexus.components.interactivity.Prompter</role>

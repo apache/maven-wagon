@@ -1,7 +1,7 @@
 package org.apache.maven.wagon;
 
 /*
- * Copyright 2001-2005 The Apache Software Foundation.
+ * Copyright 2001-2006 The Apache Software Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,29 @@ package org.apache.maven.wagon;
  * limitations under the License.
  */
 
-/**
- * @author <a href="mailto:brett@apache.org">Brett Porter</a>
- * @version $Id$
- */
-public interface CommandExecutor
-    extends Wagon
+public class Streams
 {
-    String ROLE = CommandExecutor.class.getName();
+    private String out = "";
 
-    void executeCommand( String command )
-        throws CommandExecutionException;
+    private String err = "";
 
-    Streams executeCommand( String command, boolean ignoreFailures )
-        throws CommandExecutionException;
+    public String getOut()
+    {
+        return out;
+    }
+
+    public void setOut( String out )
+    {
+        this.out = out;
+    }
+
+    public String getErr()
+    {
+        return err;
+    }
+
+    public void setErr( String err )
+    {
+        this.err = err;
+    }
 }

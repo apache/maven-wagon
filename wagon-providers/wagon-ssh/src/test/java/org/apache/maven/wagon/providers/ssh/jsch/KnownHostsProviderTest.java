@@ -1,4 +1,6 @@
-package org.apache.maven.wagon;
+package org.apache.maven.wagon.providers.ssh.jsch;
+
+import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProviderTestCase;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
@@ -17,17 +19,14 @@ package org.apache.maven.wagon;
  */
 
 /**
- * @author <a href="mailto:brett@apache.org">Brett Porter</a>
- * @version $Id$
+ * Generic Unit test for <code>KnownHostsProvider</code>
+ *
+ * @author Juan F. Codagnone
+ * @see org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider
+ * @since Sep 12, 2005
  */
-public interface CommandExecutor
-    extends Wagon
+public class KnownHostsProviderTest
+    extends KnownHostsProviderTestCase
 {
-    String ROLE = CommandExecutor.class.getName();
 
-    void executeCommand( String command )
-        throws CommandExecutionException;
-
-    Streams executeCommand( String command, boolean ignoreFailures )
-        throws CommandExecutionException;
 }

@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.ssh;
+package org.apache.maven.wagon.providers.ssh.jsch;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
@@ -16,21 +16,34 @@ package org.apache.maven.wagon.providers.ssh;
  * limitations under the License.
  */
 
-import org.apache.maven.wagon.CommandExecutorTestCase;
-import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.WagonTestCase;
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.providers.ssh.TestData;
 
 /**
- * Test the command executor.
- *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  * @version $Id$
  */
-public class SshCommandExecutorTest
-    extends CommandExecutorTestCase
+public class SftpWagonTest
+    extends WagonTestCase
 {
-
-    protected Repository getTestRepository()
+    protected String getProtocol()
     {
-        return new Repository( "test", "scp://localhost/" );
+        return "sftp";
     }
+
+    public String getTestRepositoryUrl()
+    {
+        return TestData.getTestRepositoryUrl();
+    }
+
+    protected AuthenticationInfo getAuthInfo()
+    {
+        AuthenticationInfo authInfo = super.getAuthInfo();
+
+        authInfo.setUserName( TestData.getUserName() );
+
+        return authInfo;
+    }
+
 }

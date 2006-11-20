@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.ssh.knownhost;
+package org.apache.maven.wagon.providers.ssh.jsch;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
@@ -16,15 +16,21 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
  * limitations under the License.
  */
 
+import org.apache.maven.wagon.CommandExecutorTestCase;
+import org.apache.maven.wagon.repository.Repository;
+
 /**
- * Generic Unit test for <code>KnownHostsProvider</code>
+ * Test the command executor.
  *
- * @author Juan F. Codagnone
- * @see org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider
- * @since Sep 12, 2005
+ * @author <a href="mailto:brett@apache.org">Brett Porter</a>
+ * @version $Id$
  */
-public class KnownHostsProviderTest
-    extends KnownHostsProviderTestCase
+public class SshCommandExecutorTest
+    extends CommandExecutorTestCase
 {
 
+    protected Repository getTestRepository()
+    {
+        return new Repository( "test", "scp://localhost/" );
+    }
 }

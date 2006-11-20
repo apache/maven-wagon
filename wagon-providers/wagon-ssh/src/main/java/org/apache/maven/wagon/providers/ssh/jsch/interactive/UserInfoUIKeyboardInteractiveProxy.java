@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.ssh.interactive;
+package org.apache.maven.wagon.providers.ssh.jsch.interactive;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
@@ -40,7 +40,7 @@ public class UserInfoUIKeyboardInteractiveProxy
     }
 
     /**
-     * @see com.jcraft.jsch.UIKeyboardInteractive#promptKeyboardInteractive(String, String, String, String[], boolean[])
+     * @see com.jcraft.jsch.UIKeyboardInteractive#promptKeyboardInteractive(String,String,String,String[],boolean[])
      */
     public String[] promptKeyboardInteractive( String destination, String name, String instruction, String[] prompt,
                                                boolean[] echo )

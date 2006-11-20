@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.ssh;
+package org.apache.maven.wagon.providers.ssh.jsch;
 
 /*
  * Copyright 2001-2006 The Apache Software Foundation.
@@ -19,15 +19,13 @@ package org.apache.maven.wagon.providers.ssh;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
 import org.apache.maven.wagon.CommandExecutionException;
-import org.apache.maven.wagon.PathUtils;
-import org.apache.maven.wagon.PermissionModeUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.providers.ssh.ScpHelper;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.StringUtils;
 
 import java.io.EOFException;
 import java.io.File;
@@ -48,69 +46,36 @@ import java.io.OutputStream;
  * @todo [BP] add compression flag
  */
 public class ScpWagon
-    extends AbstractSshWagon
+    extends AbstractJschWagon
 {
-    private static final char PATH_SEPARATOR = '/';
-
-    private static final char COPY_START_CHAR = 'C';
-
-    private static final char ACK_SEPARATOR = ' ';
-
-    private static final String END_OF_FILES_MSG = "E\n";
-
-    public void put( File source, String resourceName )
+    public void put( File source, String destination )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         String basedir = getRepository().getBasedir();
 
-        resourceName = StringUtils.replace( resourceName, "\\", "/" );
-        String dir = PathUtils.dirname( resourceName );
-        dir = StringUtils.replace( dir, "\\", "/" );
+        Resource resource = getResource( destination );
 
-        Resource resource = new Resource( resourceName );
+        String dir = getResourceDirectory( resource.getName() );
 
         firePutInitiated( resource, source );
 
-        try
-        {
-            String umaskCmd = null;
-            if ( getRepository().getPermissions() != null )
-            {
-                String dirPerms = getRepository().getPermissions().getDirectoryMode();
-
-                if ( dirPerms != null )
-                {
-                    umaskCmd = "umask " + PermissionModeUtils.getUserMaskFor( dirPerms );
-                }
-            }
-
-            String mkdirCmd = "mkdir -p " + getPath( basedir, dir );
-
-            if ( umaskCmd != null )
-            {
-                mkdirCmd = umaskCmd + "; " + mkdirCmd;
-            }
-
-            executeCommand( mkdirCmd );
-        }
-        catch ( CommandExecutionException e )
-        {
-            throw new TransferFailedException( "Error performing commands for file transfer", e );
-        }
-
-        OutputStream out = null;
-
-        String path = getPath( basedir, resourceName );
+        ScpHelper.createRemoteDirectories( getPath( basedir, dir ), getRepository().getPermissions(), this );
 
         RepositoryPermissions permissions = getRepository().getPermissions();
 
-        scpJsch( path, out, source, resourceName, resource, getOctalMode( permissions ) );
+        put( source, basedir, resource, getOctalMode( permissions ) );
 
+        setFileGroup( permissions, basedir, resource );
+    }
+
+    private void setFileGroup( RepositoryPermissions permissions, String basedir, Resource resource )
+        throws TransferFailedException
+    {
         try
         {
             if ( permissions != null && permissions.getGroup() != null )
             {
-                executeCommand( "chgrp -f " + permissions.getGroup() + " " + path );
+                executeCommand( "chgrp -f " + permissions.getGroup() + " " + getPath( basedir, resource.getName() ) );
             }
         }
         catch ( CommandExecutionException e )
@@ -119,12 +84,45 @@ public class ScpWagon
         }
     }
 
-    private void scpJsch( String path, OutputStream out, File source, String resourceName, Resource resource,
-                          String mode )
+    public void get( String resourceName, File destination )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        String basedir = getRepository().getBasedir();
+
+        Resource resource = new Resource( resourceName );
+
+        fireGetInitiated( resource, destination );
+
+        get( basedir, resource, destination );
+    }
+
+    public boolean getIfNewer( String resourceName, File destination, long timestamp )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        // TODO Implement ScpWagon.getIfNewer()
+        throw new UnsupportedOperationException( "getIfNewer in scp wagon is not implemented" );
+    }
+
+    private static final char COPY_START_CHAR = 'C';
+
+    private static final char ACK_SEPARATOR = ' ';
+
+    private static final String END_OF_FILES_MSG = "E\n";
+
+    private static final int LINE_BUFFER_SIZE = 8192;
+
+    private static final byte LF = '\n';
+
+    public void put( File source, String basedir, Resource resource, String octalMode )
         throws TransferFailedException
     {
+        String path = getPath( basedir, resource.getName() );
+
+        String resourceName = resource.getName();
+
         ChannelExec channel = null;
 
+        OutputStream out = null;
         try
         {
             // exec 'scp -t -d rfile' remotely
@@ -148,7 +146,7 @@ public class ScpWagon
             // send "C0644 filesize filename", where filename should not include '/'
             long filesize = source.length();
 
-            command = "C" + mode + " " + filesize + " ";
+            command = "C" + octalMode + " " + filesize + " ";
 
             if ( resourceName.lastIndexOf( PATH_SEPARATOR ) > 0 )
             {
@@ -202,30 +200,6 @@ public class ScpWagon
         }
     }
 
-    private String getOctalMode( RepositoryPermissions permissions )
-    {
-        String mode = "0644";
-        if ( permissions != null && permissions.getFileMode() != null )
-        {
-            if ( permissions.getFileMode().matches( "[0-9]{3,4}" ) )
-            {
-                mode = permissions.getFileMode();
-
-                if ( mode.length() == 3 )
-                {
-                    mode = "0" + mode;
-                }
-            }
-            else
-            {
-                // TODO: calculate?
-                // TODO: as warning
-                fireSessionDebug( "Not using non-octal permissions: " + mode );
-            }
-        }
-        return mode;
-    }
-
     private void checkAck( InputStream in )
         throws IOException, TransferFailedException
     {
@@ -250,25 +224,13 @@ public class ScpWagon
         }
     }
 
-    public void get( String resourceName, File destination )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        Resource resource = new Resource( resourceName );
-
-        fireGetInitiated( resource, destination );
-
-        String basedir = getRepository().getBasedir();
-
-        getJsch( basedir, resourceName, resource, destination, getPath( basedir, resourceName ) );
-    }
-
-    private void getJsch( String basedir, String resourceName, Resource resource, File destination, String path )
+    public void get( String basedir, Resource resource, File destination )
         throws ResourceDoesNotExistException, TransferFailedException
     {
+        String path = getPath( basedir, resource.getName() );
+
         //I/O streams for remote scp
         OutputStream out = null;
-
-        InputStream in;
 
         ChannelExec channel = null;
 
@@ -285,7 +247,7 @@ public class ScpWagon
             // get I/O streams for remote scp
             out = channel.getOutputStream();
 
-            in = channel.getInputStream();
+            InputStream in = channel.getInputStream();
 
             channel.connect();
 
@@ -376,11 +338,40 @@ public class ScpWagon
         }
     }
 
-    public boolean getIfNewer( String resourceName, File destination, long timestamp )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    protected String readLine( InputStream in )
+        throws IOException
     {
-        // TODO Implement ScpWagon.getIfNewer()
-        throw new UnsupportedOperationException( "getIfNewer in scp wagon is not implemented" );
+        StringBuffer sb = new StringBuffer();
+
+        while ( true )
+        {
+            if ( sb.length() > LINE_BUFFER_SIZE )
+            {
+                throw new IOException( "Remote server sent a too long line" );
+            }
+
+            int c = in.read();
+
+            if ( c < 0 )
+            {
+                throw new IOException( "Remote connection terminated unexpectedly." );
+            }
+
+            if ( c == LF )
+            {
+                break;
+            }
+
+            sb.append( (char) c );
+        }
+        return sb.toString();
     }
 
+    protected static void sendEom( OutputStream out )
+        throws IOException
+    {
+        out.write( 0 );
+
+        out.flush();
+    }
 }

@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.ssh;
+package org.apache.maven.wagon.providers.ssh.jsch;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
@@ -18,19 +18,18 @@ package org.apache.maven.wagon.providers.ssh;
 
 import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
-
-import java.io.File;
+import org.apache.maven.wagon.providers.ssh.TestData;
 
 /**
- * @author <a href="mailto:brett@apache.org">Brett Porter</a>
+ * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  */
-public class SftpWagonTest
+public class ScpWagonWithSshPrivateKeySearchTest
     extends WagonTestCase
 {
     protected String getProtocol()
     {
-        return "sftp";
+        return "scp";
     }
 
     public String getTestRepositoryUrl()
@@ -38,13 +37,17 @@ public class SftpWagonTest
         return TestData.getTestRepositoryUrl();
     }
 
+
     protected AuthenticationInfo getAuthInfo()
     {
         AuthenticationInfo authInfo = super.getAuthInfo();
 
         authInfo.setUserName( TestData.getUserName() );
 
+        authInfo.setPassphrase( "" );
+
         return authInfo;
     }
+
 
 }

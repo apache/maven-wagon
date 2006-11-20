@@ -25,7 +25,7 @@
             <exclude>**/ScpWagon*Test.*</exclude>
             <exclude>**/SftpWagonTest.*</exclude>
             <exclude>**/SshCommandExecutorTest.*</exclude>
-            <exclude>**/knownhost/**</exclude>
+            <exclude>**/KnownHostsProviderTest.*</exclude>
           </excludes>
         </configuration>
       </plugin>

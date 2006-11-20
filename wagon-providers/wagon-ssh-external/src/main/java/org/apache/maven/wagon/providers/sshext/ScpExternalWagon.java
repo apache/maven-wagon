@@ -16,21 +16,13 @@ package org.apache.maven.wagon.providers.sshext;
  * limitations under the License.
  */
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.CommandExecutionException;
 import org.apache.maven.wagon.CommandExecutor;
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.PermissionModeUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
+import org.apache.maven.wagon.Streams;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.authentication.AuthenticationException;
@@ -45,6 +37,15 @@ import org.codehaus.plexus.util.cli.CommandLineException;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
 import org.codehaus.plexus.util.cli.Commandline;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * SCP deployer using "external" scp program.  To allow for
  * ssh-agent type behavior, until we can construct a Java SSH Agent and interface for JSch.
@@ -52,6 +53,7 @@ import org.codehaus.plexus.util.cli.Commandline;
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  * @version $Id$
  * @todo [BP] add compression flag
+ * TODO! this can be shared with ssh-commons now
  */
 public class ScpExternalWagon
     extends AbstractWagon
@@ -92,12 +94,6 @@ public class ScpExternalWagon
     private String password;
 
     private static final int SSH_FATAL_EXIT_CODE = 255;
-    
-    class Streams
-    {
-        String out;
-        String err;
-    }
 
     // ----------------------------------------------------------------------
     //
@@ -183,7 +179,7 @@ public class ScpExternalWagon
         // nothing to disconnect
     }
 
-    public Streams executeCommand( String command, boolean ignoreFailures )
+    public org.apache.maven.wagon.Streams executeCommand( String command, boolean ignoreFailures )
         throws CommandExecutionException
     {
         boolean putty = sshExecutable.indexOf( "plink" ) >= 0;
@@ -220,10 +216,10 @@ public class ScpExternalWagon
             CommandLineUtils.StringStreamConsumer err = new CommandLineUtils.StringStreamConsumer();
             int exitCode = CommandLineUtils.executeCommandLine( cl, out, err );
             Streams streams = new Streams();
-            streams.out = out.getOutput();
-            streams.err = err.getOutput();
-            fireSessionDebug( streams.out );
-            fireSessionDebug( streams.err );
+            streams.setOut( out.getOutput() );
+            streams.setErr( err.getOutput() );
+            fireSessionDebug( streams.getOut() );
+            fireSessionDebug( streams.getErr() );
             if ( exitCode != 0 )
             {
                 if ( !ignoreFailures || exitCode == SSH_FATAL_EXIT_CODE )
@@ -564,32 +560,32 @@ public class ScpExternalWagon
         {
             String path = getPath( getRepository().getBasedir(), destinationDirectory );
             Streams streams = executeCommand( "ls -la " + path, true );
-            
-            BufferedReader br = new BufferedReader(new StringReader(streams.out));
-            
+
+            BufferedReader br = new BufferedReader( new StringReader( streams.getOut() ) );
+
             List ret = new ArrayList();
             String line = br.readLine();
-            
-            while(line != null)
+
+            while ( line != null )
             {
                 String parts[] = StringUtils.split( line, " " );
-                if(parts.length >= 8)
+                if ( parts.length >= 8 )
                 {
-                    ret.add(parts[8]);
+                    ret.add( parts[8] );
                 }
-                
+
                 line = br.readLine();
             }
-            
+
             return ret;
         }
         catch ( CommandExecutionException e )
         {
-            throw new TransferFailedException( "Error performing file listing.", e);
+            throw new TransferFailedException( "Error performing file listing.", e );
         }
         catch ( IOException e )
         {
-            throw new TransferFailedException( "Error parsing file listing.", e);
+            throw new TransferFailedException( "Error parsing file listing.", e );
         }
     }
 
@@ -600,32 +596,32 @@ public class ScpExternalWagon
         {
             String path = getPath( getRepository().getBasedir(), resourceName );
             Streams streams = executeCommand( "ls " + path, true );
-            
-            BufferedReader br = new BufferedReader(new StringReader(streams.err));
+
+            BufferedReader br = new BufferedReader( new StringReader( streams.getErr() ) );
             Pattern pat = Pattern.compile( "No such file or directory" );
-            
+
             String line = br.readLine();
-            
-            while(line != null)
+
+            while ( line != null )
             {
                 Matcher mat = pat.matcher( line );
-                if(mat.find())
+                if ( mat.find() )
                 {
                     return false;
                 }
-                
+
                 line = br.readLine();
             }
-            
+
             return true;
         }
         catch ( CommandExecutionException e )
         {
-            throw new TransferFailedException( "Error performing file listing.", e);
+            throw new TransferFailedException( "Error performing file listing.", e );
         }
         catch ( IOException e )
         {
-            throw new TransferFailedException( "Error parsing file listing.", e);
+            throw new TransferFailedException( "Error parsing file listing.", e );
         }
     }
 }

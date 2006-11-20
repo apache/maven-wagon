@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.ssh;
+package org.apache.maven.wagon.providers.ssh.jsch;
 
 /*
  * Copyright 2001-2006 The Apache Software Foundation.
@@ -16,8 +16,10 @@ package org.apache.maven.wagon.providers.ssh;
  * limitations under the License.
  */
 
-import java.io.File;
-
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpATTRS;
+import com.jcraft.jsch.SftpException;
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
@@ -25,12 +27,8 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.StringUtils;
 
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpATTRS;
-import com.jcraft.jsch.SftpException;
+import java.io.File;
 
 /**
  * SFTP protocol wagon.
@@ -40,51 +38,23 @@ import com.jcraft.jsch.SftpException;
  * @todo [BP] add compression flag
  */
 public class SftpWagon
-    extends AbstractSshWagon
+    extends AbstractJschWagon
 {
     private static final String SFTP_CHANNEL = "sftp";
 
     private static final int S_IFDIR = 0x4000;
 
-    private static final char PATH_SEPARATOR = '/';
-
     private static final long MILLIS_PER_SEC = 1000L;
 
-    // ----------------------------------------------------------------------
-    //
-    // ----------------------------------------------------------------------
-
-    public void put( File source, String resourceName )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        String basedir = getRepository().getBasedir();
-
-        resourceName = StringUtils.replace( resourceName, "\\", "/" );
-        String dir = PathUtils.dirname( resourceName );
-        dir = StringUtils.replace( dir, "\\", "/" );
-
-        Resource resource = new Resource( resourceName );
-
-        firePutInitiated( resource, source );
-
-        putJsch( basedir, resourceName, resource, source, dir );
-    }
-
-    private void putJsch( String basedir, String resourceName, Resource resource, File source, String dir )
+    public void put( String basedir, Resource resource, File source )
         throws TransferFailedException
     {
-        String filename;
+        String resourceName = resource.getName();
+        String dir = getResourceDirectory( resourceName );
 
-        if ( resourceName.lastIndexOf( PATH_SEPARATOR ) > 0 )
-        {
-            filename = resourceName.substring( resourceName.lastIndexOf( PATH_SEPARATOR ) + 1 );
-        }
-        else
-        {
-            filename = resourceName;
-        }
+        String filename = getResourceFilename( resourceName );
 
-        ChannelSftp channel;
+        ChannelSftp channel = null;
 
         try
         {
@@ -110,30 +80,12 @@ public class SftpWagon
 
             if ( permissions != null && permissions.getGroup() != null )
             {
-                try
-                {
-                    int group = Integer.valueOf( permissions.getGroup() ).intValue();
-                    channel.chgrp( group, filename );
-                }
-                catch ( NumberFormatException e )
-                {
-                    // TODO: warning level
-                    fireTransferDebug( "Not setting group: must be a numerical GID for SFTP" );
-                }
+                setGroup( channel, filename, permissions );
             }
 
             if ( permissions != null && permissions.getFileMode() != null )
             {
-                try
-                {
-                    int mode = getOctalMode( permissions.getFileMode() );
-                    channel.chmod( mode, filename );
-                }
-                catch ( NumberFormatException e )
-                {
-                    // TODO: warning level
-                    fireTransferDebug( "Not setting mode: must be a numerical mode for SFTP" );
-                }
+                setFileMode( channel, filename, permissions );
             }
 
             firePutCompleted( resource, source );
@@ -158,44 +110,43 @@ public class SftpWagon
 
             throw new TransferFailedException( msg, e );
         }
-
-        if ( channel != null )
+        finally
         {
-            channel.disconnect();
+            if ( channel != null )
+            {
+                channel.disconnect();
+            }
         }
     }
 
-    /**
-     * @param permissions repository's permissions
-     * @return the directory mode for the repository or <code>-1</code> if it
-     *         wasn't set
-     */
-    private int getDirectoryMode( RepositoryPermissions permissions )
+    private void setGroup( ChannelSftp channel, String filename, RepositoryPermissions permissions )
+        throws SftpException
     {
-        int ret = -1;
-
-        if ( permissions != null )
-        {
-            ret = getOctalMode( permissions.getDirectoryMode() );
-        }
-
-        return ret;
-    }
-
-    private int getOctalMode( String mode )
-    {
-        int ret;
         try
         {
-            ret = Integer.valueOf( mode, 8 ).intValue();
+            int group = Integer.valueOf( permissions.getGroup() ).intValue();
+            channel.chgrp( group, filename );
         }
         catch ( NumberFormatException e )
         {
             // TODO: warning level
-            fireTransferDebug( "the file mode must be a numerical mode for SFTP" );
-            ret = -1;
+            fireTransferDebug( "Not setting group: must be a numerical GID for SFTP" );
         }
-        return ret;
+    }
+
+    private void setFileMode( ChannelSftp channel, String filename, RepositoryPermissions permissions )
+        throws SftpException
+    {
+        try
+        {
+            int mode = getOctalMode( permissions.getFileMode() );
+            channel.chmod( mode, filename );
+        }
+        catch ( NumberFormatException e )
+        {
+            // TODO: warning level
+            fireTransferDebug( "Not setting mode: must be a numerical mode for SFTP" );
+        }
     }
 
     private void mkdirs( ChannelSftp channel, String resourceName, int mode )
@@ -231,7 +182,7 @@ public class SftpWagon
                 {
                     channel.chmod( mode, dir );
                 }
-                catch ( final SftpException e1 )
+                catch ( SftpException e1 )
                 {
                     // for some extrange reason we recive this exception,
                     // even when chmod success
@@ -240,17 +191,12 @@ public class SftpWagon
         }
     }
 
-    public boolean getIfNewer( String resourceName, File destination, long timestamp )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    public boolean getIfNewer( Resource resource, File destination, long timestamp )
+        throws ResourceDoesNotExistException, TransferFailedException
     {
-        boolean bDownloaded = true;
-        createParentDirectories( destination );
+        String filename = getResourceFilename( resource.getName() );
 
-        ChannelSftp channel;
-
-        resourceName = StringUtils.replace( resourceName, "\\", "/" );
-        String dir = PathUtils.dirname( resourceName );
-        dir = StringUtils.replace( dir, "\\", "/" );
+        String dir = getResourceDirectory( resource.getName() );
 
         // we already setuped the root directory. Ignore beginning /
         if ( dir.length() > 0 && dir.charAt( 0 ) == PATH_SEPARATOR )
@@ -258,66 +204,14 @@ public class SftpWagon
             dir = dir.substring( 1 );
         }
 
-        Resource resource = new Resource( resourceName );
-
-        fireGetInitiated( resource, destination );
-
-        String filename;
-        if ( resourceName.lastIndexOf( PATH_SEPARATOR ) > 0 )
-        {
-            filename = resourceName.substring( resourceName.lastIndexOf( PATH_SEPARATOR ) + 1 );
-        }
-        else
-        {
-            filename = resourceName;
-        }
-
+        boolean bDownloaded = true;
         try
         {
-            channel = (ChannelSftp) session.openChannel( SFTP_CHANNEL );
+            ChannelSftp channel = (ChannelSftp) session.openChannel( SFTP_CHANNEL );
 
             channel.connect();
 
-            try
-            {
-                channel.cd( repository.getBasedir() );
-            }
-            catch ( SftpException e )
-            {
-                if ( "No such file".equals( e.toString() ) )
-                {
-                    throw new ResourceDoesNotExistException( "Repository base directory is missing for: " + repository.getId(), e );
-                }
-                else
-                {
-                    throw e;
-                }
-            }
-            
-            // This must be called first to ensure that if the file doesn't exist it throws an exception
-            SftpATTRS attrs;
-            try
-            {
-                channel.cd( repository.getBasedir() );
-
-                if ( dir.length() > 0 )
-                {
-                    channel.cd( dir );
-                }
-
-                attrs = channel.stat( filename );
-            }
-            catch ( SftpException e )
-            {
-                if ( e.toString().trim().endsWith( "No such file" ) )
-                {
-                    throw new ResourceDoesNotExistException( e.toString(), e );
-                }
-                else
-                {
-                    throw e;
-                }
-            }
+            SftpATTRS attrs = changeToRepositoryDirectory( channel, dir, filename );
 
             if ( timestamp <= 0 || attrs.getMTime() * MILLIS_PER_SEC > timestamp )
             {
@@ -355,10 +249,63 @@ public class SftpWagon
         return bDownloaded;
     }
 
+    private SftpATTRS changeToRepositoryDirectory( ChannelSftp channel, String dir, String filename )
+        throws ResourceDoesNotExistException, SftpException
+    {
+        // This must be called first to ensure that if the file doesn't exist it throws an exception
+        SftpATTRS attrs;
+        try
+        {
+            channel.cd( repository.getBasedir() );
+
+            if ( dir.length() > 0 )
+            {
+                channel.cd( dir );
+            }
+
+            attrs = channel.stat( filename );
+        }
+        catch ( SftpException e )
+        {
+            if ( e.toString().trim().endsWith( "No such file" ) )
+            {
+                throw new ResourceDoesNotExistException( e.toString(), e );
+            }
+            else
+            {
+                throw e;
+            }
+        }
+        return attrs;
+    }
+
+    public void put( File source, String destination )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        String basedir = getRepository().getBasedir();
+
+        Resource resource = getResource( destination );
+
+        firePutInitiated( resource, source );
+
+        put( basedir, resource, source );
+    }
 
     public void get( String resourceName, File destination )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         getIfNewer( resourceName, destination, 0 );
+    }
+
+    public boolean getIfNewer( String resourceName, File destination, long timestamp )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        createParentDirectories( destination );
+
+        Resource resource = getResource( resourceName );
+
+        fireGetInitiated( resource, destination );
+
+        return getIfNewer( resource, destination, timestamp );
     }
 }
