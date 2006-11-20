@@ -313,9 +313,7 @@ public abstract class WagonTestCase
 
             FileUtils.deleteDirectory( sourceFile );
 
-            createDirectory( wagon, resourceToCreate, resources, dirName );
-
-            wagon.connect( testRepository, getAuthInfo() );
+            createDirectory( wagon, resourceToCreate, dirName );
 
             for ( int i = 0; i < resources.length; i++ )
             {
@@ -347,11 +345,10 @@ public abstract class WagonTestCase
      *
      * @param wagon
      * @param resourceToCreate name of the resource to be created
-     * @param resourcesPresent names of the resources that we'll check don't exist
      * @param dirName          directory name to create
      * @throws Exception
      */
-    protected void createDirectory( Wagon wagon, String resourceToCreate, String[] resourcesPresent, String dirName )
+    protected void createDirectory( Wagon wagon, String resourceToCreate, String dirName )
         throws Exception
     {
         writeTestFile( resourceToCreate );
@@ -359,17 +356,6 @@ public abstract class WagonTestCase
         wagon.connect( testRepository, getAuthInfo() );
 
         wagon.putDirectory( sourceFile, dirName );
-
-        for ( int i = 0; i < resourcesPresent.length; i++ )
-        {
-            String resourceName = dirName + "/" + resourcesPresent[i];
-            
-            File destFile = FileTestUtils.createUniqueFile( getName(), resourceName );
-
-            destFile.deleteOnExit();
-
-            wagon.get( resourceName, destFile );
-        }
 
         wagon.disconnect();
     }
