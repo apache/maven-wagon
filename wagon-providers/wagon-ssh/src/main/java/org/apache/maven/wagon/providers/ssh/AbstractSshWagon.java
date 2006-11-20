@@ -41,9 +41,9 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo;
 import org.apache.maven.wagon.providers.ssh.interactive.NullInteractiveUserInfo;
 import org.apache.maven.wagon.providers.ssh.interactive.UserInfoUIKeyboardInteractiveProxy;
+import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostChangedException;
 import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
 import org.apache.maven.wagon.providers.ssh.knownhost.UnknownHostException;
-import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostChangedException;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
@@ -73,7 +73,7 @@ import java.util.Properties;
  */
 public abstract class AbstractSshWagon
     extends AbstractWagon
-    implements CommandExecutor
+    implements CommandExecutor, SshWagon
 {
     public static final int DEFAULT_SSH_PORT = 22;
 
@@ -267,7 +267,7 @@ public abstract class AbstractSshWagon
         {
             fireSessionError( e );
 
-            if ( e.getMessage().startsWith( "UnknownHostKey:" ) || e.getMessage().startsWith( "reject HostKey:") )
+            if ( e.getMessage().startsWith( "UnknownHostKey:" ) || e.getMessage().startsWith( "reject HostKey:" ) )
             {
                 throw new UnknownHostException( host, e );
             }

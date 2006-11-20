@@ -16,29 +16,13 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
  * limitations under the License.
  */
 
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.UserInfo;
-
-import java.util.Properties;
-import java.io.IOException;
-
 /**
- * Provides a way to add Known Hosts fingerprints to the JSch transport
+ * Dummy <code>KnownHostsProvider</code>
  *
  * @author Juan F. Codagnone
  * @since Sep 12, 2005
  */
-public interface KnownHostsProvider
+public final class NullKnownHostProvider
+    extends AbstractKnownHostsProvider
 {
-    String ROLE = KnownHostsProvider.class.getName();
-
-    void storeKnownHosts( String contents )
-        throws IOException;
-
-    void setHostKeyChecking( String hostKeyChecking );
-
-    String getHostKeyChecking();
-
-    String getContents();
 }

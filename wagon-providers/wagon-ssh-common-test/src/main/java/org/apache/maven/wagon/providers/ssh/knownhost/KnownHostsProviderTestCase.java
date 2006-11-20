@@ -17,19 +17,12 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
  */
 
 import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.providers.ssh.AbstractSshWagon;
+import org.apache.maven.wagon.providers.ssh.SshWagon;
 import org.apache.maven.wagon.providers.ssh.TestData;
 import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.plexus.PlexusTestCase;
 
-/**
- * Generic Unit test for <code>KnownHostsProvider</code>
- *
- * @author Juan F. Codagnone
- * @see org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider
- * @since Sep 12, 2005
- */
-public abstract class AbstractKnownHostsProviderTest
+public class KnownHostsProviderTestCase
     extends PlexusTestCase
 {
     protected KnownHostsProvider okHostsProvider;
@@ -38,9 +31,14 @@ public abstract class AbstractKnownHostsProviderTest
 
     protected KnownHostsProvider changedHostsProvider;
 
-    private AbstractSshWagon wagon;
+    private SshWagon wagon;
 
     private Repository source;
+
+    private static final String CORRECT_KEY = TestData.getHostKey();
+
+    private static final String CHANGED_KEY =
+        "AAAAB3NzaC1yc2EAAAABIwAAAQEA8VLKkfHl2CNqW+m0603z07dyweWzzdVGQlMPUX4z1264E7M/h+6lPKiOo+u49CL7eQVA+FtWTZoJ3oBAMABcKnHx41TnSpQUkbdR6rzyC6IG1lXiVtEjG2w7DUnxpCtVo5PaQuJobwoXv5NNL3vx03THPgcDJquLPWvGnDWhnXoEh3/6c7rprwT+PrjZ6LIT35ZCUGajoehhF151oNbFMQHllfR6EAiZIP0z0nIVI+Jiv6g+XZapumVPVYjdOfxvLKQope1H9HJamT3bDIm8mkebUB10DzQJYxFt4/0wiNH3L4jsIFn+CiW1/IQm5yyff1CUO87OqVbtp9BlaXZNmw==";
 
     /**
      * tests what happens if the remote host has a different key than the one
@@ -98,6 +96,8 @@ public abstract class AbstractKnownHostsProviderTest
         wagon.setKnownHostsProvider( okHostsProvider );
 
         wagon.connect( source );
+
+        assertTrue( true );
     }
 
     protected void setUp()
@@ -107,7 +107,11 @@ public abstract class AbstractKnownHostsProviderTest
         source =
             new Repository( "test", "scp://" + TestData.getUserName() + "@" + TestData.getHostname() + "/tmp/foo" );
 
-        wagon = (AbstractSshWagon) lookup( Wagon.ROLE, "scp" );
+        wagon = (SshWagon) lookup( Wagon.ROLE, "scp" );
         wagon.setInteractive( false );
+
+        this.okHostsProvider = new SingleKnownHostProvider( TestData.getHostname(), CORRECT_KEY );
+        this.failHostsProvider = new SingleKnownHostProvider( "beaver.codehaus.org", CORRECT_KEY );
+        this.changedHostsProvider = new SingleKnownHostProvider( TestData.getHostname(), CHANGED_KEY );
     }
 }

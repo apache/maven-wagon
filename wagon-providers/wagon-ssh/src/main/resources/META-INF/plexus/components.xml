@@ -8,6 +8,7 @@
       <requirements>
         <requirement>
           <role>org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider</role>
+          <role-hint>file</role-hint>
         </requirement>
         <requirement>
           <role>org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo</role>
@@ -25,6 +26,7 @@
       <requirements>
         <requirement>
           <role>org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider</role>
+          <role-hint>file</role-hint>
         </requirement>
         <requirement>
           <role>org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo</role>
@@ -41,6 +43,7 @@
       <requirements>
         <requirement>
           <role>org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider</role>
+          <role-hint>file</role-hint>
         </requirement>
         <requirement>
           <role>org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo</role>
@@ -59,14 +62,6 @@
           <role>org.codehaus.plexus.components.interactivity.Prompter</role>
         </requirement>
       </requirements>
-    </component>
-    <component>
-      <role>org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider</role>
-      <implementation>org.apache.maven.wagon.providers.ssh.knownhost.FileKnownHostsProvider</implementation>
-      <instantiation-strategy>per-lookup</instantiation-strategy>
-      <configuration>
-        <hostKeyChecking>ask</hostKeyChecking>
-      </configuration>
     </component>
     <component>
       <role>com.jcraft.jsch.UIKeyboardInteractive</role>

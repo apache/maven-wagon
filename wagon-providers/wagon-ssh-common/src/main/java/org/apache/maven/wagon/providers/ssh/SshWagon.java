@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.ssh.knownhost;
+package org.apache.maven.wagon.providers.ssh;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
@@ -16,25 +16,11 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
  * limitations under the License.
  */
 
-import com.jcraft.jsch.HostKeyRepository;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.UserInfo;
-import org.codehaus.plexus.util.Base64;
+import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
 
-/**
- * Simple <code>KnownHostsProvider</code> with known wired values
- *
- * @author Juan F. Codagnone
- * @since Sep 12, 2005
- */
-public class SingleKnownHostProvider
-    extends AbstractKnownHostsProvider
+public interface SshWagon
+    extends Wagon
 {
-    /**
-     * Creates the SingleKnownHostProvider.
-     */
-    public SingleKnownHostProvider( String host, String key )
-    {
-        this.contents = host + " ssh-rsa " + key + "\n";
-    }
+    void setKnownHostsProvider( KnownHostsProvider knownHostsProvider );
 }

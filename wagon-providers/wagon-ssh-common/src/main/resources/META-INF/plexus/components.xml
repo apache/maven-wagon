@@ -1,0 +1,22 @@
+<component-set>
+  <components>
+    <component>
+      <role>org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider</role>
+      <role-hint>file</role-hint>
+      <implementation>org.apache.maven.wagon.providers.ssh.knownhost.FileKnownHostsProvider</implementation>
+      <instantiation-strategy>per-lookup</instantiation-strategy>
+      <configuration>
+        <hostKeyChecking>ask</hostKeyChecking>
+      </configuration>
+    </component>
+    <component>
+      <role>org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider</role>
+      <role-hint>null</role-hint>
+      <implementation>org.apache.maven.wagon.providers.ssh.knownhost.NullKnownHostsProvider</implementation>
+      <instantiation-strategy>per-lookup</instantiation-strategy>
+      <configuration>
+        <hostKeyChecking>ask</hostKeyChecking>
+      </configuration>
+    </component>
+  </components>
+</component-set>

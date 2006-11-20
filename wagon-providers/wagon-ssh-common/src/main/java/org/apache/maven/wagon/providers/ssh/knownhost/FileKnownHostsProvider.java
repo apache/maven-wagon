@@ -1,19 +1,5 @@
 package org.apache.maven.wagon.providers.ssh.knownhost;
 
-import com.jcraft.jsch.HostKey;
-import com.jcraft.jsch.HostKeyRepository;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-
-import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.FileUtils;
-
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
  *
@@ -29,6 +15,14 @@ import org.codehaus.plexus.util.FileUtils;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import org.codehaus.plexus.util.FileUtils;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Provides known hosts from a file
