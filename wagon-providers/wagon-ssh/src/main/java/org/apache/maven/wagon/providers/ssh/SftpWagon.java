@@ -67,8 +67,12 @@ public class SftpWagon
 
         firePutInitiated( resource, source );
 
-        ChannelSftp channel;
+        putJsch( basedir, resourceName, resource, source, dir );
+    }
 
+    private void putJsch( String basedir, String resourceName, Resource resource, File source, String dir )
+        throws TransferFailedException
+    {
         String filename;
 
         if ( resourceName.lastIndexOf( PATH_SEPARATOR ) > 0 )
@@ -80,6 +84,8 @@ public class SftpWagon
             filename = resourceName;
         }
 
+        ChannelSftp channel;
+
         try
         {
             channel = (ChannelSftp) session.openChannel( SFTP_CHANNEL );
@@ -89,11 +95,11 @@ public class SftpWagon
             RepositoryPermissions permissions = getRepository().getPermissions();
 
             int directoryMode = getDirectoryMode( permissions );
-            
+
             mkdirs( channel, basedir, directoryMode );
 
             channel.cd( basedir );
-            
+
             mkdirs( channel, resourceName, directoryMode );
 
             firePutStarted( resource, source );
