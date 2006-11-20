@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.sshext;
+package org.apache.maven.wagon.providers.ssh.external;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
@@ -18,6 +18,7 @@ package org.apache.maven.wagon.providers.sshext;
 
 import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.providers.ssh.TestData;
 
 import java.io.File;
 

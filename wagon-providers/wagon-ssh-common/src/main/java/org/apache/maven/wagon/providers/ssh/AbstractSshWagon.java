@@ -56,13 +56,13 @@ public abstract class AbstractSshWagon
     extends AbstractWagon
     implements CommandExecutor, SshWagon
 {
-    private static final int DEFAULT_SSH_PORT = 22;
-
     protected KnownHostsProvider knownHostsProvider;
 
     protected InteractiveUserInfo interactiveUserInfo;
 
     protected static final char PATH_SEPARATOR = '/';
+
+    protected static final int DEFAULT_SSH_PORT = 22;
 
     protected String getOctalMode( RepositoryPermissions permissions )
     {
@@ -207,19 +207,6 @@ public abstract class AbstractSshWagon
         return port;
     }
 
-    private void createAuthenticationInfo()
-    {
-        if ( authenticationInfo == null )
-        {
-            authenticationInfo = new AuthenticationInfo();
-        }
-
-        if ( authenticationInfo.getUserName() == null )
-        {
-            authenticationInfo.setUserName( System.getProperty( "user.name" ) );
-        }
-    }
-
     private File findPrivateKey()
     {
         String privateKeyDirectory = System.getProperty( "wagon.privateKeyDirectory" );
@@ -357,7 +344,7 @@ public abstract class AbstractSshWagon
         try
         {
             String path = getPath( getRepository().getBasedir(), destinationDirectory );
-            Streams streams = executeCommand( "ls -la " + path, true );
+            Streams streams = executeCommand( "ls -la " + path, false );
 
             BufferedReader br = new BufferedReader( new StringReader( streams.getOut() ) );
 

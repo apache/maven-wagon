@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.sshext;
+package org.apache.maven.wagon.providers.ssh.external;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
@@ -31,6 +31,6 @@ public class SshCommandExecutorTest
 
     protected Repository getTestRepository()
     {
-        return new Repository( "test", "scp://localhost/" );
+        return new Repository( "test", "scpexe://localhost/" );
     }
 }

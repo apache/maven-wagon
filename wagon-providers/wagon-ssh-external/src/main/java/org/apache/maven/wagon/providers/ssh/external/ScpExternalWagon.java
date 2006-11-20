@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.sshext;
+package org.apache.maven.wagon.providers.ssh.external;
 
 /*
  * Copyright 2001-2006 The Apache Software Foundation.
@@ -16,19 +16,16 @@ package org.apache.maven.wagon.providers.sshext;
  * limitations under the License.
  */
 
-import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.CommandExecutionException;
-import org.apache.maven.wagon.CommandExecutor;
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.PermissionModeUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.Streams;
 import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.authentication.AuthenticationException;
-import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
+import org.apache.maven.wagon.providers.ssh.AbstractSshWagon;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
@@ -37,14 +34,9 @@ import org.codehaus.plexus.util.cli.CommandLineException;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
 import org.codehaus.plexus.util.cli.Commandline;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * SCP deployer using "external" scp program.  To allow for
@@ -53,11 +45,9 @@ import java.util.regex.Pattern;
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  * @version $Id$
  * @todo [BP] add compression flag
- * TODO! this can be shared with ssh-commons now
  */
 public class ScpExternalWagon
-    extends AbstractWagon
-    implements CommandExecutor
+    extends AbstractSshWagon
 {
     /**
      * The external SCP command to use - default is <code>scp</code>.
@@ -87,12 +77,6 @@ public class ScpExternalWagon
      */
     private String sshArgs;
 
-    private int port;
-
-    private File privateKey;
-
-    private String password;
-
     private static final int SSH_FATAL_EXIT_CODE = 255;
 
     // ----------------------------------------------------------------------
@@ -102,91 +86,25 @@ public class ScpExternalWagon
     public void openConnection()
         throws AuthenticationException
     {
-        if ( authenticationInfo == null )
-        {
-            authenticationInfo = new AuthenticationInfo();
-        }
+        super.openConnection();
 
-        if ( authenticationInfo.getUserName() == null )
-        {
-            authenticationInfo.setUserName( System.getProperty( "user.name" ) );
-        }
-
-        port = getRepository().getPort();
-
-        // If user don't define a password, he want to use a private key
-        if ( authenticationInfo.getPassword() == null )
-        {
-            File privateKey;
-
-            if ( authenticationInfo.getPrivateKey() != null )
-            {
-                privateKey = new File( authenticationInfo.getPrivateKey() );
-            }
-            else
-            {
-                privateKey = findPrivateKey();
-            }
-
-            if ( privateKey.exists() )
-            {
-                if ( authenticationInfo.getPassphrase() == null )
-                {
-                    authenticationInfo.setPassphrase( "" );
-                }
-
-                fireSessionDebug( "Using private key: " + privateKey );
-
-                this.privateKey = privateKey;
-            }
-        }
-        else
-        {
-            this.password = authenticationInfo.getPassword();
-        }
         // nothing to connect to
     }
-
-    // ----------------------------------------------------------------------
-    // TODO: share with scp wagon
-    // ----------------------------------------------------------------------
-
-    private File findPrivateKey()
-    {
-        String privateKeyDirectory = System.getProperty( "wagon.privateKeyDirectory" );
-
-        if ( privateKeyDirectory == null )
-        {
-            privateKeyDirectory = System.getProperty( "user.home" );
-        }
-
-        File privateKey = new File( privateKeyDirectory, ".ssh/id_dsa" );
-
-        if ( !privateKey.exists() )
-        {
-            privateKey = new File( privateKeyDirectory, ".ssh/id_rsa" );
-        }
-
-        return privateKey;
-    }
-
-    // ----------------------------------------------------------------------
-    //
-    // ----------------------------------------------------------------------
 
     public void closeConnection()
     {
         // nothing to disconnect
     }
 
-    public org.apache.maven.wagon.Streams executeCommand( String command, boolean ignoreFailures )
+    public Streams executeCommand( String command, boolean ignoreFailures )
         throws CommandExecutionException
     {
         boolean putty = sshExecutable.indexOf( "plink" ) >= 0;
 
         Commandline cl = createBaseCommandLine( putty, sshExecutable );
 
-        if ( port != WagonConstants.UNKNOWN_PORT )
+        int port = getPort();
+        if ( port != DEFAULT_SSH_PORT )
         {
             if ( putty )
             {
@@ -241,12 +159,14 @@ public class ScpExternalWagon
 
         cl.setExecutable( executable );
 
+        File privateKey = getPrivateKey();
         if ( privateKey != null )
         {
             cl.createArgument().setValue( "-i" );
             cl.createArgument().setFile( privateKey );
         }
 
+        String password = authenticationInfo.getPassword();
         if ( putty && password != null )
         {
             cl.createArgument().setValue( "-pw" );
@@ -276,7 +196,8 @@ public class ScpExternalWagon
 
         cl.setWorkingDirectory( localFile.getParentFile().getAbsolutePath() );
 
-        if ( port != WagonConstants.UNKNOWN_PORT )
+        int port = getPort();
+        if ( port != DEFAULT_SSH_PORT )
         {
             cl.createArgument().setLine( "-P " + port );
         }
@@ -545,83 +466,6 @@ public class ScpExternalWagon
         catch ( CommandExecutionException e )
         {
             throw new TransferFailedException( "Error performing commands for file transfer", e );
-        }
-    }
-
-    public boolean supportsDirectoryCopy()
-    {
-        return true;
-    }
-
-    public List getFileList( String destinationDirectory )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        try
-        {
-            String path = getPath( getRepository().getBasedir(), destinationDirectory );
-            Streams streams = executeCommand( "ls -la " + path, true );
-
-            BufferedReader br = new BufferedReader( new StringReader( streams.getOut() ) );
-
-            List ret = new ArrayList();
-            String line = br.readLine();
-
-            while ( line != null )
-            {
-                String parts[] = StringUtils.split( line, " " );
-                if ( parts.length >= 8 )
-                {
-                    ret.add( parts[8] );
-                }
-
-                line = br.readLine();
-            }
-
-            return ret;
-        }
-        catch ( CommandExecutionException e )
-        {
-            throw new TransferFailedException( "Error performing file listing.", e );
-        }
-        catch ( IOException e )
-        {
-            throw new TransferFailedException( "Error parsing file listing.", e );
-        }
-    }
-
-    public boolean resourceExists( String resourceName )
-        throws TransferFailedException, AuthorizationException
-    {
-        try
-        {
-            String path = getPath( getRepository().getBasedir(), resourceName );
-            Streams streams = executeCommand( "ls " + path, true );
-
-            BufferedReader br = new BufferedReader( new StringReader( streams.getErr() ) );
-            Pattern pat = Pattern.compile( "No such file or directory" );
-
-            String line = br.readLine();
-
-            while ( line != null )
-            {
-                Matcher mat = pat.matcher( line );
-                if ( mat.find() )
-                {
-                    return false;
-                }
-
-                line = br.readLine();
-            }
-
-            return true;
-        }
-        catch ( CommandExecutionException e )
-        {
-            throw new TransferFailedException( "Error performing file listing.", e );
-        }
-        catch ( IOException e )
-        {
-            throw new TransferFailedException( "Error parsing file listing.", e );
         }
     }
 }
