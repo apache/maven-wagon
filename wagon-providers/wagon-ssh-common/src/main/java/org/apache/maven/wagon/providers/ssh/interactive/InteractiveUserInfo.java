@@ -20,22 +20,18 @@ package org.apache.maven.wagon.providers.ssh.interactive;
  * Interactive part for <code>UserInfo</code>
  *
  * @author Juan F. Codagnone
- * @since Sep 12, 2005
  * @see com.jcraft.jsch.UserInfo
+ * @since Sep 12, 2005
  */
 public interface InteractiveUserInfo
 {
     String ROLE = InteractiveUserInfo.class.getName();
 
-    /** @see com.jcraft.jsch.UserInfo#promptYesNo(java.lang.String) */
     boolean promptYesNo( String message );
 
-    /*** @see com.jcraft.jsch.UserInfo#showMessage(java.lang.String) */
     void showMessage( String message );
 
-    /** @see com.jcraft.jsch.UserInfo#promptPassword(String) */
     String promptPassword( String message );
 
-    /** @see com.jcraft.jsch.UserInfo#promptPassphrase(String) */
     String promptPassphrase( String message );
 }

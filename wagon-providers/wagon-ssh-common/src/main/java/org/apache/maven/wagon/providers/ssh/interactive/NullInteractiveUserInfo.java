@@ -16,31 +16,31 @@ package org.apache.maven.wagon.providers.ssh.interactive;
  * limitations under the License.
  */
 
-import org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo;
-
 /**
  * Dummy Implementation for <code>InteractiveUserInfo</code>, nice for
  * non-Interactive environments
  *
  * @author Juan F. Codagnone
- * @since Sep 12, 2005
  * @see org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo
+ * @since Sep 12, 2005
  */
 public class NullInteractiveUserInfo
     implements InteractiveUserInfo
 {
     private final boolean promptYesNoResult;
 
-    /** @see #NullInteractiveUserInfo(boolean) */
+    /**
+     * @see #NullInteractiveUserInfo(boolean)
+     */
     public NullInteractiveUserInfo()
     {
         this( false ); // the safest value
     }
 
     /**
-     * Creates a <code>NullInteractiveUserInfo</code> with a hardcoded 
+     * Creates a <code>NullInteractiveUserInfo</code> with a hardcoded
      * prompYesNo result
-     * 
+     *
      * @param promptYesNoResult the hardcoded result
      */
     public NullInteractiveUserInfo( final boolean promptYesNoResult )
@@ -48,13 +48,17 @@ public class NullInteractiveUserInfo
         this.promptYesNoResult = promptYesNoResult;
     }
 
-    /** @see InteractiveUserInfo#promptYesNo(java.lang.String) */
+    /**
+     * @see InteractiveUserInfo#promptYesNo(java.lang.String)
+     */
     public boolean promptYesNo( final String message )
     {
         return promptYesNoResult;
     }
 
-    /** @see InteractiveUserInfo#showMessage(java.lang.String) */
+    /**
+     * @see InteractiveUserInfo#showMessage(java.lang.String)
+     */
     public void showMessage( final String message )
     {
         // nothing to do

@@ -54,16 +54,6 @@
       </requirements>
     </component>
     <component>
-      <role>org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo</role>
-      <implementation>org.apache.maven.wagon.providers.ssh.interactive.ConsoleInteractiveUserInfo</implementation>
-      <instantiation-strategy>per-lookup</instantiation-strategy>
-      <requirements>
-        <requirement>
-          <role>org.codehaus.plexus.components.interactivity.Prompter</role>
-        </requirement>
-      </requirements>
-    </component>
-    <component>
       <role>com.jcraft.jsch.UIKeyboardInteractive</role>
       <implementation>org.apache.maven.wagon.providers.ssh.interactive.PrompterUIKeyboardInteractive</implementation>
       <requirements>
