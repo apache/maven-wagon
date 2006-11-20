@@ -39,7 +39,7 @@ public abstract class AbstractKnownHostsProviderTest
 
     protected final String user = TestData.getUserName();
 
-    protected final String host = TestData.getHostname();
+    protected String host;
 
     /**
      * tests what happens if the remote host has a different key than the one
@@ -80,6 +80,13 @@ public abstract class AbstractKnownHostsProviderTest
 
         final Session session = sch.getSession( user, host );
 
-        session.connect();
+        try
+        {
+            session.connect();
+        }
+        catch ( JSchException e )
+        {
+            assertFalse( e.getMessage().indexOf( "UnknownHostKey") >= 0 );
+        }
     }
 }

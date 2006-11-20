@@ -16,7 +16,10 @@ package org.apache.maven.wagon.providers.ssh;
  * limitations under the License.
  */
 
+import org.codehaus.plexus.util.FileUtils;
+
 import java.io.File;
+import java.io.IOException;
 
 /**
  * @author <a href="michal@codehaus.org">Michal Maczka</a>
@@ -41,14 +44,18 @@ public class TestData
 
     public static String getHostname()
     {
-        return System.getProperty( "test.host", "beaver.codehaus.org" );
+        return System.getProperty( "test.host", "localhost" );
     }
 
     public static String getHostKey()
     {
-        // beaver.codehaus.org
-        return "AAAAB3NzaC1yc2EAAAABIwAAAIEAwCT2lARY2T3EYjhQW1G4fYDltZgKKdg35esqhqM" +
-            "Z3lUV8QTg26aY1HfotUNJ0qaWsa587KP3zRUtHW4oP+hrOq/XQNsn57LKFFceCoy2vf" +
-            "/t9/Qin24mCW2QsGdyZ/txEhADbGjPkt4/Z9e/KoZGahWoPTjR26G1i1St9IsZPcU=";
+        try
+        {
+            return FileUtils.fileRead( "/etc/ssh_host_rsa_key.pub" ).substring( "ssh-rsa".length() ).trim();
+        }
+        catch ( IOException e )
+        {
+            return null;
+        }
     }
 }

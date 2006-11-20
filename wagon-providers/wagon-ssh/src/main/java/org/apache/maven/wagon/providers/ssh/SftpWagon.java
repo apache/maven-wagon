@@ -293,14 +293,17 @@ public class SftpWagon
             try
             {
                 channel.cd( repository.getBasedir() );
-                
-                channel.cd( dir );
-                
+
+                if ( dir.length() > 0 )
+                {
+                    channel.cd( dir );
+                }
+
                 attrs = channel.stat( filename );
             }
             catch ( SftpException e )
             {
-                if ( "No such file".equals( e.toString() ) )
+                if ( e.toString().trim().endsWith( "No such file" ) )
                 {
                     throw new ResourceDoesNotExistException( e.toString(), e );
                 }

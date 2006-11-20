@@ -37,6 +37,7 @@ public class SingleKnownHostsProviderTest
     {
         super.setUp();
 
+        this.host = TestData.getHostname();
         this.okHostsProvider = new SingleKnownHostProvider( host, correctKey );
         this.failHostsProvider = new SingleKnownHostProvider( host, incorrectKey );
     }

@@ -16,12 +16,8 @@ package org.apache.maven.wagon.providers.ssh;
  * limitations under the License.
  */
 
-import java.io.EOFException;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.JSchException;
 import org.apache.maven.wagon.CommandExecutionException;
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.PermissionModeUtils;
@@ -33,8 +29,11 @@ import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSchException;
+import java.io.EOFException;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * A base class for deployers and fetchers using protocols from SSH2 family and
@@ -99,13 +98,32 @@ public class ScpWagon
             throw new TransferFailedException( "Error performing commands for file transfer", e );
         }
 
-        ChannelExec channel = null;
-
         OutputStream out = null;
 
         String path = getPath( basedir, resourceName );
 
         RepositoryPermissions permissions = getRepository().getPermissions();
+
+        scpJsch( path, out, source, resourceName, resource, getOctalMode( permissions ) );
+
+        try
+        {
+            if ( permissions != null && permissions.getGroup() != null )
+            {
+                executeCommand( "chgrp -f " + permissions.getGroup() + " " + path );
+            }
+        }
+        catch ( CommandExecutionException e )
+        {
+            throw new TransferFailedException( "Error performing commands for file transfer", e );
+        }
+    }
+
+    private void scpJsch( String path, OutputStream out, File source, String resourceName, Resource resource,
+                          String mode )
+        throws TransferFailedException
+    {
+        ChannelExec channel = null;
 
         try
         {
@@ -130,21 +148,7 @@ public class ScpWagon
             // send "C0644 filesize filename", where filename should not include '/'
             long filesize = source.length();
 
-            String mode = "644";
-            if ( permissions != null && permissions.getFileMode() != null )
-            {
-                if ( permissions.getFileMode().matches( "[0-9]{3}" ) )
-                {
-                    mode = permissions.getFileMode();
-                }
-                else
-                {
-                    // TODO: as warning
-                    fireSessionDebug( "Not using non-octal permissions: " + mode );
-                }
-            }
-
-            command = "C0" + mode + " " + filesize + " ";
+            command = "C" + mode + " " + filesize + " ";
 
             if ( resourceName.lastIndexOf( PATH_SEPARATOR ) > 0 )
             {
@@ -196,18 +200,30 @@ public class ScpWagon
                 channel.disconnect();
             }
         }
+    }
 
-        try
+    private String getOctalMode( RepositoryPermissions permissions )
+    {
+        String mode = "0644";
+        if ( permissions != null && permissions.getFileMode() != null )
         {
-            if ( permissions != null && permissions.getGroup() != null )
+            if ( permissions.getFileMode().matches( "[0-9]{3,4}" ) )
             {
-                executeCommand( "chgrp -f " + permissions.getGroup() + " " + path );
+                mode = permissions.getFileMode();
+
+                if ( mode.length() == 3 )
+                {
+                    mode = "0" + mode;
+                }
+            }
+            else
+            {
+                // TODO: calculate?
+                // TODO: as warning
+                fireSessionDebug( "Not using non-octal permissions: " + mode );
             }
         }
-        catch ( CommandExecutionException e )
-        {
-            throw new TransferFailedException( "Error performing commands for file transfer", e );
-        }
+        return mode;
     }
 
     private void checkAck( InputStream in )
@@ -241,18 +257,23 @@ public class ScpWagon
 
         fireGetInitiated( resource, destination );
 
-        ChannelExec channel = null;
+        String basedir = getRepository().getBasedir();
 
+        getJsch( basedir, resourceName, resource, destination, getPath( basedir, resourceName ) );
+    }
+
+    private void getJsch( String basedir, String resourceName, Resource resource, File destination, String path )
+        throws ResourceDoesNotExistException, TransferFailedException
+    {
         //I/O streams for remote scp
         OutputStream out = null;
 
         InputStream in;
 
-        String basedir = getRepository().getBasedir();
+        ChannelExec channel = null;
 
         try
         {
-            String path = getPath( basedir, resourceName );
             String cmd = "scp -f " + path;
 
             fireTransferDebug( "Executing command: " + cmd );

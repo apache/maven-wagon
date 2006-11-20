@@ -16,12 +16,6 @@ package org.apache.maven.wagon;
  * limitations under the License.
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.observers.ChecksumObserver;
@@ -30,6 +24,12 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.util.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
@@ -76,7 +76,7 @@ public abstract class WagonTestCase
     /**
      * URL of the repository. For a complete test it should point to a non existing folder so
      * we also check for the creation of new folders in the remote site.
-     * 
+     * <p/>
      * return the URL of the repository as specified by Wagon syntax
      */
     protected abstract String getTestRepositoryUrl()
@@ -84,7 +84,7 @@ public abstract class WagonTestCase
 
     /**
      * Protocol id of the Wagon to use, eg. <code>scp</code>, <code>ftp</code>
-     * 
+     *
      * @return the protocol id
      */
     protected abstract String getProtocol();
@@ -208,9 +208,9 @@ public abstract class WagonTestCase
         if ( wagon.supportsDirectoryCopy() )
         {
             sourceFile = new File( FileTestUtils.getTestOutputDir(), "directory-copy" );
-            
+
             FileUtils.deleteDirectory( sourceFile );
-            
+
             writeTestFile( "test-resource-1.txt" );
             writeTestFile( "a/test-resource-2.txt" );
             writeTestFile( "a/b/test-resource-3.txt" );
@@ -229,79 +229,78 @@ public abstract class WagonTestCase
             wagon.get( "directory-copy/a/test-resource-2.txt", destFile );
             wagon.get( "directory-copy/a/b/test-resource-3.txt", destFile );
             wagon.get( "directory-copy/c/test-resource-4.txt", destFile );
-            wagon.get( "directory-copy/d/e/f/test-resource-5.txt", destFile);
+            wagon.get( "directory-copy/d/e/f/test-resource-5.txt", destFile );
 
             wagon.disconnect();
         }
 
         tearDownWagonTestingFixtures();
     }
-    
+
     /**
      * Test for putting a directory with a destination that multiple directories deep,
      * all of which haven't been created.
-     * @since 1.0-beta-2
+     *
      * @throws Exception
+     * @since 1.0-beta-2
      */
     public void testWagonPutDirectoryDeepDestination()
         throws Exception
     {
         setupRepositories();
-    
+
         setupWagonTestingFixtures();
-    
+
         Wagon wagon = getWagon();
-    
+
         if ( wagon.supportsDirectoryCopy() )
         {
             sourceFile = new File( FileTestUtils.getTestOutputDir(), "deep0/deep1/deep2" );
-            
+
             FileUtils.deleteDirectory( sourceFile );
-            
+
             writeTestFile( "test-resource-1.txt" );
             writeTestFile( "a/test-resource-2.txt" );
             writeTestFile( "a/b/test-resource-3.txt" );
             writeTestFile( "c/test-resource-4.txt" );
             writeTestFile( "d/e/f/test-resource-5.txt" );
-    
+
             wagon.connect( testRepository, getAuthInfo() );
-    
+
             wagon.putDirectory( sourceFile, "deep0/deep1/deep2" );
-    
+
             destFile = FileTestUtils.createUniqueFile( getName(), getName() );
-    
+
             destFile.deleteOnExit();
-    
+
             wagon.get( "deep0/deep1/deep2/test-resource-1.txt", destFile );
             wagon.get( "deep0/deep1/deep2/a/test-resource-2.txt", destFile );
             wagon.get( "deep0/deep1/deep2/a/b/test-resource-3.txt", destFile );
             wagon.get( "deep0/deep1/deep2/c/test-resource-4.txt", destFile );
-            wagon.get( "deep0/deep1/deep2/d/e/f/test-resource-5.txt", destFile);
-    
+            wagon.get( "deep0/deep1/deep2/d/e/f/test-resource-5.txt", destFile );
+
             wagon.disconnect();
         }
-    
+
         tearDownWagonTestingFixtures();
     }
 
     /**
      * Test that when putting a directory that already exists new files get also copied
-     * @since 1.0-beta-1
+     *
      * @throws Exception
+     * @since 1.0-beta-1
      */
     public void testWagonPutDirectoryWhenDirectoryAlreadyExists()
         throws Exception
     {
-        
-        final String dirName =  "directory-copy-existing";
+
+        final String dirName = "directory-copy-existing";
 
         final String resourceToCreate = "test-resource-1.txt";
 
-        final String[] resources = {
-            "a/test-resource-2.txt",
-            "a/b/test-resource-3.txt",
-            "c/test-resource-4.txt" };
-        
+        final String[] resources = {"a/test-resource-2.txt", "a/b/test-resource-3.txt", "c/test-resource-4.txt"};
+
         setupRepositories();
 
         setupWagonTestingFixtures();
@@ -314,7 +313,7 @@ public abstract class WagonTestCase
 
             FileUtils.deleteDirectory( sourceFile );
 
-            createDirectory( wagon, resourceToCreate , resources, dirName );
+            createDirectory( wagon, resourceToCreate, resources, dirName );
 
             wagon.connect( testRepository, getAuthInfo() );
 
@@ -344,14 +343,15 @@ public abstract class WagonTestCase
     }
 
     /**
-     * Create a directory with a resource and check that the other ones don't exist 
+     * Create a directory with a resource and check that the other ones don't exist
+     *
      * @param wagon
      * @param resourceToCreate name of the resource to be created
-     * @param resourcesNotPresent names of the resources that we'll check don't exist
-     * @param dirName directory name to create
+     * @param resourcesPresent names of the resources that we'll check don't exist
+     * @param dirName          directory name to create
      * @throws Exception
      */
-    protected void createDirectory( Wagon wagon, String resourceToCreate, String[] resourcesNotPresent, String dirName )
+    protected void createDirectory( Wagon wagon, String resourceToCreate, String[] resourcesPresent, String dirName )
         throws Exception
     {
         writeTestFile( resourceToCreate );
@@ -360,14 +360,20 @@ public abstract class WagonTestCase
 
         wagon.putDirectory( sourceFile, dirName );
 
-        for ( int i = 0; i < resourcesNotPresent.length; i++ )
+        for ( int i = 0; i < resourcesPresent.length; i++ )
         {
-            assertNotExists( wagon, dirName + "/" + resourcesNotPresent[i] );
+            String resourceName = dirName + "/" + resourcesPresent[i];
+            
+            File destFile = FileTestUtils.createUniqueFile( getName(), resourceName );
+
+            destFile.deleteOnExit();
+
+            wagon.get( resourceName, destFile );
         }
 
         wagon.disconnect();
     }
-    
+
     protected void assertResourcesAreInRemoteSide( Wagon wagon, List resourceNames )
         throws IOException, TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
@@ -376,7 +382,7 @@ public abstract class WagonTestCase
         {
             String resourceName = (String) iter.next();
 
-            destFile = FileTestUtils.createUniqueFile( getName(), resourceName );
+            File destFile = FileTestUtils.createUniqueFile( getName(), resourceName );
 
             destFile.deleteOnExit();
 
@@ -386,12 +392,13 @@ public abstract class WagonTestCase
 
     /**
      * Assert that a resource does not exist in the remote wagon system
-     * @since 1.0-beta-1
-     * @param wagon wagon to get the resource from
+     *
+     * @param wagon        wagon to get the resource from
      * @param resourceName name of the resource
-     * @throws IOException if a temp file can't be created
-     * @throws AuthorizationException 
-     * @throws TransferFailedException 
+     * @throws IOException             if a temp file can't be created
+     * @throws AuthorizationException
+     * @throws TransferFailedException
+     * @since 1.0-beta-1
      */
     protected void assertNotExists( Wagon wagon, String resourceName )
         throws IOException, TransferFailedException, AuthorizationException
@@ -458,12 +465,12 @@ public abstract class WagonTestCase
             tearDownWagonTestingFixtures();
         }
     }
-    
+
     /**
      * Test {@link Wagon#getFileList(String)}.
-     * 
-     * @since 1.0-beta-2
+     *
      * @throws Exception
+     * @since 1.0-beta-2
      */
     public void testWagonGetFileList()
         throws Exception
@@ -474,11 +481,8 @@ public abstract class WagonTestCase
 
         String dirName = "file-list";
 
-        String filenames[] = new String[] {
-            "test-resource.txt",
-            "test-resource-b.txt",
-            "test-resource.pom",
-            "more-resources.dat" };
+        String filenames[] =
+            new String[]{"test-resource.txt", "test-resource-b.txt", "test-resource.pom", "more-resources.dat"};
 
         for ( int i = 0; i < filenames.length; i++ )
         {
@@ -503,12 +507,12 @@ public abstract class WagonTestCase
 
         tearDownWagonTestingFixtures();
     }
-    
+
     /**
      * Test {@link Wagon#getFileList(String)} when the directory does not exist.
-     * 
-     * @since 1.0-beta-2
+     *
      * @throws Exception
+     * @since 1.0-beta-2
      */
     public void testWagonGetFileListWhenDirectoryDoesNotExist()
         throws Exception
@@ -542,9 +546,9 @@ public abstract class WagonTestCase
 
     /**
      * Test for an existing resource.
-     * 
-     * @since 1.0-beta-2
+     *
      * @throws Exception
+     * @since 1.0-beta-2
      */
     public void testWagonResourceExists()
         throws Exception
@@ -556,7 +560,7 @@ public abstract class WagonTestCase
         Wagon wagon = getWagon();
 
         putFile();
-        
+
         wagon.connect( testRepository, getAuthInfo() );
 
         assertTrue( sourceFile.getName() + " does not exist", wagon.resourceExists( sourceFile.getName() ) );
@@ -565,12 +569,12 @@ public abstract class WagonTestCase
 
         tearDownWagonTestingFixtures();
     }
-    
+
     /**
      * Test for an invalid resource.
-     * 
-     * @since 1.0-beta-2
+     *
      * @throws Exception
+     * @since 1.0-beta-2
      */
     public void testWagonResourceNotExists()
         throws Exception
@@ -589,7 +593,6 @@ public abstract class WagonTestCase
 
         tearDownWagonTestingFixtures();
     }
-    
 
     // ----------------------------------------------------------------------
     // File <--> File round trip testing
@@ -597,8 +600,8 @@ public abstract class WagonTestCase
     // We are testing taking a file, our sourcefile, and placing it into the
     // test repository that we have setup.
     // ----------------------------------------------------------------------
-    
-    protected void putFile(String resourceName, String testFileName, String content)
+
+    protected void putFile( String resourceName, String testFileName, String content )
         throws Exception
     {
         message( "Putting test artifact: " + resourceName + " into test repository " + testRepository );
@@ -617,7 +620,7 @@ public abstract class WagonTestCase
 
         wagon.removeTransferListener( checksumObserver );
 
-        wagon.disconnect();        
+        wagon.disconnect();
     }
 
     protected void putFile()
@@ -694,5 +697,5 @@ public abstract class WagonTestCase
 
         return repository;
     }
-    
+
 }

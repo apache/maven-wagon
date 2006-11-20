@@ -16,17 +16,15 @@ package org.apache.maven.wagon.providers.ssh;
  * limitations under the License.
  */
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Proxy;
+import com.jcraft.jsch.ProxyHTTP;
+import com.jcraft.jsch.ProxySOCKS5;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.UIKeyboardInteractive;
+import com.jcraft.jsch.UserInfo;
 import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.CommandExecutionException;
 import org.apache.maven.wagon.CommandExecutor;
@@ -48,15 +46,16 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Proxy;
-import com.jcraft.jsch.ProxyHTTP;
-import com.jcraft.jsch.ProxySOCKS5;
-import com.jcraft.jsch.Session;
-import com.jcraft.jsch.UIKeyboardInteractive;
-import com.jcraft.jsch.UserInfo;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * Common SSH operations.
@@ -90,9 +89,10 @@ public abstract class AbstractSshWagon
     class Streams
     {
         String out = "";
+
         String err = "";
     }
-    
+
     public void openConnection()
         throws AuthenticationException
     {
@@ -106,8 +106,6 @@ public abstract class AbstractSshWagon
             authenticationInfo.setUserName( System.getProperty( "user.name" ) );
         }
 
-        JSch sch = new JSch();
-
         int port = getRepository().getPort();
 
         if ( port == WagonConstants.UNKNOWN_PORT )
@@ -117,21 +115,10 @@ public abstract class AbstractSshWagon
 
         String host = getRepository().getHost();
 
-        try
-        {
-            session = sch.getSession( authenticationInfo.getUserName(), host, port );
-        }
-        catch ( JSchException e )
-        {
-            fireSessionError( e );
-
-            throw new AuthenticationException( "Cannot connect. Reason: " + e.getMessage(), e );
-        }
-
         // If user don't define a password, he want to use a private key
+        File privateKey = null;
         if ( authenticationInfo.getPassword() == null )
         {
-            File privateKey;
 
             if ( authenticationInfo.getPrivateKey() != null )
             {
@@ -150,18 +137,51 @@ public abstract class AbstractSshWagon
                 }
 
                 fireSessionDebug( "Using private key: " + privateKey );
-
-                try
-                {
-                    sch.addIdentity( privateKey.getAbsolutePath(), authenticationInfo.getPassphrase() );
-                }
-                catch ( JSchException e )
-                {
-                    fireSessionError( e );
-
-                    throw new AuthenticationException( "Cannot connect. Reason: " + e.getMessage(), e );
-                }
             }
+        }
+
+        Properties config = new Properties();
+        config.setProperty( "BatchMode", interactive ? "no" : "yes" );
+
+        if ( !interactive )
+        {
+            interactiveUserInfo = new NullInteractiveUserInfo();
+            uIKeyboardInteractive = null;
+        }
+
+        knownHostsProvider.addConfiguration( config );
+
+        initJsch( privateKey, host, port, config );
+    }
+
+    private void initJsch( File privateKey, String host, int port, Properties config )
+        throws AuthenticationException
+    {
+        JSch sch = new JSch();
+
+        if ( privateKey != null && privateKey.exists() )
+        {
+            try
+            {
+                sch.addIdentity( privateKey.getAbsolutePath(), authenticationInfo.getPassphrase() );
+            }
+            catch ( JSchException e )
+            {
+                fireSessionError( e );
+
+                throw new AuthenticationException( "Cannot connect. Reason: " + e.getMessage(), e );
+            }
+        }
+
+        try
+        {
+            session = sch.getSession( authenticationInfo.getUserName(), host, port );
+        }
+        catch ( JSchException e )
+        {
+            fireSessionError( e );
+
+            throw new AuthenticationException( "Cannot connect. Reason: " + e.getMessage(), e );
         }
 
         if ( proxyInfo != null && proxyInfo.getHost() != null )
@@ -189,15 +209,6 @@ public abstract class AbstractSshWagon
             session.setProxy( null );
         }
 
-        Properties config = new Properties();
-        config.setProperty( "BatchMode", interactive ? "no" : "yes" );
-
-        if ( !interactive )
-        {
-            interactiveUserInfo = new NullInteractiveUserInfo();
-            uIKeyboardInteractive = null;
-        }
-
         // username and password will be given via UserInfo interface.
         UserInfo ui = new WagonUserInfo( authenticationInfo, interactiveUserInfo );
 
@@ -210,7 +221,6 @@ public abstract class AbstractSshWagon
         {
             try
             {
-                knownHostsProvider.addConfiguration( config );
                 knownHostsProvider.addKnownHosts( sch, ui );
             }
             catch ( JSchException e )
@@ -259,108 +269,103 @@ public abstract class AbstractSshWagon
 
         return privateKey;
     }
-    
+
     public Streams executeCommand( String command, boolean ignoreFailures )
         throws CommandExecutionException
     {
-        ChannelExec channel = null;
+        fireTransferDebug( "Executing command: " + command );
 
-        InputStream in = null;
-        InputStream err = null;
-        OutputStream out = null;
+        ChannelExec channel = null;
+        BufferedReader stdoutReader = null;
+        BufferedReader stderrReader = null;
         try
         {
-            fireTransferDebug( "Executing command: " + command );
-
             channel = (ChannelExec) session.openChannel( EXEC_CHANNEL );
 
             channel.setCommand( command + "\n" );
 
-            out = channel.getOutputStream();
-
-            in = channel.getInputStream();
-
-            err = channel.getErrStream();
+            InputStream stdout = channel.getInputStream();
+            InputStream stderr = channel.getErrStream();
 
             channel.connect();
 
-            BufferedReader r = new BufferedReader( new InputStreamReader( err ) );
+            stdoutReader = new BufferedReader( new InputStreamReader( stdout ) );
+            stderrReader = new BufferedReader( new InputStreamReader( stderr ) );
 
-            List output = null;
+            Streams streams = processStreams( stderrReader, stdoutReader );
 
-            Streams streams = new Streams();
-            
-            while ( true )
+            if ( streams.err.length() > 0 )
             {
-                String line = r.readLine();
-                if ( line == null )
-                {
-                    break;
-                }
+                int exitCode = channel.getExitStatus();
+                throw new CommandExecutionException( "Exit code: " + exitCode + " - " + streams.err );
+            }
 
-                if ( output == null )
-                {
-                    output = new ArrayList();
-                }
-
-                // TODO: I think we need to deal with exit codes instead, but IIRC there are some cases of errors that don't have exit codes
-                // ignore this error. TODO: output a warning
-                if ( !line.startsWith( "Could not chdir to home directory" ) && !line.endsWith( "ttyname: Operation not supported" ) )
-                {
-                    output.add( line );
-                    streams.err += line + "\n";
-                }
-            }
-            
-            r = new BufferedReader( new InputStreamReader( in ));
-            while(true)
-            {
-                String line = r.readLine();
-                if(line == null)
-                {
-                    break;
-                }
-                
-                streams.out += line + "\n";
-            }
-            
-            // drain the output stream.
-            // TODO: we'll save this for the 1.0-alpha-8 line, so we can test it more. the -q arg in the
-            // unzip command should keep us until then...
-//            int avail = in.available();
-//            byte[] trashcan = new byte[1024];
-//            
-//            while( ( avail = in.available() ) > 0 )
-//            {
-//                in.read( trashcan, 0, avail );
-//            }
-            
-            if ( output != null && !output.isEmpty() )
-            {
-                throw new CommandExecutionException(
-                    "Exit code: " + channel.getExitStatus() + " - " + StringUtils.join( output.iterator(), "\n" ) );
-            }
-            
             return streams;
-        }
-        catch ( JSchException e )
-        {
-            throw new CommandExecutionException( "Cannot execute remote command: " + command, e );
         }
         catch ( IOException e )
         {
             throw new CommandExecutionException( "Cannot execute remote command: " + command, e );
         }
+        catch ( JSchException e )
+        {
+            throw new CommandExecutionException( "Cannot execute remote command: " + command, e );
+        }
         finally
         {
-            IOUtil.close( out );
-            IOUtil.close( in );
-            IOUtil.close( err );
+            IOUtil.close( stdoutReader );
+            IOUtil.close( stderrReader );
             if ( channel != null )
             {
                 channel.disconnect();
             }
         }
+    }
+
+    private Streams processStreams( BufferedReader stderrReader, BufferedReader stdoutReader )
+        throws IOException, CommandExecutionException
+    {
+        Streams streams = new Streams();
+
+        while ( true )
+        {
+            String line = stderrReader.readLine();
+            if ( line == null )
+            {
+                break;
+            }
+
+            // TODO: I think we need to deal with exit codes instead, but IIRC there are some cases of errors that don't have exit codes
+            // ignore this error. TODO: output a warning
+            if ( !line.startsWith( "Could not chdir to home directory" ) &&
+                !line.endsWith( "ttyname: Operation not supported" ) )
+            {
+                streams.err += line + "\n";
+            }
+        }
+
+        while ( true )
+        {
+            String line = stdoutReader.readLine();
+            if ( line == null )
+            {
+                break;
+            }
+
+            streams.out += line + "\n";
+        }
+
+        // drain the output stream.
+        // TODO: we'll save this for the 1.0-alpha-8 line, so we can test it more. the -q arg in the
+        // unzip command should keep us until then...
+//            int avail = in.available();
+//            byte[] trashcan = new byte[1024];
+//
+//            while( ( avail = in.available() ) > 0 )
+//            {
+//                in.read( trashcan, 0, avail );
+//            }
+
+        return streams;
     }
 
     public void executeCommand( String command )
@@ -613,32 +618,39 @@ public abstract class AbstractSshWagon
         {
             String path = getPath( getRepository().getBasedir(), destinationDirectory );
             Streams streams = executeCommand( "ls -la " + path, true );
-            
-            BufferedReader br = new BufferedReader(new StringReader(streams.out));
-            
+
+            BufferedReader br = new BufferedReader( new StringReader( streams.out ) );
+
             List ret = new ArrayList();
             String line = br.readLine();
-            
-            while(line != null)
+
+            while ( line != null )
             {
-                String parts[] = StringUtils.split( line, " " );
-                if(parts.length >= 8)
+                String[] parts = StringUtils.split( line, " " );
+                if ( parts.length >= 8 )
                 {
-                    ret.add(parts[8]);
+                    ret.add( parts[8] );
                 }
-                
+
                 line = br.readLine();
             }
-            
+
             return ret;
         }
         catch ( CommandExecutionException e )
         {
-            throw new TransferFailedException( "Error performing file listing.", e);
+            if ( e.getMessage().trim().endsWith( "No such file or directory" ) )
+            {
+                throw new ResourceDoesNotExistException( e.getMessage().trim() );
+            }
+            else
+            {
+                throw new TransferFailedException( "Error performing file listing.", e );
+            }
         }
         catch ( IOException e )
         {
-            throw new TransferFailedException( "Error parsing file listing.", e);
+            throw new TransferFailedException( "Error parsing file listing.", e );
         }
     }
 

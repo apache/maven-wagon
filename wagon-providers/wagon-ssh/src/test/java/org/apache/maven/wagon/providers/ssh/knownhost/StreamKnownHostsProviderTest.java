@@ -34,6 +34,7 @@ public class StreamKnownHostsProviderTest
     {
         super.setUp();
 
+        host = "beaver.codehaus.org";
         okHostsProvider = getProvider( "ok.knownhosts" );
         failHostsProvider = getProvider( "fail.knownhosts" );
     }
