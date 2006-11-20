@@ -43,7 +43,7 @@ import java.util.List;
  * ssh-agent type behavior, until we can construct a Java SSH Agent and interface for JSch.
  *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
- * @version $Id$
+ * @version $Id:ScpExternalWagon.java 477260 2006-11-20 17:11:39Z brett $
  * @todo [BP] add compression flag
  */
 public class ScpExternalWagon
@@ -344,11 +344,6 @@ public class ScpExternalWagon
         postProcessListeners( resource, destination, TransferEvent.REQUEST_GET );
 
         fireGetCompleted( resource, destination );
-    }
-
-    public boolean getIfNewer( String resourceName, File destination, long timestamp )
-    {
-        throw new UnsupportedOperationException( "getIfNewer is scp wagon must be still implemented" );
     }
 
     //

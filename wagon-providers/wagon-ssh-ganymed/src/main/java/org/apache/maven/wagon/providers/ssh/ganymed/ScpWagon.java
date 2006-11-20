@@ -177,12 +177,4 @@ public class ScpWagon
             IOUtil.close( os );
         }
     }
-
-    public boolean getIfNewer( String resourceName, File destination, long timestamp )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        // TODO Implement ScpWagon.getIfNewer()
-        throw new UnsupportedOperationException( "getIfNewer in scp wagon is not implemented" );
-    }
-
 }

@@ -64,6 +64,14 @@ public abstract class AbstractSshWagon
 
     protected static final int DEFAULT_SSH_PORT = 22;
 
+    public boolean getIfNewer( String resourceName, File destination, long timestamp )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        fireSessionDebug( "getIfNewer in SCP wagon is not supported - performing an unconditional get" );
+        get( resourceName, destination );
+        return true;
+    }
+
     protected String getOctalMode( RepositoryPermissions permissions )
     {
         String mode = "0644";
