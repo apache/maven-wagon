@@ -712,4 +712,10 @@ public abstract class AbstractWagon
     {
         throw new UnsupportedOperationException( "The wagon you are using has not implemented getFileList()" );
     }
+
+    public boolean resourceExists( String resourceName )
+        throws TransferFailedException, AuthorizationException
+    {
+        throw new UnsupportedOperationException( "The wagon you are using has not implemented resourceExists()" );
+    }
 }
