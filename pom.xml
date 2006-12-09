@@ -5,9 +5,9 @@
   <parent>
     <artifactId>maven-parent</artifactId>
     <groupId>org.apache.maven</groupId>
-    <version>2</version>
+    <version>4</version>
     <relativePath>../pom/maven/pom.xml</relativePath>
-  </parent>
+  </parent>  
   <groupId>org.apache.maven.wagon</groupId>
   <artifactId>wagon</artifactId>
   <packaging>pom</packaging>
