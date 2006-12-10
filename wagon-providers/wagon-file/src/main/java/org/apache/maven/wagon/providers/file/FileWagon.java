@@ -16,6 +16,7 @@ package org.apache.maven.wagon.providers.file;
  * limitations under the License.
  */
 
+import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.LazyFileOutputStream;
 import org.apache.maven.wagon.OutputData;
@@ -89,7 +90,18 @@ public class FileWagon
     }
 
     public void openConnection()
+        throws ConnectionException
     {
+        // [WAGON-61] Check the File repository exists 
+        File basedir = new File( getRepository().getBasedir() );
+        if ( !basedir.exists() )
+        {
+            throw new ConnectionException( "Repository path " + basedir + " does not exist" );
+        }
+        if ( !basedir.canRead() )
+        {
+            throw new ConnectionException( "Repository path " + basedir + " cannot be read" );
+        }
     }
 
     public void closeConnection()
