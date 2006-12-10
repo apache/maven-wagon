@@ -118,7 +118,27 @@ public class FileWagon
     {
         File path = resolveDestinationPath( destinationDirectory );
 
-        path.mkdirs();
+        try
+        {
+            /* Done to address issue found in HP-UX with regards to "." directory references.
+             * Details found in ..
+             * WAGON-30 - wagon-file failed when used by maven-site-plugin
+             * WAGON-33 - FileWagon#putDirectory() fails in HP-UX if destinationDirectory is "."
+             * http://www.nabble.com/With-maven-2.0.2-site%3Adeploy-doesn%27t-work-t934716.html for details.
+             * 
+             * Using path.getCanonicalFile() ensures that the path is fully 
+             * resolved before an attempt to create it.
+             * 
+             * TODO: consider moving this to FileUtils.mkdirs()
+             */
+            File realFile = path.getCanonicalFile();
+            realFile.mkdirs();
+        }
+        catch ( IOException e )
+        {
+            // Fall back to standard way if getCanonicalFile() fails.
+            path.mkdirs();
+        }
  
         if ( !path.exists() || !path.isDirectory() )
         {
