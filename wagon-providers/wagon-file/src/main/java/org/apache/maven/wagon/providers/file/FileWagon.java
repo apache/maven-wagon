@@ -142,7 +142,16 @@ public class FileWagon
  
         if ( !path.exists() || !path.isDirectory() )
         {
-            throw new TransferFailedException( "Could not make directory '" + path.getAbsolutePath() + "'." );
+            String emsg = "Could not make directory '" + path.getAbsolutePath() + "'.";
+            
+            // Add assistive message in case of failure.
+            File basedir = new File( getRepository().getBasedir() );
+            if ( !basedir.canWrite() )
+            {
+                emsg += "  The base directory " + basedir + " is read-only.";
+            }
+            
+            throw new TransferFailedException( emsg );
         }
 
         try
