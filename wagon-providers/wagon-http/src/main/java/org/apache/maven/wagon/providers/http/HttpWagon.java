@@ -16,17 +16,6 @@ package org.apache.maven.wagon.providers.http;
  * limitations under the License.
  */
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.util.zip.GZIPInputStream;
-
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
@@ -50,6 +39,17 @@ import org.apache.maven.wagon.resource.Resource;
 import org.apache.maven.wagon.shared.http.HtmlFileListParser;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.zip.GZIPInputStream;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -192,10 +192,11 @@ public class HttpWagon
         // Check that we didn't run out of retries.
         switch ( statusCode )
         {
-            case HttpStatus.SC_OK:
-                break;
-
-            case HttpStatus.SC_CREATED:
+            // Success Codes
+            case HttpStatus.SC_OK: // 200
+            case HttpStatus.SC_CREATED: // 201
+            case HttpStatus.SC_ACCEPTED: // 202
+            case HttpStatus.SC_NO_CONTENT:  // 204
                 break;
 
             case SC_NULL:
