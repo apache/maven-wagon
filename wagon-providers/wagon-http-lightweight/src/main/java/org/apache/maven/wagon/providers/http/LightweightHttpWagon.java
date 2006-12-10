@@ -50,9 +50,13 @@ public class LightweightHttpWagon
 {
     private String previousProxyExclusions;
 
-    private String previousProxyHost;
+    private String previousHttpProxyHost;
 
-    private String previousProxyPort;
+    private String previousHttpsProxyHost;
+
+    private String previousHttpProxyPort;
+    
+    private String previousHttpsProxyPort;
 
     private HttpURLConnection putConnection;
 
@@ -181,15 +185,20 @@ public class LightweightHttpWagon
     public void openConnection()
         throws ConnectionException, AuthenticationException
     {
-        previousProxyHost = System.getProperty( "http.proxyHost" );
-        previousProxyPort = System.getProperty( "http.proxyPort" );
+
+        previousHttpProxyHost = System.getProperty( "http.proxyHost" );
+        previousHttpProxyPort = System.getProperty( "http.proxyPort" );
+        previousHttpsProxyHost = System.getProperty( "https.proxyHost" );
+        previousHttpsProxyPort = System.getProperty( "https.proxyPort" );        
         previousProxyExclusions = System.getProperty( "http.nonProxyHosts" );
 
         final ProxyInfo proxyInfo = this.proxyInfo;
         if ( proxyInfo != null )
         {
             System.setProperty( "http.proxyHost", proxyInfo.getHost() );
+            System.setProperty( "https.proxyHost", proxyInfo.getHost() );
             System.setProperty( "http.proxyPort", String.valueOf( proxyInfo.getPort() ) );
+            System.setProperty( "https.proxyPort", String.valueOf( proxyInfo.getPort() ) );
             if ( proxyInfo.getNonProxyHosts() != null )
             {
                 System.setProperty( "http.nonProxyHosts", proxyInfo.getNonProxyHosts() );
@@ -239,13 +248,21 @@ public class LightweightHttpWagon
         {
             putConnection.disconnect();
         }
-        if ( previousProxyHost != null )
+        if ( previousHttpProxyHost != null )
         {
-            System.setProperty( "http.proxyHost", previousProxyHost );
+            System.setProperty( "http.proxyHost", previousHttpProxyHost );
         }
-        if ( previousProxyPort != null )
+        if ( previousHttpsProxyHost != null )
         {
-            System.setProperty( "http.proxyPort", previousProxyPort );
+            System.setProperty( "https.proxyHost", previousHttpsProxyHost );
+        }
+        if ( previousHttpProxyPort != null )
+        {
+            System.setProperty( "http.proxyPort", previousHttpProxyPort );
+        }
+        if ( previousHttpsProxyPort != null )
+        {
+            System.setProperty( "https.proxyPort", previousHttpsProxyPort );
         }
         if ( previousProxyExclusions != null )
         {
