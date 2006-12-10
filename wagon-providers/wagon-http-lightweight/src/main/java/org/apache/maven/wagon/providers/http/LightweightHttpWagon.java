@@ -154,13 +154,11 @@ public class LightweightHttpWagon
 
             switch ( statusCode )
             {
-                case HttpURLConnection.HTTP_OK:
-                    break;
-
-                case HttpURLConnection.HTTP_CREATED:
-                    break;
-
-                case HttpURLConnection.HTTP_NO_CONTENT:
+                // Success Codes
+                case HttpURLConnection.HTTP_OK: // 200
+                case HttpURLConnection.HTTP_CREATED: // 201
+                case HttpURLConnection.HTTP_ACCEPTED: // 202
+                case HttpURLConnection.HTTP_NO_CONTENT:  // 204
                     break;
 
                 case HttpURLConnection.HTTP_FORBIDDEN:
