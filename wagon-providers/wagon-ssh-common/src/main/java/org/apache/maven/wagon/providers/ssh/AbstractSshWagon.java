@@ -362,9 +362,22 @@ public abstract class AbstractSshWagon
             while ( line != null )
             {
                 String[] parts = StringUtils.split( line, " " );
-                if ( parts.length >= 8 )
+                /* This should split out the 'ls' command output.
+                 * Example: "-rw-r--r-- 1 joakim wheel    18 2006-12-10 10:00 test-resource.pom"
+                 * 
+                 * 0 : The permissions mask : "-rw-r--r--"
+                 * 1 : Directory Complexity : "1"
+                 * 2 : Owner                : "joakim"
+                 * 3 : Group                : "wheel"
+                 * 4 : Size                 : "18"
+                 * 5 : Date                 : "2006-12-10"
+                 * 6 : Time                 : "10:00"
+                 * 7 : File Name            : "test-resource.pom"
+                 */
+                if ( parts.length >= 7 )
                 {
-                    ret.add( parts[8] );
+                    // This is the filename portion of the 'ls' command output.
+                    ret.add( parts[7] );
                 }
 
                 line = br.readLine();
