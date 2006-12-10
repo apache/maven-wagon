@@ -16,27 +16,12 @@ package org.apache.maven.wagon.providers.webdav;
  * limitations under the License.
  */
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Properties;
-import java.util.TimeZone;
-
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.HttpURL;
 import org.apache.commons.httpclient.HttpsURL;
 import org.apache.commons.httpclient.URIException;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.LazyFileOutputStream;
@@ -53,6 +38,22 @@ import org.apache.webdav.lib.methods.DepthSupport;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.TimeZone;
 
 /**
  * <p>WebDavWagon</p>
@@ -114,6 +115,9 @@ public class WebDavWagon
     public void openConnection()
         throws AuthenticationException, ConnectionException
     {
+        final boolean hasProxy = ( proxyInfo != null && proxyInfo.getUserName() != null );
+        final boolean hasAuthentication = ( authenticationInfo != null && authenticationInfo.getUserName() != null );
+
         String url = getURL( repository );
 
         repository.setUrl( url );
@@ -123,8 +127,8 @@ public class WebDavWagon
         try
         {
             httpURL = urlToHttpURL( url );
-            
-            if ( authenticationInfo != null )
+
+            if ( hasAuthentication )
             {
                 String userName = authenticationInfo.getUserName();
                 String password = authenticationInfo.getPassword();
@@ -137,6 +141,20 @@ public class WebDavWagon
 
             CorrectedWebdavResource.setDefaultAction( CorrectedWebdavResource.NOACTION );
             webdavResource = new CorrectedWebdavResource( httpURL );
+
+            if ( hasProxy )
+            {
+                
+                
+                webdavResource.setProxy( proxyInfo.getHost(), proxyInfo.getPort() );
+                if ( !StringUtils.isEmpty( proxyInfo.getUserName() ) )
+                {
+                    UsernamePasswordCredentials proxyCredentials = new UsernamePasswordCredentials();
+                    proxyCredentials.setUserName( proxyInfo.getUserName() );
+                    proxyCredentials.setPassword( proxyInfo.getPassword() );
+                    webdavResource.setProxyCredentials( proxyCredentials );
+                }
+            }
         }
         catch ( HttpException he )
         {
@@ -268,7 +286,7 @@ public class WebDavWagon
             InputStream is = new PutInputStream( source, resource, this, getTransferEventSupport() );
             boolean success = webdavResource.putMethod( dest, is, (int) source.length() );
             int statusCode = webdavResource.getStatusCode();
-            
+
             switch ( statusCode )
             {
                 case HttpStatus.SC_OK:
@@ -286,7 +304,7 @@ public class WebDavWagon
                 case HttpStatus.SC_LENGTH_REQUIRED:
                     throw new ResourceDoesNotExistException( "Transfer failed, server requires Content-Length." );
 
-                //add more entries here
+                    //add more entries here
                 default:
                     if ( !success )
                     {
@@ -401,7 +419,7 @@ public class WebDavWagon
         }
 
         InputStream is = null;
-        OutputStream output = new LazyFileOutputStream( destination ); 
+        OutputStream output = new LazyFileOutputStream( destination );
         try
         {
             is = webdavResource.getMethodData( url );
@@ -416,7 +434,7 @@ public class WebDavWagon
         catch ( IOException e )
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-            
+
             if ( destination.exists() )
             {
                 boolean deleted = destination.delete();
@@ -447,8 +465,8 @@ public class WebDavWagon
 
                 default:
                     throw new TransferFailedException( "Failed to transfer file: " + url + ". Return code is: "
-                                                       + statusCode, e );
-            }                
+                        + statusCode, e );
+            }
         }
         finally
         {
@@ -482,7 +500,7 @@ public class WebDavWagon
                 throw new TransferFailedException( "Failed to transfer file: " + url + ". Return code is: "
                     + statusCode );
         }
-        
+
     }
 
     private String getURL( Repository repository )
@@ -498,7 +516,7 @@ public class WebDavWagon
             return url;
         }
     }
-    
+
     /**
      * This wagon supports directory copying
      * 
@@ -508,7 +526,7 @@ public class WebDavWagon
     {
         return true;
     }
-    
+
     /**
      * Copy a directory from local system to remote webdav server
      * 
@@ -518,11 +536,11 @@ public class WebDavWagon
      * @throws ResourceDoesNotExistException
      * @throws AuthorizationException
      */
-    public void putDirectory( File sourceDirectory, String destinationDirectory ) 
+    public void putDirectory( File sourceDirectory, String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        
-        File [] listFiles = sourceDirectory.listFiles();
+
+        File[] listFiles = sourceDirectory.listFiles();
 
         for ( int i = 0; i < listFiles.length; i++ )
         {
@@ -533,7 +551,7 @@ public class WebDavWagon
             else
             {
                 String target = destinationDirectory + "/" + listFiles[i].getName();
-                
+
                 put( listFiles[i], target );
             }
         }
@@ -622,7 +640,7 @@ public class WebDavWagon
     }
 
     public boolean resourceExists( String resourceName )
-        throws TransferFailedException, AuthorizationException 
+        throws TransferFailedException, AuthorizationException
     {
         try
         {
