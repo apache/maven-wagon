@@ -7,7 +7,7 @@
     <groupId>org.apache.maven</groupId>
     <version>4</version>
     <relativePath>../pom/maven/pom.xml</relativePath>
-  </parent>  
+  </parent>
   <groupId>org.apache.maven.wagon</groupId>
   <artifactId>wagon</artifactId>
   <packaging>pom</packaging>
@@ -133,4 +133,39 @@
       </site>
     </distributionManagement>
   -->
+  <profiles>
+    <profile>
+      <id>sharedResources</id>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>people.apache.org</id>
+          <url>http://people.apache.org/repo/m2-snapshot-repository</url>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-remote-resources-plugin</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>process</goal>
+                </goals>
+                <configuration>
+                  <resourceBundles>
+                    <resourceBundle>org.apache:apache-jar-resource-bundle:1.0</resourceBundle>
+                  </resourceBundles>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
