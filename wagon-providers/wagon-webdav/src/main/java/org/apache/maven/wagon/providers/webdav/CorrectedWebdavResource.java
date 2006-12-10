@@ -52,6 +52,7 @@ public class CorrectedWebdavResource
         throws IOException
     {
         super( url );
+        setFollowRedirects( true ); // TODO: Make this configurable.
     }
 
     public void setHeaders( Map headers )
@@ -88,10 +89,10 @@ public class CorrectedWebdavResource
     public InputStream getMethodData( String path )
         throws IOException
     {
-
         setClient();
 
         GetMethod method = new GetMethod( URIUtil.encodePathQuery( path ) );
+        method.setFollowRedirects( super.followRedirects );
 
         generateTransactionHeader( method );
         generateAdditionalHeaders( method );
@@ -142,6 +143,7 @@ public class CorrectedWebdavResource
 
         setClient();
         PutMethod method = new PutMethod( URIUtil.encodePathQuery( path ) );
+        method.setFollowRedirects( super.followRedirects );
         generateIfHeader( method );
         if ( getGetContentType() != null && !getGetContentType().equals( "" ) )
         {
