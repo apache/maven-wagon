@@ -37,11 +37,8 @@ import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -353,37 +350,8 @@ public abstract class AbstractSshWagon
         {
             String path = getPath( getRepository().getBasedir(), destinationDirectory );
             Streams streams = executeCommand( "ls -la " + path, false );
-
-            BufferedReader br = new BufferedReader( new StringReader( streams.getOut() ) );
-
-            List ret = new ArrayList();
-            String line = br.readLine();
-
-            while ( line != null )
-            {
-                String[] parts = StringUtils.split( line, " " );
-                /* This should split out the 'ls' command output.
-                 * Example: "-rw-r--r-- 1 joakim wheel    18 2006-12-10 10:00 test-resource.pom"
-                 * 
-                 * 0 : The permissions mask : "-rw-r--r--"
-                 * 1 : Directory Complexity : "1"
-                 * 2 : Owner                : "joakim"
-                 * 3 : Group                : "wheel"
-                 * 4 : Size                 : "18"
-                 * 5 : Date                 : "2006-12-10"
-                 * 6 : Time                 : "10:00"
-                 * 7 : File Name            : "test-resource.pom"
-                 */
-                if ( parts.length >= 7 )
-                {
-                    // This is the filename portion of the 'ls' command output.
-                    ret.add( parts[7] );
-                }
-
-                line = br.readLine();
-            }
-
-            return ret;
+            
+            return new LSParser().parseFiles( streams.getOut() );
         }
         catch ( CommandExecutionException e )
         {
@@ -395,10 +363,6 @@ public abstract class AbstractSshWagon
             {
                 throw new TransferFailedException( "Error performing file listing.", e );
             }
-        }
-        catch ( IOException e )
-        {
-            throw new TransferFailedException( "Error parsing file listing.", e );
         }
     }
 
