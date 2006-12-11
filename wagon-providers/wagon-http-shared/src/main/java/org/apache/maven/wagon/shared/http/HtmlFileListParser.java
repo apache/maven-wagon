@@ -1,37 +1,37 @@
 package org.apache.maven.wagon.shared.http;
 
 /*
- * Copyright 2001-2006 The Apache Software Foundation.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
-
 import org.apache.maven.wagon.TransferFailedException;
-import org.apache.xerces.parsers.DOMParser;
 import org.codehaus.plexus.util.StringUtils;
-import org.cyberneko.html.HTMLConfiguration;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+import org.w3c.tidy.Tidy;
+
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Html File List Parser.
@@ -48,44 +48,34 @@ public class HtmlFileListParser
     public static List parseFileList( String baseurl, InputStream is )
         throws TransferFailedException
     {
-        try
-        {
-            DOMParser parser = new DOMParser( new HTMLConfiguration() );
-            parser.setFeature( "http://xml.org/sax/features/namespaces", false );
+        Tidy tidy = new Tidy();
+        tidy.setXHTML( true );
+        // Don't care about the warning messages.
+        tidy.setErrout( new PrintWriter( new NullOutputStream() ) );
+        // Don't care about the cleaned up version of the HTML.
+        Document doc = tidy.parseDOM( is, new NullOutputStream() );
 
-            parser.parse( new InputSource( is ) );
+        List links = new ArrayList();
+        links = findAnchorLinks( links, baseurl, doc );
 
-            Document doc = parser.getDocument();
-
-            List links = new ArrayList();
-            links = findAnchorLinks( links, baseurl, doc );
-
-            return links;
-        }
-        catch ( SAXException e )
-        {
-            throw new TransferFailedException( "Unable to parse HTML.", e );
-        }
-        catch ( IOException e )
-        {
-            throw new TransferFailedException( "Unable to parse HTML.", e );
-        }
+        return links;
     }
 
     private static List findAnchorLinks( List links, String baseurl, Node node )
     {
         String basepath = baseurl;
-        
+
         int colslash = basepath.indexOf( "://" );
         if ( colslash > 0 )
         {
             int pathstart = basepath.indexOf( '/', colslash + 3 );
-            if(pathstart > 0)
+            if ( pathstart > 0 )
             {
                 // slash starts path
                 // "http://localhost:10007/test/path/" = "/test/path"
                 basepath = baseurl.substring( pathstart );
-            } else
+            }
+            else
             {
                 // no path means top level.
                 // "http://localhost:10007" = ""
@@ -93,7 +83,7 @@ public class HtmlFileListParser
             }
         }
 
-        if ( node.getNodeName().equalsIgnoreCase( "a" ) )
+        if ( StringUtils.equalsIgnoreCase( "a", node.getNodeName() ) )
         {
             if ( node.hasAttributes() )
             {
