@@ -135,7 +135,8 @@ public class FileWagon
 
     public boolean supportsDirectoryCopy()
     {
-        return ( getRepository().getBasedir() != null );
+        // TODO: should we test for null basedir here?
+        return true;
     }
 
     public void putDirectory( File sourceDirectory, String destinationDirectory )
