@@ -17,8 +17,13 @@ package org.apache.maven.wagon.providers.file;
  */
 
 
+import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.FileTestUtils;
+import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.WagonTestCase;
+import org.apache.maven.wagon.authentication.AuthenticationException;
+import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.resource.Resource;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,5 +46,21 @@ public class FileWagonTest
         File file = FileTestUtils.createUniqueDir( getName() + ".file-repository." );
 
         return "file://" + file.getPath();
+    }
+    
+    /**
+     * This test is introduced to allow for null file wagons.
+     * Which is used heavily in the maven component ITs.
+     * 
+     * @throws ConnectionException
+     * @throws AuthenticationException
+     */
+    public void testNullFileWagon() throws ConnectionException, AuthenticationException
+    {
+        Wagon wagon = new FileWagon();
+        Resource resource = new Resource();
+        resource.setContentLength( 100000 );
+        Repository repository = new Repository();
+        wagon.connect( repository );
     }
 }

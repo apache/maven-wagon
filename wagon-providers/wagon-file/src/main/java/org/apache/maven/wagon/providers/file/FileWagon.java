@@ -49,6 +49,10 @@ public class FileWagon
     public void fillInputData( InputData inputData )
         throws TransferFailedException, ResourceDoesNotExistException
     {
+        if ( getRepository().getBasedir() == null )
+        {
+            throw new TransferFailedException( "Unable to operate with a null basedir." );
+        }
 
         Resource resource = inputData.getResource();
 
@@ -78,6 +82,11 @@ public class FileWagon
     public void fillOutputData( OutputData outputData )
         throws TransferFailedException
     {
+        if ( getRepository().getBasedir() == null )
+        {
+            throw new TransferFailedException( "Unable to operate with a null basedir." );
+        }
+        
         Resource resource = outputData.getResource();
 
         File file = new File( getRepository().getBasedir(), resource.getName() );
@@ -92,6 +101,18 @@ public class FileWagon
     public void openConnection()
         throws ConnectionException
     {
+        if ( getRepository() == null )
+        {
+            throw new ConnectionException( "Unable to operate with a null repository." );
+        }
+
+        if ( getRepository().getBasedir() == null )
+        {
+            // This condition is possible when using wagon-file under integration testing conditions.
+            fireSessionDebug( "Using a null basedir." );
+            return;
+        }
+
         // Check the File repository exists 
         File basedir = new File( getRepository().getBasedir() );
         if ( !basedir.exists() )
@@ -114,12 +135,17 @@ public class FileWagon
 
     public boolean supportsDirectoryCopy()
     {
-        return true;
+        return ( getRepository().getBasedir() != null );
     }
 
     public void putDirectory( File sourceDirectory, String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
+        if ( getRepository().getBasedir() == null )
+        {
+            throw new TransferFailedException( "Unable to putDirectory() with a null basedir." );
+        }
+
         File path = resolveDestinationPath( destinationDirectory );
 
         try
@@ -189,8 +215,13 @@ public class FileWagon
     }
 
     public List getFileList( String destinationDirectory )
-        throws ResourceDoesNotExistException, AuthorizationException
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException 
     {
+        if ( getRepository().getBasedir() == null )
+        {
+            throw new TransferFailedException( "Unable to getFileList() with a null basedir." );
+        }
+        
         File path = resolveDestinationPath( destinationDirectory );
 
         if ( !path.exists() )
@@ -211,6 +242,11 @@ public class FileWagon
     public boolean resourceExists( String resourceName )
         throws TransferFailedException, AuthorizationException
     {
+        if ( getRepository().getBasedir() == null )
+        {
+            throw new TransferFailedException( "Unable to getFileList() with a null basedir." );
+        }
+        
         File file = resolveDestinationPath( resourceName );
 
         return file.exists();
