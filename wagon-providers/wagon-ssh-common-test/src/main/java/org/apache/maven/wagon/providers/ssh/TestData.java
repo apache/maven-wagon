@@ -27,9 +27,14 @@ import java.io.IOException;
  */
 public class TestData
 {
+    public static String getTempDirectory()
+    {
+        return System.getProperty( "java.io.tmpdir", "/tmp" );
+    }
+    
     public static String getTestRepositoryUrl()
     {
-        return "scp://" + getHostname() + "/tmp/wagon-ssh-test/" + getUserName();
+        return "scp://" + getHostname() + getTempDirectory() + "/wagon-ssh-test/" + getUserName();
     }
 
     public static String getUserName()
