@@ -92,12 +92,16 @@ public class FileWagon
     public void openConnection()
         throws ConnectionException
     {
-        // [WAGON-61] Check the File repository exists 
+        // Check the File repository exists 
         File basedir = new File( getRepository().getBasedir() );
         if ( !basedir.exists() )
         {
-            throw new ConnectionException( "Repository path " + basedir + " does not exist" );
+            if ( !basedir.mkdirs() )
+            {
+                throw new ConnectionException( "Repository path " + basedir + " does not exist, and cannot be created." );
+            }
         }
+
         if ( !basedir.canRead() )
         {
             throw new ConnectionException( "Repository path " + basedir + " cannot be read" );
@@ -139,18 +143,18 @@ public class FileWagon
             // Fall back to standard way if getCanonicalFile() fails.
             path.mkdirs();
         }
- 
+
         if ( !path.exists() || !path.isDirectory() )
         {
             String emsg = "Could not make directory '" + path.getAbsolutePath() + "'.";
-            
+
             // Add assistive message in case of failure.
             File basedir = new File( getRepository().getBasedir() );
             if ( !basedir.canWrite() )
             {
                 emsg += "  The base directory " + basedir + " is read-only.";
             }
-            
+
             throw new TransferFailedException( emsg );
         }
 
@@ -163,11 +167,11 @@ public class FileWagon
             throw new TransferFailedException( "Error copying directory structure", e );
         }
     }
-    
-    private File resolveDestinationPath(String destinationPath)
+
+    private File resolveDestinationPath( String destinationPath )
     {
         String basedir = getRepository().getBasedir();
-        
+
         destinationPath = StringUtils.replace( destinationPath, "\\", "/" );
 
         File path;
@@ -180,7 +184,7 @@ public class FileWagon
         {
             path = new File( basedir, destinationPath );
         }
-        
+
         return path;
     }
 
