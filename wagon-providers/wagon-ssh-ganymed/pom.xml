@@ -22,10 +22,8 @@
         <configuration>
           <!-- These require an ssh server on localhost -->
           <excludes>
-            <!--
-                        <exclude>**/ScpWagon*Test.*</exclude>
-                        <exclude>**/SshCommandExecutorTest.*</exclude>
-            -->
+            <exclude>**/ScpWagon*Test.*</exclude>
+            <exclude>**/SshCommandExecutorTest.*</exclude>
             <!-- Don't pass yet -->
             <exclude>**/KnownHostsProviderTest.*</exclude>
           </excludes>

@@ -23,7 +23,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <excludes>
-            <exclude>**/ScpExternalWagon*Test.*</exclude>
+            <exclude>**/Scp*Test.*</exclude>
             <exclude>**/SshCommandExecutorTest.*</exclude>
           </excludes>
         </configuration>
