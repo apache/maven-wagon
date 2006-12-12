@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>maven-parent</artifactId>
@@ -12,7 +11,7 @@
   <artifactId>wagon</artifactId>
   <packaging>pom</packaging>
   <name>Maven Wagon</name>
-  <version>1.0-beta-2-SNAPSHOT</version>
+  <version>1.0-beta-2</version>
   <description>Tools to manage artifacts and deployment</description>
   <url>http://maven.apache.org/wagon</url>
 
@@ -53,9 +52,9 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/wagon/trunk/</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/trunk/</developerConnection>
-    <url>http://svn.apache.org/viewcvs.cgi/maven/wagon/</url>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/tags/wagon-1.0-beta-2</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/tags/wagon-1.0-beta-2</developerConnection>
+    <url>https://svn.apache.org/repos/asf/maven/wagon/tags/wagon-1.0-beta-2</url>
   </scm>
   <build>
     <pluginManagement>
@@ -86,22 +85,22 @@
       <dependency>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-provider-api</artifactId>
-        <version>1.0-beta-2-SNAPSHOT</version>
+        <version>1.0-beta-2</version>
       </dependency>
       <dependency>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-provider-test</artifactId>
-        <version>1.0-beta-2-SNAPSHOT</version>
+        <version>1.0-beta-2</version>
       </dependency>
       <dependency>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-ssh-common-test</artifactId>
-        <version>1.0-beta-2-SNAPSHOT</version>
+        <version>1.0-beta-2</version>
       </dependency>
       <dependency>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-ssh-common</artifactId>
-        <version>1.0-beta-2-SNAPSHOT</version>
+        <version>1.0-beta-2</version>
       </dependency>
       <dependency>
         <groupId>junit</groupId>
