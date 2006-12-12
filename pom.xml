@@ -11,7 +11,7 @@
   <artifactId>wagon</artifactId>
   <packaging>pom</packaging>
   <name>Maven Wagon</name>
-  <version>1.0-beta-2</version>
+  <version>1.0-beta-3-SNAPSHOT</version>
   <description>Tools to manage artifacts and deployment</description>
   <url>http://maven.apache.org/wagon</url>
 
@@ -52,9 +52,9 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/tags/wagon-1.0-beta-2</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/tags/wagon-1.0-beta-2</developerConnection>
-    <url>https://svn.apache.org/repos/asf/maven/wagon/tags/wagon-1.0-beta-2</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/wagon/trunk/</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/trunk/</developerConnection>
+    <url>http://svn.apache.org/viewcvs.cgi/maven/wagon/</url>
   </scm>
   <build>
     <pluginManagement>
