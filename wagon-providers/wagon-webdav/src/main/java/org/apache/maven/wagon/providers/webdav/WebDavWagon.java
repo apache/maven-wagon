@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.Stack;
 import java.util.TimeZone;
 
 /**
@@ -210,8 +211,6 @@ public class WebDavWagon
     {
         Repository repository = getRepository();
 
-        String basedir = repository.getBasedir();
-
         resourceName = StringUtils.replace( resourceName, "\\", "/" );
         String dir = PathUtils.dirname( resourceName );
         dir = StringUtils.replace( dir, "\\", "/" );
@@ -229,54 +228,8 @@ public class WebDavWagon
         }
 
         firePutInitiated( resource, source );
-        String oldpath = webdavResource.getPath();
 
-        String relpath = getPath( basedir, dir );
-
-        try
-        {
-            // Test if dest resource path exist.
-            String cdpath = checkUri( relpath + "/" );
-            webdavResource.setPath( cdpath );
-
-            if ( webdavResource.exists() && !webdavResource.isCollection() )
-            {
-                throw new TransferFailedException(
-                    "Destination path exists and is not a WebDAV collection (directory): " + cdpath );
-            }
-
-            webdavResource.setPath( oldpath );
-
-            // if dest resource path does not exist, create it
-            if ( !webdavResource.exists() )
-            {
-                // mkcolMethod() cannot create a directory hierarchy at once,
-                // it has to create each directory one at a time
-                try
-                {
-                    String[] dirs = relpath.split( "/" );
-                    String createDir = "/";
-
-                    // start at 1 because first element of dirs[] from split() is ""
-                    for ( int count = 1; count < dirs.length; count++ )
-                    {
-                        createDir = createDir + dirs[count] + "/";
-                        webdavResource.mkcolMethod( createDir );
-                    }
-                    webdavResource.setPath( oldpath );
-                }
-                catch ( IOException ioe )
-                {
-                    throw new TransferFailedException( "Failed to create destination WebDAV collection (directory): "
-                        + relpath, ioe );
-                }
-            }
-        }
-        catch ( IOException e )
-        {
-            throw new TransferFailedException(
-                "Failed to create destination WebDAV collection (directory): " + relpath, e );
-        }
+        mkdirs( dir );
 
         try
         {
@@ -299,10 +252,11 @@ public class WebDavWagon
                     throw new AuthorizationException( "Access denied to: " + dest );
 
                 case HttpStatus.SC_NOT_FOUND:
-                    throw new ResourceDoesNotExistException( "File: " + dest + " does not exist" );
+                    // should never happen as the destination is created before or fail
+                    throw new TransferFailedException( "Destination does not exist: " + repository.getUrl() );
 
                 case HttpStatus.SC_LENGTH_REQUIRED:
-                    throw new ResourceDoesNotExistException( "Transfer failed, server requires Content-Length." );
+                    throw new TransferFailedException( "Transfer failed, server requires Content-Length." );
 
                     //add more entries here
                 default:
@@ -329,6 +283,103 @@ public class WebDavWagon
     }
 
     /**
+     * Create directories in server as needed.
+     * They are created one at a time until the whole path exists.
+     *
+     * @param dir path to be created in server from repository basedir
+     * @throws TransferFailedException
+     */
+    private void mkdirs( String dir )
+        throws TransferFailedException
+    {
+        Repository repository = getRepository();
+        String basedir = repository.getBasedir();
+        String destinationPath = webdavResource.getPath();
+
+        String relpath = FileUtils.normalize( getPath( basedir, dir ) + "/" );
+        String currentPath = relpath;
+
+        Stack directoriesToBeCreated = new Stack();
+
+        try
+        {
+            while ( currentPath != null )
+            {
+                webdavResource.setPath( currentPath );
+
+                /* needed to call webdavResource.exists() later */
+                try
+                {
+                    webdavResource.setProperties( WebdavResource.NAME, DepthSupport.DEPTH_0 );
+                }
+                catch ( HttpException e )
+                {
+                    // ignore exceptions thrown when the path does not exist ( 404 errors )
+                }
+
+                if ( webdavResource.exists() )
+                {
+                    if ( webdavResource.isCollection() )
+                    {
+                        /* path exists and it's a directory */
+                        break;
+                    }
+                    else
+                    {
+                        throw new TransferFailedException(
+                                                           "Destination path exists and is not a WebDAV collection (directory): "
+                                                               + webdavResource.toString() );
+                    }
+                }
+
+                /* if dest resource path does not exist, create it later */
+                directoriesToBeCreated.push( currentPath );
+
+                /* go down a folder */
+                currentPath += "/../";
+                currentPath = FileUtils.normalize( currentPath );
+            }
+
+            // mkcolMethod() cannot create a directory hierarchy at once,
+            // it has to create each directory one at a time
+            while ( !directoriesToBeCreated.empty() )
+            {
+                currentPath = (String) directoriesToBeCreated.pop();
+                webdavResource.setPath( currentPath );
+
+                try
+                {
+                    boolean destinationCreated = webdavResource.mkcolMethod( currentPath );
+                    if ( !destinationCreated )
+                    {
+                        throw new TransferFailedException( "Destination folder could not be created: "
+                            + webdavResource.toString() );
+                    }
+                }
+                catch ( IOException e )
+                {
+                    throw new TransferFailedException( "Failed to create destination WebDAV collection (directory): "
+                        + webdavResource.toString(), e );
+                }
+            }
+
+            webdavResource.setPath( destinationPath );
+
+        }
+        catch ( HttpException e )
+        {
+            throw new TransferFailedException( "Unknown error creating destination WebDAV collection (directory): "
+                + webdavResource.toString() + ". Server returned error: "
+                + HttpStatus.getStatusText( e.getReasonCode() ), e );
+        }
+        catch ( IOException e )
+        {
+            throw new TransferFailedException( "Unknown error creating destination WebDAV collection (directory): "
+                + webdavResource.toString(), e );
+        }
+    }
+
+    /**
      * Converts a String url to an HttpURL
      *
      * @param url String url to convert to an HttpURL
@@ -350,9 +401,10 @@ public class WebDavWagon
 
     /**
      * Determine which URI to use at the prompt.
+     * @see FileUtils#normalize(String)
      *
      * @param uri the path to be set.
-     * @return the absolute path.
+     * @return the normalized path.
      */
     private String checkUri( String uri )
         throws IOException
