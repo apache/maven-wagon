@@ -97,7 +97,6 @@ public class WebDavWagon
                 {
                     props.load( pomUrl.openStream() );
                     wagonVersion = props.getProperty( "version" );
-                    System.out.println( "WAGON_VERSION: " + wagonVersion );
                 }
                 catch ( IOException e )
                 {
