@@ -67,6 +67,20 @@
         </plugin>
       </plugins>
     </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.plexus</groupId>
+        <artifactId>plexus-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>generate</id>
+            <goals>
+              <goal>descriptor</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
   <modules>
     <module>wagon-provider-api</module>
@@ -85,22 +99,22 @@
       <dependency>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-provider-api</artifactId>
-        <version>1.0-beta-2</version>
+        <version>1.0-beta-3-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-provider-test</artifactId>
-        <version>1.0-beta-2</version>
+        <version>1.0-beta-3-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-ssh-common-test</artifactId>
-        <version>1.0-beta-2</version>
+        <version>1.0-beta-3-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-ssh-common</artifactId>
-        <version>1.0-beta-2</version>
+        <version>1.0-beta-3-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>junit</groupId>
@@ -111,6 +125,16 @@
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-interactivity-api</artifactId>
         <version>1.0-alpha-4</version>
+        <exclusions>
+          <exclusion>
+            <groupId>plexus</groupId>
+            <artifactId>plexus-utils</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>classworlds</groupId>
+            <artifactId>classworlds</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.codehaus.plexus</groupId>

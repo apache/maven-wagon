@@ -1,19 +1,22 @@
 package org.apache.maven.wagon.providers.ssh.jsch;
 
 /*
- * Copyright 2001-2006 The Apache Software Foundation.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 import com.jcraft.jsch.ChannelExec;
@@ -27,13 +30,18 @@ import com.jcraft.jsch.ProxySOCKS5;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
+
 import org.apache.maven.wagon.CommandExecutionException;
 import org.apache.maven.wagon.Streams;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.providers.ssh.AbstractSshWagon;
 import org.apache.maven.wagon.providers.ssh.CommandExecutorStreamProcessor;
+import org.apache.maven.wagon.providers.ssh.SshWagon;
+import org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo;
+import org.apache.maven.wagon.providers.ssh.interactive.NullInteractiveUserInfo;
 import org.apache.maven.wagon.providers.ssh.jsch.interactive.UserInfoUIKeyboardInteractiveProxy;
 import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostChangedException;
+import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
 import org.apache.maven.wagon.providers.ssh.knownhost.UnknownHostException;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringInputStream;
@@ -47,11 +55,30 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Properties;
 
+/**
+ * AbstractJschWagon 
+ *
+ * @version $Id$
+ */
 public abstract class AbstractJschWagon
     extends AbstractSshWagon
+    implements SshWagon
 {
     protected Session session;
+    
+    /**
+     * @plexus.requirement role-hint="file"
+     */
+    private KnownHostsProvider knownHostsProvider;
+    
+    /**
+     * @plexus.requirement
+     */
+    private InteractiveUserInfo interactiveUserInfo;
 
+    /**
+     * @plexus.requirement
+     */
     private UIKeyboardInteractive uIKeyboardInteractive;
 
     private static final int SOCKS5_PROXY_PORT = 1080;
@@ -66,6 +93,7 @@ public abstract class AbstractJschWagon
         if ( !interactive )
         {
             uIKeyboardInteractive = null;
+            setInteractiveUserInfo( new NullInteractiveUserInfo() );
         }
 
         JSch sch = new JSch();
@@ -121,7 +149,7 @@ public abstract class AbstractJschWagon
         }
 
         // username and password will be given via UserInfo interface.
-        UserInfo ui = new WagonUserInfo( authenticationInfo, interactiveUserInfo );
+        UserInfo ui = new WagonUserInfo( authenticationInfo, getInteractiveUserInfo() );
 
         if ( uIKeyboardInteractive != null )
         {
@@ -129,11 +157,11 @@ public abstract class AbstractJschWagon
         }
 
         Properties config = new Properties();
-        if ( knownHostsProvider != null )
+        if ( getKnownHostsProvider() != null )
         {
             try
             {
-                String contents = knownHostsProvider.getContents();
+                String contents = getKnownHostsProvider().getContents();
                 if ( contents != null )
                 {
                     sch.setKnownHosts( new StringInputStream( contents ) );
@@ -143,7 +171,7 @@ public abstract class AbstractJschWagon
             {
                 // continue without known_hosts
             }
-            config.setProperty( "StrictHostKeyChecking", knownHostsProvider.getHostKeyChecking() );
+            config.setProperty( "StrictHostKeyChecking", getKnownHostsProvider().getHostKeyChecking() );
         }
 
         config.setProperty( "BatchMode", interactive ? "no" : "yes" );
@@ -157,7 +185,7 @@ public abstract class AbstractJschWagon
         {
             session.connect();
 
-            if ( knownHostsProvider != null )
+            if ( getKnownHostsProvider() != null )
             {
                 PrintWriter w = new PrintWriter( stringWriter );
 
@@ -189,7 +217,7 @@ public abstract class AbstractJschWagon
 
         try
         {
-            knownHostsProvider.storeKnownHosts( stringWriter.toString() );
+            getKnownHostsProvider().storeKnownHosts( stringWriter.toString() );
         }
         catch ( IOException e )
         {
@@ -256,5 +284,25 @@ public abstract class AbstractJschWagon
                 channel.disconnect();
             }
         }
+    }
+
+    public InteractiveUserInfo getInteractiveUserInfo()
+    {
+        return this.interactiveUserInfo;
+    }
+
+    public KnownHostsProvider getKnownHostsProvider()
+    {
+        return this.knownHostsProvider;
+    }
+
+    public void setInteractiveUserInfo( InteractiveUserInfo interactiveUserInfo )
+    {
+        this.interactiveUserInfo = interactiveUserInfo;
+    }
+
+    public void setKnownHostsProvider( KnownHostsProvider knownHostsProvider )
+    {
+        this.knownHostsProvider = knownHostsProvider;
     }
 }

@@ -42,8 +42,14 @@ import org.apache.maven.wagon.resource.Resource;
 import org.apache.maven.wagon.shared.http.HtmlFileListParser;
 
 /**
+ * LightweightHttpWagon
+ * 
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
+ * 
+ * @plexus.component role="org.apache.maven.wagon.Wagon" 
+ *   role-hint="http"
+ *   instantiation-strategy="per-lookup"
  */
 public class LightweightHttpWagon
     extends StreamWagon
@@ -52,12 +58,8 @@ public class LightweightHttpWagon
 
     private String previousHttpProxyHost;
 
-    private String previousHttpsProxyHost;
-
     private String previousHttpProxyPort;
     
-    private String previousHttpsProxyPort;
-
     private HttpURLConnection putConnection;
 
     /**
@@ -186,17 +188,13 @@ public class LightweightHttpWagon
 
         previousHttpProxyHost = System.getProperty( "http.proxyHost" );
         previousHttpProxyPort = System.getProperty( "http.proxyPort" );
-        previousHttpsProxyHost = System.getProperty( "https.proxyHost" );
-        previousHttpsProxyPort = System.getProperty( "https.proxyPort" );        
         previousProxyExclusions = System.getProperty( "http.nonProxyHosts" );
 
         final ProxyInfo proxyInfo = this.proxyInfo;
         if ( proxyInfo != null )
         {
             System.setProperty( "http.proxyHost", proxyInfo.getHost() );
-            System.setProperty( "https.proxyHost", proxyInfo.getHost() );
             System.setProperty( "http.proxyPort", String.valueOf( proxyInfo.getPort() ) );
-            System.setProperty( "https.proxyPort", String.valueOf( proxyInfo.getPort() ) );
             if ( proxyInfo.getNonProxyHosts() != null )
             {
                 System.setProperty( "http.nonProxyHosts", proxyInfo.getNonProxyHosts() );
@@ -250,17 +248,9 @@ public class LightweightHttpWagon
         {
             System.setProperty( "http.proxyHost", previousHttpProxyHost );
         }
-        if ( previousHttpsProxyHost != null )
-        {
-            System.setProperty( "https.proxyHost", previousHttpsProxyHost );
-        }
         if ( previousHttpProxyPort != null )
         {
             System.setProperty( "http.proxyPort", previousHttpProxyPort );
-        }
-        if ( previousHttpsProxyPort != null )
-        {
-            System.setProperty( "https.proxyPort", previousHttpsProxyPort );
         }
         if ( previousProxyExclusions != null )
         {

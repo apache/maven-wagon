@@ -29,8 +29,10 @@ public abstract class AbstractKnownHostsProvider
 {
     /**
      * Valid values are ask, yes, no.
+     * 
+     * @plexus.configuration default-value="ask"
      */
-    private String hostKeyChecking = "yes";
+    private String hostKeyChecking = "ask";
 
     /**
      * the known hosts, in the openssh format

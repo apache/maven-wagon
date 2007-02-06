@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.ssh.knownhost;
+package org.apache.maven.wagon.providers.ssh.ganymed;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -19,34 +19,23 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
  * under the License.
  */
 
-import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.StringOutputStream;
-
-import java.io.IOException;
-import java.io.InputStream;
-
 /**
- * Provides known hosts from a file
+ * ScpCommandExecutor - bridge class for plexus:descriptor 
  *
- * @author Juan F. Codagnone
- * @since Sep 12, 2005
+ * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
+ * @version $Id$
+ * 
+ * @todo is this even needed anymore?
+ * 
+ * @plexus.component role="org.apache.maven.wagon.CommandExecutor"
+ *   role-hint="scp" 
+ *   instantiation-strategy="per-lookup"
  */
-public class StreamKnownHostsProvider
-    extends AbstractKnownHostsProvider
+public class ScpCommandExecutor
+    extends ScpWagon
 {
-
-    public StreamKnownHostsProvider( InputStream stream )
-        throws IOException
+    public ScpCommandExecutor()
     {
-        try
-        {
-            StringOutputStream stringOutputStream = new StringOutputStream();
-            IOUtil.copy( stream, stringOutputStream );
-            this.contents = stringOutputStream.toString();
-        }
-        finally
-        {
-            IOUtil.close( stream );
-        }
+        super();
     }
 }

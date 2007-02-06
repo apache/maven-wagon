@@ -27,12 +27,12 @@
       <dependency>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-ssh-common</artifactId>
-        <version>1.0-beta-2</version>
+        <version>1.0-beta-3-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-ssh-common-test</artifactId>
-        <version>1.0-beta-2</version>
+        <version>1.0-beta-3-SNAPSHOT</version>
         <scope>test</scope>
       </dependency>
     </dependencies>
