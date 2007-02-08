@@ -189,7 +189,7 @@ public class TransferEventSupportTest
 
     private TransferEvent getEvent( final Wagon wagon )
     {
-        final TransferEvent event = new TransferEvent( wagon, null, TransferEvent.TRANSFER_COMPLETED,
+        final TransferEvent event = new TransferEvent( wagon, null, null, TransferEvent.TRANSFER_COMPLETED,
                                                        TransferEvent.REQUEST_GET );
         return event;
     }

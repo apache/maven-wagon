@@ -17,6 +17,7 @@ package org.apache.maven.wagon.events;
  */
 
 import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 
 import java.io.File;
@@ -77,9 +78,16 @@ public class TransferEvent
 
     private File localFile;
 
-    public TransferEvent( final Wagon wagon, final Resource resource, final int eventType, final int requestType )
+    public TransferEvent( final Wagon wagon, final Repository repository, final Resource resource, final Exception exception, final int requestType )
     {
-        super( wagon );
+        this( wagon, repository, resource, TRANSFER_ERROR, requestType );
+
+        this.exception = exception;
+    }
+    
+    public TransferEvent( final Wagon wagon, final Repository repository, final Resource resource, final int eventType, final int requestType )
+    {
+        super( wagon, repository );
 
         this.resource = resource;
 
@@ -87,13 +95,6 @@ public class TransferEvent
 
         setRequestType( requestType );
 
-    }
-
-    public TransferEvent( final Wagon wagon, final Resource resource, final Exception exception, final int requestType )
-    {
-        this( wagon, resource, TRANSFER_ERROR, requestType );
-
-        this.exception = exception;
     }
 
     /**
@@ -141,7 +142,7 @@ public class TransferEvent
             case REQUEST_GET:
                 break;
 
-            default :
+            default:
                 throw new IllegalArgumentException( "Illegal request type: " + requestType );
         }
 
@@ -174,7 +175,7 @@ public class TransferEvent
                 break;
             case TRANSFER_ERROR:
                 break;
-            default :
+            default:
                 throw new IllegalArgumentException( "Illegal event type: " + eventType );
         }
 
@@ -203,5 +204,57 @@ public class TransferEvent
     public void setLocalFile( File localFile )
     {
         this.localFile = localFile;
+    }
+
+    public String toString()
+    {
+        StringBuffer sb = new StringBuffer();
+
+        sb.append( "TransferEvent[" );
+
+        switch ( this.getRequestType() )
+        {
+            case REQUEST_GET:
+                sb.append( "GET" );
+                break;
+            case REQUEST_PUT:
+                sb.append( "PUT" );
+                break;
+            default:
+                sb.append( this.getRequestType() );
+                break;
+        }
+
+        sb.append( "|" );
+        switch ( this.getEventType() )
+        {
+            case TRANSFER_COMPLETED:
+                sb.append( "COMPLETED" );
+                break;
+            case TRANSFER_ERROR:
+                sb.append( "ERROR" );
+                break;
+            case TRANSFER_INITIATED:
+                sb.append( "INITIATED" );
+                break;
+            case TRANSFER_PROGRESS:
+                sb.append( "PROGRESS" );
+                break;
+            case TRANSFER_STARTED:
+                sb.append( "STARTED" );
+                break;
+            default:
+                sb.append( this.getEventType() );
+                break;
+        }
+
+        sb.append( "|" );
+
+        sb.append( this.repository ).append( "|" );
+        sb.append( this.getLocalFile() ).append( "|" );
+        sb.append( this.getResource() );
+        sb.append( "]" );
+
+        return sb.toString();
     }
 }

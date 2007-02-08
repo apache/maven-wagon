@@ -1,19 +1,22 @@
 package org.apache.maven.wagon;
 
 /*
- * Copyright 2001-2006 The Apache Software Foundation.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
@@ -165,6 +168,9 @@ public abstract class WagonTestCase
         throws Exception
     {
         Wagon wagon = (Wagon) lookup( Wagon.ROLE, getProtocol() );
+        
+        wagon.setRepository( testRepository );
+        wagon.setAuthenticationInfo( getAuthInfo() );
 
         Debug debug = new Debug();
 
@@ -217,7 +223,7 @@ public abstract class WagonTestCase
             writeTestFile( "c/test-resource-4.txt" );
             writeTestFile( "d/e/f/test-resource-5.txt" );
 
-            wagon.connect( testRepository, getAuthInfo() );
+            wagon.connect();
 
             wagon.putDirectory( sourceFile, "directory-copy" );
 
@@ -265,7 +271,7 @@ public abstract class WagonTestCase
             writeTestFile( "c/test-resource-4.txt" );
             writeTestFile( "d/e/f/test-resource-5.txt" );
 
-            wagon.connect( testRepository, getAuthInfo() );
+            wagon.connect();
 
             wagon.putDirectory( sourceFile, "deep0/deep1/deep2" );
 
@@ -320,7 +326,7 @@ public abstract class WagonTestCase
                 writeTestFile( resources[i] );
             }
 
-            wagon.connect( testRepository, getAuthInfo() );
+            wagon.connect();
 
             wagon.putDirectory( sourceFile, dirName );
 
@@ -353,7 +359,7 @@ public abstract class WagonTestCase
     {
         writeTestFile( resourceToCreate );
 
-        wagon.connect( testRepository, getAuthInfo() );
+        wagon.connect();
 
         wagon.putDirectory( sourceFile, dirName );
 
@@ -423,10 +429,10 @@ public abstract class WagonTestCase
         message( "Getting test artifact from test repository " + testRepository );
 
         Wagon wagon = getWagon();
-
+        
         wagon.addTransferListener( checksumObserver );
 
-        wagon.connect( testRepository, getAuthInfo() );
+        wagon.connect();
 
         destFile = FileTestUtils.createUniqueFile( getName(), getName() );
 
@@ -477,7 +483,7 @@ public abstract class WagonTestCase
 
         Wagon wagon = getWagon();
 
-        wagon.connect( testRepository, getAuthInfo() );
+        wagon.connect();
 
         List list = wagon.getFileList( dirName );
         assertNotNull( "file list should not be null.", list );
@@ -511,7 +517,7 @@ public abstract class WagonTestCase
 
         Wagon wagon = getWagon();
 
-        wagon.connect( testRepository, getAuthInfo() );
+        wagon.connect();
 
         try
         {
@@ -547,7 +553,7 @@ public abstract class WagonTestCase
 
         putFile();
 
-        wagon.connect( testRepository, getAuthInfo() );
+        wagon.connect();
 
         assertTrue( sourceFile.getName() + " does not exist", wagon.resourceExists( sourceFile.getName() ) );
 
@@ -571,7 +577,7 @@ public abstract class WagonTestCase
 
         Wagon wagon = getWagon();
 
-        wagon.connect( testRepository, getAuthInfo() );
+        wagon.connect();
 
         assertFalse( wagon.resourceExists( "a/bad/resource/name/that/should/not/exist.txt" ) );
 
@@ -596,7 +602,7 @@ public abstract class WagonTestCase
 
         wagon.addTransferListener( checksumObserver );
 
-        wagon.connect( testRepository, getAuthInfo() );
+        wagon.connect();
 
         sourceFile = new File( FileTestUtils.getTestOutputDir(), testFileName );
         sourceFile.getParentFile().mkdirs();
@@ -624,7 +630,7 @@ public abstract class WagonTestCase
 
         wagon.addTransferListener( checksumObserver );
 
-        wagon.connect( testRepository, getAuthInfo() );
+        wagon.connect();
 
         destFile = FileTestUtils.createUniqueFile( getName(), getName() );
 

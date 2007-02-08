@@ -1,19 +1,22 @@
 package org.apache.maven.wagon.providers.webdav;
 
 /*
- * Copyright 2001-2006 The Apache Software Foundation.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 import java.io.File;
@@ -35,6 +38,7 @@ import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
@@ -58,8 +62,9 @@ public class PutInputStreamTest
         
         Resource resource = new Resource();
         AbstractWagon wagon = new NullWagon();
+        Repository repo = new Repository( "null", "http://localhost:10007/null/" );
         
-        InputStream input = new PutInputStream(sourceFile, resource, wagon, wagon.getTransferEventSupport() );
+        InputStream input = new PutInputStream(sourceFile, repo, resource, wagon, wagon.getTransferEventSupport() );
         
         FileOutputStream output = new FileOutputStream(destFile);
         byte buf[] = new byte[BUFFER_SIZE];
@@ -112,6 +117,11 @@ public class PutInputStreamTest
     
     public class NullWagon extends AbstractWagon
     {
+        public String getProtocol()
+        {
+            return "null";
+        }
+        
         protected void closeConnection()
             throws ConnectionException
         {

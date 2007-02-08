@@ -44,9 +44,10 @@ public class WagonEvent
     /**
      * @param source The Wagon object on which the WagonEvent initially occurred
      */
-    public WagonEvent( final Wagon source )
+    public WagonEvent( final Wagon source, final Repository repository )
     {
         super( source );
+        this.repository = repository;
     }
 
     /**
@@ -79,4 +80,13 @@ public class WagonEvent
         this.timestamp = timestamp;
     }
 
+    /**
+     * Returns the repository which this event is associated with.
+     * 
+     * @return the repository that this event is associated with.
+     */
+    public Repository getRepository()
+    {
+        return repository;
+    }
 }

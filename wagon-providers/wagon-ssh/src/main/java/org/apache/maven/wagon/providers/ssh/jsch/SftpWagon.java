@@ -52,6 +52,11 @@ public class SftpWagon
     private static final int S_IFDIR = 0x4000;
 
     private static final long MILLIS_PER_SEC = 1000L;
+    
+    public String getProtocol()
+    {
+        return "sftp";
+    }
 
     public void put( String basedir, Resource resource, File source )
         throws TransferFailedException

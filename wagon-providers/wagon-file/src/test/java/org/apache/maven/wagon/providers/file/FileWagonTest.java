@@ -63,6 +63,7 @@ public class FileWagonTest
         Resource resource = new Resource();
         resource.setContentLength( 100000 );
         Repository repository = new Repository();
-        wagon.connect( repository );
+        wagon.setRepository( repository );
+        wagon.connect();
     }
 }

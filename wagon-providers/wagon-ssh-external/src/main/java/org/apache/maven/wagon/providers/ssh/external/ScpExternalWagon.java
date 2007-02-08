@@ -89,6 +89,11 @@ public class ScpExternalWagon
     // ----------------------------------------------------------------------
     //
     // ----------------------------------------------------------------------
+    
+    public String getProtocol()
+    {
+        return "scpexe";
+    }
 
     public void openConnection()
         throws AuthenticationException

@@ -22,6 +22,7 @@ import java.io.IOException;
 import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonTestCase;
+import org.apache.maven.wagon.servlet.ServletServer;
 
 /**
  * WebDAV Wagon Test 
@@ -88,7 +89,7 @@ public class WebDavWagonTest
         catch ( TransferFailedException e )
         {
             assertEquals( "Exception message doesn't match expected", "Destination folder could not be created: " + url
-                + "/", e.getMessage() );
+                + "/test-resource", e.getMessage() );
         }
 
         testRepository.setUrl( getTestRepositoryUrl() );

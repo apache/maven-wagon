@@ -1,19 +1,22 @@
 package org.apache.maven.wagon.providers.webdav;
 
 /*
- * Copyright 2006 The Apache Software Foundation.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 import java.io.File;
@@ -33,77 +36,86 @@ import org.mortbay.http.handler.ResourceHandler;
 
 import junit.framework.TestCase;
 
-public class WebDavWagonGzipTest extends TestCase 
+/**
+ * WebDavWagonGzipTest 
+ *
+ * @version $Id$
+ */
+public class WebDavWagonGzipTest
+    extends TestCase
 {
-    public void testGzipGet() throws Exception 
+    public void testGzipGet()
+        throws Exception
     {
         HttpServer server = new HttpServer();
         SocketListener listener = new SocketListener();
-        listener.setPort(10008);
-        server.addListener(listener);
+        listener.setPort( 10008 );
+        server.addListener( listener );
 
         String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
         HttpContext context = new HttpContext();
-        context.setContextPath("/");
-        context.setResourceBase(localRepositoryPath);
+        context.setContextPath( "/" );
+        context.setResourceBase( localRepositoryPath );
         ResourceHandler rh = new ResourceHandler();
-        rh.setMinGzipLength(1);
-        context.addHandler(rh);
-        server.addContext(context);
+        rh.setMinGzipLength( 1 );
+        context.addHandler( rh );
+        server.addContext( context );
         server.start();
 
-        try 
+        try
         {
             Wagon wagon = new WebDavWagon();
-
             Repository testRepository = new Repository();
 
-            testRepository.setUrl("http://localhost:10008");
+            testRepository.setUrl( "http://localhost:10008" );
 
-            File sourceFile = new File(localRepositoryPath + "/gzip");
+            File sourceFile = new File( localRepositoryPath + "/gzip" );
+
+            wagon.setRepository( testRepository );
 
             sourceFile.deleteOnExit();
 
             String resName = "gzip-res.txt";
-            String sourceContent = writeTestFileGzip(sourceFile, resName);
+            String sourceContent = writeTestFileGzip( sourceFile, resName );
 
-            wagon.connect(testRepository);
+            wagon.connect();
 
-            File destFile = FileTestUtils.createUniqueFile(getName(), getName());
+            File destFile = FileTestUtils.createUniqueFile( getName(), getName() );
 
             destFile.deleteOnExit();
 
-            wagon.get("gzip/" + resName, destFile);
+            wagon.get( "gzip/" + resName, destFile );
 
             wagon.disconnect();
 
-            String destContent = FileUtils.fileRead(destFile);
+            String destContent = FileUtils.fileRead( destFile );
 
-            assertEquals(sourceContent, destContent);
-        } 
-        finally 
+            assertEquals( sourceContent, destContent );
+        }
+        finally
         {
             server.stop();
         }
     }
 
-    private String writeTestFileGzip(File parent, String child) throws IOException 
+    private String writeTestFileGzip( File parent, String child )
+        throws IOException
     {
-        File file = new File(parent, child);
+        File file = new File( parent, child );
         file.getParentFile().mkdirs();
         file.deleteOnExit();
-        OutputStream out = new FileOutputStream(file);
-        out.write(child.getBytes());
+        OutputStream out = new FileOutputStream( file );
+        out.write( child.getBytes() );
         out.close();
-        
-        file = new File(parent, child + ".gz");
+
+        file = new File( parent, child + ".gz" );
         file.deleteOnExit();
-        out = new FileOutputStream(file);
-        out = new GZIPOutputStream(out);
+        out = new FileOutputStream( file );
+        out = new GZIPOutputStream( out );
         //write out different data than non-gz file, so we can
         //assert the gz version was returned
         String content = file.getAbsolutePath();
-        out.write(content.getBytes());
+        out.write( content.getBytes() );
         out.close();
         return content;
     }

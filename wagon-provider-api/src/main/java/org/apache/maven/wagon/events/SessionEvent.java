@@ -17,6 +17,7 @@ package org.apache.maven.wagon.events;
  */
 
 import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.repository.Repository;
 
 /**
  * SessionEvent is used for notifing SessionListeners about
@@ -95,25 +96,26 @@ public class SessionEvent
     /**
      * Creates new instance of SessionEvent
      *
-     * @param wagon     <code>Wagon<code> object which created this event
+     * @param wagon     <code>Wagon</code> object which created this event
+     * @param repository <code>Repository</code> object that this event belongs to.
      * @param eventType the type of the event
      */
-    public SessionEvent( final Wagon wagon, final int eventType )
+    public SessionEvent( final Wagon wagon, final Repository repository, final int eventType )
     {
-        super( wagon );
+        super( wagon, repository );
         this.eventType = eventType;
-
     }
 
     /**
      * Creates new instance of SessionEvent. Sets event type to <code>SESSION_ERROR_OCCURRED</code>
      *
-     * @param wagon     <code>Wagon<code> object which created this event
+     * @param wagon     <code>Wagon</code> object which created this event
+     * @param repository <code>Repository</code> object that this event belongs to.
      * @param exception the exception
      */
-    public SessionEvent( final Wagon wagon, final Exception exception )
+    public SessionEvent( final Wagon wagon, final Repository repository, final Exception exception )
     {
-        super( wagon );
+        super( wagon, repository );
         this.exception = exception;
         this.eventType = SESSION_ERROR_OCCURRED;
 
@@ -161,7 +163,7 @@ public class SessionEvent
                 break;
             case SessionEvent.SESSION_CONNECTION_REFUSED:
                 break;
-            default :
+            default:
                 throw new IllegalArgumentException( "Illegal event type: " + eventType );
         }
         this.eventType = eventType;
@@ -175,4 +177,58 @@ public class SessionEvent
         this.exception = exception;
     }
 
+    public String toString()
+    {
+        StringBuffer sb = new StringBuffer();
+
+        sb.append( "SessionEvent[" );
+
+        switch ( this.eventType )
+        {
+            case SessionEvent.SESSION_CLOSED:
+                sb.append( "CONNECTION_CLOSED" );
+                break;
+            case SessionEvent.SESSION_DISCONNECTED:
+                sb.append( "CONNECTION_DISCONNECTED" );
+                break;
+            case SessionEvent.SESSION_DISCONNECTING:
+                sb.append( "CONNECTION_DISCONNECTING" );
+                break;
+            case SessionEvent.SESSION_ERROR_OCCURRED:
+                sb.append( "CONNECTION_ERROR_OCCURRED" );
+                break;
+            case SessionEvent.SESSION_LOGGED_IN:
+                sb.append( "CONNECTION_LOGGED_IN" );
+                break;
+            case SessionEvent.SESSION_LOGGED_OFF:
+                sb.append( "CONNECTION_LOGGED_OFF" );
+                break;
+            case SessionEvent.SESSION_OPENED:
+                sb.append( "CONNECTION_OPENED" );
+                break;
+            case SessionEvent.SESSION_OPENING:
+                sb.append( "CONNECTION_OPENING" );
+                break;
+            case SessionEvent.SESSION_CONNECTION_REFUSED:
+                sb.append( "CONNECTION_CONNECTION_REFUSED" );
+                break;
+            default:
+                sb.append( eventType );
+        }
+        sb.append( "|" );
+
+        sb.append( this.repository ).append( "|" );
+        sb.append( this.source );
+
+        if ( exception != null )
+        {
+            sb.append( "|" );
+            sb.append( exception.getClass().getName() ).append( ":" );
+            sb.append( exception.getMessage() );
+        }
+
+        sb.append( "]" );
+
+        return sb.toString();
+    }
 }

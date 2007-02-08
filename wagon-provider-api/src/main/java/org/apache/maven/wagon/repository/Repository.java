@@ -1,23 +1,27 @@
 package org.apache.maven.wagon.repository;
 
 /*
- * Copyright 2001-2005 The Apache Software Foundation.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.WagonConstants;
+import org.codehaus.plexus.util.StringUtils;
 
 import java.io.Serializable;
 import java.util.Properties;
@@ -194,12 +198,19 @@ public class Repository
 
     public String toString()
     {
-        if ( getName() != null )
+        StringBuffer sb = new StringBuffer();
+
+        sb.append( "Repository[" );
+
+        if ( StringUtils.isNotEmpty( getName() ) )
         {
-            return "[" + getName() + "] -> " + getUrl();
+            sb.append( getName() ).append( "|" );
         }
 
-        return getUrl();
+        sb.append( getUrl() );
+        sb.append( "]" );
+
+        return sb.toString();
     }
 
     public String getProtocol()

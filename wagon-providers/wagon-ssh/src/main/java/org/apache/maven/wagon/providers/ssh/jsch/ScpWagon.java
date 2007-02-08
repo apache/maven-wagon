@@ -57,6 +57,11 @@ import java.io.OutputStream;
 public class ScpWagon
     extends AbstractJschWagon
 {
+    public String getProtocol()
+    {
+        return "scp";
+    }
+    
     public void put( File source, String destination )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {

@@ -40,12 +40,12 @@
   <dependencies>
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>
-      <artifactId>wagon-provider-test</artifactId>
-      <scope>test</scope>
+      <artifactId>wagon-provider-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>
-      <artifactId>wagon-provider-api</artifactId>
+      <artifactId>wagon-provider-test</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

@@ -33,77 +33,80 @@ import org.mortbay.http.handler.ResourceHandler;
 
 import junit.framework.TestCase;
 
-public class LightweightHttpWagonGzipTest extends TestCase 
+public class LightweightHttpWagonGzipTest
+    extends TestCase
 {
-    public void testGzipGet() throws Exception 
+    public void testGzipGet()
+        throws Exception
     {
         HttpServer server = new HttpServer();
         SocketListener listener = new SocketListener();
-        listener.setPort(10008);
-        server.addListener(listener);
+        listener.setPort( 10008 );
+        server.addListener( listener );
 
         String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
         HttpContext context = new HttpContext();
-        context.setContextPath("/");
-        context.setResourceBase(localRepositoryPath);
+        context.setContextPath( "/" );
+        context.setResourceBase( localRepositoryPath );
         ResourceHandler rh = new ResourceHandler();
-        rh.setMinGzipLength(1);
-        context.addHandler(rh);
-        server.addContext(context);
+        rh.setMinGzipLength( 1 );
+        context.addHandler( rh );
+        server.addContext( context );
         server.start();
 
-        try 
+        try
         {
             Wagon wagon = new LightweightHttpWagon();
 
-            Repository testRepository = new Repository();
+            Repository testRepository = new Repository( "testrepo", "http://localhost:10008" );
 
-            testRepository.setUrl("http://localhost:10008");
+            wagon.setRepository( testRepository );
 
-            File sourceFile = new File(localRepositoryPath + "/gzip");
+            File sourceFile = new File( localRepositoryPath + "/gzip" );
 
             sourceFile.deleteOnExit();
 
             String resName = "gzip-res.txt";
-            String sourceContent = writeTestFileGzip(sourceFile, resName);
+            String sourceContent = writeTestFileGzip( sourceFile, resName );
 
-            wagon.connect(testRepository);
+            wagon.connect();
 
-            File destFile = FileTestUtils.createUniqueFile(getName(), getName());
+            File destFile = FileTestUtils.createUniqueFile( getName(), getName() );
 
             destFile.deleteOnExit();
 
-            wagon.get("gzip/" + resName, destFile);
+            wagon.get( "gzip/" + resName, destFile );
 
             wagon.disconnect();
 
-            String destContent = FileUtils.fileRead(destFile);
+            String destContent = FileUtils.fileRead( destFile );
 
-            assertEquals(sourceContent, destContent);
-        } 
-        finally 
+            assertEquals( sourceContent, destContent );
+        }
+        finally
         {
             server.stop();
         }
     }
 
-    private String writeTestFileGzip(File parent, String child) throws IOException 
+    private String writeTestFileGzip( File parent, String child )
+        throws IOException
     {
-        File file = new File(parent, child);
+        File file = new File( parent, child );
         file.getParentFile().mkdirs();
         file.deleteOnExit();
-        OutputStream out = new FileOutputStream(file);
-        out.write(child.getBytes());
+        OutputStream out = new FileOutputStream( file );
+        out.write( child.getBytes() );
         out.close();
-        
-        file = new File(parent, child + ".gz");
+
+        file = new File( parent, child + ".gz" );
         file.deleteOnExit();
-        out = new FileOutputStream(file);
-        out = new GZIPOutputStream(out);
+        out = new FileOutputStream( file );
+        out = new GZIPOutputStream( out );
         //write out different data than non-gz file, so we can
         //assert the gz version was returned
         String content = file.getAbsolutePath();
-        out.write(content.getBytes());
+        out.write( content.getBytes() );
         out.close();
         return content;
     }

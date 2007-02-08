@@ -59,6 +59,11 @@ public class FtpWagon
     extends StreamWagon
 {
     private FTPClient ftp;
+    
+    public String getProtocol()
+    {
+        return "ftp";
+    }
 
     public void openConnection()
         throws ConnectionException, AuthenticationException

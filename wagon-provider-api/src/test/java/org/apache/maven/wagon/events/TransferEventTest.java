@@ -59,7 +59,8 @@ public class TransferEventTest
 
         final Repository repo = new Repository();
 
-        wagon.connect( repo );
+        wagon.setRepository( repo );
+        wagon.connect();
 
         final long timestamp = System.currentTimeMillis();
 
@@ -69,7 +70,7 @@ public class TransferEventTest
 
         resource.setName( "mm" );
 
-        TransferEvent event = new TransferEvent( wagon, resource, TransferEvent.TRANSFER_COMPLETED,
+        TransferEvent event = new TransferEvent( wagon, repo, resource, TransferEvent.TRANSFER_COMPLETED,
                                                  TransferEvent.REQUEST_GET );
 
         assertEquals( wagon, event.getWagon() );
@@ -86,7 +87,7 @@ public class TransferEventTest
 
         res.setName( "mm" );
 
-        event = new TransferEvent( wagon, res, exception, TransferEvent.REQUEST_GET );
+        event = new TransferEvent( wagon, repo, res, exception, TransferEvent.REQUEST_GET );
 
         assertEquals( wagon, event.getWagon() );
 

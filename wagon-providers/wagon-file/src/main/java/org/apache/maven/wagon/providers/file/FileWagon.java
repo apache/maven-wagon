@@ -53,6 +53,11 @@ import java.util.List;
 public class FileWagon
     extends StreamWagon
 {
+    public String getProtocol()
+    {
+        return "file";
+    }
+    
     public void fillInputData( InputData inputData )
         throws TransferFailedException, ResourceDoesNotExistException
     {

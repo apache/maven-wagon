@@ -29,6 +29,7 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
+import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -51,7 +52,7 @@ import java.util.zip.ZipOutputStream;
 public abstract class AbstractWagon
     implements Wagon
 {
-    protected static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
+    protected static final int DEFAULT_BUFFER_SIZE = 1024 * 32;
 
     protected Repository repository;
 
@@ -64,6 +65,8 @@ public abstract class AbstractWagon
     protected AuthenticationInfo authenticationInfo;
 
     protected boolean interactive = true;
+    
+    private boolean connected = false;
 
     // ----------------------------------------------------------------------
     // Accessors
@@ -74,75 +77,127 @@ public abstract class AbstractWagon
         return repository;
     }
 
+    public void setRepository( Repository repository )
+    {
+        this.repository = repository;
+    }
+
     public ProxyInfo getProxyInfo()
     {
         return proxyInfo;
     }
 
+    public void setProxyInfo( ProxyInfo proxyInfo )
+    {
+        this.proxyInfo = proxyInfo;
+    }
+
     public AuthenticationInfo getAuthenticationInfo()
     {
+        if ( authenticationInfo == null )
+        {
+            authenticationInfo = new AuthenticationInfo();
+        }
         return authenticationInfo;
+    }
+
+    public void setAuthenticationInfo( AuthenticationInfo authnInfo )
+    {
+        this.authenticationInfo = authnInfo;
+    }
+    
+    public boolean isConnected()
+    {
+        return this.connected;
     }
 
     // ----------------------------------------------------------------------
     // Connection
     // ----------------------------------------------------------------------
 
-    public void connect( Repository repository )
-        throws ConnectionException, AuthenticationException
-    {
-        connect( repository, null, null );
-    }
+    /**
+     * Handle the protocol specific connection opening process.
+     * 
+     * Note: Providers should look for the values in {@link #getRepository()}, {@link #getAuthenticationInfo()}, and
+     * {@link #getProxyInfo()} to properly establish their connection.
+     * 
+     * @throws ConnectionException
+     * @throws AuthenticationException
+     */
+    protected abstract void openConnection()
+        throws ConnectionException, AuthenticationException;
 
-    public void connect( Repository repository, ProxyInfo proxyInfo )
-        throws ConnectionException, AuthenticationException
-    {
-        connect( repository, null, proxyInfo );
-    }
-
-    public void connect( Repository repository, AuthenticationInfo authenticationInfo )
-        throws ConnectionException, AuthenticationException
-    {
-        connect( repository, authenticationInfo, null );
-    }
-
-    public void connect( Repository repository, AuthenticationInfo authenticationInfo, ProxyInfo proxyInfo )
+    public void connect()
         throws ConnectionException, AuthenticationException
     {
         if ( repository == null )
         {
-            throw new IllegalStateException( "The repository specified cannot be null." );
+            throw new IllegalStateException( "Cannot open a connection to a null wagon repository." );
         }
 
-        this.repository = repository;
-
-        if ( authenticationInfo == null )
+        /* Perform some AuthenticationInfo to Wagon URL mappings */
+        if ( getAuthenticationInfo() != null )
         {
-            authenticationInfo = new AuthenticationInfo();
-        }
-
-        if ( authenticationInfo.getUserName() == null )
-        {
-            // Get user/pass that were encoded in the URL.
-            if ( repository.getUsername() != null )
+            if ( !StringUtils.isEmpty( getAuthenticationInfo().getUserName() ) )
             {
-                authenticationInfo.setUserName( repository.getUsername() );
-                if ( repository.getPassword() != null && authenticationInfo.getPassword() == null )
+                // Get user/pass that were encoded in the URL.
+                if ( !StringUtils.isEmpty( repository.getUsername() ) )
                 {
-                    authenticationInfo.setPassword( repository.getPassword() );
+                    authenticationInfo.setUserName( repository.getUsername() );
+                    if ( repository.getPassword() != null && authenticationInfo.getPassword() == null )
+                    {
+                        authenticationInfo.setPassword( repository.getPassword() );
+                    }
                 }
             }
         }
 
-        // TODO: Do these needs to be fields, or are they only used in openConnection()?
-        this.authenticationInfo = authenticationInfo;
-        this.proxyInfo = proxyInfo;
-
         fireSessionOpening();
 
         openConnection();
-
+        
         fireSessionOpened();
+        
+        connected = true;
+    }
+
+    /**
+     * @deprecated Replaced by calls to {@link #connect()}, uses {@link #getRepository()}
+     */
+    public void connect( Repository repository )
+        throws ConnectionException, AuthenticationException
+    {
+        connect();
+    }
+
+    /**
+     * @deprecated Replaced by calls to {@link #connect()}, uses {@link #getRepository()} and 
+     *   {@link #getProxyInfo()}
+     */
+    public void connect( Repository repository, ProxyInfo proxyInfo )
+        throws ConnectionException, AuthenticationException
+    {
+        connect();
+    }
+
+    /**
+     * @deprecated Replaced by calls to {@link #connect()}, uses {@link #getRepository()} and 
+     *   {@link #getAuthenticationInfo()}
+     */
+    public void connect( Repository repository, AuthenticationInfo authenticationInfo )
+        throws ConnectionException, AuthenticationException
+    {
+        connect();
+    }
+
+    /**
+     * @deprecated Replaced by calls to {@link #connect()}, uses {@link #getRepository()} and 
+     *   {@link #getAuthenticationInfo()} and {@link #getProxyInfo()}
+     */
+    public void connect( Repository repository, AuthenticationInfo authenticationInfo, ProxyInfo proxyInfo )
+        throws ConnectionException, AuthenticationException
+    {
+        connect();
     }
 
     public void disconnect()
@@ -153,6 +208,8 @@ public abstract class AbstractWagon
         closeConnection();
 
         fireSessionDisconnected();
+        
+        connected = false;
     }
 
     protected abstract void closeConnection()
@@ -166,8 +223,8 @@ public abstract class AbstractWagon
         {
             if ( !destinationDirectory.mkdirs() )
             {
-                throw new TransferFailedException(
-                    "Specified destination directory cannot be created: " + destinationDirectory );
+                throw new TransferFailedException( "Specified destination directory cannot be created: "
+                    + destinationDirectory );
             }
         }
     }
@@ -182,8 +239,7 @@ public abstract class AbstractWagon
         getTransfer( resource, destination, input, true, Integer.MAX_VALUE );
     }
 
-    protected void getTransfer( Resource resource, File destination, InputStream input, boolean closeInput,
-                                int maxSize )
+    protected void getTransfer( Resource resource, File destination, InputStream input, boolean closeInput, int maxSize )
         throws TransferFailedException
     {
         // ensure that the destination is created only when we are ready to transfer
@@ -321,7 +377,7 @@ public abstract class AbstractWagon
     {
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
-        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_PROGRESS, requestType );
+        TransferEvent transferEvent = new TransferEvent( this, repository, resource, TransferEvent.TRANSFER_PROGRESS, requestType );
 
         int remaining = maxSize;
         while ( remaining > 0 )
@@ -354,7 +410,7 @@ public abstract class AbstractWagon
     {
         long timestamp = System.currentTimeMillis();
 
-        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_COMPLETED,
+        TransferEvent transferEvent = new TransferEvent( this, repository, resource, TransferEvent.TRANSFER_COMPLETED,
                                                          TransferEvent.REQUEST_GET );
 
         transferEvent.setTimestamp( timestamp );
@@ -368,7 +424,7 @@ public abstract class AbstractWagon
     {
         long timestamp = System.currentTimeMillis();
 
-        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_STARTED,
+        TransferEvent transferEvent = new TransferEvent( this, repository, resource, TransferEvent.TRANSFER_STARTED,
                                                          TransferEvent.REQUEST_GET );
 
         transferEvent.setTimestamp( timestamp );
@@ -382,7 +438,7 @@ public abstract class AbstractWagon
     {
         long timestamp = System.currentTimeMillis();
 
-        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_INITIATED,
+        TransferEvent transferEvent = new TransferEvent( this, repository, resource, TransferEvent.TRANSFER_INITIATED,
                                                          TransferEvent.REQUEST_GET );
 
         transferEvent.setTimestamp( timestamp );
@@ -396,7 +452,7 @@ public abstract class AbstractWagon
     {
         long timestamp = System.currentTimeMillis();
 
-        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_INITIATED,
+        TransferEvent transferEvent = new TransferEvent( this, repository, resource, TransferEvent.TRANSFER_INITIATED,
                                                          TransferEvent.REQUEST_PUT );
 
         transferEvent.setTimestamp( timestamp );
@@ -410,7 +466,7 @@ public abstract class AbstractWagon
     {
         long timestamp = System.currentTimeMillis();
 
-        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_COMPLETED,
+        TransferEvent transferEvent = new TransferEvent( this, repository, resource, TransferEvent.TRANSFER_COMPLETED,
                                                          TransferEvent.REQUEST_PUT );
 
         transferEvent.setTimestamp( timestamp );
@@ -424,7 +480,7 @@ public abstract class AbstractWagon
     {
         long timestamp = System.currentTimeMillis();
 
-        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_STARTED,
+        TransferEvent transferEvent = new TransferEvent( this, repository, resource, TransferEvent.TRANSFER_STARTED,
                                                          TransferEvent.REQUEST_PUT );
 
         transferEvent.setTimestamp( timestamp );
@@ -438,7 +494,7 @@ public abstract class AbstractWagon
     {
         long timestamp = System.currentTimeMillis();
 
-        SessionEvent sessionEvent = new SessionEvent( this, SessionEvent.SESSION_DISCONNECTED );
+        SessionEvent sessionEvent = new SessionEvent( this, this.repository, SessionEvent.SESSION_DISCONNECTED );
 
         sessionEvent.setTimestamp( timestamp );
 
@@ -449,7 +505,7 @@ public abstract class AbstractWagon
     {
         long timestamp = System.currentTimeMillis();
 
-        SessionEvent sessionEvent = new SessionEvent( this, SessionEvent.SESSION_DISCONNECTING );
+        SessionEvent sessionEvent = new SessionEvent( this, this.repository, SessionEvent.SESSION_DISCONNECTING );
 
         sessionEvent.setTimestamp( timestamp );
 
@@ -460,7 +516,7 @@ public abstract class AbstractWagon
     {
         long timestamp = System.currentTimeMillis();
 
-        SessionEvent sessionEvent = new SessionEvent( this, SessionEvent.SESSION_LOGGED_IN );
+        SessionEvent sessionEvent = new SessionEvent( this, this.repository, SessionEvent.SESSION_LOGGED_IN );
 
         sessionEvent.setTimestamp( timestamp );
 
@@ -471,7 +527,7 @@ public abstract class AbstractWagon
     {
         long timestamp = System.currentTimeMillis();
 
-        SessionEvent sessionEvent = new SessionEvent( this, SessionEvent.SESSION_LOGGED_OFF );
+        SessionEvent sessionEvent = new SessionEvent( this, this.repository, SessionEvent.SESSION_LOGGED_OFF );
 
         sessionEvent.setTimestamp( timestamp );
 
@@ -482,7 +538,7 @@ public abstract class AbstractWagon
     {
         long timestamp = System.currentTimeMillis();
 
-        SessionEvent sessionEvent = new SessionEvent( this, SessionEvent.SESSION_OPENED );
+        SessionEvent sessionEvent = new SessionEvent( this, this.repository, SessionEvent.SESSION_OPENED );
 
         sessionEvent.setTimestamp( timestamp );
 
@@ -493,7 +549,7 @@ public abstract class AbstractWagon
     {
         long timestamp = System.currentTimeMillis();
 
-        SessionEvent sessionEvent = new SessionEvent( this, SessionEvent.SESSION_OPENING );
+        SessionEvent sessionEvent = new SessionEvent( this, this.repository, SessionEvent.SESSION_OPENING );
 
         sessionEvent.setTimestamp( timestamp );
 
@@ -505,7 +561,7 @@ public abstract class AbstractWagon
 
         long timestamp = System.currentTimeMillis();
 
-        SessionEvent sessionEvent = new SessionEvent( this, SessionEvent.SESSION_CONNECTION_REFUSED );
+        SessionEvent sessionEvent = new SessionEvent( this, this.repository, SessionEvent.SESSION_CONNECTION_REFUSED );
 
         sessionEvent.setTimestamp( timestamp );
 
@@ -516,7 +572,7 @@ public abstract class AbstractWagon
     {
         long timestamp = System.currentTimeMillis();
 
-        SessionEvent sessionEvent = new SessionEvent( this, exception );
+        SessionEvent sessionEvent = new SessionEvent( this, this.repository, exception );
 
         sessionEvent.setTimestamp( timestamp );
 
@@ -566,11 +622,10 @@ public abstract class AbstractWagon
 
     protected void fireTransferError( Resource resource, Exception e, int requestType )
     {
-        TransferEvent transferEvent = new TransferEvent( this, resource, e, requestType );
+        TransferEvent transferEvent = new TransferEvent( this, repository, resource, e, requestType );
 
         transferEventSupport.fireTransferError( transferEvent );
     }
-
 
     public SessionEventSupport getSessionEventSupport()
     {
@@ -601,7 +656,7 @@ public abstract class AbstractWagon
     {
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
-        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_PROGRESS, requestType );
+        TransferEvent transferEvent = new TransferEvent( this, repository, resource, TransferEvent.TRANSFER_PROGRESS, requestType );
 
         try
         {

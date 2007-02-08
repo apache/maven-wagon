@@ -1,9 +1,5 @@
 package org.apache.maven.wagon.providers.http;
 
-import org.apache.maven.wagon.ConnectionException;
-import org.apache.maven.wagon.authentication.AuthenticationException;
-import org.apache.maven.wagon.proxy.ProxyInfo;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -23,6 +19,10 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
  * under the License.
  */
 
+import org.apache.maven.wagon.ConnectionException;
+import org.apache.maven.wagon.authentication.AuthenticationException;
+import org.apache.maven.wagon.proxy.ProxyInfo;
+
 /**
  * LIghtweightHttpsWagon 
  *
@@ -39,10 +39,15 @@ public class LightweightHttpsWagon
     private String previousHttpsProxyHost;
     
     private String previousHttpsProxyPort;
-
+    
     public LightweightHttpsWagon()
     {
         super();
+    }
+
+    public String getProtocol()
+    {
+        return "https";
     }
 
     public void openConnection()

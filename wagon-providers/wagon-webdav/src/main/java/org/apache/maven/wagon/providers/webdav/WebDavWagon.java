@@ -110,6 +110,11 @@ public class WebDavWagon
             }
         }
     }
+    
+    public String getProtocol()
+    {
+        return "dav";
+    }
 
     /**
      * Opens a connection via web-dav resource
@@ -149,8 +154,6 @@ public class WebDavWagon
 
             if ( hasProxy )
             {
-                
-                
                 webdavResource.setProxy( proxyInfo.getHost(), proxyInfo.getPort() );
                 if ( !StringUtils.isEmpty( proxyInfo.getUserName() ) )
                 {
@@ -240,7 +243,7 @@ public class WebDavWagon
             // Put source into destination path.
             firePutStarted( resource, source );
 
-            InputStream is = new PutInputStream( source, resource, this, getTransferEventSupport() );
+            InputStream is = new PutInputStream( source, repository, resource, this, getTransferEventSupport() );
             boolean success = webdavResource.putMethod( dest, is, (int) source.length() );
             int statusCode = webdavResource.getStatusCode();
 
@@ -257,7 +260,7 @@ public class WebDavWagon
 
                 case HttpStatus.SC_NOT_FOUND:
                     // should never happen as the destination is created before or fail
-                    throw new TransferFailedException( "Destination does not exist: " + repository.getUrl() );
+                    throw new TransferFailedException( "Destination folder could not be created: " + dest );
 
                 case HttpStatus.SC_LENGTH_REQUIRED:
                     throw new TransferFailedException( "Transfer failed, server requires Content-Length." );
@@ -304,7 +307,7 @@ public class WebDavWagon
         String currentPath = relpath;
 
         Stack directoriesToBeCreated = new Stack();
-
+        
         try
         {
             while ( currentPath != null )
@@ -349,6 +352,13 @@ public class WebDavWagon
             while ( !directoriesToBeCreated.empty() )
             {
                 currentPath = (String) directoriesToBeCreated.pop();
+                
+                if ( currentPath.equals( "/" ) )
+                {
+                    /* Impossible to create root directory, skip */
+                    continue;
+                }
+                
                 webdavResource.setPath( currentPath );
 
                 try
@@ -356,14 +366,16 @@ public class WebDavWagon
                     boolean destinationCreated = webdavResource.mkcolMethod( currentPath );
                     if ( !destinationCreated )
                     {
-                        throw new TransferFailedException( "Destination folder could not be created: "
-                            + webdavResource.toString() );
+                        throw new TransferFailedException( "Destination folder [" + currentPath
+                            + "] could not be created: " + webdavResource.toString() + " - Server returned error: "
+                            + webdavResource.getStatusCode() + ": "
+                            + HttpStatus.getStatusText( webdavResource.getStatusCode() ) );
                     }
                 }
                 catch ( IOException e )
                 {
-                    throw new TransferFailedException( "Failed to create destination WebDAV collection (directory): "
-                        + webdavResource.toString(), e );
+                    throw new TransferFailedException( "Failed to create destination WebDAV collection (directory) ["
+                        + currentPath + "]: " + webdavResource.toString(), e );
                 }
             }
 

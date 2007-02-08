@@ -48,7 +48,10 @@ public final class TransferEventSupport
      */
     public void addTransferListener( final TransferListener listener )
     {
-        listeners.add( listener );
+        if ( listener != null )
+        {
+            listeners.add( listener );
+        }
     }
 
     /**
