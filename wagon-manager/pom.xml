@@ -8,6 +8,17 @@
   <artifactId>wagon-manager</artifactId>
   <name>Maven Wagon Manager</name>
   <description>Manager tools to best utilize wagon.</description>
+
+  <repositories>
+    <repository>
+      <id>codehaus.snapshots</id>
+      <url>http://snapshots.repository.codehaus.org/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
   <dependencies>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
