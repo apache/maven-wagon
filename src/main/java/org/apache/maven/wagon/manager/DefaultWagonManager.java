@@ -26,8 +26,11 @@ import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.manager.stats.WagonStatistics;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
+import org.codehaus.classworlds.ClassRealm;
 import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusContainer;
+import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
+import org.codehaus.plexus.component.configurator.ComponentConfigurator;
 import org.codehaus.plexus.component.repository.exception.ComponentLifecycleException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.context.Context;
@@ -75,6 +78,11 @@ public class DefaultWagonManager
      */
     private WagonStatistics stats;
 
+    /**
+     * @plexus.requirement
+     */
+    private ComponentConfigurator componentConfigurator;
+
     private PlexusContainer container;
 
     private Set protocols = new HashSet();
@@ -82,6 +90,8 @@ public class DefaultWagonManager
     private Map proxies = new HashMap();
 
     private Map repositories = new HashMap();
+
+    private Map settings = new HashMap();
 
     private List listeners = new ArrayList();
 
@@ -137,8 +147,60 @@ public class DefaultWagonManager
             getLogger().debug( Messages.getString( "wagon.manager.warn.overwrite.repository", id ) ); //$NON-NLS-1$
         }
 
-        RepositoryBinding repoBinding = new RepositoryBinding( id, repository );
-        repositories.put( id, repoBinding );
+        // Store repository, configure later.
+        repositories.put( id, repository );
+    }
+
+    public void addRepositoryMirror( String repositoryIdToMirror, String mirrorId, String urlOfMirror )
+    {
+        // TODO: Add support for WILDCARD "*" repositoryIdToMirror
+
+        if ( StringUtils.isEmpty( mirrorId ) )
+        {
+            throw new IllegalArgumentException( Messages.getString( "wagon.manager.repository.mirror.may.not.be.empty" ) ); //$NON-NLS-1$
+        }
+
+        if ( StringUtils.isEmpty( repositoryIdToMirror ) )
+        {
+            throw new IllegalArgumentException( Messages.getString( "wagon.manager.repository.id.may.not.be.empty" ) ); //$NON-NLS-1$
+        }
+
+        if ( StringUtils.equals( repositoryIdToMirror, mirrorId ) )
+        {
+            throw new IllegalArgumentException( Messages
+                .getString( "wagon.manager.repository.mirror.may.not.equal.repository", mirrorId ) ); //$NON-NLS-1$
+        }
+
+        // repositoryIdToMirror can't point to a mirror repository.
+        RepositorySettings repoSettings = getRepositorySettings( repositoryIdToMirror );
+        if ( repoSettings.isMirror() )
+        {
+            throw new IllegalArgumentException(
+                                                "You can't mirror a mirror.  Requested to mirror repository [{0}], which itself is already defined as mirror to [{1}]." );
+        }
+
+        // Save mirror id into repository settings for repo.
+        repoSettings.addMirror( mirrorId );
+
+        // Setup the mirror settings.
+        RepositorySettings mirrorSettings = getRepositorySettings( mirrorId );
+        mirrorSettings.setMirrorOf( repositoryIdToMirror );
+
+        // Create the mirror repository.
+        Repository mirrorRepository = new Repository( mirrorId, urlOfMirror );
+
+        // Store mirror repository, configure later.
+        repositories.put( mirrorId, mirrorRepository );
+    }
+
+    public Repository getRepository( String repositoryId )
+    {
+        Repository repository = (Repository) repositories.get( repositoryId );
+        RepositorySettings settings = getRepositorySettings( repository.getId() );
+
+        repository.setPermissions( settings.getPermissions() );
+
+        return repository;
     }
 
     public void addTransferListener( TransferListener listener )
@@ -166,7 +228,7 @@ public class DefaultWagonManager
         return (ProxyInfo) proxies.get( protocol );
     }
 
-    public Wagon getRawWagon( String protocol )
+    private Wagon getRawWagon( String protocol )
         throws UnsupportedProtocolException
     {
         if ( StringUtils.isEmpty( protocol ) )
@@ -186,6 +248,7 @@ public class DefaultWagonManager
             wagon.addSessionListener( stats );
             wagon.addTransferListener( stats );
             wagon.setProxyInfo( getProxy( protocol ) );
+            wagon.setInteractive( isInteractive() );
 
             return wagon;
         }
@@ -200,41 +263,81 @@ public class DefaultWagonManager
         return Collections.unmodifiableMap( repositories );
     }
 
-    public RepositoryBinding getRepositoryBindings( String id )
-        throws RepositoryNotFoundException
+    public RepositorySettings getRepositorySettings( String id )
     {
-        if ( !repositories.containsKey( id ) )
+        RepositorySettings ret = (RepositorySettings) settings.get( id );
+
+        if ( ret == null )
         {
-            throw new RepositoryNotFoundException( Messages.getString( "wagon.manager.repository.id.not.found", id ) ); //$NON-NLS-1$
+            ret = new RepositorySettings( id );
+            settings.put( id, ret );
         }
 
-        return (RepositoryBinding) repositories.get( id );
-    }
-
-    public Wagon getWagon( RepositoryBinding repositoryBinding )
-        throws UnsupportedProtocolException
-    {
-        String protocol = repositoryBinding.getRepository().getProtocol();
-        Wagon wagon = getRawWagon( protocol );
-
-        wagon.setRepository( repositoryBinding.getRepository() );
-        wagon.setAuthenticationInfo( repositoryBinding.getAuthenticationInfo() );
-        wagon.setProxyInfo( repositoryBinding.getProxyInfo() );
-
-        return wagon;
+        return ret;
     }
 
     public Wagon getWagon( String repositoryId )
-        throws UnsupportedProtocolException, RepositoryNotFoundException
+        throws WagonConfigurationException, UnsupportedProtocolException, RepositoryNotFoundException,
+        NotOnlineException
     {
-        RepositoryBinding repositoryBinding = getRepositoryBindings( repositoryId );
-        return getWagon( repositoryBinding );
-    }
+        RepositorySettings settings = getRepositorySettings( repositoryId );
+        String fetchId = repositoryId;
+        boolean hasMirror = settings.hasMirror();
+        Wagon wagon = null;
 
-    public void removeRepository( RepositoryBinding repositoryBinding )
-        throws RepositoryNotFoundException
-    {
-        removeRepository( repositoryBinding.getId() );
+        if ( hasMirror )
+        {
+            // Fetch the first mirror id.
+            fetchId = (String) settings.getMirrors().get( 0 );
+        }
+
+        Repository repository = getRepository( fetchId );
+        String protocol = repository.getProtocol();
+
+        if ( !protocol.equals( "file" ) && !isOnline() )
+        {
+            throw new NotOnlineException( "Unable to honor request for " + protocol
+                + " Wagon, as WagonManager has been flagged as offline." );
+            // TODO: Return NullWagon instead?
+        }
+
+        // Get Wagon
+        if ( hasMirror )
+        {
+            Wagon subwagon = getRawWagon( protocol );
+            wagon = new MirroredWagon( this, repositoryId, subwagon, getLogger() );
+        }
+        else
+        {
+            wagon = getRawWagon( protocol );
+        }
+
+        // Configure Wagon
+        wagon.setRepository( repository );
+        wagon.setAuthenticationInfo( settings.getAuthentication() );
+
+        ProxyInfo proxy = getProxy( protocol );
+        if ( proxy != null )
+        {
+            wagon.setProxyInfo( proxy );
+        }
+
+        if ( settings.getConfiguration() != null )
+        {
+            try
+            {
+                componentConfigurator.configureComponent( wagon, settings.getConfiguration(), (ClassRealm) container
+                    .getContainerRealm() );
+            }
+            catch ( ComponentConfigurationException e )
+            {
+                throw new WagonConfigurationException( "Unable to configure wagon [" + repositoryId
+                    + "] from defined configuration.", e );
+            }
+        }
+
+        // Return Wagon
+        return wagon;
     }
 
     public void removeRepository( String repoId )
@@ -302,6 +405,12 @@ public class DefaultWagonManager
 
     public void releaseWagon( Wagon wagon )
     {
+        // Safe to do this here, since WagonManager is the only place a MirroredWagon is created.
+        if ( wagon instanceof MirroredWagon )
+        {
+            wagon = ( (MirroredWagon) wagon ).getCurrentWagon();
+        }
+
         if ( wagon != null )
         {
             if ( wagon.isConnected() )

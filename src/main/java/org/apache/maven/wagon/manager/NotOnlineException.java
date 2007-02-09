@@ -1,7 +1,5 @@
 package org.apache.maven.wagon.manager;
 
-import org.apache.maven.wagon.WagonException;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,22 +19,26 @@ import org.apache.maven.wagon.WagonException;
  * under the License.
  */
 
+import org.apache.maven.wagon.WagonException;
+
 /**
- * RepositoryNotFoundException 
+ * NotOnlineException - thrown when an attempt to fetch a wagon from a {@link WagonManager} that has been
+ * flagged as Offline {@link WagonManager#setOnline(boolean)}  
  *
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
  * @version $Id$
  */
-public class RepositoryNotFoundException
+public class NotOnlineException
     extends WagonException
 {
-    public RepositoryNotFoundException( String message )
+
+    public NotOnlineException( String message, Throwable cause )
     {
-        super( message );
+        super( message, cause);
     }
 
-    public RepositoryNotFoundException( String message, Throwable cause )
+    public NotOnlineException( String message )
     {
-        super( message, cause );
+        super( message );
     }
 }

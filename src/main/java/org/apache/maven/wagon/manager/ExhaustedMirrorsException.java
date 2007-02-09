@@ -1,7 +1,5 @@
 package org.apache.maven.wagon.manager;
 
-import org.apache.maven.wagon.WagonException;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,21 +20,21 @@ import org.apache.maven.wagon.WagonException;
  */
 
 /**
- * RepositoryNotFoundException 
+ * ExhaustedMirrorsException 
  *
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
  * @version $Id$
  */
-public class RepositoryNotFoundException
-    extends WagonException
+public class ExhaustedMirrorsException
+    extends RepositoryNotFoundException
 {
-    public RepositoryNotFoundException( String message )
-    {
-        super( message );
-    }
-
-    public RepositoryNotFoundException( String message, Throwable cause )
+    public ExhaustedMirrorsException( String message, Throwable cause )
     {
         super( message, cause );
+    }
+
+    public ExhaustedMirrorsException( String message )
+    {
+        super( message );
     }
 }
