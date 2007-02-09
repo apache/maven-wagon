@@ -144,7 +144,7 @@ public class WagonStatistics
 
     public void transferCompleted( TransferEvent transferEvent )
     {
-        getLogger().info( ".transferCompleted(" + transferEvent + ")" );
+        getLogger().debug( ".transferCompleted(" + transferEvent + ")" );
         TransferStatistics repoStats = getTransferStatsByRepository( transferEvent.getRepository() );
 
         switch ( transferEvent.getRequestType() )
@@ -166,7 +166,7 @@ public class WagonStatistics
 
     public void transferError( TransferEvent transferEvent )
     {
-        getLogger().info( ".transferError(" + transferEvent + ")" );
+        getLogger().debug( ".transferError(" + transferEvent + ")" );
 
         TransferStatistics repoStats = getTransferStatsByRepository( transferEvent.getRepository() );
 
@@ -189,12 +189,12 @@ public class WagonStatistics
 
     public void transferInitiated( TransferEvent transferEvent )
     {
-        getLogger().info( ".transferInitiated(" + transferEvent + ")" );
+        getLogger().debug( ".transferInitiated(" + transferEvent + ")" );
     }
 
     public void transferProgress( TransferEvent transferEvent, byte[] buffer, int length )
     {
-        getLogger().info( ".transferProgress(" + transferEvent + ", (byte[]) buffer, " + length + ")" );
+        getLogger().debug( ".transferProgress(" + transferEvent + ", (byte[]) buffer, " + length + ")" );
 
         TransferStatistics repoStats = getTransferStatsByRepository( transferEvent.getRepository() );
 
@@ -217,46 +217,46 @@ public class WagonStatistics
 
     public void transferStarted( TransferEvent transferEvent )
     {
-        getLogger().info( ".transferStarted(" + transferEvent + ")" );
+        getLogger().debug( ".transferStarted(" + transferEvent + ")" );
     }
 
     public void sessionConnectionRefused( SessionEvent sessionEvent )
     {
-        getLogger().info( ".sessionConnectionRefused(" + sessionEvent + ")" );
+        getLogger().debug( ".sessionConnectionRefused(" + sessionEvent + ")" );
     }
 
     public void sessionDisconnected( SessionEvent sessionEvent )
     {
-        getLogger().info( ".sessionDisconnected(" + sessionEvent + ")" );
+        getLogger().debug( ".sessionDisconnected(" + sessionEvent + ")" );
     }
 
     public void sessionDisconnecting( SessionEvent sessionEvent )
     {
-        getLogger().info( ".sessionDisconnecting(" + sessionEvent + ")" );
+        getLogger().debug( ".sessionDisconnecting(" + sessionEvent + ")" );
     }
 
     public void sessionError( SessionEvent sessionEvent )
     {
-        getLogger().info( ".sessionError(" + sessionEvent + ")" );
+        getLogger().debug( ".sessionError(" + sessionEvent + ")" );
     }
 
     public void sessionLoggedIn( SessionEvent sessionEvent )
     {
-        getLogger().info( ".sessionLoggedIn(" + sessionEvent + ")" );
+        getLogger().debug( ".sessionLoggedIn(" + sessionEvent + ")" );
     }
 
     public void sessionLoggedOff( SessionEvent sessionEvent )
     {
-        getLogger().info( ".sessionLoggedOff(" + sessionEvent + ")" );
+        getLogger().debug( ".sessionLoggedOff(" + sessionEvent + ")" );
     }
 
     public void sessionOpened( SessionEvent sessionEvent )
     {
-        getLogger().info( ".sessionOpened(" + sessionEvent + ")" );
+        getLogger().debug( ".sessionOpened(" + sessionEvent + ")" );
     }
 
     public void sessionOpening( SessionEvent sessionEvent )
     {
-        getLogger().info( ".sessionOpening(" + sessionEvent + ")" );
+        getLogger().debug( ".sessionOpening(" + sessionEvent + ")" );
     }
 }
