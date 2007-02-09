@@ -21,16 +21,48 @@ package org.apache.maven.wagon.manager;
 
 import org.apache.maven.wagon.UnsupportedProtocolException;
 import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.manager.stats.WagonStatistics;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.repository.RepositoryPermissions;
 
 import java.util.Map;
 import java.util.Set;
 
 /**
- * WagonManager 
+ * <p>
+ * WagonManager - The source for your Wagon needs.
+ * </p>
+ * 
+ * <p>
+ * Typical usage pattern ...
+ * 
+ * <pre>
+ *   WagonManager wagonManager = lookup( WagonManager.ROLE, "default" );
+ *   
+ *   wagonManager.addRepository( new Repository( "foo", "dav:http://foo.hostname.com/repo/" ) );
+ *   
+ *   Wagon wagon = wagonManager.getWagon( "foo" );
+ *   
+ *   try
+ *   {
+ *      wagon.connect();
+ *      
+ *      wagon.put( new File( "/path/on/local/filename.jar" ), "path/on/remote/server/filename.jar" );
+ *      
+ *      wagon.get( "path/on/remote/server/different.jar", new File( "/path/on/local/different.jar" ) );
+ *      
+ *      wagon.disconnect();
+ *   }
+ *   finally
+ *   {
+ *      wagonManager.releaseWagon( wagon );
+ *   }
+ * </pre>
+ * 
+ * </p>
  *
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
  * @version $Id$
@@ -89,38 +121,12 @@ public interface WagonManager
     ProxyInfo getProxy( String protocol );
 
     /**
-     * Get a Wagon provider that understands the protocol passed as argument.
-     * It doesn't configure the Wagon.
-     * 
-     * NOTE: This implementation creates a raw Wagon object, regardless of any registered Repositories.
-     *
-     * @param protocol the protocol the {@link Wagon} will handle
-     * @return the {@link Wagon} instance able to handle the protocol provided
-     * @throws UnsupportedProtocolException if there is no provider able to handle the protocol
-     */
-    Wagon getRawWagon( String protocol )
-        throws UnsupportedProtocolException;
-
-    /**
      * Get the RepositoryBinding for the specific repository id.
      * 
      * @param id the repository id to get the bindings for.
      * @return the {@link RepositoryBinding} for the id.
-     * @throws RepositoryNotFoundException
      */
-    RepositoryBinding getRepositoryBindings( String id )
-        throws RepositoryNotFoundException;
-
-    /**
-     * Get a Wagon provider that understands the protocol defined within the specified Repository.
-     * It doesn't configure the Wagon.
-     *
-     * @param repository the {@link Repository} the {@link Wagon} will handle
-     * @return the {@link Wagon} instance able to handle the protocol provided
-     * @throws UnsupportedProtocolException if there is no provider able to handle the protocol
-     */
-    Wagon getWagon( RepositoryBinding repository )
-        throws UnsupportedProtocolException;
+    RepositorySettings getRepositorySettings( String id );
 
     /**
      * Get a Wagon provider that understands the protocol defined within the specified Repository.
@@ -130,18 +136,12 @@ public interface WagonManager
      * @return the {@link Wagon} instance able to handle the protocol provided
      * @throws UnsupportedProtocolException if there is no provider able to handle the protocol
      * @throws RepositoryNotFoundException if the specified id cannot be found.
+     * @throws WagonConfigurationException if the wagon could not be configured.
+     * @throws NotOnlineException thrown if request for {@link Wagon} when manager is not online ({@link #isOnline()}.
      */
     Wagon getWagon( String repositoryId )
-        throws UnsupportedProtocolException, RepositoryNotFoundException;
-    
-    /**
-     * Release a previously used wagon.
-     * 
-     * All tracking and statistics for this wagon are stopped.
-     * 
-     * @param wagon the wagon to release.
-     */
-    void releaseWagon(Wagon wagon);
+        throws UnsupportedProtocolException, RepositoryNotFoundException, WagonConfigurationException,
+        NotOnlineException;
 
     /**
      * Flag indicating that the interactivity of wagons.
@@ -156,6 +156,16 @@ public interface WagonManager
      * @return true if the manager is online.
      */
     boolean isOnline();
+
+    /**
+     * Release a previously used wagon.
+     * 
+     * NOTE: All tracking and statistics for this wagon are stopped.
+     * This method will disconnect and active wagon before releasing it.
+     * 
+     * @param wagon the wagon to release.
+     */
+    void releaseWagon( Wagon wagon );
 
     /**
      * Remove a specific TransferListener from WagonManager.
@@ -189,6 +199,18 @@ public interface WagonManager
     public void addRepository( Repository repository );
 
     /**
+     * Create a mirror of a the specified repository.
+     * 
+     * WagonManager will attach {@link AuthenticationInfo}, {@link ProxyInfo}, and {@link RepositoryPermissions} to
+     * the mirror automatically, based on the <code>mirrorId</code>.
+     * 
+     * @param repositoryIdToMirror the id of the repository to mirror. (cannot refer to another repository mirror)
+     * @param mirrorId the id of the mirror repository. (cannot be the same as the <code>repositoryIdToMirror</code>)
+     * @param urlOfMirror the url of the mirror.
+     */
+    public void addRepositoryMirror( String repositoryIdToMirror, String mirrorId, String urlOfMirror );
+
+    /**
      * Get a Map of {@link RepositoryBinding} objects being tracked.
      * 
      * @return Map of {@link Repository} keys to {@link RepositoryBinding} objects.
@@ -196,20 +218,19 @@ public interface WagonManager
     public Map getRepositories();
 
     /**
+     * Get a {@link Repository} for the specified repositoryId. 
+     * 
+     * @param repositoryId the repository id to fetch.
+     * @return the {@link Repository} or null if not found.
+     */
+    public Repository getRepository( String repositoryId );
+
+    /**
      * Get the Statistics gathered so far.
      * 
      * @return the statistics gathered so far.
      */
     public WagonStatistics getStatistics();
-
-    /**
-     * Remove the repository from the list of repositories being tracked.
-     *  
-     * @param repositoryBinding the repository to remove.
-     * @throws RepositoryNotFoundException
-     */
-    public void removeRepository( RepositoryBinding repositoryBinding )
-        throws RepositoryNotFoundException;
 
     /**
      * Remove the repository from the list of repositories being tracked.

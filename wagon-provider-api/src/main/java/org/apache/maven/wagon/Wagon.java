@@ -188,28 +188,36 @@ public interface Wagon
     boolean isConnected();
     
     /**
-     * @deprecated Replaced by calls to {@link #connect()}, uses {@link #getRepository()}
+     * 
+     * @see #setRepository(Repository)
+     * @deprecated Use {@link #connect()} instead, (will be removed in Wagon 2.0)
      */
     void connect( Repository source )
         throws ConnectionException, AuthenticationException;
 
     /**
-     * @deprecated Replaced by calls to {@link #connect()}, uses {@link #getRepository()} and 
-     *   {@link #getProxyInfo()}
+     * 
+     * @see #setRepository(Repository)
+     * @see #setProxyInfo(ProxyInfo)
+     * @deprecated Use {@link #connect()} instead, (will be removed in Wagon 2.0)
      */
     void connect( Repository source, ProxyInfo proxyInfo )
         throws ConnectionException, AuthenticationException;
 
     /**
-     * @deprecated Replaced by calls to {@link #connect()}, uses {@link #getRepository()} and 
-     *   {@link #getAuthenticationInfo()}
+     * 
+     * @see #setRepository(Repository)
+     * @see #setAuthenticationInfo(AuthenticationInfo)
+     * @deprecated Use {@link #connect()} instead, (will be removed in Wagon 2.0)
      */
     void connect( Repository source, AuthenticationInfo authenticationInfo )
         throws ConnectionException, AuthenticationException;
 
     /**
-     * @deprecated Replaced by calls to {@link #connect()}, uses {@link #getRepository()} and 
-     *   {@link #getAuthenticationInfo()} and {@link #getProxyInfo()}
+     * @see #setRepository(Repository)
+     * @see #setAuthenticationInfo(AuthenticationInfo)
+     * @see #setProxyInfo(ProxyInfo)
+     * @deprecated Use {@link #connect()} instead, (will be removed in Wagon 2.0)
      */
     void connect( Repository source, AuthenticationInfo authenticationInfo, ProxyInfo proxyInfo )
         throws ConnectionException, AuthenticationException;

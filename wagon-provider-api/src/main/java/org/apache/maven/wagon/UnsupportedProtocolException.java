@@ -25,8 +25,6 @@ package org.apache.maven.wagon;
 public class UnsupportedProtocolException
     extends WagonException
 {
-
-
     /**
      * @see WagonException
      */
