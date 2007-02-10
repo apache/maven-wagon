@@ -211,7 +211,7 @@ public class WagonManagerTest
         assertNotNull( protocols );
 
         String expectedProtocols[] = new String[] { "file", "ftp", "http", "https", "scp", "scpexe", "sftp", "dav" };
-
+        
         assertEquals( "Supported Protocols : " + protocols, expectedProtocols.length, protocols.size() );
     }
 

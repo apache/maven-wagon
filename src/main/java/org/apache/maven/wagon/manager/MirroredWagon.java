@@ -19,7 +19,6 @@ package org.apache.maven.wagon.manager;
  * under the License.
  */
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
@@ -33,6 +32,7 @@ import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.plexus.logging.Logger;
+import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -311,7 +311,7 @@ public class MirroredWagon
         while ( it.hasNext() && !found )
         {
             String mirrorId = (String) it.next();
-            if ( StringUtils.equals( mirrorId, previous.getRepository().getId() ) )
+            if ( mirrorId.equals( previous.getRepository().getId() ) )
             {
                 // Found current mirror.  What's next?
 

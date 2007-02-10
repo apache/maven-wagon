@@ -19,11 +19,11 @@ package org.apache.maven.wagon.manager;
  * under the License.
  */
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
+import org.codehaus.plexus.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -126,7 +126,7 @@ public class RepositorySettings
     
     public boolean isMirror()
     {
-        return StringUtils.isNotBlank( mirrorOf );
+        return !StringUtils.isEmpty( mirrorOf );
     }
 
     public void setAuthentication( AuthenticationInfo authentication )
