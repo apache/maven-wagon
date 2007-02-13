@@ -27,6 +27,8 @@ import org.apache.maven.wagon.manager.stats.WagonStatistics;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
+import org.codehaus.plexus.PlexusContainer;
+import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 
 import java.util.Map;
 import java.util.Set;
@@ -240,4 +242,13 @@ public interface WagonManager
      */
     public void removeRepository( String repoId )
         throws RepositoryNotFoundException;
+
+    /**
+     * Register a Plexus Extension Container for wagon lookups.
+     * 
+     * @param extContainer the extension Container to use for lookups.
+     * @throws ComponentLookupException if there was a problem looking up Wagon implementations.
+     */
+    public void registerExtensionContainer( PlexusContainer extContainer )
+        throws ComponentLookupException;
 }
