@@ -44,7 +44,6 @@ import org.codehaus.plexus.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +84,10 @@ public class DefaultWagonManager
 
     private PlexusContainer container;
 
-    private Set protocols = new HashSet();
+    /**
+     * Map of wagon hints to PlexusContainers.
+     */
+    private Map availableWagons = new HashMap();
 
     private Map proxies = new HashMap();
 
@@ -210,7 +212,7 @@ public class DefaultWagonManager
 
     public Set getProtocols()
     {
-        return Collections.unmodifiableSet( protocols );
+        return Collections.unmodifiableSet( availableWagons.keySet() );
     }
 
     public Map getProxies()
@@ -236,7 +238,7 @@ public class DefaultWagonManager
             throw new IllegalArgumentException( Messages.getString( "wagon.manager.protocol.may.not.be.empty" ) ); //$NON-NLS-1$
         }
 
-        if ( !protocols.contains( protocol ) )
+        if ( !availableWagons.containsKey( protocol ) )
         {
             throw new UnsupportedProtocolException( Messages
                 .getString( "wagon.manager.protocol.not.supported", protocol ) ); //$NON-NLS-1$
@@ -244,7 +246,7 @@ public class DefaultWagonManager
 
         try
         {
-            Wagon wagon = (Wagon) container.lookup( Wagon.ROLE, protocol );
+            Wagon wagon = (Wagon) getWagonContainer( protocol ).lookup( Wagon.ROLE, protocol );
             wagon.addSessionListener( stats );
             wagon.addTransferListener( stats );
             wagon.setProxyInfo( getProxy( protocol ) );
@@ -371,25 +373,67 @@ public class DefaultWagonManager
         this.online = online;
     }
 
+    public PlexusContainer getWagonContainer( String protocol )
+        throws UnsupportedProtocolException
+    {
+        PlexusContainer wagonContainer = (PlexusContainer) this.availableWagons.get( protocol );
+        if ( wagonContainer == null )
+        {
+            throw new UnsupportedProtocolException( "Unable to find wagon for protocol [" + protocol + "]" );
+        }
+
+        return wagonContainer;
+    }
+
     public void initialize()
         throws InitializationException
     {
-        List availableWagonProviders;
         try
         {
-            availableWagonProviders = container.lookupList( Wagon.ROLE );
-            Iterator it = availableWagonProviders.iterator();
+            registerAvailableWagons( container );
+        }
+        catch ( ComponentLookupException e )
+        {
+            throw new InitializationException( "Unable to initialize: " + e.getMessage(), e );
+        }
+    }
+
+    public void registerAvailableWagons( PlexusContainer container )
+        throws ComponentLookupException
+    {
+        Map discoveredWagonProviders;
+        try
+        {
+            discoveredWagonProviders = container.lookupMap( Wagon.ROLE );
+            Iterator it = discoveredWagonProviders.keySet().iterator();
 
             while ( it.hasNext() )
             {
-                Wagon wagon = (Wagon) it.next();
-                protocols.add( wagon.getProtocol() );
+                String wagonHint = (String) it.next();
+                Wagon wagon = (Wagon) container.lookup( Wagon.ROLE, wagonHint );
+                if ( !StringUtils.equals( wagon.getProtocol(), wagonHint ) )
+                {
+                    throw new IllegalStateException( "Plexus Hint [" + wagonHint + "] and Wagon.getProtocol() ["
+                        + wagon.getProtocol() + "] do not agree." );
+                }
+
+                // TODO: need to address what to do when an extension container becomes unavailable.
+                // TODO: need to figure out how to remove a container.
+                // TODO: need to restore parent wagons if extension container overwrites them.
+
+                this.availableWagons.put( wagonHint, container );
             }
         }
         catch ( ComponentLookupException e )
         {
-            throw new InitializationException( "Unable to find list of available Wagons.", e );
+            throw new ComponentLookupException( "Unable to find list of available Wagons.", e );
         }
+    }
+
+    public void registerExtensionContainer( PlexusContainer extContainer )
+        throws ComponentLookupException
+    {
+        registerAvailableWagons( extContainer );
     }
 
     public WagonStatistics getStatistics()
@@ -427,11 +471,15 @@ public class DefaultWagonManager
 
             try
             {
-                container.release( wagon );
+                getWagonContainer( wagon.getProtocol() ).release( wagon );
             }
             catch ( ComponentLifecycleException e )
             {
                 getLogger().warn( "Unable to release wagon (" + wagon.getClass().getName() + ")", e );
+            }
+            catch ( UnsupportedProtocolException e )
+            {
+                getLogger().warn( "Unable to release wagon (" + wagon.getClass().getName() + "): " + e.getMessage(), e );
             }
         }
     }
