@@ -398,19 +398,19 @@ public class DefaultWagonManager
         }
     }
 
-    public void registerAvailableWagons( PlexusContainer container )
+    public void registerAvailableWagons( PlexusContainer searchContainer )
         throws ComponentLookupException
     {
         Map discoveredWagonProviders;
         try
         {
-            discoveredWagonProviders = container.lookupMap( Wagon.ROLE );
+            discoveredWagonProviders = searchContainer.lookupMap( Wagon.ROLE );
             Iterator it = discoveredWagonProviders.keySet().iterator();
 
             while ( it.hasNext() )
             {
                 String wagonHint = (String) it.next();
-                Wagon wagon = (Wagon) container.lookup( Wagon.ROLE, wagonHint );
+                Wagon wagon = (Wagon) searchContainer.lookup( Wagon.ROLE, wagonHint );
                 if ( !StringUtils.equals( wagon.getProtocol(), wagonHint ) )
                 {
                     throw new IllegalStateException( "Plexus Hint [" + wagonHint + "] and Wagon.getProtocol() ["
@@ -421,7 +421,7 @@ public class DefaultWagonManager
                 // TODO: need to figure out how to remove a container.
                 // TODO: need to restore parent wagons if extension container overwrites them.
 
-                this.availableWagons.put( wagonHint, container );
+                this.availableWagons.put( wagonHint, searchContainer );
             }
         }
         catch ( ComponentLookupException e )
