@@ -11,11 +11,8 @@
 
   <repositories>
     <repository>
-      <id>codehaus.snapshots</id>
-      <url>http://snapshots.repository.codehaus.org/</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
+      <id>codehaus.org</id>
+      <url>http://repository.codehaus.org/</url>
     </repository>
   </repositories>
 
@@ -66,7 +63,7 @@
     <dependency>
       <groupId>org.codehaus.plexus.webdav</groupId>
       <artifactId>plexus-webdav-simple</artifactId>
-      <version>1.0-alpha-1-SNAPSHOT</version>
+      <version>1.0-alpha-1</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
