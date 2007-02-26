@@ -32,7 +32,6 @@ import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.plexus.logging.Logger;
-import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -58,14 +57,20 @@ public class MirroredWagon
 
     private List transferListeners = new ArrayList();
 
+    private List mirrors;
+
+    private Iterator mirrorsIterator;
+
     private Logger logger;
 
     public MirroredWagon( WagonManager wagonManager, String mirrorOf, Wagon firstWagon, Logger logger )
     {
         this.wagonManager = wagonManager;
         this.mirrorOfRepoId = mirrorOf;
-        this.impl = firstWagon;
         this.logger = logger;
+        this.impl = firstWagon;
+
+        initMirrorsList();
     }
 
     public void addSessionListener( SessionListener listener )
@@ -86,7 +91,7 @@ public class MirroredWagon
         try
         {
             // Keep trying with .nextMirror() et al.
-            while ( true )
+            while ( hasMirror() )
             {
                 try
                 {
@@ -95,11 +100,13 @@ public class MirroredWagon
                 catch ( ConnectionException e )
                 {
                     logger.warn( "Unable to connect to mirror [" + this.impl.getRepository().getId() + "]" );
+                    // This can result in an ExhaustedMirrorsException.
                     nextMirror();
                 }
                 catch ( AuthenticationException e )
                 {
                     logger.warn( "Unable to authenticate to mirror [" + this.impl.getRepository().getId() + "]" );
+                    // This can result in an ExhaustedMirrorsException.
                     nextMirror();
                 }
             }
@@ -114,25 +121,29 @@ public class MirroredWagon
     public void connect( Repository repository )
         throws ConnectionException, AuthenticationException
     {
-        this.impl.connect( repository );
+        throw new ConnectionException( "MirroredWagon.connect(Repository) "
+            + "is not supported ( See Wagon.connect() )." );
     }
 
     public void connect( Repository repository, AuthenticationInfo authn )
         throws ConnectionException, AuthenticationException
     {
-        this.impl.connect( repository, authn );
+        throw new ConnectionException( "MirroredWagon.connect(Repository, AuthenticationInfo) "
+            + "is not supported ( See Wagon.connect() )." );
     }
 
     public void connect( Repository repository, AuthenticationInfo authn, ProxyInfo proxy )
         throws ConnectionException, AuthenticationException
     {
-        this.impl.connect( repository, authn, proxy );
+        throw new ConnectionException( "MirroredWagon.connect(Repository, AuthenticationInfo, ProxyInfo) "
+            + "is not supported ( See Wagon.connect() )." );
     }
 
     public void connect( Repository repository, ProxyInfo proxy )
         throws ConnectionException, AuthenticationException
     {
-        this.impl.connect( repository, proxy );
+        throw new ConnectionException( "MirroredWagon.connect(Repository, ProxyInfo) "
+            + "is not supported ( See Wagon.connect() )." );
     }
 
     public void disconnect()
@@ -146,7 +157,7 @@ public class MirroredWagon
     {
         try
         {
-            while ( true )
+            while ( hasMirror() )
             {
                 try
                 {
@@ -154,13 +165,14 @@ public class MirroredWagon
                 }
                 catch ( TransferFailedException e )
                 {
+                    // This can result in an ExhaustedMirrorsException.
                     nextMirror();
                 }
             }
         }
         catch ( ExhaustedMirrorsException e )
         {
-
+            throw new TransferFailedException( "Unable to fetch resource " + resource + " from any mirror." );
         }
 
     }
@@ -299,94 +311,106 @@ public class MirroredWagon
         to.setInteractive( from.isInteractive() );
     }
 
+    private void initMirrorsList()
+    {
+        mirrors = new ArrayList();
+
+        RepositorySettings settings = wagonManager.getRepositorySettings( mirrorOfRepoId );
+
+        Iterator it = settings.getMirrors().iterator();
+        while ( it.hasNext() )
+        {
+            String mirrorId = (String) it.next();
+
+            try
+            {
+                Wagon mirrorWagon = wagonManager.getWagon( mirrorId );
+                RepositorySettings mirrorSettings = wagonManager.getRepositorySettings( mirrorId );
+
+                if ( mirrorSettings.isBlacklisted() )
+                {
+                    logger.debug( "Skipping blacklisted mirror [" + mirrorId + "]" );
+                    continue;
+                }
+
+                if ( !mirrorSettings.isEnabled() )
+                {
+                    logger.debug( "Skipping disabled mirror [" + mirrorId + "]" );
+                    continue;
+                }
+
+                copyConfiguration( mirrorWagon, this.impl );
+                mirrors.add( mirrorWagon );
+            }
+            catch ( UnsupportedProtocolException e )
+            {
+                blacklistMirror( mirrorId );
+                logger.warn( "Unable to use mirror [" + mirrorId + "]: " + e.getMessage(), e );
+            }
+            catch ( RepositoryNotFoundException e )
+            {
+                blacklistMirror( mirrorId );
+                logger.warn( "Unable to use mirror [" + mirrorId + "]: " + e.getMessage(), e );
+            }
+            catch ( WagonConfigurationException e )
+            {
+                blacklistMirror( mirrorId );
+                logger.warn( "Unable to use mirror [" + mirrorId + "]: " + e.getMessage(), e );
+            }
+            catch ( NotOnlineException e )
+            {
+                logger.warn( "Unable to use mirror [" + mirrorId + "]: " + e.getMessage(), e );
+            }
+        }
+
+        mirrorsIterator = mirrors.iterator();
+    }
+
+    private boolean hasMirror()
+    {
+        return mirrorsIterator.hasNext();
+    }
+
     private void nextMirror()
         throws ExhaustedMirrorsException
     {
         Wagon previous = this.impl;
-        RepositorySettings settings = wagonManager.getRepositorySettings( mirrorOfRepoId );
 
-        boolean wasConnected = previous.isConnected();
-        boolean found = false;
-        Iterator it = settings.getMirrors().iterator();
-        while ( it.hasNext() && !found )
+        boolean wasConnected = false;
+        if ( previous != null )
         {
-            String mirrorId = (String) it.next();
-            if ( mirrorId.equals( previous.getRepository().getId() ) )
-            {
-                // Found current mirror.  What's next?
-
-                while ( it.hasNext() )
-                {
-                    String nextId = (String) it.next();
-                    try
-                    {
-                        RepositorySettings mirrorSettings = wagonManager.getRepositorySettings( nextId );
-
-                        if ( mirrorSettings.isBlacklisted() )
-                        {
-                            // Skip this mirror, it's blacklisted.
-                            logger.debug( "Skipping blacklisted mirror [" + nextId + "]" );
-                            continue;
-                        }
-
-                        if ( !mirrorSettings.isEnabled() )
-                        {
-                            logger.debug( "Skipping disabled mirror [" + nextId + "]" );
-                            continue;
-                        }
-
-                        this.impl = wagonManager.getWagon( nextId );
-                        copyConfiguration( previous, this.impl );
-
-                        // Reconnect next wagon if previous was connected.
-                        if ( wasConnected )
-                        {
-                            disconnectQuietly( previous );
-                            this.impl.connect();
-                        }
-
-                        found = true;
-                        break;
-                    }
-                    catch ( UnsupportedProtocolException e )
-                    {
-                        blacklistMirror( nextId );
-                        logger.warn( "Unable to use mirror [" + nextId + "]: " + e.getMessage(), e );
-                    }
-                    catch ( RepositoryNotFoundException e )
-                    {
-                        blacklistMirror( nextId );
-                        logger.warn( "Unable to use mirror [" + nextId + "]: " + e.getMessage(), e );
-                    }
-                    catch ( WagonConfigurationException e )
-                    {
-                        blacklistMirror( nextId );
-                        logger.error( "Unable to use mirror [" + nextId + "]: " + e.getMessage(), e );
-                    }
-                    catch ( ConnectionException e )
-                    {
-                        blacklistMirror( nextId );
-                        logger.error( "Unable to use mirror [" + nextId + "]: " + e.getMessage(), e );
-                    }
-                    catch ( AuthenticationException e )
-                    {
-                        blacklistMirror( nextId );
-                        logger.error( "Unable to use mirror [" + nextId + "]: " + e.getMessage(), e );
-                    }
-                    catch ( NotOnlineException e )
-                    {
-                        logger.error( "Unable to use mirror [" + nextId + "]: " + e.getMessage(), e );
-                    }
-                }
-            }
+            previous.isConnected();
         }
 
-        wagonManager.releaseWagon( previous );
-
-        if ( !found )
+        if ( !hasMirror() )
         {
             this.impl = null;
             throw new ExhaustedMirrorsException( "Exhausted all mirrors for repository [" + mirrorOfRepoId + "]." );
+        }
+
+        this.impl = (Wagon) mirrorsIterator.next();
+
+        if ( wasConnected )
+        {
+            disconnectQuietly( previous );
+            try
+            {
+                this.impl.connect();
+            }
+            catch ( ConnectionException e )
+            {
+                // Whoops! Gotta try the next one now.
+                logger.warn( "Unable to connect to mirror [" + this.impl.getRepository().getId() + "]: "
+                    + e.getMessage() );
+                nextMirror();
+            }
+            catch ( AuthenticationException e )
+            {
+                // Whoops! Gotta try the next one now.
+                logger.warn( "Unable to authenticate to mirror [" + this.impl.getRepository().getId() + "]: "
+                    + e.getMessage() );
+                nextMirror();
+            }
         }
     }
 
@@ -414,5 +438,10 @@ public class MirroredWagon
     protected Wagon getCurrentWagon()
     {
         return this.impl;
+    }
+
+    public List getMirrors()
+    {
+        return mirrors;
     }
 }
