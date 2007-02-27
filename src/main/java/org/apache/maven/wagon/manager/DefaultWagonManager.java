@@ -97,6 +97,9 @@ public class DefaultWagonManager
 
     private List listeners = new ArrayList();
 
+    // this is a reverse-mapping of className to hint, to make it simpler to release legacy wagons. 
+    private Map availableWagonHintsByClassName = new HashMap();
+
     public void addProxy( String protocol, ProxyInfo proxyInfo )
     {
         if ( StringUtils.isEmpty( protocol ) )
@@ -172,7 +175,7 @@ public class DefaultWagonManager
             throw new IllegalArgumentException( Messages
                 .getString( "wagon.manager.repository.mirror.may.not.equal.repository", mirrorId ) ); //$NON-NLS-1$
         }
-
+        
         // repositoryIdToMirror can't point to a mirror repository.
         RepositorySettings repoSettings = getRepositorySettings( repositoryIdToMirror );
         if ( repoSettings.isMirror() )
@@ -279,10 +282,11 @@ public class DefaultWagonManager
     }
 
     public Wagon getWagon( String repositoryId )
-        throws WagonConfigurationException, UnsupportedProtocolException, RepositoryNotFoundException,
+        throws WagonConfigurationException, UnsupportedProtocolException, RepositoryNotFoundException, 
         NotOnlineException
     {
         RepositorySettings settings = getRepositorySettings( repositoryId );
+        
         String fetchId = repositoryId;
         boolean hasMirror = settings.hasMirror();
         Wagon wagon = null;
@@ -294,8 +298,9 @@ public class DefaultWagonManager
         }
 
         Repository repository = getRepository( fetchId );
+        
         String protocol = repository.getProtocol();
-
+        
         if ( !protocol.equals( "file" ) && !isOnline() )
         {
             throw new NotOnlineException( "Unable to honor request for " + protocol
@@ -314,8 +319,9 @@ public class DefaultWagonManager
             wagon = getRawWagon( protocol );
         }
 
-        // Configure Wagon
-        wagon.setRepository( repository );
+        // Configure Wagon; make a defensive copy of the repository, in case the wagon alters it.
+        wagon.setRepository( new Repository( repository.getId(), repository.getUrl() ) );
+        
         wagon.setAuthenticationInfo( settings.getAuthentication() );
 
         ProxyInfo proxy = getProxy( protocol );
@@ -337,7 +343,7 @@ public class DefaultWagonManager
                     + "] from defined configuration.", e );
             }
         }
-
+        
         // Return Wagon
         return wagon;
     }
@@ -405,13 +411,22 @@ public class DefaultWagonManager
         try
         {
             discoveredWagonProviders = searchContainer.lookupMap( Wagon.ROLE );
-            Iterator it = discoveredWagonProviders.keySet().iterator();
+            Iterator it = discoveredWagonProviders.entrySet().iterator();
 
             while ( it.hasNext() )
             {
-                String wagonHint = (String) it.next();
+                Map.Entry entry = (Map.Entry) it.next();
+                
+                String wagonHint = (String) entry.getKey();
+                Object wagonInstance = entry.getValue();
+                
+                getLogger().debug( "Registering wagon for: " + wagonHint );
+                
                 Wagon wagon = (Wagon) searchContainer.lookup( Wagon.ROLE, wagonHint );
-                if ( !StringUtils.equals( wagon.getProtocol(), wagonHint ) )
+                
+                // TODO: Remove this null check once we're clear of backward compat issues with
+                // wagons <= 1.0-beta-2.
+                if ( wagon.getProtocol() != null && !StringUtils.equals( wagon.getProtocol(), wagonHint ) )
                 {
                     throw new IllegalStateException( "Plexus Hint [" + wagonHint + "] and Wagon.getProtocol() ["
                         + wagon.getProtocol() + "] do not agree." );
@@ -422,6 +437,7 @@ public class DefaultWagonManager
                 // TODO: need to restore parent wagons if extension container overwrites them.
 
                 this.availableWagons.put( wagonHint, searchContainer );
+                this.availableWagonHintsByClassName.put( wagonInstance.getClass().getName(), wagonHint );
             }
         }
         catch ( ComponentLookupException e )
@@ -469,18 +485,41 @@ public class DefaultWagonManager
                 }
             }
 
-            try
+            String hint = findWagonHint( wagon );
+            
+            if ( hint != null )
             {
-                getWagonContainer( wagon.getProtocol() ).release( wagon );
-            }
-            catch ( ComponentLifecycleException e )
-            {
-                getLogger().warn( "Unable to release wagon (" + wagon.getClass().getName() + ")", e );
-            }
-            catch ( UnsupportedProtocolException e )
-            {
-                getLogger().warn( "Unable to release wagon (" + wagon.getClass().getName() + "): " + e.getMessage(), e );
+                try
+                {
+                    getWagonContainer( hint ).release( wagon );
+                }
+                catch ( ComponentLifecycleException e )
+                {
+                    getLogger().warn( "Unable to release wagon (" + wagon.getClass().getName() + ")", e );
+                }
+                catch ( UnsupportedProtocolException e )
+                {
+                    getLogger().warn( "Unable to release wagon (" + wagon.getClass().getName() + "): " + e.getMessage(), e );
+                }
             }
         }
+    }
+
+    private String findWagonHint( Wagon wagon )
+    {
+        String result = null;
+        
+        result = wagon.getProtocol();
+        
+        if ( result == null )
+        {
+            getLogger().debug( "Looking for key of wagon-class: " + wagon.getClass().getName() + " in availableWagons:\n" + String.valueOf( availableWagonHintsByClassName ).replace( ',', '\n' ) );
+            
+            result = (String) availableWagonHintsByClassName.get( wagon.getClass().getName() );
+        }
+        
+        getLogger().debug( "Found wagon-class: " + wagon.getClass().getName() + " under key: " + result );
+        
+        return result;
     }
 }

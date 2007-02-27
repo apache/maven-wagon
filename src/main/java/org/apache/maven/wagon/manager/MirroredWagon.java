@@ -444,4 +444,12 @@ public class MirroredWagon
     {
         return mirrors;
     }
+
+    /**
+     * @deprecated Provided for backward compatibility. Use {@link MirroredWagon#connect()} instead.
+     */
+    public void openConnection()
+        throws ConnectionException, AuthenticationException
+    {
+    }
 }
