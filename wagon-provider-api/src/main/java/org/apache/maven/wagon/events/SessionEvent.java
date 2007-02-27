@@ -122,6 +122,35 @@ public class SessionEvent
     }
 
     /**
+     * Creates new instance of SessionEvent
+     *
+     * @deprecated Use {@link SessionEvent#SessionEvent(Wagon, Repository, int)} instead
+     * @param wagon     <code>Wagon</code> object which created this event
+     * @param eventType the type of the event
+     */
+    public SessionEvent( final Wagon wagon, final int eventType )
+    {
+        super( wagon );
+        this.eventType = eventType;
+    }
+
+    /**
+     * Creates new instance of SessionEvent. Sets event type to <code>SESSION_ERROR_OCCURRED</code>
+     *
+     * @param wagon     <code>Wagon</code> object which created this event
+     * @param repository <code>Repository</code> object that this event belongs to.
+     * @param exception the exception
+     * @deprecated Use {@link SessionEvent#SessionEvent(Wagon, Repository, Exception)} instead.
+     */
+    public SessionEvent( final Wagon wagon, final Exception exception )
+    {
+        super( wagon );
+        this.exception = exception;
+        this.eventType = SESSION_ERROR_OCCURRED;
+
+    }
+
+    /**
      * @return Returns the type.
      */
     public int getEventType()

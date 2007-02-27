@@ -250,4 +250,17 @@ public interface Wagon
 
     boolean hasTransferListener( TransferListener listener );
 
+    /**
+     * Handle the protocol specific connection opening process.
+     * 
+     * Note: Providers should look for the values in {@link #getRepository()}, {@link #getAuthenticationInfo()}, and
+     * {@link #getProxyInfo()} to properly establish their connection.
+     * 
+     * @deprecated Use {@link Wagon#connect()} instead.
+     * 
+     * @throws ConnectionException
+     * @throws AuthenticationException
+     */
+    void openConnection()
+        throws ConnectionException, AuthenticationException;
 }

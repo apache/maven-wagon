@@ -124,7 +124,7 @@ public abstract class AbstractWagon
      * @throws ConnectionException
      * @throws AuthenticationException
      */
-    protected abstract void openConnection()
+    public abstract void openConnection()
         throws ConnectionException, AuthenticationException;
 
     public void connect()
@@ -773,4 +773,17 @@ public abstract class AbstractWagon
     {
         throw new UnsupportedOperationException( "The wagon you are using has not implemented resourceExists()" );
     }
+    
+    /**
+     * Get the protocol for this wagon.
+     * 
+     * NOTE: This requires that the wagon only support 1 protocol.
+     * 
+     * @return the protocol supported by this wagon. By default, return null.
+     */
+    public String getProtocol()
+    {
+        return null;
+    }
+
 }

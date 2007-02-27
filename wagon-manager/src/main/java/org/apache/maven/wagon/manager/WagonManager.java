@@ -144,7 +144,7 @@ public interface WagonManager
     Wagon getWagon( String repositoryId )
         throws UnsupportedProtocolException, RepositoryNotFoundException, WagonConfigurationException,
         NotOnlineException;
-
+    
     /**
      * Flag indicating that the interactivity of wagons.
      *  

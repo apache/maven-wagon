@@ -51,6 +51,16 @@ public class WagonEvent
     }
 
     /**
+     * @param source The Wagon object on which the WagonEvent initially occurred
+     * @deprecated Use {@link WagonEvent#WagonEvent(Wagon, Repository)} instead.
+     */
+    public WagonEvent( final Wagon source )
+    {
+        super( source );
+        this.repository = new Repository( "unknown" );
+    }
+
+    /**
      * Returns The Wagon object on which the WagonEvent initially occurred
      *
      * @return The Wagon object on which the WagonEvent initially occurred

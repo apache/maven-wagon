@@ -98,6 +98,31 @@ public class TransferEvent
     }
 
     /**
+     * @deprecated Use {@link TransferEvent#TransferEvent(Wagon, Repository, Resource, Exception, int)} instead
+     */
+    public TransferEvent( final Wagon wagon, final Resource resource, final Exception exception, final int requestType )
+    {
+        this( wagon, resource, TRANSFER_ERROR, requestType );
+
+        this.exception = exception;
+    }
+    
+    /**
+     * @deprecated Use {@link TransferEvent#TransferEvent(Wagon, Repository, Resource, int, int)} instead
+     */
+    public TransferEvent( final Wagon wagon, final Resource resource, final int eventType, final int requestType )
+    {
+        super( wagon );
+
+        this.resource = resource;
+
+        setEventType( eventType );
+
+        setRequestType( requestType );
+
+    }
+
+    /**
      * @return Returns the resource.
      */
     public Resource getResource()
