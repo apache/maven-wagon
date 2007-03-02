@@ -34,7 +34,7 @@ public class ConsoleInteractiveUserInfo
     implements InteractiveUserInfo
 {
     /**
-     * @plexus.requirement
+     * @plexus.requirement role-hint="default"
      */
     private Prompter prompter;
 

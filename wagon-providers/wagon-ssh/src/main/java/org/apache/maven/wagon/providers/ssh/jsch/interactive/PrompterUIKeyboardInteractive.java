@@ -39,7 +39,7 @@ public class PrompterUIKeyboardInteractive
     implements UIKeyboardInteractive
 {
     /**
-     * @plexus.requirement
+     * @plexus.requirement role-hint="default"
      */
     private Prompter prompter;
 
