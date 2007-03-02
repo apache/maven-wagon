@@ -78,7 +78,7 @@ public class DefaultWagonManager
     private WagonStatistics stats;
 
     /**
-     * @plexus.requirement
+     * @plexus.requirement role-hint="basic"
      */
     private ComponentConfigurator componentConfigurator;
 
