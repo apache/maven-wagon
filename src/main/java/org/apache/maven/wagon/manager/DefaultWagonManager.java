@@ -252,6 +252,14 @@ public class DefaultWagonManager
             Wagon wagon = (Wagon) getWagonContainer( protocol ).lookup( Wagon.ROLE, protocol );
             wagon.addSessionListener( stats );
             wagon.addTransferListener( stats );
+
+            for ( Iterator i = listeners.iterator(); i.hasNext(); )
+            {
+                TransferListener transferListener = (TransferListener) i.next();
+
+                wagon.addTransferListener( transferListener );
+            }
+
             wagon.setProxyInfo( getProxy( protocol ) );
             wagon.setInteractive( isInteractive() );
 
