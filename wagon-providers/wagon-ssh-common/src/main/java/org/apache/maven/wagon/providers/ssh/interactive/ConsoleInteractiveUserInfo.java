@@ -26,10 +26,16 @@ import java.util.Arrays;
  *
  * @author Juan F. Codagnone
  * @since Sep 12, 2005
+ * 
+ * @plexus.component role="org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo"
+ *    instantiation-strategy="per-lookup"
  */
 public class ConsoleInteractiveUserInfo
     implements InteractiveUserInfo
 {
+    /**
+     * @plexus.requirement role-hint="default"
+     */
     private Prompter prompter;
 
     public ConsoleInteractiveUserInfo()

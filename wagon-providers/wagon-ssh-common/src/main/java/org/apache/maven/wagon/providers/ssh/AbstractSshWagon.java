@@ -29,9 +29,6 @@ import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
-import org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo;
-import org.apache.maven.wagon.providers.ssh.interactive.NullInteractiveUserInfo;
-import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
@@ -51,12 +48,8 @@ import java.util.List;
  */
 public abstract class AbstractSshWagon
     extends AbstractWagon
-    implements CommandExecutor, SshWagon
+    implements CommandExecutor
 {
-    protected KnownHostsProvider knownHostsProvider;
-
-    protected InteractiveUserInfo interactiveUserInfo;
-
     protected static final char PATH_SEPARATOR = '/';
 
     protected static final int DEFAULT_SSH_PORT = 22;
@@ -165,11 +158,6 @@ public abstract class AbstractSshWagon
         {
             authenticationInfo.setUserName( System.getProperty( "user.name" ) );
         }
-
-        if ( !interactive )
-        {
-            interactiveUserInfo = new NullInteractiveUserInfo();
-        }
     }
 
     protected File getPrivateKey()
@@ -238,35 +226,7 @@ public abstract class AbstractSshWagon
 
         executeCommand( command, false );
     }
-
-    public final KnownHostsProvider getKnownHostsProvider()
-    {
-        return knownHostsProvider;
-    }
-
-    public final void setKnownHostsProvider( KnownHostsProvider knownHostsProvider )
-    {
-        if ( knownHostsProvider == null )
-        {
-            throw new IllegalArgumentException( "knownHostsProvider can't be null" );
-        }
-        this.knownHostsProvider = knownHostsProvider;
-    }
-
-    public InteractiveUserInfo getInteractiveUserInfo()
-    {
-        return interactiveUserInfo;
-    }
-
-    public void setInteractiveUserInfo( InteractiveUserInfo interactiveUserInfo )
-    {
-        if ( interactiveUserInfo == null )
-        {
-            throw new IllegalArgumentException( "interactiveUserInfo can't be null" );
-        }
-        this.interactiveUserInfo = interactiveUserInfo;
-    }
-
+    
     public void putDirectory( File sourceDirectory, String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {

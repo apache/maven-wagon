@@ -46,6 +46,10 @@ import java.io.OutputStream;
  *
  * @version $Id: ScpWagon.java 430944 2006-08-12 02:02:20Z carlos $
  * @todo [BP] add compression flag
+ * 
+ * @plexus.component role="org.apache.maven.wagon.Wagon" 
+ *   role-hint="scp"
+ *   instantiation-strategy="per-lookup"
  */
 public class ScpWagon
     extends AbstractGanymedWagon

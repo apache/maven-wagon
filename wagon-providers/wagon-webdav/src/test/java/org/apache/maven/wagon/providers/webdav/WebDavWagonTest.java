@@ -20,12 +20,14 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.maven.wagon.FileTestUtils;
+import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonTestCase;
 
 /**
  * WebDAV Wagon Test 
  * 
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
+ * @author <a href="mailto:carlos@apache.org">Carlos Sanchez</a>
  */
 public class WebDavWagonTest
     extends WagonTestCase
@@ -66,4 +68,32 @@ public class WebDavWagonTest
     {
         release( server );
     }
+
+    public void testWagonPutToNonWebdav()
+        throws Exception
+    {
+        setupRepositories();
+
+        String url = "http://localhost:10007";
+
+        testRepository.setUrl( "dav:" + url );
+
+        setupWagonTestingFixtures();
+
+        try
+        {
+            putFile();
+            fail( "Expected and not thrown " + TransferFailedException.class.getName() );
+        }
+        catch ( TransferFailedException e )
+        {
+            assertEquals( "Exception message doesn't match expected", "Destination folder could not be created: " + url
+                + "/", e.getMessage() );
+        }
+
+        testRepository.setUrl( getTestRepositoryUrl() );
+
+        tearDownWagonTestingFixtures();
+    }
+
 }

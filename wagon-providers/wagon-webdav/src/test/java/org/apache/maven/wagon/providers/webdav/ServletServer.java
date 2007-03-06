@@ -100,11 +100,15 @@ public class ServletServer
             context.addHandler( new SecurityHandler() );
         }
 
-        Iterator itpaths = wdc.getServlets().iterator();
-        while ( itpaths.hasNext() )
+        List servlets = wdc.getServlets();
+        if ( servlets != null )
         {
-            Servlet servlet = (Servlet) itpaths.next();
-            initServlet( context, servlet );
+            Iterator itpaths = servlets.iterator();
+            while ( itpaths.hasNext() )
+            {
+                Servlet servlet = (Servlet) itpaths.next();
+                initServlet( context, servlet );
+            }
         }
     }
 
