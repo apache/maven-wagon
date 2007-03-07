@@ -56,6 +56,19 @@
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/branches/wagon-1.x</developerConnection>
     <url>https://svn.apache.org/repos/asf/maven/wagon/branches/wagon-1.x</url>
   </scm>
+  <repositories>
+    <!-- TODO: Remove once plexus-interactivity-api is released -->
+    <repository>
+      <id>snapshots.codehaus</id>
+      <url>http://snapshots.repository.codehaus.org</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
   <build>
     <pluginManagement>
       <plugins>
