@@ -20,6 +20,7 @@ package org.apache.maven.wagon.providers.ftp;
  */
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -458,5 +459,178 @@ public class FtpWagon
         {
             return false;
         }
+    }
+    
+    public boolean supportsDirectoryCopy()
+    {
+        return true;
+    }
+
+    public void putDirectory( File sourceDirectory, String destinationDirectory )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+
+        // Change to root.
+        try
+        {
+            if ( !ftp.changeWorkingDirectory( getRepository().getBasedir() ) )
+            {
+                throw new TransferFailedException( "Required directory: '" + getRepository().getBasedir() + "' "
+                                + "is missing" );
+            }
+        }
+        catch ( IOException e )
+        {
+            throw new TransferFailedException( "Cannot change to root path " + getRepository().getBasedir() );
+        }
+
+        fireTransferDebug( "Recursively uploading directory " + sourceDirectory.getAbsolutePath() + " as "
+                        + destinationDirectory );
+        ftpRecursivePut( sourceDirectory, destinationDirectory );
+    }
+
+    private void ftpRecursivePut( File sourceFile, String fileName ) throws TransferFailedException
+    {
+        final RepositoryPermissions permissions = repository.getPermissions();
+
+        fireTransferDebug( "processing = " + sourceFile.getAbsolutePath() + " as " + fileName );
+
+        if ( sourceFile.isDirectory() )
+        {
+            if ( !fileName.equals( "." ) )
+                try
+                {
+                    // change directory if it already exists.
+                    if ( !ftp.changeWorkingDirectory( fileName ) )
+                    {
+                        // first, try to create it
+                        if ( ftp.makeDirectory( fileName ) )
+                        {
+                            if ( permissions != null )
+                            {
+                                // Process permissions; note that if we get errors or exceptions here, they are ignored.
+                                // This appears to be a conscious decision, based on other parts of this code.
+                                String group = permissions.getGroup();
+                                if ( group != null )
+                                    try
+                                    {
+                                        ftp.sendSiteCommand( "CHGRP " + permissions.getGroup() );
+                                    }
+                                    catch ( IOException e )
+                                    {
+                                    }
+                                String mode = permissions.getDirectoryMode();
+                                if ( mode != null )
+                                    try
+                                    {
+                                        ftp.sendSiteCommand( "CHMOD " + permissions.getDirectoryMode() );
+                                    }
+                                    catch ( IOException e )
+                                    {
+                                    }
+                            }
+
+                            if ( !ftp.changeWorkingDirectory( fileName ) )
+                            {
+                                throw new TransferFailedException( "Unable to change cwd on ftp server to " + fileName
+                                                + " when processing " + sourceFile.getAbsolutePath() );
+                            }
+                        }
+                        else
+                        {
+                            throw new TransferFailedException( "Unable to create directory " + fileName
+                                            + " when processing " + sourceFile.getAbsolutePath() );
+                        }
+                    }
+                }
+                catch ( IOException e )
+                {
+                    throw new TransferFailedException( "IOException caught while processing path at "
+                                    + sourceFile.getAbsolutePath(), e );
+                }
+
+            File[] files = sourceFile.listFiles();
+            if ( files != null && files.length > 0 )
+            {
+                fireTransferDebug( "listing children of = " + sourceFile.getAbsolutePath() + " found " + files.length );
+
+                // Directories first, then files. Let's go deep early.
+                for ( int i = 0; i < files.length; i++ )
+                {
+                    if ( files[i].isDirectory() )
+                    {
+                        ftpRecursivePut( files[i], files[i].getName() );
+                    }
+                }
+                for ( int i = 0; i < files.length; i++ )
+                {
+                    if ( !files[i].isDirectory() )
+                    {
+                        ftpRecursivePut( files[i], files[i].getName() );
+                    }
+                }
+            }
+
+            // Step back up a directory once we're done with the contents of this one.
+            try
+            {
+                ftp.changeToParentDirectory();
+            }
+            catch ( IOException e )
+            {
+                throw new TransferFailedException(
+                                                   "IOException caught while attempting to step up to parent directory after successfully processing "
+                                                                   + sourceFile.getAbsolutePath(), e );
+            }
+        }
+        else
+        {
+            // Oh how I hope and pray, in denial, but today I am still just a file.
+            try
+            {
+                // It's a file. Upload it in the current directory.
+                if ( ftp.storeFile( fileName, new FileInputStream( sourceFile ) ) )
+                {
+                    if ( permissions != null )
+                    {
+                        // Process permissions; note that if we get errors or exceptions here, they are ignored.
+                        // This appears to be a conscious decision, based on other parts of this code.
+                        String group = permissions.getGroup();
+                        if ( group != null )
+                            try
+                            {
+                                ftp.sendSiteCommand( "CHGRP " + permissions.getGroup() );
+                            }
+                            catch ( IOException e )
+                            {
+                            }
+                        String mode = permissions.getFileMode();
+                        if ( mode != null )
+                            try
+                            {
+                                ftp.sendSiteCommand( "CHMOD " + permissions.getDirectoryMode() );
+                            }
+                            catch ( IOException e )
+                            {
+                            }
+                    }
+                }
+                else
+                {
+                    String msg =
+                        "Cannot transfer resource:  '" + sourceFile.getAbsolutePath() + "' FTP Server response: "
+                                        + ftp.getReplyString();
+                    throw new TransferFailedException( msg );
+                }
+            }
+            catch ( IOException e )
+            {
+                throw new TransferFailedException( "IOException caught while attempting to upload "
+                                + sourceFile.getAbsolutePath(), e );
+            }
+
+        }
+
+        fireTransferDebug( "completed = " + sourceFile.getAbsolutePath() );
     }
 }
