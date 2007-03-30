@@ -91,6 +91,7 @@
     </plugins>
   </build>
   <modules>
+    <module>wagon-manager</module>
     <module>wagon-provider-api</module>
     <module>wagon-provider-test</module>
     <module>wagon-providers</module>
