@@ -80,6 +80,15 @@ public class FtpWagon
 
         String password = authInfo.getPassword();
 
+        if ( username == null )
+        {
+            throw new AuthenticationException( "Username not specified for repository " + getRepository().getId() );
+        }
+        if ( password == null )
+        {
+            throw new AuthenticationException( "Password not specified for repository " + getRepository().getId() );
+        }
+
         String host = getRepository().getHost();
 
         ftp = new FTPClient();
@@ -140,7 +149,7 @@ public class FtpWagon
 
         try
         {
-            if ( !ftp.login( username.trim(), password.trim() ) )
+            if ( !ftp.login( username, password ) )
             {
                 fireSessionConnectionRefused();
 
