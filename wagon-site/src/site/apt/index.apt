@@ -23,4 +23,6 @@ Maven Wagon
  
  * {{{wagon-providers/wagon-webdav/}WebDAV}}
 
+ * {{{wagon-providers/wagon-s3/}Amazon S3}}
+
  * {{{wagon-providers/wagon-scm/}SCM}} (in progress)
