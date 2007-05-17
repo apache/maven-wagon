@@ -43,23 +43,9 @@
     <module>wagon-ssh-common-test</module>
     <module>wagon-ssh</module>
     <module>wagon-ssh-ganymed</module>
+    <module>wagon-s3</module>
     <module>wagon-webdav</module>
   </modules>
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-ssh-common</artifactId>
-        <version>2.0-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-ssh-common-test</artifactId>
-        <version>2.0-SNAPSHOT</version>
-        <scope>test</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
   <dependencies>
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>

@@ -46,6 +46,7 @@ public class CommandExecutorStreamProcessor
         while ( true )
         {
             String line = stderrReader.readLine();
+
             if ( line == null )
             {
                 break;
@@ -63,6 +64,7 @@ public class CommandExecutorStreamProcessor
         while ( true )
         {
             String line = stdoutReader.readLine();
+
             if ( line == null )
             {
                 break;
