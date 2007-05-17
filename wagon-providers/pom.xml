@@ -43,7 +43,6 @@
     <module>wagon-ssh-common-test</module>
     <module>wagon-ssh</module>
     <module>wagon-ssh-ganymed</module>
-    <module>wagon-s3</module>
     <module>wagon-webdav</module>
   </modules>
   <dependencies>
