@@ -32,13 +32,6 @@
   <name>Maven Wagon Manager</name>
   <description>Manager tools to best utilize wagon.</description>
 
-  <repositories>
-    <repository>
-      <id>codehaus.org</id>
-      <url>http://repository.codehaus.org/</url>
-    </repository>
-  </repositories>
-
   <dependencies>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
