@@ -78,7 +78,6 @@
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/branches/wagon-1.x</developerConnection>
     <url>https://svn.apache.org/repos/asf/maven/wagon/branches/wagon-1.x</url>
   </scm>
-
   <build>
     <pluginManagement>
       <plugins>
@@ -162,6 +161,10 @@
             <artifactId>plexus-utils</artifactId>
           </exclusion>
           <exclusion>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-container-default</artifactId>
+          </exclusion>
+          <exclusion>
             <groupId>classworlds</groupId>
             <artifactId>classworlds</artifactId>
           </exclusion>
@@ -170,7 +173,8 @@
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-container-default</artifactId>
-        <version>1.0-alpha-8</version>
+        <version>1.0-alpha-9</version>
+        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
