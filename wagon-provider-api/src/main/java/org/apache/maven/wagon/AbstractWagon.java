@@ -197,6 +197,9 @@ public abstract class AbstractWagon
     public void connect( Repository repository, AuthenticationInfo authenticationInfo, ProxyInfo proxyInfo )
         throws ConnectionException, AuthenticationException
     {
+        setRepository( repository );
+        setAuthenticationInfo( authenticationInfo );
+        setProxyInfo( proxyInfo );
         connect();
     }
 
