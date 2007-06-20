@@ -167,6 +167,7 @@ public abstract class AbstractWagon
     public void connect( Repository repository )
         throws ConnectionException, AuthenticationException
     {
+        setRepository( repository );
         connect();
     }
 
@@ -177,6 +178,8 @@ public abstract class AbstractWagon
     public void connect( Repository repository, ProxyInfo proxyInfo )
         throws ConnectionException, AuthenticationException
     {
+        setRepository( repository );
+        setProxyInfo( proxyInfo );
         connect();
     }
 
@@ -187,6 +190,8 @@ public abstract class AbstractWagon
     public void connect( Repository repository, AuthenticationInfo authenticationInfo )
         throws ConnectionException, AuthenticationException
     {
+        setRepository( repository );
+        setAuthenticationInfo( authenticationInfo );
         connect();
     }
 
