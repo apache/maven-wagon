@@ -180,7 +180,7 @@
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-utils</artifactId>
-        <version>1.4.2-SNAPSHOT</version>
+        <version>1.4.2</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -192,17 +192,5 @@
       </site>
     </distributionManagement>
   -->
-
-  <!-- for plexus-utils -->
-  <repositories>
-    <repository>
-      <id>codehaus.org</id>
-      <name>Maven Central Development Repository</name>
-      <url>http://snapshots.repository.codehaus.org</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-  </repositories>
 
 </project>
