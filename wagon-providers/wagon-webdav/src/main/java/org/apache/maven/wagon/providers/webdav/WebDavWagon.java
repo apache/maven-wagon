@@ -311,10 +311,11 @@ public class WebDavWagon
             {
                 webdavResource.setPath( currentPath );
 
-                /* needed to call webdavResource.exists() later */
+                // set basic properties like 'resourcetype' so we can query for
+                // exists() and isCollection()
                 try
                 {
-                    webdavResource.setProperties( WebdavResource.NAME, DepthSupport.DEPTH_0 );
+                    webdavResource.setProperties( WebdavResource.BASIC, DepthSupport.DEPTH_0 );
                 }
                 catch ( HttpException e )
                 {
