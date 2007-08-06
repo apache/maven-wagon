@@ -96,6 +96,7 @@ public class MirroredWagon
                 try
                 {
                     this.impl.connect();
+                    return;
                 }
                 catch ( ConnectionException e )
                 {
@@ -162,6 +163,7 @@ public class MirroredWagon
                 try
                 {
                     this.impl.get( resource, destination );
+                    return;
                 }
                 catch ( TransferFailedException e )
                 {
