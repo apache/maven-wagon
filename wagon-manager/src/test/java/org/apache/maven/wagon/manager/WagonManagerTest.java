@@ -347,6 +347,29 @@ public class WagonManagerTest
         assertEquals( 272661, totals.getBytesTransferred() );
     }
 
+    /**
+     * Tests #connect and #get on a Mirror.
+     */
+    public void testMirroredWagon() throws Exception
+	{
+        final Repository testRepo = createTestRepository();
+        wagonManager.addRepository( testRepo );
+        wagonManager.addRepositoryMirror( "testmirrorrepo", "testrepo", "http://localhost:" + HTTP_PORT + "/" );
+        final Wagon httpWagon = wagonManager.getWagon( "testmirrorrepo" );
+        
+        try {
+            httpWagon.connect();
+            
+            FileUtils.copyDirectory( testDataDir, httpRootDir );
+            
+            final String destFilename = "daytrader-streamer-2.0-SNAPSHOT-javadoc.jar";
+            httpWagon.get( destFilename, new File( localDownloadDir, destFilename ));
+        } finally {
+            httpWagon.disconnect();
+            wagonManager.releaseWagon( httpWagon );
+        }
+	}
+    
     private Repository createDavRepository()
     {
         Repository repo = new Repository( "davrepo", "dav:http://localhost:" + DAV_PORT + DAV_CONTEXT + "/" );
