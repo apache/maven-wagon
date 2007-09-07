@@ -9,7 +9,7 @@ package org.apache.maven.wagon.providers.http;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -74,11 +74,6 @@ public class HttpWagon
     private int numberOfAttempts = DEFAULT_NUMBER_OF_ATTEMPTS;
 
     private static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone( "GMT" );
-    
-    public String getProtocol()
-    {
-        return "http";
-    }
 
     public void openConnection()
     {
@@ -163,7 +158,7 @@ public class HttpWagon
 
         try
         {
-            InputStream is = new PutInputStream( source, repository, resource, this, getTransferEventSupport() );
+            InputStream is = new PutInputStream( source, resource, this, getTransferEventSupport() );
 
             putMethod.setRequestBody( is );
         }
