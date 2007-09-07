@@ -178,4 +178,58 @@ public class SessionEvent
         this.exception = exception;
     }
 
+    public String toString()
+    {
+        StringBuffer sb = new StringBuffer();
+
+        sb.append( "SessionEvent[" );
+
+        switch ( this.eventType )
+        {
+            case SessionEvent.SESSION_CLOSED:
+                sb.append( "CONNECTION_CLOSED" );
+                break;
+            case SessionEvent.SESSION_DISCONNECTED:
+                sb.append( "CONNECTION_DISCONNECTED" );
+                break;
+            case SessionEvent.SESSION_DISCONNECTING:
+                sb.append( "CONNECTION_DISCONNECTING" );
+                break;
+            case SessionEvent.SESSION_ERROR_OCCURRED:
+                sb.append( "CONNECTION_ERROR_OCCURRED" );
+                break;
+            case SessionEvent.SESSION_LOGGED_IN:
+                sb.append( "CONNECTION_LOGGED_IN" );
+                break;
+            case SessionEvent.SESSION_LOGGED_OFF:
+                sb.append( "CONNECTION_LOGGED_OFF" );
+                break;
+            case SessionEvent.SESSION_OPENED:
+                sb.append( "CONNECTION_OPENED" );
+                break;
+            case SessionEvent.SESSION_OPENING:
+                sb.append( "CONNECTION_OPENING" );
+                break;
+            case SessionEvent.SESSION_CONNECTION_REFUSED:
+                sb.append( "CONNECTION_CONNECTION_REFUSED" );
+                break;
+            default:
+                sb.append( eventType );
+        }
+        sb.append( "|" );
+
+        sb.append( this.repository ).append( "|" );
+        sb.append( this.source );
+
+        if ( exception != null )
+        {
+            sb.append( "|" );
+            sb.append( exception.getClass().getName() ).append( ":" );
+            sb.append( exception.getMessage() );
+        }
+
+        sb.append( "]" );
+
+        return sb.toString();
+    }
 }

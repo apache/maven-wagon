@@ -34,6 +34,7 @@ import org.apache.maven.wagon.resource.Resource;
  * notify the listeners of transfer events on a put request.
  * 
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
+ * @todo move to wagon-providers-api
  */
 public class PutInputStream
     extends FileInputStream

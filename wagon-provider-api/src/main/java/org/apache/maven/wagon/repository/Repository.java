@@ -21,6 +21,7 @@ package org.apache.maven.wagon.repository;
 
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.WagonConstants;
+import org.codehaus.plexus.util.StringUtils;
 
 import java.io.Serializable;
 import java.util.Properties;
@@ -197,12 +198,19 @@ public class Repository
 
     public String toString()
     {
-        if ( getName() != null )
+        StringBuffer sb = new StringBuffer();
+
+        sb.append( "Repository[" );
+
+        if ( StringUtils.isNotEmpty( getName() ) )
         {
-            return "[" + getName() + "] -> " + getUrl();
+            sb.append( getName() ).append( "|" );
         }
 
-        return getUrl();
+        sb.append( getUrl() );
+        sb.append( "]" );
+
+        return sb.toString();
     }
 
     public String getProtocol()

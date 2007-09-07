@@ -19,16 +19,16 @@ package org.apache.maven.wagon.providers.webdav;
  * under the License.
  */
 
-import java.io.File;
-import java.io.IOException;
-
 import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonTestCase;
 
+import java.io.File;
+import java.io.IOException;
+
 /**
- * WebDAV Wagon Test 
- * 
+ * WebDAV Wagon Test
+ *
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
  * @author <a href="mailto:carlos@apache.org">Carlos Sanchez</a>
  */
@@ -90,8 +90,8 @@ public class WebDavWagonTest
         }
         catch ( TransferFailedException e )
         {
-            assertEquals( "Exception message doesn't match expected", "Destination folder could not be created: " + url
-                + "/", e.getMessage() );
+            assertEquals( "Exception message doesn't match expected",
+                          "Destination folder could not be created: " + url + "/test-resource", e.getMessage() );
         }
 
         testRepository.setUrl( getTestRepositoryUrl() );
