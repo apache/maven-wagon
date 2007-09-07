@@ -71,11 +71,6 @@ public class Repository
 
     }
 
-    public Repository( String id )
-    {
-        setId( id );
-    }
-
     public Repository( String id, String url )
     {
         setId( id );

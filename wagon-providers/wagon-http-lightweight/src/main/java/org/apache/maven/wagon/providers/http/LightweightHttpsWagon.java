@@ -39,15 +39,10 @@ public class LightweightHttpsWagon
     private String previousHttpsProxyHost;
     
     private String previousHttpsProxyPort;
-    
+
     public LightweightHttpsWagon()
     {
         super();
-    }
-
-    public String getProtocol()
-    {
-        return "https";
     }
 
     public void openConnection()

@@ -20,7 +20,6 @@ package org.apache.maven.wagon.events;
  */
 
 import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 
 import java.io.File;
@@ -81,38 +80,6 @@ public class TransferEvent
 
     private File localFile;
 
-    public TransferEvent( final Wagon wagon, final Repository repository, final Resource resource, final Exception exception, final int requestType )
-    {
-        this( wagon, repository, resource, TRANSFER_ERROR, requestType );
-
-        this.exception = exception;
-    }
-    
-    public TransferEvent( final Wagon wagon, final Repository repository, final Resource resource, final int eventType, final int requestType )
-    {
-        super( wagon, repository );
-
-        this.resource = resource;
-
-        setEventType( eventType );
-
-        setRequestType( requestType );
-
-    }
-
-    /**
-     * @deprecated Use {@link TransferEvent#TransferEvent(Wagon, Repository, Resource, Exception, int)} instead
-     */
-    public TransferEvent( final Wagon wagon, final Resource resource, final Exception exception, final int requestType )
-    {
-        this( wagon, resource, TRANSFER_ERROR, requestType );
-
-        this.exception = exception;
-    }
-    
-    /**
-     * @deprecated Use {@link TransferEvent#TransferEvent(Wagon, Repository, Resource, int, int)} instead
-     */
     public TransferEvent( final Wagon wagon, final Resource resource, final int eventType, final int requestType )
     {
         super( wagon );
@@ -123,6 +90,13 @@ public class TransferEvent
 
         setRequestType( requestType );
 
+    }
+
+    public TransferEvent( final Wagon wagon, final Resource resource, final Exception exception, final int requestType )
+    {
+        this( wagon, resource, TRANSFER_ERROR, requestType );
+
+        this.exception = exception;
     }
 
     /**
@@ -170,7 +144,7 @@ public class TransferEvent
             case REQUEST_GET:
                 break;
 
-            default:
+            default :
                 throw new IllegalArgumentException( "Illegal request type: " + requestType );
         }
 
@@ -203,7 +177,7 @@ public class TransferEvent
                 break;
             case TRANSFER_ERROR:
                 break;
-            default:
+            default :
                 throw new IllegalArgumentException( "Illegal event type: " + eventType );
         }
 

@@ -20,8 +20,8 @@
 <plexus>
   <components>
     <component>
-      <role>org.apache.maven.wagon.servlet.ServletServer</role>
-      <implementation>org.apache.maven.wagon.servlet.ServletServer</implementation>
+      <role>org.apache.maven.wagon.providers.webdav.ServletServer</role>
+      <implementation>org.apache.maven.wagon.providers.webdav.ServletServer</implementation>
       <configuration>
         <port>10007</port>
         <contexts>

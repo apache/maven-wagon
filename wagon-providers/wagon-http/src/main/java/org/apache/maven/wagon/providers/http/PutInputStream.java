@@ -22,13 +22,13 @@ package org.apache.maven.wagon.providers.http;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferEventSupport;
-import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -37,20 +37,22 @@ import java.io.IOException;
 public class PutInputStream
     extends FileInputStream
 {
+
     private TransferEventSupport eventSupport;
 
     private TransferEvent event;
 
-    public PutInputStream( File file, Repository repo, Resource resource, Wagon wagon, TransferEventSupport eventSupport )
+    public PutInputStream( File file, Resource resource, Wagon wagon, TransferEventSupport eventSupport )
         throws FileNotFoundException
     {
         super( file );
 
         this.eventSupport = eventSupport;
 
-        event = new TransferEvent( wagon, repo, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT );
+        event = new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT );
 
         event.setLocalFile( file );
+
     }
 
 
@@ -58,6 +60,7 @@ public class PutInputStream
         throws IOException
     {
         return read( b, 0, b.length );
+
     }
 
     public int read()
@@ -66,6 +69,7 @@ public class PutInputStream
         byte b[] = new byte[1];
 
         return read( b );
+
     }
 
     public int read( byte b[], int off, int len )

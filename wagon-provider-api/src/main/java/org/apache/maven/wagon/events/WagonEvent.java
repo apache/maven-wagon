@@ -47,20 +47,9 @@ public class WagonEvent
     /**
      * @param source The Wagon object on which the WagonEvent initially occurred
      */
-    public WagonEvent( final Wagon source, final Repository repository )
-    {
-        super( source );
-        this.repository = repository;
-    }
-
-    /**
-     * @param source The Wagon object on which the WagonEvent initially occurred
-     * @deprecated Use {@link WagonEvent#WagonEvent(Wagon, Repository)} instead.
-     */
     public WagonEvent( final Wagon source )
     {
         super( source );
-        this.repository = new Repository( "unknown" );
     }
 
     /**
@@ -93,13 +82,4 @@ public class WagonEvent
         this.timestamp = timestamp;
     }
 
-    /**
-     * Returns the repository which this event is associated with.
-     * 
-     * @return the repository that this event is associated with.
-     */
-    public Repository getRepository()
-    {
-        return repository;
-    }
 }

@@ -27,7 +27,6 @@ import java.io.IOException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferEventSupport;
-import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 
 /**
@@ -35,7 +34,7 @@ import org.apache.maven.wagon.resource.Resource;
  * notify the listeners of transfer events on a put request.
  * 
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
- * @todo copy to wagon-providers-api
+ * @todo move to wagon-providers-api
  */
 public class PutInputStream
     extends FileInputStream
@@ -44,14 +43,14 @@ public class PutInputStream
 
     private TransferEvent event;
 
-    public PutInputStream( File file, Repository repo, Resource resource, Wagon wagon, TransferEventSupport eventSupport )
+    public PutInputStream( File file, Resource resource, Wagon wagon, TransferEventSupport eventSupport )
         throws FileNotFoundException
     {
         super( file );
 
         this.eventSupport = eventSupport;
 
-        event = new TransferEvent( wagon, repo, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT );
+        event = new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT );
 
         event.setLocalFile( file );
     }

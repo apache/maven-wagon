@@ -25,11 +25,6 @@ import org.apache.maven.wagon.providers.ssh.TestData;
 import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.plexus.PlexusTestCase;
 
-/**
- * KnownHostsProviderTestCase 
- *
- * @version $Id$
- */
 public class KnownHostsProviderTestCase
     extends PlexusTestCase
 {
@@ -61,7 +56,7 @@ public class KnownHostsProviderTestCase
 
         try
         {
-            wagon.connect();
+            wagon.connect( source );
 
             fail( "Should not have successfully connected - host is not known" );
         }
@@ -83,7 +78,7 @@ public class KnownHostsProviderTestCase
 
         try
         {
-            wagon.connect();
+            wagon.connect( source );
 
             fail( "Should not have successfully connected - host is changed" );
         }
@@ -103,7 +98,7 @@ public class KnownHostsProviderTestCase
     {
         wagon.setKnownHostsProvider( okHostsProvider );
 
-        wagon.connect();
+        wagon.connect( source );
 
         assertTrue( true );
     }
@@ -117,7 +112,6 @@ public class KnownHostsProviderTestCase
 
         wagon = (SshWagon) lookup( Wagon.ROLE, "scp" );
         wagon.setInteractive( false );
-        wagon.setRepository( source );
 
         this.okHostsProvider = new SingleKnownHostProvider( TestData.getHostname(), CORRECT_KEY );
         this.failHostsProvider = new SingleKnownHostProvider( "beaver.codehaus.org", CORRECT_KEY );

@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.manager;
+package org.apache.maven.wagon.providers.webdav;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -19,24 +19,35 @@ package org.apache.maven.wagon.manager;
  * under the License.
  */
 
-import org.apache.maven.wagon.WagonException;
+import java.util.List;
+
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
 /**
- * RepositoryNotFoundException 
- *
+ * Context
+ * 
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
- * @version $Id$
  */
-public class RepositoryNotFoundException
-    extends WagonException
+public class Context
 {
-    public RepositoryNotFoundException( String message )
+    private String id;
+
+    private AuthenticationInfo authenticationInfo;
+
+    private List servlets;
+
+    public String getId()
     {
-        super( message );
+        return id;
     }
 
-    public RepositoryNotFoundException( String message, Throwable cause )
+    public AuthenticationInfo getAuthenticationInfo()
     {
-        super( message, cause );
+        return authenticationInfo;
+    }
+
+    public List getServlets()
+    {
+        return servlets;
     }
 }

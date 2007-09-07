@@ -72,7 +72,8 @@ public interface Wagon
 
     /**
      * Copy a file from local system to remote
-     * @param source the local file
+     *
+     * @param source      the local file
      * @param destination the remote destination
      * @throws TransferFailedException
      * @throws ResourceDoesNotExistException
@@ -83,7 +84,8 @@ public interface Wagon
 
     /**
      * Copy a directory from local system to remote
-     * @param sourceDirectory the local directory
+     *
+     * @param sourceDirectory      the local directory
      * @param destinationDirectory the remote destination
      * @throws TransferFailedException
      * @throws ResourceDoesNotExistException
@@ -94,138 +96,118 @@ public interface Wagon
 
     /**
      * Check if a remote resource exists
-     * 
+     *
      * @param resourceName
-     * @return whether the resource exists or not 
+     * @return whether the resource exists or not
      * @throws TransferFailedException if there's an error trying to access the remote side
-     * @throws AuthorizationException if not authorized to verify the existence of the resource
+     * @throws AuthorizationException  if not authorized to verify the existence of the resource
      */
     boolean resourceExists( String resourceName )
         throws TransferFailedException, AuthorizationException;
 
     /**
-     * <p>
+     * <p/>
      * Returns a {@link List} of strings naming the files and directories in the directory denoted by
      * this abstract pathname.
      * </p>
-     * <p>
+     * <p/>
      * If this abstract pathname does not denote a directory, or does not exist, then this method throws
      * {@link ResourceDoesNotExistException}.
      * Otherwise a {@link List} of strings is returned, one for each file or directory in the directory.
      * Names denoting the directory itself and the directory's parent directory are not included in
      * the result. Each string is a file name rather than a complete path.
      * </p>
-     * <p>
+     * <p/>
      * There is no guarantee that the name strings in the resulting list will appear in any specific
      * order; they are not, in particular, guaranteed to appear in alphabetical order.
-     * </p> 
-     * 
+     * </p>
+     *
      * @param destinationDirectory directory to list contents of
      * @return A {@link List} of strings naming the files and directories in the directory denoted by
-     * this abstract pathname. The {@link List} will be empty if the directory is empty.
-     * @throws TransferFailedException if there's an error trying to access the remote side
+     *         this abstract pathname. The {@link List} will be empty if the directory is empty.
+     * @throws TransferFailedException       if there's an error trying to access the remote side
      * @throws ResourceDoesNotExistException if destinationDirectory does not exist or is not a directory
-     * @throws AuthorizationException if not authorized to list the contents of the directory
+     * @throws AuthorizationException        if not authorized to list the contents of the directory
      */
     List getFileList( String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
 
-    // ----------------------------------------------------------------------
-    // Settings / Configuration
-    // ----------------------------------------------------------------------
-
-    /**
-     * Get the protocol for this wagon.
-     * 
-     * NOTE: This requires that the wagon only support 1 protocol.
-     * 
-     * @return the protocol supported by this wagon.
-     */
-    String getProtocol();
-
     /**
      * Flag indicating if this wagon supports directory copy operations.
-     * 
+     *
      * @return whether if this wagon supports directory operations
      */
     boolean supportsDirectoryCopy();
 
-    boolean isInteractive();
-
-    void setInteractive( boolean interactive );
-
     Repository getRepository();
-    
-    void setRepository( Repository repository );
-
-    AuthenticationInfo getAuthenticationInfo();
-
-    void setAuthenticationInfo( AuthenticationInfo authnInfo );
-
-    ProxyInfo getProxyInfo();
-
-    void setProxyInfo( ProxyInfo proxyInfo );
 
     // ----------------------------------------------------------------------
     // Connection/Disconnection
     // ----------------------------------------------------------------------
 
     /**
-     * Initiate the connection to the Repository.
-     * 
-     * @see #getAuthenticationInfo()
-     * @see #getProxyInfo()
-     * @see #getRepository()
-     */
-    void connect()
-        throws ConnectionException, AuthenticationException;
-    
-    /**
-     * Flag indicating if the wagon is currently connected (or not)
-     * 
-     * @return true if wagon is currently connected.
-     */
-    boolean isConnected();
-    
-    /**
-     * 
-     * @see #setRepository(Repository)
-     * @deprecated Use {@link #connect()} instead, (will be removed in Wagon 2.0)
+     * Initiate the connection to the repository.
+     *
+     * @param source the repository to connect to
+     * @throws ConnectionException if there is a problem connecting
+     * @throws org.apache.maven.wagon.authentication.AuthenticationException
+     *                             if ther credentials for connecting are not sufficient
      */
     void connect( Repository source )
         throws ConnectionException, AuthenticationException;
 
     /**
-     * 
-     * @see #setRepository(Repository)
-     * @see #setProxyInfo(ProxyInfo)
-     * @deprecated Use {@link #connect()} instead, (will be removed in Wagon 2.0)
+     * Initiate the connection to the repository.
+     *
+     * @param source the repository to connect to
+     * @throws ConnectionException if there is a problem connecting
+     * @throws org.apache.maven.wagon.authentication.AuthenticationException
+     *                             if ther credentials for connecting are not sufficient
      */
     void connect( Repository source, ProxyInfo proxyInfo )
         throws ConnectionException, AuthenticationException;
 
     /**
-     * 
-     * @see #setRepository(Repository)
-     * @see #setAuthenticationInfo(AuthenticationInfo)
-     * @deprecated Use {@link #connect()} instead, (will be removed in Wagon 2.0)
+     * Initiate the connection to the repository.
+     *
+     * @param source             the repository to connect to
+     * @param authenticationInfo authentication credentials for connecting
+     * @throws ConnectionException if there is a problem connecting
+     * @throws org.apache.maven.wagon.authentication.AuthenticationException
+     *                             if ther credentials for connecting are not sufficient
      */
     void connect( Repository source, AuthenticationInfo authenticationInfo )
         throws ConnectionException, AuthenticationException;
 
     /**
-     * @see #setRepository(Repository)
-     * @see #setAuthenticationInfo(AuthenticationInfo)
-     * @see #setProxyInfo(ProxyInfo)
-     * @deprecated Use {@link #connect()} instead, (will be removed in Wagon 2.0)
+     * Initiate the connection to the repository.
+     *
+     * @param source             the repository to connect to
+     * @param authenticationInfo authentication credentials for connecting
+     * @param proxyInfo          the network proxy to use to connect to the remote repository
+     * @throws ConnectionException if there is a problem connecting
+     * @throws org.apache.maven.wagon.authentication.AuthenticationException
+     *                             if ther credentials for connecting are not sufficient
      */
     void connect( Repository source, AuthenticationInfo authenticationInfo, ProxyInfo proxyInfo )
         throws ConnectionException, AuthenticationException;
 
     /**
-     * Close the connection. 
-     * 
-     * @throws ConnectionException
+     * Initiate the connection to the repository.
+     *
+     * @throws ConnectionException if there is a problem connecting
+     * @throws org.apache.maven.wagon.authentication.AuthenticationException
+     *                             if ther credentials for connecting are not sufficient
+     * @todo delegate this to a truly internal connection method
+     * @deprecated connect using the {@link #connect(org.apache.maven.wagon.repository.Repository)} or related methods - this is an internal method
+     */
+    void openConnection()
+        throws ConnectionException, AuthenticationException;
+
+    /**
+     * Disconnect from the repository.
+     *
+     * @throws ConnectionException if there is a problem disconnecting
      */
     void disconnect()
         throws ConnectionException;
@@ -250,17 +232,7 @@ public interface Wagon
 
     boolean hasTransferListener( TransferListener listener );
 
-    /**
-     * Handle the protocol specific connection opening process.
-     * 
-     * Note: Providers should look for the values in {@link #getRepository()}, {@link #getAuthenticationInfo()}, and
-     * {@link #getProxyInfo()} to properly establish their connection.
-     * 
-     * @deprecated Use {@link Wagon#connect()} instead.
-     * 
-     * @throws ConnectionException
-     * @throws AuthenticationException
-     */
-    void openConnection()
-        throws ConnectionException, AuthenticationException;
+    boolean isInteractive();
+
+    void setInteractive( boolean interactive );
 }

@@ -37,8 +37,6 @@ public class WagonMock
     extends StreamWagon
 {
     private boolean errorInputStream;
-    
-    private String protocol;
 
     public WagonMock()
     {
@@ -125,13 +123,4 @@ public class WagonMock
         return false;
     }
 
-    public String getProtocol()
-    {
-        return protocol;
-    }
-
-    public void setProtocol( String protocol )
-    {
-        this.protocol = protocol;
-    }
 }

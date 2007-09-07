@@ -20,7 +20,6 @@ package org.apache.maven.wagon.events;
  */
 
 import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.repository.Repository;
 
 /**
  * SessionEvent is used for notifing SessionListeners about
@@ -99,51 +98,21 @@ public class SessionEvent
     /**
      * Creates new instance of SessionEvent
      *
-     * @param wagon     <code>Wagon</code> object which created this event
-     * @param repository <code>Repository</code> object that this event belongs to.
-     * @param eventType the type of the event
-     */
-    public SessionEvent( final Wagon wagon, final Repository repository, final int eventType )
-    {
-        super( wagon, repository );
-        this.eventType = eventType;
-    }
-
-    /**
-     * Creates new instance of SessionEvent. Sets event type to <code>SESSION_ERROR_OCCURRED</code>
-     *
-     * @param wagon     <code>Wagon</code> object which created this event
-     * @param repository <code>Repository</code> object that this event belongs to.
-     * @param exception the exception
-     */
-    public SessionEvent( final Wagon wagon, final Repository repository, final Exception exception )
-    {
-        super( wagon, repository );
-        this.exception = exception;
-        this.eventType = SESSION_ERROR_OCCURRED;
-
-    }
-
-    /**
-     * Creates new instance of SessionEvent
-     *
-     * @deprecated Use {@link SessionEvent#SessionEvent(Wagon, Repository, int)} instead
-     * @param wagon     <code>Wagon</code> object which created this event
+     * @param wagon     <code>Wagon<code> object which created this event
      * @param eventType the type of the event
      */
     public SessionEvent( final Wagon wagon, final int eventType )
     {
         super( wagon );
         this.eventType = eventType;
+
     }
 
     /**
      * Creates new instance of SessionEvent. Sets event type to <code>SESSION_ERROR_OCCURRED</code>
      *
-     * @param wagon     <code>Wagon</code> object which created this event
-     * @param repository <code>Repository</code> object that this event belongs to.
+     * @param wagon     <code>Wagon<code> object which created this event
      * @param exception the exception
-     * @deprecated Use {@link SessionEvent#SessionEvent(Wagon, Repository, Exception)} instead.
      */
     public SessionEvent( final Wagon wagon, final Exception exception )
     {
@@ -195,7 +164,7 @@ public class SessionEvent
                 break;
             case SessionEvent.SESSION_CONNECTION_REFUSED:
                 break;
-            default:
+            default :
                 throw new IllegalArgumentException( "Illegal event type: " + eventType );
         }
         this.eventType = eventType;

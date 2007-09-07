@@ -74,11 +74,6 @@ public class HttpWagon
     private int numberOfAttempts = DEFAULT_NUMBER_OF_ATTEMPTS;
 
     private static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone( "GMT" );
-    
-    public String getProtocol()
-    {
-        return "http";
-    }
 
     public void openConnection()
     {
@@ -163,7 +158,7 @@ public class HttpWagon
 
         try
         {
-            InputStream is = new PutInputStream( source, repository, resource, this, getTransferEventSupport() );
+            InputStream is = new PutInputStream( source, resource, this, getTransferEventSupport() );
 
             putMethod.setRequestBody( is );
         }

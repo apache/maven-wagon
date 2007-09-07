@@ -63,21 +63,20 @@ public class SessionEventTest
 
         final Wagon wagon = new WagonMock();
         final Repository repo = new Repository();
-        wagon.setRepository( repo );
 
-        wagon.connect();
+        wagon.connect( repo );
 
         final long timestamp = System.currentTimeMillis();
         final Exception exception = new AuthenticationException( "dummy" );
 
-        SessionEvent event = new SessionEvent( wagon, repo, SessionEvent.SESSION_CLOSED );
+        SessionEvent event = new SessionEvent( wagon, SessionEvent.SESSION_CLOSED );
 
         assertEquals( wagon, event.getWagon() );
         assertEquals( repo, event.getWagon().getRepository() );
 
         assertEquals( SessionEvent.SESSION_CLOSED, event.getEventType() );
 
-        event = new SessionEvent( wagon, repo, exception );
+        event = new SessionEvent( wagon, exception );
 
         assertEquals( wagon, event.getWagon() );
         assertEquals( repo, event.getWagon().getRepository() );

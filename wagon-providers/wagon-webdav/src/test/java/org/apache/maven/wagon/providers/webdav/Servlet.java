@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.manager;
+package org.apache.maven.wagon.providers.webdav;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -19,24 +19,40 @@ package org.apache.maven.wagon.manager;
  * under the License.
  */
 
-import org.apache.maven.wagon.WagonException;
+import java.util.Properties;
 
 /**
- * WagonConfigurationException 
- *
+ * Servlet
+ * 
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
- * @version $Id$
  */
-public class WagonConfigurationException
-    extends WagonException
+public class Servlet
 {
-    public WagonConfigurationException( String message, Throwable cause )
+    private String id;
+
+    private Properties parameters;
+
+    private String path;
+    
+    private String servlet;
+
+    public String getId()
     {
-        super( message, cause );
+        return id;
     }
 
-    public WagonConfigurationException( String message )
+    public Properties getParameters()
     {
-        super( message );
+        return parameters;
+    }
+
+    public String getPath()
+    {
+        return path;
+    }
+
+    public String getServlet()
+    {
+        return servlet;
     }
 }

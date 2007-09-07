@@ -61,16 +61,15 @@ import java.util.TimeZone;
 
 /**
  * <p>WebDavWagon</p>
- * 
+ * <p/>
  * <p>Allows using a webdav remote repository for downloads and deployments</p>
- * 
+ *
  * @author <a href="mailto:hisidro@exist.com">Henry Isidro</a>
  * @author <a href="mailto:joakime@apache.org">Joakim Erdfelt</a>
  * @author <a href="mailto:carlos@apache.org">Carlos Sanchez</a>
- * 
- * @plexus.component role="org.apache.maven.wagon.Wagon" 
- *   role-hint="dav"
- *   instantiation-strategy="per-lookup"
+ * @plexus.component role="org.apache.maven.wagon.Wagon"
+ * role-hint="dav"
+ * instantiation-strategy="per-lookup"
  */
 public class WebDavWagon
     extends AbstractWagon
@@ -110,16 +109,11 @@ public class WebDavWagon
             }
         }
     }
-    
-    public String getProtocol()
-    {
-        return "dav";
-    }
 
     /**
      * Opens a connection via web-dav resource
-     * 
-     * @throws AuthenticationException 
+     *
+     * @throws AuthenticationException
      * @throws ConnectionException
      */
     public void openConnection()
@@ -154,6 +148,7 @@ public class WebDavWagon
 
             if ( hasProxy )
             {
+
                 webdavResource.setProxy( proxyInfo.getHost(), proxyInfo.getPort() );
                 if ( !StringUtils.isEmpty( proxyInfo.getUserName() ) )
                 {
@@ -166,8 +161,8 @@ public class WebDavWagon
         }
         catch ( HttpException he )
         {
-            throw new ConnectionException( "Connection Exception: " + url + " " + he.getReasonCode() + " "
-                + HttpStatus.getStatusText( he.getReasonCode() ), he );
+            throw new ConnectionException( "Connection Exception: " + url + " " + he.getReasonCode() + " " +
+                HttpStatus.getStatusText( he.getReasonCode() ), he );
         }
         catch ( URIException urie )
         {
@@ -181,8 +176,8 @@ public class WebDavWagon
 
     /**
      * Closes the connection
-     * 
-     * @throws ConnectionException 
+     *
+     * @throws ConnectionException
      */
     public void closeConnection()
         throws ConnectionException
@@ -207,7 +202,7 @@ public class WebDavWagon
     /**
      * Puts a file into the remote repository
      *
-     * @param source the file to transfer
+     * @param source       the file to transfer
      * @param resourceName the name of the resource
      * @throws TransferFailedException
      * @throws ResourceDoesNotExistException
@@ -243,7 +238,7 @@ public class WebDavWagon
             // Put source into destination path.
             firePutStarted( resource, source );
 
-            InputStream is = new PutInputStream( source, repository, resource, this, getTransferEventSupport() );
+            InputStream is = new PutInputStream( source, resource, this, getTransferEventSupport() );
             boolean success = webdavResource.putMethod( dest, is, (int) source.length() );
             int statusCode = webdavResource.getStatusCode();
 
@@ -269,8 +264,8 @@ public class WebDavWagon
                 default:
                     if ( !success )
                     {
-                        throw new TransferFailedException( "Failed to transfer file: " + dest + ". Return code is: "
-                            + statusCode + " " + HttpStatus.getStatusText( statusCode ) );
+                        throw new TransferFailedException( "Failed to transfer file: " + dest + ". Return code is: " +
+                            statusCode + " " + HttpStatus.getStatusText( statusCode ) );
                     }
             }
         }
@@ -307,7 +302,7 @@ public class WebDavWagon
         String currentPath = relpath;
 
         Stack directoriesToBeCreated = new Stack();
-        
+
         try
         {
             while ( currentPath != null )
@@ -334,8 +329,8 @@ public class WebDavWagon
                     else
                     {
                         throw new TransferFailedException(
-                                                           "Destination path exists and is not a WebDAV collection (directory): "
-                                                               + webdavResource.toString() );
+                            "Destination path exists and is not a WebDAV collection (directory): " +
+                                webdavResource.toString() );
                     }
                 }
 
@@ -352,13 +347,11 @@ public class WebDavWagon
             while ( !directoriesToBeCreated.empty() )
             {
                 currentPath = (String) directoriesToBeCreated.pop();
-                
                 if ( currentPath.equals( "/" ) )
                 {
                     /* Impossible to create root directory, skip */
                     continue;
                 }
-                
                 webdavResource.setPath( currentPath );
 
                 try
@@ -366,16 +359,16 @@ public class WebDavWagon
                     boolean destinationCreated = webdavResource.mkcolMethod( currentPath );
                     if ( !destinationCreated )
                     {
-                        throw new TransferFailedException( "Destination folder [" + currentPath
-                            + "] could not be created: " + webdavResource.toString() + " - Server returned error: "
-                            + webdavResource.getStatusCode() + ": "
-                            + HttpStatus.getStatusText( webdavResource.getStatusCode() ) );
+                        throw new TransferFailedException( "Destination folder [" + currentPath +
+                            "] could not be created: " + webdavResource.toString() + " - Server returned error: " +
+                            webdavResource.getStatusCode() + ": " +
+                            HttpStatus.getStatusText( webdavResource.getStatusCode() ) );
                     }
                 }
                 catch ( IOException e )
                 {
-                    throw new TransferFailedException( "Failed to create destination WebDAV collection (directory) ["
-                        + currentPath + "]: " + webdavResource.toString(), e );
+                    throw new TransferFailedException( "Failed to create destination WebDAV collection (directory) [" +
+                        currentPath + "]: " + webdavResource.toString(), e );
                 }
             }
 
@@ -384,14 +377,14 @@ public class WebDavWagon
         }
         catch ( HttpException e )
         {
-            throw new TransferFailedException( "Unknown error creating destination WebDAV collection (directory): "
-                + webdavResource.toString() + ". Server returned error: "
-                + HttpStatus.getStatusText( e.getReasonCode() ), e );
+            throw new TransferFailedException( "Unknown error creating destination WebDAV collection (directory): " +
+                webdavResource.toString() + ". Server returned error: " + HttpStatus.getStatusText( e.getReasonCode() ),
+                                               e );
         }
         catch ( IOException e )
         {
-            throw new TransferFailedException( "Unknown error creating destination WebDAV collection (directory): "
-                + webdavResource.toString(), e );
+            throw new TransferFailedException(
+                "Unknown error creating destination WebDAV collection (directory): " + webdavResource.toString(), e );
         }
     }
 
@@ -417,10 +410,10 @@ public class WebDavWagon
 
     /**
      * Determine which URI to use at the prompt.
-     * @see FileUtils#normalize(String)
      *
      * @param uri the path to be set.
      * @return the normalized path.
+     * @see FileUtils#normalize(String)
      */
     private String checkUri( String uri )
         throws IOException
@@ -454,10 +447,10 @@ public class WebDavWagon
 
     /**
      * Get a file from remote server
-     * 
+     *
      * @param resourceName
      * @param destination
-     * @param timestamp the timestamp to check against, only downloading if newer. If <code>0</code>, always download
+     * @param timestamp    the timestamp to check against, only downloading if newer. If <code>0</code>, always download
      * @return <code>true</code> if newer version was downloaded, <code>false</code> otherwise.
      * @throws TransferFailedException
      * @throws ResourceDoesNotExistException
@@ -496,8 +489,8 @@ public class WebDavWagon
         catch ( HttpException e )
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-            throw new TransferFailedException( "Failed to transfer file: " + url + ".  Return code is: "
-                + e.getReasonCode(), e );
+            throw new TransferFailedException(
+                "Failed to transfer file: " + url + ".  Return code is: " + e.getReasonCode(), e );
         }
         catch ( IOException e )
         {
@@ -532,8 +525,8 @@ public class WebDavWagon
                     throw new ResourceDoesNotExistException( "File: " + url + " does not exist" );
 
                 default:
-                    throw new TransferFailedException( "Failed to transfer file: " + url + ". Return code is: "
-                        + statusCode, e );
+                    throw new TransferFailedException(
+                        "Failed to transfer file: " + url + ". Return code is: " + statusCode, e );
             }
         }
         finally
@@ -565,8 +558,8 @@ public class WebDavWagon
                 throw new ResourceDoesNotExistException( "File: " + url + " does not exist" );
 
             default:
-                throw new TransferFailedException( "Failed to transfer file: " + url + ". Return code is: "
-                    + statusCode );
+                throw new TransferFailedException(
+                    "Failed to transfer file: " + url + ". Return code is: " + statusCode );
         }
 
     }
@@ -587,7 +580,7 @@ public class WebDavWagon
 
     /**
      * This wagon supports directory copying
-     * 
+     *
      * @return <code>true</code> always
      */
     public boolean supportsDirectoryCopy()
@@ -597,8 +590,8 @@ public class WebDavWagon
 
     /**
      * Copy a directory from local system to remote webdav server
-     * 
-     * @param sourceDirectory the local directory
+     *
+     * @param sourceDirectory      the local directory
      * @param destinationDirectory the remote destination
      * @throws TransferFailedException
      * @throws ResourceDoesNotExistException
@@ -669,8 +662,8 @@ public class WebDavWagon
 
                 if ( !webdavResource.isCollection() )
                 {
-                    throw new ResourceDoesNotExistException( "Destination path exists but is not a "
-                        + "WebDAV collection (directory): " + cdpath );
+                    throw new ResourceDoesNotExistException(
+                        "Destination path exists but is not a " + "WebDAV collection (directory): " + cdpath );
                 }
 
                 String[] entries = webdavResource.list();
@@ -691,8 +684,8 @@ public class WebDavWagon
                 }
                 else
                 {
-                    throw new TransferFailedException( "Unable to obtain file list from WebDAV collection, "
-                        + "HTTP error: " + HttpStatus.getStatusText( e.getReasonCode() ), e );
+                    throw new TransferFailedException( "Unable to obtain file list from WebDAV collection, " +
+                        "HTTP error: " + HttpStatus.getStatusText( e.getReasonCode() ), e );
                 }
             }
             finally

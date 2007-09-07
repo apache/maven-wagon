@@ -25,7 +25,6 @@ import java.io.IOException;
 import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
-import org.apache.maven.wagon.servlet.ServletServer;
 
 /**
  * Authenticated WebDAV Wagon Test 

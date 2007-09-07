@@ -71,11 +71,6 @@ public class LightweightHttpWagon
      * @component.configuration default="false"
      */
     private boolean useCache;
-    
-    public String getProtocol()
-    {
-        return "http";
-    }
 
     public void fillInputData( InputData inputData )
         throws TransferFailedException, ResourceDoesNotExistException

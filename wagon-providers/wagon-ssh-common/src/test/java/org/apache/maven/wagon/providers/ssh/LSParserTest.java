@@ -47,8 +47,7 @@ public class LSParserTest
         assertTrue( files.contains( "pom.xml" ) );
     }
 
-    public void testParseOSX()
-        throws TransferFailedException
+    public void testParseOSX() throws TransferFailedException
     {
         String rawLS = "total 32\n" + "drwxr-xr-x   5  joakim  joakim   238 Dec 11 10:30 .\n"
             + "drwxr-xr-x  14  joakim  joakim   518 Dec 11 10:30 ..\n"
@@ -66,8 +65,7 @@ public class LSParserTest
         assertTrue( files.contains( "pom.xml" ) );
     }
 
-    public void testParseCygwin()
-        throws TransferFailedException
+    public void testParseCygwin() throws TransferFailedException
     {
         String rawLS = "total 32\n" + "drwxr-xr-x+  5 joakim None    0 Dec 11 10:30 .\n"
             + "drwxr-xr-x+ 14 joakim None    0 Dec 11 10:30 ..\n"
@@ -77,7 +75,7 @@ public class LSParserTest
             + "drwxr-xr-x+  4 joakim None    0 Dec 11 12:26 src\n"
             + "drwxr-xr-x+  7 joakim None    0 Dec 11 10:31 .svn\n"
             + "drwxr-xr-x+  3 joakim None    0 Dec 11 08:39 target\n";
-
+        
         LSParser parser = new LSParser();
         List files = parser.parseFiles( rawLS );
         assertNotNull( files );
@@ -92,7 +90,7 @@ public class LSParserTest
      */
     public void testParsePeopleApacheStaging() throws TransferFailedException
     {
-        String rawLS = "total 6\n" 
+        String rawLS = "total 6\n"
             + "drwxr-xr-x  3 snicoll  snicoll  512 Feb  7 11:04 .\n"
             + "drwxr-xr-x  3 snicoll  snicoll  512 Feb  7 11:04 ..\n"
             + "drwxr-xr-x  3 snicoll  snicoll  512 Feb  7 11:04 org\n";
