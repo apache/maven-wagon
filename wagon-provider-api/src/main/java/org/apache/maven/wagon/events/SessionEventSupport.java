@@ -49,7 +49,10 @@ public final class SessionEventSupport
      */
     public void addSessionListener( final SessionListener listener )
     {
-        listeners.add( listener );
+        if ( listener != null )
+        {
+            listeners.add( listener );
+        }
     }
 
     /**

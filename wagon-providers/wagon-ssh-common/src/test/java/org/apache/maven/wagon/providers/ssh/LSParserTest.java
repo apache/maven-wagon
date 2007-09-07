@@ -82,4 +82,23 @@ public class LSParserTest
         assertEquals( 8, files.size() );
         assertTrue( files.contains( "pom.xml" ) );
     }
+
+    /**
+     * Snicoll, Jvanzyl, and Tom reported problems with wagon-ssh.getFileList().
+     * Just adding a real-world example of the ls to see if it is a problem.
+     *   - Joakime
+     */
+    public void testParsePeopleApacheStaging() throws TransferFailedException
+    {
+        String rawLS = "total 6\n"
+            + "drwxr-xr-x  3 snicoll  snicoll  512 Feb  7 11:04 .\n"
+            + "drwxr-xr-x  3 snicoll  snicoll  512 Feb  7 11:04 ..\n"
+            + "drwxr-xr-x  3 snicoll  snicoll  512 Feb  7 11:04 org\n";
+
+        LSParser parser = new LSParser();
+        List files = parser.parseFiles( rawLS );
+        assertNotNull( files );
+        assertEquals( 3, files.size() );
+        assertTrue( files.contains( "org" ) );
+    }
 }
