@@ -186,7 +186,7 @@ public abstract class AbstractGanymedWagon
         {
             Streams streams = CommandExecutorStreamProcessor.processStreams( stderrReader, stdoutReader );
 
-            if ( streams.getErr().length() > 0 )
+            if ( streams.getErr().length() > 0 && !ignoreFailures )
             {
                 int exitCode = session.getExitStatus().intValue();
                 throw new CommandExecutionException( "Exit code: " + exitCode + " - " + streams.getErr() );

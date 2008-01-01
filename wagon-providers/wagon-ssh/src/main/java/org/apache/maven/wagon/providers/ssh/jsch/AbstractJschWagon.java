@@ -192,7 +192,7 @@ public abstract class AbstractJschWagon
                 HostKeyRepository hkr = sch.getHostKeyRepository();
                 HostKey[] keys = hkr.getHostKey();
 
-                for ( int i = 0; i < keys.length; i++ )
+                for ( int i = 0; keys != null && i < keys.length; i++ )
                 {
                     HostKey key = keys[i];
                     w.println( key.getHost() + " " + key.getType() + " " + key.getKey() );
@@ -259,7 +259,7 @@ public abstract class AbstractJschWagon
 
             Streams streams = CommandExecutorStreamProcessor.processStreams( stderrReader, stdoutReader );
 
-            if ( streams.getErr().length() > 0 )
+            if ( streams.getErr().length() > 0 && !ignoreFailures )
             {
                 int exitCode = channel.getExitStatus();
                 throw new CommandExecutionException( "Exit code: " + exitCode + " - " + streams.getErr() );
