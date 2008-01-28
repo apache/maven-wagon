@@ -18,12 +18,32 @@
   -->
 
 <component-set>
-  <components>
-    <component>
-      <role>org.apache.maven.wagon.Wagon</role>
-      <role-hint>http</role-hint>
-      <implementation>org.apache.maven.wagon.providers.http.HttpWagon</implementation>
-      <instantiation-strategy>per-lookup</instantiation-strategy>
-    </component>
-  </components>
+    <components>
+	  <component>
+	    <role>org.apache.commons.httpclient.HttpConnectionManager</role>
+	    <implementation>org.apache.commons.httpclient.MultiThreadedHttpConnectionManager</implementation>
+	  </component>
+      <component>
+        <role>org.apache.maven.wagon.Wagon</role>
+        <role-hint>http</role-hint>
+        <implementation>org.apache.maven.wagon.providers.http.HttpWagon</implementation>
+        <instantiation-strategy>per-lookup</instantiation-strategy>
+	    <requirements>
+		  <requirement>
+		    <role>org.apache.commons.httpclient.HttpConnectionManager</role>
+		  </requirement>
+	    </requirements>
+      </component>
+      <component>
+        <role>org.apache.maven.wagon.Wagon</role>
+        <role-hint>https</role-hint>
+        <implementation>org.apache.maven.wagon.providers.http.HttpWagon</implementation>
+        <instantiation-strategy>per-lookup</instantiation-strategy>
+	    <requirements>
+		  <requirement>
+		    <role>org.apache.commons.httpclient.HttpConnectionManager</role>
+		  </requirement>
+	    </requirements>
+      </component>
+    </components>
 </component-set>

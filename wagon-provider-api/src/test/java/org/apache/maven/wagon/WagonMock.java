@@ -37,6 +37,7 @@ public class WagonMock
     extends StreamWagon
 {
     private boolean errorInputStream;
+    private int timeout = 0;
 
     public WagonMock()
     {
@@ -109,6 +110,16 @@ public class WagonMock
 
     public void closeConnection()
     {
+    }
+    
+    public void setTimeout( int timeoutValue )
+    {
+    	timeout = timeoutValue;
+    }
+    
+    public int getTimeout()
+    {
+    	return timeout;
     }
 
     public List getFileList( String destinationDirectory )

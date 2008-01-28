@@ -117,6 +117,7 @@ public abstract class AbstractJschWagon
         try
         {
             session = sch.getSession( authenticationInfo.getUserName(), host, port );
+            session.setTimeout(getTimeout());
         }
         catch ( JSchException e )
         {

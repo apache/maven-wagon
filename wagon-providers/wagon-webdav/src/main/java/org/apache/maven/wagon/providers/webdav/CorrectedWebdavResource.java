@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.HttpURL;
@@ -56,6 +57,11 @@ public class CorrectedWebdavResource
     {
         super( url );
         setFollowRedirects( true ); // TODO: Make this configurable.
+    }
+    
+    public void setConnectionTimeout(int timeout)
+    {
+    	client.setConnectionTimeout(timeout);
     }
 
     public void setHeaders( Map headers )

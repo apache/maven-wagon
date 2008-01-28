@@ -67,6 +67,8 @@ public abstract class AbstractWagon
     protected AuthenticationInfo authenticationInfo;
 
     protected boolean interactive = true;
+    
+    private int connectionTimeout = 60000;
 
     // ----------------------------------------------------------------------
     // Accessors
@@ -173,6 +175,16 @@ public abstract class AbstractWagon
                     "Specified destination directory cannot be created: " + destinationDirectory );
             }
         }
+    }
+    
+    public void setTimeout( int timeoutValue )
+    {
+    	connectionTimeout = timeoutValue;
+    }
+    
+    public int getTimeout()
+    {
+    	return connectionTimeout;
     }
 
     // ----------------------------------------------------------------------

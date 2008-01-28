@@ -92,7 +92,9 @@ public class FtpWagon
         String host = getRepository().getHost();
 
         ftp = new FTPClient();
-
+        ftp.setDefaultTimeout(getTimeout());
+        ftp.setDataTimeout(getTimeout());
+        
         ftp.addProtocolCommandListener( new PrintCommandListener( this ) );
 
         try

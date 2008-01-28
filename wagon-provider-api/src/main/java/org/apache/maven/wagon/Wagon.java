@@ -211,6 +211,16 @@ public interface Wagon
      */
     void disconnect()
         throws ConnectionException;
+    
+    /**
+     * Set the connection timeout limit in milliseconds
+     */
+    void setTimeout( int timeoutValue );
+    
+    /**
+     * Get the connection timeout limit in milliseconds
+     */
+    int getTimeout();
 
     // ----------------------------------------------------------------------
     //  Session listener

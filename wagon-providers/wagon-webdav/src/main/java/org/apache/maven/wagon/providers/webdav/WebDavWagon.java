@@ -145,10 +145,10 @@ public class WebDavWagon
 
             CorrectedWebdavResource.setDefaultAction( CorrectedWebdavResource.NOACTION );
             webdavResource = new CorrectedWebdavResource( httpURL );
+            webdavResource.setConnectionTimeout(getTimeout());
 
             if ( hasProxy )
             {
-
                 webdavResource.setProxy( proxyInfo.getHost(), proxyInfo.getPort() );
                 if ( !StringUtils.isEmpty( proxyInfo.getUserName() ) )
                 {
