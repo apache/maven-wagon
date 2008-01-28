@@ -23,14 +23,15 @@ import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpRecoverableException;
+import org.apache.commons.httpclient.HttpConnectionManager;
+import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.commons.httpclient.NTCredentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.NTCredentials;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
+import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.util.DateParseException;
 import org.apache.commons.httpclient.util.DateParser;
 import org.apache.maven.wagon.AbstractWagon;
@@ -57,27 +58,21 @@ import java.util.zip.GZIPInputStream;
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
- * 
- * @plexus.component role="org.apache.maven.wagon.Wagon" 
- *   role-hint="http"
- *   instantiation-strategy="per-lookup"
  */
 public class HttpWagon
     extends AbstractWagon
 {
-    private static final int DEFAULT_NUMBER_OF_ATTEMPTS = 3;
-
     private static final int SC_NULL = -1;
 
     private HttpClient client;
 
-    private int numberOfAttempts = DEFAULT_NUMBER_OF_ATTEMPTS;
-
     private static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone( "GMT" );
+
+    private HttpConnectionManager connectionManager;
 
     public void openConnection()
     {
-        client = new HttpClient( new MultiThreadedHttpConnectionManager() );
+        client = new HttpClient( connectionManager );
 
         String username = null;
 
@@ -155,11 +150,11 @@ public class HttpWagon
         firePutInitiated( resource, source );
 
         PutMethod putMethod = new PutMethod( url );
+        putMethod.getParams().setSoTimeout( getTimeout() );
 
         try
         {
             InputStream is = new PutInputStream( source, resource, this, getTransferEventSupport() );
-
             putMethod.setRequestBody( is );
         }
         catch ( FileNotFoundException e )
@@ -169,31 +164,8 @@ public class HttpWagon
             throw new ResourceDoesNotExistException( "Source file does not exist: " + source, e );
         }
 
-        int statusCode = SC_NULL;
-
-        int attempt = 0;
-
-        fireTransferDebug( "about to execute client for put" );
-
-        // We will retry up to NumberOfAttempts times.
-        while ( statusCode == SC_NULL && attempt < getNumberOfAttempts() )
-        {
-            try
-            {
-                firePutStarted( resource, source );
-
-                statusCode = client.executeMethod( putMethod );
-            }
-            catch ( HttpRecoverableException e )
-            {
-                attempt++;
-            }
-            catch ( IOException e )
-            {
-                throw new TransferFailedException( e.getMessage(), e );
-            }
-        }
-
+        int statusCode = execute( putMethod );
+        
         fireTransferDebug( url + " - Status code: " + statusCode );
 
         // Check that we didn't run out of retries.
@@ -207,8 +179,7 @@ public class HttpWagon
                 break;
 
             case SC_NULL:
-                throw new TransferFailedException(
-                    "Failed to transfer file: " + url + " after " + attempt + " attempts" );
+                throw new TransferFailedException( "Failed to transfer file: " + url );
 
             case HttpStatus.SC_FORBIDDEN:
                 throw new AuthorizationException( "Access denied to: " + url );
@@ -264,6 +235,7 @@ public class HttpWagon
         String url = getRepository().getUrl() + "/" + resourceName;
 
         GetMethod getMethod = new GetMethod( url );
+        getMethod.getParams().setSoTimeout( getTimeout() );
 
         try
         {
@@ -284,27 +256,7 @@ public class HttpWagon
                 getMethod.addRequestHeader( hdr );
             }
 
-            int statusCode = SC_NULL;
-
-            int attempt = 0;
-
-            // We will retry up to NumberOfAttempts times.
-            while ( statusCode == SC_NULL && attempt < getNumberOfAttempts() )
-            {
-                try
-                {
-                    // execute the getMethod.
-                    statusCode = client.executeMethod( getMethod );
-                }
-                catch ( HttpRecoverableException e )
-                {
-                    attempt++;
-                }
-                catch ( IOException e )
-                {
-                    throw new TransferFailedException( e.getMessage(), e );
-                }
-            }
+            int statusCode = execute( getMethod );
 
             fireTransferDebug( url + " - Status code: " + statusCode );
 
@@ -318,8 +270,7 @@ public class HttpWagon
                     return false;
 
                 case SC_NULL:
-                    throw new TransferFailedException(
-                        "Failed to transfer file: " + url + " after " + attempt + " attempts" );
+                    throw new TransferFailedException( "Failed to transfer file: " + url );
 
                 case HttpStatus.SC_FORBIDDEN:
                     throw new AuthorizationException( "Access denied to: " + url );
@@ -435,16 +386,6 @@ public class HttpWagon
         }
     }
 
-    public int getNumberOfAttempts()
-    {
-        return numberOfAttempts;
-    }
-
-    public void setNumberOfAttempts( int numberOfAttempts )
-    {
-        this.numberOfAttempts = numberOfAttempts;
-    }
-
     public List getFileList( String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException 
     {
@@ -456,6 +397,7 @@ public class HttpWagon
         String url = getRepository().getUrl() + "/" + destinationDirectory;
 
         GetMethod getMethod = new GetMethod( url );
+        getMethod.getParams().setSoTimeout( getTimeout() );
 
         try
         {
@@ -466,27 +408,7 @@ public class HttpWagon
             getMethod.addRequestHeader( "Pragma", "no-cache" );
             getMethod.addRequestHeader( "Expires", "0" );
 
-            int statusCode = SC_NULL;
-
-            int attempt = 0;
-
-            // We will retry up to NumberOfAttempts times.
-            while ( statusCode == SC_NULL && attempt < getNumberOfAttempts() )
-            {
-                try
-                {
-                    // execute the getMethod.
-                    statusCode = client.executeMethod( getMethod );
-                }
-                catch ( HttpRecoverableException e )
-                {
-                    attempt++;
-                }
-                catch ( IOException e )
-                {
-                    throw new TransferFailedException( e.getMessage(), e );
-                }
-            }
+            int statusCode = execute( getMethod );
 
             fireTransferDebug( url + " - Status code: " + statusCode );
 
@@ -497,8 +419,7 @@ public class HttpWagon
                     break;
 
                 case SC_NULL:
-                    throw new TransferFailedException(
-                        "Failed to transfer file: " + url + " after " + attempt + " attempts" );
+                    throw new TransferFailedException( "Failed to transfer file: " );
 
                 case HttpStatus.SC_FORBIDDEN:
                     throw new AuthorizationException( "Access denied to: " + url );
@@ -540,29 +461,12 @@ public class HttpWagon
         String url = getRepository().getUrl() + "/" + resourceName;
         
         HeadMethod headMethod = new HeadMethod( url );
+        headMethod.getParams().setSoTimeout( getTimeout() );
         
-        int statusCode = SC_NULL;
-        int attempt = 0;
+        int statusCode = execute( headMethod );
         
         try
         {
-            while ( statusCode == SC_NULL && attempt < getNumberOfAttempts() )
-            {
-                try
-                {
-                    // execute the getMethod.
-                    statusCode = client.executeMethod( headMethod );
-                }
-                catch ( HttpRecoverableException e )
-                {
-                    attempt++;
-                }
-                catch ( IOException e )
-                {
-                    throw new TransferFailedException( e.getMessage(), e );
-                }
-            }
-
             switch ( statusCode )
             {
                 case HttpStatus.SC_OK:
@@ -572,8 +476,7 @@ public class HttpWagon
                     return true;
 
                 case SC_NULL:
-                    throw new TransferFailedException( "Failed to transfer file: " + url + " after " + attempt
-                        + " attempts" );
+                    throw new TransferFailedException( "Failed to transfer file: " + url);
 
                 case HttpStatus.SC_FORBIDDEN:
                     throw new AuthorizationException( "Access denied to: " + url );
@@ -597,5 +500,25 @@ public class HttpWagon
         {
             headMethod.releaseConnection();
         }
+    }
+
+    private int execute(HttpMethod httpMethod)
+        throws TransferFailedException
+    {
+        int statusCode = SC_NULL;
+        try
+        {
+            // execute the method.
+            statusCode = client.executeMethod( httpMethod );
+        }
+        catch ( IOException e )
+        {
+            throw new TransferFailedException( e.getMessage(), e );
+        }
+        return statusCode;
+    }
+
+    public void setConnectionManager(HttpConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
     }
 }
