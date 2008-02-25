@@ -136,17 +136,17 @@ public class AbstractWagonTest
 
         wagon.connect( repository );
 
+        assertEquals( "fetch debug message", transferListener.getDebugMessage() );
+
+        assertTrue( transferListener.isDebugCalled() );
+
         wagon.get( artifact, destination );
 
         assertTrue( transferListener.isTransferStartedCalled() );
 
         assertTrue( transferListener.isTransferCompletedCalled() );
 
-        assertTrue( transferListener.isDebugCalled() );
-
         assertTrue( transferListener.isTransferProgressCalled() );
-
-        assertEquals( "fetch debug message", transferListener.getDebugMessage() );
 
         assertEquals( 5, transferListener.getNumberOfProgressCalls() );
     }
