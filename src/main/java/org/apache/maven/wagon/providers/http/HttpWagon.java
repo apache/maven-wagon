@@ -174,7 +174,7 @@ public class HttpWagon
         }
 
         // Problem. Check that the collections exist.
-        if ( statusCode == HttpStatus.SC_CONFLICT )
+        if ( ( isDav ) && ( statusCode == HttpStatus.SC_CONFLICT ) )
         {
             URI absoluteURI = toURI( url );
             URI parentURI = absoluteURI.resolve( "./" ).normalize();
@@ -199,6 +199,9 @@ public class HttpWagon
                 return;
             }
         }
+
+        throw new TransferFailedException( "Unable to upload (" + statusCode + "/"
+            + HttpStatus.getStatusText( statusCode ) + ") file " + source.getAbsolutePath() + " to " + url );
     }
 
     /**
