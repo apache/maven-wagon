@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.Stack;
 import java.util.TimeZone;
 import java.util.zip.GZIPInputStream;
 
@@ -59,6 +60,7 @@ import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.providers.http.dav.DavResource;
+import org.apache.maven.wagon.providers.http.dav.MkColMethod;
 import org.apache.maven.wagon.providers.http.dav.MultiStatus;
 import org.apache.maven.wagon.providers.http.dav.PropFindMethod;
 import org.apache.maven.wagon.providers.http.links.LinkParser;
@@ -81,7 +83,7 @@ public class HttpWagon
     private static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone( "GMT" );
 
     private HttpConnectionManager connectionManager;
-    
+
     private LinkParser linkParser = new LinkParser();
 
     protected boolean isDav;
@@ -163,10 +165,61 @@ public class HttpWagon
 
         Resource resource = new Resource( resourceName );
 
+        // Try simple put first (works 90% of the time) 
+        int statusCode = putSource( url, source, resource );
+        if ( isSuccessfulPUT( statusCode ) )
+        {
+            // expected path.
+            return;
+        }
+
+        // Problem. Check that the collections exist.
+        if ( statusCode == HttpStatus.SC_CONFLICT )
+        {
+            URI absoluteURI = toURI( url );
+            URI parentURI = absoluteURI.resolve( "./" ).normalize();
+            Stack/*<URI>*/missingPaths = davGetMissingPaths( parentURI );
+
+            if ( missingPaths.empty() )
+            {
+                throw new TransferFailedException( "Unable to put (Conflict, collections exist) file "
+                    + source.getAbsolutePath() + " to " + absoluteURI.toASCIIString() );
+            }
+
+            while ( !missingPaths.empty() )
+            {
+                URI missingPath = (URI) missingPaths.pop();
+                davCreateCollection( missingPath );
+            }
+
+            statusCode = putSource( url, source, resource );
+            if ( isSuccessfulPUT( statusCode ) )
+            {
+                // Expected Good result.
+                return;
+            }
+        }
+    }
+
+    /**
+     * HTTP RFC 2616 section 9.6 "PUT": "If an existing resource is modified,
+     * either the 200 (OK) or 204 (No Content) response codes SHOULD be sent
+     * to indicate successful completion of the request." 
+     */
+    private boolean isSuccessfulPUT( int status )
+    {
+        return ( ( status == HttpStatus.SC_CREATED ) || ( status == HttpStatus.SC_OK ) || ( status == HttpStatus.SC_NO_CONTENT ) );
+    }
+
+    private int putSource( String url, File source, Resource resource )
+        throws ResourceDoesNotExistException, TransferFailedException, AuthorizationException
+    {
         firePutInitiated( resource, source );
 
         PutMethod putMethod = new PutMethod( url );
         putMethod.getParams().setSoTimeout( getTimeout() );
+
+        // TODO: worry about setting the Mime-Type on the request header.
 
         try
         {
@@ -188,10 +241,24 @@ public class HttpWagon
         switch ( statusCode )
         {
             // Success Codes
+            /**
+             * HTTP RFC 2616 section 9.6 "PUT": "If an existing resource is modified,
+             * either the 200 (OK) or 204 (No Content) response codes SHOULD be sent
+             * to indicate successful completion of the request." 
+             */
             case HttpStatus.SC_OK: // 200
             case HttpStatus.SC_CREATED: // 201
             case HttpStatus.SC_ACCEPTED: // 202
             case HttpStatus.SC_NO_CONTENT: // 204
+                break;
+
+            /* 409/Conflict is usually seen when attempting to PUT on a 
+             * WebDAV server without the parent Collections existing first.
+             * 
+             * We want to exit out of this and allow the put() routine to 
+             * manage the creation of the collections.
+             */
+            case HttpStatus.SC_CONFLICT: // 409 
                 break;
 
             case SC_NULL:
@@ -212,6 +279,132 @@ public class HttpWagon
         putMethod.releaseConnection();
 
         firePutCompleted( resource, source );
+
+        return statusCode;
+    }
+
+    public void davCreateCollection( URI uri )
+        throws TransferFailedException
+    {
+        MkColMethod method = new MkColMethod( uri );
+        try
+        {
+            int status = client.executeMethod( method );
+            if ( status == HttpStatus.SC_CREATED )
+            {
+                return;
+            }
+
+            throw new TransferFailedException( "Unable to create collection (" + status + "/"
+                + HttpStatus.getStatusText( status ) + "): " + uri.toASCIIString() );
+        }
+        catch ( HttpException e )
+        {
+            throw new TransferFailedException( "Unable to create collection: " + uri.toASCIIString(), e );
+        }
+        catch ( IOException e )
+        {
+            throw new TransferFailedException( "Unable to create collection: " + uri.toASCIIString(), e );
+        }
+        finally
+        {
+            method.releaseConnection();
+        }
+    }
+
+    /**
+     * Collect the stack of missing paths.
+     * 
+     * @param absoluteURI the abosoluteURI to start from.
+     * @return
+     * @throws TransferFailedException 
+     */
+    public Stack/*<URI>*/davGetMissingPaths( URI targetURI )
+        throws TransferFailedException
+    {
+        URI baseuri = toURI( getRepository().getUrl() );
+
+        Stack/*<URI>*/missingPaths = new Stack/*<URI>*/();
+        URI currentURI = targetURI;
+        if ( !currentURI.getPath().endsWith( "/" ) )
+        {
+            try
+            {
+                currentURI = new URI( targetURI.toASCIIString() + "/" );
+            }
+            catch ( URISyntaxException e )
+            {
+                fireTransferDebug( "Should never happen: " + e.getMessage() );
+            }
+        }
+
+        boolean done = false;
+        while ( !done )
+        {
+            if ( targetURI.equals( baseuri ) )
+            {
+                done = true;
+                break;
+            }
+
+            if ( davCollectionExists( currentURI ) )
+            {
+                done = true;
+                break;
+            }
+
+            missingPaths.push( currentURI );
+
+            currentURI = currentURI.resolve( "../" ).normalize();
+        }
+
+        return missingPaths;
+    }
+
+    public boolean davCollectionExists( URI uri )
+        throws TransferFailedException
+    {
+        PropFindMethod method = new PropFindMethod( uri );
+        try
+        {
+            method.setDepth( 1 );
+            int status = client.executeMethod( method );
+            if ( ( status == HttpStatus.SC_MULTI_STATUS ) || ( status == HttpStatus.SC_OK ) )
+            {
+                MultiStatus multistatus = method.getMultiStatus();
+                if ( multistatus == null )
+                {
+                    return false;
+                }
+
+                DavResource resource = multistatus.getResource( uri.getPath() );
+                if ( resource == null )
+                {
+                    return false;
+                }
+
+                return resource.isCollection();
+            }
+
+            if ( status == HttpStatus.SC_BAD_REQUEST )
+            {
+                throw new TransferFailedException( "Bad HTTP Request (400) during PROPFIND on \"" + uri.toASCIIString()
+                    + "\"" );
+            }
+        }
+        catch ( HttpException e )
+        {
+            fireTransferDebug( "Can't determine if collection exists: " + uri + " : " + e.getMessage() );
+        }
+        catch ( IOException e )
+        {
+            fireTransferDebug( "Can't determine if collection exists: " + uri + " : " + e.getMessage() );
+        }
+        finally
+        {
+            method.releaseConnection();
+        }
+        return false;
     }
 
     public void closeConnection()
@@ -474,10 +667,11 @@ public class HttpWagon
 
     }
 
-    private List getHttpListing( String url ) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    private List getHttpListing( String url )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         URI absoluteURI = toURI( url );
-        
+
         GetMethod getMethod = new GetMethod( url );
         getMethod.getParams().setSoTimeout( getTimeout() );
 
@@ -527,7 +721,7 @@ public class HttpWagon
 
             Set/*<String>*/links = linkParser.collectLinks( absoluteURI, is );
 
-            return new ArrayList(links);
+            return new ArrayList( links );
         }
         catch ( IOException e )
         {
