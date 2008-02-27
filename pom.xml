@@ -41,9 +41,20 @@
 
   <dependencies>
     <dependency>
-      <groupId>${pom.groupId}</groupId>
-      <artifactId>wagon-http-shared</artifactId>
-      <version>1.0-rc1-SNAPSHOT</version>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+      <version>1.0.4</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-httpclient</groupId>
+      <artifactId>commons-httpclient</artifactId>
+      <version>3.1</version>
+    </dependency>
+    <dependency>
+      <groupId>nekohtml</groupId>
+      <artifactId>nekohtml</artifactId>
+      <version>1.9.6.1</version>
     </dependency>
     <dependency>
       <groupId>plexus</groupId>
@@ -58,15 +69,10 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.0.4</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>commons-httpclient</groupId>
-      <artifactId>commons-httpclient</artifactId>
-      <version>3.1</version>
+      <groupId>it.could</groupId>
+      <artifactId>webdav</artifactId>
+      <version>0.4</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   <build>

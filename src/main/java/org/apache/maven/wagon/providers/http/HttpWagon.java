@@ -19,19 +19,38 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.zip.GZIPInputStream;
+
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpConnectionManager;
+import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.NTCredentials;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
+import org.apache.commons.httpclient.methods.OptionsMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
-import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.util.DateParseException;
 import org.apache.commons.httpclient.util.DateParser;
 import org.apache.maven.wagon.AbstractWagon;
@@ -39,21 +58,14 @@ import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
+import org.apache.maven.wagon.providers.http.dav.DavResource;
+import org.apache.maven.wagon.providers.http.dav.MultiStatus;
+import org.apache.maven.wagon.providers.http.dav.PropFindMethod;
+import org.apache.maven.wagon.providers.http.links.LinkParser;
 import org.apache.maven.wagon.resource.Resource;
-import org.apache.maven.wagon.shared.http.HtmlFileListParser;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.util.zip.GZIPInputStream;
+import org.xml.sax.SAXException;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -69,6 +81,10 @@ public class HttpWagon
     private static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone( "GMT" );
 
     private HttpConnectionManager connectionManager;
+    
+    private LinkParser linkParser = new LinkParser();
+
+    protected boolean isDav;
 
     public void openConnection()
     {
@@ -165,7 +181,7 @@ public class HttpWagon
         }
 
         int statusCode = execute( putMethod );
-        
+
         fireTransferDebug( url + " - Status code: " + statusCode );
 
         // Check that we didn't run out of retries.
@@ -175,7 +191,7 @@ public class HttpWagon
             case HttpStatus.SC_OK: // 200
             case HttpStatus.SC_CREATED: // 201
             case HttpStatus.SC_ACCEPTED: // 202
-            case HttpStatus.SC_NO_CONTENT:  // 204
+            case HttpStatus.SC_NO_CONTENT: // 204
                 break;
 
             case SC_NULL:
@@ -188,9 +204,9 @@ public class HttpWagon
                 throw new ResourceDoesNotExistException( "File: " + url + " does not exist" );
 
                 //add more entries here
-            default :
-                throw new TransferFailedException(
-                    "Failed to transfer file: " + url + ". Return code is: " + statusCode );
+            default:
+                throw new TransferFailedException( "Failed to transfer file: " + url + ". Return code is: "
+                    + statusCode );
         }
 
         putMethod.releaseConnection();
@@ -285,9 +301,9 @@ public class HttpWagon
                     throw new ResourceDoesNotExistException( "File: " + url + " does not exist" );
 
                     //add more entries here
-                default :
-                    throw new TransferFailedException(
-                        "Failed to transfer file: " + url + ". Return code is: " + statusCode );
+                default:
+                    throw new TransferFailedException( "Failed to transfer file: " + url + ". Return code is: "
+                        + statusCode );
             }
 
             InputStream is = null;
@@ -304,8 +320,8 @@ public class HttpWagon
                 }
                 catch ( NumberFormatException e )
                 {
-                    fireTransferDebug(
-                        "error parsing content length header '" + contentLengthHeader.getValue() + "' " + e );
+                    fireTransferDebug( "error parsing content length header '" + contentLengthHeader.getValue() + "' "
+                        + e );
                 }
             }
 
@@ -331,14 +347,15 @@ public class HttpWagon
             if ( timestamp == 0 || timestamp < lastModified )
             {
                 retValue = true;
-                
+
                 Header contentEncoding = getMethod.getResponseHeader( "Content-Encoding" );
-                boolean isGZipped = contentEncoding == null ? false : "gzip".equalsIgnoreCase(contentEncoding.getValue());
+                boolean isGZipped = contentEncoding == null ? false : "gzip".equalsIgnoreCase( contentEncoding
+                    .getValue() );
 
                 try
                 {
                     is = getMethod.getResponseBodyAsStream();
-                    if (isGZipped)
+                    if ( isGZipped )
                     {
                         is = new GZIPInputStream( is );
                     }
@@ -387,7 +404,7 @@ public class HttpWagon
     }
 
     public List getFileList( String destinationDirectory )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException 
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         if ( !destinationDirectory.endsWith( "/" ) )
         {
@@ -396,6 +413,71 @@ public class HttpWagon
 
         String url = getRepository().getUrl() + "/" + destinationDirectory;
 
+        if ( isDav )
+        {
+            return getDavListing( url );
+        }
+        else
+        {
+            return getHttpListing( url );
+        }
+    }
+
+    private List getDavListing( String url )
+        throws TransferFailedException
+    {
+        URI absoluteURI = toURI( url );
+
+        PropFindMethod method = new PropFindMethod( absoluteURI );
+        try
+        {
+            int status = client.executeMethod( method );
+            if ( ( status == HttpStatus.SC_MULTI_STATUS ) || ( status == HttpStatus.SC_OK ) )
+            {
+                MultiStatus multistatus = method.getMultiStatus();
+                Set/*<String>*/listing = new HashSet/*<String>*/();
+
+                Iterator itresources = multistatus.getResources().iterator();
+                while ( itresources.hasNext() )
+                {
+                    DavResource resource = (DavResource) itresources.next();
+                    if ( resource.isCollection() )
+                    {
+                        continue;
+                    }
+                    String href = resource.getHref();
+
+                    int idx = href.lastIndexOf( '/' );
+                    if ( idx < 0 )
+                    {
+                        listing.add( href );
+                    }
+                    else
+                    {
+                        listing.add( href.substring( idx + 1 ) );
+                    }
+                }
+
+                return new ArrayList( listing );
+            }
+
+            return Collections.emptyList();
+        }
+        catch ( IOException e )
+        {
+            throw new TransferFailedException( "Could not read response body.", e );
+        }
+        finally
+        {
+            method.releaseConnection();
+        }
+
+    }
+
+    private List getHttpListing( String url ) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        URI absoluteURI = toURI( url );
+        
         GetMethod getMethod = new GetMethod( url );
         getMethod.getParams().setSoTimeout( getTimeout() );
 
@@ -434,20 +516,26 @@ public class HttpWagon
                     throw new ResourceDoesNotExistException( "File: " + url + " does not exist" );
 
                     //add more entries here
-                default :
-                    throw new TransferFailedException(
-                        "Failed to transfer file: " + url + ". Return code is: " + statusCode );
+                default:
+                    throw new TransferFailedException( "Failed to transfer file: " + url + ". Return code is: "
+                        + statusCode );
             }
 
             InputStream is = null;
-            
+
             is = getMethod.getResponseBodyAsStream();
 
-            return HtmlFileListParser.parseFileList( url, is );
+            Set/*<String>*/links = linkParser.collectLinks( absoluteURI, is );
+
+            return new ArrayList(links);
         }
         catch ( IOException e )
         {
             throw new TransferFailedException( "Could not read response body.", e );
+        }
+        catch ( SAXException e )
+        {
+            throw new TransferFailedException( "Could not parse response body.", e );
         }
         finally
         {
@@ -455,16 +543,29 @@ public class HttpWagon
         }
     }
 
+    private URI toURI( String url )
+        throws TransferFailedException
+    {
+        try
+        {
+            return new URI( url );
+        }
+        catch ( URISyntaxException e )
+        {
+            throw new TransferFailedException( "Invalid uri: " + url );
+        }
+    }
+
     public boolean resourceExists( String resourceName )
         throws TransferFailedException, AuthorizationException
     {
         String url = getRepository().getUrl() + "/" + resourceName;
-        
+
         HeadMethod headMethod = new HeadMethod( url );
         headMethod.getParams().setSoTimeout( getTimeout() );
-        
+
         int statusCode = execute( headMethod );
-        
+
         try
         {
             switch ( statusCode )
@@ -476,7 +577,7 @@ public class HttpWagon
                     return true;
 
                 case SC_NULL:
-                    throw new TransferFailedException( "Failed to transfer file: " + url);
+                    throw new TransferFailedException( "Failed to transfer file: " + url );
 
                 case HttpStatus.SC_FORBIDDEN:
                     throw new AuthorizationException( "Access denied to: " + url );
@@ -502,7 +603,7 @@ public class HttpWagon
         }
     }
 
-    private int execute(HttpMethod httpMethod)
+    private int execute( HttpMethod httpMethod )
         throws TransferFailedException
     {
         int statusCode = SC_NULL;
@@ -518,7 +619,76 @@ public class HttpWagon
         return statusCode;
     }
 
-    public void setConnectionManager(HttpConnectionManager connectionManager) {
+    public void setConnectionManager( HttpConnectionManager connectionManager )
+    {
         this.connectionManager = connectionManager;
     }
+
+    public boolean isWebDavCapableServer()
+    {
+        String baseurl = getRepository().getUrl() + "/";
+
+        OptionsMethod method = new OptionsMethod( baseurl );
+        try
+        {
+            int status = client.executeMethod( method );
+            if ( status == HttpStatus.SC_OK )
+            {
+                // Test DAV Header Options
+                boolean supportsDav1 = false;
+
+                Header davOptionHeader = method.getResponseHeader( "dav" );
+                if ( davOptionHeader != null )
+                {
+                    String davSupport[] = StringUtils.split( davOptionHeader.getValue(), "," );
+                    for ( int i = 0; i < davSupport.length; i++ )
+                    {
+                        String support = davSupport[i].trim();
+                        support = support.trim();
+                        if ( "1".equals( support ) )
+                        {
+                            supportsDav1 = true;
+                        }
+                    }
+                }
+
+                if ( !supportsDav1 )
+                {
+                    fireTransferDebug( "No DAV Support: " + baseurl );
+                    return false;
+                }
+
+                // Not validate.
+                String requiredMethods[] = new String[] { "HEAD", "GET", "MKCOL", "PROPFIND", "PUT", "OPTIONS" };
+
+                boolean supportsRequired = true;
+                for ( int i = 0; i < requiredMethods.length; i++ )
+                {
+                    String required = requiredMethods[i];
+                    if ( !method.isAllowed( required ) )
+                    {
+                        fireTransferDebug( "No " + required + " Support: " + baseurl );
+                        supportsRequired = false;
+                    }
+                }
+
+                return supportsRequired;
+            }
+        }
+        catch ( HttpException e )
+        {
+            fireTransferDebug( "Unable to get OPTIONS from " + baseurl + " : " + e.getMessage() );
+        }
+        catch ( IOException e )
+        {
+            fireTransferDebug( "Unable to get OPTIONS from " + baseurl + " : " + e.getMessage() );
+        }
+        finally
+        {
+            method.releaseConnection();
+        }
+
+        return false;
+    }
+
 }

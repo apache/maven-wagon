@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<D:multistatus xmlns:D="DAV:">
+ <D:response>
+  <D:href>/archiva/repository/</D:href>
+  <D:propstat>
+   <D:prop>
+    <D:resourcetype><D:collection/></D:resourcetype>
+    <D:getcontenttype>httpd/unix-directory</D:getcontenttype>
+    <D:getetag>"D41D8CD98F00B204E9800998ECF8427E-00000000-000001181418F217"</D:getetag>
+    <D:creationdate>2008-02-13T18:40:22Z</D:creationdate>
+    <D:getlastmodified>Wed, 13 Feb 2008 18:40:22 GMT</D:getlastmodified>
+   </D:prop>
+   <D:status>HTTP/1.1 200 OK</D:status>
+  </D:propstat>
+ </D:response>
+</D:multistatus>

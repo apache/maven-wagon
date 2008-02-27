@@ -21,6 +21,21 @@
   <components>
     <component>
       <role>org.codehaus.plexus.jetty.Httpd</role>
+      <role-hint>default</role-hint>
+      <implementation>org.codehaus.plexus.jetty.DefaultHttpd</implementation>
+      <configuration>
+        <port>10007</port>
+        <contexts>
+          <context>
+            <path>/</path>
+            <document-root>${basedir}/target/test-output/http-repository</document-root>
+          </context>
+        </contexts>
+      </configuration>
+    </component>
+    <component>
+      <role>org.codehaus.plexus.jetty.Httpd</role>
+      <role-hint>webdav</role-hint>
       <implementation>org.codehaus.plexus.jetty.DefaultHttpd</implementation>
       <configuration>
         <port>10007</port>

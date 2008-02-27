@@ -1,0 +1,91 @@
+<?xml version="1.0" ?>
+<D:multistatus xmlns:D="DAV:">
+ <D:response>
+  <D:href>/archiva/repository/commons-httpclient/commons-httpclient/commons-httpclient/commons-httpclient/</D:href>
+  <D:propstat>
+   <D:prop>
+    <D:resourcetype><D:collection/></D:resourcetype>
+    <D:getcontenttype>httpd/unix-directory</D:getcontenttype>
+    <D:getetag>"2F812D8B7CCBA19910BF1A15718F118B-E4BBEAA0-00000118143CFEAB"</D:getetag>
+    <D:creationdate>2008-02-13T19:19:44Z</D:creationdate>
+    <D:getlastmodified>Wed, 13 Feb 2008 19:19:44 GMT</D:getlastmodified>
+   </D:prop>
+   <D:status>HTTP/1.1 200 OK</D:status>
+  </D:propstat>
+ </D:response>
+ <D:response>
+  <D:href>/archiva/repository/commons-httpclient/commons-httpclient/commons-httpclient/commons-httpclient/2.0.2/</D:href>
+  <D:propstat>
+   <D:prop>
+    <D:resourcetype><D:collection/></D:resourcetype>
+    <D:getcontenttype>httpd/unix-directory</D:getcontenttype>
+    <D:getetag>"D4253C46655DD4141DC3D6D75A6CD82F-067A7F97-000001181404DC68"</D:getetag>
+    <D:creationdate>2008-02-13T18:18:25Z</D:creationdate>
+    <D:getlastmodified>Wed, 13 Feb 2008 18:18:25 GMT</D:getlastmodified>
+   </D:prop>
+   <D:status>HTTP/1.1 200 OK</D:status>
+  </D:propstat>
+ </D:response>
+ <D:response>
+  <D:href>/archiva/repository/commons-httpclient/commons-httpclient/commons-httpclient/commons-httpclient/3.1/</D:href>
+  <D:propstat>
+   <D:prop>
+    <D:resourcetype><D:collection/></D:resourcetype>
+    <D:getcontenttype>httpd/unix-directory</D:getcontenttype>
+    <D:getetag>"26C8BB9FDF7237C045BBE1288F4F49D4-F99D7C59-0000011814147485"</D:getetag>
+    <D:creationdate>2008-02-13T18:35:27Z</D:creationdate>
+    <D:getlastmodified>Wed, 13 Feb 2008 18:35:27 GMT</D:getlastmodified>
+   </D:prop>
+   <D:status>HTTP/1.1 200 OK</D:status>
+  </D:propstat>
+ </D:response>
+ <D:response>
+  <D:href>/archiva/repository/commons-httpclient/commons-httpclient/commons-httpclient/commons-httpclient/commons-httpclient-2.0.2.jar</D:href>
+  <D:propstat>
+   <D:prop>
+    <D:getetag>"5C4B72044538BDF4F24B47C857562642-9B45"
+7DD0-000001180F922A3C"</D:getetag>
+    <D:creationdate>2008-02-12T21:34:40Z</D:creationdate>
+    <D:getlastmodified>Tue, 12 Feb 2008 21:34:40 GMT</D:getlastmodified>
+    <D:getcontentlength>225375</D:getcontentlength>
+   </D:prop>
+   <D:status>HTTP/1.1 200 OK</D:status>
+  </D:propstat>
+ </D:response>
+ <D:response>
+  <D:href>/archiva/repository/commons-httpclient/commons-httpclient/commons-httpclient/commons-httpclient/commons-httpclient-2.0.2.jar.sha1</D:href>
+  <D:propstat>
+   <D:prop>
+    <D:getetag>"D7F31DD0A65F72E2DD262C3A37D10E85-5B4EB663-000001180F922A8A"</D:getetag>
+    <D:creationdate>2008-02-12T21:34:40Z</D:creationdate>
+    <D:getlastmodified>Tue, 12 Feb 2008 21:34:40 GMT</D:getlastmodified>
+    <D:getcontentlength>40</D:getcontentlength>
+   </D:prop>
+   <D:status>HTTP/1.1 200 OK</D:status>
+  </D:propstat>
+ </D:response>
+ <D:response>
+  <D:href>/archiva/repository/commons-httpclient/commons-httpclient/commons-httpclient/commons-httpclient/commons-httpclient-2.0.2.pom</D:href>
+  <D:propstat>
+   <D:prop>
+    <D:getetag>"EFCB41F811A750397EC52DCE148F5C19-9B459603-000001180F921F8E"</D:getetag>
+    <D:creationdate>2008-02-12T21:34:37Z</D:creationdate>
+    <D:getlastmodified>Tue, 12 Feb 2008 21:34:37 GMT</D:getlastmodified>
+    <D:getcontentlength>7078</D:getcontentlength>
+   </D:prop>
+   <D:status>HTTP/1.1 200 OK</D:status>
+  </D:propstat>
+ </D:response>
+ <D:response>
+  <D:href>/archiva/repository/commons-httpclient/commons-httpclient/commons-httpclient/commons-httpclient/commons-httpclient-2.0.2.pom.sha1</D:href>
+  <D:propstat>
+   <D:prop>
+    <D:getetag>"81636E870D7BF2C0570C2B3D517525C8-A6A4C610-000001180F921FDC"</D:getetag>
+    <D:creationdate>2008-02-12T21:34:37Z</D:creationdate>
+    <D:getlastmodified>Tue, 12 Feb 2008 21:34:37 GMT</D:getlastmodified>
+    <D:getcontentlength>40</D:getcontentlength>
+   </D:prop>
+   <D:status>HTTP/1.1 200 OK</D:status>
+  </D:propstat>
+ </D:response>
+</D:multistatus>

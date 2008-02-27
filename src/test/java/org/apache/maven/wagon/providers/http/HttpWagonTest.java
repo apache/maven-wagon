@@ -21,7 +21,6 @@ package org.apache.maven.wagon.providers.http;
 
 import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.WagonTestCase;
-import org.codehaus.plexus.jetty.Httpd;
 
 import java.io.File;
 
@@ -32,8 +31,6 @@ import java.io.File;
 public class HttpWagonTest
     extends WagonTestCase
 {
-    private Httpd httpd;
-
     protected String getProtocol()
     {
         return "http";
@@ -72,8 +69,6 @@ public class HttpWagonTest
         f.getParentFile().mkdirs();
 
         FileTestUtils.generateFile( f.getAbsolutePath(), "artifact-dummy" );
-
-        httpd = (Httpd) lookup( Httpd.ROLE );
     }
 
     public void testWagonGetFileList()
@@ -88,6 +83,6 @@ public class HttpWagonTest
     protected void tearDownWagonTestingFixtures()
         throws Exception
     {
-        release( httpd );
+
     }
 }

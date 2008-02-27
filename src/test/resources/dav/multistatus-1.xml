@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<D:multistatus xmlns:D="DAV:" xmlns:J="http://example.com/jsprops/">
+	<D:response>
+		<D:href>/MyCollection/</D:href>
+		<D:propstat>
+			<D:prop>
+				<D:resourcetype>
+					<D:collection />
+				</D:resourcetype>
+				<J:keywords>diary, interests, hobbies</J:keywords>
+			</D:prop>
+			<D:status>HTTP/1.1 200 OK</D:status>
+		</D:propstat>
+	</D:response>
+	<D:response>
+		<D:href>/MyCollection/diary.html</D:href>
+		<D:propstat>
+			<D:prop>
+				<D:resourcetype />
+				<J:keywords>diary, travel, family, history</J:keywords>
+			</D:prop>
+			<D:status>HTTP/1.1 200 OK</D:status>
+		</D:propstat>
+	</D:response>
+	<D:response>
+		<D:href>/MyCollection/nunavut</D:href>
+		<D:status>HTTP/1.1 302 Found</D:status>
+		<D:location>
+			<D:href>http://example.ca/art/inuit/</D:href>
+		</D:location>
+	</D:response>
+</D:multistatus>
