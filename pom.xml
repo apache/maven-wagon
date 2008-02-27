@@ -29,7 +29,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>wagon-http</artifactId>
-  <name>Maven Wagon HTTP Provider</name>
+  <name>Maven Wagon HTTP/WebDav Provider</name>
   <description>
     Wagon that gets and puts artifacts through http using Apache commons-httpclient
   </description>
