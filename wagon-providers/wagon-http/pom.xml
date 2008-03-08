@@ -74,7 +74,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>1.0-beta-1</version>
+        <version>1.0</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -105,26 +105,6 @@
                   <shadedPattern>org.apache.maven.wagon.providers.http.httpclient</shadedPattern>
                 </relocation>
               </relocations>
-              <filters>
-                <filter>
-                  <artifact>commons-logging:commons-logging</artifact>
-                  <excludes>
-                    <exclude>META-INF/**</exclude>
-                  </excludes>
-                </filter>
-                <filter>
-                  <artifact>commons-codec:commons-codec</artifact>
-                  <excludes>
-                    <exclude>META-INF/**</exclude>
-                  </excludes>
-                </filter>
-                <filter>
-                  <artifact>commons-httpclient:commons-httpclient</artifact>
-                  <excludes>
-                    <exclude>META-INF/**</exclude>
-                  </excludes>
-                </filter>
-              </filters>
             </configuration>
           </execution>
         </executions>
