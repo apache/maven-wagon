@@ -105,7 +105,7 @@ public class FileWagon
         outputData.setOutputStream( outputStream );
     }
 
-    public void openConnection()
+    protected void openConnectionInternal()
         throws ConnectionException
     {
         if ( getRepository() == null )

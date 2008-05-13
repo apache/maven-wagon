@@ -93,6 +93,12 @@ public abstract class AbstractWagon
     // Connection
     // ----------------------------------------------------------------------
 
+    public void openConnection()
+        throws ConnectionException, AuthenticationException
+    {
+        openConnectionInternal();
+    }
+
     public void connect( Repository repository )
         throws ConnectionException, AuthenticationException
     {
@@ -145,10 +151,13 @@ public abstract class AbstractWagon
 
         fireSessionOpening();
 
-        openConnection();
+        openConnectionInternal();
 
         fireSessionOpened();
     }
+
+    protected abstract void openConnectionInternal()
+        throws ConnectionException, AuthenticationException;
 
     public void disconnect()
         throws ConnectionException

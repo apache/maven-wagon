@@ -62,10 +62,10 @@ public abstract class AbstractGanymedWagon
     
     protected Connection connection;
 
-    public void openConnection()
+    public void openConnectionInternal()
         throws AuthenticationException
     {
-        super.openConnection();
+        super.openConnectionInternal();
 
         String host = getRepository().getHost();
         int port = getPort();
@@ -207,6 +207,8 @@ public abstract class AbstractGanymedWagon
 
     public void closeConnection()
     {
+        super.closeConnection();
+        
         if ( connection != null )
         {
             connection.close();

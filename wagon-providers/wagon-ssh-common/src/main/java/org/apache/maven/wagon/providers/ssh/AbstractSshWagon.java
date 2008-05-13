@@ -149,7 +149,7 @@ public abstract class AbstractSshWagon
         return new Resource( r );
     }
 
-    public void openConnection()
+    protected void openConnectionInternal()
         throws AuthenticationException
     {
         if ( authenticationInfo == null )
@@ -161,6 +161,11 @@ public abstract class AbstractSshWagon
         {
             authenticationInfo.setUserName( System.getProperty( "user.name" ) );
         }
+    }
+
+    public void closeConnection()
+    {
+        // nothing to disconnect
     }
 
     protected File getPrivateKey()

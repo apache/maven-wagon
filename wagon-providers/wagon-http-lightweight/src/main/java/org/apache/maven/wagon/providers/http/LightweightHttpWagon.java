@@ -184,11 +184,9 @@ public class LightweightHttpWagon
         }
     }
 
-
-    public void openConnection()
+    protected void openConnectionInternal()
         throws ConnectionException, AuthenticationException
     {
-
         previousHttpProxyHost = System.getProperty( "http.proxyHost" );
         previousHttpProxyPort = System.getProperty( "http.proxyPort" );
         previousProxyExclusions = System.getProperty( "http.nonProxyHosts" );

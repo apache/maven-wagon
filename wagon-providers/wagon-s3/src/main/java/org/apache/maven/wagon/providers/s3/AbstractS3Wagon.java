@@ -63,7 +63,7 @@ public abstract class AbstractS3Wagon
 
     private S3Bucket bucket;
 
-    public void openConnection()
+    protected void openConnectionInternal()
         throws ConnectionException, AuthenticationException
     {
         if( authenticationInfo == null )

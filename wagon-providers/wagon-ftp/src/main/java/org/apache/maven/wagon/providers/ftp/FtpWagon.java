@@ -61,7 +61,7 @@ public class FtpWagon
 {
     private FTPClient ftp;
 
-    public void openConnection()
+    protected void openConnectionInternal()
         throws ConnectionException, AuthenticationException
     {
         AuthenticationInfo authInfo = getAuthenticationInfo();

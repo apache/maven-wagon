@@ -156,5 +156,11 @@ public class PutInputStreamTest
         {
             return false;
         }
+
+        protected void openConnectionInternal()
+            throws ConnectionException, AuthenticationException
+        {
+            
+        }
     }
 }

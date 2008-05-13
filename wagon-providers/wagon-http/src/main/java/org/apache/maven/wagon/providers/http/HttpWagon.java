@@ -69,7 +69,7 @@ public class HttpWagon
 
     private HttpConnectionManager connectionManager;
 
-    public void openConnection()
+    protected void openConnectionInternal()
     {
         client = new HttpClient( connectionManager );
 

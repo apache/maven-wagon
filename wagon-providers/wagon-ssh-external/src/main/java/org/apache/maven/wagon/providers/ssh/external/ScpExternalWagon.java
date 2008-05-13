@@ -19,13 +19,16 @@ package org.apache.maven.wagon.providers.ssh.external;
  * under the License.
  */
 
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
 import org.apache.maven.wagon.CommandExecutionException;
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.PermissionModeUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.Streams;
 import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.providers.ssh.AbstractSshWagon;
@@ -36,10 +39,6 @@ import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.cli.CommandLineException;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
 import org.codehaus.plexus.util.cli.Commandline;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
 
 /**
  * SCP deployer using "external" scp program.  To allow for
@@ -89,19 +88,6 @@ public class ScpExternalWagon
     // ----------------------------------------------------------------------
     //
     // ----------------------------------------------------------------------
-
-    public void openConnection()
-        throws AuthenticationException
-    {
-        super.openConnection();
-
-        // nothing to connect to
-    }
-
-    public void closeConnection()
-    {
-        // nothing to disconnect
-    }
 
     public Streams executeCommand( String command, boolean ignoreFailures )
         throws CommandExecutionException

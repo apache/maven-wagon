@@ -104,7 +104,7 @@ public class WagonMock
         return false;
     }
 
-    public void openConnection()
+    public void openConnectionInternal()
     {
     }
 

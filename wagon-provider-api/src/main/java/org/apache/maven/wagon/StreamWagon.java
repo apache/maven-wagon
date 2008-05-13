@@ -19,14 +19,13 @@ package org.apache.maven.wagon;
  * under the License.
  */
 
-import org.apache.maven.wagon.authentication.AuthenticationException;
-import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.IOUtil;
-
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.resource.Resource;
+import org.codehaus.plexus.util.IOUtil;
 
 /**
  * Base class for wagon which provide stream based API.
@@ -46,9 +45,6 @@ public abstract class StreamWagon
 
     public abstract void fillOutputData( OutputData outputData )
         throws TransferFailedException;
-
-    public abstract void openConnection()
-        throws ConnectionException, AuthenticationException;
 
     public abstract void closeConnection()
         throws ConnectionException;

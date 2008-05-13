@@ -116,7 +116,7 @@ public class WebDavWagon
      * @throws AuthenticationException
      * @throws ConnectionException
      */
-    public void openConnection()
+    public void openConnectionInternal()
         throws AuthenticationException, ConnectionException
     {
         final boolean hasProxy = ( proxyInfo != null && proxyInfo.getUserName() != null );

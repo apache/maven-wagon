@@ -85,10 +85,10 @@ public abstract class AbstractJschWagon
 
     protected static final String EXEC_CHANNEL = "exec";
 
-    public void openConnection()
+    public void openConnectionInternal()
         throws AuthenticationException
     {
-        super.openConnection();
+        super.openConnectionInternal();
 
         if ( !interactive )
         {
@@ -231,6 +231,8 @@ public abstract class AbstractJschWagon
 
     public void closeConnection()
     {
+        super.closeConnection();
+        
         if ( session != null )
         {
             session.disconnect();
