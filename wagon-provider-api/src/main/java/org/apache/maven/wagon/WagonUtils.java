@@ -139,21 +139,10 @@ public class WagonUtils
             authInfo.setPassphrase( "" );
         }
 
-        // TODO: what about modes?
-
-//        authInfo.setGroup( getUserGroup() );
+        // TODO: what about modes, groups?
 
         return authInfo;
     }
-
-    private static String getUserGroup()
-    {
-        // TODO: this isn't a normal system property
-        String retValue = System.getProperty( "user.group" );
-
-        return retValue;
-    }
-
 
     public static String getUserName()
     {

@@ -19,20 +19,13 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
  
-import org.codehaus.plexus.PlexusTestCase;
-import org.codehaus.plexus.util.FileUtils;
-import org.mortbay.http.HttpServer;
-import org.mortbay.http.SocketListener;
-import org.mortbay.http.HttpContext;
-import org.mortbay.http.handler.ResourceHandler;
-import org.mortbay.jetty.servlet.ServletHandler;
-import org.apache.maven.wagon.Wagon;
+import java.io.File;
+
 import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.ResourceDoesNotExistException;
+import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.repository.Repository;
-
-import java.io.File;
+import org.mortbay.jetty.servlet.ServletHandler;
 
 /**
  * User: jdumay

@@ -47,8 +47,6 @@ public class SessionListenerMock
 
     private String message;
 
-    private boolean connectionErrorCalled;
-
     public boolean isSessionDisconnectedCalled()
     {
         return connectionDisconnectedCalled;
@@ -164,8 +162,6 @@ public class SessionListenerMock
 
     public void sessionError( final SessionEvent connectionEvent )
     {
-        connectionErrorCalled = true;
-
         this.sessionEvent = connectionEvent;
     }
 

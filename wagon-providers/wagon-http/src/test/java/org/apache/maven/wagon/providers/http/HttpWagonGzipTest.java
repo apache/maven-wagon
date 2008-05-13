@@ -27,16 +27,8 @@ import java.util.zip.GZIPOutputStream;
 
 import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.PlexusTestCase;
-import org.mortbay.http.HttpContext;
-import org.mortbay.http.HttpServer;
-import org.mortbay.http.SocketListener;
-import org.mortbay.http.handler.ResourceHandler;
-
-import junit.framework.TestCase;
 
 public class HttpWagonGzipTest extends HttpWagonHttpServerTestCase
 {

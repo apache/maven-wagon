@@ -20,8 +20,8 @@ package org.apache.maven.wagon.repository;
  */
 
 import junit.framework.TestCase;
+
 import org.apache.maven.wagon.WagonConstants;
-import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
 /**
  * @author <a href="mailto:jvanzyl@maven.org">Jason van Zyl</a>
