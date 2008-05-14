@@ -373,7 +373,6 @@ public class WebDavWagon
             }
 
             webdavResource.setPath( destinationPath );
-
         }
         catch ( HttpException e )
         {
@@ -465,13 +464,7 @@ public class WebDavWagon
 
         String url = getRepository().getUrl() + "/" + resourceName;
 
-        webdavResource.addRequestHeader( "X-wagon-provider", "wagon-webdav" );
-        webdavResource.addRequestHeader( "X-wagon-version", wagonVersion );
-
-        webdavResource.addRequestHeader( "Cache-control", "no-cache" );
-        webdavResource.addRequestHeader( "Cache-store", "no-store" );
-        webdavResource.addRequestHeader( "Pragma", "no-cache" );
-        webdavResource.addRequestHeader( "Expires", "0" );
+        addRequestHeaders();
         webdavResource.addRequestHeader( "Accept-Encoding", "gzip" );
 
         if ( timestamp > 0 )
@@ -600,7 +593,6 @@ public class WebDavWagon
     public void putDirectory( File sourceDirectory, String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-
         File[] listFiles = sourceDirectory.listFiles();
 
         for ( int i = 0; i < listFiles.length; i++ )
@@ -622,13 +614,7 @@ public class WebDavWagon
     public List getFileList( String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        webdavResource.addRequestHeader( "X-wagon-provider", "wagon-webdav" );
-        webdavResource.addRequestHeader( "X-wagon-version", wagonVersion );
-
-        webdavResource.addRequestHeader( "Cache-control", "no-cache" );
-        webdavResource.addRequestHeader( "Cache-store", "no-store" );
-        webdavResource.addRequestHeader( "Pragma", "no-cache" );
-        webdavResource.addRequestHeader( "Expires", "0" );
+        addRequestHeaders();
 
         String basedir = repository.getBasedir();
 
@@ -698,6 +684,17 @@ public class WebDavWagon
         {
             throw new TransferFailedException( "Unable to obtain file list from WebDAV collection.", e );
         }
+    }
+
+    private void addRequestHeaders()
+    {
+        webdavResource.addRequestHeader( "X-wagon-provider", "wagon-webdav" );
+        webdavResource.addRequestHeader( "X-wagon-version", wagonVersion );
+
+        webdavResource.addRequestHeader( "Cache-control", "no-cache" );
+        webdavResource.addRequestHeader( "Cache-store", "no-store" );
+        webdavResource.addRequestHeader( "Pragma", "no-cache" );
+        webdavResource.addRequestHeader( "Expires", "0" );
     }
 
     public boolean resourceExists( String resourceName )
