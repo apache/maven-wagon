@@ -72,13 +72,31 @@ public class LightweightHttpWagon
      */
     private boolean useCache;
 
+    /**
+     * Builds a complete URL string from the repository URL and the relative path passed.
+     * 
+     * @param path the relative path
+     * @return the complete URL
+     */
+    private String buildUrl( String path )
+    {
+        final String repoUrl = getRepository().getUrl();
+
+        if ( repoUrl.charAt( repoUrl.length() - 1 ) != '/' )
+        {
+            return repoUrl + '/' + path;
+        }
+
+        return repoUrl + path;
+    }    
+
     public void fillInputData( InputData inputData )
         throws TransferFailedException, ResourceDoesNotExistException
     {
         Resource resource = inputData.getResource();
         try
         {
-            URL url = resolveResourceURL( resource );
+            URL url = new URL( buildUrl( resource.getName() ) );
             URLConnection urlConnection = url.openConnection();
             urlConnection.setRequestProperty( "Accept-Encoding", "gzip" );
             if ( !useCache )
@@ -116,7 +134,7 @@ public class LightweightHttpWagon
         Resource resource = outputData.getResource();
         try
         {
-            URL url = resolveResourceURL( resource );
+            URL url = new URL( buildUrl( resource.getName() ) );
             putConnection = (HttpURLConnection) url.openConnection();
 
             putConnection.setRequestMethod( "PUT" );
@@ -129,24 +147,6 @@ public class LightweightHttpWagon
         }
     }
 
-    private URL resolveResourceURL( Resource resource )
-        throws MalformedURLException
-    {
-        String repositoryUrl = getRepository().getUrl();
-        
-        URL url;
-        if ( repositoryUrl.endsWith( "/" ) )
-        {
-            url = new URL( repositoryUrl + resource.getName() );
-        }
-        else
-        {
-            url = new URL( repositoryUrl + "/" + resource.getName() );
-        }
-        return url;
-    }
-
-
     public void put( File source, String resourceName )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
@@ -154,7 +154,7 @@ public class LightweightHttpWagon
 
         try
         {
-            String url = getRepository().getUrl() + "/" + resourceName;
+            String url = buildUrl( resourceName );
             int statusCode = putConnection.getResponseCode();
 
             switch ( statusCode )
@@ -269,7 +269,7 @@ public class LightweightHttpWagon
             destinationDirectory += "/";
         }
 
-        String url = getRepository().getUrl() + "/" + destinationDirectory;
+        String url = buildUrl( destinationDirectory );
 
         Resource resource = new Resource( destinationDirectory );
 
@@ -294,7 +294,7 @@ public class LightweightHttpWagon
         
         try
         {
-            URL url = resolveResourceURL( new Resource(resourceName) );
+            URL url = new URL( buildUrl( new Resource(resourceName).getName() ) );
             headConnection = (HttpURLConnection) url.openConnection();
     
             headConnection.setRequestMethod( "HEAD" );

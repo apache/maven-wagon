@@ -41,7 +41,7 @@ public class LightweightHttpWagonTest
 
     protected String getTestRepositoryUrl()
     {
-        return "http://localhost:10007";
+        return "http://localhost:10007/";
     }
 
     protected void setupWagonTestingFixtures()
