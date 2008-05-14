@@ -21,7 +21,10 @@ package org.apache.maven.wagon.providers.webdav;
 
 import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.WagonTestCase;
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.codehaus.plexus.util.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,7 +56,7 @@ public class WebDavWagonTest
     {
         if ( System.getProperty( "basedir" ) == null )
         {
-            fail( "System property 'basedir' must be set for the web server to run properly" );
+            System.setProperty( "basedir", System.getProperty( "user.dir" ) );
         }
 
         File file = FileTestUtils.createUniqueFile( "dav-repository", "test-resource" );
@@ -98,5 +101,4 @@ public class WebDavWagonTest
 
         tearDownWagonTestingFixtures();
     }
-
 }
