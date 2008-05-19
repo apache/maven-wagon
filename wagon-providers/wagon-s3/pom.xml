@@ -31,10 +31,6 @@
   <artifactId>wagon-s3</artifactId>
   <name>Maven Wagon Amazon S3 Provider</name>
   <description>Wagon that gets and puts artifacts using the Amazon S3 protocol</description>
-  <issueManagement>
-    <system>jira</system>
-    <url>http://jira.codehaus.org/browse/WAGON</url>
-  </issueManagement>
 
   <build>
     <plugins>

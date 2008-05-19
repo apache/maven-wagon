@@ -33,8 +33,4 @@
   <description>
     Wagon that gets and puts artifacts using file system protocol
   </description>
-  <issueManagement>
-    <system>jira</system>
-    <url>http://jira.codehaus.org/browse/WAGONFILE</url>
-  </issueManagement>
 </project>

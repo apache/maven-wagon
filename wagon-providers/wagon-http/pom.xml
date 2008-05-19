@@ -34,11 +34,6 @@
     Wagon that gets and puts artifacts through http using Apache commons-httpclient
   </description>
 
-  <issueManagement>
-    <system>jira</system>
-    <url>http://jira.codehaus.org/browse/WAGONHTTP</url>
-  </issueManagement>
-
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>

@@ -31,11 +31,6 @@
   <artifactId>wagon-ssh</artifactId>
   <name>Maven Wagon SSH Provider</name>
 
-  <issueManagement>
-    <system>jira</system>
-    <url>http://jira.codehaus.org/browse/WAGONSSH</url>
-  </issueManagement>
-
   <build>
     <plugins>
       <plugin>
