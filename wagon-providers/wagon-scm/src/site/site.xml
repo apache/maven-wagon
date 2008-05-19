@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="Wagon SCM">
+  <body>
+    <menu name="Wagon SCM">
+      <item name="Introduction" href="index.html"/>
+      <item name="Usage" href="usage.html"/>
+    </menu>
+    ${reports}
+  </body>
+</project>
