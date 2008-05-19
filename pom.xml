@@ -207,4 +207,36 @@
     </distributionManagement>
   -->
 
+  <contributors>
+    <contributor>
+      <name>James William Dumay</name>
+    </contributor>
+    <contributor>
+      <name>Nathan Beyer</name>
+    </contributor>
+    <contributor>
+      <name>Gregory Block</name>
+    </contributor>
+    <contributor>
+      <name>Thomas Recloux</name>
+    </contributor>
+    <contributor>
+      <name>Trustin Lee</name>
+    </contributor>
+    <contributor>
+      <name>John Wells</name>
+    </contributor>
+    <contributor>
+      <name>Marcel Schutte</name>
+    </contributor>
+    <contributor>
+      <name>David Hawkins</name>
+    </contributor>
+    <contributor>
+      <name>Juan F. Codagnone</name>
+    </contributor>
+    <contributor>
+      <name>ysoonleo</name>
+    </contributor>
+  </contributors>
 </project>
