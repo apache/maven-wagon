@@ -1,12 +1,12 @@
  ------
- Maven Wagon SCM
+ Usage
  ------
  Eric Redmond
  ------
 
-Maven Wagon S3 Usage
+Usage
 
- Add the following extensions to your pom, and set the <<<distributionManagement>>> <<<url>>> to <<<s3soap://>>> followed by the name of your S3 bucket.
+ Add the following extensions to your POM, and set the <<<distributionManagement>>> <<<url>>> to <<<s3soap://>>> followed by the name of your S3 bucket.
 
 ------
   <build>

@@ -18,12 +18,11 @@
   ~ under the License.
   -->
 
-<project name="Wagon S3">
+<project>
   <body>
-    <menu name="Wagon S3">
+    <menu name="Overview">
       <item name="Introduction" href="index.html"/>
       <item name="Usage" href="usage.html"/>
     </menu>
-    ${reports}
   </body>
 </project>
