@@ -94,7 +94,8 @@ public abstract class StreamWagon
 
         InputStream is = inputData.getInputStream();
 
-        if ( resource.getLastModified() > timestamp )
+        // always get if timestamp is 0 (ie, target doesn't exist), otherwise only if older than the remote file
+        if ( timestamp == 0 || timestamp < resource.getLastModified() )
         {
             retValue = true;
 
