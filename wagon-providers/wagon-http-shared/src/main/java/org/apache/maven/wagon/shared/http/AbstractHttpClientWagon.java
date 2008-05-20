@@ -36,6 +36,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpConnectionManager;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.NTCredentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -65,7 +66,7 @@ public abstract class AbstractHttpClientWagon extends AbstractWagon
 
     private HttpClient client;
 
-    protected HttpConnectionManager connectionManager;
+    protected HttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
 
     public void openConnectionInternal()
     {

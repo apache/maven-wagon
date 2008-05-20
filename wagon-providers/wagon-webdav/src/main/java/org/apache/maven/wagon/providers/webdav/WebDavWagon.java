@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.MultiStatus;
@@ -55,6 +56,10 @@ import org.w3c.dom.Node;
  * @author <a href="mailto:joakime@apache.org">Joakim Erdfelt</a>
  * @author <a href="mailto:carlos@apache.org">Carlos Sanchez</a>
  * @author <a href="mailto:james@atlassian.com>James William Dumay</a>
+ * 
+ * @plexus.component role="org.apache.maven.wagon.Wagon" 
+ *   role-hint="dav"
+ *   instantiation-strategy="per-lookup"
  */
 public class WebDavWagon
     extends AbstractHttpClientWagon
