@@ -123,24 +123,29 @@ public class WebDavWagon
         String relpath = FileUtils.normalize( getPath( basedir, dir ) + "/" );
 
         PathNavigator navigator = new PathNavigator(relpath);
-        while (navigator.backward())
+        
+        // traverse backwards until we hit a directory that already exists (OK/NOT_ALLOWED), or that we were able to 
+        // create (CREATED), or until we get to the top of the path
+        int status = SC_NULL;        
+        while ( navigator.backward() )
         {
-            int status = SC_NULL;
-            String url = getUrl(navigator);
-            status = doMkCol(url);
-
-            //If collection has been created or exists
-            if (status == HttpStatus.SC_OK
-                    || status == HttpStatus.SC_CREATED
-                    || status == HttpStatus.SC_METHOD_NOT_ALLOWED)
+            String url = getUrl( navigator );
+            status = doMkCol( url );
+            if ( status == HttpStatus.SC_OK || status == HttpStatus.SC_CREATED
+                || status == HttpStatus.SC_METHOD_NOT_ALLOWED )
             {
-                while (navigator.forward())
-                {
-                    status = SC_NULL;
-                    url = getUrl(navigator);
-                    status = doMkCol(url);
-                }
                 break;
+            }
+        }
+
+        // traverse forward creating missing directories
+        while ( navigator.forward() )
+        {
+            String url = getUrl( navigator );
+            status = doMkCol( url );
+            if ( status != HttpStatus.SC_OK && status != HttpStatus.SC_CREATED )
+            {
+                throw new TransferFailedException( "Unable to create collection: " + url + "; status code = " + status );
             }
         }
     }
