@@ -28,15 +28,14 @@ import java.util.zip.GZIPOutputStream;
 import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.repository.Repository;
+import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.util.FileUtils;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpServer;
 import org.mortbay.http.SocketListener;
 import org.mortbay.http.handler.ResourceHandler;
 
-import junit.framework.TestCase;
-
-public class WebDavWagonGzipTest extends TestCase 
+public class WebDavWagonGzipTest extends PlexusTestCase
 {
     public void testGzipGet() throws Exception 
     {
@@ -57,7 +56,7 @@ public class WebDavWagonGzipTest extends TestCase
 
         try 
         {
-            Wagon wagon = new WebDavWagon();
+            Wagon wagon = (Wagon)lookup("org.apache.maven.wagon.Wagon", "dav");
 
             Repository testRepository = new Repository();
 

@@ -34,12 +34,6 @@ public class WagonEvent
     extends EventObject
 {
     /**
-     * Repository to which the Wagon
-     * object which emitted this event is connected
-     */
-    protected Repository repository;
-
-    /**
      * The time when event occured
      */
     protected long timestamp;

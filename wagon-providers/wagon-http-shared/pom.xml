@@ -17,7 +17,7 @@
   ~ KIND, either express or implied.  See the License for the
   ~ specific language governing permissions and limitations
   ~ under the License.
-  -->
+-->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -31,19 +31,20 @@
   <artifactId>wagon-http-shared</artifactId>
   <name>Maven Wagon HTTP Shared Library</name>
   <description>
-    Shared Library for the wagon-http, and wagon-http-lightweight wagon providers.
+    Shared Library for the wagon-http, and wagon-http-lightweight wagon
+    providers.
   </description>
-
-  <issueManagement>
-    <system>jira</system>
-    <url>http://jira.codehaus.org/browse/WAGONHTTP</url>
-  </issueManagement>
 
   <dependencies>
     <dependency>
       <groupId>jtidy</groupId>
       <artifactId>jtidy</artifactId>
       <version>4aug2000r7-dev</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-httpclient</groupId>
+      <artifactId>commons-httpclient</artifactId>
+      <version>3.1</version>
     </dependency>
   </dependencies>
 </project>

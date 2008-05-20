@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.webdav;
+package org.apache.maven.wagon.shared.http;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -139,7 +139,7 @@ public class PutInputStreamTest
             
         }
 
-        public void openConnection()
+        public void openConnectionInternal()
             throws ConnectionException, AuthenticationException
         {
 
@@ -155,12 +155,6 @@ public class PutInputStreamTest
             throws TransferFailedException, AuthorizationException
         {
             return false;
-        }
-
-        protected void openConnectionInternal()
-            throws ConnectionException, AuthenticationException
-        {
-            
         }
     }
 }

@@ -252,11 +252,56 @@ public class TransferEvent
 
         sb.append( "|" );
 
-        sb.append( this.repository ).append( "|" );
+        sb.append( this.getWagon().getRepository() ).append( "|" );
         sb.append( this.getLocalFile() ).append( "|" );
         sb.append( this.getResource() );
         sb.append( "]" );
 
         return sb.toString();
     }
+
+    public int hashCode()
+    {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + eventType;
+        result = prime * result + ( ( exception == null ) ? 0 : exception.hashCode() );
+        result = prime * result + ( ( localFile == null ) ? 0 : localFile.hashCode() );
+        result = prime * result + requestType;
+        result = prime * result + ( ( resource == null ) ? 0 : resource.hashCode() );
+        return result;
+    }
+
+    public boolean equals( Object obj )
+    {
+        if ( this == obj )
+            return true;
+        if ( obj == null )
+            return false;
+        if ( getClass() != obj.getClass() )
+            return false;
+        final TransferEvent other = (TransferEvent) obj;
+        if ( eventType != other.eventType )
+            return false;
+        if ( exception == null )
+        {
+            if ( other.exception != null )
+                return false;
+        }
+        else if ( !exception.equals( other.exception ) )
+            return false;
+        if ( requestType != other.requestType )
+            return false;
+        if ( resource == null )
+        {
+            if ( other.resource != null )
+                return false;
+        }
+        else if ( !resource.equals( other.resource ) )
+            return false;
+        else if ( !source.equals( other.source ) )
+            return false;
+        return true;
+    }
+    
 }
