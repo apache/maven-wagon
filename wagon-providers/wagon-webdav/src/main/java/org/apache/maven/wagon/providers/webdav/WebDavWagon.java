@@ -94,7 +94,7 @@ public class WebDavWagon
         //Parent directories need to be created before posting
         mkdirs( dir );
 
-        super.put(source, resourceName, false);
+        super.put(source, resource);
     }
 
     /**

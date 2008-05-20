@@ -257,6 +257,10 @@ public abstract class AbstractWagon
     protected void putTransfer( Resource resource, File source, OutputStream output, boolean closeOutput )
         throws TransferFailedException
     {
+        resource.setContentLength( source.length() );
+
+        resource.setLastModified( source.lastModified() );
+
         firePutStarted( resource, source );
 
         transfer( resource, source, output, closeOutput );
@@ -278,10 +282,6 @@ public abstract class AbstractWagon
     protected void transfer( Resource resource, File source, OutputStream output, boolean closeOutput )
         throws TransferFailedException
     {
-        resource.setContentLength( source.length() );
-
-        resource.setLastModified( source.lastModified() );
-
         InputStream input = null;
 
         try
@@ -346,6 +346,7 @@ public abstract class AbstractWagon
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
         TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_PROGRESS, requestType );
+        transferEvent.setTimestamp( System.currentTimeMillis() );
 
         int remaining = maxSize;
         while ( remaining > 0 )
@@ -626,6 +627,8 @@ public abstract class AbstractWagon
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
         TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_PROGRESS, requestType );
+        transferEvent.setTimestamp( System.currentTimeMillis() );
+        transferEvent.setLocalFile( source );
 
         try
         {

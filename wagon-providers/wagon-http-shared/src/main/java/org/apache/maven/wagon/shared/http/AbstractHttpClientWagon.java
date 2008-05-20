@@ -19,31 +19,39 @@ package org.apache.maven.wagon.shared.http;
  * under the License.
  */
 
-import org.apache.maven.wagon.AbstractWagon;
-import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.ResourceDoesNotExistException;
-import org.apache.maven.wagon.repository.Repository;
-import org.apache.maven.wagon.events.TransferEvent;
-import org.apache.maven.wagon.resource.Resource;
-import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.apache.commons.httpclient.*;
-import org.apache.commons.httpclient.util.DateParser;
-import org.apache.commons.httpclient.util.DateParseException;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.zip.GZIPInputStream;
+
+import org.apache.commons.httpclient.Credentials;
+import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HostConfiguration;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpConnectionManager;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.NTCredentials;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.httpclient.util.DateParseException;
+import org.apache.commons.httpclient.util.DateParser;
+import org.apache.maven.wagon.AbstractWagon;
+import org.apache.maven.wagon.ResourceDoesNotExistException;
+import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.events.TransferEvent;
+import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
-
-import java.util.TimeZone;
-import java.util.Locale;
-import java.util.Date;
-import java.util.zip.GZIPInputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.FileNotFoundException;
-import java.text.SimpleDateFormat;
+import org.codehaus.plexus.util.StringUtils;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -228,6 +236,8 @@ public abstract class AbstractHttpClientWagon extends AbstractWagon
                 try
                 {
                     lastModified = DateParser.parseDate( lastModifiedHeader.getValue() ).getTime();
+                    
+                    resource.setLastModified( lastModified );
                 }
                 catch ( DateParseException e )
                 {
@@ -299,19 +309,21 @@ public abstract class AbstractHttpClientWagon extends AbstractWagon
     public void put( File source, String resourceName )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        put(source, resourceName, true);
+        Resource resource = new Resource( resourceName );
+        
+        firePutInitiated( resource, source );
+
+        put(source, resource);
     }
 
-    protected void put( File source, String resourceName, boolean firePutInitiated )
+    protected void put( File source, Resource resource )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        String url = getRepository().getUrl() + "/" + resourceName;
-        Resource resource = new Resource( resourceName );
-
-        if (firePutInitiated)
-        {
-            firePutInitiated( resource, source );
-        }
+        resource.setContentLength( source.length() );
+        
+        resource.setLastModified( source.lastModified() );
+        
+        String url = getRepository().getUrl() + "/" + resource.getName();
 
         PutMethod putMethod = new PutMethod( url );
         InputStream is = null;
@@ -329,6 +341,8 @@ public abstract class AbstractHttpClientWagon extends AbstractWagon
 
         try
         {
+            firePutStarted( resource, source );
+            
             int statusCode = execute( putMethod );
 
             fireTransferDebug( url + " - Status code: " + statusCode );

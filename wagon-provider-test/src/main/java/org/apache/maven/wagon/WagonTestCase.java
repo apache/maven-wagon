@@ -21,12 +21,18 @@ package org.apache.maven.wagon;
 
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.events.TransferEvent;
+import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.observers.ChecksumObserver;
 import org.apache.maven.wagon.observers.Debug;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
+import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.util.FileUtils;
+import org.easymock.AbstractMatcher;
+import org.easymock.ArgumentsMatcher;
+import org.easymock.MockControl;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,6 +47,31 @@ import java.util.List;
 public abstract class WagonTestCase
     extends PlexusTestCase
 {
+    private static final class ProgressArgumentMatcher
+        extends AbstractMatcher
+    {
+        private int size;
+
+        protected boolean argumentMatches( Object expected, Object actual )
+        {
+            if ( actual instanceof byte[] )
+            {
+                return true;
+            }
+            if ( actual instanceof Integer )
+            {
+                size += ((Integer) actual).intValue();
+                return true;
+            }
+            return super.argumentMatches( expected, actual );
+        }
+        
+        public int getSize()
+        {
+            return size;
+        }
+    }
+
     protected static String POM = "pom.xml";
 
     protected Repository localRepository;
@@ -60,6 +91,10 @@ public abstract class WagonTestCase
     protected File artifactDestFile;
 
     protected ChecksumObserver checksumObserver;
+    
+    protected TransferListener mockTransferListener;
+    
+    protected MockControl mockTransferListenerControl;
 
     // ----------------------------------------------------------------------
     // Constructors
@@ -69,6 +104,9 @@ public abstract class WagonTestCase
         throws Exception
     {
         checksumObserver = new ChecksumObserver();
+        
+        mockTransferListenerControl = MockControl.createControl( TransferListener.class ); 
+        mockTransferListener = (TransferListener) mockTransferListenerControl.getMock();
 
         super.setUp();
     }
@@ -593,51 +631,130 @@ public abstract class WagonTestCase
     protected void putFile( String resourceName, String testFileName, String content )
         throws Exception
     {
-        message( "Putting test artifact: " + resourceName + " into test repository " + testRepository );
-
-        Wagon wagon = getWagon();
-
-        wagon.addTransferListener( checksumObserver );
-
-        wagon.connect( testRepository, getAuthInfo() );
-
         sourceFile = new File( FileTestUtils.getTestOutputDir(), testFileName );
         sourceFile.getParentFile().mkdirs();
         FileUtils.fileWrite( sourceFile.getAbsolutePath(), content );
 
-        wagon.put( sourceFile, resourceName );
-
-        wagon.removeTransferListener( checksumObserver );
-
-        wagon.disconnect();
-    }
-
-    protected void putFile()
-        throws Exception
-    {
-        putFile( resource, "test-resource", "test-resource.txt\n" );
-    }
-
-    protected void getFile()
-        throws Exception
-    {
-        message( "Getting test artifact from test repository " + testRepository );
-
         Wagon wagon = getWagon();
+
+        Resource resource = new Resource( resourceName );
+        mockTransferListener.transferInitiated( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_INITIATED,
+                                                                     TransferEvent.REQUEST_PUT, sourceFile ) );
+        resource = new Resource( resourceName );
+        resource.setContentLength( content.length() );
+        resource.setLastModified( sourceFile.lastModified() );
+        mockTransferListener.transferStarted( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED,
+                                                                   TransferEvent.REQUEST_PUT, sourceFile ) );
+        mockTransferListener.transferProgress( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS,
+                                                                    TransferEvent.REQUEST_PUT, sourceFile ),
+                                               new byte[] {}, 0 );
+        ProgressArgumentMatcher progressArgumentMatcher = new ProgressArgumentMatcher();
+        mockTransferListenerControl.setMatcher( progressArgumentMatcher );
+
+        mockTransferListener.debug( null );
+        mockTransferListenerControl.setMatcher( MockControl.ALWAYS_MATCHER );
+        mockTransferListenerControl.setVoidCallable( MockControl.ZERO_OR_MORE );
+        
+        mockTransferListener.transferCompleted( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_COMPLETED,
+                                                                     TransferEvent.REQUEST_PUT, sourceFile ) );
+        
+        mockTransferListenerControl.replay();
+        
+        message( "Putting test artifact: " + resourceName + " into test repository " + testRepository );
 
         wagon.addTransferListener( checksumObserver );
 
+        wagon.addTransferListener( mockTransferListener );
+
         wagon.connect( testRepository, getAuthInfo() );
 
-        destFile = FileTestUtils.createUniqueFile( getName(), getName() );
+        wagon.put( sourceFile, resourceName );
 
-        destFile.deleteOnExit();
-
-        wagon.get( resource, destFile );
-
+        wagon.removeTransferListener( mockTransferListener );
+        
         wagon.removeTransferListener( checksumObserver );
 
         wagon.disconnect();
+        
+        mockTransferListenerControl.verify();
+        
+        assertEquals( content.length(), progressArgumentMatcher.getSize() );
+        
+        mockTransferListenerControl.reset();
+    }
+
+    private TransferEvent createTransferEvent( Wagon wagon, Resource resource, int eventType, int requestType,
+                                               File file )
+    {
+        TransferEvent transferEvent = new TransferEvent( wagon, resource, eventType, requestType );
+        transferEvent.setLocalFile( file );
+        return transferEvent;
+    }
+
+    protected int putFile()
+        throws Exception
+    {
+        String content = "test-resource.txt\n";
+        putFile( resource, "test-resource", content );
+        return content.length();
+    }
+
+    protected void getFile(int expectedSize)
+        throws Exception
+    {
+        destFile = FileTestUtils.createUniqueFile( getName(), getName() );
+        destFile.deleteOnExit();
+
+        Wagon wagon = getWagon();
+
+        Resource resource = new Resource( this.resource );
+        mockTransferListener.transferInitiated( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_INITIATED,
+                                                                     TransferEvent.REQUEST_GET, destFile ) );
+        resource = new Resource( this.resource );
+        resource.setContentLength( expectedSize );
+        resource.setLastModified( getExpectedLastModifiedOnGet() );
+        mockTransferListener.transferStarted( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED,
+                                                                   TransferEvent.REQUEST_GET, destFile ) );
+        mockTransferListener.transferProgress( new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS,
+                                                                  TransferEvent.REQUEST_GET ), new byte[] {}, 0 );
+        ProgressArgumentMatcher progressArgumentMatcher = new ProgressArgumentMatcher();
+        mockTransferListenerControl.setMatcher( progressArgumentMatcher );
+        
+        mockTransferListener.debug( null );
+        mockTransferListenerControl.setMatcher( MockControl.ALWAYS_MATCHER );
+        mockTransferListenerControl.setVoidCallable( MockControl.ZERO_OR_MORE );
+        
+        mockTransferListener.transferCompleted( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_COMPLETED,
+                                                                     TransferEvent.REQUEST_GET, destFile ) );
+        
+        mockTransferListenerControl.replay();
+        
+        message( "Getting test artifact from test repository " + testRepository );
+
+        wagon.addTransferListener( checksumObserver );
+        
+        wagon.addTransferListener( mockTransferListener );
+
+        wagon.connect( testRepository, getAuthInfo() );
+
+        wagon.get( this.resource, destFile );
+
+        wagon.removeTransferListener( mockTransferListener );
+        
+        wagon.removeTransferListener( checksumObserver );
+
+        wagon.disconnect();
+        
+        mockTransferListenerControl.verify();
+        
+        assertEquals( expectedSize, progressArgumentMatcher.getSize() );
+        
+        mockTransferListenerControl.reset();
+    }
+
+    protected long getExpectedLastModifiedOnGet()
+    {
+        return sourceFile.lastModified();
     }
 
     protected void fileRoundTripTesting()
@@ -645,7 +762,7 @@ public abstract class WagonTestCase
     {
         message( "File round trip testing ..." );
 
-        putFile();
+        int expectedSize = putFile();
 
         assertNotNull( "check checksum is not null", checksumObserver.getActualChecksum() );
 
@@ -653,7 +770,7 @@ public abstract class WagonTestCase
 
         checksumObserver = new ChecksumObserver();
 
-        getFile();
+        getFile( expectedSize );
 
         assertNotNull( "check checksum is not null", checksumObserver.getActualChecksum() );
 

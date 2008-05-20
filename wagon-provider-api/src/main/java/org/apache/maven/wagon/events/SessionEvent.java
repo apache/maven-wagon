@@ -218,7 +218,7 @@ public class SessionEvent
         }
         sb.append( "|" );
 
-        sb.append( this.repository ).append( "|" );
+        sb.append( this.getWagon().getRepository() ).append( "|" );
         sb.append( this.source );
 
         if ( exception != null )

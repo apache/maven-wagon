@@ -45,5 +45,10 @@
       <artifactId>plexus-container-default</artifactId>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>easymock</groupId>
+      <artifactId>easymock</artifactId>
+      <version>1.2_Java1.3</version>
+    </dependency>
   </dependencies>
 </project>

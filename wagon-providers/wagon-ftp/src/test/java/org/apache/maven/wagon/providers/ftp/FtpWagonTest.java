@@ -37,6 +37,12 @@ public class FtpWagonTest
         return "ftp";
     }
 
+    protected long getExpectedLastModifiedOnGet()
+    {
+        // granularity for FTP is minutes
+        return ( sourceFile.lastModified() / 60000 ) * 60000;
+    }
+
     protected void setupWagonTestingFixtures()
         throws Exception
     {
