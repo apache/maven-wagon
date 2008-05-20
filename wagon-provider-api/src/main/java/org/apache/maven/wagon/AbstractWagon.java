@@ -29,6 +29,7 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferEventSupport;
 import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.proxy.ProxyInfo;
+import org.apache.maven.wagon.proxy.ProxyUtils;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
@@ -147,8 +148,15 @@ public abstract class AbstractWagon
 
         // TODO: Do these needs to be fields, or are they only used in openConnection()?
         this.authenticationInfo = authenticationInfo;
-        this.proxyInfo = proxyInfo;
-
+        this.proxyInfo = null;
+        if ( proxyInfo != null )
+        {
+            if ( !ProxyUtils.validateNonProxyHosts( proxyInfo, this.repository.getHost() ) )
+            {
+                this.proxyInfo = proxyInfo;
+            }
+        }
+        
         fireSessionOpening();
 
         openConnectionInternal();
