@@ -32,8 +32,6 @@ import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.apache.maven.wagon.events.TransferEvent;
-import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
 
 /**

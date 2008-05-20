@@ -19,10 +19,9 @@ package org.apache.maven.wagon.events;
  * under the License.
  */
 
-import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.repository.Repository;
-
 import java.util.EventObject;
+
+import org.apache.maven.wagon.Wagon;
 
 /**
  * Base class for all events emitted by <code>Wagon</code> objects.
