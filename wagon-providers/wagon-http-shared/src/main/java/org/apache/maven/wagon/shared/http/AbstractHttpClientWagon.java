@@ -331,7 +331,6 @@ public abstract class AbstractHttpClientWagon extends AbstractWagon
         try
         {
             is = new PutInputStream( source, resource, this, getTransferEventSupport() );
-            putMethod.setRequestBody( is );
         }
         catch ( FileNotFoundException e )
         {
@@ -339,6 +338,8 @@ public abstract class AbstractHttpClientWagon extends AbstractWagon
 
             throw new ResourceDoesNotExistException( "Source file does not exist: " + source, e );
         }
+
+        putMethod.setRequestBody( is );
 
         try
         {
