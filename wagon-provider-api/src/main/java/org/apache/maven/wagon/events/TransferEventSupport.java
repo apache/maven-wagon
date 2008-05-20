@@ -49,7 +49,7 @@ public final class TransferEventSupport
      * @see #removeTransferListener(org.apache.maven.wagon.events.TransferListener)
      * @see TransferListener
      */
-    public void addTransferListener( final TransferListener listener )
+    public synchronized void addTransferListener( final TransferListener listener )
     {
         if ( listener != null )
         {
@@ -68,7 +68,7 @@ public final class TransferEventSupport
      * @param listener the transfer listener
      * @see #addTransferListener(TransferListener)
      */
-    public void removeTransferListener( final TransferListener listener )
+    public synchronized void removeTransferListener( final TransferListener listener )
     {
         listeners.remove( listener );
     }
@@ -85,7 +85,7 @@ public final class TransferEventSupport
      * @see org.apache.maven.wagon.events.TransferEvent
      * @see #addTransferListener(TransferListener)
      */
-    public boolean hasTransferListener( final TransferListener listener )
+    public synchronized boolean hasTransferListener( final TransferListener listener )
     {
         return listeners.contains( listener );
     }
@@ -98,7 +98,7 @@ public final class TransferEventSupport
      *
      * @param transferEvent the TransferEvent which will be dispached to listeners
      */
-    public void fireTransferStarted( final TransferEvent transferEvent )
+    public synchronized void fireTransferStarted( final TransferEvent transferEvent )
     {
         for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
         {
@@ -116,7 +116,7 @@ public final class TransferEventSupport
      * @param buffer        the buffer containing the additional content
      * @param length        the length of the content in the buffer
      */
-    public void fireTransferProgress( final TransferEvent transferEvent, byte[] buffer, int length )
+    public synchronized void fireTransferProgress( final TransferEvent transferEvent, byte[] buffer, int length )
     {
         for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
         {
@@ -133,7 +133,7 @@ public final class TransferEventSupport
      *
      * @param transferEvent the TransferEvent which will be dispached to listeners
      */
-    public void fireTransferCompleted( final TransferEvent transferEvent )
+    public synchronized void fireTransferCompleted( final TransferEvent transferEvent )
     {
         for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
         {
@@ -151,7 +151,7 @@ public final class TransferEventSupport
      *
      * @param transferEvent the TransferEvent which will be dispached to listeners
      */
-    public void fireTransferError( final TransferEvent transferEvent )
+    public synchronized void fireTransferError( final TransferEvent transferEvent )
     {
         for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
         {
@@ -167,7 +167,7 @@ public final class TransferEventSupport
      *
      * @param message the debug message which will be dispached to listeners
      */
-    public void fireDebug( final String message )
+    public synchronized void fireDebug( final String message )
     {
 
         for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
@@ -185,7 +185,7 @@ public final class TransferEventSupport
      *
      * @param transferEvent the TransferEvent which will be dispached to listeners
      */
-    public void fireTransferInitiated( final TransferEvent transferEvent )
+    public synchronized void fireTransferInitiated( final TransferEvent transferEvent )
     {
         for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
         {
