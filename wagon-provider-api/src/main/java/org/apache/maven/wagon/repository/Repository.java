@@ -101,6 +101,12 @@ public class Repository
         this.id = id;
     }
 
+    /**
+     * Retrieve the base directory of the repository. This is derived from the full repository URL, and
+     * contains the entire path component.
+     * 
+     * @return the base directory
+     */
     public String getBasedir()
     {
         return basedir;

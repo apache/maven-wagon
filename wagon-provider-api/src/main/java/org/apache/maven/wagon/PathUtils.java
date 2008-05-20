@@ -281,8 +281,10 @@ public class PathUtils
     }
 
     /**
-     * @param url
-     * @return
+     * Derive the path portion of the given URL.
+     * 
+     * @param url the repository URL
+     * @return the basedir of the repository
      * @todo need to URL decode for spaces?
      */
     public static String basedir( String url )
