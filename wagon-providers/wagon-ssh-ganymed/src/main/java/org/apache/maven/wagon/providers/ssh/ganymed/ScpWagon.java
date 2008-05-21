@@ -47,7 +47,7 @@ import java.io.OutputStream;
  * We will first try to use public keys for authentication and if that doesn't
  * work then we fall back to using the login and password
  *
- * @version $Id: ScpWagon.java 430944 2006-08-12 02:02:20Z carlos $
+ * @version $Id$
  * @todo [BP] add compression flag
  * 
  * @plexus.component role="org.apache.maven.wagon.Wagon" 

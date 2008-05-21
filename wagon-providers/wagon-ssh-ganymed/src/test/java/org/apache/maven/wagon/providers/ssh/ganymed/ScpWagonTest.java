@@ -27,7 +27,7 @@ import java.io.File;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id: ScpWagonTest.java 312572 2005-10-10 07:17:58Z brett $
+ * @version $Id$
  */
 public class ScpWagonTest
     extends WagonTestCase

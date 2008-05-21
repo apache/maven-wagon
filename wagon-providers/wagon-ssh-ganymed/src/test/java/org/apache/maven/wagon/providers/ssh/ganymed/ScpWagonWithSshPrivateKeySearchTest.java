@@ -25,7 +25,7 @@ import org.apache.maven.wagon.providers.ssh.TestData;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id: ScpWagonWithSshPrivateKeySearchTest.java 312572 2005-10-10 07:17:58Z brett $
+ * @version $Id$
  */
 public class ScpWagonWithSshPrivateKeySearchTest
     extends WagonTestCase
