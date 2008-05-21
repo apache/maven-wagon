@@ -89,9 +89,9 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/branches/wagon-1.x</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/branches/wagon-1.x</developerConnection>
-    <url>https://svn.apache.org/repos/asf/maven/wagon/branches/wagon-1.x</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/wagon/trunk</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/trunk</developerConnection>
+    <url>http://svn.apache.org/viewvc/maven/wagon/trunk</url>
   </scm>
   <build>
     <pluginManagement>
