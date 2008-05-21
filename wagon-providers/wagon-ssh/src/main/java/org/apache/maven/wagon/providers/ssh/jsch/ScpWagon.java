@@ -268,7 +268,7 @@ public class ScpWagon
 
             if ( exitCode != COPY_START_CHAR )
             {
-                if ( exitCode == 1 && line.endsWith( "No such file or directory" ) )
+                if ( exitCode == 1 && line.indexOf( "No such file or directory" ) != -1 )
                 {
                     throw new ResourceDoesNotExistException( line );
                 }
