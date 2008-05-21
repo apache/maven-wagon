@@ -150,13 +150,13 @@ public class PathUtils
 
         final String protocol = PathUtils.protocol( url );
 
-        if ( protocol == null || protocol.equals( "file" ) )
+        if ( protocol == null || protocol.equalsIgnoreCase( "file" ) )
         {
             return "localhost";
         }
 
         String host = url;
-        if ( protocol.equals( "scm" ) )
+        if ( protocol.equalsIgnoreCase( "scm" ) )
         {
             // skip over type
             host = host.substring( host.indexOf( ":", 4 ) + 1 ).trim();
@@ -224,7 +224,7 @@ public class PathUtils
 
         final String protocol = PathUtils.protocol( url );
 
-        if ( protocol == null || protocol.equals( "file" ) )
+        if ( protocol == null || protocol.equalsIgnoreCase( "file" ) )
         {
             return WagonConstants.UNKNOWN_PORT;
         }
@@ -236,13 +236,13 @@ public class PathUtils
             return WagonConstants.UNKNOWN_PORT;
         }
 
-        if ( protocol.equals( "scm" ) )
+        if ( protocol.equalsIgnoreCase( "scm" ) )
         {
             // skip over type
             url = url.substring( url.indexOf( ":", 4 ) + 1 ).trim();
         }
 
-        if ( url.startsWith( "file:" ) || url.startsWith( "local:" ) )
+        if ( url.regionMatches( true, 0, "file:", 0, 5 ) || url.regionMatches( true, 0, "local:", 0, 6 ) )
         {
             return WagonConstants.UNKNOWN_PORT;
         }
@@ -293,17 +293,17 @@ public class PathUtils
 
         String retValue = null;
 
-        if ( protocol.equals( "scm" ) )
+        if ( protocol.equalsIgnoreCase( "scm" ) )
         {
             // skip over SCM bits
-            if ( url.startsWith( "scm:svn:" ) )
+            if ( url.regionMatches( true, 0, "scm:svn:", 0, 8 ) )
             {
                 url = url.substring( url.indexOf( ":", 4 ) + 1 );
                 protocol = PathUtils.protocol( url );
             }
         }
 
-        if ( protocol.equals( "file" ) )
+        if ( protocol.equalsIgnoreCase( "file" ) )
         {
             retValue = url.substring( protocol.length() + 1 );
             // special case: if omitted // on protocol, keep path as is
@@ -352,7 +352,7 @@ public class PathUtils
 
             int pos;
 
-            if ( protocol.equals( "scm" ) )
+            if ( protocol.equalsIgnoreCase( "scm" ) )
             {
                 pos = url.indexOf( ":", 4 ) + 1;
                 pos = url.indexOf( ":", pos ) + 1;
