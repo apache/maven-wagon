@@ -37,6 +37,8 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.util.Arrays;
 import java.util.List;
 
@@ -72,7 +74,7 @@ public class FileWagon
 
         try
         {
-            InputStream in = new FileInputStream( file );
+            InputStream in = new BufferedInputStream(new FileInputStream( file ));
 
             inputData.setInputStream( in );
 
@@ -100,7 +102,7 @@ public class FileWagon
 
         createParentDirectories( file );
 
-        OutputStream outputStream = new LazyFileOutputStream( file );
+        OutputStream outputStream = new BufferedOutputStream(new LazyFileOutputStream( file ));
 
         outputData.setOutputStream( outputStream );
     }
