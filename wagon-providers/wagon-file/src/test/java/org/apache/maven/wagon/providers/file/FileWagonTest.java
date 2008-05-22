@@ -65,4 +65,9 @@ public class FileWagonTest
         Repository repository = new Repository();
         wagon.connect( repository );
     }
+
+    protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
+    {
+        return new File( repository.getBasedir(), resource.getName() ).lastModified();
+    }
 }

@@ -21,6 +21,8 @@ package org.apache.maven.wagon.providers.http;
 
 import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.WagonTestCase;
+import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.jetty.Httpd;
 
 import java.io.File;
@@ -89,5 +91,11 @@ public class HttpWagonTest
         throws Exception
     {
         release( httpd );
+    }
+
+    protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
+    {
+        File file = getTestFile( "target/test-output/http-repository", resource.getName() );
+        return file.lastModified();
     }
 }

@@ -91,6 +91,11 @@ public class Resource
     {
         return name;
     }
+    
+    public String inspect()
+    {
+        return name + "[len = " + contentLength + "; mod = " + lastModified + "]";
+    }
 
     public int hashCode()
     {

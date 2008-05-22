@@ -703,7 +703,7 @@ public abstract class WagonTestCase
     {
         destFile = FileTestUtils.createUniqueFile( getName(), getName() );
         destFile.deleteOnExit();
-
+        
         Wagon wagon = getWagon();
 
         Resource resource = new Resource( this.resource );
@@ -711,7 +711,7 @@ public abstract class WagonTestCase
                                                                      TransferEvent.REQUEST_GET, destFile ) );
         resource = new Resource( this.resource );
         resource.setContentLength( getExpectedContentLengthOnGet( expectedSize ) );
-        resource.setLastModified( getExpectedLastModifiedOnGet() );
+        resource.setLastModified( getExpectedLastModifiedOnGet( testRepository, resource ) );
         mockTransferListener.transferStarted( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED,
                                                                    TransferEvent.REQUEST_GET, destFile ) );
         mockTransferListener.transferProgress( new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS,
@@ -756,8 +756,11 @@ public abstract class WagonTestCase
         return expectedSize;
     }
 
-    protected long getExpectedLastModifiedOnGet()
+    protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
     {
+        // default implementation - prone to failing if the time between test file creation and completion of putFile()
+        // cross the "second" boundary, causing the "remote" and local files to have different times.
+
         return sourceFile.lastModified();
     }
 

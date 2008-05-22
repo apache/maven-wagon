@@ -19,9 +19,13 @@ package org.apache.maven.wagon.providers.ftp;
  * under the License.
  */
 
+import java.io.File;
+
 import org.apache.ftpserver.interfaces.FtpServerInterface;
 import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.resource.Resource;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -35,12 +39,6 @@ public class FtpWagonTest
     protected String getProtocol()
     {
         return "ftp";
-    }
-
-    protected long getExpectedLastModifiedOnGet()
-    {
-        // granularity for FTP is minutes
-        return ( sourceFile.lastModified() / 60000 ) * 60000;
     }
 
     protected void setupWagonTestingFixtures()
@@ -72,5 +70,13 @@ public class FtpWagonTest
         authInfo.setPassword( "admin" );
 
         return authInfo;
+    }
+
+    protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
+    {
+        File file = getTestFile( "target/test-output/local-repository", resource.getName() );
+        
+        // granularity for FTP is minutes
+        return ( file.lastModified() / 60000 ) * 60000;
     }
 }

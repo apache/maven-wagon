@@ -24,6 +24,8 @@ import java.io.IOException;
 
 import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.WagonTestCase;
+import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.resource.Resource;
 
 /**
  * WebDAV Wagon Test
@@ -69,5 +71,11 @@ public class WebDavWagonTest
         throws Exception
     {
         release( server );
+    }
+
+    protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
+    {
+        File file = getTestFile( "target/test-output/dav-repository/newfolder/folder2", resource.getName() );
+        return file.lastModified();
     }
 }

@@ -27,7 +27,7 @@ import java.io.IOException;
  * @author <a href="brett@apache.org">Brett Porter</a>
  * @version $Id$
  */
-public class AbstractScmCvsWagonTest
+public abstract class AbstractScmCvsWagonTest
     extends AbstractScmWagonTest
 {
 

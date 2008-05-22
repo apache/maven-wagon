@@ -254,7 +254,7 @@ public class TransferEvent
 
         sb.append( this.getWagon().getRepository() ).append( "|" );
         sb.append( this.getLocalFile() ).append( "|" );
-        sb.append( this.getResource() );
+        sb.append( this.getResource().inspect() );
         sb.append( "]" );
 
         return sb.toString();

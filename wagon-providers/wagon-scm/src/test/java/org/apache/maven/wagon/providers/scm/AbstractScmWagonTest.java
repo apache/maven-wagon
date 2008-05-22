@@ -32,6 +32,8 @@ import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
 
 /**
@@ -104,7 +106,7 @@ public abstract class AbstractScmWagonTest
         return WagonConstants.UNKNOWN_LENGTH;
     }
     
-    protected long getExpectedLastModifiedOnGet()
+    protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
     {
         return 0;
     }

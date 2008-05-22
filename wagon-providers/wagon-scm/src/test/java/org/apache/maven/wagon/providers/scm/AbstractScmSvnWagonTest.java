@@ -29,7 +29,7 @@ import org.codehaus.plexus.util.FileUtils;
  * @author <a href="brett@apache.org">Brett Porter</a>
  * @version $Id$
  */
-public class AbstractScmSvnWagonTest
+public abstract class AbstractScmSvnWagonTest
     extends AbstractScmWagonTest
 {
     private String repository;
