@@ -48,6 +48,10 @@ public class UserInfoUIKeyboardInteractiveProxy
     public String[] promptKeyboardInteractive( String destination, String name, String instruction, String[] prompt,
                                                boolean[] echo )
     {
+        if ( userInfo.getPassword() != null )
+        {
+            prompt[0] = "Keyboard interactive required, supplied password is ignored\n" + prompt[0];
+        }
         return interactive.promptKeyboardInteractive( destination, name, instruction, prompt, echo );
     }
 
