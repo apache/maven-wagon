@@ -97,7 +97,22 @@ public abstract class AbstractWagon
     public void openConnection()
         throws ConnectionException, AuthenticationException
     {
-        openConnectionInternal();
+        try
+        {
+            openConnectionInternal();
+        }
+        catch ( ConnectionException e )
+        {
+            fireSessionConnectionRefused();
+            
+            throw e;
+        }
+        catch ( AuthenticationException e )
+        {
+            fireSessionConnectionRefused();
+            
+            throw e;
+        }
     }
 
     public void connect( Repository repository )
@@ -178,7 +193,22 @@ public abstract class AbstractWagon
         
         fireSessionOpening();
 
-        openConnectionInternal();
+        try
+        {
+            openConnectionInternal();
+        }
+        catch ( ConnectionException e )
+        {
+            fireSessionConnectionRefused();
+            
+            throw e;
+        }
+        catch ( AuthenticationException e )
+        {
+            fireSessionConnectionRefused();
+            
+            throw e;
+        }
 
         fireSessionOpened();
     }
@@ -191,7 +221,15 @@ public abstract class AbstractWagon
     {
         fireSessionDisconnecting();
 
-        closeConnection();
+        try
+        {
+            closeConnection();
+        }
+        catch ( ConnectionException e )
+        {
+            fireSessionError( e );
+            throw e;
+        }
 
         fireSessionDisconnected();
     }
@@ -328,6 +366,8 @@ public abstract class AbstractWagon
         }
         catch ( FileNotFoundException e )
         {
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+
             throw new TransferFailedException( "Specified source file does not exist: " + source, e );
         }
         catch ( IOException e )
@@ -563,7 +603,6 @@ public abstract class AbstractWagon
 
     protected void fireSessionConnectionRefused()
     {
-
         long timestamp = System.currentTimeMillis();
 
         SessionEvent sessionEvent = new SessionEvent( this, SessionEvent.SESSION_CONNECTION_REFUSED );
@@ -684,6 +723,8 @@ public abstract class AbstractWagon
         }
         catch ( IOException e )
         {
+            fireTransferError( resource, e, requestType );
+            
             throw new TransferFailedException( "Failed to post-process the source file", e );
         }
     }
@@ -691,7 +732,7 @@ public abstract class AbstractWagon
     public void putDirectory( File sourceDirectory, String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        throw new TransferFailedException( "directory copy not supported for " + getClass().getName() );
+        throw new UnsupportedOperationException( "The wagon you are using has not implemented putDirectory()" );
     }
 
     public boolean supportsDirectoryCopy()
@@ -741,7 +782,6 @@ public abstract class AbstractWagon
                 jar.write( buffer, 0, bytesRead );
             }
         }
-
         finally
         {
             is.close();

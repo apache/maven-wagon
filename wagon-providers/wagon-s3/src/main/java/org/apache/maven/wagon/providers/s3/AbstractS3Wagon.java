@@ -135,6 +135,8 @@ public abstract class AbstractS3Wagon
         }
         catch( IOException e )
         {
+            fireTransferError( resource, e, TransferEvent.REQUEST_GET );            
+            
             throw new TransferFailedException( "", e );
         }
 
@@ -151,19 +153,21 @@ public abstract class AbstractS3Wagon
         try
         {
             s3Object = s3Service.getObjectDetails( bucket, resource.getName() );
-
-            Date lastModified = s3Object.getLastModifiedDate();
-
-            if( lastModified.getTime() > timestamp )
-            {
-                get( resourceName, destination );
-
-                return true;
-            }
         }
-        catch( S3ServiceException e )
+        catch ( S3ServiceException e )
         {
-            throw new TransferFailedException( "Cannot put object to S3", e );
+            fireTransferError( resource, e, TransferEvent.REQUEST_GET );            
+            
+            throw new TransferFailedException( "Cannot get object from S3", e );
+        }
+
+        Date lastModified = s3Object.getLastModifiedDate();
+
+        if ( lastModified.getTime() > timestamp )
+        {
+            get( resourceName, destination );
+
+            return true;
         }
 
         return false;
@@ -201,6 +205,8 @@ public abstract class AbstractS3Wagon
         }
         catch( S3ServiceException e )
         {
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+
             throw new TransferFailedException( "Cannot put object to S3", e );
         }
 

@@ -78,9 +78,18 @@ public class SftpWagon
 
             channel.cd( "/" );
             
-            mkdirs( channel, basedir + "/", directoryMode );
-            
-            mkdirs( channel, resourceName, directoryMode );
+            try
+            {
+                mkdirs( channel, basedir + "/", directoryMode );
+                
+                mkdirs( channel, resourceName, directoryMode );
+            }
+            catch ( TransferFailedException e )
+            {
+                fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+
+                throw e;
+            }
 
             putFile( channel, source, resource, permissions );
 
@@ -92,6 +101,8 @@ public class SftpWagon
         }
         catch ( SftpException e )
         {
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+            
             String msg = "Error occured while deploying '" + resourceName + "' " + "to remote repository: " +
                 getRepository().getUrl();
 
@@ -99,6 +110,8 @@ public class SftpWagon
         }
         catch ( JSchException e )
         {
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+
             String msg = "Error occured while deploying '" + resourceName + "' " + "to remote repository: " +
                 getRepository().getUrl();
 
@@ -172,7 +185,7 @@ public class SftpWagon
     }
 
     private void mkdirs( ChannelSftp channel, String resourceName, int mode )
-        throws TransferFailedException, SftpException
+        throws SftpException, TransferFailedException
     {
         String[] dirs = PathUtils.dirnames( resourceName );
         for ( int i = 0; i < dirs.length; i++ )

@@ -130,7 +130,6 @@ public abstract class AbstractGanymedWagon
         }
         catch ( IOException e )
         {
-            fireSessionError( e );
             throw new AuthenticationException( "Cannot connect. Reason: " + e.getMessage(), e );
         }
 
@@ -162,7 +161,6 @@ public abstract class AbstractGanymedWagon
         catch ( IOException e )
         {
             closeConnection();
-            fireSessionError( e );
             throw new AuthenticationException( "Cannot authenticate. Reason: " + e.getMessage(), e );
         }
     }

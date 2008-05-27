@@ -373,7 +373,7 @@ public abstract class AbstractSshWagon
             }
         }
 
-        String msg = "Error occured while downloading '" + resource + "' from the remote repository:" + getRepository();
+        String msg = "Error occured while downloading '" + resource + "' from the remote repository:" + getRepository() + ": " + e.getMessage();
 
         throw new TransferFailedException( msg, e );
     }

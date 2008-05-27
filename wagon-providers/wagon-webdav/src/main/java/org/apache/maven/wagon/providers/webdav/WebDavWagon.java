@@ -25,6 +25,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
@@ -40,6 +41,7 @@ import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;
@@ -97,7 +99,14 @@ public class WebDavWagon
         firePutInitiated( resource, source );
 
         //Parent directories need to be created before posting
-        mkdirs( dir );
+        try
+        {
+            mkdirs( dir );
+        }
+        catch ( IOException e )
+        {
+            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+        }
 
         super.put(source, resource);
     }
@@ -117,10 +126,11 @@ public class WebDavWagon
      * They are created one at a time until the whole path exists.
      *
      * @param dir path to be created in server from repository basedir
+     * @throws IOException 
+     * @throws HttpException 
      * @throws TransferFailedException
      */
-    private void mkdirs( String dir )
-        throws TransferFailedException
+    private void mkdirs( String dir ) throws HttpException, IOException
     {
         Repository repository = getRepository();
         String basedir = repository.getBasedir();
@@ -150,12 +160,12 @@ public class WebDavWagon
             status = doMkCol( url );
             if ( status != HttpStatus.SC_OK && status != HttpStatus.SC_CREATED )
             {
-                throw new TransferFailedException( "Unable to create collection: " + url + "; status code = " + status );
+                throw new IOException( "Unable to create collection: " + url + "; status code = " + status );
             }
         }
     }
 
-    private int doMkCol(String url) throws TransferFailedException
+    private int doMkCol(String url) throws HttpException, IOException
     {
         MkColMethod method = null;
         try
@@ -205,7 +215,7 @@ public class WebDavWagon
 
     }
 
-    private boolean isDirectory(String url) throws TransferFailedException
+    private boolean isDirectory( String url ) throws IOException, DavException
     {
         DavPropertyNameSet nameSet = new DavPropertyNameSet();
         nameSet.add(DavPropertyName.create(DavConstants.PROPERTY_RESOURCETYPE));
@@ -229,14 +239,6 @@ public class WebDavWagon
             }
             return false;
         }
-        catch (DavException e)
-        {
-            throw new TransferFailedException(e.getMessage(), e);
-        }
-        catch (IOException e)
-        {
-            throw new TransferFailedException(e.getMessage(), e);
-        }
         finally
         {
             if (method != null) method.releaseConnection();
@@ -247,10 +249,10 @@ public class WebDavWagon
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         final String url = getRepository().getUrl() + '/' + destinationDirectory;
-        if (isDirectory(url))
+        PropFindMethod method = null;
+        try
         {
-            PropFindMethod method = null;
-            try
+            if (isDirectory(url))
             {
                 DavPropertyNameSet nameSet = new DavPropertyNameSet();
                 nameSet.add(DavPropertyName.create(DavConstants.PROPERTY_DISPLAYNAME));
@@ -279,18 +281,18 @@ public class WebDavWagon
                     throw new ResourceDoesNotExistException( "Destination directory does not exist: " + url ); 
                 }
             }
-            catch (DavException e)
-            {
-                throw new TransferFailedException(e.getMessage(), e);
-            }
-            catch (IOException e)
-            {
-                throw new TransferFailedException(e.getMessage(), e); 
-            }
-            finally
-            {
-                if (method != null) method.releaseConnection();
-            }
+        }
+        catch (DavException e)
+        {
+            throw new TransferFailedException(e.getMessage(), e);
+        }
+        catch (IOException e)
+        {
+            throw new TransferFailedException(e.getMessage(), e); 
+        }
+        finally
+        {
+            if (method != null) method.releaseConnection();
         }
         throw new ResourceDoesNotExistException("Destination path exists but is not a " + "WebDAV collection (directory): " + url );
     }

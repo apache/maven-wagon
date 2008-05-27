@@ -22,7 +22,6 @@ package org.apache.maven.wagon.providers.ssh;
 import org.apache.maven.wagon.CommandExecutionException;
 import org.apache.maven.wagon.CommandExecutor;
 import org.apache.maven.wagon.PermissionModeUtils;
-import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 
 public class ScpHelper
@@ -33,33 +32,26 @@ public class ScpHelper
 
     public static void createRemoteDirectories( String path, RepositoryPermissions permissions,
                                                 CommandExecutor commandExecutor )
-        throws TransferFailedException
+        throws CommandExecutionException
     {
-        try
+        String umaskCmd = null;
+        if ( permissions != null )
         {
-            String umaskCmd = null;
-            if ( permissions != null )
+            String dirPerms = permissions.getDirectoryMode();
+
+            if ( dirPerms != null )
             {
-                String dirPerms = permissions.getDirectoryMode();
-
-                if ( dirPerms != null )
-                {
-                    umaskCmd = "umask " + PermissionModeUtils.getUserMaskFor( dirPerms );
-                }
+                umaskCmd = "umask " + PermissionModeUtils.getUserMaskFor( dirPerms );
             }
-
-            String mkdirCmd = "mkdir -p " + path;
-
-            if ( umaskCmd != null )
-            {
-                mkdirCmd = umaskCmd + "; " + mkdirCmd;
-            }
-
-            commandExecutor.executeCommand( mkdirCmd );
         }
-        catch ( CommandExecutionException e )
+
+        String mkdirCmd = "mkdir -p " + path;
+
+        if ( umaskCmd != null )
         {
-            throw new TransferFailedException( "Error performing commands for file transfer", e );
+            mkdirCmd = umaskCmd + "; " + mkdirCmd;
         }
+
+        commandExecutor.executeCommand( mkdirCmd );
     }
 }

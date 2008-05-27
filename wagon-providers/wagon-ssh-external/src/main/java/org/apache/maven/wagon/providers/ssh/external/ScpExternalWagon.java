@@ -212,7 +212,7 @@ public class ScpExternalWagon
     }
 
 
-    private void executeScpCommand( File localFile, String remoteFile, boolean put )
+    private void executeScpCommand( Resource resource, File localFile, boolean put )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         boolean putty = scpExecutable.indexOf( "pscp" ) >= 0;
@@ -224,6 +224,8 @@ public class ScpExternalWagon
         }
         catch ( FileNotFoundException e )
         {
+            fireSessionConnectionRefused();
+            
             throw new AuthorizationException( e.getMessage() );
         }
         Commandline cl = createBaseCommandLine( putty, scpExecutable, privateKey );
@@ -240,6 +242,10 @@ public class ScpExternalWagon
         {
             cl.createArgument().setLine( scpArgs );
         }
+        
+        String resourceName = normalizeResource( resource );
+        String remoteFile = getRepository().getBasedir() + "/" + resourceName;
+        
         String qualifiedRemoteFile = this.buildRemoteHost() + ":" + remoteFile;
         if ( put )
         {
@@ -266,14 +272,25 @@ public class ScpExternalWagon
                 }
                 else
                 {
-                    throw new TransferFailedException( "Exit code: " + exitCode + " - " + err.getOutput() );
+                    TransferFailedException e = new TransferFailedException( "Exit code: " + exitCode + " - " + err.getOutput() );
+
+                    fireTransferError( resource, e, put ? TransferEvent.REQUEST_PUT : TransferEvent.REQUEST_GET );
+
+                    throw e;
                 }
             }
         }
         catch ( CommandLineException e )
         {
+            fireTransferError( resource, e, put ? TransferEvent.REQUEST_PUT : TransferEvent.REQUEST_GET );
+
             throw new TransferFailedException( "Error executing command line", e );
         }
+    }
+
+    private String normalizeResource( Resource resource )
+    {
+        return StringUtils.replace( resource.getName(), "\\", "/" );
     }
 
     public void put( File source, String destination )
@@ -285,7 +302,7 @@ public class ScpExternalWagon
 
         if ( !source.exists() )
         {
-            throw new TransferFailedException( "Specified source file does not exist: " + source );
+            throw new ResourceDoesNotExistException( "Specified source file does not exist: " + source );
         }
 
         String basedir = getRepository().getBasedir();
@@ -320,6 +337,8 @@ public class ScpExternalWagon
         }
         catch ( CommandExecutionException e )
         {
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+            
             throw new TransferFailedException( "Error executing command for transfer", e );
         }
         
@@ -329,7 +348,7 @@ public class ScpExternalWagon
 
         firePutStarted( resource, source );
 
-        executeScpCommand( source, basedir + "/" + resourceName, true );
+        executeScpCommand( resource, source, true );
 
         postProcessListeners( resource, source, TransferEvent.REQUEST_PUT );
 
@@ -352,6 +371,8 @@ public class ScpExternalWagon
         }
         catch ( CommandExecutionException e )
         {
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+
             throw new TransferFailedException( "Error executing command for transfer", e );
         }
         firePutCompleted( resource, source );
@@ -378,7 +399,7 @@ public class ScpExternalWagon
 
         fireGetStarted( resource, destination );
 
-        executeScpCommand( destination, basedir + "/" + path, false );
+        executeScpCommand( resource, destination, false );
 
         postProcessListeners( resource, destination, TransferEvent.REQUEST_GET );
 

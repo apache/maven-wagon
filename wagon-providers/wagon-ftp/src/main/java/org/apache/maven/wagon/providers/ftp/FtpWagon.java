@@ -128,13 +128,7 @@ public class FtpWagon
 
             if ( !FTPReply.isPositiveCompletion( reply ) )
             {
-                fireSessionConnectionRefused();
-
-                fireSessionDisconnecting();
-
                 ftp.disconnect();
-
-                fireSessionDisconnected();
 
                 throw new AuthenticationException( "FTP server refused connection." );
             }
@@ -147,11 +141,7 @@ public class FtpWagon
                 {
                     fireSessionError( e );
 
-                    fireSessionDisconnecting();
-
                     ftp.disconnect();
-
-                    fireSessionDisconnected();
                 }
                 catch ( IOException f )
                 {
@@ -166,8 +156,6 @@ public class FtpWagon
         {
             if ( !ftp.login( username, password ) )
             {
-                fireSessionConnectionRefused();
-
                 throw new AuthenticationException( "Cannot login to remote system" );
             }
 
@@ -220,7 +208,6 @@ public class FtpWagon
         super.firePutCompleted( resource, file );
     }
 
-
     protected void fireGetCompleted( Resource resource, File localFile )
     {
         try
@@ -253,7 +240,6 @@ public class FtpWagon
             }
         }
     }
-
 
     public void fillOutputData( OutputData outputData )
         throws TransferFailedException
@@ -404,7 +390,6 @@ public class FtpWagon
             }
         }
     }
-
 
     public class PrintCommandListener
         implements ProtocolCommandListener

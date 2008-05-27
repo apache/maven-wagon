@@ -94,6 +94,8 @@ public class ScpWagon
         }
         catch ( CommandExecutionException e )
         {
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+            
             throw new TransferFailedException( "Error performing commands for file transfer", e );
         }
 
@@ -113,6 +115,8 @@ public class ScpWagon
         }
         catch ( IOException e )
         {
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+
             throw new TransferFailedException( "Error transferring file. Reason: " + e.getMessage(), e );
         }
 
@@ -129,6 +133,8 @@ public class ScpWagon
         }
         catch ( CommandExecutionException e )
         {
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+
             throw new TransferFailedException( "Error performing commands for file transfer", e );
         }
     }
@@ -153,6 +159,8 @@ public class ScpWagon
         }
         catch ( FileNotFoundException e )
         {
+            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+
             throw new TransferFailedException( "Error writing output file. Reason: " + e.getMessage(), e );
         }
 
@@ -176,6 +184,8 @@ public class ScpWagon
             }
             else
             {
+                fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+
                 throw new TransferFailedException( "Error transferring file. Reason: " + e.getMessage(), e );
             }
         }

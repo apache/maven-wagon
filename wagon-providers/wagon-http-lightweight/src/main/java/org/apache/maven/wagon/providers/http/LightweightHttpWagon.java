@@ -42,6 +42,7 @@ import org.apache.maven.wagon.StreamWagon;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.resource.Resource;
 import org.apache.maven.wagon.shared.http.HtmlFileListParser;
@@ -202,6 +203,8 @@ public class LightweightHttpWagon
         }
         catch ( IOException e )
         {
+            fireTransferError( new Resource( resourceName ), e, TransferEvent.REQUEST_PUT );
+            
             throw new TransferFailedException( "Error transferring file", e );
         }
     }

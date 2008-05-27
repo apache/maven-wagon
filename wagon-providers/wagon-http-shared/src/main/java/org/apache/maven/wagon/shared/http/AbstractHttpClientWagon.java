@@ -37,6 +37,7 @@ import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpConnectionManager;
+import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
@@ -182,7 +183,17 @@ public abstract class AbstractHttpClientWagon extends AbstractWagon
                 getMethod.addRequestHeader( hdr );
             }
 
-            int statusCode = execute( getMethod );
+            int statusCode;
+            try
+            {
+                statusCode = execute( getMethod );
+            }
+            catch ( IOException e )
+            {
+                fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+
+                throw new TransferFailedException( e.getMessage(), e );
+            }
 
             fireTransferDebug( url + " - Status code: " + statusCode );
 
@@ -196,24 +207,36 @@ public abstract class AbstractHttpClientWagon extends AbstractWagon
                     return false;
 
                 case SC_NULL:
-                    throw new TransferFailedException( "Failed to transfer file: " + url );
+                {
+                    TransferFailedException e = new TransferFailedException( "Failed to transfer file: " + url );
+                    fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+                    throw e;
+                }
 
                 case HttpStatus.SC_FORBIDDEN:
+                    fireSessionConnectionRefused();
                     throw new AuthorizationException( "Access denied to: " + url );
 
                 case HttpStatus.SC_UNAUTHORIZED:
+                    fireSessionConnectionRefused();
                     throw new AuthorizationException( "Not authorized." );
 
                 case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
+                    fireSessionConnectionRefused();
                     throw new AuthorizationException( "Not authorized by proxy." );
 
                 case HttpStatus.SC_NOT_FOUND:
                     throw new ResourceDoesNotExistException( "File: " + url + " does not exist" );
 
-                    //add more entries here
+                //add more entries here
                 default :
-                    throw new TransferFailedException(
-                        "Failed to transfer file: " + url + ". Return code is: " + statusCode );
+                {
+                    TransferFailedException e =
+                            new TransferFailedException( "Failed to transfer file: " + url + ". Return code is: "
+                                + statusCode );
+                    fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+                    throw e;
+                }
             }
 
             InputStream is = null;
@@ -357,7 +380,17 @@ public abstract class AbstractHttpClientWagon extends AbstractWagon
         {
             firePutStarted( resource, source );
             
-            int statusCode = execute( putMethod );
+            int statusCode;
+            try
+            {
+                statusCode = execute( putMethod );
+            }
+            catch ( IOException e )
+            {
+                fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+
+                throw new TransferFailedException( e.getMessage(), e );
+            }
 
             fireTransferDebug( url + " - Status code: " + statusCode );
 
@@ -372,27 +405,37 @@ public abstract class AbstractHttpClientWagon extends AbstractWagon
                     break;
 
                 case SC_NULL:
-                    throw new TransferFailedException( "Failed to transfer file: " + url );
+                {
+                    TransferFailedException e = new TransferFailedException( "Failed to transfer file: " + url );
+                    fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+                    throw e;
+                }
 
                 case HttpStatus.SC_FORBIDDEN:
+                    fireSessionConnectionRefused();
                     throw new AuthorizationException( "Access denied to: " + url );
 
                 case HttpStatus.SC_NOT_FOUND:
                     throw new ResourceDoesNotExistException( "File: " + url + " does not exist" );
 
-                    //add more entries here
+                //add more entries here
                 default :
-                    throw new TransferFailedException(
-                        "Failed to transfer file: " + url + ". Return code is: " + statusCode );
+                {
+                    TransferFailedException e =
+                            new TransferFailedException( "Failed to transfer file: " + url + ". Return code is: "
+                                + statusCode );
+                    fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+                    throw e;
+                }
             }
-
-            putMethod.releaseConnection();
 
             firePutCompleted( resource, source );
         }
         finally
         {
             IOUtil.close(is);
+            
+            putMethod.releaseConnection();
         }
     }
 
@@ -401,7 +444,15 @@ public abstract class AbstractHttpClientWagon extends AbstractWagon
     {
         String url = getRepository().getUrl() + "/" + resourceName;
         HeadMethod headMethod = new HeadMethod( url );
-        int statusCode = execute( headMethod );
+        int statusCode;
+        try
+        {
+            statusCode = execute( headMethod );
+        }
+        catch ( IOException e )
+        {
+            throw new TransferFailedException( e.getMessage(), e );
+        }
         try
         {
             switch ( statusCode )
@@ -439,21 +490,12 @@ public abstract class AbstractHttpClientWagon extends AbstractWagon
         }
     }
 
-    protected int execute(HttpMethod httpMethod)
-        throws TransferFailedException
+    protected int execute(HttpMethod httpMethod) throws HttpException, IOException
     {
         int statusCode = SC_NULL;
         httpMethod.getParams().setSoTimeout( getTimeout() );
         setHeaders(httpMethod);
-        try
-        {
-            // execute the method.
-            statusCode = client.executeMethod( httpMethod );
-        }
-        catch ( IOException e )
-        {
-            throw new TransferFailedException( e.getMessage(), e );
-        }
+        statusCode = client.executeMethod( httpMethod );
         return statusCode;
     }
 

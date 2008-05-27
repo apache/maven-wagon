@@ -25,6 +25,7 @@ import org.apache.maven.wagon.CommandExecutionException;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.providers.ssh.ScpHelper;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
@@ -68,28 +69,30 @@ public class ScpWagon
 
         firePutInitiated( resource, source );
 
-        ScpHelper.createRemoteDirectories( getPath( basedir, dir ), getRepository().getPermissions(), this );
-
-        RepositoryPermissions permissions = getRepository().getPermissions();
-
-        put( source, basedir, resource, getOctalMode( permissions ) );
-
-        setFileGroup( permissions, basedir, resource );
-    }
-
-    private void setFileGroup( RepositoryPermissions permissions, String basedir, Resource resource )
-        throws TransferFailedException
-    {
         try
         {
-            if ( permissions != null && permissions.getGroup() != null )
-            {
-                executeCommand( "chgrp -f " + permissions.getGroup() + " " + getPath( basedir, resource.getName() ) );
-            }
+            ScpHelper.createRemoteDirectories( getPath( basedir, dir ), getRepository().getPermissions(), this );
+
+            RepositoryPermissions permissions = getRepository().getPermissions();
+
+            put( source, basedir, resource, getOctalMode( permissions ) );
+
+            setFileGroup( permissions, basedir, resource );
         }
         catch ( CommandExecutionException e )
         {
-            throw new TransferFailedException( "Error performing commands for file transfer", e );
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+            
+            throw new TransferFailedException( e.getMessage(), e );
+        }
+    }
+
+    private void setFileGroup( RepositoryPermissions permissions, String basedir, Resource resource )
+        throws CommandExecutionException
+    {
+        if ( permissions != null && permissions.getGroup() != null )
+        {
+            executeCommand( "chgrp -f " + permissions.getGroup() + " " + getPath( basedir, resource.getName() ) );
         }
     }
 
@@ -179,15 +182,19 @@ public class ScpWagon
         }
         catch ( IOException e )
         {
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );            
+            
             String msg = "Error occured while deploying '" + resourceName + "' to remote repository: " +
-                getRepository().getUrl();
+                getRepository().getUrl() + ": " + e.getMessage();
 
             throw new TransferFailedException( msg, e );
         }
         catch ( JSchException e )
         {
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );            
+            
             String msg = "Error occured while deploying '" + resourceName + "' to remote repository: " +
-                getRepository().getUrl();
+                getRepository().getUrl() + ": " + e.getMessage();
 
             throw new TransferFailedException( msg, e );
         }
@@ -203,26 +210,26 @@ public class ScpWagon
     }
 
     private void checkAck( InputStream in )
-        throws IOException, TransferFailedException
+        throws IOException
     {
         int code = in.read();
         if ( code == -1 )
         {
-            throw new TransferFailedException( "Unexpected end of data" );
+            throw new IOException( "Unexpected end of data" );
         }
         else if ( code == 1 )
         {
             String line = readLine( in );
 
-            throw new TransferFailedException( "SCP terminated with error: '" + line + "'" );
+            throw new IOException( "SCP terminated with error: '" + line + "'" );
         }
         else if ( code == 2 )
         {
-            throw new TransferFailedException( "SCP terminated with error (code: " + code + ")" );
+            throw new IOException( "SCP terminated with error (code: " + code + ")" );
         }
         else if ( code != 0 )
         {
-            throw new TransferFailedException( "SCP terminated with unknown error code" );
+            throw new IOException( "SCP terminated with unknown error code" );
         }
     }
 
@@ -274,7 +281,7 @@ public class ScpWagon
                 }
                 else
                 {
-                    throw new TransferFailedException( "Exit code: " + exitCode + " - " + line );
+                    throw new IOException( "Exit code: " + exitCode + " - " + line );
                 }
             }
 
@@ -288,13 +295,13 @@ public class ScpWagon
 
             if ( line.charAt( 4 ) != ACK_SEPARATOR && line.charAt( 5 ) != ACK_SEPARATOR )
             {
-                throw new TransferFailedException( "Invalid transfer header: " + line );
+                throw new IOException( "Invalid transfer header: " + line );
             }
 
             int index = line.indexOf( ACK_SEPARATOR, 5 );
             if ( index < 0 )
             {
-                throw new TransferFailedException( "Invalid transfer header: " + line );
+                throw new IOException( "Invalid transfer header: " + line );
             }
 
             int filesize = Integer.valueOf( line.substring( 5, index ) ).intValue();
@@ -311,7 +318,7 @@ public class ScpWagon
 
             if ( destination.length() != filesize )
             {
-                throw new TransferFailedException(
+                throw new IOException(
                     "Expected file length: " + filesize + "; received = " + destination.length() );
             }
 
