@@ -213,7 +213,8 @@ public abstract class AbstractWagon
         }
         if ( destinationDirectory != null && !destinationDirectory.exists() )
         {
-            if ( !destinationDirectory.mkdirs() )
+            destinationDirectory.mkdirs();
+            if ( !destinationDirectory.exists() )
             {
                 throw new TransferFailedException(
                     "Specified destination directory cannot be created: " + destinationDirectory );
