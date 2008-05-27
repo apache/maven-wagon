@@ -186,7 +186,7 @@ public class ScmWagon
     }
 
     private ScmRepository getScmRepository( String url )
-        throws TransferFailedException
+        throws ScmRepositoryException, NoSuchScmProviderException
     {
         String username = null;
 
@@ -207,20 +207,7 @@ public class ScmWagon
             passphrase = authenticationInfo.getPassphrase();
         }
 
-        ScmRepository scmRepository;
-
-        try
-        {
-            scmRepository = getScmManager().makeScmRepository( url );
-        }
-        catch ( ScmRepositoryException e )
-        {
-            throw new TransferFailedException( "Error initialising SCM repository", e );
-        }
-        catch ( NoSuchScmProviderException e )
-        {
-            throw new TransferFailedException( "Unknown SCM type", e );
-        }
+        ScmRepository scmRepository = getScmManager().makeScmRepository( url );
 
         ScmProviderRepository providerRepository = scmRepository.getProviderRepository();
 
@@ -276,21 +263,21 @@ public class ScmWagon
 
         firePutInitiated( target, source );
 
-        ScmRepository scmRepository = getScmRepository( getRepository().getUrl() );
-
-        target.setContentLength( source.length() );
-        target.setLastModified( source.lastModified() );
-        
-        firePutStarted( target, source );
-
         try
         {
+            ScmRepository scmRepository = getScmRepository( getRepository().getUrl() );
+
+            target.setContentLength( source.length() );
+            target.setLastModified( source.lastModified() );
+            
+            firePutStarted( target, source );
+
             String msg = "Wagon: Adding " + source.getName() + " to repository";
 
             ScmProvider scmProvider = getScmProvider( scmRepository.getProvider() );
 
             String checkoutTargetName = source.isDirectory() ? targetName : getDirname( targetName );
-            String relPath = checkOut( scmProvider, scmRepository, checkoutTargetName );
+            String relPath = checkOut( scmProvider, scmRepository, checkoutTargetName, target );
 
             File newCheckoutDirectory = new File( checkoutDirectory, relPath );
 
@@ -318,7 +305,7 @@ public class ScmWagon
 
                 if ( !fileAlreadyInScm && addedFiles == 0 )
                 {
-                    throw new TransferFailedException(
+                    throw new ScmException(
                         "Unable to add file to SCM: " + scmFile + "; see error messages above for more information" );
                 }
             }
@@ -329,11 +316,15 @@ public class ScmWagon
         }
         catch ( ScmException e )
         {
-            throw new TransferFailedException( "Error interacting with SCM", e );
+            fireTransferError( target, e, TransferEvent.REQUEST_GET );
+            
+            throw new TransferFailedException( "Error interacting with SCM: " + e.getMessage(), e );
         }
         catch ( IOException e )
         {
-            throw new TransferFailedException( "Error interacting with SCM", e );
+            fireTransferError( target, e, TransferEvent.REQUEST_GET );
+            
+            throw new TransferFailedException( "Error interacting with SCM: " + e.getMessage(), e );
         }
 
         if ( source.isFile() )
@@ -354,7 +345,7 @@ public class ScmWagon
      * @return
      * @throws TransferFailedException
      */
-    private String checkOut( ScmProvider scmProvider, ScmRepository scmRepository, String targetName )
+    private String checkOut( ScmProvider scmProvider, ScmRepository scmRepository, String targetName, Resource resource )
         throws TransferFailedException
     {
         checkoutDirectory = createCheckoutDirectory();
@@ -380,7 +371,9 @@ public class ScmWagon
         }
         catch ( ScmException e )
         {
-            throw new TransferFailedException( "Error listing repository", e );
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+            
+            throw new TransferFailedException( "Error listing repository: " + e.getMessage(), e );
         }
 
         // ok, we've established that target exists, or is empty.
@@ -400,7 +393,9 @@ public class ScmWagon
         }
         catch ( ScmException e )
         {
-            throw new TransferFailedException( "Error checking out", e );
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+            
+            throw new TransferFailedException( "Error checking out: " + e.getMessage(), e );
         }
 
         // now create the subdirs in target, if it's a parent of targetName
@@ -425,6 +420,8 @@ public class ScmWagon
             }
             catch ( ScmException e )
             {
+                fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+                
                 throw new TransferFailedException( "Failed to add directory " + newDir + " to working copy", e );
             }
         }
@@ -445,7 +442,7 @@ public class ScmWagon
      * @throws ScmException
      */
     private int addFiles( ScmProvider scmProvider, ScmRepository scmRepository, File basedir, String scmFilePath )
-        throws ScmException, TransferFailedException
+        throws ScmException
     {
         int addedFiles = 0;
 
@@ -511,13 +508,14 @@ public class ScmWagon
      *
      * @param result
      * @throws TransferFailedException if result was not a successful operation
+     * @throws ScmException 
      */
     private void checkScmResult( ScmResult result )
-        throws TransferFailedException
+        throws ScmException
     {
         if ( !result.isSuccess() )
         {
-            throw new TransferFailedException( "Unable to commit file. " + result.getProviderMessage() + " " +
+            throw new ScmException( "Unable to commit file. " + result.getProviderMessage() + " " +
                 ( result.getCommandOutput() == null ? "" : result.getCommandOutput() ) );
         }
     }
@@ -551,18 +549,18 @@ public class ScmWagon
         // remove the file
         url = url.substring( 0, url.lastIndexOf( '/' ) );
 
-        ScmRepository scmRepository = getScmRepository( url );
-
-        fireGetStarted( resource, destination );
-
-        // TODO: limitations:
-        // - destination filename must match that in the repository - should allow the "-d" CVS equiv to be passed in
-        // - we don't get granular exceptions from SCM (ie, auth, not found)
-        // - need to make it non-recursive to save time
-        // - exists() check doesn't test if it is in SCM already
-
         try
         {
+            ScmRepository scmRepository = getScmRepository( url );
+
+            fireGetStarted( resource, destination );
+
+            // TODO: limitations:
+            // - destination filename must match that in the repository - should allow the "-d" CVS equiv to be passed in
+            // - we don't get granular exceptions from SCM (ie, auth, not found)
+            // - need to make it non-recursive to save time
+            // - exists() check doesn't test if it is in SCM already
+
             File scmFile = new File( checkoutDirectory, resourceName );
 
             File basedir = scmFile.getParentFile();
@@ -595,10 +593,14 @@ public class ScmWagon
         }
         catch ( ScmException e )
         {
+            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+            
             throw new TransferFailedException( "Error getting file from SCM", e );
         }
         catch ( IOException e )
         {
+            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+            
             throw new TransferFailedException( "Error getting file from SCM", e );
         }
 
@@ -614,10 +616,10 @@ public class ScmWagon
     public List getFileList( String resourcePath )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        ScmRepository repository = getScmRepository( getRepository().getUrl() );
-
         try
         {
+            ScmRepository repository = getScmRepository( getRepository().getUrl() );
+
             ScmProvider provider = getScmProvider( repository.getProvider() );
 
             ListScmResult result = provider.list( repository,
@@ -643,7 +645,6 @@ public class ScmWagon
         }
         catch ( ScmException e )
         {
-            e.printStackTrace();
             throw new TransferFailedException( "Error getting filelist from SCM", e );
         }
     }
