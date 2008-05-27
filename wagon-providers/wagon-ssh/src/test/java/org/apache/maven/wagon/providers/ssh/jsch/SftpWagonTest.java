@@ -19,9 +19,13 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  * under the License.
  */
 
+import java.io.File;
+
 import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.providers.ssh.TestData;
+import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.resource.Resource;
 
 /**
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
@@ -49,4 +53,8 @@ public class SftpWagonTest
         return authInfo;
     }
 
+    protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
+    {
+        return new File( repository.getBasedir(), resource.getName() ).lastModified();
+    }
 }

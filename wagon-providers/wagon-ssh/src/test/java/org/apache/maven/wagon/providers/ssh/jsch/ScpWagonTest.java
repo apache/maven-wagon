@@ -22,6 +22,8 @@ package org.apache.maven.wagon.providers.ssh.jsch;
 import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.providers.ssh.TestData;
+import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.resource.Resource;
 
 import java.io.File;
 
@@ -58,6 +60,11 @@ public class ScpWagonTest
         }
 
         return authInfo;
+    }
+
+    protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
+    {
+        return 0;
     }
 
 }

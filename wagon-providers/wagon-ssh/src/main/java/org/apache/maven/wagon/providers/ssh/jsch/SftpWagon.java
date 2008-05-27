@@ -19,10 +19,8 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  * under the License.
  */
 
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpATTRS;
-import com.jcraft.jsch.SftpException;
+import java.io.File;
+
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
@@ -31,7 +29,10 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 
-import java.io.File;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpATTRS;
+import com.jcraft.jsch.SftpException;
 
 /**
  * SFTP protocol wagon.
@@ -59,8 +60,6 @@ public class SftpWagon
         String resourceName = resource.getName();
         String dir = getResourceDirectory( resourceName );
 
-        String filename = getResourceFilename( resourceName );
-
         ChannelSftp channel = null;
 
         try
@@ -73,29 +72,13 @@ public class SftpWagon
 
             int directoryMode = getDirectoryMode( permissions );
 
-            mkdirs( channel, basedir, directoryMode );
-
+            mkdir( channel, basedir, directoryMode );
+            
             channel.cd( basedir );
-
+            
             mkdirs( channel, resourceName, directoryMode );
 
-            firePutStarted( resource, source );
-
-            channel.put( source.getAbsolutePath(), filename );
-
-            postProcessListeners( resource, source, TransferEvent.REQUEST_PUT );
-
-            if ( permissions != null && permissions.getGroup() != null )
-            {
-                setGroup( channel, filename, permissions );
-            }
-
-            if ( permissions != null && permissions.getFileMode() != null )
-            {
-                setFileMode( channel, filename, permissions );
-            }
-
-            firePutCompleted( resource, source );
+            putFile( channel, source, resource, permissions );
 
             String[] dirs = PathUtils.dirnames( dir );
             for ( int i = 0; i < dirs.length; i++ )
@@ -124,6 +107,34 @@ public class SftpWagon
                 channel.disconnect();
             }
         }
+    }
+
+    private void putFile( ChannelSftp channel, File source, Resource resource, RepositoryPermissions permissions )
+        throws SftpException, TransferFailedException
+    {
+        resource.setContentLength( source.length() );
+        
+        resource.setLastModified( source.lastModified() );
+        
+        String filename = getResourceFilename( resource.getName() );
+
+        firePutStarted( resource, source );
+
+        channel.put( source.getAbsolutePath(), filename );
+
+        postProcessListeners( resource, source, TransferEvent.REQUEST_PUT );
+
+        if ( permissions != null && permissions.getGroup() != null )
+        {
+            setGroup( channel, filename, permissions );
+        }
+
+        if ( permissions != null && permissions.getFileMode() != null )
+        {
+            setFileMode( channel, filename, permissions );
+        }
+
+        firePutCompleted( resource, source );
     }
 
     private void setGroup( ChannelSftp channel, String filename, RepositoryPermissions permissions )
@@ -220,8 +231,13 @@ public class SftpWagon
 
             SftpATTRS attrs = changeToRepositoryDirectory( channel, dir, filename );
 
-            if ( timestamp <= 0 || attrs.getMTime() * MILLIS_PER_SEC > timestamp )
+            long lastModified = attrs.getMTime() * MILLIS_PER_SEC;
+            if ( timestamp <= 0 || lastModified > timestamp )
             {
+                resource.setContentLength( attrs.getSize() );
+                
+                resource.setLastModified( lastModified );
+                
                 fireGetStarted( resource, destination );
 
                 channel.get( filename, destination.getAbsolutePath() );
@@ -314,5 +330,96 @@ public class SftpWagon
         fireGetInitiated( resource, destination );
 
         return getIfNewer( resource, destination, timestamp );
+    }
+
+    public void putDirectory( File sourceDirectory, String destinationDirectory )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        final RepositoryPermissions permissions = repository.getPermissions();
+
+        ChannelSftp channel = null;
+
+        try
+        {
+            channel = (ChannelSftp) session.openChannel( SFTP_CHANNEL );
+
+            channel.connect();
+
+            channel.cd( "/" );
+            
+            mkdirs( channel, getRepository().getBasedir(), getDirectoryMode( permissions ) );
+
+            fireTransferDebug( "Recursively uploading directory " + sourceDirectory.getAbsolutePath() + " as "
+                + destinationDirectory );
+            ftpRecursivePut( channel, sourceDirectory, destinationDirectory );
+        }
+        catch ( SftpException e )
+        {
+            String msg =
+                "Error occured while deploying '" + sourceDirectory.getAbsolutePath() + "' " + "to remote repository: "
+                    + getRepository().getUrl();
+
+            throw new TransferFailedException( msg, e );
+        }
+        catch ( JSchException e )
+        {
+            String msg =
+                "Error occured while deploying '" + sourceDirectory.getAbsolutePath() + "' " + "to remote repository: "
+                    + getRepository().getUrl();
+
+            throw new TransferFailedException( msg, e );
+        }
+        finally
+        {
+            if ( channel != null )
+            {
+                channel.disconnect();
+            }
+        }
+    }
+
+    private void ftpRecursivePut( ChannelSftp channel, File sourceFile, String fileName )
+        throws TransferFailedException, SftpException
+    {
+        final RepositoryPermissions permissions = repository.getPermissions();
+
+        if ( sourceFile.isDirectory() )
+        {
+            if ( !fileName.equals( "." ) )
+            {
+                mkdirs( channel, fileName, getDirectoryMode( permissions ) );
+            }
+
+            File[] files = sourceFile.listFiles();
+            if ( files != null && files.length > 0 )
+            {
+                // Directories first, then files. Let's go deep early.
+                for ( int i = 0; i < files.length; i++ )
+                {
+                    if ( files[i].isDirectory() )
+                    {
+                        ftpRecursivePut( channel, files[i], fileName + "/" + files[i].getName() );
+                    }
+                }
+                for ( int i = 0; i < files.length; i++ )
+                {
+                    if ( !files[i].isDirectory() )
+                    {
+                        ftpRecursivePut( channel, files[i], fileName + "/" + files[i].getName() );
+                    }
+                }
+            }
+
+            // Step back up a directory once we're done with the contents of this one.
+            channel.cd( ".." );
+        }
+        else
+        {
+            Resource resource = getResource( fileName );
+
+            firePutInitiated( resource, sourceFile );
+
+            putFile( channel, sourceFile, resource, permissions );
+        }
     }
 }
