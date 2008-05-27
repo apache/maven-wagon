@@ -101,7 +101,15 @@ public class ScpExternalWagon
         {
             username = authenticationInfo.getUserName();
         }
-        return username + "@" + getRepository().getHost();
+        
+        if ( username == null )
+        {
+            return getRepository().getHost();
+        }
+        else
+        {
+            return username + "@" + getRepository().getHost();
+        }
     }
     
     public Streams executeCommand( String command, boolean ignoreFailures )

@@ -119,37 +119,4 @@ public class WagonUtils
         }
 
     }
-
-    public static AuthenticationInfo getAuthInfo()
-    {
-        // TODO: not used presently?
-
-        AuthenticationInfo authInfo = new AuthenticationInfo();
-
-        String userName = getUserName();
-
-        authInfo.setUserName( userName );
-
-        File privateKey = new File( System.getProperty( "user.home" ), "/.ssh/id_dsa" );
-
-        if ( privateKey.exists() )
-        {
-            authInfo.setPrivateKey( privateKey.getAbsolutePath() );
-
-            authInfo.setPassphrase( "" );
-        }
-
-        // TODO: what about modes, groups?
-
-        return authInfo;
-    }
-
-    public static String getUserName()
-    {
-        String retValue = System.getProperty( "user.name" );
-
-        return retValue;
-    }
-
-
 }

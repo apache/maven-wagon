@@ -157,11 +157,6 @@ public abstract class AbstractSshWagon
         {
             authenticationInfo = new AuthenticationInfo();
         }
-
-        if ( authenticationInfo.getUserName() == null )
-        {
-            authenticationInfo.setUserName( System.getProperty( "user.name" ) );
-        }
     }
 
     public void closeConnection()

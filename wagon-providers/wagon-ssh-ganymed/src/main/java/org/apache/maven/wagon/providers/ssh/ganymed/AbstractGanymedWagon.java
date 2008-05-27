@@ -138,15 +138,19 @@ public abstract class AbstractGanymedWagon
         {
             boolean authenticated;
 
+            String userName = authenticationInfo.getUserName();
+            if ( userName == null )
+            {
+                userName = System.getProperty( "user.name" );
+            }
             if ( privateKey != null && privateKey.exists() )
             {
-                authenticated = connection.authenticateWithPublicKey( authenticationInfo.getUserName(), privateKey,
-                                                                      authenticationInfo.getPassphrase() );
+                authenticated =
+                    connection.authenticateWithPublicKey( userName, privateKey, authenticationInfo.getPassphrase() );
             }
             else
             {
-                authenticated = connection.authenticateWithPassword( authenticationInfo.getUserName(),
-                                                                     authenticationInfo.getPassword() );
+                authenticated = connection.authenticateWithPassword( userName, authenticationInfo.getPassword() );
             }
             // TODO! keyboard interactive
 
