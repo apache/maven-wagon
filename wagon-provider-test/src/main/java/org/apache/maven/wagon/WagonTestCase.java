@@ -381,6 +381,58 @@ public abstract class WagonTestCase
     }
 
     /**
+     * Test that when putting a directory that already exists new files get also copied and destination is "."
+     *
+     * @throws Exception
+     * @since 1.0-beta-1
+     */
+    public void testWagonPutDirectoryForDot()
+        throws Exception
+    {
+        final String resourceToCreate = "test-resource-1.txt";
+
+        final String[] resources = {"a/test-resource-2.txt", "a/b/test-resource-3.txt", "c/test-resource-4.txt"};
+
+        setupRepositories();
+
+        setupWagonTestingFixtures();
+
+        Wagon wagon = getWagon();
+
+        if ( wagon.supportsDirectoryCopy() )
+        {
+            sourceFile = new File( FileTestUtils.getTestOutputDir(), "dot-repo" );
+            
+            FileUtils.deleteDirectory( sourceFile );
+
+            createDirectory( wagon, resourceToCreate, "." );
+
+            for ( int i = 0; i < resources.length; i++ )
+            {
+                writeTestFile( resources[i] );
+            }
+
+            wagon.connect( testRepository, getAuthInfo() );
+
+            wagon.putDirectory( sourceFile, "." );
+
+            List resourceNames = new ArrayList( resources.length + 1 );
+
+            resourceNames.add( resourceToCreate );
+            for ( int i = 0; i < resources.length; i++ )
+            {
+                resourceNames.add( resources[i] );
+            }
+
+            assertResourcesAreInRemoteSide( wagon, resourceNames );
+
+            wagon.disconnect();
+        }
+
+        tearDownWagonTestingFixtures();
+    }
+
+    /**
      * Create a directory with a resource and check that the other ones don't exist
      *
      * @param wagon
@@ -392,12 +444,6 @@ public abstract class WagonTestCase
         throws Exception
     {
         writeTestFile( resourceToCreate );
-
-        wagon.connect( testRepository, getAuthInfo() );
-
-        wagon.putDirectory( sourceFile, dirName );
-
-        wagon.disconnect();
     }
 
     protected void assertResourcesAreInRemoteSide( Wagon wagon, List resourceNames )

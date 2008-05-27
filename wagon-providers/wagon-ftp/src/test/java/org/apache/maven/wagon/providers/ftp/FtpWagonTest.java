@@ -22,6 +22,7 @@ package org.apache.maven.wagon.providers.ftp;
 import java.io.File;
 
 import org.apache.ftpserver.interfaces.FtpServerInterface;
+import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.repository.Repository;
@@ -47,7 +48,14 @@ public class FtpWagonTest
         super.setUp();
 
         server = (FtpServerInterface) lookup( FtpServerInterface.ROLE );
-
+    }
+    
+    protected void createDirectory( Wagon wagon, String resourceToCreate, String dirName )
+        throws Exception
+    {
+        super.createDirectory( wagon, resourceToCreate, dirName );
+        
+        getRepositoryDirectory().mkdirs();
     }
 
     protected void tearDownWagonTestingFixtures()
@@ -74,9 +82,14 @@ public class FtpWagonTest
 
     protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
     {
-        File file = getTestFile( "target/test-output/local-repository", resource.getName() );
+        File file = new File( getRepositoryDirectory(), resource.getName() );
         
         // granularity for FTP is minutes
         return ( file.lastModified() / 60000 ) * 60000;
+    }
+
+    private File getRepositoryDirectory()
+    {
+        return getTestFile( "target/test-output/local-repository" );
     }
 }

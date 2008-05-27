@@ -76,9 +76,9 @@ public class SftpWagon
 
             int directoryMode = getDirectoryMode( permissions );
 
-            mkdir( channel, basedir, directoryMode );
+            channel.cd( "/" );
             
-            channel.cd( basedir );
+            mkdirs( channel, basedir + "/", directoryMode );
             
             mkdirs( channel, resourceName, directoryMode );
 
@@ -360,11 +360,16 @@ public class SftpWagon
 
             channel.cd( "/" );
             
-            mkdirs( channel, getRepository().getBasedir(), getDirectoryMode( permissions ) );
-
+            String basedir = getRepository().getBasedir();
+            int directoryMode = getDirectoryMode( permissions );
+            
+            mkdirs( channel, basedir + "/", directoryMode );
+            
             fireTransferDebug( "Recursively uploading directory " + sourceDirectory.getAbsolutePath() + " as "
                 + destinationDirectory );
-            ftpRecursivePut( channel, sourceDirectory, destinationDirectory );
+            
+            mkdirs( channel, destinationDirectory, directoryMode );
+            ftpRecursivePut( channel, sourceDirectory, null, getResourceFilename( destinationDirectory ), directoryMode );
         }
         catch ( SftpException e )
         {
@@ -391,7 +396,7 @@ public class SftpWagon
         }
     }
 
-    private void ftpRecursivePut( ChannelSftp channel, File sourceFile, String fileName )
+    private void ftpRecursivePut( ChannelSftp channel, File sourceFile, String prefix, String fileName, int directoryMode )
         throws TransferFailedException, SftpException
     {
         final RepositoryPermissions permissions = repository.getPermissions();
@@ -400,7 +405,9 @@ public class SftpWagon
         {
             if ( !fileName.equals( "." ) )
             {
-                mkdirs( channel, fileName, getDirectoryMode( permissions ) );
+                prefix = getFileName( prefix, fileName );
+                mkdir( channel, fileName, directoryMode );
+                channel.cd( fileName );
             }
 
             File[] files = sourceFile.listFiles();
@@ -411,29 +418,41 @@ public class SftpWagon
                 {
                     if ( files[i].isDirectory() )
                     {
-                        ftpRecursivePut( channel, files[i], fileName + "/" + files[i].getName() );
+                        ftpRecursivePut( channel, files[i], prefix, files[i].getName(), directoryMode );
                     }
                 }
                 for ( int i = 0; i < files.length; i++ )
                 {
                     if ( !files[i].isDirectory() )
                     {
-                        ftpRecursivePut( channel, files[i], fileName + "/" + files[i].getName() );
+                        ftpRecursivePut( channel, files[i], prefix, files[i].getName(), directoryMode );
                     }
                 }
             }
-
-            // Step back up a directory once we're done with the contents of this one.
+            
             channel.cd( ".." );
         }
         else
         {
-            Resource resource = getResource( fileName );
+            Resource resource = getResource( getFileName( prefix, fileName ) );
 
             firePutInitiated( resource, sourceFile );
 
             putFile( channel, sourceFile, resource, permissions );
         }
+    }
+
+    private String getFileName( String prefix, String fileName )
+    {
+        if ( prefix != null )
+        {
+            prefix = prefix + "/" + fileName;
+        }
+        else
+        {
+            prefix = fileName;
+        }
+        return prefix;
     }
     
     public List getFileList( String destinationDirectory )
