@@ -60,6 +60,19 @@ public class FtpWagon
     extends StreamWagon
 {
     private FTPClient ftp;
+    
+    /** @plexus.configuration default-value="true" */
+    private boolean passiveMode = true;
+
+    public boolean isPassiveMode()
+    {
+        return passiveMode;
+    }
+
+    public void setPassiveMode( boolean passiveMode )
+    {
+        this.passiveMode = passiveMode;
+    }
 
     protected void openConnectionInternal()
         throws ConnectionException, AuthenticationException
@@ -165,8 +178,10 @@ public class FtpWagon
 
             // Use passive mode as default because most of us are
             // behind firewalls these days.
-            // TODO [BP]: make optional based on a flag
-            ftp.enterLocalPassiveMode();
+            if ( isPassiveMode() )
+            {                
+                ftp.enterLocalPassiveMode();
+            }
         }
         catch ( IOException e )
         {
