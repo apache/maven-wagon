@@ -196,6 +196,14 @@ public abstract class AbstractWagon
         throws TransferFailedException
     {
         File destinationDirectory = destination.getParentFile();
+        try
+        {
+            destinationDirectory = destinationDirectory.getCanonicalFile();
+        }
+        catch ( IOException e )
+        {
+            // not essential to have a canonical file
+        }
         if ( destinationDirectory != null && !destinationDirectory.exists() )
         {
             if ( !destinationDirectory.mkdirs() )
