@@ -331,7 +331,12 @@ public abstract class AbstractHttpClientWagon extends AbstractWagon
         
         resource.setLastModified( source.lastModified() );
         
-        String url = getRepository().getUrl() + "/" + URLEncoder.encode( resource.getName() );
+        String url = getRepository().getUrl();
+        String[] parts = StringUtils.split( resource.getName(), "/" );
+        for ( int i = 0; i < parts.length; i++ )
+        {
+            url += "/" + URLEncoder.encode( parts[i] );
+        }
 
         PutMethod putMethod = new PutMethod( url );
         InputStream is = null;
