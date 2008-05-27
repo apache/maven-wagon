@@ -43,6 +43,7 @@ import org.apache.maven.wagon.providers.ssh.jsch.interactive.UserInfoUIKeyboardI
 import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostChangedException;
 import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
 import org.apache.maven.wagon.providers.ssh.knownhost.UnknownHostException;
+import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringInputStream;
 
@@ -124,6 +125,8 @@ public abstract class AbstractJschWagon
             throw new AuthenticationException( "Cannot connect. Reason: " + e.getMessage(), e );
         }
 
+        // TODO: should the protocol be http? Can then use SOCKS5 has a protocol also. If so, retain "scp" for backwards compat
+        ProxyInfo proxyInfo = getProxyInfo( getRepository().getProtocol(), getRepository().getHost() );
         if ( proxyInfo != null && proxyInfo.getHost() != null )
         {
             Proxy proxy;

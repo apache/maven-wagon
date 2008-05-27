@@ -29,6 +29,7 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferEventSupport;
 import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.proxy.ProxyInfo;
+import org.apache.maven.wagon.proxy.ProxyInfoProvider;
 import org.apache.maven.wagon.proxy.ProxyUtils;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
@@ -50,7 +51,6 @@ import java.util.zip.ZipOutputStream;
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
- * @todo [BP] The proxy information should probably be validated to match the wagon type
  */
 public abstract class AbstractWagon
     implements Wagon
@@ -63,13 +63,13 @@ public abstract class AbstractWagon
 
     protected TransferEventSupport transferEventSupport = new TransferEventSupport();
 
-    protected ProxyInfo proxyInfo;
-
     protected AuthenticationInfo authenticationInfo;
 
     protected boolean interactive = true;
     
     private int connectionTimeout = 60000;
+
+    private ProxyInfoProvider proxyInfoProvider;
 
     // ----------------------------------------------------------------------
     // Accessors
@@ -82,7 +82,7 @@ public abstract class AbstractWagon
 
     public ProxyInfo getProxyInfo()
     {
-        return proxyInfo;
+        return proxyInfoProvider.getProxyInfo( null );
     }
 
     public AuthenticationInfo getAuthenticationInfo()
@@ -103,7 +103,7 @@ public abstract class AbstractWagon
     public void connect( Repository repository )
         throws ConnectionException, AuthenticationException
     {
-        connect( repository, null, null );
+        connect( repository, null, (ProxyInfoProvider) null );
     }
 
     public void connect( Repository repository, ProxyInfo proxyInfo )
@@ -112,13 +112,33 @@ public abstract class AbstractWagon
         connect( repository, null, proxyInfo );
     }
 
+    public void connect( Repository repository, ProxyInfoProvider proxyInfoProvider )
+        throws ConnectionException, AuthenticationException
+    {
+        connect( repository, null, proxyInfoProvider );
+    }
+
     public void connect( Repository repository, AuthenticationInfo authenticationInfo )
         throws ConnectionException, AuthenticationException
     {
-        connect( repository, authenticationInfo, null );
+        connect( repository, authenticationInfo, (ProxyInfoProvider) null );
     }
 
     public void connect( Repository repository, AuthenticationInfo authenticationInfo, ProxyInfo proxyInfo )
+        throws ConnectionException, AuthenticationException
+    {
+        final ProxyInfo proxy = proxyInfo;
+        connect( repository, authenticationInfo, new ProxyInfoProvider()
+        {
+            public ProxyInfo getProxyInfo( String protocol )
+            {
+                return proxy;
+            }
+        } );
+    }
+    
+    public void connect( Repository repository, AuthenticationInfo authenticationInfo,
+                         ProxyInfoProvider proxyInfoProvider )
         throws ConnectionException, AuthenticationException
     {
         if ( repository == null )
@@ -148,14 +168,6 @@ public abstract class AbstractWagon
 
         // TODO: Do these needs to be fields, or are they only used in openConnection()?
         this.authenticationInfo = authenticationInfo;
-        this.proxyInfo = null;
-        if ( proxyInfo != null )
-        {
-            if ( !ProxyUtils.validateNonProxyHosts( proxyInfo, this.repository.getHost() ) )
-            {
-                this.proxyInfo = proxyInfo;
-            }
-        }
         
         fireSessionOpening();
 
@@ -752,5 +764,18 @@ public abstract class AbstractWagon
         throws TransferFailedException, AuthorizationException
     {
         throw new UnsupportedOperationException( "The wagon you are using has not implemented resourceExists()" );
+    }
+
+    protected ProxyInfo getProxyInfo( String protocol, String host )
+    {
+        if ( proxyInfoProvider != null )
+        {
+            ProxyInfo proxyInfo = proxyInfoProvider.getProxyInfo( protocol );
+            if ( !ProxyUtils.validateNonProxyHosts( proxyInfo, host ) )
+            {
+                return proxyInfo;
+            }
+        }
+        return null;
     }
 }

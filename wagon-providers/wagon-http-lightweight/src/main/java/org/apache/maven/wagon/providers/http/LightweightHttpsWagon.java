@@ -51,7 +51,7 @@ public class LightweightHttpsWagon
         previousHttpsProxyHost = System.getProperty( "https.proxyHost" );
         previousHttpsProxyPort = System.getProperty( "https.proxyPort" );
         
-        final ProxyInfo proxyInfo = this.proxyInfo;
+        final ProxyInfo proxyInfo = getProxyInfo( "https", getRepository().getHost() );
         if ( proxyInfo != null )
         {
             System.setProperty( "https.proxyHost", proxyInfo.getHost() );

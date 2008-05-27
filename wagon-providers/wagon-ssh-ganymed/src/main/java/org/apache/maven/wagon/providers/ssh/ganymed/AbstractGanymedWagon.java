@@ -19,11 +19,11 @@ package org.apache.maven.wagon.providers.ssh.ganymed;
  * under the License.
  */
 
-import ch.ethz.ssh2.Connection;
-import ch.ethz.ssh2.HTTPProxyData;
-import ch.ethz.ssh2.ProxyData;
-import ch.ethz.ssh2.Session;
-import ch.ethz.ssh2.StreamGobbler;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import org.apache.maven.wagon.CommandExecutionException;
 import org.apache.maven.wagon.Streams;
@@ -33,13 +33,14 @@ import org.apache.maven.wagon.providers.ssh.CommandExecutorStreamProcessor;
 import org.apache.maven.wagon.providers.ssh.SshWagon;
 import org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo;
 import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
+import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.codehaus.plexus.util.IOUtil;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import ch.ethz.ssh2.Connection;
+import ch.ethz.ssh2.HTTPProxyData;
+import ch.ethz.ssh2.ProxyData;
+import ch.ethz.ssh2.Session;
+import ch.ethz.ssh2.StreamGobbler;
 
 /**
  * AbstractGanymedWagon 
@@ -82,6 +83,8 @@ public abstract class AbstractGanymedWagon
 
         connection = new Connection( host, port );
 
+        // TODO: should the protocol be http?
+        ProxyInfo proxyInfo = getProxyInfo( getRepository().getProtocol(), getRepository().getHost() );
         if ( proxyInfo != null && proxyInfo.getHost() != null )
         {
             ProxyData proxy = new HTTPProxyData( proxyInfo.getHost(), proxyInfo.getPort(), proxyInfo.getUserName(),

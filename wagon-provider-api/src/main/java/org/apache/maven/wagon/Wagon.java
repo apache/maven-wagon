@@ -25,6 +25,7 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.SessionListener;
 import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.proxy.ProxyInfo;
+import org.apache.maven.wagon.proxy.ProxyInfoProvider;
 import org.apache.maven.wagon.repository.Repository;
 
 import java.io.File;
@@ -170,11 +171,23 @@ public interface Wagon
     /**
      * Initiate the connection to the repository.
      *
+     * @param source the repository to connect to
+     * @param proxyInfoProvider  the provider to obtain a network proxy to use to connect to the remote repository
+     * @throws ConnectionException if there is a problem connecting
+     * @throws org.apache.maven.wagon.authentication.AuthenticationException
+     *                             if the credentials for connecting are not sufficient
+     */
+    void connect( Repository source, ProxyInfoProvider proxyInfoProvider )
+        throws ConnectionException, AuthenticationException;
+
+    /**
+     * Initiate the connection to the repository.
+     *
      * @param source             the repository to connect to
      * @param authenticationInfo authentication credentials for connecting
      * @throws ConnectionException if there is a problem connecting
      * @throws org.apache.maven.wagon.authentication.AuthenticationException
-     *                             if ther credentials for connecting are not sufficient
+     *                             if the credentials for connecting are not sufficient
      */
     void connect( Repository source, AuthenticationInfo authenticationInfo )
         throws ConnectionException, AuthenticationException;
@@ -187,9 +200,22 @@ public interface Wagon
      * @param proxyInfo          the network proxy to use to connect to the remote repository
      * @throws ConnectionException if there is a problem connecting
      * @throws org.apache.maven.wagon.authentication.AuthenticationException
-     *                             if ther credentials for connecting are not sufficient
+     *                             if the credentials for connecting are not sufficient
      */
     void connect( Repository source, AuthenticationInfo authenticationInfo, ProxyInfo proxyInfo )
+        throws ConnectionException, AuthenticationException;
+
+    /**
+     * Initiate the connection to the repository.
+     *
+     * @param source             the repository to connect to
+     * @param authenticationInfo authentication credentials for connecting
+     * @param proxyInfoProvider  the provider to obtain a network proxy to use to connect to the remote repository
+     * @throws ConnectionException if there is a problem connecting
+     * @throws org.apache.maven.wagon.authentication.AuthenticationException
+     *                             if the credentials for connecting are not sufficient
+     */
+    void connect( Repository source, AuthenticationInfo authenticationInfo, ProxyInfoProvider proxyInfoProvider )
         throws ConnectionException, AuthenticationException;
 
     /**

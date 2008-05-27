@@ -191,7 +191,7 @@ public class LightweightHttpWagon
         previousHttpProxyPort = System.getProperty( "http.proxyPort" );
         previousProxyExclusions = System.getProperty( "http.nonProxyHosts" );
 
-        final ProxyInfo proxyInfo = this.proxyInfo;
+        final ProxyInfo proxyInfo = getProxyInfo( "http", getRepository().getHost() );
         if ( proxyInfo != null )
         {
             System.setProperty( "http.proxyHost", proxyInfo.getHost() );
