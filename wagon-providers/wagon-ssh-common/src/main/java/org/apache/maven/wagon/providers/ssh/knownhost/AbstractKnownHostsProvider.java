@@ -57,6 +57,11 @@ public abstract class AbstractKnownHostsProvider
         return contents;
     }
 
+    public void setContents( String contents )
+    {
+        this.contents = contents;
+    }
+    
     public void storeKnownHosts( String contents )
         throws IOException
     {

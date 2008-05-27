@@ -22,12 +22,20 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
 /**
  * Simple <code>KnownHostsProvider</code> with known wired values
  *
+ * @plexus.component role="org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider"
+ *    role-hint="single"
+ *    instantiation-strategy="per-lookup"
+ *    
  * @author Juan F. Codagnone
  * @since Sep 12, 2005
  */
 public class SingleKnownHostProvider
     extends AbstractKnownHostsProvider
 {
+    public SingleKnownHostProvider()
+    {        
+    }
+    
     /**
      * Creates the SingleKnownHostProvider.
      */
