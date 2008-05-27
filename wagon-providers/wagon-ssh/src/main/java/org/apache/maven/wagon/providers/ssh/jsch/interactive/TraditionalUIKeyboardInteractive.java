@@ -37,11 +37,18 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 public class TraditionalUIKeyboardInteractive
     implements UIKeyboardInteractive
 {
-    private final AuthenticationInfo authInfo;
+    private AuthenticationInfo authInfo;
 
+    public TraditionalUIKeyboardInteractive() 
+    {
+        // void
+    }
+    
     public TraditionalUIKeyboardInteractive( AuthenticationInfo authInfo )
     {
         this.authInfo = authInfo;
+        
+        checkProperties();
     }
 
     /**
@@ -68,5 +75,21 @@ public class TraditionalUIKeyboardInteractive
         }
 
         return ret;
+    }
+
+    public void setAuthInfo( AuthenticationInfo authInfo )
+    {
+        this.authInfo = authInfo;
+        
+        checkProperties();
+    }
+    
+    private void checkProperties()
+        throws IllegalArgumentException
+    {
+        if ( authInfo == null )
+        {
+            throw new IllegalArgumentException( "authorization info can't be null" );
+        }
     }
 }
