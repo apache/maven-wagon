@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -326,7 +327,7 @@ public abstract class AbstractHttpClientWagon extends AbstractWagon
         
         resource.setLastModified( source.lastModified() );
         
-        String url = getRepository().getUrl() + "/" + resource.getName();
+        String url = getRepository().getUrl() + "/" + URLEncoder.encode( resource.getName() );
 
         PutMethod putMethod = new PutMethod( url );
         InputStream is = null;

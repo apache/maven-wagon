@@ -29,6 +29,7 @@ import org.w3c.tidy.Tidy;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -122,7 +123,7 @@ public class HtmlFileListParser
                                 // Starts with host relative base url "/maven2/"
                                 if ( value.startsWith( basepath ) )
                                 {
-                                    String tst = value.substring( basepath.length() );
+                                    String tst = URLDecoder.decode( value.substring( basepath.length() ) );
                                     if ( validFilename( tst ) )
                                     {
                                         links.add( tst );

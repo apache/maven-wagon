@@ -508,7 +508,7 @@ public abstract class WagonTestCase
         String dirName = "file-list";
 
         String filenames[] =
-            new String[]{"test-resource.txt", "test-resource-b.txt", "test-resource.pom", "more-resources.dat"};
+            new String[]{"test-resource.txt", "test-resource b.txt", "test-resource.pom", "more-resources.dat"};
 
         for ( int i = 0; i < filenames.length; i++ )
         {

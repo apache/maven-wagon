@@ -21,6 +21,7 @@ package org.apache.maven.wagon.providers.webdav;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -264,7 +265,7 @@ public class WebDavWagon
                     for (int i = 0; i < multiStatus.getResponses().length; i++)
                     {
                         MultiStatusResponse response = multiStatus.getResponses()[i];
-                        String fileName = PathUtils.filename(response.getHref());
+                        String fileName = PathUtils.filename(URLDecoder.decode( response.getHref()));
                         if (!StringUtils.isEmpty(fileName))
                         {
                             dirs.add(fileName);
