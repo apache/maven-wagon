@@ -21,6 +21,7 @@ package org.apache.maven.wagon.providers.ssh.ganymed;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -71,7 +72,15 @@ public abstract class AbstractGanymedWagon
         String host = getRepository().getHost();
         int port = getPort();
 
-        File privateKey = getPrivateKey();
+        File privateKey;
+        try
+        {
+            privateKey = getPrivateKey();
+        }
+        catch ( FileNotFoundException e )
+        {
+            throw new AuthenticationException( e.getMessage() );
+        }
 
         /*
         if ( !interactive )

@@ -38,6 +38,7 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
@@ -168,7 +169,7 @@ public abstract class AbstractSshWagon
         // nothing to disconnect
     }
 
-    protected File getPrivateKey()
+    protected File getPrivateKey() throws FileNotFoundException
     {
         // If user don't define a password, he want to use a private key
         File privateKey = null;
@@ -178,13 +179,17 @@ public abstract class AbstractSshWagon
             if ( authenticationInfo.getPrivateKey() != null )
             {
                 privateKey = new File( authenticationInfo.getPrivateKey() );
+                if ( !privateKey.exists() )
+                {
+                    throw new FileNotFoundException( "Private key '" + privateKey + "' not found" );
+                }
             }
             else
             {
                 privateKey = findPrivateKey();
             }
 
-            if ( privateKey.exists() )
+            if ( privateKey != null && privateKey.exists() )
             {
                 if ( authenticationInfo.getPassphrase() == null )
                 {
@@ -222,6 +227,10 @@ public abstract class AbstractSshWagon
         if ( !privateKey.exists() )
         {
             privateKey = new File( privateKeyDirectory, ".ssh/id_rsa" );
+            if ( !privateKey.exists() )
+            {
+                privateKey = null;
+            }
         }
 
         return privateKey;

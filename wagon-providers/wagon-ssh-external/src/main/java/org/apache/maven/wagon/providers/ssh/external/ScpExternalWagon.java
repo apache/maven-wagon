@@ -20,6 +20,7 @@ package org.apache.maven.wagon.providers.ssh.external;
  */
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
@@ -108,7 +109,16 @@ public class ScpExternalWagon
     {
         boolean putty = sshExecutable.indexOf( "plink" ) >= 0;
 
-        Commandline cl = createBaseCommandLine( putty, sshExecutable );
+        File privateKey;
+        try
+        {
+            privateKey = getPrivateKey();
+        }
+        catch ( FileNotFoundException e )
+        {
+            throw new CommandExecutionException( e.getMessage() );
+        }
+        Commandline cl = createBaseCommandLine( putty, sshExecutable, privateKey );
 
         int port = getPort();
         if ( port != DEFAULT_SSH_PORT )
@@ -161,13 +171,12 @@ public class ScpExternalWagon
         }
     }
 
-    private Commandline createBaseCommandLine( boolean putty, String executable )
+    private Commandline createBaseCommandLine( boolean putty, String executable, File privateKey )
     {
         Commandline cl = new Commandline();
 
         cl.setExecutable( executable );
 
-        File privateKey = getPrivateKey();
         if ( privateKey != null )
         {
             cl.createArgument().setValue( "-i" );
@@ -196,11 +205,20 @@ public class ScpExternalWagon
 
 
     private void executeScpCommand( File localFile, String remoteFile, boolean put )
-        throws TransferFailedException, ResourceDoesNotExistException
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         boolean putty = scpExecutable.indexOf( "pscp" ) >= 0;
 
-        Commandline cl = createBaseCommandLine( putty, scpExecutable );
+        File privateKey;
+        try
+        {
+            privateKey = getPrivateKey();
+        }
+        catch ( FileNotFoundException e )
+        {
+            throw new AuthorizationException( e.getMessage() );
+        }
+        Commandline cl = createBaseCommandLine( putty, scpExecutable, privateKey );
 
         cl.setWorkingDirectory( localFile.getParentFile().getAbsolutePath() );
 
