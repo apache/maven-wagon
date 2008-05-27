@@ -29,7 +29,9 @@ import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.maven.wagon.ConnectionException;
@@ -68,9 +70,12 @@ public class LightweightHttpWagon
     /**
      * Whether to use any proxy cache or not.
      *
-     * @component.configuration default="false"
+     * @plexus.configuration default="false"
      */
     private boolean useCache;
+
+    /** @plexus.configuration */
+    private Properties httpHeaders;
 
     /**
      * Builds a complete URL string from the repository URL and the relative path passed.
@@ -103,6 +108,9 @@ public class LightweightHttpWagon
             {
                 urlConnection.setRequestProperty( "Pragma", "no-cache" );
             }
+            
+            addHeaders( urlConnection );
+            
             InputStream is = urlConnection.getInputStream();
             String contentEncoding = urlConnection.getHeaderField( "Content-Encoding" );
             boolean isGZipped = contentEncoding == null ? false : "gzip".equalsIgnoreCase(contentEncoding);
@@ -128,6 +136,18 @@ public class LightweightHttpWagon
         }
     }
 
+    private void addHeaders( URLConnection urlConnection )
+    {
+        if ( httpHeaders != null )
+        {
+            for ( Iterator i = httpHeaders.keySet().iterator(); i.hasNext(); )
+            {
+                String header = (String) i.next();
+                urlConnection.setRequestProperty( header, httpHeaders.getProperty( header ) );
+            }                
+        }
+    }
+
     public void fillOutputData( OutputData outputData )
         throws TransferFailedException
     {
@@ -137,6 +157,8 @@ public class LightweightHttpWagon
             URL url = new URL( buildUrl( resource.getName() ) );
             putConnection = (HttpURLConnection) url.openConnection();
 
+            addHeaders( putConnection );
+            
             putConnection.setRequestMethod( "PUT" );
             putConnection.setDoOutput( true );
             outputData.setOutputStream( putConnection.getOutputStream() );
@@ -297,6 +319,8 @@ public class LightweightHttpWagon
             URL url = new URL( buildUrl( new Resource(resourceName).getName() ) );
             headConnection = (HttpURLConnection) url.openConnection();
     
+            addHeaders( headConnection );
+
             headConnection.setRequestMethod( "HEAD" );
             headConnection.setDoOutput( true );
             
@@ -319,6 +343,26 @@ public class LightweightHttpWagon
         }
         
         return false;
+    }
+
+    public boolean isUseCache()
+    {
+        return useCache;
+    }
+
+    public void setUseCache( boolean useCache )
+    {
+        this.useCache = useCache;
+    }
+
+    public Properties getHttpHeaders()
+    {
+        return httpHeaders;
+    }
+
+    public void setHttpHeaders( Properties httpHeaders )
+    {
+        this.httpHeaders = httpHeaders;
     }
 }
 

@@ -26,7 +26,9 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.TimeZone;
 import java.util.zip.GZIPInputStream;
 
@@ -69,6 +71,8 @@ public abstract class AbstractHttpClientWagon extends AbstractWagon
     private HttpClient client;
 
     protected HttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
+
+    private Properties httpHeaders;
 
     public void openConnectionInternal()
     {
@@ -450,11 +454,21 @@ public abstract class AbstractHttpClientWagon extends AbstractWagon
 
     protected void setHeaders(HttpMethod method)
     {
+        // TODO: merge with the other headers and have some better defaults, unify with lightweight headers
         method.addRequestHeader( "Cache-control", "no-cache" );
         method.addRequestHeader( "Cache-store", "no-store" );
         method.addRequestHeader( "Pragma", "no-cache" );
         method.addRequestHeader( "Expires", "0" );
         method.addRequestHeader( "Accept-Encoding", "gzip" );
+
+        if ( httpHeaders != null )
+        {
+            for ( Iterator i = httpHeaders.keySet().iterator(); i.hasNext(); )
+            {
+                String header = (String) i.next();
+                method.addRequestHeader( header, httpHeaders.getProperty( header ) );
+            }                
+        }
     }
 
     /**
@@ -474,5 +488,15 @@ public abstract class AbstractHttpClientWagon extends AbstractWagon
 
     public void setConnectionManager(HttpConnectionManager connectionManager) {
         this.connectionManager = connectionManager;
+    }
+
+    public Properties getHttpHeaders()
+    {
+        return httpHeaders;
+    }
+
+    public void setHttpHeaders( Properties httpHeaders )
+    {
+        this.httpHeaders = httpHeaders;
     }
 }
