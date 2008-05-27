@@ -383,7 +383,7 @@ public class ScmWagon
 
         try
         {
-            scmRepository = getScmRepository( getRepository().getUrl() + "/" + target );
+            scmRepository = getScmRepository( getRepository().getUrl() + "/" + target.replace( '\\', '/' ) );
 
             CheckOutScmResult ret = scmProvider.checkOut( scmRepository,
                                                           new ScmFileSet( new File( checkoutDirectory, "" ) ),
