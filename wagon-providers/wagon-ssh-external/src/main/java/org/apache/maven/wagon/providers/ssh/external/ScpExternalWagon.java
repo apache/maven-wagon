@@ -89,6 +89,20 @@ public class ScpExternalWagon
     //
     // ----------------------------------------------------------------------
 
+    /**
+     * @return The hostname of the remote server prefixed with the username, which comes either from the repository URL
+     *         or from the authenticationInfo.
+     */
+    private String buildRemoteHost()
+    {
+        String username = this.getRepository().getUsername();
+        if ( username == null )
+        {
+            username = authenticationInfo.getUserName();
+        }
+        return username + "@" + getRepository().getHost();
+    }
+    
     public Streams executeCommand( String command, boolean ignoreFailures )
         throws CommandExecutionException
     {
@@ -113,7 +127,8 @@ public class ScpExternalWagon
         {
             cl.createArgument().setLine( sshArgs );
         }
-        String remoteHost = authenticationInfo.getUserName() + "@" + getRepository().getHost();
+        
+        String remoteHost = this.buildRemoteHost();
 
         cl.createArgument().setValue( remoteHost );
 
@@ -199,8 +214,7 @@ public class ScpExternalWagon
         {
             cl.createArgument().setLine( scpArgs );
         }
-        String qualifiedRemoteFile =
-            authenticationInfo.getUserName() + "@" + getRepository().getHost() + ":" + remoteFile;
+        String qualifiedRemoteFile = this.buildRemoteHost() + ":" + remoteFile;
         if ( put )
         {
             cl.createArgument().setValue( localFile.getName() );
