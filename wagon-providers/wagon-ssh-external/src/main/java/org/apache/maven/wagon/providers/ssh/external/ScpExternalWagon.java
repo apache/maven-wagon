@@ -282,6 +282,10 @@ public class ScpExternalWagon
         {
             throw new TransferFailedException( "Error executing command for transfer", e );
         }
+        
+        resource.setContentLength( source.length() );
+        
+        resource.setLastModified( source.lastModified() );
 
         firePutStarted( resource, source );
 
@@ -322,13 +326,15 @@ public class ScpExternalWagon
     public void get( String resourceName, File destination )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        String basedir = getRepository().getBasedir();
-
         String path = StringUtils.replace( resourceName, "\\", "/" );
 
-        createParentDirectories( destination );
-
         Resource resource = new Resource( path );
+
+        fireGetInitiated( resource, destination );
+        
+        String basedir = getRepository().getBasedir();
+
+        createParentDirectories( destination );
 
         fireGetStarted( resource, destination );
 

@@ -19,9 +19,12 @@ package org.apache.maven.wagon.providers.ssh.external;
  * under the License.
  */
 
+import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.providers.ssh.TestData;
+import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.resource.Resource;
 
 import java.io.File;
 
@@ -32,6 +35,16 @@ import java.io.File;
 public class ScpExternalWagonTest
     extends WagonTestCase
 {
+    protected int getExpectedContentLengthOnGet( int expectedSize )
+    {
+        return WagonConstants.UNKNOWN_LENGTH;
+    }
+
+    protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
+    {
+        return 0;
+    }
+
     protected String getProtocol()
     {
         return "scpexe";
