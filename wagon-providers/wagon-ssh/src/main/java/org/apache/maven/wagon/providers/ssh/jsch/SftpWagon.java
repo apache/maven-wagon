@@ -20,6 +20,10 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  */
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
@@ -222,10 +226,12 @@ public class SftpWagon
             dir = dir.substring( 1 );
         }
 
+        ChannelSftp channel = null;
+        
         boolean bDownloaded = true;
         try
         {
-            ChannelSftp channel = (ChannelSftp) session.openChannel( SFTP_CHANNEL );
+            channel = (ChannelSftp) session.openChannel( SFTP_CHANNEL );
 
             channel.connect();
 
@@ -267,6 +273,13 @@ public class SftpWagon
         catch ( JSchException e )
         {
             handleGetException( resource, e, destination );
+        }
+        finally
+        {
+            if ( channel != null )
+            {
+                channel.disconnect();
+            }
         }
 
         return bDownloaded;
@@ -420,6 +433,120 @@ public class SftpWagon
             firePutInitiated( resource, sourceFile );
 
             putFile( channel, sourceFile, resource, permissions );
+        }
+    }
+    
+    public List getFileList( String destinationDirectory )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        String filename = getResourceFilename( destinationDirectory );
+
+        String dir = getResourceDirectory( destinationDirectory );
+
+        // we already setuped the root directory. Ignore beginning /
+        if ( dir.length() > 0 && dir.charAt( 0 ) == PATH_SEPARATOR )
+        {
+            dir = dir.substring( 1 );
+        }
+
+        ChannelSftp channel = null;
+        try
+        {
+            channel = (ChannelSftp) session.openChannel( SFTP_CHANNEL );
+
+            channel.connect();
+
+            SftpATTRS attrs = changeToRepositoryDirectory( channel, dir, filename );
+            if ( ( attrs.getPermissions() & S_IFDIR ) == 0 )
+            {
+                throw new TransferFailedException( "Remote path is not a directory:" + dir );
+            }
+
+            Vector fileList = channel.ls( filename );
+            List files = new ArrayList( fileList.size() );
+            for ( Iterator i = fileList.iterator(); i.hasNext(); )
+            {
+                ChannelSftp.LsEntry entry = (ChannelSftp.LsEntry) i.next();
+                
+                files.add( entry.getFilename() );
+            }
+            return files;
+        }
+        catch ( SftpException e )
+        {
+            String msg =
+                "Error occured while listing '" + destinationDirectory + "' " + "on remote repository: "
+                    + getRepository().getUrl();
+
+            throw new TransferFailedException( msg, e );
+        }
+        catch ( JSchException e )
+        {
+            String msg =
+                "Error occured while listing '" + destinationDirectory + "' " + "on remote repository: "
+                    + getRepository().getUrl();
+
+            throw new TransferFailedException( msg, e );
+        }
+        finally
+        {
+            if ( channel != null )
+            {
+                channel.disconnect();
+            }
+        }
+    }
+    
+    public boolean resourceExists( String resourceName )
+        throws TransferFailedException, AuthorizationException
+    {
+        String filename = getResourceFilename( resourceName );
+
+        String dir = getResourceDirectory( resourceName );
+
+        // we already setuped the root directory. Ignore beginning /
+        if ( dir.length() > 0 && dir.charAt( 0 ) == PATH_SEPARATOR )
+        {
+            dir = dir.substring( 1 );
+        }
+
+        ChannelSftp channel = null;
+        try
+        {
+            channel = (ChannelSftp) session.openChannel( SFTP_CHANNEL );
+
+            channel.connect();
+
+            changeToRepositoryDirectory( channel, dir, filename );
+            
+            return true;
+        }
+        catch ( ResourceDoesNotExistException e )
+        {
+            return false;
+        }
+        catch ( SftpException e )
+        {
+            String msg =
+                "Error occured while looking for '" + resourceName + "' " + "on remote repository: "
+                    + getRepository().getUrl();
+
+            throw new TransferFailedException( msg, e );
+        }
+        catch ( JSchException e )
+        {
+            String msg =
+                "Error occured while looking for '" + resourceName + "' " + "on remote repository: "
+                    + getRepository().getUrl();
+
+            throw new TransferFailedException( msg, e );
+        }
+        finally
+        {
+            if ( channel != null )
+            {
+                channel.disconnect();
+            }
         }
     }
 }

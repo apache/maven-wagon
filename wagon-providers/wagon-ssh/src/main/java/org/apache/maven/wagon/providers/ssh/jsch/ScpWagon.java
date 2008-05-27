@@ -128,7 +128,7 @@ public class ScpWagon
         try
         {
             // exec 'scp -t -d rfile' remotely
-            String command = "scp -t " + path;
+            String command = "scp -t \"" + path + "\"";
 
             fireTransferDebug( "Executing command: " + command );
 
