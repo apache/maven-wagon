@@ -19,17 +19,14 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  * under the License.
  */
 
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.HostKey;
-import com.jcraft.jsch.HostKeyRepository;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Proxy;
-import com.jcraft.jsch.ProxyHTTP;
-import com.jcraft.jsch.ProxySOCKS5;
-import com.jcraft.jsch.Session;
-import com.jcraft.jsch.UIKeyboardInteractive;
-import com.jcraft.jsch.UserInfo;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Properties;
 
 import org.apache.maven.wagon.CommandExecutionException;
 import org.apache.maven.wagon.Streams;
@@ -47,14 +44,17 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringInputStream;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Properties;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.HostKey;
+import com.jcraft.jsch.HostKeyRepository;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Proxy;
+import com.jcraft.jsch.ProxyHTTP;
+import com.jcraft.jsch.ProxySOCKS5;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.UIKeyboardInteractive;
+import com.jcraft.jsch.UserInfo;
 
 /**
  * AbstractJschWagon 
@@ -125,32 +125,42 @@ public abstract class AbstractJschWagon
             throw new AuthenticationException( "Cannot connect. Reason: " + e.getMessage(), e );
         }
 
-        // TODO: should the protocol be http? Can then use SOCKS5 has a protocol also. If so, retain "scp" for backwards compat
-        ProxyInfo proxyInfo = getProxyInfo( getRepository().getProtocol(), getRepository().getHost() );
+        Proxy proxy = null;
+        ProxyInfo proxyInfo = getProxyInfo( ProxyInfo.PROXY_SOCKS5, getRepository().getHost() );
         if ( proxyInfo != null && proxyInfo.getHost() != null )
         {
-            Proxy proxy;
-
-            int proxyPort = proxyInfo.getPort();
-
-            // HACK: if port == 1080 we will use SOCKS5 Proxy, otherwise will use HTTP Proxy
-            if ( proxyPort == SOCKS5_PROXY_PORT )
-            {
-                proxy = new ProxySOCKS5( proxyInfo.getHost() );
-                ( (ProxySOCKS5) proxy ).setUserPasswd( proxyInfo.getUserName(), proxyInfo.getPassword() );
-            }
-            else
-            {
-                proxy = new ProxyHTTP( proxyInfo.getHost(), proxyPort );
-                ( (ProxyHTTP) proxy ).setUserPasswd( proxyInfo.getUserName(), proxyInfo.getPassword() );
-            }
-
-            session.setProxy( proxy );
+            proxy = new ProxySOCKS5( proxyInfo.getHost(), proxyInfo.getPort() );
+            ( (ProxySOCKS5) proxy ).setUserPasswd( proxyInfo.getUserName(), proxyInfo.getPassword() );
         }
         else
         {
-            session.setProxy( null );
+            proxyInfo = getProxyInfo( ProxyInfo.PROXY_HTTP, getRepository().getHost() );
+            if ( proxyInfo != null && proxyInfo.getHost() != null )
+            {
+                proxy = new ProxyHTTP( proxyInfo.getHost(), proxyInfo.getPort() );
+                ( (ProxyHTTP) proxy ).setUserPasswd( proxyInfo.getUserName(), proxyInfo.getPassword() );
+            }
+            else
+            {
+                // Backwards compatibility
+                proxyInfo = getProxyInfo( getRepository().getProtocol(), getRepository().getHost() );
+                if ( proxyInfo != null && proxyInfo.getHost() != null )
+                {
+                    // if port == 1080 we will use SOCKS5 Proxy, otherwise will use HTTP Proxy
+                    if ( proxyInfo.getPort() == SOCKS5_PROXY_PORT )
+                    {
+                        proxy = new ProxySOCKS5( proxyInfo.getHost(), proxyInfo.getPort() );
+                        ( (ProxySOCKS5) proxy ).setUserPasswd( proxyInfo.getUserName(), proxyInfo.getPassword() );
+                    }
+                    else
+                    {
+                        proxy = new ProxyHTTP( proxyInfo.getHost(), proxyInfo.getPort() );
+                        ( (ProxyHTTP) proxy ).setUserPasswd( proxyInfo.getUserName(), proxyInfo.getPassword() );
+                    }
+                }
+            }
         }
+        session.setProxy( proxy );
 
         // username and password will be given via UserInfo interface.
         UserInfo ui = new WagonUserInfo( authenticationInfo, getInteractiveUserInfo() );
