@@ -47,6 +47,9 @@ import java.io.OutputStream;
  * 
  * We will first try to use public keys for authentication and if that doesn't
  * work then we fall back to using the login and password.
+ * 
+ * See <a href="http://blogs.sun.com/janp/entry/how_the_scp_protocol_works">http://blogs.sun.com/janp/entry/how_the_scp_protocol_works</a>
+ * for information on how the SCP protocol works.
  *
  * @version $Id$
  * @todo [BP] add compression flag
@@ -130,8 +133,8 @@ public class ScpWagon
         OutputStream out = null;
         try
         {
-            // exec 'scp -t -d rfile' remotely
-            String command = "scp -t \"" + path + "\"";
+            // exec 'scp -p -t rfile' remotely
+            String command = "scp -p -t \"" + path + "\"";
 
             fireTransferDebug( "Executing command: " + command );
 
