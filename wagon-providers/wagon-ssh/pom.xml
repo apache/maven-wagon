@@ -51,7 +51,7 @@
     <dependency>
       <groupId>com.jcraft</groupId>
       <artifactId>jsch</artifactId>
-      <version>0.1.31</version>
+      <version>0.1.38</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
