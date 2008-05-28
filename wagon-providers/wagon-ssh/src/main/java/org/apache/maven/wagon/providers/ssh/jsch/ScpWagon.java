@@ -134,7 +134,12 @@ public class ScpWagon
         try
         {
             // exec 'scp -p -t rfile' remotely
-            String command = "scp -p -t \"" + path + "\"";
+            String command = "scp";
+            if ( octalMode != null )
+            {
+                command += " -p";
+            }
+            command += " -t \"" + path + "\"";
 
             fireTransferDebug( "Executing command: " + command );
 
@@ -154,7 +159,8 @@ public class ScpWagon
             // send "C0644 filesize filename", where filename should not include '/'
             long filesize = source.length();
 
-            command = "C" + octalMode + " " + filesize + " ";
+            String mode = octalMode == null ? "0644" : octalMode;
+            command = "C" + mode + " " + filesize + " ";
 
             if ( resourceName.lastIndexOf( PATH_SEPARATOR ) > 0 )
             {

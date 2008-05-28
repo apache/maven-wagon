@@ -68,7 +68,7 @@ public abstract class AbstractSshWagon
 
     protected String getOctalMode( RepositoryPermissions permissions )
     {
-        String mode = "0644";
+        String mode = null;
         if ( permissions != null && permissions.getFileMode() != null )
         {
             if ( permissions.getFileMode().matches( "[0-9]{3,4}" ) )

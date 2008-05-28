@@ -362,12 +362,11 @@ public class ScpExternalWagon
                                 true );
             }
 
-            String fileMode = "644";
             if ( permissions != null && permissions.getFileMode() != null )
             {
-                fileMode = permissions.getFileMode();
+                executeCommand( "chmod -f " + permissions.getFileMode() + " " + basedir + "/" + resourceName + "\n",
+                                true );
             }
-            executeCommand( "chmod -f " + fileMode + " " + basedir + "/" + resourceName + "\n", true );
         }
         catch ( CommandExecutionException e )
         {

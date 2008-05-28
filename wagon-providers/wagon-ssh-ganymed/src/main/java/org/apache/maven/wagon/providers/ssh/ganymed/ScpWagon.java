@@ -110,8 +110,16 @@ public class ScpWagon
         try
         {
             int index = path.lastIndexOf( '/' );
-            client.put( source.getAbsolutePath(), path.substring( index + 1 ), path.substring( 0, index ),
-                        getOctalMode( permissions ) );
+            String octalMode = getOctalMode( permissions );
+            if ( octalMode != null )
+            {
+                client.put( source.getAbsolutePath(), path.substring( index + 1 ), path.substring( 0, index ),
+                            octalMode );
+            }
+            else
+            {
+                client.put( source.getAbsolutePath(), path.substring( index + 1 ), path.substring( 0, index ) );
+            }
         }
         catch ( IOException e )
         {

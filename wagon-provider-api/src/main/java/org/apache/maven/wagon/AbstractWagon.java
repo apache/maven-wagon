@@ -32,6 +32,7 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.proxy.ProxyInfoProvider;
 import org.apache.maven.wagon.proxy.ProxyUtils;
 import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
 
@@ -68,8 +69,10 @@ public abstract class AbstractWagon
     protected boolean interactive = true;
     
     private int connectionTimeout = 60000;
-
+    
     private ProxyInfoProvider proxyInfoProvider;
+    
+    private RepositoryPermissions permissionsOverride;
 
     // ----------------------------------------------------------------------
     // Accessors
@@ -168,6 +171,11 @@ public abstract class AbstractWagon
             throw new IllegalStateException( "The repository specified cannot be null." );
         }
 
+        if ( permissionsOverride != null )
+        {
+            repository.setPermissions( permissionsOverride );
+        }
+        
         this.repository = repository;
 
         if ( authenticationInfo == null )
@@ -833,5 +841,15 @@ public abstract class AbstractWagon
             }
         }
         return null;
+    }
+
+    public RepositoryPermissions getPermissionsOverride()
+    {
+        return permissionsOverride;
+    }
+
+    public void setPermissionsOverride( RepositoryPermissions permissionsOverride )
+    {
+        this.permissionsOverride = permissionsOverride;
     }
 }
