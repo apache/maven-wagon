@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.webdav;
+package org.apache.maven.wagon.providers.webdav.jackrabbit;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one

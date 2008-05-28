@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.webdav;
+package org.apache.maven.wagon.providers.webdav.jackrabbit;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -24,16 +24,16 @@ import java.io.IOException;
 
 import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.WagonTestCase;
-import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 
 /**
- * Authenticated WebDAV Wagon Test 
- * 
- * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
+ * WebDAV Wagon Test
+ *
+ * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
+ * @author <a href="mailto:carlos@apache.org">Carlos Sanchez</a>
  */
-public class AuthenticatedWebDavWagonTest
+public class WebDavWagonTest
     extends WagonTestCase
 {
     private ServletServer server;
@@ -41,7 +41,7 @@ public class AuthenticatedWebDavWagonTest
     protected String getTestRepositoryUrl()
         throws IOException
     {
-        return "dav:http://localhost:10007/authdav/newfolder/folder2";
+        return "dav:http://localhost:10007/dav/newfolder/folder2";
     }
 
     protected String getProtocol()
@@ -49,26 +49,15 @@ public class AuthenticatedWebDavWagonTest
         return "dav";
     }
 
-    protected AuthenticationInfo getAuthInfo()
-    {
-        AuthenticationInfo authenticationInfo = new AuthenticationInfo();
-
-        authenticationInfo.setUserName( "userName" );
-
-        authenticationInfo.setPassword( "password" );
-
-        return authenticationInfo;
-    }
-
     protected void setupWagonTestingFixtures()
         throws Exception
     {
         if ( System.getProperty( "basedir" ) == null )
         {
-            fail( "System property 'basedir' must be set for the web server to run properly" );
+            System.setProperty( "basedir", System.getProperty( "user.dir" ) );
         }
 
-        File file = FileTestUtils.createUniqueFile( "authdav-repository", "test-resource" );
+        File file = FileTestUtils.createUniqueFile( "dav-repository", "test-resource" );
 
         file.delete();
 
@@ -86,7 +75,7 @@ public class AuthenticatedWebDavWagonTest
 
     protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
     {
-        File file = getTestFile( "target/test-output/authdav-repository/newfolder/folder2", resource.getName() );
+        File file = getTestFile( "target/test-output/dav-repository/newfolder/folder2", resource.getName() );
         return file.lastModified();
     }
 }

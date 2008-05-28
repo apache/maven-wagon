@@ -20,13 +20,17 @@
 <plexus>
   <components>
     <component>
-      <role>org.apache.maven.wagon.providers.webdav.ServletServer</role>
-      <implementation>org.apache.maven.wagon.providers.webdav.ServletServer</implementation>
+      <role>org.apache.maven.wagon.providers.webdav.jackrabbit.ServletServer</role>
+      <implementation>org.apache.maven.wagon.providers.webdav.jackrabbit.ServletServer</implementation>
       <configuration>
         <port>10007</port>
         <contexts>
           <context>
-            <id>/dav</id>
+            <id>/authdav</id>
+            <authenticationInfo>
+            	<userName>userName</userName>
+            	<password>password</password>
+            </authenticationInfo>
             <servlets>
               <servlet>
                 <id>LOCALREPO</id>
@@ -35,7 +39,7 @@
                 <parameters>
                   <property>
                     <name>rootPath</name>
-                    <value>${basedir}/target/test-output/dav-repository</value>
+                    <value>${basedir}/target/test-output/authdav-repository</value>
                   </property>
                   <property>
                     <name>xmlOnly</name>
