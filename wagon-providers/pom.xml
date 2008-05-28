@@ -42,7 +42,7 @@
     <module>wagon-ssh-common</module>
     <module>wagon-ssh-common-test</module>
     <module>wagon-ssh</module>
-    <module>wagon-webdav</module>
+    <module>wagon-webdav-jackrabbit</module>
   </modules>
   <dependencies>
     <dependency>

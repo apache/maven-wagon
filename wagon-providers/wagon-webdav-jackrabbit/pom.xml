@@ -28,7 +28,7 @@
     <version>1.0-rc1-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>wagon-webdav</artifactId>
+  <artifactId>wagon-webdav-jackrabbit</artifactId>
   <name>Maven Wagon WebDav Provider</name>
   <description>
     Wagon that gets and puts artifacts through webdav protocol
