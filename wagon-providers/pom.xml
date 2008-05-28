@@ -37,13 +37,11 @@
     <module>wagon-http-lightweight</module>
     <module>wagon-http</module>
     <module>wagon-http-shared</module>
-    <module>wagon-s3</module>
     <module>wagon-scm</module>
     <module>wagon-ssh-external</module>
     <module>wagon-ssh-common</module>
     <module>wagon-ssh-common-test</module>
     <module>wagon-ssh</module>
-    <module>wagon-ssh-ganymed</module>
     <module>wagon-webdav</module>
   </modules>
   <dependencies>
