@@ -392,8 +392,6 @@ public class ScpExternalWagon
 
         fireGetInitiated( resource, destination );
         
-        String basedir = getRepository().getBasedir();
-
         createParentDirectories( destination );
 
         fireGetStarted( resource, destination );
