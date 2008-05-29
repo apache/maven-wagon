@@ -191,12 +191,19 @@ public class ScpWagon
         }
         catch ( IOException e )
         {
-            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );            
-            
-            String msg = "Error occured while deploying '" + resourceName + "' to remote repository: " +
-                getRepository().getUrl() + ": " + e.getMessage();
-
-            throw new TransferFailedException( msg, e );
+            if ( e.getMessage().indexOf( "set mode: Operation not permitted" ) >= 0 )
+            {
+                fireTransferDebug( e.getMessage() );                
+            }
+            else
+            {
+                fireTransferError( resource, e, TransferEvent.REQUEST_PUT );            
+                
+                String msg = "Error occured while deploying '" + resourceName + "' to remote repository: " +
+                    getRepository().getUrl() + ": " + e.getMessage();
+    
+                throw new TransferFailedException( msg, e );
+            }
         }
         catch ( JSchException e )
         {

@@ -170,7 +170,6 @@ public class SftpWagon
     }
 
     private void setFileMode( ChannelSftp channel, String filename, RepositoryPermissions permissions )
-        throws SftpException
     {
         try
         {
@@ -181,6 +180,10 @@ public class SftpWagon
         {
             // TODO: warning level
             fireTransferDebug( "Not setting mode: must be a numerical mode for SFTP" );
+        }
+        catch ( SftpException e )
+        {
+            fireTransferDebug( "Not setting mode: " + e.getMessage() );            
         }
     }
 
