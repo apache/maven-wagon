@@ -37,9 +37,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>jtidy</groupId>
-      <artifactId>jtidy</artifactId>
-      <version>4aug2000r7-dev</version>
+      <groupId>nekohtml</groupId>
+      <artifactId>nekohtml</artifactId>
+      <version>1.9.6.1</version>
     </dependency>
     <dependency>
       <groupId>commons-httpclient</groupId>

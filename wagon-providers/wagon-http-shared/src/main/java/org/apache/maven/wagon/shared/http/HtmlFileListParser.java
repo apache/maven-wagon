@@ -19,26 +19,50 @@ package org.apache.maven.wagon.shared.http;
  * under the License.
  */
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
+
 import org.apache.maven.wagon.TransferFailedException;
 import org.codehaus.plexus.util.StringUtils;
-import org.w3c.dom.Document;
+import org.cyberneko.html.parsers.DOMParser;
+import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.tidy.Tidy;
-
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
 
 /**
  * Html File List Parser.
  */
 public class HtmlFileListParser
 {
+    private static final Set/*<Pattern>*/skips = new HashSet/*<Pattern>*/();
+
+    static
+    {
+        // Apache Fancy Index Sort Headers
+        skips.add( Pattern.compile( "\\?[CDMNS]=.*" ) );
+
+        // URLs with excessive paths.
+        skips.add( Pattern.compile( "/[^/]*/" ) );
+
+        // URLs that to a parent directory.
+        skips.add( Pattern.compile( "\\.\\./" ) );
+
+        // mailto urls
+        skips.add( Pattern.compile( "mailto:.*" ) );
+    }
+
     /**
      * Fetches a raw HTML from a provided InputStream, parses it, and returns the file list.
      * 
@@ -46,128 +70,137 @@ public class HtmlFileListParser
      * @return the file list.
      * @throws TransferFailedException if there was a problem fetching the raw html.
      */
-    public static List parseFileList( String baseurl, InputStream is )
+    public static List/*<String>*/parseFileList( String baseurl, InputStream stream )
         throws TransferFailedException
     {
-        Tidy tidy = new Tidy();
-        tidy.setXHTML( true );
-        // Don't care about the warning messages.
-        tidy.setErrout( new PrintWriter( new NullOutputStream() ) );
-        // Don't care about the cleaned up version of the HTML.
-        Document doc = tidy.parseDOM( is, new NullOutputStream() );
+        try
+        {
+            // Use URI object to get benefits of proper absolute and relative path resolution for free
+            URI baseURI = new URI( baseurl );
 
-        List links = new ArrayList();
-        links = findAnchorLinks( links, baseurl, doc );
+            DOMParser parser = new DOMParser();
+            parser.setFeature( "http://cyberneko.org/html/features/augmentations", true );
+            parser.setProperty( "http://cyberneko.org/html/properties/names/elems", "upper" );
+            parser.setProperty( "http://cyberneko.org/html/properties/names/attrs", "upper" );
+            parser.parse( new InputSource( stream ) );
 
-        return links;
+            Set/*<String>*/links = new HashSet/*<String>*/();
+
+            recursiveLinkCollector( parser.getDocument(), baseURI, links );
+
+            return new ArrayList( links );
+
+        }
+        catch ( URISyntaxException e )
+        {
+            throw new TransferFailedException( "Unable to parse as URI: " + baseurl );
+        }
+        catch ( SAXNotRecognizedException e )
+        {
+            throw new TransferFailedException( "Unable to setup XML/SAX: " + e.getMessage(), e );
+        }
+        catch ( SAXNotSupportedException e )
+        {
+            throw new TransferFailedException( "XML/SAX not supported?: " + e.getMessage(), e );
+        }
+        catch ( SAXException e )
+        {
+            throw new TransferFailedException( "XML/SAX error: " + e.getMessage(), e );
+        }
+        catch ( IOException e )
+        {
+            throw new TransferFailedException( "I/O error: " + e.getMessage(), e );
+        }
     }
 
-    private static List findAnchorLinks( List links, String baseurl, Node node )
+    private static void recursiveLinkCollector( Node node, URI baseURI, Set/*<String>*/links )
     {
-        String basepath = baseurl;
-
-        int colslash = basepath.indexOf( "://" );
-        if ( colslash > 0 )
+        if ( node.getNodeType() == Node.ELEMENT_NODE )
         {
-            int pathstart = basepath.indexOf( '/', colslash + 3 );
-            if ( pathstart > 0 )
+            //            System.out.println("Element <" + node.getNodeName() + dumpAttributes((Element) node) + ">");
+            if ( "A".equals( node.getNodeName() ) )
             {
-                // slash starts path
-                // "http://localhost:10007/test/path/" = "/test/path"
-                basepath = baseurl.substring( pathstart );
-            }
-            else
-            {
-                // no path means top level.
-                // "http://localhost:10007" = ""
-                basepath = "";
-            }
-        }
-
-        if ( StringUtils.equalsIgnoreCase( "a", node.getNodeName() ) )
-        {
-            if ( node.hasAttributes() )
-            {
-                String key;
-                String value;
-                NamedNodeMap attributes = node.getAttributes();
-                for ( int i = 0; i < attributes.getLength(); i++ )
+                Element anchor = (Element) node;
+                NamedNodeMap nodemap = anchor.getAttributes();
+                Node href = nodemap.getNamedItem( "HREF" );
+                if ( href != null )
                 {
-                    key = attributes.item( i ).getNodeName().toLowerCase();
-                    if ( "href".equals( key ) )
+                    String link = cleanLink( baseURI, href.getNodeValue() );
+                    //                    System.out.println("HREF (" + href.getNodeValue() + " => " + link + ")");
+                    if ( isAcceptableLink( link ) )
                     {
-                        value = attributes.item( i ).getNodeValue();
-                        if ( StringUtils.isNotEmpty( value ) )
-                        {
-                            value = StringUtils.trim( value );
-                            if ( validFilename( value ) )
-                            {
-                                // simple filename.
-                                links.add( value );
-                            }
-                            else
-                            {
-                                // Potentially Complex Filename.
-
-                                // Starts with full URL base "http://www.ibiblio.org/maven2/"
-                                if ( value.startsWith( baseurl ) )
-                                {
-                                    String tst = value.substring( baseurl.length() );
-                                    if ( validFilename( tst ) )
-                                    {
-                                        links.add( tst );
-                                        continue;
-                                    }
-                                }
-
-                                // Starts with host relative base url "/maven2/"
-                                if ( value.startsWith( basepath ) )
-                                {
-                                    String tst = URLDecoder.decode( value.substring( basepath.length() ) );
-                                    if ( validFilename( tst ) )
-                                    {
-                                        links.add( tst );
-                                        continue;
-                                    }
-                                }
-                            }
-                        }
+                        links.add( link );
                     }
                 }
             }
         }
 
-        if ( node.hasChildNodes() )
+        Node child = node.getFirstChild();
+        while ( child != null )
         {
-            NodeList nodes = node.getChildNodes();
-            for ( int nodenum = 0; nodenum < nodes.getLength(); nodenum++ )
-            {
-                findAnchorLinks( links, baseurl, nodes.item( nodenum ) );
-            }
+            recursiveLinkCollector( child, baseURI, links );
+            child = child.getNextSibling();
         }
-
-        return links;
     }
 
-    private static boolean validFilename( String tst )
+    //    private String dumpAttributes(Element elem) {
+    //        StringBuffer buf = new StringBuffer();
+    //        NamedNodeMap nodemap = elem.getAttributes();
+    //        int len = nodemap.getLength();
+    //        for (int i = 0; i < len; i++) {
+    //            Node att = nodemap.item(i);
+    //            buf.append(" ");
+    //            buf.append(att.getNodeName()).append("=\"");
+    //            buf.append(att.getNodeValue()).append("\"");
+    //        }
+    //        return buf.toString();
+    //    }
+
+    private static String cleanLink( URI baseURI, String link )
     {
-        final Pattern badFilenames = Pattern.compile( "[:?&@*]" );
+        if ( StringUtils.isEmpty( link ) )
+        {
+            return "";
+        }
 
-        if ( badFilenames.matcher( tst ).find() )
+        String ret = link;
+
+        try
+        {
+            URI linkuri = new URI( ret );
+            URI relativeURI = baseURI.relativize( linkuri ).normalize();
+            ret = relativeURI.toASCIIString();
+            if ( ret.startsWith( baseURI.getPath() ) )
+            {
+                ret = ret.substring( baseURI.getPath().length() );
+            }
+            // TODO: Fix string escaping properly.
+            ret = StringUtils.replace( ret, "%20", " " );
+            ret = StringUtils.replace( ret, "+", " " );
+        }
+        catch ( URISyntaxException e )
+        {
+        }
+
+        return ret;
+    }
+    
+    
+
+    private static boolean isAcceptableLink( String link )
+    {
+        if ( StringUtils.isEmpty( link ) )
         {
             return false;
         }
 
-        String tstpath = StringUtils.replace( tst, '\\', '/' );
-        int pathparts = StringUtils.countMatches( tstpath, "/" );
-
-        if ( pathparts > 1 )
+        for ( Iterator it = skips.iterator(); it.hasNext(); )
         {
-            return false;
-        }
-        else if ( ( pathparts == 1 ) && ( !tstpath.endsWith( "/" ) ) )
-        {
-            return false;
+            Pattern skipPat = (Pattern) it.next();
+            if ( skipPat.matcher( link ).find() )
+            {
+                return false;
+            }
         }
 
         return true;
