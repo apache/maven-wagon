@@ -67,6 +67,23 @@ public class WebDavWagon
     extends AbstractHttpClientWagon
 {
     /**
+     * Defines the protocol mapping to use.
+     * 
+     * First string is the user definition way to define a webdav url,
+     * the second string is the internal representation of that url.
+     * 
+     * NOTE: The order of the mapping becomes the search order.
+     */
+    private static final String[][] protocolMap = new String[][] {
+        { "dav:http://", "http://" },    /* maven 2.0.x url string format. (violates URI spec) */
+        { "dav:https://", "https://" },  /* maven 2.0.x url string format. (violates URI spec) */
+        { "dav+http://", "http://" },    /* URI spec compliant (protocol+transport) */
+        { "dav+https://", "https://" },  /* URI spec compliant (protocol+transport) */
+        { "dav://", "http://" },         /* URI spec compliant (protocol only) */
+        { "davs://", "https://" }        /* URI spec compliant (protocol only) */
+    };
+    
+    /**
      * Puts a file into the remote repository
      *
      * @param source       the file to transfer
@@ -297,17 +314,21 @@ public class WebDavWagon
         throw new ResourceDoesNotExistException("Destination path exists but is not a " + "WebDAV collection (directory): " + url );
     }
     
-    protected String getURL( Repository repository )
+    public String getURL( Repository repository )
     {
         String url = repository.getUrl();
-        String s = "dav:";
-        if ( url.startsWith( s ) )
+
+        // Process mappings first.
+        for ( int i = 0; i < protocolMap.length; i++ )
         {
-            return url.substring( s.length() );
+            String protocol = protocolMap[i][0];
+            if ( url.startsWith( protocol ) )
+            {
+                return protocolMap[i][1] + url.substring( protocol.length() );
+            }
         }
-        else
-        {
-            return url;
-        }
+
+        // No mapping trigger? then just return as-is.
+        return url;
     }
 }

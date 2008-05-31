@@ -48,7 +48,7 @@ public class WebDavWagonTest
     {
         return "dav";
     }
-
+    
     protected void setupWagonTestingFixtures()
         throws Exception
     {
@@ -77,5 +77,60 @@ public class WebDavWagonTest
     {
         File file = getTestFile( "target/test-output/dav-repository/newfolder/folder2", resource.getName() );
         return file.lastModified();
+    }
+    
+    private void assertURL( String userUrl, String expectedUrl )
+    {
+        Repository repo = new Repository( "test-geturl", userUrl );
+        String actualUrl = ( new WebDavWagon() ).getURL( repo );
+        assertEquals( "WebDavWagon.getURL(" + userUrl + ")", expectedUrl, actualUrl );
+    }
+
+    /**
+     * Tests the maven 2.0.x way to define a webdav URL without SSL.
+     */
+    public void testGetURLDavHttp()
+    {
+        assertURL( "dav:http://localhost:10007/dav/", "http://localhost:10007/dav/" );
+    }
+    
+    /**
+     * Tests the maven 2.0.x way to define a webdav URL with SSL.
+     */
+    public void testGetURLDavHttps()
+    {
+        assertURL( "dav:https://localhost:10007/dav/", "https://localhost:10007/dav/" );
+    }
+
+    /**
+     * Tests the URI spec way of defining a webdav URL without SSL.
+     */
+    public void testGetURLDavUri()
+    {
+        assertURL( "dav://localhost:10007/dav/", "http://localhost:10007/dav/" );
+    }
+
+    /**
+     * Tests the URI spec way of defining a webdav URL with SSL.
+     */
+    public void testGetURLDavUriWithSsl()
+    {
+        assertURL( "davs://localhost:10007/dav/", "https://localhost:10007/dav/" );
+    }
+
+    /**
+     * Tests the URI spec way of defining a webdav URL without SSL.
+     */
+    public void testGetURLDavPlusHttp()
+    {
+        assertURL( "dav+https://localhost:10007/dav/", "https://localhost:10007/dav/" );
+    }
+
+    /**
+     * Tests the URI spec way of defining a webdav URL with SSL.
+     */
+    public void testGetURLDavPlusHttps()
+    {
+        assertURL( "dav+https://localhost:10007/dav/", "https://localhost:10007/dav/" );
     }
 }
