@@ -106,6 +106,8 @@ public class WebDavWagon
         catch ( IOException e )
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+            
+            throw new TransferFailedException( e.getMessage() );
         }
 
         super.put(source, resource);
@@ -128,9 +130,10 @@ public class WebDavWagon
      * @param dir path to be created in server from repository basedir
      * @throws IOException 
      * @throws HttpException 
+     * @throws AuthorizationException 
      * @throws TransferFailedException
      */
-    private void mkdirs( String dir ) throws HttpException, IOException
+    private void mkdirs( String dir ) throws HttpException, IOException, AuthorizationException
     {
         Repository repository = getRepository();
         String basedir = repository.getBasedir();
@@ -150,6 +153,16 @@ public class WebDavWagon
                 || status == HttpStatus.SC_METHOD_NOT_ALLOWED )
             {
                 break;
+            }
+
+            if ( status == HttpStatus.SC_UNAUTHORIZED )
+            {
+                throw new AuthorizationException( "Unable to create collection: " + url );
+            }
+            
+            if ( status != HttpStatus.SC_CONFLICT )
+            {
+                throw new IOException( "Unable to create collection: " + url + "; status code = " + status );
             }
         }
 
