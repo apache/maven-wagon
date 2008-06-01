@@ -19,17 +19,19 @@ package org.apache.maven.wagon;
  * under the License.
  */
 
-import junit.framework.TestCase;
-import org.apache.maven.wagon.authentication.AuthenticationException;
-import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.apache.maven.wagon.events.SessionListenerMock;
-import org.apache.maven.wagon.events.TransferListenerMock;
-import org.apache.maven.wagon.repository.Repository;
-import org.codehaus.plexus.util.IOUtil;
-
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import junit.framework.TestCase;
+
+import org.apache.maven.wagon.authentication.AuthenticationException;
+import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.events.SessionListener;
+import org.apache.maven.wagon.events.TransferListener;
+import org.apache.maven.wagon.repository.Repository;
+import org.codehaus.plexus.util.IOUtil;
+import org.easymock.MockControl;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -48,9 +50,13 @@ public class AbstractWagonTest
 
     private String artifact;
 
-    private SessionListenerMock sessionListener = null;
+    private SessionListener sessionListener = null;
 
-    private TransferListenerMock transferListener = null;
+    private TransferListener transferListener = null;
+
+    private MockControl transferListenerControl;
+
+    private MockControl sessionListenerControl;
 
     protected void setUp()
         throws Exception
@@ -65,11 +71,13 @@ public class AbstractWagonTest
 
         wagon = new WagonMock();
 
-        sessionListener = new SessionListenerMock();
+        sessionListenerControl = MockControl.createControl( SessionListener.class ); 
+        sessionListener = (SessionListener) sessionListenerControl.getMock();
 
         wagon.addSessionListener( sessionListener );
 
-        transferListener = new TransferListenerMock();
+        transferListenerControl = MockControl.createControl( TransferListener.class ); 
+        transferListener = (TransferListener) transferListenerControl.getMock();
 
         wagon.addTransferListener( transferListener );
 
@@ -98,64 +106,66 @@ public class AbstractWagonTest
     {
         Repository repository = new Repository();
 
+        sessionListenerControl.setDefaultMatcher( MockControl.ALWAYS_MATCHER );
+        sessionListener.sessionOpening( null );
+        sessionListener.sessionOpened( null );
+        sessionListenerControl.replay();
+        
         wagon.connect( repository );
+        
+        sessionListenerControl.verify();
 
         assertEquals( repository, wagon.getRepository() );
-
-        assertTrue( sessionListener.isSessionOpenningCalled() );
-
-        assertTrue( sessionListener.isSessionOpenedCalled() );
-
-        //!!
-        //assertTrue( sessionListener.isSessionLoggedInCalled() );
-
-        //!!
-        //assertTrue( sessionListener.isSessionRefusedCalled() );
-
     }
 
     public void testSessionCloseEvents()
         throws Exception
     {
+        sessionListenerControl.setDefaultMatcher( MockControl.ALWAYS_MATCHER );
+        sessionListener.sessionDisconnecting( null );
+        sessionListener.sessionDisconnected( null );
+        sessionListenerControl.replay();
+        
         wagon.disconnect();
-
-        //!!
-        //assertTrue( sessionListener.isSessionLoggedOffCalled() );
-
-        assertTrue( sessionListener.isSessionDisconnectingCalled() );
-
-        assertTrue( sessionListener.isSessionDisconnectedCalled() );
+        
+        sessionListenerControl.verify();
     }
 
     public void testGetTransferEvents()
         throws Exception
     {
+        transferListener.debug( "fetch debug message" );
+        transferListenerControl.setDefaultMatcher( MockControl.ALWAYS_MATCHER );
+        transferListener.transferInitiated( null );
+        transferListener.transferStarted( null );
+        transferListener.debug( null );
+        transferListenerControl.setVoidCallable( MockControl.ZERO_OR_MORE );
+        transferListener.transferProgress( null, null, 0 );
+        transferListenerControl.setVoidCallable( 5 );
+        transferListener.transferCompleted( null );
+        transferListenerControl.replay();
+        
         wagon.fireTransferDebug( "fetch debug message" );
 
         Repository repository = new Repository();
-
         wagon.connect( repository );
 
-        assertEquals( "fetch debug message", transferListener.getDebugMessage() );
-
-        assertTrue( transferListener.isDebugCalled() );
-
         wagon.get( artifact, destination );
-
-        assertTrue( transferListener.isTransferStartedCalled() );
-
-        assertTrue( transferListener.isTransferCompletedCalled() );
-
-        assertTrue( transferListener.isTransferProgressCalled() );
-
-        assertEquals( 5, transferListener.getNumberOfProgressCalls() );
+        
+        transferListenerControl.verify();
     }
 
     public void testGetError()
         throws Exception
     {
-        TransferListenerMock transferListener = new TransferListenerMock();
-
+        transferListenerControl.setDefaultMatcher( MockControl.ALWAYS_MATCHER );
+        transferListener.transferInitiated( null );
+        transferListener.transferStarted( null );        
+        transferListener.debug( null );
+        transferListenerControl.setVoidCallable( MockControl.ZERO_OR_MORE );
+        transferListener.transferError( null );
+        transferListenerControl.replay();
+        
         try
         {
             Repository repository = new Repository();
@@ -175,17 +185,21 @@ public class AbstractWagonTest
             assertTrue( true );
         }
 
-        assertTrue( transferListener.isTransferStartedCalled() );
-
-        assertTrue( transferListener.isTransferErrorCalled() );
-
-        assertFalse( transferListener.isTransferCompletedCalled() );
+        transferListenerControl.verify();
     }
 
     public void testPutTransferEvents()
         throws ConnectionException, AuthenticationException, ResourceDoesNotExistException, TransferFailedException,
         AuthorizationException
     {
+        transferListener.debug( "deploy debug message" );
+        transferListenerControl.setDefaultMatcher( MockControl.ALWAYS_MATCHER );
+        transferListener.transferInitiated( null );
+        transferListener.transferStarted( null );
+        transferListener.transferProgress( null, null, 0 );
+        transferListener.transferCompleted( null );
+        transferListenerControl.replay();
+        
         wagon.fireTransferDebug( "deploy debug message" );
 
         Repository repository = new Repository();
@@ -194,18 +208,7 @@ public class AbstractWagonTest
 
         wagon.put( source, artifact );
 
-        assertTrue( transferListener.isTransferStartedCalled() );
-
-        assertTrue( transferListener.isTransferCompletedCalled() );
-
-        assertTrue( transferListener.isDebugCalled() );
-
-        assertTrue( transferListener.isTransferProgressCalled() );
-
-        assertEquals( "deploy debug message", transferListener.getDebugMessage() );
-
-        //!!
-        //assertEquals( 5, transferListener.getNumberOfProgressCalls() );
+        transferListenerControl.verify();
     }
 
     /*

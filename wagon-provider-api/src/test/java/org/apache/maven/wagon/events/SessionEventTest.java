@@ -21,10 +21,10 @@ package org.apache.maven.wagon.events;
 
 import junit.framework.TestCase;
 import org.apache.maven.wagon.ConnectionException;
-import org.apache.maven.wagon.WagonMock;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.repository.Repository;
+import org.easymock.MockControl;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -33,26 +33,6 @@ import org.apache.maven.wagon.repository.Repository;
 public class SessionEventTest
     extends TestCase
 {
-
-    /*
-	 * @see TestCase#setUp()
-	 */
-    protected void setUp()
-        throws Exception
-    {
-        super.setUp();
-    }
-
-    /**
-     * Constructor for SESSIONEventTest.
-     *
-     * @param arg0
-     */
-    public SessionEventTest( final String arg0 )
-    {
-        super( arg0 );
-    }
-
     /*
 	 * Class to test for void SESSIONEvent(Wagon, Repository, String, int,
 	 * int)
@@ -61,7 +41,7 @@ public class SessionEventTest
         throws ConnectionException, AuthenticationException
     {
 
-        final Wagon wagon = new WagonMock();
+        final Wagon wagon = (Wagon) MockControl.createControl( Wagon.class ).getMock();
         final Repository repo = new Repository();
 
         wagon.connect( repo );
@@ -72,14 +52,12 @@ public class SessionEventTest
         SessionEvent event = new SessionEvent( wagon, SessionEvent.SESSION_CLOSED );
 
         assertEquals( wagon, event.getWagon() );
-        assertEquals( repo, event.getWagon().getRepository() );
 
         assertEquals( SessionEvent.SESSION_CLOSED, event.getEventType() );
 
         event = new SessionEvent( wagon, exception );
 
         assertEquals( wagon, event.getWagon() );
-        assertEquals( repo, event.getWagon().getRepository() );
         assertEquals( SessionEvent.SESSION_ERROR_OCCURRED, event.getEventType() );
         assertEquals( exception, event.getException() );
 

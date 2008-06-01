@@ -21,11 +21,11 @@ package org.apache.maven.wagon.events;
 
 import junit.framework.TestCase;
 import org.apache.maven.wagon.ConnectionException;
-import org.apache.maven.wagon.WagonMock;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
+import org.easymock.MockControl;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -34,22 +34,6 @@ import org.apache.maven.wagon.resource.Resource;
 public class TransferEventTest
     extends TestCase
 {
-
-    public TransferEventTest( final String name )
-    {
-        super( name );
-    }
-
-    /*
-     * @see TestCase#setUp()
-     */
-    protected void setUp()
-        throws Exception
-    {
-        super.setUp();
-    }
-
-
     /*
      * Class to test for void TransferEvent(Wagon, Repository, String, int,
      * int)
@@ -57,8 +41,7 @@ public class TransferEventTest
     public void testTransferEventProperties()
         throws ConnectionException, AuthenticationException
     {
-
-        final Wagon wagon = new WagonMock();
+        final Wagon wagon = (Wagon) MockControl.createControl( Wagon.class ).getMock();
 
         final Repository repo = new Repository();
 
@@ -77,8 +60,6 @@ public class TransferEventTest
 
         assertEquals( wagon, event.getWagon() );
 
-        assertEquals( repo, event.getWagon().getRepository() );
-
         assertEquals( "mm", event.getResource().getName() );
 
         assertEquals( TransferEvent.TRANSFER_COMPLETED, event.getEventType() );
@@ -92,8 +73,6 @@ public class TransferEventTest
         event = new TransferEvent( wagon, res, exception, TransferEvent.REQUEST_GET );
 
         assertEquals( wagon, event.getWagon() );
-
-        assertEquals( repo, event.getWagon().getRepository() );
 
         assertEquals( "mm", event.getResource().getName() );
 
