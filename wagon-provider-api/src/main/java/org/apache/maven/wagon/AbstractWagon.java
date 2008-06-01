@@ -72,6 +72,9 @@ public abstract class AbstractWagon
     
     private ProxyInfoProvider proxyInfoProvider;
     
+    /** @deprecated */
+    protected ProxyInfo proxyInfo;
+    
     private RepositoryPermissions permissionsOverride;
 
     // ----------------------------------------------------------------------
@@ -160,6 +163,7 @@ public abstract class AbstractWagon
                 }
             }
         } );
+        this.proxyInfo = proxyInfo;
     }
     
     public void connect( Repository repository, AuthenticationInfo authenticationInfo,
@@ -201,22 +205,7 @@ public abstract class AbstractWagon
         
         fireSessionOpening();
 
-        try
-        {
-            openConnectionInternal();
-        }
-        catch ( ConnectionException e )
-        {
-            fireSessionConnectionRefused();
-            
-            throw e;
-        }
-        catch ( AuthenticationException e )
-        {
-            fireSessionConnectionRefused();
-            
-            throw e;
-        }
+        openConnection();
 
         fireSessionOpened();
     }
