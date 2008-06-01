@@ -21,8 +21,10 @@ package org.apache.maven.wagon.shared.http;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -174,11 +176,13 @@ public class HtmlFileListParser
             {
                 ret = ret.substring( baseURI.getPath().length() );
             }
-            // TODO: Fix string escaping properly.
-            ret = StringUtils.replace( ret, "%20", " " );
-            ret = StringUtils.replace( ret, "+", " " );
+            
+            ret = URLDecoder.decode( ret, "UTF-8" );
         }
         catch ( URISyntaxException e )
+        {
+        }
+        catch ( UnsupportedEncodingException e )
         {
         }
 
