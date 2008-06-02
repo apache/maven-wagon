@@ -30,7 +30,6 @@ import org.apache.maven.wagon.CommandExecutor;
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.PermissionModeUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
-import org.apache.maven.wagon.StreamWagon;
 import org.apache.maven.wagon.Streams;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonConstants;

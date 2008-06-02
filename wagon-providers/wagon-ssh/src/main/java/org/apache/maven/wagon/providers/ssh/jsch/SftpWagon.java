@@ -25,6 +25,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.maven.wagon.InputData;
+import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
@@ -88,7 +90,7 @@ public class SftpWagon
         }
     }
 
-    private void returnToParentDirectory( Resource resource, ChannelSftp channel )
+    private void returnToParentDirectory( Resource resource )
         throws SftpException
     {
         String dir = getResourceDirectory( resource.getName() );
@@ -99,7 +101,7 @@ public class SftpWagon
         }
     }
 
-    private void putFile( ChannelSftp channel, File source, Resource resource, RepositoryPermissions permissions )
+    private void putFile( File source, Resource resource, RepositoryPermissions permissions )
         throws SftpException, TransferFailedException
     {
         resource.setContentLength( source.length() );
@@ -116,18 +118,18 @@ public class SftpWagon
 
         if ( permissions != null && permissions.getGroup() != null )
         {
-            setGroup( channel, filename, permissions );
+            setGroup( filename, permissions );
         }
 
         if ( permissions != null && permissions.getFileMode() != null )
         {
-            setFileMode( channel, filename, permissions );
+            setFileMode( filename, permissions );
         }
 
         firePutCompleted( resource, source );
     }
 
-    private void setGroup( ChannelSftp channel, String filename, RepositoryPermissions permissions )
+    private void setGroup( String filename, RepositoryPermissions permissions )
         throws SftpException
     {
         try
@@ -142,7 +144,7 @@ public class SftpWagon
         }
     }
 
-    private void setFileMode( ChannelSftp channel, String filename, RepositoryPermissions permissions )
+    private void setFileMode( String filename, RepositoryPermissions permissions )
     {
         try
         {
@@ -160,19 +162,19 @@ public class SftpWagon
         }
     }
 
-    private void mkdirs( ChannelSftp channel, String resourceName, int mode )
+    private void mkdirs( String resourceName, int mode )
         throws SftpException, TransferFailedException
     {
         String[] dirs = PathUtils.dirnames( resourceName );
         for ( int i = 0; i < dirs.length; i++ )
         {
-            mkdir( channel, dirs[i], mode );
+            mkdir( dirs[i], mode );
 
             channel.cd( dirs[i] );
         }
     }
 
-    private void mkdir( ChannelSftp channel, String dir, int mode )
+    private void mkdir( String dir, int mode )
         throws TransferFailedException, SftpException
     {
         try
@@ -202,7 +204,7 @@ public class SftpWagon
         }
     }
 
-    private SftpATTRS changeToRepositoryDirectory( ChannelSftp channel, String dir, String filename )
+    private SftpATTRS changeToRepositoryDirectory( String dir, String filename )
         throws ResourceDoesNotExistException, SftpException
     {
         // This must be called first to ensure that if the file doesn't exist it throws an exception
@@ -245,9 +247,9 @@ public class SftpWagon
         
             preparePut( resource, permissions );
         
-            putFile( channel, source, resource, permissions );
+            putFile( source, resource, permissions );
         
-            returnToParentDirectory( resource, channel );
+            returnToParentDirectory( resource );
         }
         catch ( SftpException e )
         {
@@ -270,9 +272,9 @@ public class SftpWagon
         try
         {
             String basedir = getRepository().getBasedir();
-            mkdirs( channel, basedir + "/", directoryMode );
+            mkdirs( basedir + "/", directoryMode );
             
-            mkdirs( channel, resource.getName(), directoryMode );
+            mkdirs( resource.getName(), directoryMode );
         }
         catch ( TransferFailedException e )
         {
@@ -287,26 +289,20 @@ public class SftpWagon
     {
         final RepositoryPermissions permissions = repository.getPermissions();
 
-        ChannelSftp channel = null;
-
         try
         {
-            channel = (ChannelSftp) session.openChannel( SFTP_CHANNEL );
-
-            channel.connect();
-
             channel.cd( "/" );
             
             String basedir = getRepository().getBasedir();
             int directoryMode = getDirectoryMode( permissions );
             
-            mkdirs( channel, basedir + "/", directoryMode );
+            mkdirs( basedir + "/", directoryMode );
             
             fireTransferDebug( "Recursively uploading directory " + sourceDirectory.getAbsolutePath() + " as "
                 + destinationDirectory );
             
-            mkdirs( channel, destinationDirectory, directoryMode );
-            ftpRecursivePut( channel, sourceDirectory, null, getResourceFilename( destinationDirectory ), directoryMode );
+            mkdirs( destinationDirectory, directoryMode );
+            ftpRecursivePut( sourceDirectory, null, getResourceFilename( destinationDirectory ), directoryMode );
         }
         catch ( SftpException e )
         {
@@ -316,24 +312,9 @@ public class SftpWagon
 
             throw new TransferFailedException( msg, e );
         }
-        catch ( JSchException e )
-        {
-            String msg =
-                "Error occured while deploying '" + sourceDirectory.getAbsolutePath() + "' " + "to remote repository: "
-                    + getRepository().getUrl();
-
-            throw new TransferFailedException( msg, e );
-        }
-        finally
-        {
-            if ( channel != null )
-            {
-                channel.disconnect();
-            }
-        }
     }
 
-    private void ftpRecursivePut( ChannelSftp channel, File sourceFile, String prefix, String fileName, int directoryMode )
+    private void ftpRecursivePut( File sourceFile, String prefix, String fileName, int directoryMode )
         throws TransferFailedException, SftpException
     {
         final RepositoryPermissions permissions = repository.getPermissions();
@@ -343,7 +324,7 @@ public class SftpWagon
             if ( !fileName.equals( "." ) )
             {
                 prefix = getFileName( prefix, fileName );
-                mkdir( channel, fileName, directoryMode );
+                mkdir( fileName, directoryMode );
                 channel.cd( fileName );
             }
 
@@ -355,14 +336,14 @@ public class SftpWagon
                 {
                     if ( files[i].isDirectory() )
                     {
-                        ftpRecursivePut( channel, files[i], prefix, files[i].getName(), directoryMode );
+                        ftpRecursivePut( files[i], prefix, files[i].getName(), directoryMode );
                     }
                 }
                 for ( int i = 0; i < files.length; i++ )
                 {
                     if ( !files[i].isDirectory() )
                     {
-                        ftpRecursivePut( channel, files[i], prefix, files[i].getName(), directoryMode );
+                        ftpRecursivePut( files[i], prefix, files[i].getName(), directoryMode );
                     }
                 }
             }
@@ -375,7 +356,7 @@ public class SftpWagon
 
             firePutInitiated( resource, sourceFile );
 
-            putFile( channel, sourceFile, resource, permissions );
+            putFile( sourceFile, resource, permissions );
         }
     }
 
@@ -405,14 +386,9 @@ public class SftpWagon
             dir = dir.substring( 1 );
         }
 
-        ChannelSftp channel = null;
         try
         {
-            channel = (ChannelSftp) session.openChannel( SFTP_CHANNEL );
-
-            channel.connect();
-
-            SftpATTRS attrs = changeToRepositoryDirectory( channel, dir, filename );
+            SftpATTRS attrs = changeToRepositoryDirectory( dir, filename );
             if ( ( attrs.getPermissions() & S_IFDIR ) == 0 )
             {
                 throw new TransferFailedException( "Remote path is not a directory:" + dir );
@@ -436,21 +412,6 @@ public class SftpWagon
 
             throw new TransferFailedException( msg, e );
         }
-        catch ( JSchException e )
-        {
-            String msg =
-                "Error occured while listing '" + destinationDirectory + "' " + "on remote repository: "
-                    + getRepository().getUrl();
-
-            throw new TransferFailedException( msg, e );
-        }
-        finally
-        {
-            if ( channel != null )
-            {
-                channel.disconnect();
-            }
-        }
     }
     
     public boolean resourceExists( String resourceName )
@@ -466,14 +427,9 @@ public class SftpWagon
             dir = dir.substring( 1 );
         }
 
-        ChannelSftp channel = null;
         try
         {
-            channel = (ChannelSftp) session.openChannel( SFTP_CHANNEL );
-
-            channel.connect();
-
-            changeToRepositoryDirectory( channel, dir, filename );
+            changeToRepositoryDirectory( dir, filename );
             
             return true;
         }
@@ -488,21 +444,6 @@ public class SftpWagon
                     + getRepository().getUrl();
 
             throw new TransferFailedException( msg, e );
-        }
-        catch ( JSchException e )
-        {
-            String msg =
-                "Error occured while looking for '" + resourceName + "' " + "on remote repository: "
-                    + getRepository().getUrl();
-
-            throw new TransferFailedException( msg, e );
-        }
-        finally
-        {
-            if ( channel != null )
-            {
-                channel.disconnect();
-            }
         }
     }
 
@@ -525,16 +466,10 @@ public class SftpWagon
             dir = dir.substring( 1 );
         }
 
-        ChannelSftp channel = null;
-
         boolean bDownloaded = true;
         try
         {
-            channel = (ChannelSftp) session.openChannel( SFTP_CHANNEL );
-
-            channel.connect();
-
-            SftpATTRS attrs = changeToRepositoryDirectory( channel, dir, filename );
+            SftpATTRS attrs = changeToRepositoryDirectory( dir, filename );
 
             long lastModified = attrs.getMTime() * MILLIS_PER_SEC;
             if ( timestamp <= 0 || lastModified > timestamp )
@@ -569,17 +504,6 @@ public class SftpWagon
         {
             handleGetException( resource, e, destination );
         }
-        catch ( JSchException e )
-        {
-            handleGetException( resource, e, destination );
-        }
-        finally
-        {
-            if ( channel != null )
-            {
-                channel.disconnect();
-            }
-        }
 
         return bDownloaded;
     }
@@ -588,5 +512,19 @@ public class SftpWagon
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         getIfNewer( resourceName, destination, 0 );        
+    }
+
+    public void fillInputData( InputData inputData )
+        throws TransferFailedException, ResourceDoesNotExistException
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void fillOutputData( OutputData outputData )
+        throws TransferFailedException
+    {
+        // TODO Auto-generated method stub
+        
     }
 }
