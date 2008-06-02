@@ -36,6 +36,7 @@ import org.codehaus.plexus.util.IOUtil;
  */
 public abstract class StreamWagon
     extends AbstractWagon
+    implements StreamingWagon
 {
     // ----------------------------------------------------------------------
     //
@@ -57,31 +58,22 @@ public abstract class StreamWagon
     public void get( String resourceName, File destination )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        InputData inputData = new InputData();
-
         Resource resource = new Resource( resourceName );
 
         fireGetInitiated( resource, destination );
 
-        inputData.setResource( resource );
+        InputStream is = getInputStream( resource );
 
-        try
-        {
-            fillInputData( inputData );
-        }
-        catch ( TransferFailedException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-            throw e;
-        }
-        catch ( ResourceDoesNotExistException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-            throw e;
-        }
+        checkInputStream( is, resource );
 
-        InputStream is = inputData.getInputStream();
+        createParentDirectories( destination );
 
+        getTransfer( resource, destination, is );
+    }
+
+    protected void checkInputStream( InputStream is, Resource resource )
+        throws TransferFailedException
+    {
         if ( is == null )
         {
             TransferFailedException e =
@@ -90,10 +82,6 @@ public abstract class StreamWagon
             fireTransferError( resource, e, TransferEvent.REQUEST_GET );
             throw e;
         }
-
-        createParentDirectories( destination );
-
-        getTransfer( inputData.getResource(), destination, is );
     }
 
     public boolean getIfNewer( String resourceName, File destination, long timestamp )
@@ -101,46 +89,22 @@ public abstract class StreamWagon
     {
         boolean retValue = false;
 
-        InputData inputData = new InputData();
-
         Resource resource = new Resource( resourceName );
 
-        inputData.setResource( resource );
+        fireGetInitiated( resource, destination );
 
-        try
-        {
-            fillInputData( inputData );
-        }
-        catch ( TransferFailedException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-            throw e;
-        }
-        catch ( ResourceDoesNotExistException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-            throw e;
-        }
-
-        InputStream is = inputData.getInputStream();
+        InputStream is = getInputStream( resource );
 
         // always get if timestamp is 0 (ie, target doesn't exist), otherwise only if older than the remote file
         if ( timestamp == 0 || timestamp < resource.getLastModified() )
         {
             retValue = true;
 
-            if ( is == null )
-            {
-                TransferFailedException e =
-                    new TransferFailedException( getRepository().getUrl()
-                        + " - Could not open input stream for resource: '" + resource + "'" );
-                fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-                throw e;
-            }
+            checkInputStream( is, resource );
 
             createParentDirectories( destination );
 
-            getTransfer( inputData.getResource(), destination, is );
+            getTransfer( resource, destination, is );
         }
         else
         {
@@ -150,15 +114,63 @@ public abstract class StreamWagon
         return retValue;
     }
 
+    protected InputStream getInputStream( Resource resource )
+        throws TransferFailedException, ResourceDoesNotExistException
+    {
+        InputData inputData = new InputData();
+
+        inputData.setResource( resource );
+
+        try
+        {
+            fillInputData( inputData );
+        }
+        catch ( TransferFailedException e )
+        {
+            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+            throw e;
+        }
+        catch ( ResourceDoesNotExistException e )
+        {
+            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+            throw e;
+        }
+
+        return inputData.getInputStream();
+    }
+
     // source doesn't exist exception
     public void put( File source, String resourceName )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        OutputData outputData = new OutputData();
-
         Resource resource = new Resource( resourceName );
 
         firePutInitiated( resource, source );
+
+        OutputStream os = getOutputStream( resource );
+
+        checkOutputStream( resource, os );
+
+        putTransfer( resource, source, os, true );
+    }
+
+    protected void checkOutputStream( Resource resource, OutputStream os )
+        throws TransferFailedException
+    {
+        if ( os == null )
+        {
+            TransferFailedException e =
+                new TransferFailedException( getRepository().getUrl()
+                    + " - Could not open output stream for resource: '" + resource + "'" );
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+            throw e;
+        }
+    }
+
+    protected OutputStream getOutputStream( Resource resource )
+        throws TransferFailedException
+    {
+        OutputData outputData = new OutputData();
 
         outputData.setResource( resource );
 
@@ -174,16 +186,94 @@ public abstract class StreamWagon
         }
 
         OutputStream os = outputData.getOutputStream();
+        return os;
+    }
 
-        if ( os == null )
+    public boolean getIfNewerToStream( String resourceName, OutputStream stream, long timestamp )
+        throws ResourceDoesNotExistException, TransferFailedException
+    {
+        boolean retValue = false;
+
+        Resource resource = new Resource( resourceName );
+
+        fireGetInitiated( resource, null );
+
+        InputStream is = getInputStream( resource );
+
+        // always get if timestamp is 0 (ie, target doesn't exist), otherwise only if older than the remote file
+        if ( timestamp == 0 || timestamp < resource.getLastModified() )
         {
-            TransferFailedException e =
-                new TransferFailedException( getRepository().getUrl()
-                    + " - Could not open output stream for resource: '" + resource + "'" );
-            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
-            throw e;
-        }
+            retValue = true;
 
-        putTransfer( outputData.getResource(), source, os, true );
+            checkInputStream( is, resource );
+
+            fireGetStarted( resource, null );
+
+            getTransfer( resource, stream, is, true, Integer.MAX_VALUE );
+
+            fireGetCompleted( resource, null );
+        }
+        else
+        {
+            IOUtil.close( is );
+        }
+        
+        return retValue;
+    }
+
+    public void getToStream( String resourceName, OutputStream stream )
+        throws ResourceDoesNotExistException, TransferFailedException
+    {
+        Resource resource = new Resource( resourceName );
+
+        fireGetInitiated( resource, null );
+
+        InputStream is = getInputStream( resource );
+
+        checkInputStream( is, resource );
+
+        fireGetStarted( resource, null );
+
+        getTransfer( resource, stream, is );
+
+        fireGetCompleted( resource, null );
+    }
+
+    public void putFromStream( InputStream stream, String destination )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        Resource resource = new Resource( destination );
+
+        firePutInitiated( resource, null );
+
+        putFromStream( stream, resource );
+    }
+
+    public void putFromStream( InputStream stream, String destination, long contentLength, long lastModified )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        Resource resource = new Resource( destination );
+
+        firePutInitiated( resource, null );
+
+        resource.setContentLength( contentLength );
+
+        resource.setLastModified( lastModified );
+
+        putFromStream( stream, resource );
+    }
+
+    private void putFromStream( InputStream stream, Resource resource )
+        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
+    {
+        OutputStream os = getOutputStream( resource );
+
+        checkOutputStream( resource, os );
+
+        firePutStarted( resource, null );
+
+        putTransfer( resource, stream, os, true );
+
+        firePutCompleted( resource, null );
     }
 }

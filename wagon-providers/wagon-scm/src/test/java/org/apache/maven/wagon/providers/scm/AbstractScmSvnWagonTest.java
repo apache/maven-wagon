@@ -71,4 +71,9 @@ public abstract class AbstractScmSvnWagonTest
     {
         return repository;
     }
+
+    protected boolean supportsGetIfNewer()
+    {
+        return false;
+    }
 }

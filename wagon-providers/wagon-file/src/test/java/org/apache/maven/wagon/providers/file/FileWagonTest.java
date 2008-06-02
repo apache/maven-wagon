@@ -21,6 +21,7 @@ package org.apache.maven.wagon.providers.file;
 
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.FileTestUtils;
+import org.apache.maven.wagon.StreamingWagonTestCase;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.authentication.AuthenticationException;
@@ -35,7 +36,7 @@ import java.io.IOException;
  * @version $Id$
  */
 public class FileWagonTest
-    extends WagonTestCase
+    extends StreamingWagonTestCase
 {
     protected String getProtocol()
     {

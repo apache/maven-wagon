@@ -122,7 +122,7 @@ public class ScpWagon
     private static final byte LF = '\n';
 
     public void put( File source, String basedir, Resource resource, String octalMode )
-        throws TransferFailedException
+        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
         String path = getPath( basedir, resource.getName() );
 

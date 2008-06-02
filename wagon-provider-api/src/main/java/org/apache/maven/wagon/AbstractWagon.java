@@ -277,6 +277,12 @@ public abstract class AbstractWagon
         getTransfer( resource, destination, input, true, Integer.MAX_VALUE );
     }
 
+    protected void getTransfer( Resource resource, OutputStream output, InputStream input )
+        throws TransferFailedException
+    {
+        getTransfer( resource, output, input, true, Integer.MAX_VALUE );
+    }
+
     protected void getTransfer( Resource resource, File destination, InputStream input, boolean closeInput,
                                 int maxSize )
         throws TransferFailedException
@@ -285,18 +291,16 @@ public abstract class AbstractWagon
         fireTransferDebug( "attempting to create parent directories for destination: " + destination.getName() );
         createParentDirectories( destination );
 
-        fireGetStarted( resource, destination );
-
         OutputStream output = new LazyFileOutputStream( destination );
+
+        fireGetStarted( resource, destination );
 
         try
         {
-            transfer( resource, input, output, TransferEvent.REQUEST_GET, maxSize );
+            getTransfer( resource, output, input, closeInput, maxSize );
         }
-        catch ( IOException e )
+        catch ( TransferFailedException e )
         {
-            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-
             if ( destination.exists() )
             {
                 boolean deleted = destination.delete();
@@ -306,11 +310,26 @@ public abstract class AbstractWagon
                     destination.deleteOnExit();
                 }
             }
+            throw e;
+        }
+
+        fireGetCompleted( resource, destination );
+    }
+
+    protected void getTransfer( Resource resource, OutputStream output, InputStream input, boolean closeInput, int maxSize )
+        throws TransferFailedException
+    {
+        try
+        {
+            transfer( resource, input, output, TransferEvent.REQUEST_GET, maxSize );
+        }
+        catch ( IOException e )
+        {
+            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
 
             String msg = "GET request of: " + resource.getName() + " from " + repository.getName() + " failed";
 
             throw new TransferFailedException( msg, e );
-
         }
         finally
         {
@@ -321,12 +340,10 @@ public abstract class AbstractWagon
 
             IOUtil.close( output );
         }
-
-        fireGetCompleted( resource, destination );
     }
 
     protected void putTransfer( Resource resource, File source, OutputStream output, boolean closeOutput )
-        throws TransferFailedException
+        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
         resource.setContentLength( source.length() );
 
@@ -349,9 +366,11 @@ public abstract class AbstractWagon
      * @param output output stream
      * @param closeOutput whether the output stream should be closed or not
      * @throws TransferFailedException
+     * @throws ResourceDoesNotExistException 
+     * @throws AuthorizationException 
      */
     protected void transfer( Resource resource, File source, OutputStream output, boolean closeOutput )
-        throws TransferFailedException
+        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
         InputStream input = null;
 
@@ -359,7 +378,7 @@ public abstract class AbstractWagon
         {
             input = new FileInputStream( source );
 
-            transfer( resource, input, output, TransferEvent.REQUEST_PUT );
+            putTransfer( resource, input, output, closeOutput );
         }
         catch ( FileNotFoundException e )
         {
@@ -367,18 +386,29 @@ public abstract class AbstractWagon
 
             throw new TransferFailedException( "Specified source file does not exist: " + source, e );
         }
+        finally
+        {
+            IOUtil.close( input );
+        }
+    }
+
+    protected void putTransfer( Resource resource, InputStream input, OutputStream output, boolean closeOutput )
+        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
+    {
+        try
+        {
+            transfer( resource, input, output, TransferEvent.REQUEST_PUT );
+        }
         catch ( IOException e )
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
 
-            String msg = "PUT request for: " + resource + " to " + source.getName() + "failed";
+            String msg = "PUT request to: " + resource.getName() + " in " + repository.getName() + " failed";
 
             throw new TransferFailedException( msg, e );
         }
         finally
         {
-            IOUtil.close( input );
-
             if ( closeOutput )
             {
                 IOUtil.close( output );
@@ -437,6 +467,7 @@ public abstract class AbstractWagon
 
             remaining -= n;
         }
+        output.flush();
     }
 
     // ----------------------------------------------------------------------
