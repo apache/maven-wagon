@@ -31,6 +31,7 @@ import java.text.SimpleDateFormat;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.observers.ChecksumObserver;
+import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 
@@ -105,7 +106,8 @@ public abstract class StreamingWagonTestCase
             setupRepositories();
             setupWagonTestingFixtures();
             int expectedSize = putFile();
-            getIfNewerToStream( sourceFile.lastModified() + 30000, false, expectedSize );
+            getIfNewerToStream( getExpectedLastModifiedOnGet( testRepository, new Resource( resource ) ) + 30000,
+                                false, expectedSize );
         }
     }
 
@@ -130,7 +132,8 @@ public abstract class StreamingWagonTestCase
             setupRepositories();
             setupWagonTestingFixtures();
             int expectedSize = putFile();
-            getIfNewerToStream( sourceFile.lastModified(), false, expectedSize );
+            getIfNewerToStream( getExpectedLastModifiedOnGet( testRepository, new Resource( resource ) ), false,
+                                expectedSize );
         }
     }
 
