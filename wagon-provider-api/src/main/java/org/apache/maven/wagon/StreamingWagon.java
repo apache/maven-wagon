@@ -34,10 +34,11 @@ public interface StreamingWagon
      * @param destination
      * @throws TransferFailedException
      * @throws ResourceDoesNotExistException
+     * @throws AuthorizationException 
      * @throws AuthorizationException
      */
     void getToStream( String resourceName, OutputStream stream )
-        throws ResourceDoesNotExistException, TransferFailedException;
+        throws ResourceDoesNotExistException, TransferFailedException, AuthorizationException;
 
     /**
      * Downloads specified resource from the repository if it was modified since specified date. The date is measured in
@@ -50,10 +51,11 @@ public interface StreamingWagon
      *         repository is older or has the same age.
      * @throws TransferFailedException
      * @throws ResourceDoesNotExistException
+     * @throws AuthorizationException 
      * @throws AuthorizationException
      */
     boolean getIfNewerToStream( String resourceName, OutputStream stream, long timestamp )
-        throws ResourceDoesNotExistException, TransferFailedException;
+        throws ResourceDoesNotExistException, TransferFailedException, AuthorizationException;
 
     /**
      * Copy from a local input stream to remote.

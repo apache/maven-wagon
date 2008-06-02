@@ -410,20 +410,19 @@ public class SftpWagon
         }
     }
 
-    protected void getTransfer( Resource resource, OutputStream output, InputStream input, boolean closeInput,
-                                int maxSize )
-        throws TransferFailedException
+    protected void cleanupGetTransfer( Resource resource )
     {
-        super.getTransfer( resource, output, input, closeInput, maxSize );
-
         returnToParentDirectory( resource );
     }
     
-    protected void putTransfer( Resource resource, InputStream input, OutputStream output, boolean closeOutput )
-        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
+    protected void cleanupPutTransfer( Resource resource )
     {
-        super.putTransfer( resource, input, output, closeOutput );
+        returnToParentDirectory( resource );
+    }
 
+    protected void finishPutTransfer( Resource resource, InputStream input, OutputStream output )
+        throws TransferFailedException
+    {
         RepositoryPermissions permissions = getRepository().getPermissions();
 
         String filename = ScpHelper.getResourceFilename( resource.getName() );
@@ -436,8 +435,6 @@ public class SftpWagon
         {
             setFileMode( filename, permissions );
         }
-
-        returnToParentDirectory( resource );
     }
 
     public void fillInputData( InputData inputData )

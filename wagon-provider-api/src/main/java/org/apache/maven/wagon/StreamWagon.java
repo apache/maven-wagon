@@ -43,7 +43,7 @@ public abstract class StreamWagon
     // ----------------------------------------------------------------------
 
     public abstract void fillInputData( InputData inputData )
-        throws TransferFailedException, ResourceDoesNotExistException;
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
 
     public abstract void fillOutputData( OutputData outputData )
         throws TransferFailedException;
@@ -83,6 +83,8 @@ public abstract class StreamWagon
 
         fireGetInitiated( resource, destination );
 
+        resource.setLastModified( timestamp );
+        
         InputStream is = getInputStream( resource );
 
         // always get if timestamp is 0 (ie, target doesn't exist), otherwise only if older than the remote file
@@ -91,8 +93,6 @@ public abstract class StreamWagon
             retValue = true;
 
             checkInputStream( is, resource );
-
-            createParentDirectories( destination );
 
             getTransfer( resource, destination, is );
         }
@@ -105,7 +105,7 @@ public abstract class StreamWagon
     }
 
     protected InputStream getInputStream( Resource resource )
-        throws TransferFailedException, ResourceDoesNotExistException
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         InputData inputData = new InputData();
 
@@ -124,6 +124,18 @@ public abstract class StreamWagon
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_GET );
             throw e;
+        }
+        catch ( AuthorizationException e )
+        {
+            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+            throw e;
+        }
+        finally
+        {
+            if ( inputData.getInputStream() == null )
+            {
+                cleanupGetTransfer( resource );
+            }
         }
 
         return inputData.getInputStream();
@@ -178,12 +190,19 @@ public abstract class StreamWagon
 
             throw e;
         }
+        finally
+        {
+            if ( outputData.getOutputStream() == null )
+            {
+                cleanupPutTransfer( resource );
+            }
+        }
 
         return outputData.getOutputStream();
     }
 
     public boolean getIfNewerToStream( String resourceName, OutputStream stream, long timestamp )
-        throws ResourceDoesNotExistException, TransferFailedException
+        throws ResourceDoesNotExistException, TransferFailedException, AuthorizationException
     {
         boolean retValue = false;
 
@@ -215,7 +234,7 @@ public abstract class StreamWagon
     }
 
     public void getToStream( String resourceName, OutputStream stream )
-        throws ResourceDoesNotExistException, TransferFailedException
+        throws ResourceDoesNotExistException, TransferFailedException, AuthorizationException
     {
         getIfNewerToStream( resourceName, stream, 0 );
     }

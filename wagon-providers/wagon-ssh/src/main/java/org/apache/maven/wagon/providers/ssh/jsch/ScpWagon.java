@@ -29,12 +29,10 @@ import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.providers.ssh.ScpHelper;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.IOUtil;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
@@ -83,13 +81,20 @@ public class ScpWagon
         }
     }
 
-    protected void putTransfer( Resource resource, InputStream input, OutputStream output, boolean closeOutput )
-        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
+    protected void cleanupPutTransfer( Resource resource )
+    {
+        if ( channel != null )
+        {
+            channel.disconnect();
+            channel = null;
+        }
+    }
+
+    protected void finishPutTransfer( Resource resource, InputStream input, OutputStream output )
+        throws TransferFailedException
     {
         try
         {
-            super.putTransfer( resource, input, output, false );
-
             sendEom( output );
 
             checkAck( channelInputStream );
@@ -102,18 +107,6 @@ public class ScpWagon
         {
             handleIOException( resource, e );
         }
-        finally
-        {
-            if ( closeOutput )
-            {
-                IOUtil.close( output );
-            }
-            
-            if ( channel != null )
-            {
-                channel.disconnect();
-            }
-        }        
 
         String basedir = getRepository().getBasedir();
         try
@@ -151,37 +144,37 @@ public class ScpWagon
             throw new IOException( "SCP terminated with unknown error code" );
         }
     }    
-    
-    protected void getTransfer( Resource resource, OutputStream output, InputStream input, boolean closeInput,
-                                int maxSize )
+
+    protected void finishGetTransfer( Resource resource, InputStream input, OutputStream output )
         throws TransferFailedException
     {
         try
         {
-            super.getTransfer( resource, output, input, false, (int) resource.getContentLength() );
-
             checkAck( input );
-
+    
             sendEom( channelOutputStream );
         }
         catch ( IOException e )
         {
             handleGetException( resource, e );
         }
-        finally
+    }
+    
+    protected void cleanupGetTransfer( Resource resource )
+    {
+        if ( channel != null )
         {
-            if ( closeInput )
-            {
-                IOUtil.close( input );
-            }
-            
-            if ( channel != null )
-            {
-                channel.disconnect();
-            }
+            channel.disconnect();
         }
     }
-
+    
+    protected void getTransfer( Resource resource, OutputStream output, InputStream input, boolean closeInput,
+                                int maxSize )
+        throws TransferFailedException
+    {
+        super.getTransfer( resource, output, input, closeInput, (int) resource.getContentLength() );
+    }
+    
     protected String readLine( InputStream in )
         throws IOException
     {

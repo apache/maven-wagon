@@ -19,20 +19,20 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
+import java.io.File;
+
 import org.apache.maven.wagon.FileTestUtils;
-import org.apache.maven.wagon.WagonTestCase;
+import org.apache.maven.wagon.StreamingWagonTestCase;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.jetty.Httpd;
-
-import java.io.File;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  */
 public class HttpWagonTest
-    extends WagonTestCase
+    extends StreamingWagonTestCase
 {
     private Httpd httpd;
 

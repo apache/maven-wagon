@@ -23,7 +23,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.maven.wagon.FileTestUtils;
-import org.apache.maven.wagon.WagonTestCase;
+import org.apache.maven.wagon.StreamingWagonTestCase;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 
@@ -34,7 +34,7 @@ import org.apache.maven.wagon.resource.Resource;
  * @author <a href="mailto:carlos@apache.org">Carlos Sanchez</a>
  */
 public class WebDavWagonTest
-    extends WagonTestCase
+    extends StreamingWagonTestCase
 {
     private ServletServer server;
 

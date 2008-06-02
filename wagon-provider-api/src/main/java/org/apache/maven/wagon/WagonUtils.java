@@ -19,13 +19,12 @@ package org.apache.maven.wagon;
  * under the License.
  */
 
-import org.apache.maven.wagon.authentication.AuthenticationInfo;
-import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.codehaus.plexus.util.FileUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
+
+import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.codehaus.plexus.util.FileUtils;
 
 /**
  * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a>

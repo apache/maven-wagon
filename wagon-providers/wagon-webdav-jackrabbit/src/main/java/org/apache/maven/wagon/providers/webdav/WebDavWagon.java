@@ -41,9 +41,7 @@ import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.repository.Repository;
-import org.apache.maven.wagon.resource.Resource;
 import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
@@ -84,51 +82,6 @@ public class WebDavWagon
     };
     
     /**
-     * Puts a file into the remote repository
-     *
-     * @param source       the file to transfer
-     * @param resourceName the name of the resource
-     * @throws TransferFailedException
-     * @throws ResourceDoesNotExistException
-     * @throws AuthorizationException
-     */
-    public void put( File source, String resourceName )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        Repository repository = getRepository();
-
-        resourceName = StringUtils.replace( resourceName, "\\", "/" );
-        String dir = PathUtils.dirname( resourceName );
-        dir = StringUtils.replace( dir, "\\", "/" );
-
-        String dest = repository.getUrl();
-        Resource resource = new Resource( resourceName );
-
-        if ( dest.endsWith( "/" ) )
-        {
-            dest = dest + resource.getName();
-        }
-        else
-        {
-            dest = dest + "/" + resource.getName();
-        }
-
-        firePutInitiated( resource, source );
-
-        //Parent directories need to be created before posting
-        try
-        {
-            mkdirs( dir );
-        }
-        catch ( IOException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-        }
-
-        super.put(source, resource);
-    }
-
-    /**
      * This wagon supports directory copying
      *
      * @return <code>true</code> always
@@ -147,7 +100,7 @@ public class WebDavWagon
      * @throws HttpException 
      * @throws TransferFailedException
      */
-    private void mkdirs( String dir ) throws HttpException, IOException
+    protected void mkdirs( String dir ) throws HttpException, IOException
     {
         Repository repository = getRepository();
         String basedir = repository.getBasedir();

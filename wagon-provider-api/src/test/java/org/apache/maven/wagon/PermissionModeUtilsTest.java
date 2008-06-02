@@ -20,7 +20,6 @@ package org.apache.maven.wagon;
  */
 
 import junit.framework.TestCase;
-import org.apache.maven.wagon.PermissionModeUtils;
 
 /**
  * Unit test for PermissionModeUtils class

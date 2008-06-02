@@ -19,6 +19,14 @@ package org.apache.maven.wagon;
  * under the License.
  */
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
+
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
@@ -35,17 +43,6 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 /**
  * Implementation of common facilties for Wagon providers.
@@ -312,6 +309,10 @@ public abstract class AbstractWagon
             }
             throw e;
         }
+        finally
+        {
+            IOUtil.close( output );
+        }
 
         fireGetCompleted( resource, destination );
     }
@@ -322,6 +323,8 @@ public abstract class AbstractWagon
         try
         {
             transfer( resource, input, output, TransferEvent.REQUEST_GET, maxSize );
+            
+            finishGetTransfer( resource, input, output );
         }
         catch ( IOException e )
         {
@@ -338,8 +341,17 @@ public abstract class AbstractWagon
                 IOUtil.close( input );
             }
 
-            IOUtil.close( output );
+            cleanupGetTransfer( resource );
         }
+    }
+
+    protected void finishGetTransfer( Resource resource, InputStream input, OutputStream output )
+        throws TransferFailedException
+    {
+    }
+
+    protected void cleanupGetTransfer( Resource resource )
+    {
     }
 
     protected void putTransfer( Resource resource, File source, OutputStream output, boolean closeOutput )
@@ -394,6 +406,8 @@ public abstract class AbstractWagon
         try
         {
             transfer( resource, input, output, TransferEvent.REQUEST_PUT );
+            
+            finishPutTransfer( resource, input, output );
         }
         catch ( IOException e )
         {
@@ -409,7 +423,18 @@ public abstract class AbstractWagon
             {
                 IOUtil.close( output );
             }
+            
+            cleanupPutTransfer( resource );
         }
+    }
+
+    protected void cleanupPutTransfer( Resource resource )
+    {
+    }
+
+    protected void finishPutTransfer( Resource resource, InputStream input, OutputStream output )
+        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
+    {
     }
 
     /**

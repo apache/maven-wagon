@@ -170,11 +170,9 @@ public class LightweightHttpWagon
         }
     }
 
-    protected void putTransfer( Resource resource, InputStream input, OutputStream output, boolean closeOutput )
+    protected void finishPutTransfer( Resource resource, InputStream input, OutputStream output )
         throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
-        super.putTransfer( resource, input, output, closeOutput );
-
         try
         {
             int statusCode = putConnection.getResponseCode();
