@@ -733,9 +733,10 @@ public abstract class AbstractWagon
         transferEvent.setTimestamp( System.currentTimeMillis() );
         transferEvent.setLocalFile( source );
 
+        InputStream input = null;
         try
         {
-            InputStream input = new FileInputStream( source );
+            input = new FileInputStream( source );
 
             while ( true )
             {
@@ -754,6 +755,10 @@ public abstract class AbstractWagon
             fireTransferError( resource, e, requestType );
             
             throw new TransferFailedException( "Failed to post-process the source file", e );
+        }
+        finally
+        {
+            IOUtil.close( input );
         }
     }
 
