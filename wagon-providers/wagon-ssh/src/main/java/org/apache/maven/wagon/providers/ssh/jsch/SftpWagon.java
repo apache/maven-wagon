@@ -28,6 +28,7 @@ import java.util.Vector;
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
@@ -59,6 +60,34 @@ public class SftpWagon
 
     private static final long MILLIS_PER_SEC = 1000L;
 
+    private ChannelSftp channel;
+    
+    public void closeConnection()
+    {
+        if ( channel != null )
+        {
+            channel.disconnect();
+        }
+        super.closeConnection();
+    }
+
+    public void openConnectionInternal()
+        throws AuthenticationException
+    {
+        super.openConnectionInternal();
+
+        try
+        {
+            channel = (ChannelSftp) session.openChannel( SFTP_CHANNEL );
+
+            channel.connect();
+        }
+        catch ( JSchException e )
+        {
+            throw new AuthenticationException( "Error connecting to remote repository: " + getRepository().getUrl(), e );
+        }
+    }
+
     private void returnToParentDirectory( Resource resource, ChannelSftp channel )
         throws SftpException
     {
@@ -68,34 +97,6 @@ public class SftpWagon
         {
             channel.cd( ".." );
         }
-    }
-
-    private ChannelSftp preparePut( Resource resource, RepositoryPermissions permissions )
-        throws JSchException, SftpException, TransferFailedException
-    {
-        ChannelSftp channel;
-        channel = (ChannelSftp) session.openChannel( SFTP_CHANNEL );
-
-        channel.connect();
-
-        int directoryMode = getDirectoryMode( permissions );
-
-        channel.cd( "/" );
-        
-        try
-        {
-            String basedir = getRepository().getBasedir();
-            mkdirs( channel, basedir + "/", directoryMode );
-            
-            mkdirs( channel, resource.getName(), directoryMode );
-        }
-        catch ( TransferFailedException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
-
-            throw e;
-        }
-        return channel;
     }
 
     private void putFile( ChannelSftp channel, File source, Resource resource, RepositoryPermissions permissions )
@@ -109,8 +110,6 @@ public class SftpWagon
 
         firePutStarted( resource, source );
 
-        
-        
         channel.put( source.getAbsolutePath(), filename );
 
         postProcessListeners( resource, source, TransferEvent.REQUEST_PUT );
@@ -240,13 +239,11 @@ public class SftpWagon
 
         firePutInitiated( resource, source );
 
-        ChannelSftp channel = null;
-        
         try
         {
             RepositoryPermissions permissions = getRepository().getPermissions();
         
-            channel = preparePut( resource, permissions );
+            preparePut( resource, permissions );
         
             putFile( channel, source, resource, permissions );
         
@@ -261,21 +258,27 @@ public class SftpWagon
         
             throw new TransferFailedException( msg, e );
         }
-        catch ( JSchException e )
+    }
+
+    private void preparePut( Resource resource, RepositoryPermissions permissions )
+        throws SftpException, TransferFailedException
+    {
+        int directoryMode = getDirectoryMode( getRepository().getPermissions() );
+
+        channel.cd( "/" );
+        
+        try
+        {
+            String basedir = getRepository().getBasedir();
+            mkdirs( channel, basedir + "/", directoryMode );
+            
+            mkdirs( channel, resource.getName(), directoryMode );
+        }
+        catch ( TransferFailedException e )
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
-        
-            String msg = "Error occured while deploying '" + resource.getName() + "' " + "to remote repository: " +
-                getRepository().getUrl();
-        
-            throw new TransferFailedException( msg, e );
-        }
-        finally
-        {
-            if ( channel != null )
-            {
-                channel.disconnect();
-            }
+
+            throw e;
         }
     }
 
