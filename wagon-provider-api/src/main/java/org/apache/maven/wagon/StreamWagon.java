@@ -137,6 +137,10 @@ public abstract class StreamWagon
 
         firePutInitiated( resource, source );
 
+        resource.setContentLength( source.length() );
+
+        resource.setLastModified( source.lastModified() );
+
         OutputStream os = getOutputStream( resource );
 
         checkOutputStream( resource, os );
@@ -175,8 +179,7 @@ public abstract class StreamWagon
             throw e;
         }
 
-        OutputStream os = outputData.getOutputStream();
-        return os;
+        return outputData.getOutputStream();
     }
 
     public boolean getIfNewerToStream( String resourceName, OutputStream stream, long timestamp )

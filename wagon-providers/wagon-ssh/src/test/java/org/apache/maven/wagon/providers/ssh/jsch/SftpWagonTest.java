@@ -21,7 +21,7 @@ package org.apache.maven.wagon.providers.ssh.jsch;
 
 import java.io.File;
 
-import org.apache.maven.wagon.WagonTestCase;
+import org.apache.maven.wagon.StreamingWagonTestCase;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.providers.ssh.TestData;
 import org.apache.maven.wagon.repository.Repository;
@@ -32,7 +32,7 @@ import org.apache.maven.wagon.resource.Resource;
  * @version $Id$
  */
 public class SftpWagonTest
-    extends WagonTestCase
+    extends StreamingWagonTestCase
 {
     protected String getProtocol()
     {

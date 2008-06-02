@@ -19,7 +19,7 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  * under the License.
  */
 
-import org.apache.maven.wagon.WagonTestCase;
+import org.apache.maven.wagon.StreamingWagonTestCase;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.providers.ssh.TestData;
 import org.apache.maven.wagon.repository.Repository;
@@ -30,7 +30,7 @@ import org.apache.maven.wagon.resource.Resource;
  * @version $Id$
  */
 public class ScpWagonWithSshPrivateKeySearchTest
-    extends WagonTestCase
+    extends StreamingWagonTestCase
 {
     protected boolean supportsGetIfNewer()
     {

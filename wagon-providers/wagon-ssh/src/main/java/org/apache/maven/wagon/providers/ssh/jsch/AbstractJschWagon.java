@@ -27,16 +27,22 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.maven.wagon.CommandExecutionException;
+import org.apache.maven.wagon.CommandExecutor;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
+import org.apache.maven.wagon.StreamWagon;
 import org.apache.maven.wagon.Streams;
 import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.authentication.AuthenticationException;
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
-import org.apache.maven.wagon.providers.ssh.AbstractSshWagon;
 import org.apache.maven.wagon.providers.ssh.CommandExecutorStreamProcessor;
+import org.apache.maven.wagon.providers.ssh.ScpHelper;
 import org.apache.maven.wagon.providers.ssh.SshWagon;
 import org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo;
 import org.apache.maven.wagon.providers.ssh.interactive.NullInteractiveUserInfo;
@@ -67,9 +73,11 @@ import com.jcraft.jsch.UserInfo;
  * @version $Id$
  */
 public abstract class AbstractJschWagon
-    extends AbstractSshWagon
-    implements SshWagon
+    extends StreamWagon
+    implements SshWagon, CommandExecutor
 {
+    protected ScpHelper sshTool = new ScpHelper( this );
+    
     protected Session session;
     
     /**
@@ -94,7 +102,10 @@ public abstract class AbstractJschWagon
     public void openConnectionInternal()
         throws AuthenticationException
     {
-        super.openConnectionInternal();
+        if ( authenticationInfo == null )
+        {
+            authenticationInfo = new AuthenticationInfo();
+        }
 
         if ( !interactive )
         {
@@ -107,7 +118,7 @@ public abstract class AbstractJschWagon
         File privateKey;
         try
         {
-            privateKey = getPrivateKey();
+            privateKey = ScpHelper.getPrivateKey( authenticationInfo );
         }
         catch ( FileNotFoundException e )
         {
@@ -116,6 +127,7 @@ public abstract class AbstractJschWagon
 
         if ( privateKey != null && privateKey.exists() )
         {
+            fireSessionDebug( "Using private key: " + privateKey );
             try
             {
                 sch.addIdentity( privateKey.getAbsolutePath(), authenticationInfo.getPassphrase() );
@@ -127,7 +139,8 @@ public abstract class AbstractJschWagon
         }
 
         String host = getRepository().getHost();
-        int port = getPort();
+        int port =
+            repository.getPort() == WagonConstants.UNKNOWN_PORT ? ScpHelper.DEFAULT_SSH_PORT : repository.getPort();
         try
         {
             String userName = authenticationInfo.getUserName();
@@ -262,8 +275,6 @@ public abstract class AbstractJschWagon
 
     public void closeConnection()
     {
-        super.closeConnection();
-        
         if ( session != null )
         {
             session.disconnect();
@@ -320,24 +331,47 @@ public abstract class AbstractJschWagon
         }
     }
 
-    protected void handleGetException( Resource resource, Exception e, File destination )
-        throws TransferFailedException, ResourceDoesNotExistException
+    protected void handleGetException( Resource resource, Exception e )
+        throws TransferFailedException
     {
         fireTransferError( resource, e, TransferEvent.REQUEST_GET );
 
-        if ( destination.exists() )
-        {
-            boolean deleted = destination.delete();
-
-            if ( !deleted )
-            {
-                destination.deleteOnExit();
-            }
-        }
-
-        String msg = "Error occured while downloading '" + resource + "' from the remote repository:" + getRepository() + ": " + e.getMessage();
+        String msg =
+            "Error occured while downloading '" + resource + "' from the remote repository:" + getRepository() + ": "
+                + e.getMessage();
 
         throw new TransferFailedException( msg, e );
+    }
+
+    public List getFileList( String destinationDirectory )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        return sshTool.getFileList( destinationDirectory, repository );
+    }
+
+    public void putDirectory( File sourceDirectory, String destinationDirectory )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        sshTool.putDirectory( this, sourceDirectory, destinationDirectory );
+    }
+
+    public boolean resourceExists( String resourceName )
+        throws TransferFailedException, AuthorizationException
+    {
+        return sshTool.resourceExists( resourceName, repository );
+    }
+
+    public boolean supportsDirectoryCopy()
+    {
+        return true;
+    }
+
+    public void executeCommand( String command )
+        throws CommandExecutionException
+    {
+        fireTransferDebug( "Executing command: " + command );
+
+        executeCommand( command, false );
     }
 
     public InteractiveUserInfo getInteractiveUserInfo()

@@ -345,10 +345,6 @@ public abstract class AbstractWagon
     protected void putTransfer( Resource resource, File source, OutputStream output, boolean closeOutput )
         throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
-        resource.setContentLength( source.length() );
-
-        resource.setLastModified( source.lastModified() );
-
         firePutStarted( resource, source );
 
         transfer( resource, source, output, closeOutput );
@@ -771,54 +767,6 @@ public abstract class AbstractWagon
     public boolean supportsDirectoryCopy()
     {
         return false;
-    }
-
-    public void createZip( List files, File zipName, File basedir )
-        throws IOException
-    {
-        ZipOutputStream zos = new ZipOutputStream( new FileOutputStream( zipName ) );
-
-        try
-        {
-            for ( int i = 0; i < files.size(); i++ )
-            {
-                String file = (String) files.get( i );
-
-                file = file.replace( '\\', '/' );
-
-                writeZipEntry( zos, new File( basedir, file ), file );
-            }
-        }
-        finally
-        {
-            IOUtil.close( zos );
-        }
-    }
-
-    private void writeZipEntry( ZipOutputStream jar, File source, String entryName )
-        throws IOException
-    {
-        byte[] buffer = new byte[1024];
-
-        int bytesRead;
-
-        FileInputStream is = new FileInputStream( source );
-
-        try
-        {
-            ZipEntry entry = new ZipEntry( entryName );
-
-            jar.putNextEntry( entry );
-
-            while ( ( bytesRead = is.read( buffer ) ) != -1 )
-            {
-                jar.write( buffer, 0, bytesRead );
-            }
-        }
-        finally
-        {
-            is.close();
-        }
     }
 
     protected static String getPath( String basedir, String dir )

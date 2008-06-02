@@ -100,37 +100,38 @@ public abstract class StreamingWagonTestCase
     public void testWagonGetIfNewerToStreamIsNewer()
         throws Exception
     {
-        setupRepositories();
-
-        setupWagonTestingFixtures();
-
-        int expectedSize = putFile();
-
-        getIfNewerToStream( sourceFile.lastModified() + 30000, false, expectedSize );
+        if ( supportsGetIfNewer() )
+        {
+            setupRepositories();
+            setupWagonTestingFixtures();
+            int expectedSize = putFile();
+            getIfNewerToStream( sourceFile.lastModified() + 30000, false, expectedSize );
+        }
     }
 
     public void testWagonGetIfNewerToStreamIsOlder()
         throws Exception
     {
-        setupRepositories();
-
-        setupWagonTestingFixtures();
-
-        int expectedSize = putFile();
-
-        getIfNewerToStream( new SimpleDateFormat( "yyyy-MM-dd" ).parse( "2006-01-01" ).getTime(), true, expectedSize );
+        if ( supportsGetIfNewer() )
+        {
+            setupRepositories();
+            setupWagonTestingFixtures();
+            int expectedSize = putFile();
+            getIfNewerToStream( new SimpleDateFormat( "yyyy-MM-dd" ).parse( "2006-01-01" ).getTime(), true,
+                                expectedSize );
+        }
     }
 
     public void testWagonGetIfNewerToStreamIsSame()
         throws Exception
     {
-        setupRepositories();
-
-        setupWagonTestingFixtures();
-
-        int expectedSize = putFile();
-
-        getIfNewerToStream( sourceFile.lastModified(), false, expectedSize );
+        if ( supportsGetIfNewer() )
+        {
+            setupRepositories();
+            setupWagonTestingFixtures();
+            int expectedSize = putFile();
+            getIfNewerToStream( sourceFile.lastModified(), false, expectedSize );
+        }
     }
 
     private void getIfNewerToStream( long timestamp, boolean expectedResult, int expectedSize )
