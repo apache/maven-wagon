@@ -50,7 +50,7 @@
               <!-- Tests that require an ssh server on localhost -->
               <excludes>
                 <exclude>**/SshCommandExecutorTest.*</exclude>
-                <exclude>**/ScpWagon*Test.*</exclude>
+                <exclude>**/Scp*Test.*</exclude>
               </excludes>
             </configuration>
           </plugin>
