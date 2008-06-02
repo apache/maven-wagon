@@ -76,6 +76,6 @@ public interface StreamingWagon
      * @throws ResourceDoesNotExistException
      * @throws AuthorizationException
      */
-    void putFromStream( InputStream stream, String destination, long contentLength, long size )
+    void putFromStream( InputStream stream, String destination, long contentLength, long lastModified )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
 }
