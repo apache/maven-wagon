@@ -61,6 +61,14 @@ import java.io.OutputStream;
 public class ScpWagon
     extends AbstractJschWagon
 {
+    public boolean getIfNewer( String resourceName, File destination, long timestamp )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        fireSessionDebug( "getIfNewer in SCP wagon is not supported - performing an unconditional get" );
+        get( resourceName, destination );
+        return true;
+    }
+
     public void put( File source, String destination )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {

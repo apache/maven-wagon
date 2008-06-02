@@ -98,12 +98,6 @@ public class WagonMock
 
     }
 
-    public boolean getIfNewer( String resourceName, File destination, long timestamp )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        return false;
-    }
-
     public void openConnectionInternal()
     {
     }

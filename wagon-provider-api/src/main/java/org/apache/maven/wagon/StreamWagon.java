@@ -58,17 +58,7 @@ public abstract class StreamWagon
     public void get( String resourceName, File destination )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        Resource resource = new Resource( resourceName );
-
-        fireGetInitiated( resource, destination );
-
-        InputStream is = getInputStream( resource );
-
-        checkInputStream( is, resource );
-
-        createParentDirectories( destination );
-
-        getTransfer( resource, destination, is );
+        getIfNewer( resourceName, destination, 0 );
     }
 
     protected void checkInputStream( InputStream is, Resource resource )
@@ -224,19 +214,7 @@ public abstract class StreamWagon
     public void getToStream( String resourceName, OutputStream stream )
         throws ResourceDoesNotExistException, TransferFailedException
     {
-        Resource resource = new Resource( resourceName );
-
-        fireGetInitiated( resource, null );
-
-        InputStream is = getInputStream( resource );
-
-        checkInputStream( is, resource );
-
-        fireGetStarted( resource, null );
-
-        getTransfer( resource, stream, is );
-
-        fireGetCompleted( resource, null );
+        getIfNewerToStream( resourceName, stream, 0 );
     }
 
     public void putFromStream( InputStream stream, String destination )

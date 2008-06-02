@@ -30,6 +30,7 @@ import org.apache.maven.wagon.CommandExecutor;
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.PermissionModeUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
+import org.apache.maven.wagon.StreamWagon;
 import org.apache.maven.wagon.Streams;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonConstants;
@@ -56,14 +57,6 @@ public abstract class AbstractSshWagon
     protected static final char PATH_SEPARATOR = '/';
 
     protected static final int DEFAULT_SSH_PORT = 22;
-
-    public boolean getIfNewer( String resourceName, File destination, long timestamp )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        fireSessionDebug( "getIfNewer in SCP wagon is not supported - performing an unconditional get" );
-        get( resourceName, destination );
-        return true;
-    }
 
     protected String getOctalMode( RepositoryPermissions permissions )
     {

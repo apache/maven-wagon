@@ -21,8 +21,6 @@ package org.apache.maven.wagon.providers.ssh.external;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.List;
 
 import org.apache.maven.wagon.CommandExecutionException;
 import org.apache.maven.wagon.PathUtils;
@@ -35,7 +33,6 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.providers.ssh.AbstractSshWagon;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.cli.CommandLineException;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
@@ -89,6 +86,14 @@ public class ScpExternalWagon
     // ----------------------------------------------------------------------
     //
     // ----------------------------------------------------------------------
+
+    public boolean getIfNewer( String resourceName, File destination, long timestamp )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        fireSessionDebug( "getIfNewer in SCP wagon is not supported - performing an unconditional get" );
+        get( resourceName, destination );
+        return true;
+    }
 
     /**
      * @return The hostname of the remote server prefixed with the username, which comes either from the repository URL

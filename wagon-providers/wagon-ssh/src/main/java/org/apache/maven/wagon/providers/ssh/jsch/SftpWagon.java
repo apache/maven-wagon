@@ -203,78 +203,6 @@ public class SftpWagon
         }
     }
 
-    public boolean getIfNewer( Resource resource, File destination, long timestamp )
-        throws ResourceDoesNotExistException, TransferFailedException
-    {
-        String filename = getResourceFilename( resource.getName() );
-
-        String dir = getResourceDirectory( resource.getName() );
-
-        // we already setuped the root directory. Ignore beginning /
-        if ( dir.length() > 0 && dir.charAt( 0 ) == PATH_SEPARATOR )
-        {
-            dir = dir.substring( 1 );
-        }
-
-        ChannelSftp channel = null;
-        
-        boolean bDownloaded = true;
-        try
-        {
-            channel = (ChannelSftp) session.openChannel( SFTP_CHANNEL );
-
-            channel.connect();
-
-            SftpATTRS attrs = changeToRepositoryDirectory( channel, dir, filename );
-
-            long lastModified = attrs.getMTime() * MILLIS_PER_SEC;
-            if ( timestamp <= 0 || lastModified > timestamp )
-            {
-                resource.setContentLength( attrs.getSize() );
-                
-                resource.setLastModified( lastModified );
-                
-                fireGetStarted( resource, destination );
-
-                channel.get( filename, destination.getAbsolutePath() );
-
-                postProcessListeners( resource, destination, TransferEvent.REQUEST_GET );
-
-                fireGetCompleted( resource, destination );
-
-                String[] dirs = PathUtils.dirnames( dir );
-
-                for ( int i = 0; i < dirs.length; i++ )
-                {
-                    channel.cd( ".." );
-                }
-
-                bDownloaded = true;
-            }
-            else
-            {
-                bDownloaded = false;
-            }
-        }
-        catch ( SftpException e )
-        {
-            handleGetException( resource, e, destination );
-        }
-        catch ( JSchException e )
-        {
-            handleGetException( resource, e, destination );
-        }
-        finally
-        {
-            if ( channel != null )
-            {
-                channel.disconnect();
-            }
-        }
-
-        return bDownloaded;
-    }
-
     private SftpATTRS changeToRepositoryDirectory( ChannelSftp channel, String dir, String filename )
         throws ResourceDoesNotExistException, SftpException
     {
@@ -349,24 +277,6 @@ public class SftpWagon
                 channel.disconnect();
             }
         }
-    }
-
-    public void get( String resourceName, File destination )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        getIfNewer( resourceName, destination, 0 );
-    }
-
-    public boolean getIfNewer( String resourceName, File destination, long timestamp )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        createParentDirectories( destination );
-
-        Resource resource = getResource( resourceName );
-
-        fireGetInitiated( resource, destination );
-
-        return getIfNewer( resource, destination, timestamp );
     }
 
     public void putDirectory( File sourceDirectory, String destinationDirectory )
@@ -591,5 +501,89 @@ public class SftpWagon
                 channel.disconnect();
             }
         }
+    }
+
+    public boolean getIfNewer( String resourceName, File destination, long timestamp )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        createParentDirectories( destination );
+
+        Resource resource = getResource( resourceName );
+
+        fireGetInitiated( resource, destination );
+
+        String filename = getResourceFilename( resource.getName() );
+
+        String dir = getResourceDirectory( resource.getName() );
+
+        // we already setuped the root directory. Ignore beginning /
+        if ( dir.length() > 0 && dir.charAt( 0 ) == PATH_SEPARATOR )
+        {
+            dir = dir.substring( 1 );
+        }
+
+        ChannelSftp channel = null;
+
+        boolean bDownloaded = true;
+        try
+        {
+            channel = (ChannelSftp) session.openChannel( SFTP_CHANNEL );
+
+            channel.connect();
+
+            SftpATTRS attrs = changeToRepositoryDirectory( channel, dir, filename );
+
+            long lastModified = attrs.getMTime() * MILLIS_PER_SEC;
+            if ( timestamp <= 0 || lastModified > timestamp )
+            {
+                resource.setContentLength( attrs.getSize() );
+
+                resource.setLastModified( lastModified );
+
+                fireGetStarted( resource, destination );
+
+                channel.get( filename, destination.getAbsolutePath() );
+
+                postProcessListeners( resource, destination, TransferEvent.REQUEST_GET );
+
+                fireGetCompleted( resource, destination );
+
+                String[] dirs = PathUtils.dirnames( dir );
+
+                for ( int i = 0; i < dirs.length; i++ )
+                {
+                    channel.cd( ".." );
+                }
+
+                bDownloaded = true;
+            }
+            else
+            {
+                bDownloaded = false;
+            }
+        }
+        catch ( SftpException e )
+        {
+            handleGetException( resource, e, destination );
+        }
+        catch ( JSchException e )
+        {
+            handleGetException( resource, e, destination );
+        }
+        finally
+        {
+            if ( channel != null )
+            {
+                channel.disconnect();
+            }
+        }
+
+        return bDownloaded;
+    }
+
+    public void get( String resourceName, File destination )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        getIfNewer( resourceName, destination, 0 );        
     }
 }
