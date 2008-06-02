@@ -19,6 +19,8 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  * under the License.
  */
 
+import java.io.File;
+
 import org.apache.maven.wagon.StreamingWagonTestCase;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.providers.ssh.TestData;
@@ -32,11 +34,6 @@ import org.apache.maven.wagon.resource.Resource;
 public class ScpWagonWithSshPrivateKeySearchTest
     extends StreamingWagonTestCase
 {
-    protected boolean supportsGetIfNewer()
-    {
-        return false;
-    }
-
     protected String getProtocol()
     {
         return "scp";
@@ -46,7 +43,6 @@ public class ScpWagonWithSshPrivateKeySearchTest
     {
         return TestData.getTestRepositoryUrl();
     }
-
 
     protected AuthenticationInfo getAuthInfo()
     {
@@ -61,6 +57,6 @@ public class ScpWagonWithSshPrivateKeySearchTest
 
     protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
     {
-        return 0;
+        return new File( repository.getBasedir(), resource.getName() ).lastModified();
     }
 }

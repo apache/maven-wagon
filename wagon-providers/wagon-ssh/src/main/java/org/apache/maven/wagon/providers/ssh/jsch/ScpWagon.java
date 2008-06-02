@@ -225,7 +225,7 @@ public class ScpWagon
         Resource resource = inputData.getResource();
         
         String path = getPath( getRepository().getBasedir(), resource.getName() );
-        String cmd = "scp -f " + path;
+        String cmd = "scp -p -f " + path;
 
         fireTransferDebug( "Executing command: " + cmd );
 
@@ -247,10 +247,16 @@ public class ScpWagon
 
             int exitCode = in.read();
 
-            if ( exitCode == 'P' )
+            if ( exitCode == 'T' )
             {
-                // ignore modification times
+                String line = readLine( in );
+                
+                String[] times = line.split( " " );
+                
+                resource.setLastModified( Long.valueOf( times[0] ).longValue() * 1000 );
 
+                sendEom( channelOutputStream );
+                
                 exitCode = in.read();
             }
 

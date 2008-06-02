@@ -34,11 +34,6 @@ import org.apache.maven.wagon.resource.Resource;
 public class ScpWagonTest
     extends StreamingWagonTestCase
 {
-    protected boolean supportsGetIfNewer()
-    {
-        return false;
-    }
-
     protected String getProtocol()
     {
         return "scp";
@@ -69,7 +64,7 @@ public class ScpWagonTest
 
     protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
     {
-        return 0;
+        return new File( repository.getBasedir(), resource.getName() ).lastModified();
     }
 
 }
