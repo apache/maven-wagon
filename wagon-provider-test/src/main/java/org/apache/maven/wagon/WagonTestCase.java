@@ -247,7 +247,8 @@ public abstract class WagonTestCase
             setupRepositories();
             setupWagonTestingFixtures();
             int expectedSize = putFile();
-            getIfNewer( sourceFile.lastModified() + 30000, false, expectedSize );
+            getIfNewer( getExpectedLastModifiedOnGet( testRepository, new Resource( resource ) ) + 30000, false,
+                        expectedSize );
         }
     }
 
@@ -276,7 +277,7 @@ public abstract class WagonTestCase
             setupRepositories();
             setupWagonTestingFixtures();
             int expectedSize = putFile();
-            getIfNewer( sourceFile.lastModified(), false, expectedSize );
+            getIfNewer( getExpectedLastModifiedOnGet( testRepository, new Resource( resource ) ), false, expectedSize );
         }
     }
 
