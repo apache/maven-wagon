@@ -34,19 +34,30 @@
     Wagon that gets and puts artifacts using SSH protocol with a preinstalled SSH client
   </description>
 
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <excludes>
-            <exclude>**/Scp*Test.*</exclude>
-            <exclude>**/SshCommandExecutorTest.*</exclude>
-          </excludes>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+  <profiles>
+    <profile>
+      <id>no-ssh-tests</id>
+      <activation>
+        <property>
+          <name>!ssh-tests</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <!-- Tests that require an ssh server on localhost -->
+              <excludes>
+                <exclude>**/SshCommandExecutorTest.*</exclude>
+                <exclude>**/ScpWagon*Test.*</exclude>
+              </excludes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
   <dependencies>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>

@@ -19,13 +19,13 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  * under the License.
  */
 
+import java.io.File;
+
 import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.providers.ssh.TestData;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-
-import java.io.File;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -34,6 +34,11 @@ import java.io.File;
 public class ScpWagonTest
     extends WagonTestCase
 {
+    protected boolean supportsGetIfNewer()
+    {
+        return false;
+    }
+
     protected String getProtocol()
     {
         return "scp";

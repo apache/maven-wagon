@@ -246,6 +246,8 @@ public class ScpExternalWagon
         String resourceName = normalizeResource( resource );
         String remoteFile = getRepository().getBasedir() + "/" + resourceName;
         
+        remoteFile = StringUtils.replace( remoteFile, " ", "\\ " );
+        
         String qualifiedRemoteFile = this.buildRemoteHost() + ":" + remoteFile;
         if ( put )
         {
@@ -448,76 +450,5 @@ public class ScpExternalWagon
     public void setSshArgs( String sshArgs )
     {
         this.sshArgs = sshArgs;
-    }
-
-    public void putDirectory( File sourceDirectory, String destinationDirectory )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        String basedir = getRepository().getBasedir();
-
-        String dir = StringUtils.replace( destinationDirectory, "\\", "/" );
-
-        String path = getPath( basedir, dir );
-        try
-        {
-            if ( getRepository().getPermissions() != null )
-            {
-                String dirPerms = getRepository().getPermissions().getDirectoryMode();
-
-                if ( dirPerms != null )
-                {
-                    String umaskCmd = "umask " + PermissionModeUtils.getUserMaskFor( dirPerms );
-                    executeCommand( umaskCmd );
-                }
-            }
-
-            String mkdirCmd = "mkdir -p " + path;
-
-            executeCommand( mkdirCmd );
-        }
-        catch ( CommandExecutionException e )
-        {
-            throw new TransferFailedException( "Error performing commands for file transfer", e );
-        }
-
-        File zipFile;
-        try
-        {
-            zipFile = File.createTempFile( "wagon", ".zip" );
-            zipFile.deleteOnExit();
-
-            List files = FileUtils.getFileNames( sourceDirectory, "**/**", "", false );
-
-            createZip( files, zipFile, sourceDirectory );
-        }
-        catch ( IOException e )
-        {
-            throw new TransferFailedException( "Unable to create ZIP archive of directory", e );
-        }
-
-        put( zipFile, getPath( dir, zipFile.getName() ) );
-
-        try
-        {
-            executeCommand( "cd " + path + "; unzip -o " + zipFile.getName() + "; rm -f " + zipFile.getName() );
-
-            zipFile.delete();
-
-            RepositoryPermissions permissions = getRepository().getPermissions();
-
-            if ( permissions != null && permissions.getGroup() != null )
-            {
-                executeCommand( "chgrp -Rf " + permissions.getGroup() + " " + path );
-            }
-
-            if ( permissions != null && permissions.getFileMode() != null )
-            {
-                executeCommand( "chmod -Rf " + permissions.getFileMode() + " " + path );
-            }
-        }
-        catch ( CommandExecutionException e )
-        {
-            throw new TransferFailedException( "Error performing commands for file transfer", e );
-        }
     }
 }

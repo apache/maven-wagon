@@ -31,31 +31,37 @@
   <artifactId>wagon-ssh</artifactId>
   <name>Maven Wagon SSH Provider</name>
 
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <!-- Tests that require an ssh server on localhost -->
-          <excludes>
-            <exclude>**/ScpWagon*Test.*</exclude>
-            <exclude>**/SftpWagonTest.*</exclude>
-            <exclude>**/SshCommandExecutorTest.*</exclude>
-            <exclude>**/KnownHostsProviderTest.*</exclude>
-          </excludes>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+  <profiles>
+    <profile>
+      <id>no-ssh-tests</id>
+      <activation>
+        <property>
+          <name>!ssh-tests</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <!-- Tests that require an ssh server on localhost -->
+              <excludes>
+                <exclude>**/SftpWagonTest.*</exclude>
+                <exclude>**/SshCommandExecutorTest.*</exclude>
+                <exclude>**/KnownHostsProviderTest.*</exclude>
+                <exclude>**/ScpWagon*Test.*</exclude>
+              </excludes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
   <dependencies>
     <dependency>
       <groupId>com.jcraft</groupId>
       <artifactId>jsch</artifactId>
       <version>0.1.38</version>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-interactivity-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>

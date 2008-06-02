@@ -30,8 +30,11 @@ import java.io.StringWriter;
 import java.util.Properties;
 
 import org.apache.maven.wagon.CommandExecutionException;
+import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.Streams;
+import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authentication.AuthenticationException;
+import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.providers.ssh.AbstractSshWagon;
 import org.apache.maven.wagon.providers.ssh.CommandExecutorStreamProcessor;
 import org.apache.maven.wagon.providers.ssh.SshWagon;
@@ -42,6 +45,7 @@ import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostChangedException;
 import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
 import org.apache.maven.wagon.providers.ssh.knownhost.UnknownHostException;
 import org.apache.maven.wagon.proxy.ProxyInfo;
+import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringInputStream;
 
@@ -314,6 +318,26 @@ public abstract class AbstractJschWagon
                 channel.disconnect();
             }
         }
+    }
+
+    protected void handleGetException( Resource resource, Exception e, File destination )
+        throws TransferFailedException, ResourceDoesNotExistException
+    {
+        fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+
+        if ( destination.exists() )
+        {
+            boolean deleted = destination.delete();
+
+            if ( !deleted )
+            {
+                destination.deleteOnExit();
+            }
+        }
+
+        String msg = "Error occured while downloading '" + resource + "' from the remote repository:" + getRepository() + ": " + e.getMessage();
+
+        throw new TransferFailedException( msg, e );
     }
 
     public InteractiveUserInfo getInteractiveUserInfo()

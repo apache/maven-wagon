@@ -19,6 +19,11 @@ package org.apache.maven.wagon.providers.ssh;
  * under the License.
  */
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.List;
+
 import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.CommandExecutionException;
 import org.apache.maven.wagon.CommandExecutor;
@@ -31,16 +36,10 @@ import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.List;
 
 /**
  * Common SSH operations.
@@ -356,25 +355,5 @@ public abstract class AbstractSshWagon
             // Error?  Then the 'ls' command failed.  No such file found.
             return false;
         }
-    }
-
-    protected void handleGetException( Resource resource, Exception e, File destination )
-        throws TransferFailedException, ResourceDoesNotExistException
-    {
-        fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-
-        if ( destination.exists() )
-        {
-            boolean deleted = destination.delete();
-
-            if ( !deleted )
-            {
-                destination.deleteOnExit();
-            }
-        }
-
-        String msg = "Error occured while downloading '" + resource + "' from the remote repository:" + getRepository() + ": " + e.getMessage();
-
-        throw new TransferFailedException( msg, e );
     }
 }

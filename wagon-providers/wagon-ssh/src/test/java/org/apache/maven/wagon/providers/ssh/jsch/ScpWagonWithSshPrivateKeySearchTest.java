@@ -32,6 +32,11 @@ import org.apache.maven.wagon.resource.Resource;
 public class ScpWagonWithSshPrivateKeySearchTest
     extends WagonTestCase
 {
+    protected boolean supportsGetIfNewer()
+    {
+        return false;
+    }
+
     protected String getProtocol()
     {
         return "scp";

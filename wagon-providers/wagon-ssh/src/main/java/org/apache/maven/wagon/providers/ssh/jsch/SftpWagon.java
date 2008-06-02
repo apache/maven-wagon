@@ -44,6 +44,7 @@ import com.jcraft.jsch.SftpException;
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  * @version $Id$
  * @todo [BP] add compression flag
+ * @todo see if SftpProgressMonitor allows us to do streaming (without it, we can't do checksums as the input stream is lost)
  * 
  * @plexus.component role="org.apache.maven.wagon.Wagon" 
  *   role-hint="sftp"
@@ -58,72 +59,43 @@ public class SftpWagon
 
     private static final long MILLIS_PER_SEC = 1000L;
 
-    public void put( String basedir, Resource resource, File source )
-        throws TransferFailedException
+    private void returnToParentDirectory( Resource resource, ChannelSftp channel )
+        throws SftpException
     {
-        String resourceName = resource.getName();
-        String dir = getResourceDirectory( resourceName );
+        String dir = getResourceDirectory( resource.getName() );
+        String[] dirs = PathUtils.dirnames( dir );
+        for ( int i = 0; i < dirs.length; i++ )
+        {
+            channel.cd( ".." );
+        }
+    }
 
-        ChannelSftp channel = null;
+    private ChannelSftp preparePut( Resource resource, RepositoryPermissions permissions )
+        throws JSchException, SftpException, TransferFailedException
+    {
+        ChannelSftp channel;
+        channel = (ChannelSftp) session.openChannel( SFTP_CHANNEL );
 
+        channel.connect();
+
+        int directoryMode = getDirectoryMode( permissions );
+
+        channel.cd( "/" );
+        
         try
         {
-            channel = (ChannelSftp) session.openChannel( SFTP_CHANNEL );
-
-            channel.connect();
-
-            RepositoryPermissions permissions = getRepository().getPermissions();
-
-            int directoryMode = getDirectoryMode( permissions );
-
-            channel.cd( "/" );
+            String basedir = getRepository().getBasedir();
+            mkdirs( channel, basedir + "/", directoryMode );
             
-            try
-            {
-                mkdirs( channel, basedir + "/", directoryMode );
-                
-                mkdirs( channel, resourceName, directoryMode );
-            }
-            catch ( TransferFailedException e )
-            {
-                fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
-
-                throw e;
-            }
-
-            putFile( channel, source, resource, permissions );
-
-            String[] dirs = PathUtils.dirnames( dir );
-            for ( int i = 0; i < dirs.length; i++ )
-            {
-                channel.cd( ".." );
-            }
+            mkdirs( channel, resource.getName(), directoryMode );
         }
-        catch ( SftpException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
-            
-            String msg = "Error occured while deploying '" + resourceName + "' " + "to remote repository: " +
-                getRepository().getUrl();
-
-            throw new TransferFailedException( msg, e );
-        }
-        catch ( JSchException e )
+        catch ( TransferFailedException e )
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
 
-            String msg = "Error occured while deploying '" + resourceName + "' " + "to remote repository: " +
-                getRepository().getUrl();
-
-            throw new TransferFailedException( msg, e );
+            throw e;
         }
-        finally
-        {
-            if ( channel != null )
-            {
-                channel.disconnect();
-            }
-        }
+        return channel;
     }
 
     private void putFile( ChannelSftp channel, File source, Resource resource, RepositoryPermissions permissions )
@@ -137,6 +109,8 @@ public class SftpWagon
 
         firePutStarted( resource, source );
 
+        
+        
         channel.put( source.getAbsolutePath(), filename );
 
         postProcessListeners( resource, source, TransferEvent.REQUEST_PUT );
@@ -334,13 +308,47 @@ public class SftpWagon
     public void put( File source, String destination )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        String basedir = getRepository().getBasedir();
-
         Resource resource = getResource( destination );
 
         firePutInitiated( resource, source );
 
-        put( basedir, resource, source );
+        ChannelSftp channel = null;
+        
+        try
+        {
+            RepositoryPermissions permissions = getRepository().getPermissions();
+        
+            channel = preparePut( resource, permissions );
+        
+            putFile( channel, source, resource, permissions );
+        
+            returnToParentDirectory( resource, channel );
+        }
+        catch ( SftpException e )
+        {
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+            
+            String msg = "Error occured while deploying '" + resource.getName() + "' " + "to remote repository: " +
+                getRepository().getUrl();
+        
+            throw new TransferFailedException( msg, e );
+        }
+        catch ( JSchException e )
+        {
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+        
+            String msg = "Error occured while deploying '" + resource.getName() + "' " + "to remote repository: " +
+                getRepository().getUrl();
+        
+            throw new TransferFailedException( msg, e );
+        }
+        finally
+        {
+            if ( channel != null )
+            {
+                channel.disconnect();
+            }
+        }
     }
 
     public void get( String resourceName, File destination )
