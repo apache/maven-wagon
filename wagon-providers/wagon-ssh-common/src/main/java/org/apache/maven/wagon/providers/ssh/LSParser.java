@@ -19,9 +19,6 @@ package org.apache.maven.wagon.providers.ssh;
  * under the License.
  */
 
-import org.apache.maven.wagon.TransferFailedException;
-import org.codehaus.plexus.util.StringUtils;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -29,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.maven.wagon.TransferFailedException;
 
 /**
  * LSParser 

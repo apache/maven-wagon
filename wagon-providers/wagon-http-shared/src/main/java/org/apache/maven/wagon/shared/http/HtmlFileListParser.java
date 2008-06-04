@@ -27,44 +27,25 @@ import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.maven.wagon.TransferFailedException;
+import org.apache.xerces.xni.Augmentations;
+import org.apache.xerces.xni.QName;
+import org.apache.xerces.xni.XMLAttributes;
+import org.apache.xerces.xni.parser.XMLInputSource;
+import org.apache.xerces.xni.parser.XMLParserConfiguration;
 import org.codehaus.plexus.util.StringUtils;
-import org.cyberneko.html.parsers.DOMParser;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXNotRecognizedException;
-import org.xml.sax.SAXNotSupportedException;
+import org.cyberneko.html.HTMLConfiguration;
+import org.cyberneko.html.filters.DefaultFilter;
 
 /**
  * Html File List Parser.
  */
 public class HtmlFileListParser
 {
-    private static final Set/*<Pattern>*/skips = new HashSet/*<Pattern>*/();
-
-    static
-    {
-        // Apache Fancy Index Sort Headers
-        skips.add( Pattern.compile( "\\?[CDMNS]=.*" ) );
-
-        // URLs with excessive paths.
-        skips.add( Pattern.compile( "/[^/]*/" ) );
-
-        // URLs that to a parent directory.
-        skips.add( Pattern.compile( "\\.\\./" ) );
-
-        // mailto urls
-        skips.add( Pattern.compile( "mailto:.*" ) );
-    }
-
     /**
      * Fetches a raw HTML from a provided InputStream, parses it, and returns the file list.
      * 
@@ -72,7 +53,7 @@ public class HtmlFileListParser
      * @return the file list.
      * @throws TransferFailedException if there was a problem fetching the raw html.
      */
-    public static List/*<String>*/parseFileList( String baseurl, InputStream stream )
+    public static List/* <String> */parseFileList( String baseurl, InputStream stream )
         throws TransferFailedException
     {
         try
@@ -80,34 +61,21 @@ public class HtmlFileListParser
             // Use URI object to get benefits of proper absolute and relative path resolution for free
             URI baseURI = new URI( baseurl );
 
-            DOMParser parser = new DOMParser();
+            Parser handler = new Parser( baseURI );
+
+            XMLParserConfiguration parser = new HTMLConfiguration();
+            parser.setDocumentHandler( handler );
             parser.setFeature( "http://cyberneko.org/html/features/augmentations", true );
             parser.setProperty( "http://cyberneko.org/html/properties/names/elems", "upper" );
             parser.setProperty( "http://cyberneko.org/html/properties/names/attrs", "upper" );
-            parser.parse( new InputSource( stream ) );
+            parser.parse( new XMLInputSource( null, baseurl, baseURI.toString(), stream, "UTF-8" ) );
 
-            Set/*<String>*/links = new HashSet/*<String>*/();
-
-            recursiveLinkCollector( parser.getDocument(), baseURI, links );
-
-            return new ArrayList( links );
+            return new ArrayList( handler.getLinks() );
 
         }
         catch ( URISyntaxException e )
         {
             throw new TransferFailedException( "Unable to parse as URI: " + baseurl );
-        }
-        catch ( SAXNotRecognizedException e )
-        {
-            throw new TransferFailedException( "Unable to setup XML/SAX: " + e.getMessage(), e );
-        }
-        catch ( SAXNotSupportedException e )
-        {
-            throw new TransferFailedException( "XML/SAX not supported?: " + e.getMessage(), e );
-        }
-        catch ( SAXException e )
-        {
-            throw new TransferFailedException( "XML/SAX error: " + e.getMessage(), e );
         }
         catch ( IOException e )
         {
@@ -115,20 +83,46 @@ public class HtmlFileListParser
         }
     }
 
-    private static void recursiveLinkCollector( Node node, URI baseURI, Set/*<String>*/links )
+    private static class Parser
+        extends DefaultFilter
     {
-        if ( node.getNodeType() == Node.ELEMENT_NODE )
+        // Apache Fancy Index Sort Headers
+        private static final Pattern APACHE_INDEX_SKIP = Pattern.compile( "\\?[CDMNS]=.*" );
+
+        // URLs with excessive paths.
+        private static final Pattern URLS_WITH_PATHS = Pattern.compile( "/[^/]*/" );
+
+        // URLs that to a parent directory.
+        private static final Pattern URLS_TO_PARENT = Pattern.compile( "\\.\\./" );
+
+        // mailto urls
+        private static final Pattern MAILTO_URLS = Pattern.compile( "mailto:.*" );
+
+        private static final Pattern[] SKIPS =
+            new Pattern[] { APACHE_INDEX_SKIP, URLS_WITH_PATHS, URLS_TO_PARENT, MAILTO_URLS };
+        
+        private Set links = new HashSet();
+
+        private URI baseURI;
+
+        public Parser( URI baseURI )
         {
-            //            System.out.println("Element <" + node.getNodeName() + dumpAttributes((Element) node) + ">");
-            if ( "A".equals( node.getNodeName() ) )
+            this.baseURI = baseURI;
+        }
+
+        public Set getLinks()
+        {
+            return links;
+        }
+
+        public void startElement( QName element, XMLAttributes attrs, Augmentations augs )
+        {
+            if ( "A".equals( element.rawname ) )
             {
-                Element anchor = (Element) node;
-                NamedNodeMap nodemap = anchor.getAttributes();
-                Node href = nodemap.getNamedItem( "HREF" );
+                String href = attrs.getValue( "HREF" );
                 if ( href != null )
                 {
-                    String link = cleanLink( baseURI, href.getNodeValue() );
-                    //                    System.out.println("HREF (" + href.getNodeValue() + " => " + link + ")");
+                    String link = cleanLink( baseURI, href );
                     if ( isAcceptableLink( link ) )
                     {
                         links.add( link );
@@ -137,76 +131,53 @@ public class HtmlFileListParser
             }
         }
 
-        Node child = node.getFirstChild();
-        while ( child != null )
+        private static String cleanLink( URI baseURI, String link )
         {
-            recursiveLinkCollector( child, baseURI, links );
-            child = child.getNextSibling();
-        }
-    }
-
-    //    private String dumpAttributes(Element elem) {
-    //        StringBuffer buf = new StringBuffer();
-    //        NamedNodeMap nodemap = elem.getAttributes();
-    //        int len = nodemap.getLength();
-    //        for (int i = 0; i < len; i++) {
-    //            Node att = nodemap.item(i);
-    //            buf.append(" ");
-    //            buf.append(att.getNodeName()).append("=\"");
-    //            buf.append(att.getNodeValue()).append("\"");
-    //        }
-    //        return buf.toString();
-    //    }
-
-    private static String cleanLink( URI baseURI, String link )
-    {
-        if ( StringUtils.isEmpty( link ) )
-        {
-            return "";
-        }
-
-        String ret = link;
-
-        try
-        {
-            URI linkuri = new URI( ret );
-            URI relativeURI = baseURI.relativize( linkuri ).normalize();
-            ret = relativeURI.toASCIIString();
-            if ( ret.startsWith( baseURI.getPath() ) )
+            if ( StringUtils.isEmpty( link ) )
             {
-                ret = ret.substring( baseURI.getPath().length() );
+                return "";
             }
-            
-            ret = URLDecoder.decode( ret, "UTF-8" );
-        }
-        catch ( URISyntaxException e )
-        {
-        }
-        catch ( UnsupportedEncodingException e )
-        {
+
+            String ret = link;
+
+            try
+            {
+                URI linkuri = new URI( ret );
+                URI relativeURI = baseURI.relativize( linkuri ).normalize();
+                ret = relativeURI.toASCIIString();
+                if ( ret.startsWith( baseURI.getPath() ) )
+                {
+                    ret = ret.substring( baseURI.getPath().length() );
+                }
+
+                ret = URLDecoder.decode( ret, "UTF-8" );
+            }
+            catch ( URISyntaxException e )
+            {
+            }
+            catch ( UnsupportedEncodingException e )
+            {
+            }
+
+            return ret;
         }
 
-        return ret;
-    }
-    
-    
-
-    private static boolean isAcceptableLink( String link )
-    {
-        if ( StringUtils.isEmpty( link ) )
+        private static boolean isAcceptableLink( String link )
         {
-            return false;
-        }
-
-        for ( Iterator it = skips.iterator(); it.hasNext(); )
-        {
-            Pattern skipPat = (Pattern) it.next();
-            if ( skipPat.matcher( link ).find() )
+            if ( StringUtils.isEmpty( link ) )
             {
                 return false;
             }
-        }
 
-        return true;
+            for ( int i = 0; i < SKIPS.length; i++ )
+            {
+                if ( SKIPS[i].matcher( link ).find() )
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }

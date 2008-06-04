@@ -20,8 +20,9 @@ package org.apache.maven.wagon.events;
  */
 
 import junit.framework.TestCase;
-import org.apache.maven.wagon.WagonMock;
+
 import org.apache.maven.wagon.Wagon;
+import org.easymock.MockControl;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -33,6 +34,9 @@ public class SessionEventSupportTest
 
     private SessionEventSupport eventSupport;
 
+    private MockControl wagonMockControl;
+    
+    private Wagon wagon;
 
     /**
      * @see junit.framework.TestCase#setUp()
@@ -43,6 +47,11 @@ public class SessionEventSupportTest
         super.setUp();
 
         eventSupport = new SessionEventSupport();
+        
+        // TODO: actually test it gets called?
+        wagonMockControl = MockControl.createControl( Wagon.class );
+        
+        wagon = (Wagon) wagonMockControl.getMock();
     }
 
     public void testSessionListenerRegistration()
@@ -85,8 +94,6 @@ public class SessionEventSupportTest
 
         eventSupport.addSessionListener( mock2 );
 
-        final Wagon wagon = new WagonMock();
-
         final SessionEvent event = new SessionEvent( wagon, 1 );
 
         eventSupport.fireSessionDisconnected( event );
@@ -111,8 +118,6 @@ public class SessionEventSupportTest
 
         eventSupport.addSessionListener( mock2 );
 
-        final Wagon wagon = new WagonMock();
-
         final SessionEvent event = new SessionEvent( wagon, 1 );
 
         eventSupport.fireSessionDisconnecting( event );
@@ -135,8 +140,6 @@ public class SessionEventSupportTest
         final SessionListenerMock mock2 = new SessionListenerMock();
 
         eventSupport.addSessionListener( mock2 );
-
-        final Wagon wagon = new WagonMock();
 
         final SessionEvent event = new SessionEvent( wagon, 1 );
 
@@ -162,8 +165,6 @@ public class SessionEventSupportTest
 
         eventSupport.addSessionListener( mock2 );
 
-        final Wagon wagon = new WagonMock();
-
         final SessionEvent event = new SessionEvent( wagon, 1 );
 
         eventSupport.fireSessionLoggedOff( event );
@@ -187,8 +188,6 @@ public class SessionEventSupportTest
         final SessionListenerMock mock2 = new SessionListenerMock();
 
         eventSupport.addSessionListener( mock2 );
-
-        final Wagon wagon = new WagonMock();
 
         final SessionEvent event = new SessionEvent( wagon, 1 );
 
@@ -215,8 +214,6 @@ public class SessionEventSupportTest
 
         eventSupport.addSessionListener( mock2 );
 
-        final Wagon wagon = new WagonMock();
-
         final SessionEvent event = new SessionEvent( wagon, 1 );
 
         eventSupport.fireSessionOpening( event );
@@ -240,8 +237,6 @@ public class SessionEventSupportTest
         final SessionListenerMock mock2 = new SessionListenerMock();
 
         eventSupport.addSessionListener( mock2 );
-
-        final Wagon wagon = new WagonMock();
 
         final SessionEvent event = new SessionEvent( wagon, 1 );
 
@@ -277,5 +272,5 @@ public class SessionEventSupportTest
         assertEquals( "mm", mock2.getDebugMessage() );
 
     }
-
+    
 }

@@ -19,10 +19,10 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -170,14 +170,11 @@ public class LightweightHttpWagon
         }
     }
 
-    public void put( File source, String resourceName )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    protected void finishPutTransfer( Resource resource, InputStream input, OutputStream output )
+        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
-        super.put( source, resourceName );
-
         try
         {
-            String url = buildUrl( resourceName );
             int statusCode = putConnection.getResponseCode();
 
             switch ( statusCode )
@@ -190,20 +187,20 @@ public class LightweightHttpWagon
                     break;
 
                 case HttpURLConnection.HTTP_FORBIDDEN:
-                    throw new AuthorizationException( "Access denied to: " + url );
+                    throw new AuthorizationException( "Access denied to: " + buildUrl( resource.getName() ) );
 
                 case HttpURLConnection.HTTP_NOT_FOUND:
-                    throw new ResourceDoesNotExistException( "File: " + url + " does not exist" );
+                    throw new ResourceDoesNotExistException( "File: " + buildUrl( resource.getName() ) + " does not exist" );
 
                 //add more entries here
                 default :
                     throw new TransferFailedException(
-                        "Failed to transfer file: " + url + ". Return code is: " + statusCode );
+                        "Failed to transfer file: " + buildUrl( resource.getName() ) + ". Return code is: " + statusCode );
             }
         }
         catch ( IOException e )
         {
-            fireTransferError( new Resource( resourceName ), e, TransferEvent.REQUEST_PUT );
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
             
             throw new TransferFailedException( "Error transferring file", e );
         }

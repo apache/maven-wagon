@@ -20,8 +20,8 @@ package org.apache.maven.wagon.events;
  */
 
 import junit.framework.TestCase;
-import org.apache.maven.wagon.WagonMock;
 import org.apache.maven.wagon.Wagon;
+import org.easymock.MockControl;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -31,8 +31,11 @@ import org.apache.maven.wagon.Wagon;
 public class TransferEventSupportTest
     extends TestCase
 {
-
     private TransferEventSupport eventSupport;
+
+    private MockControl wagonMockControl;
+    
+    private Wagon wagon;
 
     /**
      * @see junit.framework.TestCase#setUp()
@@ -40,10 +43,14 @@ public class TransferEventSupportTest
     protected void setUp()
         throws Exception
     {
-
         super.setUp();
+        
         eventSupport = new TransferEventSupport();
-
+        
+        // TODO: actually test it gets called?
+        wagonMockControl = MockControl.createControl( Wagon.class );
+        
+        wagon = (Wagon) wagonMockControl.getMock();
     }
 
     public void testTransferListenerRegistration()
@@ -78,7 +85,6 @@ public class TransferEventSupportTest
         final TransferListenerMock mock2 = new TransferListenerMock();
         eventSupport.addTransferListener( mock2 );
 
-        final Wagon wagon = new WagonMock();
         final TransferEvent event = getEvent( wagon );
 
         eventSupport.fireTransferStarted( event );
@@ -99,8 +105,6 @@ public class TransferEventSupportTest
         final TransferListenerMock mock2 = new TransferListenerMock();
 
         eventSupport.addTransferListener( mock2 );
-
-        final Wagon wagon = new WagonMock();
 
         final TransferEvent event = getEvent( wagon );
 
@@ -126,8 +130,6 @@ public class TransferEventSupportTest
 
         eventSupport.addTransferListener( mock2 );
 
-        final Wagon wagon = new WagonMock();
-
         final TransferEvent event = getEvent( wagon );
 
         eventSupport.fireTransferCompleted( event );
@@ -151,8 +153,6 @@ public class TransferEventSupportTest
         final TransferListenerMock mock2 = new TransferListenerMock();
 
         eventSupport.addTransferListener( mock2 );
-
-        final Wagon wagon = new WagonMock();
 
         final TransferEvent event = getEvent( wagon );
 

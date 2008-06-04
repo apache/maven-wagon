@@ -65,8 +65,6 @@ public interface Wagon
      * @throws TransferFailedException
      * @throws ResourceDoesNotExistException
      * @throws AuthorizationException
-     * @todo michal: I have to learn more about timezones!
-     * Specifically how to convert time for UTC to time for GMT and if such conversioin is needed.
      */
     boolean getIfNewer( String resourceName, File destination, long timestamp )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;

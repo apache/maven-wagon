@@ -21,21 +21,24 @@ package org.apache.maven.wagon.providers.ssh.external;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.List;
 
+import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.CommandExecutionException;
+import org.apache.maven.wagon.CommandExecutor;
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.PermissionModeUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.Streams;
 import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.WagonConstants;
+import org.apache.maven.wagon.authentication.AuthenticationException;
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
-import org.apache.maven.wagon.providers.ssh.AbstractSshWagon;
+import org.apache.maven.wagon.providers.ssh.ScpHelper;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.cli.CommandLineException;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
@@ -54,7 +57,8 @@ import org.codehaus.plexus.util.cli.Commandline;
  *   instantiation-strategy="per-lookup"
  */
 public class ScpExternalWagon
-    extends AbstractSshWagon
+    extends AbstractWagon
+    implements CommandExecutor
 {
     /**
      * The external SCP command to use - default is <code>scp</code>.
@@ -84,11 +88,35 @@ public class ScpExternalWagon
      */
     private String sshArgs;
 
+    private ScpHelper sshTool = new ScpHelper( this );
+
     private static final int SSH_FATAL_EXIT_CODE = 255;
 
     // ----------------------------------------------------------------------
     //
     // ----------------------------------------------------------------------
+
+    protected void openConnectionInternal()
+        throws AuthenticationException
+    {
+        if ( authenticationInfo == null )
+        {
+            authenticationInfo = new AuthenticationInfo();
+        }
+    }
+
+    public void closeConnection()
+    {
+        // nothing to disconnect
+    }
+
+    public boolean getIfNewer( String resourceName, File destination, long timestamp )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        fireSessionDebug( "getIfNewer in SCP wagon is not supported - performing an unconditional get" );
+        get( resourceName, destination );
+        return true;
+    }
 
     /**
      * @return The hostname of the remote server prefixed with the username, which comes either from the repository URL
@@ -112,6 +140,14 @@ public class ScpExternalWagon
         }
     }
     
+    public void executeCommand( String command )
+        throws CommandExecutionException
+    {
+        fireTransferDebug( "Executing command: " + command );
+
+        executeCommand( command, false );
+    }
+
     public Streams executeCommand( String command, boolean ignoreFailures )
         throws CommandExecutionException
     {
@@ -120,7 +156,7 @@ public class ScpExternalWagon
         File privateKey;
         try
         {
-            privateKey = getPrivateKey();
+            privateKey = ScpHelper.getPrivateKey( authenticationInfo );
         }
         catch ( FileNotFoundException e )
         {
@@ -128,8 +164,9 @@ public class ScpExternalWagon
         }
         Commandline cl = createBaseCommandLine( putty, sshExecutable, privateKey );
 
-        int port = getPort();
-        if ( port != DEFAULT_SSH_PORT )
+        int port =
+            repository.getPort() == WagonConstants.UNKNOWN_PORT ? ScpHelper.DEFAULT_SSH_PORT : repository.getPort();
+        if ( port != ScpHelper.DEFAULT_SSH_PORT )
         {
             if ( putty )
             {
@@ -220,7 +257,7 @@ public class ScpExternalWagon
         File privateKey;
         try
         {
-            privateKey = getPrivateKey();
+            privateKey = ScpHelper.getPrivateKey( authenticationInfo );
         }
         catch ( FileNotFoundException e )
         {
@@ -232,8 +269,9 @@ public class ScpExternalWagon
 
         cl.setWorkingDirectory( localFile.getParentFile().getAbsolutePath() );
 
-        int port = getPort();
-        if ( port != DEFAULT_SSH_PORT )
+        int port =
+            repository.getPort() == WagonConstants.UNKNOWN_PORT ? ScpHelper.DEFAULT_SSH_PORT : repository.getPort();
+        if ( port != ScpHelper.DEFAULT_SSH_PORT )
         {
             cl.createArgument().setLine( "-P " + port );
         }
@@ -245,6 +283,8 @@ public class ScpExternalWagon
         
         String resourceName = normalizeResource( resource );
         String remoteFile = getRepository().getBasedir() + "/" + resourceName;
+        
+        remoteFile = StringUtils.replace( remoteFile, " ", "\\ " );
         
         String qualifiedRemoteFile = this.buildRemoteHost() + ":" + remoteFile;
         if ( put )
@@ -377,12 +417,6 @@ public class ScpExternalWagon
         firePutCompleted( resource, source );
     }
 
-    public void executeCommand( String command )
-        throws CommandExecutionException
-    {
-        executeCommand( command, false );
-    }
-
     public void get( String resourceName, File destination )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
@@ -409,6 +443,29 @@ public class ScpExternalWagon
     // Alternatively, we may later accept a generic parameters argument to connect, or some other configure(Properties)
     // method on a Wagon.
     //
+
+    public List getFileList( String destinationDirectory )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        return sshTool.getFileList( destinationDirectory, repository );
+    }
+
+    public void putDirectory( File sourceDirectory, String destinationDirectory )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        sshTool.putDirectory( this, sourceDirectory, destinationDirectory );
+    }
+
+    public boolean resourceExists( String resourceName )
+        throws TransferFailedException, AuthorizationException
+    {
+        return sshTool.resourceExists( resourceName, repository );
+    }
+
+    public boolean supportsDirectoryCopy()
+    {
+        return true;
+    }
 
     public String getScpExecutable()
     {
@@ -448,76 +505,5 @@ public class ScpExternalWagon
     public void setSshArgs( String sshArgs )
     {
         this.sshArgs = sshArgs;
-    }
-
-    public void putDirectory( File sourceDirectory, String destinationDirectory )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        String basedir = getRepository().getBasedir();
-
-        String dir = StringUtils.replace( destinationDirectory, "\\", "/" );
-
-        String path = getPath( basedir, dir );
-        try
-        {
-            if ( getRepository().getPermissions() != null )
-            {
-                String dirPerms = getRepository().getPermissions().getDirectoryMode();
-
-                if ( dirPerms != null )
-                {
-                    String umaskCmd = "umask " + PermissionModeUtils.getUserMaskFor( dirPerms );
-                    executeCommand( umaskCmd );
-                }
-            }
-
-            String mkdirCmd = "mkdir -p " + path;
-
-            executeCommand( mkdirCmd );
-        }
-        catch ( CommandExecutionException e )
-        {
-            throw new TransferFailedException( "Error performing commands for file transfer", e );
-        }
-
-        File zipFile;
-        try
-        {
-            zipFile = File.createTempFile( "wagon", ".zip" );
-            zipFile.deleteOnExit();
-
-            List files = FileUtils.getFileNames( sourceDirectory, "**/**", "", false );
-
-            createZip( files, zipFile, sourceDirectory );
-        }
-        catch ( IOException e )
-        {
-            throw new TransferFailedException( "Unable to create ZIP archive of directory", e );
-        }
-
-        put( zipFile, getPath( dir, zipFile.getName() ) );
-
-        try
-        {
-            executeCommand( "cd " + path + "; unzip -o " + zipFile.getName() + "; rm -f " + zipFile.getName() );
-
-            zipFile.delete();
-
-            RepositoryPermissions permissions = getRepository().getPermissions();
-
-            if ( permissions != null && permissions.getGroup() != null )
-            {
-                executeCommand( "chgrp -Rf " + permissions.getGroup() + " " + path );
-            }
-
-            if ( permissions != null && permissions.getFileMode() != null )
-            {
-                executeCommand( "chmod -Rf " + permissions.getFileMode() + " " + path );
-            }
-        }
-        catch ( CommandExecutionException e )
-        {
-            throw new TransferFailedException( "Error performing commands for file transfer", e );
-        }
     }
 }

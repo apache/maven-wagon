@@ -40,6 +40,11 @@ public class ScpExternalWagonTest
         return WagonConstants.UNKNOWN_LENGTH;
     }
 
+    protected boolean supportsGetIfNewer()
+    {
+        return false;
+    }
+
     protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
     {
         return 0;

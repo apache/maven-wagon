@@ -21,7 +21,6 @@ package org.apache.maven.wagon;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collections;
@@ -96,12 +95,6 @@ public class WagonMock
 
         outputData.setOutputStream( os );
 
-    }
-
-    public boolean getIfNewer( String resourceName, File destination, long timestamp )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        return false;
     }
 
     public void openConnectionInternal()

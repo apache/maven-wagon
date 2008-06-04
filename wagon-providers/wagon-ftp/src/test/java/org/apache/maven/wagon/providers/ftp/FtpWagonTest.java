@@ -22,8 +22,8 @@ package org.apache.maven.wagon.providers.ftp;
 import java.io.File;
 
 import org.apache.ftpserver.interfaces.FtpServerInterface;
+import org.apache.maven.wagon.StreamingWagonTestCase;
 import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
@@ -33,7 +33,7 @@ import org.apache.maven.wagon.resource.Resource;
  * @version $Id$
  */
 public class FtpWagonTest
-    extends WagonTestCase
+    extends StreamingWagonTestCase
 {
     private FtpServerInterface server;
 

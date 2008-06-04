@@ -19,6 +19,14 @@ package org.apache.maven.wagon;
  * under the License.
  */
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
+
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
@@ -35,17 +43,6 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 /**
  * Implementation of common facilties for Wagon providers.
@@ -71,6 +68,9 @@ public abstract class AbstractWagon
     private int connectionTimeout = 60000;
     
     private ProxyInfoProvider proxyInfoProvider;
+    
+    /** @deprecated */
+    protected ProxyInfo proxyInfo;
     
     private RepositoryPermissions permissionsOverride;
 
@@ -160,6 +160,7 @@ public abstract class AbstractWagon
                 }
             }
         } );
+        this.proxyInfo = proxyInfo;
     }
     
     public void connect( Repository repository, AuthenticationInfo authenticationInfo,
@@ -201,22 +202,7 @@ public abstract class AbstractWagon
         
         fireSessionOpening();
 
-        try
-        {
-            openConnectionInternal();
-        }
-        catch ( ConnectionException e )
-        {
-            fireSessionConnectionRefused();
-            
-            throw e;
-        }
-        catch ( AuthenticationException e )
-        {
-            fireSessionConnectionRefused();
-            
-            throw e;
-        }
+        openConnection();
 
         fireSessionOpened();
     }
@@ -288,6 +274,12 @@ public abstract class AbstractWagon
         getTransfer( resource, destination, input, true, Integer.MAX_VALUE );
     }
 
+    protected void getTransfer( Resource resource, OutputStream output, InputStream input )
+        throws TransferFailedException
+    {
+        getTransfer( resource, output, input, true, Integer.MAX_VALUE );
+    }
+
     protected void getTransfer( Resource resource, File destination, InputStream input, boolean closeInput,
                                 int maxSize )
         throws TransferFailedException
@@ -296,18 +288,16 @@ public abstract class AbstractWagon
         fireTransferDebug( "attempting to create parent directories for destination: " + destination.getName() );
         createParentDirectories( destination );
 
-        fireGetStarted( resource, destination );
-
         OutputStream output = new LazyFileOutputStream( destination );
+
+        fireGetStarted( resource, destination );
 
         try
         {
-            transfer( resource, input, output, TransferEvent.REQUEST_GET, maxSize );
+            getTransfer( resource, output, input, closeInput, maxSize );
         }
-        catch ( IOException e )
+        catch ( TransferFailedException e )
         {
-            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-
             if ( destination.exists() )
             {
                 boolean deleted = destination.delete();
@@ -317,11 +307,32 @@ public abstract class AbstractWagon
                     destination.deleteOnExit();
                 }
             }
+            throw e;
+        }
+        finally
+        {
+            IOUtil.close( output );
+        }
+
+        fireGetCompleted( resource, destination );
+    }
+
+    protected void getTransfer( Resource resource, OutputStream output, InputStream input, boolean closeInput, int maxSize )
+        throws TransferFailedException
+    {
+        try
+        {
+            transfer( resource, input, output, TransferEvent.REQUEST_GET, maxSize );
+            
+            finishGetTransfer( resource, input, output );
+        }
+        catch ( IOException e )
+        {
+            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
 
             String msg = "GET request of: " + resource.getName() + " from " + repository.getName() + " failed";
 
             throw new TransferFailedException( msg, e );
-
         }
         finally
         {
@@ -330,19 +341,22 @@ public abstract class AbstractWagon
                 IOUtil.close( input );
             }
 
-            IOUtil.close( output );
+            cleanupGetTransfer( resource );
         }
+    }
 
-        fireGetCompleted( resource, destination );
+    protected void finishGetTransfer( Resource resource, InputStream input, OutputStream output )
+        throws TransferFailedException
+    {
+    }
+
+    protected void cleanupGetTransfer( Resource resource )
+    {
     }
 
     protected void putTransfer( Resource resource, File source, OutputStream output, boolean closeOutput )
-        throws TransferFailedException
+        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
-        resource.setContentLength( source.length() );
-
-        resource.setLastModified( source.lastModified() );
-
         firePutStarted( resource, source );
 
         transfer( resource, source, output, closeOutput );
@@ -360,9 +374,11 @@ public abstract class AbstractWagon
      * @param output output stream
      * @param closeOutput whether the output stream should be closed or not
      * @throws TransferFailedException
+     * @throws ResourceDoesNotExistException 
+     * @throws AuthorizationException 
      */
     protected void transfer( Resource resource, File source, OutputStream output, boolean closeOutput )
-        throws TransferFailedException
+        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
         InputStream input = null;
 
@@ -370,7 +386,7 @@ public abstract class AbstractWagon
         {
             input = new FileInputStream( source );
 
-            transfer( resource, input, output, TransferEvent.REQUEST_PUT );
+            putTransfer( resource, input, output, closeOutput );
         }
         catch ( FileNotFoundException e )
         {
@@ -378,23 +394,47 @@ public abstract class AbstractWagon
 
             throw new TransferFailedException( "Specified source file does not exist: " + source, e );
         }
+        finally
+        {
+            IOUtil.close( input );
+        }
+    }
+
+    protected void putTransfer( Resource resource, InputStream input, OutputStream output, boolean closeOutput )
+        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
+    {
+        try
+        {
+            transfer( resource, input, output, TransferEvent.REQUEST_PUT );
+            
+            finishPutTransfer( resource, input, output );
+        }
         catch ( IOException e )
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
 
-            String msg = "PUT request for: " + resource + " to " + source.getName() + "failed";
+            String msg = "PUT request to: " + resource.getName() + " in " + repository.getName() + " failed";
 
             throw new TransferFailedException( msg, e );
         }
         finally
         {
-            IOUtil.close( input );
-
             if ( closeOutput )
             {
                 IOUtil.close( output );
             }
+            
+            cleanupPutTransfer( resource );
         }
+    }
+
+    protected void cleanupPutTransfer( Resource resource )
+    {
+    }
+
+    protected void finishPutTransfer( Resource resource, InputStream input, OutputStream output )
+        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
+    {
     }
 
     /**
@@ -448,6 +488,7 @@ public abstract class AbstractWagon
 
             remaining -= n;
         }
+        output.flush();
     }
 
     // ----------------------------------------------------------------------
@@ -713,9 +754,10 @@ public abstract class AbstractWagon
         transferEvent.setTimestamp( System.currentTimeMillis() );
         transferEvent.setLocalFile( source );
 
+        InputStream input = null;
         try
         {
-            InputStream input = new FileInputStream( source );
+            input = new FileInputStream( source );
 
             while ( true )
             {
@@ -735,6 +777,10 @@ public abstract class AbstractWagon
             
             throw new TransferFailedException( "Failed to post-process the source file", e );
         }
+        finally
+        {
+            IOUtil.close( input );
+        }
     }
 
     public void putDirectory( File sourceDirectory, String destinationDirectory )
@@ -746,54 +792,6 @@ public abstract class AbstractWagon
     public boolean supportsDirectoryCopy()
     {
         return false;
-    }
-
-    public void createZip( List files, File zipName, File basedir )
-        throws IOException
-    {
-        ZipOutputStream zos = new ZipOutputStream( new FileOutputStream( zipName ) );
-
-        try
-        {
-            for ( int i = 0; i < files.size(); i++ )
-            {
-                String file = (String) files.get( i );
-
-                file = file.replace( '\\', '/' );
-
-                writeZipEntry( zos, new File( basedir, file ), file );
-            }
-        }
-        finally
-        {
-            IOUtil.close( zos );
-        }
-    }
-
-    private void writeZipEntry( ZipOutputStream jar, File source, String entryName )
-        throws IOException
-    {
-        byte[] buffer = new byte[1024];
-
-        int bytesRead;
-
-        FileInputStream is = new FileInputStream( source );
-
-        try
-        {
-            ZipEntry entry = new ZipEntry( entryName );
-
-            jar.putNextEntry( entry );
-
-            while ( ( bytesRead = is.read( buffer ) ) != -1 )
-            {
-                jar.write( buffer, 0, bytesRead );
-            }
-        }
-        finally
-        {
-            is.close();
-        }
     }
 
     protected static String getPath( String basedir, String dir )

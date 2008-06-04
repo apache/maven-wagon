@@ -19,23 +19,23 @@ package org.apache.maven.wagon.providers.file;
  * under the License.
  */
 
+import java.io.File;
+import java.io.IOException;
+
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.FileTestUtils;
+import org.apache.maven.wagon.StreamingWagonTestCase;
 import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-
-import java.io.File;
-import java.io.IOException;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  */
 public class FileWagonTest
-    extends WagonTestCase
+    extends StreamingWagonTestCase
 {
     protected String getProtocol()
     {

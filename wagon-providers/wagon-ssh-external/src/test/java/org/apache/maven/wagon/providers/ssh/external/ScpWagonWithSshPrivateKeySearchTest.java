@@ -33,6 +33,11 @@ import org.apache.maven.wagon.resource.Resource;
 public class ScpWagonWithSshPrivateKeySearchTest
     extends WagonTestCase
 {
+    protected boolean supportsGetIfNewer()
+    {
+        return false;
+    }
+
     protected int getExpectedContentLengthOnGet( int expectedSize )
     {
         return WagonConstants.UNKNOWN_LENGTH;

@@ -21,10 +21,13 @@ package org.apache.maven.wagon;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
@@ -46,7 +49,7 @@ import org.easymock.MockControl;
 public abstract class WagonTestCase
     extends PlexusTestCase
 {
-    private static final class ProgressArgumentMatcher
+    static final class ProgressArgumentMatcher
         extends AbstractMatcher
     {
         private int size;
@@ -215,7 +218,7 @@ public abstract class WagonTestCase
         return wagon;
     }
 
-    private void message( String message )
+    protected void message( String message )
     {
         System.out.println( message );
     }
@@ -234,6 +237,141 @@ public abstract class WagonTestCase
         fileRoundTripTesting();
 
         tearDownWagonTestingFixtures();
+    }
+
+    public void testWagonGetIfNewerIsNewer()
+        throws Exception
+    {
+        if ( supportsGetIfNewer() )
+        {
+            setupRepositories();
+            setupWagonTestingFixtures();
+            int expectedSize = putFile();
+            getIfNewer( getExpectedLastModifiedOnGet( testRepository, new Resource( resource ) ) + 30000, false,
+                        expectedSize );
+        }
+    }
+
+    protected boolean supportsGetIfNewer()
+    {
+        return true;
+    }
+
+    public void testWagonGetIfNewerIsOlder()
+        throws Exception
+    {
+        if ( supportsGetIfNewer() )
+        {
+            setupRepositories();
+            setupWagonTestingFixtures();
+            int expectedSize = putFile();
+            getIfNewer( new SimpleDateFormat( "yyyy-MM-dd" ).parse( "2006-01-01" ).getTime(), true, expectedSize );
+        }
+    }
+
+    public void testWagonGetIfNewerIsSame()
+        throws Exception
+    {
+        if ( supportsGetIfNewer() )
+        {
+            setupRepositories();
+            setupWagonTestingFixtures();
+            int expectedSize = putFile();
+            getIfNewer( getExpectedLastModifiedOnGet( testRepository, new Resource( resource ) ), false, expectedSize );
+        }
+    }
+
+    private void getIfNewer( long timestamp, boolean expectedResult, int expectedSize )
+        throws Exception, NoSuchAlgorithmException, IOException, ConnectionException, AuthenticationException,
+        TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        Wagon wagon = getWagon();
+        
+        ProgressArgumentMatcher progressArgumentMatcher = setupGetIfNewerTest( wagon, expectedResult, expectedSize );
+        
+        connectWagon( wagon );
+        
+        boolean result = wagon.getIfNewer( this.resource, destFile, timestamp );
+        assertEquals( expectedResult, result );
+        
+        disconnectWagon( wagon );
+        
+        assertGetIfNewerTest( progressArgumentMatcher, expectedResult, expectedSize );
+        
+        tearDownWagonTestingFixtures();
+    }
+
+    protected void assertGetIfNewerTest( ProgressArgumentMatcher progressArgumentMatcher, boolean expectedResult,
+                                       int expectedSize )
+        throws IOException
+    {
+        if ( expectedResult == true )
+        {
+            verifyMock( progressArgumentMatcher, expectedSize );
+            
+            assertNotNull( "check checksum is not null", checksumObserver.getActualChecksum() );
+            
+            assertEquals( "compare checksums", "6b144b7285ffd6b0bc8300da162120b9", checksumObserver.getActualChecksum() );
+            
+            // Now compare the contents of the artifact that was placed in
+            // the repository with the contents of the artifact that was
+            // retrieved from the repository.
+            
+            String sourceContent = FileUtils.fileRead( sourceFile );
+            String destContent = FileUtils.fileRead( destFile );
+            assertEquals( sourceContent, destContent );
+        }
+        else
+        {
+            mockTransferListenerControl.verify();
+            
+            mockTransferListenerControl.reset();
+            
+            assertNull( "check checksum is null", checksumObserver.getActualChecksum() );
+            
+            assertFalse( destFile.exists() );
+        }
+    }
+
+    protected ProgressArgumentMatcher setupGetIfNewerTest( Wagon wagon, boolean expectedResult, int expectedSize )
+        throws NoSuchAlgorithmException, IOException
+    {
+        checksumObserver = new ChecksumObserver();
+        
+        destFile = FileTestUtils.createUniqueFile( getName(), getName() );
+        destFile.delete();
+        assertFalse( destFile.exists() );
+        destFile.deleteOnExit();
+        
+        ProgressArgumentMatcher progressArgumentMatcher = null;
+        if ( expectedResult == true )
+        {
+            progressArgumentMatcher = replaceMockForGet( wagon, expectedSize );
+        }
+        else
+        {
+            replaceMockForSkippedGetIfNewer( wagon, expectedSize );
+        }
+        return progressArgumentMatcher;
+    }
+
+    private void replaceMockForSkippedGetIfNewer( Wagon wagon, int expectedSize )
+    {
+        Resource resource = new Resource( this.resource );
+        mockTransferListener.transferInitiated( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_INITIATED,
+                                                                     TransferEvent.REQUEST_GET, destFile ) );
+        resource = new Resource( this.resource );
+        resource.setContentLength( getExpectedContentLengthOnGet( expectedSize ) );
+        resource.setLastModified( getExpectedLastModifiedOnGet( testRepository, resource ) );
+        // TODO: transfer skipped event?
+//        mockTransferListener.transferSkipped( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED,
+//                                                                   TransferEvent.REQUEST_GET, destFile ) );
+        
+        mockTransferListener.debug( null );
+        mockTransferListenerControl.setMatcher( MockControl.ALWAYS_MATCHER );
+        mockTransferListenerControl.setVoidCallable( MockControl.ZERO_OR_MORE );
+        
+        mockTransferListenerControl.replay();
     }
 
     public void testWagonPutDirectory()
@@ -521,7 +659,7 @@ public abstract class WagonTestCase
         try
         {
             wagon.get( "fubar.txt", destFile );
-            fail( "File was found when it sohuldn't have been" );
+            fail( "File was found when it shouldn't have been" );
         }
         catch ( ResourceDoesNotExistException e )
         {
@@ -535,6 +673,40 @@ public abstract class WagonTestCase
             wagon.disconnect();
 
             tearDownWagonTestingFixtures();
+        }
+    }
+
+    public void testFailedGetIfNewer()
+        throws Exception
+    {
+        if ( supportsGetIfNewer() )
+        {
+            setupRepositories();
+            setupWagonTestingFixtures();
+            message( "Getting test artifact from test repository " + testRepository );
+            Wagon wagon = getWagon();
+            wagon.addTransferListener( checksumObserver );
+            wagon.connect( testRepository, getAuthInfo() );
+            destFile = FileTestUtils.createUniqueFile( getName(), getName() );
+            destFile.deleteOnExit();
+            try
+            {
+                wagon.getIfNewer( "fubar.txt", destFile, 0 );
+                fail( "File was found when it shouldn't have been" );
+            }
+            catch ( ResourceDoesNotExistException e )
+            {
+                // expected
+                assertTrue( true );
+            }
+            finally
+            {
+                wagon.removeTransferListener( checksumObserver );
+
+                wagon.disconnect();
+
+                tearDownWagonTestingFixtures();
+            }
         }
     }
 
@@ -682,6 +854,21 @@ public abstract class WagonTestCase
 
         Wagon wagon = getWagon();
 
+        ProgressArgumentMatcher progressArgumentMatcher = replayMockForPut( resourceName, content, wagon );
+        
+        message( "Putting test artifact: " + resourceName + " into test repository " + testRepository );
+
+        connectWagon( wagon );
+
+        wagon.put( sourceFile, resourceName );
+
+        disconnectWagon( wagon );
+        
+        verifyMock( progressArgumentMatcher, content.length() );
+    }
+
+    protected ProgressArgumentMatcher replayMockForPut( String resourceName, String content, Wagon wagon )
+    {
         Resource resource = new Resource( resourceName );
         mockTransferListener.transferInitiated( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_INITIATED,
                                                                      TransferEvent.REQUEST_PUT, sourceFile ) );
@@ -704,31 +891,10 @@ public abstract class WagonTestCase
                                                                      TransferEvent.REQUEST_PUT, sourceFile ) );
         
         mockTransferListenerControl.replay();
-        
-        message( "Putting test artifact: " + resourceName + " into test repository " + testRepository );
-
-        wagon.addTransferListener( checksumObserver );
-
-        wagon.addTransferListener( mockTransferListener );
-
-        wagon.connect( testRepository, getAuthInfo() );
-
-        wagon.put( sourceFile, resourceName );
-
-        wagon.removeTransferListener( mockTransferListener );
-        
-        wagon.removeTransferListener( checksumObserver );
-
-        wagon.disconnect();
-        
-        mockTransferListenerControl.verify();
-        
-        assertEquals( content.length(), progressArgumentMatcher.getSize() );
-        
-        mockTransferListenerControl.reset();
+        return progressArgumentMatcher;
     }
 
-    private TransferEvent createTransferEvent( Wagon wagon, Resource resource, int eventType, int requestType,
+    protected TransferEvent createTransferEvent( Wagon wagon, Resource resource, int eventType, int requestType,
                                                File file )
     {
         TransferEvent transferEvent = new TransferEvent( wagon, resource, eventType, requestType );
@@ -752,6 +918,50 @@ public abstract class WagonTestCase
         
         Wagon wagon = getWagon();
 
+        ProgressArgumentMatcher progressArgumentMatcher = replaceMockForGet( wagon, expectedSize );
+        
+        message( "Getting test artifact from test repository " + testRepository );
+
+        connectWagon( wagon );
+
+        wagon.get( this.resource, destFile );
+
+        disconnectWagon( wagon );
+        
+        verifyMock( progressArgumentMatcher, expectedSize );
+    }
+
+    protected void verifyMock( ProgressArgumentMatcher progressArgumentMatcher, int length )
+    {
+        mockTransferListenerControl.verify();
+        
+        assertEquals( length, progressArgumentMatcher.getSize() );
+        
+        mockTransferListenerControl.reset();
+    }
+
+    protected void disconnectWagon( Wagon wagon )
+        throws ConnectionException
+    {
+        wagon.removeTransferListener( mockTransferListener );
+        
+        wagon.removeTransferListener( checksumObserver );
+
+        wagon.disconnect();
+    }
+
+    protected void connectWagon( Wagon wagon )
+        throws ConnectionException, AuthenticationException
+    {
+        wagon.addTransferListener( checksumObserver );
+        
+        wagon.addTransferListener( mockTransferListener );
+
+        wagon.connect( testRepository, getAuthInfo() );
+    }
+
+    protected ProgressArgumentMatcher replaceMockForGet( Wagon wagon, int expectedSize )
+    {
         Resource resource = new Resource( this.resource );
         mockTransferListener.transferInitiated( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_INITIATED,
                                                                      TransferEvent.REQUEST_GET, destFile ) );
@@ -773,28 +983,7 @@ public abstract class WagonTestCase
                                                                      TransferEvent.REQUEST_GET, destFile ) );
         
         mockTransferListenerControl.replay();
-        
-        message( "Getting test artifact from test repository " + testRepository );
-
-        wagon.addTransferListener( checksumObserver );
-        
-        wagon.addTransferListener( mockTransferListener );
-
-        wagon.connect( testRepository, getAuthInfo() );
-
-        wagon.get( this.resource, destFile );
-
-        wagon.removeTransferListener( mockTransferListener );
-        
-        wagon.removeTransferListener( checksumObserver );
-
-        wagon.disconnect();
-        
-        mockTransferListenerControl.verify();
-        
-        assertEquals( expectedSize, progressArgumentMatcher.getSize() );
-        
-        mockTransferListenerControl.reset();
+        return progressArgumentMatcher;
     }
 
     protected int getExpectedContentLengthOnGet( int expectedSize )
