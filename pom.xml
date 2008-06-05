@@ -249,4 +249,47 @@
       <name>Kohsuke Kawaguchi</name>
     </contributor>
   </contributors>
+  <reporting>
+    <plugins>
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.4</version>
+        <configuration>
+          <links>
+            <link>http://java.sun.com/j2ee/1.4/docs/api</link>
+            <link>http://commons.apache.org/collections/apidocs-COLLECTIONS_3_0/</link>
+            <link>http://commons.apache.org/dbcp/apidocs/</link>
+            <link>http://commons.apache.org/fileupload/apidocs/</link>
+            <link>http://commons.apache.org/httpclient/apidocs/</link>
+            <link>http://commons.apache.org/logging/apidocs/</link>
+            <link>http://commons.apache.org/pool/apidocs/</link>
+            <link>http://junit.sourceforge.net/javadoc/</link>
+            <link>http://logging.apache.org/log4j/1.2/apidocs/</link>
+            <link>http://jakarta.apache.org/regexp/apidocs/</link>
+            <link>http://velocity.apache.org/engine/releases/velocity-1.5/apidocs/</link>
+            <link>http://maven.apache.org/ref/current/maven-artifact/apidocs/</link>
+            <link>http://maven.apache.org/ref/current/maven-artifact-manager/apidocs/</link>
+            <link>http://maven.apache.org/ref/current/maven-model/apidocs/</link>
+            <link>http://maven.apache.org/ref/current/maven-plugin-api/apidocs/</link>
+            <link>http://maven.apache.org/ref/current/maven-project/apidocs/</link>
+            <link>http://maven.apache.org/ref/current/maven-reporting/maven-reporting-api/apidocs/</link>
+            <link>http://maven.apache.org/ref/current/maven-settings/apidocs/</link>
+          </links>
+          <!--
+          <doclet>gr.spinellis.umlgraph.doclet.UmlGraph</doclet>
+          <docletArtifact>
+            <groupId>gr.spinellis</groupId>
+            <artifactId>UmlGraph</artifactId>
+            <version>4.4</version>
+          </docletArtifact>
+          <additionalparam>
+            -inferrel -inferdep -quiet -hide java.* -collpackages java.util.* -qualify
+            -postfixpackage -nodefontsize 9
+            -nodefontpackagesize 7
+          </additionalparam>
+           -->
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
 </project>
