@@ -74,7 +74,10 @@ public class LazyFileOutputStream
     public void flush()
         throws IOException
     {
-        delegee.flush();
+        if ( delegee != null )
+        {
+            delegee.flush();
+        }
     }
 
 
