@@ -115,6 +115,18 @@ public class AbstractWagonTest
         assertNull( wagon.getProxyInfo( "http", "localhost" ) );
     }
 
+    public void testNullProxyConfiguration() throws ConnectionException, AuthenticationException
+    {
+        Repository repository = new Repository();
+        wagon.connect( repository, (ProxyInfo) null );
+        assertNull( wagon.getProxyInfo() );
+        assertNull( wagon.getProxyInfo( "http", "www.example.com" ) );
+        assertNull( wagon.getProxyInfo( "dav", "www.example.com" ) );
+        assertNull( wagon.getProxyInfo( "scp", "www.example.com" ) );
+        assertNull( wagon.getProxyInfo( "ftp", "www.example.com" ) );
+        assertNull( wagon.getProxyInfo( "http", "localhost" ) );
+    }
+
     public void testLegacyProxyConfiguration() throws ConnectionException, AuthenticationException
     {
         ProxyInfo proxyInfo = new ProxyInfo();

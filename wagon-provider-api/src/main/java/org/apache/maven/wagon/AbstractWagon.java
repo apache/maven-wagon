@@ -150,7 +150,7 @@ public abstract class AbstractWagon
         {
             public ProxyInfo getProxyInfo( String protocol )
             {
-                if ( protocol == null || protocol.equalsIgnoreCase( proxy.getType() ) )
+                if ( protocol == null || proxy == null || protocol.equalsIgnoreCase( proxy.getType() ) )
                 {
                     return proxy;
                 }
