@@ -85,7 +85,7 @@ public abstract class AbstractWagon
 
     public ProxyInfo getProxyInfo()
     {
-        return proxyInfoProvider.getProxyInfo( null );
+        return proxyInfoProvider != null ? proxyInfoProvider.getProxyInfo( null ) : null;
     }
 
     public AuthenticationInfo getAuthenticationInfo()
@@ -150,7 +150,7 @@ public abstract class AbstractWagon
         {
             public ProxyInfo getProxyInfo( String protocol )
             {
-                if ( proxy.getType().equalsIgnoreCase( protocol ) )
+                if ( protocol == null || protocol.equalsIgnoreCase( proxy.getType() ) )
                 {
                     return proxy;
                 }
@@ -199,6 +199,8 @@ public abstract class AbstractWagon
 
         // TODO: Do these needs to be fields, or are they only used in openConnection()?
         this.authenticationInfo = authenticationInfo;
+        
+        this.proxyInfoProvider = proxyInfoProvider;
         
         fireSessionOpening();
 

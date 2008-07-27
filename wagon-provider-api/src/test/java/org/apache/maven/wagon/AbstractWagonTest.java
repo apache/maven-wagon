@@ -29,13 +29,15 @@ import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.SessionListener;
 import org.apache.maven.wagon.events.TransferListener;
+import org.apache.maven.wagon.proxy.ProxyInfo;
+import org.apache.maven.wagon.proxy.ProxyInfoProvider;
 import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.plexus.util.IOUtil;
 import org.easymock.MockControl;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ * @version $Id: AbstractWagonTest.java 630808 2008-02-25 11:01:41Z brett $
  */
 public class AbstractWagonTest
     extends TestCase
@@ -99,6 +101,65 @@ public class AbstractWagonTest
         wagon.removeTransferListener( transferListener );
 
         assertFalse( wagon.hasTransferListener( transferListener ) );
+    }
+
+    public void testNoProxyConfiguration() throws ConnectionException, AuthenticationException
+    {
+        Repository repository = new Repository();
+        wagon.connect( repository );
+        assertNull( wagon.getProxyInfo() );
+        assertNull( wagon.getProxyInfo( "http", "www.example.com" ) );
+        assertNull( wagon.getProxyInfo( "dav", "www.example.com" ) );
+        assertNull( wagon.getProxyInfo( "scp", "www.example.com" ) );
+        assertNull( wagon.getProxyInfo( "ftp", "www.example.com" ) );
+        assertNull( wagon.getProxyInfo( "http", "localhost" ) );
+    }
+
+    public void testLegacyProxyConfiguration() throws ConnectionException, AuthenticationException
+    {
+        ProxyInfo proxyInfo = new ProxyInfo();
+        proxyInfo.setType( "http" );
+        
+        Repository repository = new Repository();
+        wagon.connect( repository, proxyInfo );
+        assertEquals( proxyInfo, wagon.getProxyInfo() );
+        assertEquals( proxyInfo, wagon.getProxyInfo( "http", "www.example.com" ) );
+        assertNull( wagon.getProxyInfo( "dav", "www.example.com" ) );
+        assertNull( wagon.getProxyInfo( "scp", "www.example.com" ) );
+        assertNull( wagon.getProxyInfo( "ftp", "www.example.com" ) );
+    }
+
+    public void testProxyConfiguration() throws ConnectionException, AuthenticationException
+    {
+        final ProxyInfo httpProxyInfo = new ProxyInfo();
+        httpProxyInfo.setType( "http" );
+        
+        final ProxyInfo socksProxyInfo = new ProxyInfo(); 
+        socksProxyInfo.setType( "http" );
+        
+        ProxyInfoProvider proxyInfoProvider = new ProxyInfoProvider()
+        {
+            public ProxyInfo getProxyInfo( String protocol )
+            {
+                if ( "http".equals( protocol ) || "dav".equals( protocol ))
+                {
+                    return httpProxyInfo;
+                }
+                else if ( "scp".equals( protocol ) )
+                {
+                    return socksProxyInfo;
+                }
+                return null;
+            }
+        };
+        
+        Repository repository = new Repository();
+        wagon.connect( repository, proxyInfoProvider );
+        assertNull( wagon.getProxyInfo() );
+        assertEquals( httpProxyInfo, wagon.getProxyInfo( "http", "www.example.com" ) );
+        assertEquals( httpProxyInfo, wagon.getProxyInfo( "dav", "www.example.com" ) );
+        assertEquals( socksProxyInfo, wagon.getProxyInfo( "scp", "www.example.com" ) );
+        assertNull( wagon.getProxyInfo( "ftp", "www.example.com" ) );
     }
 
     public void testSessionOpenEvents()
