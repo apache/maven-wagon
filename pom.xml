@@ -10,7 +10,7 @@
   <artifactId>wagon</artifactId>
   <packaging>pom</packaging>
   <name>Maven Wagon</name>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0-beta-4</version>
   <description>Tools to manage artifacts and deployment</description>
   <url>http://maven.apache.org/wagon</url>
 
@@ -66,9 +66,9 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/wagon/trunk</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/trunk</developerConnection>
-    <url>http://svn.apache.org/viewvc/maven/wagon/trunk</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/wagon/tags/wagon-1.0-beta-4</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/tags/wagon-1.0-beta-4</developerConnection>
+    <url>http://svn.apache.org/viewvc/maven/wagon/tags/wagon-1.0-beta-4</url>
   </scm>
   <build>
     <pluginManagement>
@@ -133,22 +133,22 @@
       <dependency>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-provider-api</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0-beta-4</version>
       </dependency>
       <dependency>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-provider-test</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0-beta-4</version>
       </dependency>
       <dependency>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-ssh-common-test</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0-beta-4</version>
       </dependency>
       <dependency>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-ssh-common</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0-beta-4</version>
       </dependency>
       <dependency>
         <groupId>junit</groupId>
