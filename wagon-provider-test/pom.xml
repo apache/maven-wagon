@@ -2,7 +2,7 @@
   <parent>
     <artifactId>wagon</artifactId>
     <groupId>org.apache.maven.wagon</groupId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0-beta-4</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>wagon-provider-test</artifactId>

@@ -189,13 +189,13 @@ public class FtpWagon
             if ( permissions != null && permissions.getGroup() != null )
             {
                 // ignore failures
-                ftp.sendSiteCommand( "CHGRP " + permissions.getGroup() );
+                ftp.sendSiteCommand( "CHGRP " + permissions.getGroup() + " " + resource.getName() );
             }
 
             if ( permissions != null && permissions.getFileMode() != null )
             {
                 // ignore failures
-                ftp.sendSiteCommand( "CHMOD " + permissions.getFileMode() );
+                ftp.sendSiteCommand( "CHMOD " + permissions.getFileMode() + " " + resource.getName() );
             }
         }
         catch ( IOException e )
@@ -274,13 +274,13 @@ public class FtpWagon
                         if ( permissions != null && permissions.getGroup() != null )
                         {
                             // ignore failures
-                            ftp.sendSiteCommand( "CHGRP " + permissions.getGroup() );
+                            ftp.sendSiteCommand( "CHGRP " + permissions.getGroup() + " " + dirs[i] );
                         }
 
                         if ( permissions != null && permissions.getDirectoryMode() != null )
                         {
                             // ignore failures
-                            ftp.sendSiteCommand( "CHMOD " + permissions.getDirectoryMode() );
+                            ftp.sendSiteCommand( "CHMOD " + permissions.getDirectoryMode() + " " + dirs[i] );
                         }
 
                         dirChanged = ftp.changeWorkingDirectory( dirs[i] );

@@ -83,7 +83,8 @@ public class ChecksumObserver
 
     public void transferError( TransferEvent transferEvent )
     {
-        digester = null;
+        digester.reset();
+        
         actualChecksum = null;
     }
 
