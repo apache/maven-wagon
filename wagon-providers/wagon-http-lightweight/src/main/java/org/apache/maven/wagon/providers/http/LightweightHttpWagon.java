@@ -133,7 +133,7 @@ public class LightweightHttpWagon
         }
         catch ( IOException e )
         {
-            throw new TransferFailedException( "Error transferring file", e );
+            throw new TransferFailedException( "Error transferring file: " + e.getMessage(), e );
         }
     }
 
