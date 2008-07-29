@@ -223,6 +223,11 @@ public class LightweightHttpWagon
                 System.setProperty( "http.nonProxyHosts", proxyInfo.getNonProxyHosts() );
             }
         }
+        else
+        {
+            System.getProperties().remove( "http.proxyHost" );
+            System.getProperties().remove( "http.proxyPort" );
+        }
 
         final boolean hasProxy = ( proxyInfo != null && proxyInfo.getUserName() != null );
         final boolean hasAuthentication = ( authenticationInfo != null && authenticationInfo.getUserName() != null );
@@ -271,13 +276,25 @@ public class LightweightHttpWagon
         {
             System.setProperty( "http.proxyHost", previousHttpProxyHost );
         }
+        else
+        {
+            System.getProperties().remove( "http.proxyHost" );
+        }
         if ( previousHttpProxyPort != null )
         {
             System.setProperty( "http.proxyPort", previousHttpProxyPort );
         }
+        else
+        {
+            System.getProperties().remove( "http.proxyPort" );
+        }
         if ( previousProxyExclusions != null )
         {
             System.setProperty( "http.nonProxyHosts", previousProxyExclusions );
+        }
+        else
+        {
+            System.getProperties().remove( "http.nonProxyHosts" );
         }
     }
 
