@@ -24,8 +24,11 @@ import java.util.StringTokenizer;
 /**
  * @author <a href="mailto:lafeuil@gmail.com">Thomas Champagne</a>
  */
-public class ProxyUtils
+public final class ProxyUtils
 {
+    private ProxyUtils()
+    {
+    }
 
     /**
      * Check if the specified host is in the list of non proxy hosts.

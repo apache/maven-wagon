@@ -288,7 +288,7 @@ public class TransferEvent
             if ( other.exception != null )
                 return false;
         }
-        else if ( !exception.equals( other.exception ) )
+        else if ( !exception.getClass().equals( other.exception.getClass() ) )
             return false;
         if ( requestType != other.requestType )
             return false;

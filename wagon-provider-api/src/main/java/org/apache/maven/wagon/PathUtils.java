@@ -28,8 +28,12 @@ import java.util.StringTokenizer;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  */
-public class PathUtils
+public final class PathUtils
 {
+    private PathUtils()
+    {
+    }
+    
     /**
      * Returns the directory path portion of a file specification string.
      * Matches the equally named unix command.

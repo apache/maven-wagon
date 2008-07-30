@@ -39,7 +39,6 @@ public class Debug
 
     long transfer;
 
-
     public Debug()
     {
         this( System.out );
@@ -197,6 +196,11 @@ public class Debug
     {
         out.println( " Session error: " + sessionEvent.getException() );
 
+    }
+
+    public PrintStream getOut()
+    {
+        return out;
     }
 
 }

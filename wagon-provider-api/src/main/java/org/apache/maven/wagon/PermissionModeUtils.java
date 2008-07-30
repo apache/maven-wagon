@@ -26,8 +26,12 @@ package org.apache.maven.wagon;
  * @see PermissionModeUtils
  * @since Sep 3, 2005
  */
-public class PermissionModeUtils
+public final class PermissionModeUtils
 {
+    private PermissionModeUtils()
+    {
+    }
+    
     /**
      * See the System Interfaces volume of IEEE Std 1003.1-2001, umask(1)
      *

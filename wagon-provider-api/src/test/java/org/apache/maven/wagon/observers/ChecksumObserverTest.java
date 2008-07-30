@@ -31,8 +31,10 @@ import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.WagonMock;
 import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.resource.Resource;
 
 public class ChecksumObserverTest
     extends TestCase
@@ -47,18 +49,19 @@ public class ChecksumObserverTest
         wagon = new WagonMock( true );
 
         Repository repository = new Repository();
-        wagon.connect( repository );        
+        wagon.connect( repository );
     }
-    
+
     public void tearDown()
-        throws ConnectionException
+        throws Exception
     {
         wagon.disconnect();
+
+        super.tearDown();
     }
 
     public void testSubsequentTransfersAfterTransferError()
-        throws NoSuchAlgorithmException, ResourceDoesNotExistException,
-        AuthorizationException, IOException
+        throws NoSuchAlgorithmException, ResourceDoesNotExistException, AuthorizationException, IOException
     {
         TransferListener listener = new ChecksumObserver();
 
@@ -66,7 +69,7 @@ public class ChecksumObserverTest
 
         File testFile = File.createTempFile( "wagon", "tmp" );
         testFile.deleteOnExit();
-        
+
         try
         {
             wagon.get( "resource", testFile );
@@ -86,7 +89,35 @@ public class ChecksumObserverTest
         {
             assertTrue( true );
         }
-        
+
         testFile.delete();
+    }
+
+    public void testChecksum()
+        throws NoSuchAlgorithmException
+    {
+        ChecksumObserver listener = new ChecksumObserver( "SHA-1" );
+
+        Resource resource = new Resource( "resource" );
+
+        TransferEvent transferEvent =
+            new TransferEvent( wagon, resource, TransferEvent.TRANSFER_INITIATED, TransferEvent.REQUEST_GET );
+
+        listener.transferInitiated( transferEvent );
+
+        transferEvent = new TransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_GET );
+
+        listener.transferStarted( transferEvent );
+
+        transferEvent = new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_GET );
+
+        listener.transferProgress( transferEvent, "checksum\n".getBytes(), 9 );
+
+        transferEvent =
+            new TransferEvent( wagon, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_GET );
+
+        listener.transferCompleted( transferEvent );
+
+        assertEquals( "2e5daf0201ddeb068a62d5e08da18657ab2c6be9", listener.getActualChecksum() );
     }
 }

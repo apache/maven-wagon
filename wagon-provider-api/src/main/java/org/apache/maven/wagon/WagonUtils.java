@@ -29,10 +29,13 @@ import org.codehaus.plexus.util.FileUtils;
 /**
  * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a>
  * @version $Id$
+ * @deprecated
  */
-public class WagonUtils
+public final class WagonUtils
 {
-
+    private WagonUtils()
+    {
+    }
 
     public static String toString( String resource, Wagon wagon )
         throws IOException, TransferFailedException, ResourceDoesNotExistException, AuthorizationException
