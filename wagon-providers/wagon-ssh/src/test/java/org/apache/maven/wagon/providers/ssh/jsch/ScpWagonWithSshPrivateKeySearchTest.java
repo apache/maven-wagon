@@ -20,8 +20,11 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  */
 
 import java.io.File;
+import java.io.IOException;
 
+import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.StreamingWagonTestCase;
+import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.providers.ssh.TestData;
 import org.apache.maven.wagon.repository.Repository;
@@ -58,5 +61,49 @@ public class ScpWagonWithSshPrivateKeySearchTest
     protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
     {
         return new File( repository.getBasedir(), resource.getName() ).lastModified();
+    }
+
+    public void testMissingPrivateKey()
+        throws Exception
+    {
+        File file = File.createTempFile( "wagon", "tmp" );
+        file.delete();
+
+        AuthenticationInfo authInfo = new AuthenticationInfo();
+        authInfo.setPrivateKey( file.getAbsolutePath() );
+
+        try
+        {
+            getWagon().connect( new Repository(), authInfo );
+            fail();
+        }
+        catch ( AuthenticationException e )
+        {
+            assertTrue( true );
+        }
+    }
+
+    public void testBadPrivateKey()
+        throws Exception
+    {
+        File file = File.createTempFile( "wagon", "tmp" );
+        file.deleteOnExit();
+
+        AuthenticationInfo authInfo = new AuthenticationInfo();
+        authInfo.setPrivateKey( file.getAbsolutePath() );
+
+        try
+        {
+            getWagon().connect( new Repository(), authInfo );
+            fail();
+        }
+        catch ( AuthenticationException e )
+        {
+            assertTrue( true );
+        }
+        finally
+        {
+            file.delete();
+        }
     }
 }
