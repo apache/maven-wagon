@@ -18,44 +18,37 @@ package org.apache.maven.wagon.providers.http;
  * specific language governing permissions and limitations
  * under the License.
  */
- 
-import org.codehaus.plexus.PlexusTestCase;
-import org.mortbay.http.HttpServer;
-import org.mortbay.http.SocketListener;
-import org.mortbay.http.HttpContext;
-import org.mortbay.http.handler.ResourceHandler;
+
 import org.apache.maven.wagon.Wagon;
+import org.codehaus.plexus.PlexusTestCase;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.handler.ResourceHandler;
+import org.mortbay.jetty.servlet.Context;
 
 /**
- * User: jdumay
- * Date: 24/01/2008
- * Time: 18:15:53
+ * User: jdumay Date: 24/01/2008 Time: 18:15:53
  */
-public abstract class HttpWagonHttpServerTestCase extends PlexusTestCase
+public abstract class HttpWagonHttpServerTestCase
+    extends PlexusTestCase
 {
     protected final int httpServerPort = 10008;
 
-    private HttpServer server;
-
-    protected HttpContext context;
+    private Server server;
 
     protected ResourceHandler resourceHandler;
+
+    protected Context context;
 
     protected void setUp()
         throws Exception
     {
         super.setUp();
-        server = new HttpServer();
-        SocketListener listener = new SocketListener();
-        listener.setPort( httpServerPort );
-        server.addListener( listener );
-        
-        context = new HttpContext();
-        context.setContextPath( "/" );
-        server.addContext( context );
-        
+        server = new Server( httpServerPort );
+
+        context = new Context( server, "/", Context.SESSIONS );
+
         resourceHandler = new ResourceHandler();
-        context.addHandler( resourceHandler );
+        server.addHandler( resourceHandler );
     }
 
     protected Wagon getWagon()

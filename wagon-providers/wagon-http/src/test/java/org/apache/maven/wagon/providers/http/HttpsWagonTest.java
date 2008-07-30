@@ -19,30 +19,30 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
-import java.util.Properties;
+import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.security.SslSocketConnector;
 
-import org.apache.maven.wagon.StreamingWagon;
-import org.apache.maven.wagon.http.HttpWagonTestCase;
-
-/**
- * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
- */
-public class HttpWagonTest
-    extends HttpWagonTestCase
+public class HttpsWagonTest
+    extends HttpWagonTest
 {
     protected String getProtocol()
     {
-        return "http";
+        return "https";
     }
 
-    protected String getTestRepositoryUrl()
+    protected void addConnectors( Server server )
     {
-        return getProtocol() + "://localhost:10007";
-    }
+        System.setProperty( "javax.net.ssl.trustStore",
+                            getTestFile( "src/test/resources/ssl/keystore" ).getAbsolutePath() );
 
-    protected void setHttpHeaders( StreamingWagon wagon, Properties properties )
-    {
-        ( (HttpWagon) wagon ).setHttpHeaders( properties );
+        SslSocketConnector connector = new SslSocketConnector();
+        connector.setPort( server.getConnectors()[0].getPort() );
+        connector.setKeystore( getTestPath( "src/test/resources/ssl/keystore" ) );
+        connector.setPassword( "wagonhttp" );
+        connector.setKeyPassword( "wagonhttp" );
+        connector.setTruststore( getTestPath( "src/test/resources/ssl/keystore" ) );
+        connector.setTrustPassword( "wagonhttp" );
+        server.setConnectors( new Connector[] { connector } );
     }
 }

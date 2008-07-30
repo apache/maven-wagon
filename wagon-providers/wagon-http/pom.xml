@@ -17,30 +17,6 @@
       <artifactId>wagon-http-shared</artifactId>
       <version>1.0-beta-5-SNAPSHOT</version>
     </dependency>
-    <dependency>
-      <groupId>plexus</groupId>
-      <artifactId>plexus-jetty-httpd</artifactId>
-      <version>1.0-beta-1</version>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <artifactId>plexus-container-default</artifactId>
-          <groupId>plexus</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <version>2.3</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty</artifactId>
-      <version>4.2.12</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
     <!-- I believe we can shade this in Maven itself
   <build>

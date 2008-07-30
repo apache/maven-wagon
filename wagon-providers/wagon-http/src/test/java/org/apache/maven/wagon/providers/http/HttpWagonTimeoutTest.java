@@ -18,33 +18,32 @@ package org.apache.maven.wagon.providers.http;
  * specific language governing permissions and limitations
  * under the License.
  */
- 
+
 import java.io.File;
 
 import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.repository.Repository;
-import org.mortbay.jetty.servlet.ServletHandler;
+import org.mortbay.jetty.servlet.ServletHolder;
 
 /**
- * User: jdumay
- * Date: 24/01/2008
- * Time: 17:17:34
+ * User: jdumay Date: 24/01/2008 Time: 17:17:34
  */
-public class HttpWagonTimeoutTest extends HttpWagonHttpServerTestCase
+public class HttpWagonTimeoutTest
+    extends HttpWagonHttpServerTestCase
 {
     protected void setUp()
         throws Exception
     {
         super.setUp();
-        ServletHandler servlets = new ServletHandler();
-        servlets.addServlet( "/", "org.apache.maven.wagon.providers.http.WaitForeverServlet" );
-        context.addHandler( servlets );
+        ServletHolder servlets = new ServletHolder( new WaitForeverServlet() );
+        context.addServlet( servlets, "/*" );
         startServer();
     }
 
-    public void testGetTimeout() throws Exception
+    public void testGetTimeout()
+        throws Exception
     {
         Exception thrown = null;
 
@@ -55,7 +54,7 @@ public class HttpWagonTimeoutTest extends HttpWagonHttpServerTestCase
 
             Repository testRepository = new Repository();
             testRepository.setUrl( "http://localhost:" + httpServerPort );
-            
+
             wagon.connect( testRepository );
 
             File destFile = FileTestUtils.createUniqueFile( getName(), getName() );
@@ -65,7 +64,7 @@ public class HttpWagonTimeoutTest extends HttpWagonHttpServerTestCase
 
             wagon.disconnect();
         }
-        catch (Exception e)
+        catch ( Exception e )
         {
             thrown = e;
         }
@@ -77,8 +76,9 @@ public class HttpWagonTimeoutTest extends HttpWagonHttpServerTestCase
         assertNotNull( thrown );
         assertEquals( TransferFailedException.class, thrown.getClass() );
     }
-    
-    public void testResourceExits() throws Exception
+
+    public void testResourceExits()
+        throws Exception
     {
         Exception thrown = null;
 
@@ -96,7 +96,7 @@ public class HttpWagonTimeoutTest extends HttpWagonHttpServerTestCase
 
             wagon.disconnect();
         }
-        catch (Exception e)
+        catch ( Exception e )
         {
             thrown = e;
         }
@@ -109,7 +109,8 @@ public class HttpWagonTimeoutTest extends HttpWagonHttpServerTestCase
         assertEquals( TransferFailedException.class, thrown.getClass() );
     }
 
-    public void testGetFileList() throws Exception
+    public void testGetFileList()
+        throws Exception
     {
         Exception thrown = null;
 
@@ -127,7 +128,7 @@ public class HttpWagonTimeoutTest extends HttpWagonHttpServerTestCase
 
             wagon.disconnect();
         }
-        catch (Exception e)
+        catch ( Exception e )
         {
             thrown = e;
         }
@@ -140,7 +141,8 @@ public class HttpWagonTimeoutTest extends HttpWagonHttpServerTestCase
         assertEquals( TransferFailedException.class, thrown.getClass() );
     }
 
-    public void testPutTimeout() throws Exception
+    public void testPutTimeout()
+        throws Exception
     {
         Exception thrown = null;
 
@@ -161,7 +163,7 @@ public class HttpWagonTimeoutTest extends HttpWagonHttpServerTestCase
 
             wagon.disconnect();
         }
-        catch (Exception e)
+        catch ( Exception e )
         {
             thrown = e;
         }

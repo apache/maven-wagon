@@ -19,25 +19,21 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
-import java.io.File;
+import java.util.Properties;
 
-import org.apache.maven.wagon.FileTestUtils;
-import org.apache.maven.wagon.StreamingWagonTestCase;
+import org.apache.maven.wagon.StreamingWagon;
 import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.http.HttpWagonTestCase;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
-import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.jetty.Httpd;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  */
 public class LightweightHttpWagonTest
-    extends StreamingWagonTestCase
+    extends HttpWagonTestCase
 {
-    private Httpd httpd;
-
     protected String getProtocol()
     {
         return "http";
@@ -45,48 +41,12 @@ public class LightweightHttpWagonTest
 
     protected String getTestRepositoryUrl()
     {
-        return "http://localhost:10007/";
+        return getProtocol() + "://localhost:10007/";
     }
 
-    protected void setupWagonTestingFixtures()
-        throws Exception
+    protected void setHttpHeaders( StreamingWagon wagon, Properties properties )
     {
-        // File round trip testing
-        
-        File file = FileTestUtils.createUniqueFile( "local-repository", "test-resource" );
-
-        file.delete();
-
-        file.getParentFile().mkdirs();
-
-        File f = new File( FileTestUtils.createDir( "http-repository" ), "test-resource" );
-
-        f.delete();
-
-        f.getParentFile().mkdirs();
-
-        httpd = (Httpd) lookup( Httpd.ROLE );
-    }
-    
-    protected void tearDownWagonTestingFixtures()
-        throws Exception
-    {
-        release( httpd );
-    }
-
-    public void testWagonGetFileList()
-        throws Exception
-    {
-        File f = new File( FileTestUtils.createDir( "http-repository" ), "file-list" );
-        f.mkdirs();
-        
-        super.testWagonGetFileList();
-    }
-
-    protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
-    {
-        File file = getTestFile( "target/test-output/http-repository", resource.getName() );
-        return file.lastModified();
+        ( (LightweightHttpWagon) wagon ).setHttpHeaders( properties );
     }
 
     public void testProxyReset()
@@ -103,7 +63,7 @@ public class LightweightHttpWagonTest
         String proxyHost = System.getProperty( "http.proxyHost" );
         String proxyPort = System.getProperty( "http.proxyPort" );
         String nonProxyHosts = System.getProperty( "http.nonProxyHosts" );
-  
+
         System.getProperties().remove( "http.proxyHost" );
         System.getProperties().remove( "http.proxyPort" );
 
@@ -114,12 +74,12 @@ public class LightweightHttpWagonTest
         assertEquals( "proxyhost", System.getProperty( "http.proxyHost" ) );
         assertEquals( "1234", System.getProperty( "http.proxyPort" ) );
         assertEquals( "non", System.getProperty( "http.nonProxyHosts" ) );
-        
+
         wagon.disconnect();
 
         assertNull( System.getProperty( "http.proxyHost" ) );
         assertNull( System.getProperty( "http.proxyPort" ) );
-        
+
         System.setProperty( "http.proxyHost", "host" );
         System.setProperty( "http.proxyPort", "port" );
         System.setProperty( "http.nonProxyHosts", "hosts" );
@@ -131,26 +91,26 @@ public class LightweightHttpWagonTest
         assertEquals( "proxyhost", System.getProperty( "http.proxyHost" ) );
         assertEquals( "1234", System.getProperty( "http.proxyPort" ) );
         assertEquals( "non", System.getProperty( "http.nonProxyHosts" ) );
-        
+
         wagon.disconnect();
 
         assertEquals( "host", System.getProperty( "http.proxyHost" ) );
         assertEquals( "port", System.getProperty( "http.proxyPort" ) );
         assertEquals( "hosts", System.getProperty( "http.nonProxyHosts" ) );
-        
+
         wagon = getWagon();
 
         wagon.connect( repository );
 
         assertNull( System.getProperty( "http.proxyHost" ) );
         assertNull( System.getProperty( "http.proxyPort" ) );
-        
+
         wagon.disconnect();
 
         assertEquals( "host", System.getProperty( "http.proxyHost" ) );
         assertEquals( "port", System.getProperty( "http.proxyPort" ) );
         assertEquals( "hosts", System.getProperty( "http.nonProxyHosts" ) );
-        
+
         if ( proxyHost != null )
         {
             System.setProperty( "http.proxyHost", proxyHost );

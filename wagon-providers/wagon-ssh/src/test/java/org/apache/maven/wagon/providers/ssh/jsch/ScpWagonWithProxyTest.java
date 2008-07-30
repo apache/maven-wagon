@@ -19,9 +19,7 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  * under the License.
  */
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;

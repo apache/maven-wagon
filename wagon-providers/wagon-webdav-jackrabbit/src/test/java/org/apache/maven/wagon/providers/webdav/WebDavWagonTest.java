@@ -19,66 +19,62 @@ package org.apache.maven.wagon.providers.webdav;
  * under the License.
  */
 
+import it.could.webdav.DAVServlet;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.Properties;
 
-import org.apache.maven.wagon.FileTestUtils;
-import org.apache.maven.wagon.StreamingWagonTestCase;
+import org.apache.maven.wagon.StreamingWagon;
+import org.apache.maven.wagon.http.HttpWagonTestCase;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
+import org.codehaus.plexus.util.FileUtils;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.ServletHolder;
 
 /**
  * WebDAV Wagon Test
- *
+ * 
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
  * @author <a href="mailto:carlos@apache.org">Carlos Sanchez</a>
  */
 public class WebDavWagonTest
-    extends StreamingWagonTestCase
+    extends HttpWagonTestCase
 {
-    private ServletServer server;
-
     protected String getTestRepositoryUrl()
         throws IOException
     {
-        return "dav:http://localhost:10007/dav/newfolder/folder2";
+        return getProtocol() + "://localhost:10007/newfolder/folder2";
     }
 
     protected String getProtocol()
     {
         return "dav";
     }
-    
-    protected void setupWagonTestingFixtures()
-        throws Exception
+
+    protected void createContext( Server server, File repositoryDirectory )
+        throws IOException
     {
-        if ( System.getProperty( "basedir" ) == null )
-        {
-            System.setProperty( "basedir", System.getProperty( "user.dir" ) );
-        }
-
-        File file = FileTestUtils.createUniqueFile( "dav-repository", "test-resource" );
-
-        file.delete();
-
-        File davDir = file.getParentFile();
-        davDir.mkdirs();
-
-        server = (ServletServer) lookup( ServletServer.ROLE );
-    }
-
-    protected void tearDownWagonTestingFixtures()
-        throws Exception
-    {
-        release( server );
+        Context dav = new Context( server, "/", Context.SESSIONS );
+        ServletHolder davServletHolder = new ServletHolder( new DAVServlet() );
+        davServletHolder.setInitParameter( "rootPath", repositoryDirectory.getAbsolutePath() );
+        davServletHolder.setInitParameter( "xmlOnly", "false" );
+        dav.addServlet( davServletHolder, "/*" );
     }
 
     protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
     {
-        File file = getTestFile( "target/test-output/dav-repository/newfolder/folder2", resource.getName() );
+        File file = new File( getDavRepository(), resource.getName() );
         return file.lastModified();
     }
-    
+
+    private File getDavRepository()
+    {
+        return getTestFile( "target/test-output/http-repository/newfolder/folder2" );
+    }
+
     private void assertURL( String userUrl, String expectedUrl )
     {
         Repository repo = new Repository( "test-geturl", userUrl );
@@ -93,7 +89,7 @@ public class WebDavWagonTest
     {
         assertURL( "dav:http://localhost:10007/dav/", "http://localhost:10007/dav/" );
     }
-    
+
     /**
      * Tests the maven 2.0.x way to define a webdav URL with SSL.
      */
@@ -132,5 +128,10 @@ public class WebDavWagonTest
     public void testGetURLDavPlusHttps()
     {
         assertURL( "dav+https://localhost:10007/dav/", "https://localhost:10007/dav/" );
+    }
+
+    protected void setHttpHeaders( StreamingWagon wagon, Properties properties )
+    {
+        ( (WebDavWagon) wagon ).setHttpHeaders( properties );
     }
 }

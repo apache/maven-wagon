@@ -52,10 +52,7 @@ import org.apache.maven.wagon.shared.http.HtmlFileListParser;
  * 
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
- * 
- * @plexus.component role="org.apache.maven.wagon.Wagon" 
- *   role-hint="http"
- *   instantiation-strategy="per-lookup"
+ * @plexus.component role="org.apache.maven.wagon.Wagon" role-hint="http" instantiation-strategy="per-lookup"
  */
 public class LightweightHttpWagon
     extends StreamWagon
@@ -65,12 +62,12 @@ public class LightweightHttpWagon
     private String previousHttpProxyHost;
 
     private String previousHttpProxyPort;
-    
+
     private HttpURLConnection putConnection;
 
     /**
      * Whether to use any proxy cache or not.
-     *
+     * 
      * @plexus.configuration default="false"
      */
     private boolean useCache;
@@ -88,34 +85,44 @@ public class LightweightHttpWagon
     {
         final String repoUrl = getRepository().getUrl();
 
+        path = path.replace( ' ', '+' );
+
         if ( repoUrl.charAt( repoUrl.length() - 1 ) != '/' )
         {
             return repoUrl + '/' + path;
         }
 
         return repoUrl + path;
-    }    
+    }
 
     public void fillInputData( InputData inputData )
-        throws TransferFailedException, ResourceDoesNotExistException
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         Resource resource = inputData.getResource();
         try
         {
             URL url = new URL( buildUrl( resource.getName() ) );
-            URLConnection urlConnection = url.openConnection();
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestProperty( "Accept-Encoding", "gzip" );
             if ( !useCache )
             {
                 urlConnection.setRequestProperty( "Pragma", "no-cache" );
             }
-            
+
             addHeaders( urlConnection );
-            
+
+            // TODO: handle all response codes
+            int responseCode = urlConnection.getResponseCode();
+            if ( responseCode == HttpURLConnection.HTTP_FORBIDDEN
+                || responseCode == HttpURLConnection.HTTP_UNAUTHORIZED )
+            {
+                throw new AuthorizationException( "Access denied to: " + buildUrl( resource.getName() ) );
+            }
+
             InputStream is = urlConnection.getInputStream();
             String contentEncoding = urlConnection.getHeaderField( "Content-Encoding" );
-            boolean isGZipped = contentEncoding == null ? false : "gzip".equalsIgnoreCase(contentEncoding);
-            if (isGZipped)
+            boolean isGZipped = contentEncoding == null ? false : "gzip".equalsIgnoreCase( contentEncoding );
+            if ( isGZipped )
             {
                 is = new GZIPInputStream( is );
             }
@@ -145,7 +152,7 @@ public class LightweightHttpWagon
             {
                 String header = (String) i.next();
                 urlConnection.setRequestProperty( header, httpHeaders.getProperty( header ) );
-            }                
+            }
         }
     }
 
@@ -159,7 +166,7 @@ public class LightweightHttpWagon
             putConnection = (HttpURLConnection) url.openConnection();
 
             addHeaders( putConnection );
-            
+
             putConnection.setRequestMethod( "PUT" );
             putConnection.setDoOutput( true );
             outputData.setOutputStream( putConnection.getOutputStream() );
@@ -183,25 +190,26 @@ public class LightweightHttpWagon
                 case HttpURLConnection.HTTP_OK: // 200
                 case HttpURLConnection.HTTP_CREATED: // 201
                 case HttpURLConnection.HTTP_ACCEPTED: // 202
-                case HttpURLConnection.HTTP_NO_CONTENT:  // 204
+                case HttpURLConnection.HTTP_NO_CONTENT: // 204
                     break;
 
                 case HttpURLConnection.HTTP_FORBIDDEN:
                     throw new AuthorizationException( "Access denied to: " + buildUrl( resource.getName() ) );
 
                 case HttpURLConnection.HTTP_NOT_FOUND:
-                    throw new ResourceDoesNotExistException( "File: " + buildUrl( resource.getName() ) + " does not exist" );
+                    throw new ResourceDoesNotExistException( "File: " + buildUrl( resource.getName() )
+                        + " does not exist" );
 
-                //add more entries here
-                default :
-                    throw new TransferFailedException(
-                        "Failed to transfer file: " + buildUrl( resource.getName() ) + ". Return code is: " + statusCode );
+                    // add more entries here
+                default:
+                    throw new TransferFailedException( "Failed to transfer file: " + buildUrl( resource.getName() )
+                        + ". Return code is: " + statusCode );
             }
         }
         catch ( IOException e )
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
-            
+
             throw new TransferFailedException( "Error transferring file", e );
         }
     }
@@ -222,6 +230,10 @@ public class LightweightHttpWagon
             {
                 System.setProperty( "http.nonProxyHosts", proxyInfo.getNonProxyHosts() );
             }
+            else
+            {
+                System.getProperties().remove( "http.nonProxyHosts" );
+            }
         }
         else
         {
@@ -238,8 +250,8 @@ public class LightweightHttpWagon
                 protected PasswordAuthentication getPasswordAuthentication()
                 {
                     // TODO: ideally use getRequestorType() from JDK1.5 here...
-                    if ( hasProxy && getRequestingHost().equals( proxyInfo.getHost() ) &&
-                        getRequestingPort() == proxyInfo.getPort() )
+                    if ( hasProxy && getRequestingHost().equals( proxyInfo.getHost() )
+                        && getRequestingPort() == proxyInfo.getPort() )
                     {
                         String password = "";
                         if ( proxyInfo.getPassword() != null )
@@ -262,6 +274,10 @@ public class LightweightHttpWagon
                     return super.getPasswordAuthentication();
                 }
             } );
+        }
+        else
+        {
+            Authenticator.setDefault( null );
         }
     }
 
@@ -330,17 +346,17 @@ public class LightweightHttpWagon
         throws TransferFailedException, AuthorizationException
     {
         HttpURLConnection headConnection;
-        
+
         try
         {
-            URL url = new URL( buildUrl( new Resource(resourceName).getName() ) );
+            URL url = new URL( buildUrl( new Resource( resourceName ).getName() ) );
             headConnection = (HttpURLConnection) url.openConnection();
-    
+
             addHeaders( headConnection );
 
             headConnection.setRequestMethod( "HEAD" );
             headConnection.setDoOutput( true );
-            
+
             int statusCode = headConnection.getResponseCode();
 
             switch ( statusCode )
@@ -349,17 +365,23 @@ public class LightweightHttpWagon
                     return true;
 
                 case HttpURLConnection.HTTP_FORBIDDEN:
-                    throw new AuthorizationException( "Access denided to: " + url );
+                    throw new AuthorizationException( "Access denied to: " + url );
 
                 case HttpURLConnection.HTTP_NOT_FOUND:
                     return false;
+
+                case HttpURLConnection.HTTP_UNAUTHORIZED:
+                    throw new AuthorizationException( "Access denied to: " + url );
+
+                default:
+                    throw new TransferFailedException( "Failed to look for file: " + buildUrl( resourceName )
+                        + ". Return code is: " + statusCode );
             }
-        } catch ( IOException e )
+        }
+        catch ( IOException e )
         {
             throw new TransferFailedException( "Error transferring file", e );
         }
-        
-        return false;
     }
 
     public boolean isUseCache()
@@ -382,4 +404,3 @@ public class LightweightHttpWagon
         this.httpHeaders = httpHeaders;
     }
 }
-

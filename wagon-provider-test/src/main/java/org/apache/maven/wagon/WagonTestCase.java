@@ -62,12 +62,12 @@ public abstract class WagonTestCase
             }
             if ( actual instanceof Integer )
             {
-                size += ((Integer) actual).intValue();
+                size += ( (Integer) actual ).intValue();
                 return true;
             }
             return super.argumentMatches( expected, actual );
         }
-        
+
         public int getSize()
         {
             return size;
@@ -93,9 +93,9 @@ public abstract class WagonTestCase
     protected File artifactDestFile;
 
     protected ChecksumObserver checksumObserver;
-    
+
     protected TransferListener mockTransferListener;
-    
+
     protected MockControl mockTransferListenerControl;
 
     // ----------------------------------------------------------------------
@@ -106,39 +106,38 @@ public abstract class WagonTestCase
         throws Exception
     {
         checksumObserver = new ChecksumObserver();
-        
-        mockTransferListenerControl = MockControl.createControl( TransferListener.class ); 
+
+        mockTransferListenerControl = MockControl.createControl( TransferListener.class );
         mockTransferListener = (TransferListener) mockTransferListenerControl.getMock();
 
         super.setUp();
     }
+
     // ----------------------------------------------------------------------
     // Methods that should be provided by subclasses for proper testing
     // ----------------------------------------------------------------------
 
     /**
-     * URL of the repository. For a complete test it should point to a non existing folder so
-     * we also check for the creation of new folders in the remote site.
-     * <p/>
-     * return the URL of the repository as specified by Wagon syntax
+     * URL of the repository. For a complete test it should point to a non existing folder so we also check for the
+     * creation of new folders in the remote site. <p/> return the URL of the repository as specified by Wagon syntax
      */
     protected abstract String getTestRepositoryUrl()
         throws IOException;
 
     /**
      * Protocol id of the Wagon to use, eg. <code>scp</code>, <code>ftp</code>
-     *
+     * 
      * @return the protocol id
      */
     protected abstract String getProtocol();
 
     // ----------------------------------------------------------------------
     // 1. Create a local file repository which mimic a users local file
-    //    Repository.
+    // Repository.
     //
     // 2. Create a test repository for the type of wagon we are testing. So,
-    //    for example, for testing the file wagon we might have a test
-    //    repository url of file://${basedir}/target/file-repository.
+    // for example, for testing the file wagon we might have a test
+    // repository url of file://${basedir}/target/file-repository.
     // ----------------------------------------------------------------------
 
     protected void setupRepositories()
@@ -286,37 +285,37 @@ public abstract class WagonTestCase
         TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         Wagon wagon = getWagon();
-        
+
         ProgressArgumentMatcher progressArgumentMatcher = setupGetIfNewerTest( wagon, expectedResult, expectedSize );
-        
+
         connectWagon( wagon );
-        
+
         boolean result = wagon.getIfNewer( this.resource, destFile, timestamp );
         assertEquals( expectedResult, result );
-        
+
         disconnectWagon( wagon );
-        
+
         assertGetIfNewerTest( progressArgumentMatcher, expectedResult, expectedSize );
-        
+
         tearDownWagonTestingFixtures();
     }
 
     protected void assertGetIfNewerTest( ProgressArgumentMatcher progressArgumentMatcher, boolean expectedResult,
-                                       int expectedSize )
+                                         int expectedSize )
         throws IOException
     {
         if ( expectedResult == true )
         {
             verifyMock( progressArgumentMatcher, expectedSize );
-            
+
             assertNotNull( "check checksum is not null", checksumObserver.getActualChecksum() );
-            
+
             assertEquals( "compare checksums", "6b144b7285ffd6b0bc8300da162120b9", checksumObserver.getActualChecksum() );
-            
+
             // Now compare the contents of the artifact that was placed in
             // the repository with the contents of the artifact that was
             // retrieved from the repository.
-            
+
             String sourceContent = FileUtils.fileRead( sourceFile );
             String destContent = FileUtils.fileRead( destFile );
             assertEquals( sourceContent, destContent );
@@ -324,11 +323,11 @@ public abstract class WagonTestCase
         else
         {
             mockTransferListenerControl.verify();
-            
+
             mockTransferListenerControl.reset();
-            
+
             assertNull( "check checksum is null", checksumObserver.getActualChecksum() );
-            
+
             assertFalse( destFile.exists() );
         }
     }
@@ -337,12 +336,12 @@ public abstract class WagonTestCase
         throws NoSuchAlgorithmException, IOException
     {
         checksumObserver = new ChecksumObserver();
-        
+
         destFile = FileTestUtils.createUniqueFile( getName(), getName() );
         destFile.delete();
         assertFalse( destFile.exists() );
         destFile.deleteOnExit();
-        
+
         ProgressArgumentMatcher progressArgumentMatcher = null;
         if ( expectedResult == true )
         {
@@ -364,13 +363,13 @@ public abstract class WagonTestCase
         resource.setContentLength( getExpectedContentLengthOnGet( expectedSize ) );
         resource.setLastModified( getExpectedLastModifiedOnGet( testRepository, resource ) );
         // TODO: transfer skipped event?
-//        mockTransferListener.transferSkipped( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED,
-//                                                                   TransferEvent.REQUEST_GET, destFile ) );
-        
+        // mockTransferListener.transferSkipped( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED,
+        // TransferEvent.REQUEST_GET, destFile ) );
+
         mockTransferListener.debug( null );
         mockTransferListenerControl.setMatcher( MockControl.ALWAYS_MATCHER );
         mockTransferListenerControl.setVoidCallable( MockControl.ZERO_OR_MORE );
-        
+
         mockTransferListenerControl.replay();
     }
 
@@ -416,9 +415,9 @@ public abstract class WagonTestCase
     }
 
     /**
-     * Test for putting a directory with a destination that multiple directories deep,
-     * all of which haven't been created.
-     *
+     * Test for putting a directory with a destination that multiple directories deep, all of which haven't been
+     * created.
+     * 
      * @throws Exception
      * @since 1.0-beta-2
      */
@@ -465,7 +464,7 @@ public abstract class WagonTestCase
 
     /**
      * Test that when putting a directory that already exists new files get also copied
-     *
+     * 
      * @throws Exception
      * @since 1.0-beta-1
      */
@@ -477,7 +476,7 @@ public abstract class WagonTestCase
 
         final String resourceToCreate = "test-resource-1.txt";
 
-        final String[] resources = {"a/test-resource-2.txt", "a/b/test-resource-3.txt", "c/test-resource-4.txt"};
+        final String[] resources = { "a/test-resource-2.txt", "a/b/test-resource-3.txt", "c/test-resource-4.txt" };
 
         setupRepositories();
 
@@ -520,7 +519,7 @@ public abstract class WagonTestCase
 
     /**
      * Test that when putting a directory that already exists new files get also copied and destination is "."
-     *
+     * 
      * @throws Exception
      * @since 1.0-beta-1
      */
@@ -529,7 +528,7 @@ public abstract class WagonTestCase
     {
         final String resourceToCreate = "test-resource-1.txt";
 
-        final String[] resources = {"a/test-resource-2.txt", "a/b/test-resource-3.txt", "c/test-resource-4.txt"};
+        final String[] resources = { "a/test-resource-2.txt", "a/b/test-resource-3.txt", "c/test-resource-4.txt" };
 
         setupRepositories();
 
@@ -540,7 +539,7 @@ public abstract class WagonTestCase
         if ( wagon.supportsDirectoryCopy() )
         {
             sourceFile = new File( FileTestUtils.getTestOutputDir(), "dot-repo" );
-            
+
             FileUtils.deleteDirectory( sourceFile );
 
             createDirectory( wagon, resourceToCreate, "." );
@@ -572,10 +571,10 @@ public abstract class WagonTestCase
 
     /**
      * Create a directory with a resource and check that the other ones don't exist
-     *
+     * 
      * @param wagon
      * @param resourceToCreate name of the resource to be created
-     * @param dirName          directory name to create
+     * @param dirName directory name to create
      * @throws Exception
      */
     protected void createDirectory( Wagon wagon, String resourceToCreate, String dirName )
@@ -602,10 +601,10 @@ public abstract class WagonTestCase
 
     /**
      * Assert that a resource does not exist in the remote wagon system
-     *
-     * @param wagon        wagon to get the resource from
+     * 
+     * @param wagon wagon to get the resource from
      * @param resourceName name of the resource
-     * @throws IOException             if a temp file can't be created
+     * @throws IOException if a temp file can't be created
      * @throws AuthorizationException
      * @throws TransferFailedException
      * @since 1.0-beta-1
@@ -712,7 +711,7 @@ public abstract class WagonTestCase
 
     /**
      * Test {@link Wagon#getFileList(String)}.
-     *
+     * 
      * @throws Exception
      * @since 1.0-beta-2
      */
@@ -726,7 +725,7 @@ public abstract class WagonTestCase
         String dirName = "file-list";
 
         String filenames[] =
-            new String[]{"test-resource.txt", "test-resource b.txt", "test-resource.pom", "more-resources.dat"};
+            new String[] { "test-resource.txt", "test-resource.pom", "test-resource b.txt", "more-resources.dat" };
 
         for ( int i = 0; i < filenames.length; i++ )
         {
@@ -739,8 +738,8 @@ public abstract class WagonTestCase
 
         List list = wagon.getFileList( dirName );
         assertNotNull( "file list should not be null.", list );
-        assertTrue( "file list should contain 4 or more items (actually contains " + list.size() + " elements).", list
-            .size() >= 4 );
+        assertTrue( "file list should contain 4 or more items (actually contains " + list.size() + " elements).",
+                    list.size() >= 4 );
 
         for ( int i = 0; i < filenames.length; i++ )
         {
@@ -754,7 +753,7 @@ public abstract class WagonTestCase
 
     /**
      * Test {@link Wagon#getFileList(String)} when the directory does not exist.
-     *
+     * 
      * @throws Exception
      * @since 1.0-beta-2
      */
@@ -790,7 +789,7 @@ public abstract class WagonTestCase
 
     /**
      * Test for an existing resource.
-     *
+     * 
      * @throws Exception
      * @since 1.0-beta-2
      */
@@ -816,7 +815,7 @@ public abstract class WagonTestCase
 
     /**
      * Test for an invalid resource.
-     *
+     * 
      * @throws Exception
      * @since 1.0-beta-2
      */
@@ -855,7 +854,7 @@ public abstract class WagonTestCase
         Wagon wagon = getWagon();
 
         ProgressArgumentMatcher progressArgumentMatcher = replayMockForPut( resourceName, content, wagon );
-        
+
         message( "Putting test artifact: " + resourceName + " into test repository " + testRepository );
 
         connectWagon( wagon );
@@ -863,7 +862,7 @@ public abstract class WagonTestCase
         wagon.put( sourceFile, resourceName );
 
         disconnectWagon( wagon );
-        
+
         verifyMock( progressArgumentMatcher, content.length() );
     }
 
@@ -886,16 +885,16 @@ public abstract class WagonTestCase
         mockTransferListener.debug( null );
         mockTransferListenerControl.setMatcher( MockControl.ALWAYS_MATCHER );
         mockTransferListenerControl.setVoidCallable( MockControl.ZERO_OR_MORE );
-        
+
         mockTransferListener.transferCompleted( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_COMPLETED,
                                                                      TransferEvent.REQUEST_PUT, sourceFile ) );
-        
+
         mockTransferListenerControl.replay();
         return progressArgumentMatcher;
     }
 
     protected TransferEvent createTransferEvent( Wagon wagon, Resource resource, int eventType, int requestType,
-                                               File file )
+                                                 File file )
     {
         TransferEvent transferEvent = new TransferEvent( wagon, resource, eventType, requestType );
         transferEvent.setLocalFile( file );
@@ -910,16 +909,16 @@ public abstract class WagonTestCase
         return content.length();
     }
 
-    protected void getFile(int expectedSize)
+    protected void getFile( int expectedSize )
         throws Exception
     {
         destFile = FileTestUtils.createUniqueFile( getName(), getName() );
         destFile.deleteOnExit();
-        
+
         Wagon wagon = getWagon();
 
         ProgressArgumentMatcher progressArgumentMatcher = replaceMockForGet( wagon, expectedSize );
-        
+
         message( "Getting test artifact from test repository " + testRepository );
 
         connectWagon( wagon );
@@ -927,16 +926,16 @@ public abstract class WagonTestCase
         wagon.get( this.resource, destFile );
 
         disconnectWagon( wagon );
-        
+
         verifyMock( progressArgumentMatcher, expectedSize );
     }
 
     protected void verifyMock( ProgressArgumentMatcher progressArgumentMatcher, int length )
     {
         mockTransferListenerControl.verify();
-        
+
         assertEquals( length, progressArgumentMatcher.getSize() );
-        
+
         mockTransferListenerControl.reset();
     }
 
@@ -944,7 +943,7 @@ public abstract class WagonTestCase
         throws ConnectionException
     {
         wagon.removeTransferListener( mockTransferListener );
-        
+
         wagon.removeTransferListener( checksumObserver );
 
         wagon.disconnect();
@@ -954,7 +953,7 @@ public abstract class WagonTestCase
         throws ConnectionException, AuthenticationException
     {
         wagon.addTransferListener( checksumObserver );
-        
+
         wagon.addTransferListener( mockTransferListener );
 
         wagon.connect( testRepository, getAuthInfo() );
@@ -974,14 +973,14 @@ public abstract class WagonTestCase
                                                                   TransferEvent.REQUEST_GET ), new byte[] {}, 0 );
         ProgressArgumentMatcher progressArgumentMatcher = new ProgressArgumentMatcher();
         mockTransferListenerControl.setMatcher( progressArgumentMatcher );
-        
+
         mockTransferListener.debug( null );
         mockTransferListenerControl.setMatcher( MockControl.ALWAYS_MATCHER );
         mockTransferListenerControl.setVoidCallable( MockControl.ZERO_OR_MORE );
-        
+
         mockTransferListener.transferCompleted( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_COMPLETED,
                                                                      TransferEvent.REQUEST_GET, destFile ) );
-        
+
         mockTransferListenerControl.replay();
         return progressArgumentMatcher;
     }
