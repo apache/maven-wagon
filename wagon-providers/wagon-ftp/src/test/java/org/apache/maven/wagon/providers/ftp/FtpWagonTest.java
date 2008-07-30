@@ -102,6 +102,7 @@ public class FtpWagonTest
         try
         {
             getWagon().connect( new Repository( "id", getTestRepositoryUrl() ), authenticationInfo );
+            fail();
         }
         catch ( AuthenticationException e )
         {
@@ -112,8 +113,6 @@ public class FtpWagonTest
     public void testDefaultUserName()
         throws Exception
     {
-        setupWagonTestingFixtures();
-
         AuthenticationInfo authenticationInfo = new AuthenticationInfo();
         authenticationInfo.setPassword( "secret" );
         try
@@ -125,7 +124,5 @@ public class FtpWagonTest
         {
             assertEquals( System.getProperty( "user.name" ), authenticationInfo.getUserName() );
         }
-
-        tearDownWagonTestingFixtures();
     }
 }
