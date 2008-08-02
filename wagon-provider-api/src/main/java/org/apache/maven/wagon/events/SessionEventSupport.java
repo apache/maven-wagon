@@ -90,8 +90,8 @@ public final class SessionEventSupport
 
     /**
      * Dispatches the given <code>SessionEvent</code>
-     * to all registred listeners (calls method {@link SessionListener#sessionDisconnected(SessionEvent)} on all of them}.
-     * The Event should be of type {@link SessionEvent#SESSION_DISCONNECTED}
+     * to all registred listeners (calls method {@link SessionListener#sessionDisconnected(SessionEvent)} on all of
+     * them}. The Event should be of type {@link SessionEvent#SESSION_DISCONNECTED}
      *
      * @param sessionEvent the SessionEvent which will be dispached to listeners
      */
@@ -106,8 +106,8 @@ public final class SessionEventSupport
 
     /**
      * Dispatches the given <code>SessionEvent</code>
-     * to all registred listeners (calls method {@link SessionListener#sessionDisconnecting(SessionEvent)} } on all of them}.
-     * The Event should be of type {@link SessionEvent#SESSION_DISCONNECTING}
+     * to all registred listeners (calls method {@link SessionListener#sessionDisconnecting(SessionEvent)} } on all of
+     * them}. The Event should be of type {@link SessionEvent#SESSION_DISCONNECTING}
      *
      * @param sessionEvent the SessionEvent which will be dispached to listeners
      */
@@ -186,8 +186,8 @@ public final class SessionEventSupport
 
     /**
      * Dispatches the given <code>SessionEvent</code>
-     * to all registred listeners (calls method {@link SessionListener#sessionConnectionRefused(SessionEvent)} on all of them}.
-     * The Event should be of type {@link SessionEvent#SESSION_CONNECTION_REFUSED}
+     * to all registred listeners (calls method {@link SessionListener#sessionConnectionRefused(SessionEvent)} on all
+     * of them}. The Event should be of type {@link SessionEvent#SESSION_CONNECTION_REFUSED}
      *
      * @param sessionEvent the SessionEvent which will be dispached to listeners
      */
@@ -217,8 +217,8 @@ public final class SessionEventSupport
 
     /**
      * Dispatches the given <code>SessionEvent</code>
-     * to all registred listeners (calls method {@link SessionListener#sessionConnectionRefused(SessionEvent)} on all of them.
-     * The Event should be of type {@link SessionEvent#SESSION_ERROR_OCCURRED} and it is expected that
+     * to all registred listeners (calls method {@link SessionListener#sessionConnectionRefused(SessionEvent)} on all
+     * of them}. The Event should be of type {@link SessionEvent#SESSION_ERROR_OCCURRED} and it is expected that
      * {@link SessionEvent#getException()}  method will return not null value
      *
      * @param sessionEvent the SessionEvent which will be dispached to listeners

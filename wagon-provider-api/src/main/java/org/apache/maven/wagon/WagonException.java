@@ -66,19 +66,19 @@ public abstract class WagonException
      */
     public Throwable getCause()
     {
-//		try
-//		{
-//		   Class clazz = getClass().getSuperclass();
-//		   
-//		   Method method = clazz.getMethod( "gatCause" , null );
-//		   
-//		   Throwable retValue = (Throwable) method.invoke( this, null );
+//        try
+//        {
+//           Class clazz = getClass().getSuperclass();
+//           
+//           Method method = clazz.getMethod( "gatCause" , null );
+//           
+//           Throwable retValue = (Throwable) method.invoke( this, null );
 //         return retValue;
-//		}   
-//		catch( Exception e)
-//		{
+//        }   
+//        catch( Exception e)
+//        {
 //        
-//		}
+//        }
         
         return cause;
     }
@@ -100,7 +100,7 @@ public abstract class WagonException
 //        {
 //           Class clazz = getClass().getSuperclass();
 //           Class[] parameterTypes = new Class[1];
-//		   parameterTypes[0] = Throwable.class;
+//           parameterTypes[0] = Throwable.class;
 //           Method method = clazz.getMethod( "initCause" , parameterTypes);
 //           Object[] params = { cause };
 //           method.invoke( this, params );

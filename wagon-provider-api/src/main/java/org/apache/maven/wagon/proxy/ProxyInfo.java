@@ -35,11 +35,11 @@ import java.io.Serializable;
 public class ProxyInfo
     implements Serializable
 {
-    public final static String PROXY_SOCKS5 = "SOCKS_5";
+    public static final String PROXY_SOCKS5 = "SOCKS_5";
 
-    public final static String PROXY_SOCKS4 = "SOCKS4";
+    public static final String PROXY_SOCKS4 = "SOCKS4";
 
-    public final static String PROXY_HTTP = "HTTP";
+    public static final String PROXY_HTTP = "HTTP";
 
     /**
      * Proxy server host

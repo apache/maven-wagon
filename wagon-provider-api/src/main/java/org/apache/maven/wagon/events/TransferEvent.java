@@ -43,32 +43,32 @@ public class TransferEvent
     /**
      * A transfer was started.
      */
-    public final static int TRANSFER_STARTED = 1;
+    public static final int TRANSFER_STARTED = 1;
 
     /**
      * A transfer is completed.
      */
-    public final static int TRANSFER_COMPLETED = 2;
+    public static final int TRANSFER_COMPLETED = 2;
 
     /**
      * A transfer is in progress.
      */
-    public final static int TRANSFER_PROGRESS = 3;
+    public static final int TRANSFER_PROGRESS = 3;
 
     /**
      * An error occured during transfer
      */
-    public final static int TRANSFER_ERROR = 4;
+    public static final int TRANSFER_ERROR = 4;
 
     /**
      * Indicates GET transfer  (from the repository)
      */
-    public final static int REQUEST_GET = 5;
+    public static final int REQUEST_GET = 5;
 
     /**
      * Indicates PUT transfer (to the repository)
      */
-    public final static int REQUEST_PUT = 6;
+    public static final int REQUEST_PUT = 6;
 
     private Resource resource;
 
@@ -275,32 +275,48 @@ public class TransferEvent
     public boolean equals( Object obj )
     {
         if ( this == obj )
+        {
             return true;
-        if ( obj == null )
+        }
+        if ( ( obj == null ) || ( getClass() != obj.getClass() ) )
+        {
             return false;
-        if ( getClass() != obj.getClass() )
-            return false;
+        }
         final TransferEvent other = (TransferEvent) obj;
         if ( eventType != other.eventType )
+        {
             return false;
+        }
         if ( exception == null )
         {
             if ( other.exception != null )
+            {
                 return false;
+            }
         }
         else if ( !exception.getClass().equals( other.exception.getClass() ) )
+        {
             return false;
+        }
         if ( requestType != other.requestType )
+        {
             return false;
+        }
         if ( resource == null )
         {
             if ( other.resource != null )
+            {
                 return false;
+            }
         }
         else if ( !resource.equals( other.resource ) )
+        {
             return false;
+        }
         else if ( !source.equals( other.source ) )
+        {
             return false;
+        }
         return true;
     }
     

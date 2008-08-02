@@ -46,47 +46,47 @@ public class SessionEvent
     /**
      * A SESSION was closed.
      */
-    public final static int SESSION_CLOSED = 1;
+    public static final int SESSION_CLOSED = 1;
 
     /**
      * A SESSION is about to be disconnected.
      */
-    public final static int SESSION_DISCONNECTING = 2;
+    public static final int SESSION_DISCONNECTING = 2;
 
     /**
      * A SESSION was disconnected (not currently used).
      */
-    public final static int SESSION_DISCONNECTED = 3;
+    public static final int SESSION_DISCONNECTED = 3;
 
     /**
      * A SESSION was refused.
      */
-    public final static int SESSION_CONNECTION_REFUSED = 4;
+    public static final int SESSION_CONNECTION_REFUSED = 4;
 
     /**
      * A SESSION is about to be opened.
      */
-    public final static int SESSION_OPENING = 5;
+    public static final int SESSION_OPENING = 5;
 
     /**
      * A SESSION was opened.
      */
-    public final static int SESSION_OPENED = 6;
+    public static final int SESSION_OPENED = 6;
 
     /**
      * A SESSION was opened.
      */
-    public final static int SESSION_LOGGED_IN = 7;
+    public static final int SESSION_LOGGED_IN = 7;
 
     /**
      * A SESSION was opened.
      */
-    public final static int SESSION_LOGGED_OFF = 8;
+    public static final int SESSION_LOGGED_OFF = 8;
 
     /**
      * A SESSION was opened.
      */
-    public final static int SESSION_ERROR_OCCURRED = 9;
+    public static final int SESSION_ERROR_OCCURRED = 9;
 
     /**
      * The type of the event. One of the SESSSION_XXX constans

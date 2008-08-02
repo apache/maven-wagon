@@ -223,7 +223,8 @@ public interface Wagon
      * @throws org.apache.maven.wagon.authentication.AuthenticationException
      *                             if ther credentials for connecting are not sufficient
      * @todo delegate this to a truly internal connection method
-     * @deprecated connect using the {@link #connect(org.apache.maven.wagon.repository.Repository)} or related methods - this is an internal method
+     * @deprecated connect using the {@link #connect(org.apache.maven.wagon.repository.Repository)} or related methods
+     *             - this is an internal method
      */
     void openConnection()
         throws ConnectionException, AuthenticationException;

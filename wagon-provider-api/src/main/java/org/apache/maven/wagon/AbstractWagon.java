@@ -258,12 +258,12 @@ public abstract class AbstractWagon
     
     public void setTimeout( int timeoutValue )
     {
-    	connectionTimeout = timeoutValue;
+        connectionTimeout = timeoutValue;
     }
     
     public int getTimeout()
     {
-    	return connectionTimeout;
+        return connectionTimeout;
     }
 
     // ----------------------------------------------------------------------
@@ -319,7 +319,8 @@ public abstract class AbstractWagon
         fireGetCompleted( resource, destination );
     }
 
-    protected void getTransfer( Resource resource, OutputStream output, InputStream input, boolean closeInput, int maxSize )
+    protected void getTransfer( Resource resource, OutputStream output, InputStream input, boolean closeInput,
+                                int maxSize )
         throws TransferFailedException
     {
         try
@@ -441,7 +442,8 @@ public abstract class AbstractWagon
 
     /**
      * Write from {@link InputStream} to {@link OutputStream}.
-     * Equivalent to {@link #transfer(Resource, InputStream, OutputStream, int, int)} with a maxSize equal to {@link Integer#MAX_VALUE}
+     * Equivalent to {@link #transfer(Resource, InputStream, OutputStream, int, int)} with a maxSize equals to
+     * {@link Integer#MAX_VALUE}
      * 
      * @param resource resource to transfer
      * @param input input stream
@@ -457,7 +459,8 @@ public abstract class AbstractWagon
 
     /**
      * Write from {@link InputStream} to {@link OutputStream}.
-     * Equivalent to {@link #transfer(Resource, InputStream, OutputStream, int, int)} with a maxSize equal to {@link Integer#MAX_VALUE}
+     * Equivalent to {@link #transfer(Resource, InputStream, OutputStream, int, int)} with a maxSize equals to
+     * {@link Integer#MAX_VALUE}
      * 
      * @param resource resource to transfer
      * @param input input stream

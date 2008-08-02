@@ -93,8 +93,8 @@ public final class TransferEventSupport
 
     /**
      * Dispatches the given <code>TransferEvent</code>
-     * to all registred listeners (calls method {@link TransferListener#transferStarted(TransferEvent)} on all of them}.
-     * The Event should be of type {@link TransferEvent#TRANSFER_COMPLETED}
+     * to all registred listeners (calls method {@link TransferListener#transferStarted(TransferEvent)} on all of
+     * them}. The Event should be of type {@link TransferEvent#TRANSFER_COMPLETED}
      *
      * @param transferEvent the TransferEvent which will be dispached to listeners
      */
@@ -128,8 +128,8 @@ public final class TransferEventSupport
 
     /**
      * Dispatches the given <code>TransferEvent</code>
-     * to all registred listeners (calls method {@link TransferListener#transferCompleted(TransferEvent)} on all of them}.
-     * The Event should be of type {@link TransferEvent#TRANSFER_COMPLETED}
+     * to all registred listeners (calls method {@link TransferListener#transferCompleted(TransferEvent)} on all of
+     * them}. The Event should be of type {@link TransferEvent#TRANSFER_COMPLETED}
      *
      * @param transferEvent the TransferEvent which will be dispached to listeners
      */
