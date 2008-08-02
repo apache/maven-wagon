@@ -1,0 +1,15 @@
+<project>
+  <publishDate format="yyyy-MM-dd" position="right" />
+  <version position="right" />
+
+  <body>
+    <breadcrumbs>
+      <item name="Apache" href="http://www.apache.org/" />
+      <item name="Maven"  href="http://maven.apache.org/index.html" />
+      <item name="Wagon"  href="http://maven.apache.org/wagon/index.html" />
+    </breadcrumbs>
+
+    <menu ref="modules" />
+    <menu ref="reports" />
+  </body>
+</project>
