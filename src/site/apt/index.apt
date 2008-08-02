@@ -21,8 +21,6 @@ Maven Wagon
  
  * {{{wagon-providers/wagon-ssh/}SSH/SCP}}
  
- * {{{wagon-providers/wagon-webdav/}WebDAV}}
-
- * {{{wagon-providers/wagon-s3/}Amazon S3}}
+ * {{{wagon-providers/wagon-webdav-jackrabbit/}WebDAV}}
 
  * {{{wagon-providers/wagon-scm/}SCM}} (in progress)
