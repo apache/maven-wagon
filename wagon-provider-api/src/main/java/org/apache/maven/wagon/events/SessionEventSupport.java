@@ -32,13 +32,13 @@ import java.util.List;
 public final class SessionEventSupport
 {
     /**
-     * registred listeners
+     * registered listeners
      */
     private final List listeners = new ArrayList();
 
     /**
      * Adds the listener to the collection of listeners
-     * who will be notifed when any session event occurs
+     * who will be notified when any session event occurs
      * in this <code>Wagon</code> object.
      * <br/>
      * If listener is <code>null</code>, no exception is thrown and no action is performed
@@ -74,11 +74,11 @@ public final class SessionEventSupport
     /**
      * Returns whether the specified instance of session
      * listener was added to the collection of listeners
-     * who will be notifed when an seesion event occurs
+     * who will be notified when an session event occurs
      *
      * @param listener the session listener
      * @return <code>true<code>
-     *         if given listner was added to the collection of listeners
+     *         if given listener was added to the collection of listeners
      *         <code>false</code> otherwise
      * @see org.apache.maven.wagon.events.SessionListener
      * @see #addSessionListener(org.apache.maven.wagon.events.SessionListener)
@@ -90,10 +90,10 @@ public final class SessionEventSupport
 
     /**
      * Dispatches the given <code>SessionEvent</code>
-     * to all registred listeners (calls method {@link SessionListener#sessionDisconnected(SessionEvent)} on all of
+     * to all registered listeners (calls method {@link SessionListener#sessionDisconnected(SessionEvent)} on all of
      * them}. The Event should be of type {@link SessionEvent#SESSION_DISCONNECTED}
      *
-     * @param sessionEvent the SessionEvent which will be dispached to listeners
+     * @param sessionEvent the SessionEvent which will be dispatched to listeners
      */
     public void fireSessionDisconnected( final SessionEvent sessionEvent )
     {
@@ -106,10 +106,10 @@ public final class SessionEventSupport
 
     /**
      * Dispatches the given <code>SessionEvent</code>
-     * to all registred listeners (calls method {@link SessionListener#sessionDisconnecting(SessionEvent)} } on all of
+     * to all registered listeners (calls method {@link SessionListener#sessionDisconnecting(SessionEvent)} } on all of
      * them}. The Event should be of type {@link SessionEvent#SESSION_DISCONNECTING}
      *
-     * @param sessionEvent the SessionEvent which will be dispached to listeners
+     * @param sessionEvent the SessionEvent which will be dispatched to listeners
      */
     public void fireSessionDisconnecting( final SessionEvent sessionEvent )
     {
@@ -122,10 +122,10 @@ public final class SessionEventSupport
 
     /**
      * Dispatches the given <code>SessionEvent</code>
-     * to all registred listeners (calls method {@link SessionListener#sessionLoggedIn(SessionEvent)} on all of them}.
+     * to all registered listeners (calls method {@link SessionListener#sessionLoggedIn(SessionEvent)} on all of them}.
      * The Event should be of type {@link SessionEvent#SESSION_LOGGED_IN}
      *
-     * @param sessionEvent the SessionEvent which will be dispached to listeners
+     * @param sessionEvent the SessionEvent which will be dispatched to listeners
      */
     public void fireSessionLoggedIn( final SessionEvent sessionEvent )
     {
@@ -138,10 +138,10 @@ public final class SessionEventSupport
 
     /**
      * Dispatches the given <code>SessionEvent</code>
-     * to all registred listeners (calls method {@link SessionListener#sessionLoggedOff(SessionEvent)} on all of them}.
-     * The Event should be of type {@link SessionEvent#SESSION_LOGGED_OFF}
+     * to all registered listeners (calls method {@link SessionListener#sessionLoggedOff(SessionEvent)} on all of
+     * them}. The Event should be of type {@link SessionEvent#SESSION_LOGGED_OFF}
      *
-     * @param sessionEvent the SessionEvent which will be dispached to listeners
+     * @param sessionEvent the SessionEvent which will be dispatched to listeners
      */
     public void fireSessionLoggedOff( final SessionEvent sessionEvent )
     {
@@ -154,10 +154,10 @@ public final class SessionEventSupport
 
     /**
      * Dispatches the given <code>SessionEvent</code>
-     * to all registred listeners (calls method {@link SessionListener#sessionOpened(SessionEvent)} on all of them}.
+     * to all registered listeners (calls method {@link SessionListener#sessionOpened(SessionEvent)} on all of them}.
      * The Event should be of type {@link SessionEvent#SESSION_OPENED}
      *
-     * @param sessionEvent the SessionEvent which will be dispached to listeners
+     * @param sessionEvent the SessionEvent which will be dispatched to listeners
      */
     public void fireSessionOpened( final SessionEvent sessionEvent )
     {
@@ -170,10 +170,10 @@ public final class SessionEventSupport
 
     /**
      * Dispatches the given <code>SessionEvent</code>
-     * to all registred listeners (calls method {@link SessionListener#sessionOpening(SessionEvent)} on all of them}.
+     * to all registered listeners (calls method {@link SessionListener#sessionOpening(SessionEvent)} on all of them}.
      * The Event should be of type {@link SessionEvent#SESSION_OPENING}
      *
-     * @param sessionEvent the SessionEvent which will be dispached to listeners
+     * @param sessionEvent the SessionEvent which will be dispatched to listeners
      */
     public void fireSessionOpening( final SessionEvent sessionEvent )
     {
@@ -186,10 +186,10 @@ public final class SessionEventSupport
 
     /**
      * Dispatches the given <code>SessionEvent</code>
-     * to all registred listeners (calls method {@link SessionListener#sessionConnectionRefused(SessionEvent)} on all
+     * to all registered listeners (calls method {@link SessionListener#sessionConnectionRefused(SessionEvent)} on all
      * of them}. The Event should be of type {@link SessionEvent#SESSION_CONNECTION_REFUSED}
      *
-     * @param sessionEvent the SessionEvent which will be dispached to listeners
+     * @param sessionEvent the SessionEvent which will be dispatched to listeners
      */
     public void fireSessionConnectionRefused( final SessionEvent sessionEvent )
     {
@@ -202,9 +202,9 @@ public final class SessionEventSupport
 
     /**
      * Dispatches the given debug message
-     * to all registred listeners (calls method {@link SessionListener#debug(String)} on all of them}.
+     * to all registered listeners (calls method {@link SessionListener#debug(String)} on all of them}.
      *
-     * @param message the debug message which will be dispached to listeners
+     * @param message the debug message which will be dispatched to listeners
      */
     public void fireDebug( final String message )
     {
@@ -217,11 +217,11 @@ public final class SessionEventSupport
 
     /**
      * Dispatches the given <code>SessionEvent</code>
-     * to all registred listeners (calls method {@link SessionListener#sessionConnectionRefused(SessionEvent)} on all
+     * to all registered listeners (calls method {@link SessionListener#sessionConnectionRefused(SessionEvent)} on all
      * of them}. The Event should be of type {@link SessionEvent#SESSION_ERROR_OCCURRED} and it is expected that
      * {@link SessionEvent#getException()}  method will return not null value
      *
-     * @param sessionEvent the SessionEvent which will be dispached to listeners
+     * @param sessionEvent the SessionEvent which will be dispatched to listeners
      */
     public void fireSessionError( final SessionEvent sessionEvent )
     {

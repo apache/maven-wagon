@@ -45,7 +45,7 @@ import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
 
 /**
- * Implementation of common facilties for Wagon providers.
+ * Implementation of common facilities for Wagon providers.
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$

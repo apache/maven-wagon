@@ -35,8 +35,8 @@ public final class PermissionModeUtils
     /**
      * See the System Interfaces volume of IEEE Std 1003.1-2001, umask(1)
      *
-     * @param modeStr permision mode (numeric or symbolic)
-     * @return the mode that can be used with unmask to acomplish modeStr.
+     * @param modeStr permission mode (numeric or symbolic)
+     * @return the mode that can be used with umask to accomplish modeStr.
      */
     public static String getUserMaskFor( String modeStr )
     {

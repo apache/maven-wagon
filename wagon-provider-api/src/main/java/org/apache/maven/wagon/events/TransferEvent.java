@@ -26,7 +26,7 @@ import java.io.File;
 
 /**
  * TransferEvent is used to notify TransferListeners about progress
- * in transfer of resources form/to the respository
+ * in transfer of resources form/to the repository
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
@@ -56,7 +56,7 @@ public class TransferEvent
     public static final int TRANSFER_PROGRESS = 3;
 
     /**
-     * An error occured during transfer
+     * An error occurred during transfer
      */
     public static final int TRANSFER_ERROR = 4;
 

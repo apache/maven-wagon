@@ -33,7 +33,7 @@ public class WagonEvent
     extends EventObject
 {
     /**
-     * The time when event occured
+     * The time when event occurred
      */
     protected long timestamp;
 
@@ -56,7 +56,7 @@ public class WagonEvent
     }
 
     /**
-     * Returns the timestamp which indicated the time when this event has occured
+     * Returns the timestamp which indicated the time when this event has occurred
      *
      * @return Returns the timestamp.
      */
@@ -66,7 +66,7 @@ public class WagonEvent
     }
 
     /**
-     * Sets the timestamp which indicated the time when this event has occured
+     * Sets the timestamp which indicated the time when this event has occurred
      *
      * @param timestamp The timestamp to set.
      */

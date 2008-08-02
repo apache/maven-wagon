@@ -29,7 +29,7 @@ public abstract class WagonException
     extends Exception
 {
     /**
-     * the throwable that caused this throwable to get thrown
+     * the throwable that caused this exception to get thrown
      */
     private Throwable cause;
 
@@ -60,9 +60,9 @@ public abstract class WagonException
 
     /**
      * Returns the cause of this throwable or null if the cause is nonexistent or unknown.
-     * (The cause is the throwable that caused this throwable to get thrown.)
+     * (The cause is the throwable that caused this exception to get thrown.)
      *
-     * @return the cause of this throwable or null if the cause is nonexistent or unknown.
+     * @return the cause of this exception or null if the cause is nonexistent or unknown.
      */
     public Throwable getCause()
     {

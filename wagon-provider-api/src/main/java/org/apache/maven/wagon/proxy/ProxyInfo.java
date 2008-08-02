@@ -24,7 +24,7 @@ import org.apache.maven.wagon.WagonConstants;
 import java.io.Serializable;
 
 /**
- * Conatins set of properties used by <code>Wagon</code> objects
+ * Contains set of properties used by <code>Wagon</code> objects
  * while connection to the repository must go thru a proxy server.
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>

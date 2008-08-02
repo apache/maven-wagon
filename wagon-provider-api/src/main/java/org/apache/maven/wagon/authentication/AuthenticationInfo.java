@@ -23,7 +23,7 @@ import java.io.Serializable;
 
 /**
  * This class holds the set of properties used when instance of the <code>Wagon</code>
- * will use during login opreration.
+ * will use during login operation.
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$

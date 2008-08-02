@@ -53,9 +53,9 @@ public interface Wagon
 
     /**
      * Downloads specified resource from the repository
-     * if it was modfified since specified date.
+     * if it was modified since specified date.
      * The date is measured in milliseconds, between the current time and midnight, January 1, 1970 UTC
-     * and aliged to GMT timezone.
+     * and aligned to GMT timezone.
      *
      * @param resourceName
      * @param destination
@@ -150,7 +150,7 @@ public interface Wagon
      * @param source the repository to connect to
      * @throws ConnectionException if there is a problem connecting
      * @throws org.apache.maven.wagon.authentication.AuthenticationException
-     *                             if ther credentials for connecting are not sufficient
+     *                             if the credentials for connecting are not sufficient
      */
     void connect( Repository source )
         throws ConnectionException, AuthenticationException;
@@ -161,7 +161,7 @@ public interface Wagon
      * @param source the repository to connect to
      * @throws ConnectionException if there is a problem connecting
      * @throws org.apache.maven.wagon.authentication.AuthenticationException
-     *                             if ther credentials for connecting are not sufficient
+     *                             if the credentials for connecting are not sufficient
      */
     void connect( Repository source, ProxyInfo proxyInfo )
         throws ConnectionException, AuthenticationException;

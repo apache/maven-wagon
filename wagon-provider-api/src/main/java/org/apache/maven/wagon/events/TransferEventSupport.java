@@ -24,7 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * The class allows registration and removal of event listners of type
+ * The class allows registration and removal of event listeners of type
  * TransferListener and dispatch of those events to those listeners
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -34,13 +34,13 @@ public final class TransferEventSupport
 {
 
     /**
-     * registred listeners
+     * registered listeners
      */
     private final List listeners = new ArrayList();
 
     /**
      * Adds the listener to the collection of listeners
-     * who will be notifed when any transfer event occurs
+     * who will be notified when any transfer event occurs
      * in this <code>Wagon</code> object.
      * <br/>
      * If listener is <code>null</code>, no exception is thrown and no action is performed
@@ -76,11 +76,11 @@ public final class TransferEventSupport
     /**
      * Returns whether the specified instance of transfer
      * listener was added to the collection of listeners
-     * who will be notifed when an transfer event occurs
+     * who will be notified when an transfer event occurs
      *
      * @param listener the transfer listener
      * @return <code>true<code>
-     *         if given listner was added to the collection of listeners
+     *         if given listener was added to the collection of listeners
      *         <code>false</code> otherwise
      * @see org.apache.maven.wagon.events.TransferEvent
      * @see #addTransferListener(TransferListener)
@@ -93,10 +93,10 @@ public final class TransferEventSupport
 
     /**
      * Dispatches the given <code>TransferEvent</code>
-     * to all registred listeners (calls method {@link TransferListener#transferStarted(TransferEvent)} on all of
+     * to all registered listeners (calls method {@link TransferListener#transferStarted(TransferEvent)} on all of
      * them}. The Event should be of type {@link TransferEvent#TRANSFER_COMPLETED}
      *
-     * @param transferEvent the TransferEvent which will be dispached to listeners
+     * @param transferEvent the TransferEvent which will be dispatched to listeners
      */
     public synchronized void fireTransferStarted( final TransferEvent transferEvent )
     {
@@ -109,10 +109,10 @@ public final class TransferEventSupport
 
     /**
      * Dispatches the given <code>TransferEvent</code>
-     * to all registred listeners (calls method {@link TransferListener#transferProgress(TransferEvent, byte[], int)}
+     * to all registered listeners (calls method {@link TransferListener#transferProgress(TransferEvent, byte[], int)}
      * on all of them). The Event should be of type {@link TransferEvent#TRANSFER_PROGRESS}.
      *
-     * @param transferEvent the TransferEvent which will be dispached to listeners
+     * @param transferEvent the TransferEvent which will be dispatched to listeners
      * @param buffer        the buffer containing the additional content
      * @param length        the length of the content in the buffer
      */
@@ -128,10 +128,10 @@ public final class TransferEventSupport
 
     /**
      * Dispatches the given <code>TransferEvent</code>
-     * to all registred listeners (calls method {@link TransferListener#transferCompleted(TransferEvent)} on all of
+     * to all registered listeners (calls method {@link TransferListener#transferCompleted(TransferEvent)} on all of
      * them}. The Event should be of type {@link TransferEvent#TRANSFER_COMPLETED}
      *
-     * @param transferEvent the TransferEvent which will be dispached to listeners
+     * @param transferEvent the TransferEvent which will be dispatched to listeners
      */
     public synchronized void fireTransferCompleted( final TransferEvent transferEvent )
     {
@@ -145,11 +145,11 @@ public final class TransferEventSupport
 
     /**
      * Dispatches the given <code>TransferEvent</code>
-     * to all registred listeners (calls method {@link TransferListener#transferError(TransferEvent)}  on all of them.
+     * to all registered listeners (calls method {@link TransferListener#transferError(TransferEvent)}  on all of them.
      * The Event should be of type {@link TransferEvent#TRANSFER_ERROR} and it is expected that
      * {@link TransferEvent#getException()} } method will return not null value
      *
-     * @param transferEvent the TransferEvent which will be dispached to listeners
+     * @param transferEvent the TransferEvent which will be dispatched to listeners
      */
     public synchronized void fireTransferError( final TransferEvent transferEvent )
     {
@@ -163,9 +163,9 @@ public final class TransferEventSupport
 
     /**
      * Dispatches the given debug message
-     * to all registred listeners (calls method {@link TransferListener#debug(String)} on all of them.
+     * to all registered listeners (calls method {@link TransferListener#debug(String)} on all of them.
      *
-     * @param message the debug message which will be dispached to listeners
+     * @param message the debug message which will be dispatched to listeners
      */
     public synchronized void fireDebug( final String message )
     {
@@ -180,10 +180,10 @@ public final class TransferEventSupport
 
     /**
      * Dispatches the given <code>TransferEvent</code>
-     * to all registred listeners (calls method {@link TransferListener#transferInitiated(TransferEvent)} on all of them.
-     * The Event should be of type {@link TransferEvent#TRANSFER_INITIATED}.
+     * to all registered listeners (calls method {@link TransferListener#transferInitiated(TransferEvent)} on all of
+     * them. The Event should be of type {@link TransferEvent#TRANSFER_INITIATED}.
      *
-     * @param transferEvent the TransferEvent which will be dispached to listeners
+     * @param transferEvent the TransferEvent which will be dispatched to listeners
      */
     public synchronized void fireTransferInitiated( final TransferEvent transferEvent )
     {

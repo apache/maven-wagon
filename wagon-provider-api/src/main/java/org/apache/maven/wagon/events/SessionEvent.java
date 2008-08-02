@@ -22,8 +22,8 @@ package org.apache.maven.wagon.events;
 import org.apache.maven.wagon.Wagon;
 
 /**
- * SessionEvent is used for notifing SessionListeners about
- * occurences of various sistutation releated.
+ * SessionEvent is used for notifying SessionListeners about
+ * occurrences of various situations related.
  * <p/>
  * The session event is emitted by <code>Wagon</code> objects when
  * <p/>
@@ -89,7 +89,7 @@ public class SessionEvent
     public static final int SESSION_ERROR_OCCURRED = 9;
 
     /**
-     * The type of the event. One of the SESSSION_XXX constans
+     * The type of the event. One of the SESSSION_XXX constants
      */
     private int eventType;
 
