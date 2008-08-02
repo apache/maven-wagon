@@ -371,7 +371,7 @@ public abstract class AbstractHttpClientWagon
                     return true;
 
                 case SC_NULL:
-                    throw new TransferFailedException( "Failed to transfer file: " + url);
+                    throw new TransferFailedException( "Failed to transfer file: " + url );
 
                 case HttpStatus.SC_FORBIDDEN:
                     throw new AuthorizationException( "Access denied to: " + url );
@@ -397,16 +397,16 @@ public abstract class AbstractHttpClientWagon
         }
     }
 
-    protected int execute(HttpMethod httpMethod) throws HttpException, IOException
+    protected int execute( HttpMethod httpMethod ) throws HttpException, IOException
     {
         int statusCode = SC_NULL;
         httpMethod.getParams().setSoTimeout( getTimeout() );
-        setHeaders(httpMethod);
+        setHeaders( httpMethod );
         statusCode = client.executeMethod( httpMethod );
         return statusCode;
     }
 
-    protected void setHeaders(HttpMethod method)
+    protected void setHeaders( HttpMethod method )
     {
         // TODO: merge with the other headers and have some better defaults, unify with lightweight headers
         method.addRequestHeader( "Cache-control", "no-cache" );
@@ -436,11 +436,13 @@ public abstract class AbstractHttpClientWagon
         return repository.getUrl();
     }
 
-    protected HttpClient getClient() {
+    protected HttpClient getClient()
+    {
         return client;
     }
 
-    public void setConnectionManager(HttpConnectionManager connectionManager) {
+    public void setConnectionManager( HttpConnectionManager connectionManager )
+    {
         this.connectionManager = connectionManager;
     }
 

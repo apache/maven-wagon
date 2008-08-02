@@ -81,7 +81,7 @@ public class ScmWagon
     /**
      * Get the {@link ScmManager} used in this Wagon
      *
-     * @return rhe {@link ScmManager}
+     * @return the {@link ScmManager}
      */
     public ScmManager getScmManager()
     {
@@ -310,7 +310,8 @@ public class ScmWagon
                 }
             }
 
-            ScmResult result = scmProvider.checkIn( scmRepository, new ScmFileSet( checkoutDirectory ), (ScmVersion) null, msg );
+            ScmResult result = scmProvider.checkIn( scmRepository, new ScmFileSet( checkoutDirectory ),
+                                                    (ScmVersion) null, msg );
 
             checkScmResult( result );
         }
@@ -345,7 +346,8 @@ public class ScmWagon
      * @return
      * @throws TransferFailedException
      */
-    private String checkOut( ScmProvider scmProvider, ScmRepository scmRepository, String targetName, Resource resource )
+    private String checkOut( ScmProvider scmProvider, ScmRepository scmRepository, String targetName,
+                             Resource resource )
         throws TransferFailedException
     {
         checkoutDirectory = createCheckoutDirectory();
@@ -356,7 +358,7 @@ public class ScmWagon
 
         // totally ignore scmRepository parent stuff since that is not supported by all scms.
         // Instead, assume that that url exists. If not, then that's an error.
-        // Check wheter targetName, which is a relative path into the scm, exists.
+        // Check whether targetName, which is a relative path into the scm, exists.
         // If it doesn't, check the parent, etc.
 
         try
@@ -410,8 +412,8 @@ public class ScmWagon
             File newDir = new File( checkoutDirectory, relPath );
             if ( !newDir.mkdirs() )
             {
-                throw new TransferFailedException( "Failed to create directory " + newDir.getAbsolutePath() +
-                    "; parent should exist: " + checkoutDirectory );
+                throw new TransferFailedException( "Failed to create directory " + newDir.getAbsolutePath()
+                    + "; parent should exist: " + checkoutDirectory );
             }
 
             try
@@ -515,8 +517,8 @@ public class ScmWagon
     {
         if ( !result.isSuccess() )
         {
-            throw new ScmException( "Unable to commit file. " + result.getProviderMessage() + " " +
-                ( result.getCommandOutput() == null ? "" : result.getCommandOutput() ) );
+            throw new ScmException( "Unable to commit file. " + result.getProviderMessage() + " "
+                + ( result.getCommandOutput() == null ? "" : result.getCommandOutput() ) );
         }
     }
 
@@ -556,7 +558,8 @@ public class ScmWagon
             fireGetStarted( resource, destination );
 
             // TODO: limitations:
-            // - destination filename must match that in the repository - should allow the "-d" CVS equiv to be passed in
+            // - destination filename must match that in the repository - should allow the "-d" CVS equiv to be passed
+            //   in
             // - we don't get granular exceptions from SCM (ie, auth, not found)
             // - need to make it non-recursive to save time
             // - exists() check doesn't test if it is in SCM already
@@ -575,7 +578,7 @@ public class ScmWagon
             }
             else
             {
-                // TODO: this should be checking out a full hierachy (requires the -d equiv)
+                // TODO: this should be checking out a full hierarchy (requires the -d equiv)
                 basedir.mkdirs();
 
                 scmProvider.checkOut( scmRepository, new ScmFileSet( basedir ), (ScmVersion) null );
@@ -664,15 +667,15 @@ public class ScmWagon
         }
     }
 
-    private String getFilename( String filename)
+    private String getFilename( String filename )
     {
-        String fname = StringUtils.replace( filename, "/", File.separator);
-        return FileUtils.filename( fname);
+        String fname = StringUtils.replace( filename, "/", File.separator );
+        return FileUtils.filename( fname );
     }
 
-    private String getDirname( String filename)
+    private String getDirname( String filename )
     {
-        String fname = StringUtils.replace( filename, "/", File.separator);
-        return FileUtils.dirname( fname);
+        String fname = StringUtils.replace( filename, "/", File.separator );
+        return FileUtils.dirname( fname );
     }
 }

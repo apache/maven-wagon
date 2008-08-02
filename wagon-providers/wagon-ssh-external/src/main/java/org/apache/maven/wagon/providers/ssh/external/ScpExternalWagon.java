@@ -312,7 +312,8 @@ public class ScpExternalWagon
                 }
                 else
                 {
-                    TransferFailedException e = new TransferFailedException( "Exit code: " + exitCode + " - " + err.getOutput() );
+                    TransferFailedException e = new TransferFailedException( "Exit code: " + exitCode + " - "
+                                                                             + err.getOutput() );
 
                     fireTransferError( resource, e, put ? TransferEvent.REQUEST_PUT : TransferEvent.REQUEST_GET );
 

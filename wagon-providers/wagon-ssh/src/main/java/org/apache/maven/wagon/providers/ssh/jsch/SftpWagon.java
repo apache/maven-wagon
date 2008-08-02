@@ -89,7 +89,8 @@ public class SftpWagon
         }
         catch ( JSchException e )
         {
-            throw new AuthenticationException( "Error connecting to remote repository: " + getRepository().getUrl(), e );
+            throw new AuthenticationException( "Error connecting to remote repository: " + getRepository().getUrl(),
+                                               e );
         }
     }
 

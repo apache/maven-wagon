@@ -149,7 +149,7 @@ public abstract class AbstractJschWagon
                 userName = System.getProperty( "user.name" );
             }
             session = sch.getSession( userName, host, port );
-            session.setTimeout(getTimeout());
+            session.setTimeout( getTimeout() );
         }
         catch ( JSchException e )
         {

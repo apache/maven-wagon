@@ -135,23 +135,26 @@ public class WebDavWagon
         }
     }
 
-    private int doMkCol(String url) throws HttpException, IOException
+    private int doMkCol( String url ) throws HttpException, IOException
     {
         MkColMethod method = null;
         try
         {
-            method = new MkColMethod(url);
-            return execute(method);
+            method = new MkColMethod( url );
+            return execute( method );
         }
         finally
         {
-            if (method != null) method.releaseConnection();
+            if ( method != null )
+            {
+                method.releaseConnection();
+            }
         }
     }
 
-    private String getUrl(PathNavigator navigator)
+    private String getUrl( PathNavigator navigator )
     {
-        String url = getRepository().getUrl().replaceAll(getRepository().getBasedir(), "");
+        String url = getRepository().getUrl().replaceAll( getRepository().getBasedir(), "" );
         return url + '/' + navigator.getPath();
     }
 
@@ -188,30 +191,31 @@ public class WebDavWagon
     private boolean isDirectory( String url ) throws IOException, DavException
     {
         DavPropertyNameSet nameSet = new DavPropertyNameSet();
-        nameSet.add(DavPropertyName.create(DavConstants.PROPERTY_RESOURCETYPE));
+        nameSet.add( DavPropertyName.create( DavConstants.PROPERTY_RESOURCETYPE ) );
 
         PropFindMethod method = null;
         try
         {
-            method = new PropFindMethod(url, nameSet, DavConstants.DEPTH_0);
-            execute(method);
-            if (method.succeeded())
+            method = new PropFindMethod( url, nameSet, DavConstants.DEPTH_0 );
+            execute( method );
+            if ( method.succeeded() )
             {
                 MultiStatus multiStatus = method.getResponseBodyAsMultiStatus();
                 MultiStatusResponse response = multiStatus.getResponses()[0];
-                DavPropertySet propertySet = response.getProperties(HttpStatus.SC_OK);
-                DavProperty property = propertySet.get(DavConstants.PROPERTY_RESOURCETYPE);
-                if (property != null)
+                DavPropertySet propertySet = response.getProperties( HttpStatus.SC_OK );
+                DavProperty property = propertySet.get( DavConstants.PROPERTY_RESOURCETYPE );
+                if ( property != null )
                 {
-                    Node node = (Node)property.getValue();
-                    return node.getLocalName().equals(DavConstants.XML_COLLECTION);
+                    Node node = (Node) property.getValue();
+                    return node.getLocalName().equals( DavConstants.XML_COLLECTION );
                 }
             }
             return false;
         }
         finally
         {
-            if (method != null) method.releaseConnection();
+            if ( method != null )
+                method.releaseConnection();
         }
     }
 
@@ -222,49 +226,51 @@ public class WebDavWagon
         PropFindMethod method = null;
         try
         {
-            if (isDirectory(url))
+            if ( isDirectory( url ) )
             {
                 DavPropertyNameSet nameSet = new DavPropertyNameSet();
-                nameSet.add(DavPropertyName.create(DavConstants.PROPERTY_DISPLAYNAME));
+                nameSet.add( DavPropertyName.create( DavConstants.PROPERTY_DISPLAYNAME ) );
 
-                method = new PropFindMethod(url, nameSet, DavConstants.DEPTH_1);
-                int status = execute(method);
-                if (method.succeeded())
+                method = new PropFindMethod( url, nameSet, DavConstants.DEPTH_1 );
+                int status = execute( method );
+                if ( method.succeeded() )
                 {
                     ArrayList dirs = new ArrayList();
                     MultiStatus multiStatus = method.getResponseBodyAsMultiStatus();
 
-                    for (int i = 0; i < multiStatus.getResponses().length; i++)
+                    for ( int i = 0; i < multiStatus.getResponses().length; i++ )
                     {
                         MultiStatusResponse response = multiStatus.getResponses()[i];
-                        String fileName = PathUtils.filename(URLDecoder.decode( response.getHref()));
-                        if (!StringUtils.isEmpty(fileName))
+                        String fileName = PathUtils.filename( URLDecoder.decode( response.getHref() ) );
+                        if ( !StringUtils.isEmpty( fileName ) )
                         {
-                            dirs.add(fileName);
+                            dirs.add( fileName );
                         }
                     }
                     return dirs;
                 }
-                
-                if (status == HttpStatus.SC_NOT_FOUND)
+
+                if ( status == HttpStatus.SC_NOT_FOUND )
                 {
-                    throw new ResourceDoesNotExistException( "Destination directory does not exist: " + url ); 
+                    throw new ResourceDoesNotExistException( "Destination directory does not exist: " + url );
                 }
             }
         }
-        catch (DavException e)
+        catch ( DavException e )
         {
-            throw new TransferFailedException(e.getMessage(), e);
+            throw new TransferFailedException( e.getMessage(), e );
         }
-        catch (IOException e)
+        catch ( IOException e )
         {
-            throw new TransferFailedException(e.getMessage(), e); 
+            throw new TransferFailedException( e.getMessage(), e );
         }
         finally
         {
-            if (method != null) method.releaseConnection();
+            if ( method != null )
+                method.releaseConnection();
         }
-        throw new ResourceDoesNotExistException("Destination path exists but is not a " + "WebDAV collection (directory): " + url );
+        throw new ResourceDoesNotExistException( "Destination path exists but is not a "
+                        + "WebDAV collection (directory): " + url );
     }
     
     public String getURL( Repository repository )

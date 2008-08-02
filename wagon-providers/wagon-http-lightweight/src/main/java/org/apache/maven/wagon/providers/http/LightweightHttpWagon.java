@@ -336,7 +336,8 @@ public class LightweightHttpWagon
 
         if ( is == null )
         {
-            throw new TransferFailedException( url + " - Could not open input stream for resource: '" + resource + "'" );
+            throw new TransferFailedException( url + " - Could not open input stream for resource: '" + resource
+                                               + "'" );
         }
 
         return HtmlFileListParser.parseFileList( url, is );

@@ -36,48 +36,55 @@ import javax.xml.transform.stream.StreamResult;
 /**
  * <code>XmlRequestEntity</code>...
  */
-public class XmlRequestEntity implements RequestEntity {
+public class XmlRequestEntity implements RequestEntity
+{
 
-    private static Logger log = LoggerFactory.getLogger(XmlRequestEntity.class);
+    private static Logger log = LoggerFactory.getLogger( XmlRequestEntity.class );
 
     private final RequestEntity delegatee;
 
-    public XmlRequestEntity(Document xmlDocument) throws IOException {
+    public XmlRequestEntity( Document xmlDocument ) throws IOException
+    {
         super();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        try {
+        try
+        {
             TransformerFactory factory = TransformerFactory.newInstance();
             Transformer transformer = factory.newTransformer();
-            transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-            transformer.setOutputProperty(OutputKeys.INDENT, "no");
-            transformer.transform(
-                    new DOMSource(xmlDocument), new StreamResult(out));
-        } catch (TransformerException e) {
-            log.error("XML serialization failed", e);
-            IOException exception =
-                new IOException("XML serialization failed");
-            exception.initCause(e);
+            transformer.setOutputProperty( OutputKeys.METHOD, "xml" );
+            transformer.setOutputProperty( OutputKeys.ENCODING, "UTF-8" );
+            transformer.setOutputProperty( OutputKeys.INDENT, "no" );
+            transformer.transform( new DOMSource( xmlDocument ), new StreamResult( out ) );
+        }
+        catch ( TransformerException e )
+        {
+            log.error( "XML serialization failed", e );
+            IOException exception = new IOException( "XML serialization failed" );
+            exception.initCause( e );
             throw exception;
         }
 
-        delegatee = new StringRequestEntity(out.toString(), "text/xml", "UTF-8");
+        delegatee = new StringRequestEntity( out.toString(), "text/xml", "UTF-8" );
     }
 
-    public boolean isRepeatable() {
+    public boolean isRepeatable()
+    {
         return delegatee.isRepeatable();
     }
 
-    public String getContentType() {
+    public String getContentType()
+    {
         return delegatee.getContentType();
     }
 
-    public void writeRequest(OutputStream out) throws IOException {
-        delegatee.writeRequest(out);
+    public void writeRequest( OutputStream out ) throws IOException
+    {
+        delegatee.writeRequest( out );
     }
 
-    public long getContentLength() {
+    public long getContentLength()
+    {
         return delegatee.getContentLength();
     }
 }

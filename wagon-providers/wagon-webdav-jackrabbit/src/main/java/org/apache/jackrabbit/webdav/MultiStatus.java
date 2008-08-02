@@ -31,7 +31,8 @@ import java.util.LinkedHashMap;
  * MultiStatus representing the content of a multistatus response body and
  * allows to retrieve the Xml representation.
  */
-public class MultiStatus implements DavConstants, XmlSerializable {
+public class MultiStatus implements DavConstants, XmlSerializable
+{
 
     /**
      * Map collecting the responses for this multistatus, where every href must
@@ -57,13 +58,16 @@ public class MultiStatus implements DavConstants, XmlSerializable {
      * @param propFindType
      * @param depth
      */
-    public void addResourceProperties(DavResource resource, DavPropertyNameSet propNameSet,
-                                      int propFindType, int depth) {
-        addResponse(new MultiStatusResponse(resource, propNameSet, propFindType));
-        if (depth > 0 && resource.isCollection()) {
+    public void addResourceProperties( DavResource resource, DavPropertyNameSet propNameSet, int propFindType,
+                                       int depth )
+    {
+        addResponse( new MultiStatusResponse( resource, propNameSet, propFindType ) );
+        if ( depth > 0 && resource.isCollection() )
+        {
             DavResourceIterator iter = resource.getMembers();
-            while (iter.hasNext()) {
-                addResourceProperties(iter.nextResource(), propNameSet, propFindType, depth-1);
+            while ( iter.hasNext() )
+            {
+                addResourceProperties( iter.nextResource(), propNameSet, propFindType, depth - 1 );
             }
         }
     }
@@ -80,9 +84,9 @@ public class MultiStatus implements DavConstants, XmlSerializable {
      * @see #addResourceProperties(DavResource, DavPropertyNameSet, int, int) for
      * the corresponding method that allows to specify the type explicitely.
      */
-    public void addResourceProperties(DavResource resource, DavPropertyNameSet propNameSet,
-                                      int depth) {
-        addResourceProperties(resource, propNameSet, PROPFIND_BY_PROPERTY, depth);
+    public void addResourceProperties( DavResource resource, DavPropertyNameSet propNameSet, int depth )
+    {
+        addResourceProperties( resource, propNameSet, PROPFIND_BY_PROPERTY, depth );
     }
 
     /**
@@ -94,12 +98,15 @@ public class MultiStatus implements DavConstants, XmlSerializable {
      * @param status
      * @param depth
      */
-    public void addResourceStatus(DavResource resource, int status, int depth) {
-        addResponse(new MultiStatusResponse(resource.getHref(), status));
-        if (depth > 0 && resource.isCollection()) {
+    public void addResourceStatus( DavResource resource, int status, int depth )
+    {
+        addResponse( new MultiStatusResponse( resource.getHref(), status ) );
+        if ( depth > 0 && resource.isCollection() )
+        {
             DavResourceIterator iter = resource.getMembers();
-            while (iter.hasNext()) {
-                addResourceStatus(iter.nextResource(), status, depth-1);
+            while ( iter.hasNext() )
+            {
+                addResourceStatus( iter.nextResource(), status, depth - 1 );
             }
         }
     }
@@ -109,8 +116,9 @@ public class MultiStatus implements DavConstants, XmlSerializable {
      *
      * @param response
      */
-    public void addResponse(MultiStatusResponse response) {
-        responses.put(response.getHref(), response);
+    public void addResponse( MultiStatusResponse response )
+    {
+        responses.put( response.getHref(), response );
     }
 
     /**
@@ -119,8 +127,9 @@ public class MultiStatus implements DavConstants, XmlSerializable {
      * @return array of all {@link MultiStatusResponse responses} present in this
      * multistatus.
      */
-    public MultiStatusResponse[] getResponses() {
-        return (MultiStatusResponse[]) responses.values().toArray(new MultiStatusResponse[responses.size()]);
+    public MultiStatusResponse[] getResponses()
+    {
+        return (MultiStatusResponse[]) responses.values().toArray( new MultiStatusResponse[responses.size()] );
     }
 
     /**
@@ -128,7 +137,8 @@ public class MultiStatus implements DavConstants, XmlSerializable {
      *
      * @param responseDescription
      */
-    public void setResponseDescription(String responseDescription) {
+    public void setResponseDescription( String responseDescription )
+    {
         this.responseDescription = responseDescription;
     }
 
@@ -137,7 +147,8 @@ public class MultiStatus implements DavConstants, XmlSerializable {
      *
      * @return responseDescription
      */
-    public String getResponseDescription() {
+    public String getResponseDescription()
+    {
         return responseDescription;
     }
 
@@ -147,15 +158,19 @@ public class MultiStatus implements DavConstants, XmlSerializable {
      * @return Xml document
      * @param document
      */
-    public Element toXml(Document document) {
-        Element multistatus = DomUtil.createElement(document, XML_MULTISTATUS, NAMESPACE);
+    public Element toXml( Document document )
+    {
+        Element multistatus = DomUtil.createElement( document, XML_MULTISTATUS, NAMESPACE );
         Iterator it = responses.values().iterator();
-        while(it.hasNext()) {
-            multistatus.appendChild(((MultiStatusResponse)it.next()).toXml(document));
+        while ( it.hasNext() )
+        {
+            multistatus.appendChild( ( (MultiStatusResponse) it.next() ).toXml( document ) );
         }
-        if (responseDescription != null) {
-            Element respDesc = DomUtil.createElement(document, XML_RESPONSEDESCRIPTION, NAMESPACE, responseDescription);
-            multistatus.appendChild(respDesc);
+        if ( responseDescription != null )
+        {
+            Element respDesc =
+                DomUtil.createElement( document, XML_RESPONSEDESCRIPTION, NAMESPACE, responseDescription );
+            multistatus.appendChild( respDesc );
         }
         return multistatus;
     }
@@ -168,22 +183,26 @@ public class MultiStatus implements DavConstants, XmlSerializable {
      * @throws IllegalArgumentException if the given document is <code>null</code>
      * or does not provide the required element.
      */
-    public static MultiStatus createFromXml(Element multistatusElement) {
-        if (!DomUtil.matches(multistatusElement, XML_MULTISTATUS, NAMESPACE)) {
-            throw new IllegalArgumentException("DAV:multistatus element expected.");
+    public static MultiStatus createFromXml( Element multistatusElement )
+    {
+        if ( !DomUtil.matches( multistatusElement, XML_MULTISTATUS, NAMESPACE ) )
+        {
+            throw new IllegalArgumentException( "DAV:multistatus element expected." );
         }
 
         MultiStatus multistatus = new MultiStatus();
 
-        ElementIterator it = DomUtil.getChildren(multistatusElement, XML_RESPONSE, NAMESPACE);
-        while (it.hasNext()) {
+        ElementIterator it = DomUtil.getChildren( multistatusElement, XML_RESPONSE, NAMESPACE );
+        while ( it.hasNext() )
+        {
             Element respElem = it.nextElement();
-            MultiStatusResponse response = MultiStatusResponse.createFromXml(respElem);
-            multistatus.addResponse(response);
+            MultiStatusResponse response = MultiStatusResponse.createFromXml( respElem );
+            multistatus.addResponse( response );
         }
 
         // optional response description on the multistatus element
-        multistatus.setResponseDescription(DomUtil.getChildText(multistatusElement, XML_RESPONSEDESCRIPTION, NAMESPACE));
+        multistatus.setResponseDescription( DomUtil.getChildText( multistatusElement, XML_RESPONSEDESCRIPTION,
+                                                                  NAMESPACE ) );
         return multistatus;
     }
 }

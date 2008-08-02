@@ -27,7 +27,7 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
  * user interaction :). This implementation expects only one prompt with the
  * word password in it.
  * <p/>
- * <code>UIKeyboardInteractive</code> are usefull when you don't use user with
+ * <code>UIKeyboardInteractive</code> are useful when you don't use user with
  * password authentication with a server that use keyboard-interactive and
  * doesn't allow password method <code>PasswordAuthentication no</code>.
  *
@@ -61,8 +61,8 @@ public class TraditionalUIKeyboardInteractive
 
         String[] ret;
 
-        if ( prompt.length == echo.length && prompt.length == 1 && !echo[0] &&
-            prompt[0].toLowerCase().indexOf( "password" ) > -1 )
+        if ( prompt.length == echo.length && prompt.length == 1 && !echo[0]
+             && prompt[0].toLowerCase().indexOf( "password" ) > -1 )
         {
 
             ret = new String[1];

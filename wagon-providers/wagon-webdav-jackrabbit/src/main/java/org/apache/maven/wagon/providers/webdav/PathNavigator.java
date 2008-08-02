@@ -33,27 +33,27 @@ public class PathNavigator
 
     private int currentPosition;
 
-    public PathNavigator(String path)
+    public PathNavigator( String path )
     {
-        list = Arrays.asList(StringUtils.split(path, "/"));
+        list = Arrays.asList( StringUtils.split( path, "/" ) );
         currentPosition = list.size() + 1;
     }
 
     public String getPath()
     {
-        List currentPathList = list.subList(0, currentPosition);
+        List currentPathList = list.subList( 0, currentPosition );
         StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < currentPathList.size(); i++)
+        for ( int i = 0; i < currentPathList.size(); i++ )
         {
-            sb.append(currentPathList.get(i));
-            sb.append('/');
+            sb.append( currentPathList.get( i ) );
+            sb.append( '/' );
         }
         return sb.toString();
     }
 
     public boolean backward()
     {
-        if (currentPosition - 1 == 0)
+        if ( currentPosition - 1 == 0 )
         {
             return false;
         }
@@ -63,7 +63,7 @@ public class PathNavigator
 
     public boolean forward()
     {
-        if (currentPosition + 1 > list.size())
+        if ( currentPosition + 1 > list.size() )
         {
             return false;
         }

@@ -30,30 +30,30 @@ public class PathNavigatorTest extends TestCase
 
     public void testBackForwardBack()
     {
-        PathNavigator navigator = new PathNavigator(TEST_PATH);
+        PathNavigator navigator = new PathNavigator( TEST_PATH );
 
-        //Nav backward
-        assertTrue(navigator.backward());
-        assertEquals("the/quick/brown/fox/jumps/over/the/lazy/maven/developer/", navigator.getPath());
+        // Nav backward
+        assertTrue( navigator.backward() );
+        assertEquals( "the/quick/brown/fox/jumps/over/the/lazy/maven/developer/", navigator.getPath() );
 
-        assertTrue(navigator.backward());
-        assertEquals("the/quick/brown/fox/jumps/over/the/lazy/maven/", navigator.getPath());
+        assertTrue( navigator.backward() );
+        assertEquals( "the/quick/brown/fox/jumps/over/the/lazy/maven/", navigator.getPath() );
 
-        assertTrue(navigator.backward());
-        assertEquals("the/quick/brown/fox/jumps/over/the/lazy/", navigator.getPath());
+        assertTrue( navigator.backward() );
+        assertEquals( "the/quick/brown/fox/jumps/over/the/lazy/", navigator.getPath() );
 
-        assertTrue(navigator.backward());
-        assertEquals("the/quick/brown/fox/jumps/over/the/", navigator.getPath());
+        assertTrue( navigator.backward() );
+        assertEquals( "the/quick/brown/fox/jumps/over/the/", navigator.getPath() );
 
-        //Nav forward
-        assertTrue(navigator.forward());
-        assertEquals("the/quick/brown/fox/jumps/over/the/lazy/", navigator.getPath());
+        // Nav forward
+        assertTrue( navigator.forward() );
+        assertEquals( "the/quick/brown/fox/jumps/over/the/lazy/", navigator.getPath() );
 
-        assertTrue(navigator.forward());
-        assertEquals("the/quick/brown/fox/jumps/over/the/lazy/maven/", navigator.getPath());
+        assertTrue( navigator.forward() );
+        assertEquals( "the/quick/brown/fox/jumps/over/the/lazy/maven/", navigator.getPath() );
 
-        //Nav backward
-        assertTrue(navigator.backward());
-        assertEquals("the/quick/brown/fox/jumps/over/the/lazy/", navigator.getPath());
+        // Nav backward
+        assertTrue( navigator.backward() );
+        assertEquals( "the/quick/brown/fox/jumps/over/the/lazy/", navigator.getPath() );
     }
 }

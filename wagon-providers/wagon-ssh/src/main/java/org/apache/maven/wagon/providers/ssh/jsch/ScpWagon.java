@@ -43,7 +43,8 @@ import com.jcraft.jsch.JSchException;
  * Note that this implementation is <i>not</i> thread-safe, and multiple channels can not be used on the session at
  * the same time.
  * 
- * See <a href="http://blogs.sun.com/janp/entry/how_the_scp_protocol_works">http://blogs.sun.com/janp/entry/how_the_scp_protocol_works</a>
+ * See <a href="http://blogs.sun.com/janp/entry/how_the_scp_protocol_works">
+ * http://blogs.sun.com/janp/entry/how_the_scp_protocol_works</a>
  * for information on how the SCP protocol works.
  *
  * @version $Id$
@@ -386,8 +387,8 @@ public class ScpWagon
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_PUT );            
             
-            String msg = "Error occured while deploying '" + resourceName + "' to remote repository: " +
-                getRepository().getUrl() + ": " + e.getMessage();
+            String msg = "Error occured while deploying '" + resourceName + "' to remote repository: "
+                + getRepository().getUrl() + ": " + e.getMessage();
 
             throw new TransferFailedException( msg, e );
         }
@@ -408,8 +409,8 @@ public class ScpWagon
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_PUT );            
             
-            String msg = "Error occured while deploying '" + resource.getName() + "' to remote repository: " +
-                getRepository().getUrl() + ": " + e.getMessage();
+            String msg = "Error occured while deploying '" + resource.getName() + "' to remote repository: "
+                + getRepository().getUrl() + ": " + e.getMessage();
    
             throw new TransferFailedException( msg, e );
         }

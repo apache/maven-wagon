@@ -125,7 +125,8 @@ public class FileWagon
         {
             if ( !basedir.mkdirs() )
             {
-                throw new ConnectionException( "Repository path " + basedir + " does not exist, and cannot be created." );
+                throw new ConnectionException( "Repository path " + basedir + " does not exist,"
+                                               + " and cannot be created." );
             }
         }
 

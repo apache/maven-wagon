@@ -105,8 +105,8 @@ public class FtpWagon
         String host = getRepository().getHost();
 
         ftp = new FTPClient();
-        ftp.setDefaultTimeout(getTimeout());
-        ftp.setDataTimeout(getTimeout());
+        ftp.setDefaultTimeout( getTimeout() );
+        ftp.setDataTimeout( getTimeout() );
         
         ftp.addProtocolCommandListener( new PrintCommandListener( this ) );
 
@@ -293,7 +293,7 @@ public class FtpWagon
                 }
             }
 
-            // we come back to orginal basedir so
+            // we come back to original basedir so
             // FTP wagon is ready for next requests
             if ( !ftp.changeWorkingDirectory( getRepository().getBasedir() ) )
             {
@@ -304,8 +304,8 @@ public class FtpWagon
 
             if ( os == null )
             {
-                String msg = "Cannot transfer resource:  '" + resource +
-                    "' Output stream is null. FTP Server response: " + ftp.getReplyString();
+                String msg = "Cannot transfer resource:  '" + resource
+                    + "'. Output stream is null. FTP Server response: " + ftp.getReplyString();
 
                 throw new TransferFailedException( msg );
 
@@ -394,7 +394,7 @@ public class FtpWagon
     public class PrintCommandListener
         implements ProtocolCommandListener
     {
-        FtpWagon wagon;
+        private FtpWagon wagon;
 
         public PrintCommandListener( FtpWagon wagon )
         {
@@ -421,7 +421,7 @@ public class FtpWagon
     public List getFileList( String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        Resource resource = new Resource(destinationDirectory);
+        Resource resource = new Resource( destinationDirectory );
         
         try 
         {
@@ -436,13 +436,14 @@ public class FtpWagon
             }
             
             List ret = new ArrayList();
-            for(int i=0; i<ftpFiles.length; i++)
+            for( int i=0; i < ftpFiles.length; i++ )
             {
-                ret.add(ftpFiles[i].getName());
+                ret.add( ftpFiles[i].getName() );
             }
             
             return ret;
-        } catch(IOException e)
+        }
+        catch ( IOException e )
         {
             throw new TransferFailedException( "Error transferring file via FTP", e );
         }
@@ -460,7 +461,8 @@ public class FtpWagon
             String filename = PathUtils.filename( resource.getName() );
             int status = ftp.stat( filename );
 
-            return ( ( status == FTPReply.FILE_STATUS ) || ( status == FTPReply.FILE_STATUS_OK ) || ( status == FTPReply.SYSTEM_STATUS ) );
+            return ( ( status == FTPReply.FILE_STATUS ) || ( status == FTPReply.FILE_STATUS_OK )
+                            || ( status == FTPReply.SYSTEM_STATUS ) );
         }
         catch ( IOException e )
         {
@@ -509,6 +511,7 @@ public class FtpWagon
         if ( sourceFile.isDirectory() )
         {
             if ( !fileName.equals( "." ) )
+            {
                 try
                 {
                     // change directory if it already exists.
@@ -523,6 +526,7 @@ public class FtpWagon
                                 // This appears to be a conscious decision, based on other parts of this code.
                                 String group = permissions.getGroup();
                                 if ( group != null )
+                                {
                                     try
                                     {
                                         ftp.sendSiteCommand( "CHGRP " + permissions.getGroup() );
@@ -530,8 +534,10 @@ public class FtpWagon
                                     catch ( IOException e )
                                     {
                                     }
+                                }
                                 String mode = permissions.getDirectoryMode();
                                 if ( mode != null )
+                                {
                                     try
                                     {
                                         ftp.sendSiteCommand( "CHMOD " + permissions.getDirectoryMode() );
@@ -539,6 +545,7 @@ public class FtpWagon
                                     catch ( IOException e )
                                     {
                                     }
+                                }
                             }
 
                             if ( !ftp.changeWorkingDirectory( fileName ) )
@@ -559,6 +566,7 @@ public class FtpWagon
                     throw new TransferFailedException( "IOException caught while processing path at "
                                     + sourceFile.getAbsolutePath(), e );
                 }
+            }
 
             File[] files = sourceFile.listFiles();
             if ( files != null && files.length > 0 )
@@ -589,9 +597,9 @@ public class FtpWagon
             }
             catch ( IOException e )
             {
-                throw new TransferFailedException(
-                                                   "IOException caught while attempting to step up to parent directory after successfully processing "
-                                                                   + sourceFile.getAbsolutePath(), e );
+                throw new TransferFailedException( "IOException caught while attempting to step up to parent directory"
+                                                   + " after successfully processing " + sourceFile.getAbsolutePath(),
+                                                   e );
             }
         }
         else

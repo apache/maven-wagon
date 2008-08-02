@@ -41,7 +41,10 @@ public class KnownHostsProviderTestCase
     private static final String CORRECT_KEY = TestData.getHostKey();
 
     private static final String CHANGED_KEY =
-        "AAAAB3NzaC1yc2EAAAABIwAAAQEA8VLKkfHl2CNqW+m0603z07dyweWzzdVGQlMPUX4z1264E7M/h+6lPKiOo+u49CL7eQVA+FtWTZoJ3oBAMABcKnHx41TnSpQUkbdR6rzyC6IG1lXiVtEjG2w7DUnxpCtVo5PaQuJobwoXv5NNL3vx03THPgcDJquLPWvGnDWhnXoEh3/6c7rprwT+PrjZ6LIT35ZCUGajoehhF151oNbFMQHllfR6EAiZIP0z0nIVI+Jiv6g+XZapumVPVYjdOfxvLKQope1H9HJamT3bDIm8mkebUB10DzQJYxFt4/0wiNH3L4jsIFn+CiW1/IQm5yyff1CUO87OqVbtp9BlaXZNmw==";
+        "AAAAB3NzaC1yc2EAAAABIwAAAQEA8VLKkfHl2CNqW+m0603z07dyweWzzdVGQlMPUX4z1264E7M/h+6lPKiOo+u49CL7eQVA+FtW"
+        + "TZoJ3oBAMABcKnHx41TnSpQUkbdR6rzyC6IG1lXiVtEjG2w7DUnxpCtVo5PaQuJobwoXv5NNL3vx03THPgcDJquLPWvGnDWhnXoEh"
+        + "3/6c7rprwT+PrjZ6LIT35ZCUGajoehhF151oNbFMQHllfR6EAiZIP0z0nIVI+Jiv6g+XZapumVPVYjdOfxvLKQope1H9HJamT3bDI"
+        + "m8mkebUB10DzQJYxFt4/0wiNH3L4jsIFn+CiW1/IQm5yyff1CUO87OqVbtp9BlaXZNmw==";
 
     /**
      * tests what happens if the remote host has a different key than the one
