@@ -127,8 +127,8 @@
   </build>
   <modules>
     <module>wagon-provider-api</module>
-    <module>wagon-provider-test</module>
     <module>wagon-providers</module>
+    <module>wagon-provider-test</module>
   </modules>
   <dependencies>
     <dependency>
