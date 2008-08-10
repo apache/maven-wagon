@@ -44,7 +44,7 @@
   <scm>
     <connection>scm:svn:http://svn.apache.org/repos/asf/maven/wagon/trunk/</connection>
     <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/trunk/</developerConnection>
-    <url>http://svn.apache.org/viewcvs.cgi/maven/wagon/trunk/</url>
+    <url>http://svn.apache.org/viewvc/maven/wagon/trunk/</url>
   </scm>
 
   <distributionManagement>
