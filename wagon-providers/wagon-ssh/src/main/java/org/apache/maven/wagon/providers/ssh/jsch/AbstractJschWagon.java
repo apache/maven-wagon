@@ -219,6 +219,11 @@ public abstract class AbstractJschWagon
             config.setProperty( "StrictHostKeyChecking", getKnownHostsProvider().getHostKeyChecking() );
         }
 
+        if ( authenticationInfo.getPassword() != null )
+        {
+            config.setProperty( "PreferredAuthentications", "gssapi-with-mic,publickey,password,keyboard-interactive" );
+        }
+        
         config.setProperty( "BatchMode", interactive ? "no" : "yes" );
 
         session.setConfig( config );
