@@ -342,7 +342,7 @@ public abstract class AbstractJschWagon
         fireTransferError( resource, e, TransferEvent.REQUEST_GET );
 
         String msg =
-            "Error occured while downloading '" + resource + "' from the remote repository:" + getRepository() + ": "
+            "Error occurred while downloading '" + resource + "' from the remote repository:" + getRepository() + ": "
                 + e.getMessage();
 
         throw new TransferFailedException( msg, e );

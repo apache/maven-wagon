@@ -387,7 +387,7 @@ public class ScpWagon
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_PUT );            
             
-            String msg = "Error occured while deploying '" + resourceName + "' to remote repository: "
+            String msg = "Error occurred while deploying '" + resourceName + "' to remote repository: "
                 + getRepository().getUrl() + ": " + e.getMessage();
 
             throw new TransferFailedException( msg, e );
@@ -409,7 +409,7 @@ public class ScpWagon
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_PUT );            
             
-            String msg = "Error occured while deploying '" + resource.getName() + "' to remote repository: "
+            String msg = "Error occurred while deploying '" + resource.getName() + "' to remote repository: "
                 + getRepository().getUrl() + ": " + e.getMessage();
    
             throw new TransferFailedException( msg, e );
