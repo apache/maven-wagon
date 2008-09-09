@@ -67,7 +67,7 @@ public class WebDavWagonTest
     protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
     {
         File file = new File( getDavRepository(), resource.getName() );
-        return file.lastModified();
+        return ( file.lastModified() / 1000 ) * 1000;
     }
 
     private File getDavRepository()

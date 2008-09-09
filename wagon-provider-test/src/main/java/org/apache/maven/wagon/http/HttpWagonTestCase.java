@@ -307,7 +307,7 @@ public abstract class HttpWagonTestCase
     protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
     {
         File file = new File( getRepositoryDirectory(), resource.getName() );
-        return file.lastModified();
+        return ( file.lastModified() / 1000 ) * 1000;
     }
 
     private File getRepositoryDirectory()
