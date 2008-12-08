@@ -70,4 +70,22 @@ public class FileWagonTest
     {
         return new File( repository.getBasedir(), resource.getName() ).lastModified();
     }
+    
+    public void testResourceExists()
+        throws Exception
+    {
+        String url = "file://" + getBasedir();
+        
+        Wagon wagon = new FileWagon();
+        Repository repository = new Repository( "someID", url );
+        wagon.connect( repository );
+        
+        assertTrue( wagon.resourceExists( "target" ) );
+        assertTrue( wagon.resourceExists( "target/" ) );
+        assertTrue( wagon.resourceExists( "pom.xml" ) );
+        
+        assertFalse( wagon.resourceExists( "pom.xml/" ) );
+        
+        wagon.disconnect();
+    }
 }

@@ -254,6 +254,11 @@ public class FileWagon
 
         File file = resolveDestinationPath( resourceName );
 
+        if ( resourceName.endsWith( "/" ) )
+        {
+            return file.isDirectory();
+        }
+        
         return file.exists();
     }
 }
