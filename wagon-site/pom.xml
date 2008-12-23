@@ -23,9 +23,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>wagon</artifactId>
     <groupId>org.apache.maven.wagon</groupId>
-    <version>1.0-rc1-SNAPSHOT</version>
+    <artifactId>wagon</artifactId>
+    <version>1.0-beta-5-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
   </parent>
   
   <artifactId>wagon-site</artifactId>
