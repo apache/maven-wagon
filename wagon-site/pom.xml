@@ -20,15 +20,30 @@
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <artifactId>wagon</artifactId>
     <groupId>org.apache.maven.wagon</groupId>
     <version>1.0-rc1-SNAPSHOT</version>
   </parent>
-  <modelVersion>4.0.0</modelVersion>
+  
   <artifactId>wagon-site</artifactId>
   <name>Wagon</name>
-  
+
+  <!-- repeated here so that maven-site is not appended -->
+  <scm>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/wagon/trunk/</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/trunk/</developerConnection>
+    <url>http://svn.apache.org/viewvc/maven/wagon/trunk/</url>
+  </scm>
+  <distributionManagement>
+    <site>
+      <id>apache.website</id>
+      <url>scp://people.apache.org/www/maven.apache.org/wagon/</url>
+    </site>
+  </distributionManagement>
+
   <reporting>
     <excludeDefaults>true</excludeDefaults>
     <!-- TODO: disable dependencies -->
@@ -39,19 +54,4 @@
       </plugin>
     </plugins>
   </reporting>
-
-  <!-- repeated here so that maven-site is not appended -->
-  <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/wagon/trunk/</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/trunk/</developerConnection>
-    <url>http://svn.apache.org/viewvc/maven/wagon/trunk/</url>
-  </scm>
-
-  <distributionManagement>
-    <site>
-      <id>apache.website</id>
-      <url>scp://people.apache.org/www/maven.apache.org/wagon/</url>
-    </site>
-  </distributionManagement>
-
 </project>
