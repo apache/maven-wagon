@@ -46,6 +46,7 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
+import org.codehaus.plexus.util.IOUtil;
 
 /**
  * FtpWagon 
@@ -605,10 +606,14 @@ public class FtpWagon
         else
         {
             // Oh how I hope and pray, in denial, but today I am still just a file.
+            
+            FileInputStream sourceFileStream = null;
             try
             {
+                sourceFileStream = new FileInputStream( sourceFile );
+                
                 // It's a file. Upload it in the current directory.
-                if ( ftp.storeFile( fileName, new FileInputStream( sourceFile ) ) )
+                if ( ftp.storeFile( fileName, sourceFileStream ) )
                 {
                     if ( permissions != null )
                     {
@@ -646,6 +651,10 @@ public class FtpWagon
             {
                 throw new TransferFailedException( "IOException caught while attempting to upload "
                                 + sourceFile.getAbsolutePath(), e );
+            }
+            finally
+            {
+                IOUtil.close( sourceFileStream );
             }
 
         }
