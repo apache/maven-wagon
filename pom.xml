@@ -245,6 +245,12 @@ under the License.
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
           </configuration>
         </plugin>
+        <plugin>
+          <groupId>org.codehaus.plexus</groupId>
+          <artifactId>plexus-maven-plugin</artifactId>
+          <!-- the one in maven-parent-10 and after is no longer backward compatible-->
+          <version>1.3.5</version>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
