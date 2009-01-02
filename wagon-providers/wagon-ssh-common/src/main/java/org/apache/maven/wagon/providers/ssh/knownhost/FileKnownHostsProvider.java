@@ -19,13 +19,14 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
  * under the License.
  */
 
-import org.codehaus.plexus.util.FileUtils;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Set;
+
+import org.codehaus.plexus.util.FileUtils;
 
 /**
  * Provides known hosts from a file
@@ -70,10 +71,16 @@ public class FileKnownHostsProvider
     public void storeKnownHosts( String contents )
         throws IOException
     {
-        file.getParentFile().mkdirs();
-        FileUtils.fileWrite( file.getAbsolutePath(), contents );
+        Set hosts = this.loadKnownHosts( contents );
+        
+        if ( ! this.knownHosts.equals( hosts ) )
+        {
+            file.getParentFile().mkdirs();
+            FileUtils.fileWrite( file.getAbsolutePath(), contents );
+            this.knownHosts = hosts;
+        }
     }
-
+    
     public File getFile()
     {
         return file;

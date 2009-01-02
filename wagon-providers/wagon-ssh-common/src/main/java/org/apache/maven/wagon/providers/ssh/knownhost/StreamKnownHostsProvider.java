@@ -19,11 +19,16 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
  * under the License.
  */
 
-import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.StringOutputStream;
-
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.codehaus.plexus.util.IOUtil;
+import org.codehaus.plexus.util.StringOutputStream;
+import org.codehaus.plexus.util.StringUtils;
 
 /**
  * Provides known hosts from a file
@@ -43,10 +48,38 @@ public class StreamKnownHostsProvider
             StringOutputStream stringOutputStream = new StringOutputStream();
             IOUtil.copy( stream, stringOutputStream );
             this.contents = stringOutputStream.toString();
+            
+            this.knownHosts = this.loadKnownHosts( this.contents );
         }
         finally
         {
             IOUtil.close( stream );
         }
+    }
+    
+    protected Set loadKnownHosts( String contents )
+        throws IOException
+    {
+        Set hosts = new HashSet();
+        
+        BufferedReader br = new BufferedReader( new StringReader( contents ) );
+        
+        String line = null;
+        
+        do 
+        {
+            line = br.readLine();
+            if ( line != null )
+            {
+                String tokens[] = StringUtils.split( line );
+                if ( tokens.length == 3 )
+                {
+                    hosts.add( new KnownHostEntry( tokens[0], tokens[1], tokens[2] ) );
+                }
+            }
+            
+        }while ( line != null );   
+        
+        return hosts;
     }
 }
