@@ -218,11 +218,12 @@ public class WebDavWagon
                 method.releaseConnection();
         }
     }
-
+    
     public List getFileList( String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        final String url = getRepository().getUrl() + '/' + destinationDirectory;
+        String url = getRepository().getUrl() + '/' + destinationDirectory;
+        
         PropFindMethod method = null;
         try
         {
@@ -240,8 +241,26 @@ public class WebDavWagon
 
                     for ( int i = 0; i < multiStatus.getResponses().length; i++ )
                     {
+                        
                         MultiStatusResponse response = multiStatus.getResponses()[i];
-                        String fileName = PathUtils.filename( URLDecoder.decode( response.getHref() ) );
+                        
+                        String entryUrl =  response.getHref();
+                        String fileName = PathUtils.filename( URLDecoder.decode( entryUrl ) );
+                        if ( entryUrl.endsWith( "/" ) )
+                        {
+                            if ( i == 0 )
+                            {
+                                //by design jackrabbit webdav sticks parent directory as the first entry 
+                                // so we need to ignore this entry
+                                // http://www.nabble.com/Extra-entry-in-get-file-list-with-jackrabbit-webdav-td21262786.html
+                                // http://www.webdav.org/specs/rfc4918.html#rfc.section.9.1
+                                continue;
+                            }
+                            
+                            //extract "dir/" part of "path.to.dir/"
+                            fileName = PathUtils.filename( PathUtils.dirname( URLDecoder.decode( entryUrl ) ) ) + "/";
+                        }
+                        
                         if ( !StringUtils.isEmpty( fileName ) )
                         {
                             dirs.add( fileName );
