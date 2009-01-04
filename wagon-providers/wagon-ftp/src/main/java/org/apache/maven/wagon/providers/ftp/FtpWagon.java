@@ -373,7 +373,7 @@ public class FtpWagon
     {
         if ( !ftp.changeWorkingDirectory( getRepository().getBasedir() ) )
         {
-            throw new TransferFailedException(
+            throw new ResourceDoesNotExistException(
                 "Required directory: '" + getRepository().getBasedir() + "' " + "is missing" );
         }
 

@@ -289,6 +289,10 @@ public class ScpHelper
             {
                 throw new ResourceDoesNotExistException( e.getMessage().trim() );
             }
+            else if ( e.getMessage().trim().endsWith( "Not a directory" ) )
+            {
+                throw new ResourceDoesNotExistException( e.getMessage().trim() );
+            }            
             else
             {
                 throw new TransferFailedException( "Error performing file listing.", e );
