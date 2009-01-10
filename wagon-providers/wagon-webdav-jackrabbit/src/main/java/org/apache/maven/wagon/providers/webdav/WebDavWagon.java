@@ -55,9 +55,9 @@ import org.w3c.dom.Node;
  * @author <a href="mailto:hisidro@exist.com">Henry Isidro</a>
  * @author <a href="mailto:joakime@apache.org">Joakim Erdfelt</a>
  * @author <a href="mailto:carlos@apache.org">Carlos Sanchez</a>
- * @author <a href="mailto:james@atlassian.com>James William Dumay</a>
- * 
- * @plexus.component role="org.apache.maven.wagon.Wagon" 
+ * @author <a href="mailto:james@atlassian.com">James William Dumay</a>
+ *
+ * @plexus.component role="org.apache.maven.wagon.Wagon"
  *   role-hint="dav"
  *   instantiation-strategy="per-lookup"
  */
@@ -66,10 +66,10 @@ public class WebDavWagon
 {
     /**
      * Defines the protocol mapping to use.
-     * 
+     *
      * First string is the user definition way to define a webdav url,
      * the second string is the internal representation of that url.
-     * 
+     *
      * NOTE: The order of the mapping becomes the search order.
      */
     private static final String[][] protocolMap = new String[][] {
@@ -80,7 +80,7 @@ public class WebDavWagon
         { "dav://", "http://" },         /* URI spec compliant (protocol only) */
         { "davs://", "https://" }        /* URI spec compliant (protocol only) */
     };
-    
+
     /**
      * This wagon supports directory copying
      *
@@ -96,8 +96,8 @@ public class WebDavWagon
      * They are created one at a time until the whole path exists.
      *
      * @param dir path to be created in server from repository basedir
-     * @throws IOException 
-     * @throws HttpException 
+     * @throws IOException
+     * @throws HttpException
      * @throws TransferFailedException
      */
     protected void mkdirs( String dir ) throws HttpException, IOException
@@ -108,10 +108,10 @@ public class WebDavWagon
         String relpath = FileUtils.normalize( getPath( basedir, dir ) + "/" );
 
         PathNavigator navigator = new PathNavigator(relpath);
-        
-        // traverse backwards until we hit a directory that already exists (OK/NOT_ALLOWED), or that we were able to 
+
+        // traverse backwards until we hit a directory that already exists (OK/NOT_ALLOWED), or that we were able to
         // create (CREATED), or until we get to the top of the path
-        int status = SC_NULL;        
+        int status = SC_NULL;
         while ( navigator.backward() )
         {
             String url = getUrl( navigator );
@@ -215,15 +215,17 @@ public class WebDavWagon
         finally
         {
             if ( method != null )
+            {
                 method.releaseConnection();
+            }
         }
     }
-    
+
     public List getFileList( String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         String url = getRepository().getUrl() + '/' + destinationDirectory;
-        
+
         PropFindMethod method = null;
         try
         {
@@ -241,26 +243,26 @@ public class WebDavWagon
 
                     for ( int i = 0; i < multiStatus.getResponses().length; i++ )
                     {
-                        
+
                         MultiStatusResponse response = multiStatus.getResponses()[i];
-                        
+
                         String entryUrl =  response.getHref();
                         String fileName = PathUtils.filename( URLDecoder.decode( entryUrl ) );
                         if ( entryUrl.endsWith( "/" ) )
                         {
                             if ( i == 0 )
                             {
-                                //by design jackrabbit webdav sticks parent directory as the first entry 
+                                //by design jackrabbit webdav sticks parent directory as the first entry
                                 // so we need to ignore this entry
                                 // http://www.nabble.com/Extra-entry-in-get-file-list-with-jackrabbit-webdav-td21262786.html
                                 // http://www.webdav.org/specs/rfc4918.html#rfc.section.9.1
                                 continue;
                             }
-                            
+
                             //extract "dir/" part of "path.to.dir/"
                             fileName = PathUtils.filename( PathUtils.dirname( URLDecoder.decode( entryUrl ) ) ) + "/";
                         }
-                        
+
                         if ( !StringUtils.isEmpty( fileName ) )
                         {
                             dirs.add( fileName );
@@ -286,12 +288,14 @@ public class WebDavWagon
         finally
         {
             if ( method != null )
+            {
                 method.releaseConnection();
+            }
         }
         throw new ResourceDoesNotExistException( "Destination path exists but is not a "
                         + "WebDAV collection (directory): " + url );
     }
-    
+
     public String getURL( Repository repository )
     {
         String url = repository.getUrl();
