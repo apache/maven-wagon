@@ -175,6 +175,11 @@ public class ScmWagon
     private void removeCheckoutDirectory()
         throws ConnectionException
     {
+        if( checkoutDirectory == null )
+        {
+            return; // Silently return.
+        }
+
         try
         {
             FileUtils.deleteDirectory( checkoutDirectory );
