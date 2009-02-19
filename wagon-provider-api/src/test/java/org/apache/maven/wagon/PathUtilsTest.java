@@ -178,6 +178,11 @@ public class PathUtilsTest
         assertEquals( "c:/temp", PathUtils.basedir( "file:c|/temp" ) );
         assertEquals( "/temp", PathUtils.basedir( "file:/temp" ) );
 
+        // URL decoding
+        assertEquals( "c:/my docs", PathUtils.basedir( "file:///c:/my docs" ) );
+        assertEquals( "c:/my docs", PathUtils.basedir( "file:///c:/my%20docs" ) );
+        assertEquals( "c:/name #%20?{}[]<>.txt", PathUtils.basedir( "file:///c:/name%20%23%2520%3F%7B%7D%5B%5D%3C%3E.txt" ) );
+
         assertEquals( "c:/temp", PathUtils.basedir( "FILE:///c:/temp" ) );
         assertEquals( "localhost", PathUtils.host( "FILE:///c:/temp" ) );
     }
