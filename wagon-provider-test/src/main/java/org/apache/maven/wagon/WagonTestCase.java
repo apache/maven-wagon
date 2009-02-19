@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -725,7 +726,8 @@ public abstract class WagonTestCase
         String dirName = "file-list";
 
         String filenames[] =
-            new String[] { "test-resource.txt", "test-resource.pom", "test-resource b.txt", "more-resources.dat" };
+            new String[] { "test-resource.txt", "test-resource.pom", "test-resource b.txt", "more-resources.dat",
+                ".index.txt" };
 
         for ( int i = 0; i < filenames.length; i++ )
         {
@@ -738,13 +740,24 @@ public abstract class WagonTestCase
 
         List list = wagon.getFileList( dirName );
         assertNotNull( "file list should not be null.", list );
-        assertTrue( "file list should contain 4 or more items (actually contains " + list.size() + " elements).",
-                    list.size() >= 4 );
+        assertTrue( "file list should contain more items (actually contains '" + list + "').",
+                    list.size() >= filenames.length );
 
         for ( int i = 0; i < filenames.length; i++ )
         {
             assertTrue( "Filename '" + filenames[i] + "' should be in list.", list.contains( filenames[i] ) );
         }
+        
+        // WAGON-250
+        list = wagon.getFileList( "" );
+        assertNotNull( "file list should not be null.", list );
+        assertTrue( "file list should contain items (actually contains '" + list + "').", !list.isEmpty() );
+        assertTrue( list.contains( "file-list/" ) );
+        assertFalse( list.contains( "file-list" ) );
+        assertFalse( list.contains( "." ) );
+        assertFalse( list.contains( ".." ) );
+        assertFalse( list.contains( "./" ) );
+        assertFalse( list.contains( "../" ) );
 
         wagon.disconnect();
 

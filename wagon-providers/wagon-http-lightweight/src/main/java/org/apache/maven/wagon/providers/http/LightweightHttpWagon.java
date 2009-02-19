@@ -319,7 +319,7 @@ public class LightweightHttpWagon
     {
         InputData inputData = new InputData();
 
-        if ( !destinationDirectory.endsWith( "/" ) )
+        if ( destinationDirectory.length() > 0 && !destinationDirectory.endsWith( "/" ) )
         {
             destinationDirectory += "/";
         }

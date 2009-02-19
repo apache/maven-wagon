@@ -27,6 +27,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -239,9 +240,19 @@ public class FileWagon
             throw new ResourceDoesNotExistException( "Path is not a directory: " + destinationDirectory );
         }
 
-        String files[] = path.list();
+        File[] files = path.listFiles();
 
-        return Arrays.asList( files );
+        List list = new ArrayList( files.length );
+        for ( int i = 0; i < files.length; i++ )
+        {
+            String name = files[i].getName();
+            if ( files[i].isDirectory() && !name.endsWith( "/" ) )
+            {
+                name += "/";
+            }
+            list.add( name );
+        }
+        return list;
     }
 
     public boolean resourceExists( String resourceName )

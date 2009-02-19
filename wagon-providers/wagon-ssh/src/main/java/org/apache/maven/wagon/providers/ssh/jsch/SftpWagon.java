@@ -231,6 +231,11 @@ public class SftpWagon
                 channel.cd( dir );
             }
 
+            if ( filename.length() == 0 )
+            {
+                filename = ".";
+            }
+            
             attrs = channel.stat( filename );
         }
         catch ( SftpException e )
@@ -239,6 +244,10 @@ public class SftpWagon
             {
                 throw new ResourceDoesNotExistException( e.toString(), e );
             }
+            else if( e.toString().trim().indexOf( "Can't change directory" ) != -1  )
+            {
+                throw new ResourceDoesNotExistException( e.toString(), e );
+            }   
             else
             {
                 throw e;
@@ -340,6 +349,11 @@ public class SftpWagon
     public List getFileList( String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
+        if ( destinationDirectory.length() == 0 )
+        {
+            destinationDirectory = ".";
+        }
+        
         String filename = ScpHelper.getResourceFilename( destinationDirectory );
 
         String dir = ScpHelper.getResourceDirectory( destinationDirectory );
@@ -364,7 +378,22 @@ public class SftpWagon
             {
                 ChannelSftp.LsEntry entry = (ChannelSftp.LsEntry) i.next();
                 
-                files.add( entry.getFilename() );
+                String name = entry.getFilename();
+                if ( entry.getAttrs().isDir() )
+                {
+                    if ( !name.equals( "." ) && !name.equals( ".." ) )
+                    {
+                        if ( !name.endsWith( "/" ) )
+                        {
+                            name += "/";
+                        }
+                        files.add( name );
+                    }
+                }
+                else
+                {
+                    files.add( name );
+                }
             }
             return files;
         }

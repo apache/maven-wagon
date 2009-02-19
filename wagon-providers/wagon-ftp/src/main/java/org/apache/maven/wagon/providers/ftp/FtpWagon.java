@@ -164,6 +164,7 @@ public class FtpWagon
 
             // Set to binary mode.
             ftp.setFileType( FTP.BINARY_FILE_TYPE );
+            ftp.setListHiddenFiles( true );
 
             // Use passive mode as default because most of us are
             // behind firewalls these days.
@@ -439,7 +440,14 @@ public class FtpWagon
             List ret = new ArrayList();
             for( int i=0; i < ftpFiles.length; i++ )
             {
-                ret.add( ftpFiles[i].getName() );
+                String name = ftpFiles[i].getName();
+                
+                if ( ftpFiles[i].isDirectory() && !name.endsWith( "/" ) )
+                {
+                    name += "/";
+                }
+                
+                ret.add( name );
             }
             
             return ret;

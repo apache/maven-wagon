@@ -41,7 +41,7 @@ public class HttpWagon
     public List getFileList( String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException 
     {
-        if ( !destinationDirectory.endsWith( "/" ) )
+        if ( destinationDirectory.length() > 0 && !destinationDirectory.endsWith( "/" ) )
         {
             destinationDirectory += "/";
         }
