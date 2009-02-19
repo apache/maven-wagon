@@ -22,6 +22,7 @@ package org.apache.maven.wagon.providers.ssh.external;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.CommandExecutionException;
@@ -218,7 +219,7 @@ public class ScpExternalWagon
 
     protected boolean isPuTTY()
     {
-        return sshExecutable.toLowerCase().indexOf( "plink" ) >= 0;
+        return sshExecutable.toLowerCase( Locale.ENGLISH ).indexOf( "plink" ) >= 0;
     }
 
     private Commandline createBaseCommandLine( boolean putty, String executable, File privateKey )
@@ -311,7 +312,8 @@ public class ScpExternalWagon
             int exitCode = CommandLineUtils.executeCommandLine( cl, null, err );
             if ( exitCode != 0 )
             {
-                if ( !put && err.getOutput().trim().toLowerCase().indexOf( "no such file or directory" ) != -1 )
+                if ( !put && 
+                    err.getOutput().trim().toLowerCase( Locale.ENGLISH ).indexOf( "no such file or directory" ) != -1 )
                 {
                     throw new ResourceDoesNotExistException( err.getOutput() );
                 }
@@ -336,7 +338,7 @@ public class ScpExternalWagon
 
     boolean isPuTTYSCP()
     {
-        return scpExecutable.toLowerCase().indexOf( "pscp" ) >= 0;
+        return scpExecutable.toLowerCase( Locale.ENGLISH ).indexOf( "pscp" ) >= 0;
     }
 
     private String normalizeResource( Resource resource )
