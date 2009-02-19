@@ -79,5 +79,31 @@ public class ScpExternalWagonTest
 
         return authInfo;
     }
+    
+    public void testIsPuTTY() throws Exception
+    {
+        ScpExternalWagon wagon = (ScpExternalWagon) getWagon();
 
+        wagon.setSshExecutable( "c:\\program files\\PuTTY\\plink.exe" );
+        assertTrue( wagon.isPuTTY() );
+        wagon.setSshExecutable( "plink" );
+        assertTrue( wagon.isPuTTY() );
+        wagon.setSshExecutable( "PLINK" );
+        assertTrue( wagon.isPuTTY() );
+        wagon.setSshExecutable( "PlInK" );
+        assertTrue( wagon.isPuTTY() );
+        wagon.setSshExecutable( "ssh" );
+        assertFalse( wagon.isPuTTY() );
+
+        wagon.setScpExecutable( "c:\\program files\\PuTTY\\pscp.exe" );
+        assertTrue( wagon.isPuTTYSCP() );
+        wagon.setScpExecutable( "pscp" );
+        assertTrue( wagon.isPuTTYSCP() );
+        wagon.setScpExecutable( "PSCP" );
+        assertTrue( wagon.isPuTTYSCP() );
+        wagon.setScpExecutable( "PsCp" );
+        assertTrue( wagon.isPuTTYSCP() );
+        wagon.setScpExecutable( "scp" );
+        assertFalse( wagon.isPuTTYSCP() );
+    }
 }

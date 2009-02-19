@@ -151,7 +151,7 @@ public class ScpExternalWagon
     public Streams executeCommand( String command, boolean ignoreFailures )
         throws CommandExecutionException
     {
-        boolean putty = sshExecutable.indexOf( "plink" ) >= 0;
+        boolean putty = isPuTTY();
 
         File privateKey;
         try
@@ -216,6 +216,11 @@ public class ScpExternalWagon
         }
     }
 
+    protected boolean isPuTTY()
+    {
+        return sshExecutable.toLowerCase().indexOf( "plink" ) >= 0;
+    }
+
     private Commandline createBaseCommandLine( boolean putty, String executable, File privateKey )
     {
         Commandline cl = new Commandline();
@@ -252,7 +257,7 @@ public class ScpExternalWagon
     private void executeScpCommand( Resource resource, File localFile, boolean put )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        boolean putty = scpExecutable.indexOf( "pscp" ) >= 0;
+        boolean putty = isPuTTYSCP();
 
         File privateKey;
         try
@@ -327,6 +332,11 @@ public class ScpExternalWagon
 
             throw new TransferFailedException( "Error executing command line", e );
         }
+    }
+
+    boolean isPuTTYSCP()
+    {
+        return scpExecutable.toLowerCase().indexOf( "pscp" ) >= 0;
     }
 
     private String normalizeResource( Resource resource )
