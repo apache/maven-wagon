@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.apache.commons.net.ProtocolCommandEvent;
@@ -353,7 +354,8 @@ public class FtpWagon
             //@todo check how it works! javadoc of common login says:
             // Returns the file timestamp. This usually the last modification time.
             //
-            long lastModified = ftpFiles[0].getTimestamp().getTimeInMillis();
+            Calendar timestamp = ftpFiles[0].getTimestamp();
+            long lastModified = timestamp != null ? timestamp.getTimeInMillis() : 0;
 
             resource.setContentLength( contentLength );
 
