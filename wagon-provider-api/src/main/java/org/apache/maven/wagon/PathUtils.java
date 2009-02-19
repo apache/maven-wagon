@@ -221,7 +221,7 @@ public final class PathUtils
 
     /**
      * @param url
-     * @return
+     * @return the port or {@link WagonConstants#UNKNOWN_PORT} if not existent
      */
     public static int port( String url )
     {
@@ -440,7 +440,15 @@ public final class PathUtils
 
         if ( absolutePath.startsWith( basedirPath ) )
         {
-            relative = absolutePath.substring( basedirPath.length() + 1 );
+            relative = absolutePath.substring( basedirPath.length() );
+            if ( relative.startsWith( "/" ) )
+            {
+                relative = relative.substring( 1 );
+            }
+            if ( relative.length() <= 0 )
+            {
+                relative = ".";
+            }
         }
         else
         {

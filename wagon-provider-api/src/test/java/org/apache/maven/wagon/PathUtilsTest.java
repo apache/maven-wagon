@@ -19,6 +19,8 @@ package org.apache.maven.wagon;
  * under the License.
  */
 
+import java.io.File;
+
 import junit.framework.TestCase;
 
 /**
@@ -229,6 +231,24 @@ public class PathUtilsTest
         assertEquals( "c:/temp", PathUtils.basedir( "file://c:/temp" ) );
         assertEquals( "/", PathUtils.basedir( "http://localhost:80/" ) );
         assertEquals( "/", PathUtils.basedir( "http://localhost/" ) );
+    }
+
+    public void testToRelative()
+    {
+        assertEquals( "dir", PathUtils.toRelative( new File( "/home/user" ).getAbsoluteFile(),
+                                                   new File( "/home/user/dir" ).getAbsolutePath() ) );
+        assertEquals( "dir", PathUtils.toRelative( new File( "C:/home/user" ).getAbsoluteFile(),
+                                                   new File( "C:/home/user/dir" ).getAbsolutePath() ) );
+
+        assertEquals( "dir/subdir", PathUtils.toRelative( new File( "/home/user" ).getAbsoluteFile(),
+                                                          new File( "/home/user/dir/subdir" ).getAbsolutePath() ) );
+        assertEquals( "dir/subdir", PathUtils.toRelative( new File( "C:/home/user" ).getAbsoluteFile(),
+                                                          new File( "C:/home/user/dir/subdir" ).getAbsolutePath() ) );
+
+        assertEquals( ".", PathUtils.toRelative( new File( "/home/user" ).getAbsoluteFile(),
+                                                 new File( "/home/user" ).getAbsolutePath() ) );
+        assertEquals( ".", PathUtils.toRelative( new File( "C:/home/user" ).getAbsoluteFile(),
+                                                 new File( "C:/home/user" ).getAbsolutePath() ) );
     }
 
 }
