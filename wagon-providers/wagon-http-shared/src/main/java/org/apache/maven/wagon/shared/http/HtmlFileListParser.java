@@ -107,7 +107,7 @@ public class HtmlFileListParser
 
         public Parser( URI baseURI )
         {
-            this.baseURI = baseURI;
+            this.baseURI = baseURI.normalize();
         }
 
         public Set getLinks()

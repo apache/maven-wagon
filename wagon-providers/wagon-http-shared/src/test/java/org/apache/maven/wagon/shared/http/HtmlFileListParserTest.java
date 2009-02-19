@@ -266,6 +266,80 @@ public class HtmlFileListParserTest
     }
 
     /**
+     * Test of an html which is improperly formatted, contains full host-specific paths to the resources and uses non-normalized base URI
+     * @throws Exception
+     */
+    public void testParseJettyWithNonNormalizedBaseURI()
+        throws Exception
+    {
+        List/*<String>*/links = parseLinks( "http://www.ibiblio.org/maven2/org/apache/maven/wagon//",
+                                             "jetty-wagon.html" );
+
+        String[] expected = new String[] {
+            "wagon-1.0-alpha-2.pom",
+            "wagon-1.0-alpha-2.pom.asc",
+            "wagon-1.0-alpha-2.pom.md5",
+            "wagon-1.0-alpha-2.pom.sha1",
+            "wagon-1.0-alpha-3-20050413.021234-4.pom",
+            "wagon-1.0-alpha-3-20050413.021234-4.pom.md5",
+            "wagon-1.0-alpha-3-20050413.021234-4.pom.sha1",
+            "wagon-1.0-alpha-3-20050419.043745-5.pom",
+            "wagon-1.0-alpha-3-20050419.043745-5.pom.md5",
+            "wagon-1.0-alpha-3-20050419.043745-5.pom.sha1",
+            "wagon-1.0-alpha-3-20050419.044035-6.pom",
+            "wagon-1.0-alpha-3-20050419.044035-6.pom.md5",
+            "wagon-1.0-alpha-3-20050419.044035-6.pom.sha1",
+            "wagon-1.0-alpha-3-20050421.162738-7.pom",
+            "wagon-1.0-alpha-3-20050421.162738-7.pom.md5",
+            "wagon-1.0-alpha-3-20050421.162738-7.pom.sha1",
+            "wagon-1.0-alpha-3-20050422.075233-8.pom",
+            "wagon-1.0-alpha-3-20050422.075233-8.pom.md5",
+            "wagon-1.0-alpha-3-20050422.075233-8.pom.sha1",
+            "wagon-1.0-alpha-3-20050429.051847-9.pom",
+            "wagon-1.0-alpha-3-20050429.051847-9.pom.md5",
+            "wagon-1.0-alpha-3-20050429.051847-9.pom.sha1",
+            "wagon-file/",
+            "wagon-ftp/",
+            "wagon-http-lightweight/",
+            "wagon-http/",
+            "wagon-lightweight-http/",
+            "wagon-provider-api/",
+            "wagon-provider-test/",
+            "wagon-provider/",
+            "wagon-providers-1.0-alpha-2.pom",
+            "wagon-providers-1.0-alpha-2.pom.asc",
+            "wagon-providers-1.0-alpha-2.pom.md5",
+            "wagon-providers-1.0-alpha-2.pom.sha1",
+            "wagon-providers-1.0-alpha-3-20050407.202848-1.pom",
+            "wagon-providers-1.0-alpha-3-20050407.202848-1.pom.md5",
+            "wagon-providers-1.0-alpha-3-20050407.202848-1.pom.sha1",
+            "wagon-providers-1.0-alpha-3-20050419.044035-2.pom",
+            "wagon-providers-1.0-alpha-3-20050419.044035-2.pom.md5",
+            "wagon-providers-1.0-alpha-3-20050419.044035-2.pom.sha1",
+            "wagon-providers-1.0-alpha-3-20050421.162738-3.pom",
+            "wagon-providers-1.0-alpha-3-20050421.162738-3.pom.md5",
+            "wagon-providers-1.0-alpha-3-20050421.162738-3.pom.sha1",
+            "wagon-providers-1.0-alpha-3-20050422.075233-4.pom",
+            "wagon-providers-1.0-alpha-3-20050422.075233-4.pom.md5",
+            "wagon-providers-1.0-alpha-3-20050422.075233-4.pom.sha1",
+            "wagon-providers-1.0-alpha-3-20050429.051847-5.pom",
+            "wagon-providers-1.0-alpha-3-20050429.051847-5.pom.md5",
+            "wagon-providers-1.0-alpha-3-20050429.051847-5.pom.sha1",
+            "wagon-providers/",
+            "wagon-scm/",
+            "wagon-ssh-external/",
+            "wagon-ssh/",
+            "wagon-webdav/",
+            "wagon/" };
+
+        assertContainsExpected( links, expected );
+
+        String[] avoided = new String[] { "/org/", "?C=S;O=A", "?C=D;O=A", "?C=M;O=A" };
+
+        assertNotContainingAvoided( links, avoided );
+    }
+
+    /**
      * Using repository.codehaus.org output as an example.
      * This is an example of an older RHEL installation of apache httpd with old fancy indexing output
      * This example tests how to detect directories properly.
