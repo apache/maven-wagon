@@ -36,7 +36,7 @@ public class PathNavigator
     public PathNavigator( String path )
     {
         list = Arrays.asList( StringUtils.split( path, "/" ) );
-        currentPosition = list.size() + 1;
+        currentPosition = list.size();
     }
 
     public String getPath()
@@ -53,7 +53,7 @@ public class PathNavigator
 
     public boolean backward()
     {
-        if ( currentPosition - 1 == 0 )
+        if ( currentPosition == 0 )
         {
             return false;
         }

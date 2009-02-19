@@ -129,6 +129,89 @@ public class WebDavWagonTest
     {
         assertURL( "dav+https://localhost:10007/dav/", "https://localhost:10007/dav/" );
     }
+    
+    public void testMkdirs() throws Exception
+    {
+        setupRepositories();
+
+        setupWagonTestingFixtures();
+
+        WebDavWagon wagon = (WebDavWagon) getWagon();
+        wagon.connect( testRepository, getAuthInfo() );
+        
+        try
+        {
+            File dir = getRepositoryDirectory();
+            
+            // check basedir also doesn't exist and will need to be created
+            dir = new File( dir, testRepository.getBasedir() );
+            assertFalse( dir.exists() );
+            
+            // test leading /
+            assertFalse( new File( dir, "foo" ).exists() );
+            wagon.mkdirs( "/foo" );
+            assertTrue( new File( dir, "foo" ).exists() );
+            
+            // test trailing /
+            assertFalse( new File( dir, "bar" ).exists() );
+            wagon.mkdirs( "bar/" );
+            assertTrue( new File( dir, "bar" ).exists() );
+            
+            // test when already exists
+            wagon.mkdirs( "bar" );
+            
+            // test several parts
+            assertFalse( new File( dir, "1/2/3/4" ).exists() );
+            wagon.mkdirs( "1/2/3/4" );
+            assertTrue( new File( dir, "1/2/3/4" ).exists() );
+            
+            // test additional part and trailing /
+            assertFalse( new File( dir, "1/2/3/4/5" ).exists() );
+            wagon.mkdirs( "1/2/3/4/5/" );
+            assertTrue( new File( dir, "1/2/3/4" ).exists() );
+        }
+        finally
+        {
+            wagon.disconnect();
+            
+            tearDownWagonTestingFixtures();
+        }
+    }
+
+    public void testMkdirsWithNoBasedir() throws Exception
+    {
+        // WAGON-244
+        setupRepositories();
+
+        setupWagonTestingFixtures();
+
+        // reconstruct with no basedir
+        testRepository.setUrl( testRepository.getProtocol() + "://" + testRepository.getHost() + ":"
+            + testRepository.getPort() );
+
+        WebDavWagon wagon = (WebDavWagon) getWagon();
+        wagon.connect( testRepository, getAuthInfo() );
+        
+        try
+        {
+            File dir = getRepositoryDirectory();
+            
+            // check basedir also doesn't exist and will need to be created
+            dir = new File( dir, testRepository.getBasedir() );
+            assertTrue( dir.exists() );
+            
+            // test leading /
+            assertFalse( new File( dir, "foo" ).exists() );
+            wagon.mkdirs( "/foo" );
+            assertTrue( new File( dir, "foo" ).exists() );            
+        }
+        finally
+        {
+            wagon.disconnect();
+            
+            tearDownWagonTestingFixtures();
+        }
+    }
 
     protected void setHttpHeaders( StreamingWagon wagon, Properties properties )
     {

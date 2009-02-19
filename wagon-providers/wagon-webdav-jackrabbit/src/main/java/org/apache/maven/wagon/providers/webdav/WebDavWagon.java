@@ -40,6 +40,7 @@ import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;
@@ -105,6 +106,13 @@ public class WebDavWagon
         Repository repository = getRepository();
         String basedir = repository.getBasedir();
 
+        String baseUrl = repository.getProtocol() + "://" + repository.getHost();
+        if ( repository.getPort() != WagonConstants.UNKNOWN_PORT )
+        {
+            baseUrl += ":" + repository.getPort();
+        }
+        
+        // create relative path that will always have a leading and trailing slash
         String relpath = FileUtils.normalize( getPath( basedir, dir ) + "/" );
 
         PathNavigator navigator = new PathNavigator(relpath);
@@ -112,9 +120,9 @@ public class WebDavWagon
         // traverse backwards until we hit a directory that already exists (OK/NOT_ALLOWED), or that we were able to
         // create (CREATED), or until we get to the top of the path
         int status = SC_NULL;
-        while ( navigator.backward() )
+        do
         {
-            String url = getUrl( navigator );
+            String url = baseUrl + "/" + navigator.getPath();
             status = doMkCol( url );
             if ( status == HttpStatus.SC_OK || status == HttpStatus.SC_CREATED
                 || status == HttpStatus.SC_METHOD_NOT_ALLOWED )
@@ -122,11 +130,12 @@ public class WebDavWagon
                 break;
             }
         }
+        while ( navigator.backward() );
 
         // traverse forward creating missing directories
         while ( navigator.forward() )
         {
-            String url = getUrl( navigator );
+            String url = baseUrl + "/" + navigator.getPath();
             status = doMkCol( url );
             if ( status != HttpStatus.SC_OK && status != HttpStatus.SC_CREATED )
             {
@@ -150,12 +159,6 @@ public class WebDavWagon
                 method.releaseConnection();
             }
         }
-    }
-
-    private String getUrl( PathNavigator navigator )
-    {
-        String url = getRepository().getUrl().replaceAll( getRepository().getBasedir(), "" );
-        return url + '/' + navigator.getPath();
     }
 
     /**

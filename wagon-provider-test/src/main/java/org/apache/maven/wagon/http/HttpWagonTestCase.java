@@ -310,7 +310,7 @@ public abstract class HttpWagonTestCase
         return ( file.lastModified() / 1000 ) * 1000;
     }
 
-    private File getRepositoryDirectory()
+    protected File getRepositoryDirectory()
     {
         return getTestFile( "target/test-output/http-repository" );
     }

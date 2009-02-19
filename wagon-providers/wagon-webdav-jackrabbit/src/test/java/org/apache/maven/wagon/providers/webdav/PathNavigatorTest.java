@@ -26,34 +26,38 @@ import junit.framework.TestCase;
  */
 public class PathNavigatorTest extends TestCase
 {
-    private static final String TEST_PATH = "the/quick/brown/fox/jumps/over/the/lazy/maven/developer";
+    private static final String TEST_PATH = "foo/bar/baz";
 
-    public void testBackForwardBack()
+    public void testBackAndForward()
     {
         PathNavigator navigator = new PathNavigator( TEST_PATH );
 
+        assertEquals( "foo/bar/baz/", navigator.getPath() );
+        
         // Nav backward
         assertTrue( navigator.backward() );
-        assertEquals( "the/quick/brown/fox/jumps/over/the/lazy/maven/developer/", navigator.getPath() );
+        assertEquals( "foo/bar/", navigator.getPath() );
 
         assertTrue( navigator.backward() );
-        assertEquals( "the/quick/brown/fox/jumps/over/the/lazy/maven/", navigator.getPath() );
+        assertEquals( "foo/", navigator.getPath() );
 
         assertTrue( navigator.backward() );
-        assertEquals( "the/quick/brown/fox/jumps/over/the/lazy/", navigator.getPath() );
+        assertEquals( "", navigator.getPath() );
 
-        assertTrue( navigator.backward() );
-        assertEquals( "the/quick/brown/fox/jumps/over/the/", navigator.getPath() );
-
+        assertFalse( navigator.backward() );
+        assertEquals( "", navigator.getPath() );
+        
         // Nav forward
         assertTrue( navigator.forward() );
-        assertEquals( "the/quick/brown/fox/jumps/over/the/lazy/", navigator.getPath() );
+        assertEquals( "foo/", navigator.getPath() );
 
         assertTrue( navigator.forward() );
-        assertEquals( "the/quick/brown/fox/jumps/over/the/lazy/maven/", navigator.getPath() );
+        assertEquals( "foo/bar/", navigator.getPath() );
 
-        // Nav backward
-        assertTrue( navigator.backward() );
-        assertEquals( "the/quick/brown/fox/jumps/over/the/lazy/", navigator.getPath() );
+        assertTrue( navigator.forward() );
+        assertEquals( "foo/bar/baz/", navigator.getPath() );
+
+        assertFalse( navigator.forward() );
+        assertEquals( "foo/bar/baz/", navigator.getPath() );
     }
 }
