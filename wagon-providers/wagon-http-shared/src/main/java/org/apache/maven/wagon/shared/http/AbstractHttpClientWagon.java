@@ -19,21 +19,6 @@ package org.apache.maven.wagon.shared.http;
  * under the License.
  */
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Properties;
-import java.util.TimeZone;
-import java.util.zip.GZIPInputStream;
-
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
@@ -49,6 +34,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
+import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.util.DateParseException;
 import org.apache.commons.httpclient.util.DateParser;
 import org.apache.maven.wagon.InputData;
@@ -65,6 +51,21 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.TimeZone;
+import java.util.zip.GZIPInputStream;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -143,7 +144,15 @@ public abstract class AbstractHttpClientWagon
 
     protected HttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
 
+    /**
+     * @deprecated Use httpConfiguration instead.
+     */
     private Properties httpHeaders;
+    
+    /**
+     * @since 1.0-beta-6
+     */
+    private HttpConfiguration httpConfiguration;
 
     private HttpMethod getMethod;
 
@@ -400,20 +409,44 @@ public abstract class AbstractHttpClientWagon
     protected int execute( HttpMethod httpMethod ) throws HttpException, IOException
     {
         int statusCode = SC_NULL;
-        httpMethod.getParams().setSoTimeout( getTimeout() );
+        
+        setParameters( httpMethod );
         setHeaders( httpMethod );
+        
         statusCode = client.executeMethod( httpMethod );
         return statusCode;
+    }
+    
+    protected void setParameters( HttpMethod method )
+    {
+        HttpMethodConfiguration config = httpConfiguration == null ? null : httpConfiguration.getMethodConfiguration( method );
+        if ( config != null )
+        {
+            HttpMethodParams params = config.asMethodParams( method.getParams() );
+            if ( params != null )
+            {
+                method.setParams( params );
+            }
+        }
+        
+        if ( config == null || config.getConnectionTimeout() == HttpMethodConfiguration.DEFAULT_CONNECTION_TIMEOUT )
+        {
+            method.getParams().setSoTimeout( getTimeout() );
+        }
     }
 
     protected void setHeaders( HttpMethod method )
     {
-        // TODO: merge with the other headers and have some better defaults, unify with lightweight headers
-        method.addRequestHeader( "Cache-control", "no-cache" );
-        method.addRequestHeader( "Cache-store", "no-store" );
-        method.addRequestHeader( "Pragma", "no-cache" );
-        method.addRequestHeader( "Expires", "0" );
-        method.addRequestHeader( "Accept-Encoding", "gzip" );
+        HttpMethodConfiguration config = httpConfiguration == null ? null : httpConfiguration.getMethodConfiguration( method );
+        if ( config == null || config.isUseDefaultHeaders() )
+        {
+            // TODO: merge with the other headers and have some better defaults, unify with lightweight headers
+            method.addRequestHeader( "Cache-control", "no-cache" );
+            method.addRequestHeader( "Cache-store", "no-store" );
+            method.addRequestHeader( "Pragma", "no-cache" );
+            method.addRequestHeader( "Expires", "0" );
+            method.addRequestHeader( "Accept-Encoding", "gzip" );
+        }
 
         if ( httpHeaders != null )
         {
@@ -422,6 +455,15 @@ public abstract class AbstractHttpClientWagon
                 String header = (String) i.next();
                 method.addRequestHeader( header, httpHeaders.getProperty( header ) );
             }                
+        }
+        
+        Header[] headers = config == null ? null : config.asRequestHeaders();
+        if ( headers != null )
+        {
+            for ( int i = 0; i < headers.length; i++ )
+            {
+                method.addRequestHeader( headers[i] );
+            }
         }
     }
 
@@ -454,6 +496,16 @@ public abstract class AbstractHttpClientWagon
     public void setHttpHeaders( Properties httpHeaders )
     {
         this.httpHeaders = httpHeaders;
+    }
+
+    public HttpConfiguration getHttpConfiguration()
+    {
+        return httpConfiguration;
+    }
+
+    public void setHttpConfiguration( HttpConfiguration httpConfiguration )
+    {
+        this.httpConfiguration = httpConfiguration;
     }
 
     public void fillInputData( InputData inputData )
