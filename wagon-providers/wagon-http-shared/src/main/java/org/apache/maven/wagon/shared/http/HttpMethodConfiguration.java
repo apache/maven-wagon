@@ -251,6 +251,12 @@ public class HttpMethodConfiguration
         return copy;
     }
 
+    public static HttpMethodConfiguration merge( HttpMethodConfiguration defaults, HttpMethodConfiguration base, HttpMethodConfiguration local )
+    {
+        HttpMethodConfiguration result = merge( defaults, base );
+        return merge( result, local );
+    }
+    
     public static HttpMethodConfiguration merge( HttpMethodConfiguration base, HttpMethodConfiguration local )
     {
         if ( base == null && local == null )

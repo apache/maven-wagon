@@ -260,6 +260,10 @@ public abstract class AbstractHttpClientWagon
 
     public void closeConnection()
     {
+        if ( connectionManager instanceof MultiThreadedHttpConnectionManager )
+        {
+            ( (MultiThreadedHttpConnectionManager) connectionManager ).shutdown();
+        }
     }
 
     public void put( File source, String resourceName )

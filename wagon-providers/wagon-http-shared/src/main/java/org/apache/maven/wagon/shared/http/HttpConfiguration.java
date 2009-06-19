@@ -4,9 +4,13 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
+import org.apache.commons.httpclient.params.HttpClientParams;
 
 public class HttpConfiguration
 {
+    
+    private static final HttpMethodConfiguration DEFAULT_PUT =
+        new HttpMethodConfiguration().addParam( HttpClientParams.USE_EXPECT_CONTINUE, "%b,true" );
     
     private HttpMethodConfiguration all;
     
@@ -68,7 +72,7 @@ public class HttpConfiguration
         }
         else if ( method instanceof PutMethod )
         {
-            return HttpMethodConfiguration.merge( all, put );
+            return HttpMethodConfiguration.merge( DEFAULT_PUT, all, put );
         }
         else if ( method instanceof HeadMethod )
         {
