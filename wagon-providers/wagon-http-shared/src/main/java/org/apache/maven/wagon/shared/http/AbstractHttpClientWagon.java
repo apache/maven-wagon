@@ -667,7 +667,7 @@ public abstract class AbstractHttpClientWagon
 
             String msg =
                 "Error occurred while retrieving from remote repository:" + getRepository() + ": " + e.getMessage();
-
+            
             throw new TransferFailedException( msg, e );
         }
         

@@ -118,16 +118,19 @@ public abstract class StreamWagon
         catch ( TransferFailedException e )
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+            cleanupGetTransfer( resource );
             throw e;
         }
         catch ( ResourceDoesNotExistException e )
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+            cleanupGetTransfer( resource );
             throw e;
         }
         catch ( AuthorizationException e )
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+            cleanupGetTransfer( resource );
             throw e;
         }
         finally
