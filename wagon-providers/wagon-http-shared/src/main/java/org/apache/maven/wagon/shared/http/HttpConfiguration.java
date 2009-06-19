@@ -21,9 +21,10 @@ public class HttpConfiguration
         return all;
     }
 
-    public void setAll( HttpMethodConfiguration all )
+    public HttpConfiguration setAll( HttpMethodConfiguration all )
     {
         this.all = all;
+        return this;
     }
 
     public HttpMethodConfiguration getGet()
@@ -31,9 +32,10 @@ public class HttpConfiguration
         return get;
     }
     
-    public void setGet( HttpMethodConfiguration get )
+    public HttpConfiguration setGet( HttpMethodConfiguration get )
     {
         this.get = get;
+        return this;
     }
 
     public HttpMethodConfiguration getPut()
@@ -41,9 +43,10 @@ public class HttpConfiguration
         return put;
     }
 
-    public void setPut( HttpMethodConfiguration put )
+    public HttpConfiguration setPut( HttpMethodConfiguration put )
     {
         this.put = put;
+        return this;
     }
 
     public HttpMethodConfiguration getHead()
@@ -51,9 +54,10 @@ public class HttpConfiguration
         return head;
     }
 
-    public void setHead( HttpMethodConfiguration head )
+    public HttpConfiguration setHead( HttpMethodConfiguration head )
     {
         this.head = head;
+        return this;
     }
     
     public HttpMethodConfiguration getMethodConfiguration( HttpMethod method )

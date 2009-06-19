@@ -1,0 +1,664 @@
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	1)package org.apache.maven.wagon.shared.http;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	2)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	3)/*
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	4) * Licensed to the Apache Software Foundation (ASF) under one
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	5) * or more contributor license agreements.  See the NOTICE file
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	6) * distributed with this work for additional information
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	7) * regarding copyright ownership.  The ASF licenses this file
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	8) * to you under the Apache License, Version 2.0 (the
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	9) * "License"); you may not use this file except in compliance
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	10) * with the License.  You may obtain a copy of the License at
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	11) *
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	12) *   http://www.apache.org/licenses/LICENSE-2.0
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	13) *
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	14) * Unless required by applicable law or agreed to in writing,
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	15) * software distributed under the License is distributed on an
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	16) * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	17) * KIND, either express or implied.  See the License for the
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	18) * specific language governing permissions and limitations
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	19) * under the License.
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	20) */
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	21)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	22)import org.apache.commons.httpclient.Credentials;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	23)import org.apache.commons.httpclient.Header;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	24)import org.apache.commons.httpclient.HostConfiguration;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	25)import org.apache.commons.httpclient.HttpClient;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	26)import org.apache.commons.httpclient.HttpConnectionManager;
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	27)import org.apache.commons.httpclient.HttpException;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	28)import org.apache.commons.httpclient.HttpMethod;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	29)import org.apache.commons.httpclient.HttpStatus;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	30)import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	31)import org.apache.commons.httpclient.NTCredentials;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	32)import org.apache.commons.httpclient.UsernamePasswordCredentials;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	33)import org.apache.commons.httpclient.methods.GetMethod;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	34)import org.apache.commons.httpclient.methods.HeadMethod;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	35)import org.apache.commons.httpclient.methods.PutMethod;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	36)import org.apache.commons.httpclient.methods.RequestEntity;
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	37)import org.apache.commons.httpclient.params.HttpMethodParams;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	38)import org.apache.commons.httpclient.util.DateParseException;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	39)import org.apache.commons.httpclient.util.DateParser;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	40)import org.apache.maven.wagon.InputData;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	41)import org.apache.maven.wagon.OutputData;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	42)import org.apache.maven.wagon.PathUtils;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	43)import org.apache.maven.wagon.ResourceDoesNotExistException;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	44)import org.apache.maven.wagon.StreamWagon;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	45)import org.apache.maven.wagon.TransferFailedException;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	46)import org.apache.maven.wagon.Wagon;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	47)import org.apache.maven.wagon.authorization.AuthorizationException;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	48)import org.apache.maven.wagon.events.TransferEvent;
+b6d918cb	(Brett Leslie Porter	2008-05-27 02:33:36 +0000	49)import org.apache.maven.wagon.proxy.ProxyInfo;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	50)import org.apache.maven.wagon.repository.Repository;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	51)import org.apache.maven.wagon.resource.Resource;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	52)import org.codehaus.plexus.util.IOUtil;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	53)import org.codehaus.plexus.util.StringUtils;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	54)
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	55)import java.io.File;
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	56)import java.io.FileInputStream;
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	57)import java.io.FileNotFoundException;
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	58)import java.io.IOException;
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	59)import java.io.InputStream;
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	60)import java.io.OutputStream;
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	61)import java.net.URLEncoder;
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	62)import java.text.SimpleDateFormat;
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	63)import java.util.Date;
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	64)import java.util.Iterator;
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	65)import java.util.Locale;
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	66)import java.util.Properties;
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	67)import java.util.TimeZone;
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	68)import java.util.zip.GZIPInputStream;
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	69)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	70)/**
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	71) * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	72) * @author <a href="mailto:james@atlassian.com">James William Dumay</a>
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	73) */
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	74)public abstract class AbstractHttpClientWagon
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	75)    extends StreamWagon
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	76){
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	77)    private final class RequestEntityImplementation
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	78)        implements RequestEntity
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	79)    {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	80)        private final InputStream stream;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	81)        
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	82)        private final Resource resource;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	83)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	84)        private final Wagon wagon;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	85)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	86)        private RequestEntityImplementation( InputStream stream, Resource resource, Wagon wagon )
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	87)        {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	88)            this.stream = stream;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	89)            
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	90)            this.resource = resource;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	91)            
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	92)            this.wagon = wagon;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	93)        }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	94)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	95)        public long getContentLength()
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	96)        {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	97)            return resource.getContentLength();
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	98)        }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	99)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	100)        public String getContentType()
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	101)        {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	102)            return null;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	103)        }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	104)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	105)        public boolean isRepeatable()
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	106)        {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	107)            return false;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	108)        }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	109)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	110)        public void writeRequest( OutputStream output )
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	111)            throws IOException
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	112)        {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	113)            byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	114)            
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	115)            TransferEvent transferEvent =
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	116)                new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	117)            transferEvent.setTimestamp( System.currentTimeMillis() );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	118)            
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	119)            int remaining = Integer.MAX_VALUE;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	120)            while ( remaining > 0 )
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	121)            {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	122)                int n = stream.read( buffer, 0, Math.min( buffer.length, remaining ) );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	123)            
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	124)                if ( n == -1 )
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	125)                {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	126)                    break;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	127)                }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	128)            
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	129)                fireTransferProgress( transferEvent, buffer, n );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	130)            
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	131)                output.write( buffer, 0, n );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	132)            
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	133)                remaining -= n;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	134)            }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	135)            output.flush();
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	136)        }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	137)    }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	138)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	139)    protected static final int SC_NULL = -1;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	140)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	141)    protected static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone( "GMT" );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	142)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	143)    private HttpClient client;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	144)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	145)    protected HttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	146)
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	147)    /**
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	148)     * @deprecated Use httpConfiguration instead.
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	149)     */
+2247804b	(Brett Leslie Porter	2008-05-27 13:19:38 +0000	150)    private Properties httpHeaders;
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	151)    
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	152)    /**
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	153)     * @since 1.0-beta-6
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	154)     */
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	155)    private HttpConfiguration httpConfiguration;
+2247804b	(Brett Leslie Porter	2008-05-27 13:19:38 +0000	156)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	157)    private HttpMethod getMethod;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	158)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	159)    public void openConnectionInternal()
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	160)    {
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	161)        repository.setUrl( getURL( repository ) );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	162)        client = new HttpClient( connectionManager );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	163)        String username = null;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	164)        String password = null;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	165)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	166)        if ( authenticationInfo != null )
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	167)        {
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	168)            username = authenticationInfo.getUserName();
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	169)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	170)            password = authenticationInfo.getPassword();
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	171)        }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	172)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	173)        String host = getRepository().getHost();
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	174)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	175)        if ( StringUtils.isNotEmpty( username ) && StringUtils.isNotEmpty( password ) )
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	176)        {
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	177)            Credentials creds = new UsernamePasswordCredentials( username, password );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	178)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	179)            client.getState().setCredentials( null, host, creds );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	180)            client.getState().setAuthenticationPreemptive( true );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	181)        }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	182)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	183)        HostConfiguration hc = new HostConfiguration();
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	184)
+b6d918cb	(Brett Leslie Porter	2008-05-27 02:33:36 +0000	185)        ProxyInfo proxyInfo = getProxyInfo( getRepository().getProtocol(), getRepository().getHost() );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	186)        if ( proxyInfo != null )
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	187)        {
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	188)            String proxyUsername = proxyInfo.getUserName();
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	189)            String proxyPassword = proxyInfo.getPassword();
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	190)            String proxyHost = proxyInfo.getHost();
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	191)            int proxyPort = proxyInfo.getPort();
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	192)            String proxyNtlmHost = proxyInfo.getNtlmHost();
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	193)            String proxyNtlmDomain = proxyInfo.getNtlmDomain();
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	194)            if ( proxyHost != null )
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	195)            {
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	196)                hc.setProxy( proxyHost, proxyPort );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	197)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	198)                if ( proxyUsername != null && proxyPassword != null )
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	199)                {
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	200)                    Credentials creds;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	201)                    if ( proxyNtlmHost != null || proxyNtlmDomain != null )
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	202)                    {
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	203)                        creds = new NTCredentials( proxyUsername, proxyPassword, proxyNtlmHost, proxyNtlmDomain );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	204)                    }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	205)                    else
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	206)                    {
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	207)                        creds = new UsernamePasswordCredentials( proxyUsername, proxyPassword );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	208)                    }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	209)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	210)                    client.getState().setProxyCredentials( null, proxyHost, creds );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	211)                    client.getState().setAuthenticationPreemptive( true );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	212)                }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	213)            }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	214)        }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	215)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	216)        hc.setHost( host );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	217)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	218)        //start a session with the webserver
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	219)        client.setHostConfiguration( hc );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	220)    }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	221)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	222)    public void closeConnection()
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	223)    {
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	224)    }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	225)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	226)    public void put( File source, String resourceName )
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	227)        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	228)    {
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	229)        Resource resource = new Resource( resourceName );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	230)        
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	231)        firePutInitiated( resource, source );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	232)        
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	233)        resource.setContentLength( source.length() );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	234)        
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	235)        resource.setLastModified( source.lastModified() );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	236)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	237)        InputStream stream = null;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	238)        try
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	239)        {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	240)            stream = new FileInputStream( source );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	241)            put( stream, resource, source );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	242)        }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	243)        catch ( FileNotFoundException e )
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	244)        {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	245)            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	246)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	247)            throw new TransferFailedException( "Specified source file does not exist: " + source, e );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	248)        }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	249)        finally
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	250)        {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	251)            IOUtil.close( stream );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	252)        }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	253)    }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	254)    
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	255)    public void putFromStream( final InputStream stream, String destination, long contentLength, long lastModified )
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	256)        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	257)    {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	258)        Resource resource = new Resource( destination );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	259)        
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	260)        firePutInitiated( resource, null );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	261)        
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	262)        resource.setContentLength( contentLength );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	263)        
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	264)        resource.setLastModified( lastModified );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	265)        
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	266)        put( stream, resource, null );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	267)    }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	268)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	269)    private void put( final InputStream stream, Resource resource, File source )
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	270)        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	271)    {
+757fec13	(Brett Leslie Porter	2008-05-27 13:31:15 +0000	272)        String url = getRepository().getUrl();
+757fec13	(Brett Leslie Porter	2008-05-27 13:31:15 +0000	273)        String[] parts = StringUtils.split( resource.getName(), "/" );
+757fec13	(Brett Leslie Porter	2008-05-27 13:31:15 +0000	274)        for ( int i = 0; i < parts.length; i++ )
+757fec13	(Brett Leslie Porter	2008-05-27 13:31:15 +0000	275)        {
+757fec13	(Brett Leslie Porter	2008-05-27 13:31:15 +0000	276)            url += "/" + URLEncoder.encode( parts[i] );
+757fec13	(Brett Leslie Porter	2008-05-27 13:31:15 +0000	277)        }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	278)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	279)        //Parent directories need to be created before posting
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	280)        try
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	281)        {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	282)            mkdirs( PathUtils.dirname( resource.getName() ) );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	283)        }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	284)        catch ( IOException e )
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	285)        {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	286)            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	287)        }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	288)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	289)        PutMethod putMethod = new PutMethod( url );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	290)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	291)        putMethod.setRequestEntity( new RequestEntityImplementation( stream, resource, this ) );
+88d89629	(Brett Leslie Porter	2008-05-20 06:55:30 +0000	292)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	293)        firePutStarted( resource, source );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	294)                
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	295)        try
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	296)        {
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	297)            int statusCode;
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	298)            try
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	299)            {
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	300)                statusCode = execute( putMethod );
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	301)            }
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	302)            catch ( IOException e )
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	303)            {
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	304)                fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	305)
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	306)                throw new TransferFailedException( e.getMessage(), e );
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	307)            }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	308)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	309)            fireTransferDebug( url + " - Status code: " + statusCode );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	310)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	311)            // Check that we didn't run out of retries.
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	312)            switch ( statusCode )
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	313)            {
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	314)                // Success Codes
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	315)                case HttpStatus.SC_OK: // 200
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	316)                case HttpStatus.SC_CREATED: // 201
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	317)                case HttpStatus.SC_ACCEPTED: // 202
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	318)                case HttpStatus.SC_NO_CONTENT:  // 204
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	319)                    break;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	320)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	321)                case SC_NULL:
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	322)                {
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	323)                    TransferFailedException e = new TransferFailedException( "Failed to transfer file: " + url );
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	324)                    fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	325)                    throw e;
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	326)                }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	327)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	328)                case HttpStatus.SC_FORBIDDEN:
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	329)                    fireSessionConnectionRefused();
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	330)                    throw new AuthorizationException( "Access denied to: " + url );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	331)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	332)                case HttpStatus.SC_NOT_FOUND:
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	333)                    throw new ResourceDoesNotExistException( "File: " + url + " does not exist" );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	334)
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	335)                //add more entries here
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	336)                default :
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	337)                {
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	338)                    TransferFailedException e =
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	339)                            new TransferFailedException( "Failed to transfer file: " + url + ". Return code is: "
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	340)                                + statusCode );
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	341)                    fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	342)                    throw e;
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	343)                }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	344)            }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	345)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	346)            firePutCompleted( resource, source );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	347)        }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	348)        finally
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	349)        {
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	350)            putMethod.releaseConnection();
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	351)        }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	352)    }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	353)    
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	354)    protected void mkdirs( String dirname ) throws HttpException, IOException
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	355)    {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	356)    }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	357)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	358)    public boolean resourceExists( String resourceName )
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	359)        throws TransferFailedException, AuthorizationException
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	360)    {
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	361)        String url = getRepository().getUrl() + "/" + resourceName;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	362)        HeadMethod headMethod = new HeadMethod( url );
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	363)        int statusCode;
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	364)        try
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	365)        {
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	366)            statusCode = execute( headMethod );
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	367)        }
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	368)        catch ( IOException e )
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	369)        {
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	370)            throw new TransferFailedException( e.getMessage(), e );
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	371)        }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	372)        try
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	373)        {
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	374)            switch ( statusCode )
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	375)            {
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	376)                case HttpStatus.SC_OK:
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	377)                    return true;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	378)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	379)                case HttpStatus.SC_NOT_MODIFIED:
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	380)                    return true;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	381)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	382)                case SC_NULL:
+a7f8eb8e	(Herve Boutemy	2008-08-02 22:21:46 +0000	383)                    throw new TransferFailedException( "Failed to transfer file: " + url );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	384)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	385)                case HttpStatus.SC_FORBIDDEN:
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	386)                    throw new AuthorizationException( "Access denied to: " + url );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	387)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	388)                case HttpStatus.SC_UNAUTHORIZED:
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	389)                    throw new AuthorizationException( "Not authorized." );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	390)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	391)                case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	392)                    throw new AuthorizationException( "Not authorized by proxy." );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	393)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	394)                case HttpStatus.SC_NOT_FOUND:
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	395)                    return false;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	396)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	397)                    //add more entries here
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	398)                default:
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	399)                    throw new TransferFailedException( "Failed to transfer file: " + url + ". Return code is: "
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	400)                        + statusCode );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	401)            }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	402)        }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	403)        finally
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	404)        {
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	405)            headMethod.releaseConnection();
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	406)        }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	407)    }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	408)
+a7f8eb8e	(Herve Boutemy	2008-08-02 22:21:46 +0000	409)    protected int execute( HttpMethod httpMethod ) throws HttpException, IOException
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	410)    {
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	411)        int statusCode = SC_NULL;
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	412)        
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	413)        setParameters( httpMethod );
+a7f8eb8e	(Herve Boutemy	2008-08-02 22:21:46 +0000	414)        setHeaders( httpMethod );
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	415)        
+297f22a8	(Brett Leslie Porter	2008-05-27 16:27:39 +0000	416)        statusCode = client.executeMethod( httpMethod );
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	417)        return statusCode;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	418)    }
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	419)    
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	420)    protected void setParameters( HttpMethod method )
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	421)    {
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	422)        HttpMethodConfiguration config = httpConfiguration == null ? null : httpConfiguration.getMethodConfiguration( method );
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	423)        if ( config != null )
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	424)        {
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	425)            HttpMethodParams params = config.asMethodParams( method.getParams() );
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	426)            if ( params != null )
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	427)            {
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	428)                method.setParams( params );
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	429)            }
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	430)        }
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	431)        
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	432)        if ( config == null || config.getConnectionTimeout() == HttpMethodConfiguration.DEFAULT_CONNECTION_TIMEOUT )
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	433)        {
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	434)            method.getParams().setSoTimeout( getTimeout() );
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	435)        }
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	436)    }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	437)
+a7f8eb8e	(Herve Boutemy	2008-08-02 22:21:46 +0000	438)    protected void setHeaders( HttpMethod method )
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	439)    {
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	440)        HttpMethodConfiguration config = httpConfiguration == null ? null : httpConfiguration.getMethodConfiguration( method );
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	441)        if ( config == null || config.isUseDefaultHeaders() )
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	442)        {
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	443)            // TODO: merge with the other headers and have some better defaults, unify with lightweight headers
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	444)            method.addRequestHeader( "Cache-control", "no-cache" );
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	445)            method.addRequestHeader( "Cache-store", "no-store" );
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	446)            method.addRequestHeader( "Pragma", "no-cache" );
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	447)            method.addRequestHeader( "Expires", "0" );
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	448)            method.addRequestHeader( "Accept-Encoding", "gzip" );
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	449)        }
+2247804b	(Brett Leslie Porter	2008-05-27 13:19:38 +0000	450)
+2247804b	(Brett Leslie Porter	2008-05-27 13:19:38 +0000	451)        if ( httpHeaders != null )
+2247804b	(Brett Leslie Porter	2008-05-27 13:19:38 +0000	452)        {
+2247804b	(Brett Leslie Porter	2008-05-27 13:19:38 +0000	453)            for ( Iterator i = httpHeaders.keySet().iterator(); i.hasNext(); )
+2247804b	(Brett Leslie Porter	2008-05-27 13:19:38 +0000	454)            {
+2247804b	(Brett Leslie Porter	2008-05-27 13:19:38 +0000	455)                String header = (String) i.next();
+2247804b	(Brett Leslie Porter	2008-05-27 13:19:38 +0000	456)                method.addRequestHeader( header, httpHeaders.getProperty( header ) );
+2247804b	(Brett Leslie Porter	2008-05-27 13:19:38 +0000	457)            }                
+2247804b	(Brett Leslie Porter	2008-05-27 13:19:38 +0000	458)        }
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	459)        
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	460)        Header[] headers = config == null ? null : config.asRequestHeaders();
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	461)        if ( headers != null )
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	462)        {
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	463)            for ( int i = 0; i < headers.length; i++ )
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	464)            {
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	465)                method.addRequestHeader( headers[i] );
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	466)            }
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	467)        }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	468)    }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	469)
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	470)    /**
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	471)     * getUrl
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	472)     * Implementors can override this to remove unwanted parts of the url such as role-hints
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	473)     * @param repository
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	474)     * @return
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	475)     */
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	476)    protected String getURL( Repository repository )
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	477)    {
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	478)        return repository.getUrl();
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	479)    }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	480)
+a7f8eb8e	(Herve Boutemy	2008-08-02 22:21:46 +0000	481)    protected HttpClient getClient()
+a7f8eb8e	(Herve Boutemy	2008-08-02 22:21:46 +0000	482)    {
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	483)        return client;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	484)    }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	485)
+a7f8eb8e	(Herve Boutemy	2008-08-02 22:21:46 +0000	486)    public void setConnectionManager( HttpConnectionManager connectionManager )
+a7f8eb8e	(Herve Boutemy	2008-08-02 22:21:46 +0000	487)    {
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	488)        this.connectionManager = connectionManager;
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	489)    }
+2247804b	(Brett Leslie Porter	2008-05-27 13:19:38 +0000	490)
+2247804b	(Brett Leslie Porter	2008-05-27 13:19:38 +0000	491)    public Properties getHttpHeaders()
+2247804b	(Brett Leslie Porter	2008-05-27 13:19:38 +0000	492)    {
+2247804b	(Brett Leslie Porter	2008-05-27 13:19:38 +0000	493)        return httpHeaders;
+2247804b	(Brett Leslie Porter	2008-05-27 13:19:38 +0000	494)    }
+2247804b	(Brett Leslie Porter	2008-05-27 13:19:38 +0000	495)
+2247804b	(Brett Leslie Porter	2008-05-27 13:19:38 +0000	496)    public void setHttpHeaders( Properties httpHeaders )
+2247804b	(Brett Leslie Porter	2008-05-27 13:19:38 +0000	497)    {
+2247804b	(Brett Leslie Porter	2008-05-27 13:19:38 +0000	498)        this.httpHeaders = httpHeaders;
+2247804b	(Brett Leslie Porter	2008-05-27 13:19:38 +0000	499)    }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	500)
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	501)    public HttpConfiguration getHttpConfiguration()
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	502)    {
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	503)        return httpConfiguration;
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	504)    }
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	505)
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	506)    public void setHttpConfiguration( HttpConfiguration httpConfiguration )
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	507)    {
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	508)        this.httpConfiguration = httpConfiguration;
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	509)    }
+08eeabd9	(John Dennis Casey	2009-06-09 16:02:23 +0000	510)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	511)    public void fillInputData( InputData inputData )
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	512)        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	513)    {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	514)        Resource resource = inputData.getResource();
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	515)        
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	516)        String url = getRepository().getUrl() + "/" + resource.getName();
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	517)        getMethod = new GetMethod( url );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	518)        long timestamp = resource.getLastModified();
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	519)        if ( timestamp > 0 )
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	520)        {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	521)            SimpleDateFormat fmt = new SimpleDateFormat( "EEE, dd-MMM-yy HH:mm:ss zzz", Locale.US );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	522)            fmt.setTimeZone( GMT_TIME_ZONE );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	523)            Header hdr = new Header( "If-Modified-Since", fmt.format( new Date( timestamp ) ) );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	524)            fireTransferDebug( "sending ==> " + hdr + "(" + timestamp + ")" );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	525)            getMethod.addRequestHeader( hdr );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	526)        }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	527)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	528)        int statusCode;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	529)        try
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	530)        {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	531)            statusCode = execute( getMethod );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	532)        }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	533)        catch ( IOException e )
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	534)        {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	535)            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	536)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	537)            throw new TransferFailedException( e.getMessage(), e );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	538)        }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	539)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	540)        fireTransferDebug( url + " - Status code: " + statusCode );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	541)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	542)        // TODO [BP]: according to httpclient docs, really should swallow the output on error. verify if that is
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	543)        // required
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	544)        switch ( statusCode )
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	545)        {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	546)            case HttpStatus.SC_OK:
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	547)                break;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	548)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	549)            case HttpStatus.SC_NOT_MODIFIED:
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	550)                // return, leaving last modified set to original value so getIfNewer should return unmodified
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	551)                return;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	552)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	553)            case SC_NULL:
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	554)            {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	555)                TransferFailedException e = new TransferFailedException( "Failed to transfer file: " + url );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	556)                fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	557)                throw e;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	558)            }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	559)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	560)            case HttpStatus.SC_FORBIDDEN:
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	561)                fireSessionConnectionRefused();
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	562)                throw new AuthorizationException( "Access denied to: " + url );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	563)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	564)            case HttpStatus.SC_UNAUTHORIZED:
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	565)                fireSessionConnectionRefused();
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	566)                throw new AuthorizationException( "Not authorized." );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	567)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	568)            case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	569)                fireSessionConnectionRefused();
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	570)                throw new AuthorizationException( "Not authorized by proxy." );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	571)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	572)            case HttpStatus.SC_NOT_FOUND:
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	573)                throw new ResourceDoesNotExistException( "File: " + url + " does not exist" );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	574)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	575)                // add more entries here
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	576)            default:
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	577)            {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	578)                cleanupGetTransfer( resource );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	579)                TransferFailedException e =
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	580)                    new TransferFailedException( "Failed to transfer file: " + url + ". Return code is: "
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	581)                        + statusCode );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	582)                fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	583)                throw e;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	584)            }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	585)        }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	586)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	587)        InputStream is = null;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	588)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	589)        Header contentLengthHeader = getMethod.getResponseHeader( "Content-Length" );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	590)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	591)        if ( contentLengthHeader != null )
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	592)        {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	593)            try
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	594)            {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	595)                long contentLength = Integer.valueOf( contentLengthHeader.getValue() ).intValue();
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	596)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	597)                resource.setContentLength( contentLength );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	598)            }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	599)            catch ( NumberFormatException e )
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	600)            {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	601)                fireTransferDebug( "error parsing content length header '" + contentLengthHeader.getValue() + "' "
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	602)                    + e );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	603)            }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	604)        }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	605)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	606)        Header lastModifiedHeader = getMethod.getResponseHeader( "Last-Modified" );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	607)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	608)        long lastModified = 0;
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	609)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	610)        if ( lastModifiedHeader != null )
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	611)        {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	612)            try
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	613)            {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	614)                lastModified = DateParser.parseDate( lastModifiedHeader.getValue() ).getTime();
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	615)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	616)                resource.setLastModified( lastModified );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	617)            }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	618)            catch ( DateParseException e )
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	619)            {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	620)                fireTransferDebug( "Unable to parse last modified header" );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	621)            }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	622)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	623)            fireTransferDebug( "last-modified = " + lastModifiedHeader.getValue() + " (" + lastModified + ")" );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	624)        }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	625)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	626)        Header contentEncoding = getMethod.getResponseHeader( "Content-Encoding" );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	627)        boolean isGZipped =
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	628)            contentEncoding == null ? false : "gzip".equalsIgnoreCase( contentEncoding.getValue() );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	629)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	630)        try
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	631)        {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	632)            is = getMethod.getResponseBodyAsStream();
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	633)            if ( isGZipped )
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	634)            {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	635)                is = new GZIPInputStream( is );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	636)            }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	637)        }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	638)        catch ( IOException e )
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	639)        {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	640)            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	641)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	642)            String msg =
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	643)                "Error occurred while retrieving from remote repository:" + getRepository() + ": " + e.getMessage();
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	644)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	645)            throw new TransferFailedException( msg, e );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	646)        }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	647)        
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	648)        inputData.setInputStream( is );
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	649)    }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	650)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	651)    protected void cleanupGetTransfer( Resource resource )
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	652)    {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	653)        if ( getMethod != null )
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	654)        {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	655)            getMethod.releaseConnection();
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	656)        }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	657)    }
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	658)
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	659)    public void fillOutputData( OutputData outputData )
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	660)        throws TransferFailedException
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	661)    {
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	662)        throw new IllegalStateException( "Should not be using the streaming wagon for HTTP PUT" );        
+a9fcc9fa	(Brett Leslie Porter	2008-06-02 16:38:48 +0000	663)    }
+85fcdb70	(Brett Leslie Porter	2008-05-20 05:03:57 +0000	664)}

@@ -1,12 +1,14 @@
 package org.apache.maven.wagon.shared.http;
 
 import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,13 +17,13 @@ public class HttpMethodConfiguration
     
     public static final int DEFAULT_CONNECTION_TIMEOUT = 60000;
 
-    private static final String COERCE_PATTERN = "\\{%(\\w+ ),([^}]+)\\}";
+    private static final String COERCE_PATTERN = "%(\\w+),(.+)";
     
     private Boolean useDefaultHeaders;
     
-    private Map headers = new LinkedHashMap();
+    private Properties headers = new Properties();
     
-    private Map params = new LinkedHashMap();
+    private Properties params = new Properties();
     
     private int connectionTimeout = DEFAULT_CONNECTION_TIMEOUT;
 
@@ -30,9 +32,10 @@ public class HttpMethodConfiguration
         return useDefaultHeaders == null ? true : useDefaultHeaders.booleanValue();
     }
 
-    public void setUseDefaultHeaders( boolean useDefaultHeaders )
+    public HttpMethodConfiguration setUseDefaultHeaders( boolean useDefaultHeaders )
     {
         this.useDefaultHeaders = Boolean.valueOf( useDefaultHeaders );
+        return this;
     }
     
     public Boolean getUseDefaultHeaders()
@@ -40,34 +43,38 @@ public class HttpMethodConfiguration
         return useDefaultHeaders;
     }
     
-    public void addHeader( String header, String value )
+    public HttpMethodConfiguration addHeader( String header, String value )
     {
-        headers.put( header, value );
+        headers.setProperty( header, value );
+        return this;
     }
 
-    public Map getHeaders()
+    public Properties getHeaders()
     {
         return headers;
     }
 
-    public void setHeaders( Map headers )
+    public HttpMethodConfiguration setHeaders( Properties headers )
     {
         this.headers = headers;
+        return this;
     }
     
-    public void addParam( String param, String value )
+    public HttpMethodConfiguration addParam( String param, String value )
     {
-        params.put( param, value );
+        params.setProperty( param, value );
+        return this;
     }
 
-    public Map getParams()
+    public Properties getParams()
     {
         return params;
     }
 
-    public void setParams( Map params )
+    public HttpMethodConfiguration setParams( Properties params )
     {
         this.params = params;
+        return this;
     }
 
     public int getConnectionTimeout()
@@ -75,9 +82,10 @@ public class HttpMethodConfiguration
         return connectionTimeout;
     }
 
-    public void setConnectionTimeout( int connectionTimeout )
+    public HttpMethodConfiguration setConnectionTimeout( int connectionTimeout )
     {
         this.connectionTimeout = connectionTimeout;
+        return this;
     }
 
     public HttpMethodParams asMethodParams( HttpMethodParams defaults )
@@ -138,22 +146,55 @@ public class HttpMethodConfiguration
                     {
                         case 'i':
                         {
-                            p.setIntParameter( value, Integer.parseInt( value ) );
+                            p.setIntParameter( key, Integer.parseInt( value ) );
                             break;
                         }
                         case 'd':
                         {
-                            p.setDoubleParameter( value, Double.parseDouble( value ) );
+                            p.setDoubleParameter( key, Double.parseDouble( value ) );
                             break;
                         }
                         case 'l':
                         {
-                            p.setLongParameter( value, Long.parseLong( value ) );
+                            p.setLongParameter( key, Long.parseLong( value ) );
                             break;
                         }
                         case 'b':
                         {
-                            p.setBooleanParameter( value, Boolean.valueOf( value ).booleanValue() );
+                            p.setBooleanParameter( key, Boolean.valueOf( value ).booleanValue() );
+                            break;
+                        }
+                        case 'c':
+                        {
+                            String[] entries = value.split( "," );
+                            List collection = new ArrayList();
+                            for ( int i = 0; i < entries.length; i++ )
+                            {
+                                collection.add( entries[i].trim() );
+                            }
+                            
+                            p.setParameter( key, collection );
+                            break;
+                        }
+                        case 'm':
+                        {
+                            String[] entries = value.split( "," );
+                            
+                            Map map = new LinkedHashMap();
+                            for ( int i = 0; i < entries.length; i++ )
+                            {
+                                int idx = entries[i].indexOf( "=>" );
+                                if ( idx < 1 )
+                                {
+                                    break;
+                                }
+                                
+                                String mapKey = entries[i].substring( 0, idx );
+                                String mapVal = entries[i].substring( idx + 1, entries[i].length() );
+                                map.put( mapKey.trim(), mapVal.trim() );
+                            }
+                            
+                            p.setParameter( key, map );
                             break;
                         }
                     }

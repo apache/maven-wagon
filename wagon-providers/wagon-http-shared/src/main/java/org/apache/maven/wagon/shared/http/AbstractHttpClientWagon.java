@@ -30,13 +30,14 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.NTCredentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.util.DateParseException;
-import org.apache.commons.httpclient.util.DateParser;
+import org.apache.commons.httpclient.util.DateUtil;
 import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.PathUtils;
@@ -54,7 +55,7 @@ import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -77,18 +78,42 @@ public abstract class AbstractHttpClientWagon
     private final class RequestEntityImplementation
         implements RequestEntity
     {
-        private final InputStream stream;
-        
         private final Resource resource;
 
         private final Wagon wagon;
 
-        private RequestEntityImplementation( InputStream stream, Resource resource, Wagon wagon )
+        private final File source;
+
+        private RequestEntityImplementation( final InputStream stream, final Resource resource, final Wagon wagon, final File source )
+            throws TransferFailedException
         {
-            this.stream = stream;
+            if ( source != null )
+            {
+                this.source = source;
+            }
+            else
+            {
+                FileOutputStream fos = null;
+                try
+                {
+                    this.source = File.createTempFile( "http-wagon.", ".tmp" );
+                    this.source.deleteOnExit();
+                    
+                    fos = new FileOutputStream( this.source );
+                    IOUtil.copy( stream, fos );
+                }
+                catch ( IOException e )
+                {
+                    fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+                    throw new TransferFailedException( "Failed to buffer stream contents to temp file for upload.", e );
+                }
+                finally
+                {
+                    IOUtil.close( fos );
+                }
+            }
             
             this.resource = resource;
-            
             this.wagon = wagon;
         }
 
@@ -104,7 +129,7 @@ public abstract class AbstractHttpClientWagon
 
         public boolean isRepeatable()
         {
-            return false;
+            return true;
         }
 
         public void writeRequest( OutputStream output )
@@ -116,22 +141,32 @@ public abstract class AbstractHttpClientWagon
                 new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT );
             transferEvent.setTimestamp( System.currentTimeMillis() );
             
-            int remaining = Integer.MAX_VALUE;
-            while ( remaining > 0 )
+            FileInputStream fin = null;
+            try
             {
-                int n = stream.read( buffer, 0, Math.min( buffer.length, remaining ) );
-            
-                if ( n == -1 )
+                fin = new FileInputStream( source );
+                int remaining = Integer.MAX_VALUE;
+                while ( remaining > 0 )
                 {
-                    break;
+                    int n = fin.read( buffer, 0, Math.min( buffer.length, remaining ) );
+                
+                    if ( n == -1 )
+                    {
+                        break;
+                    }
+                
+                    fireTransferProgress( transferEvent, buffer, n );
+                
+                    output.write( buffer, 0, n );
+                
+                    remaining -= n;
                 }
-            
-                fireTransferProgress( transferEvent, buffer, n );
-            
-                output.write( buffer, 0, n );
-            
-                remaining -= n;
             }
+            finally
+            {
+                IOUtil.close( fin );
+            }
+            
             output.flush();
         }
     }
@@ -176,8 +211,10 @@ public abstract class AbstractHttpClientWagon
         {
             Credentials creds = new UsernamePasswordCredentials( username, password );
 
-            client.getState().setCredentials( null, host, creds );
-            client.getState().setAuthenticationPreemptive( true );
+            int port = getRepository().getPort() > -1 ? getRepository().getPort() : AuthScope.ANY_PORT;
+            
+            AuthScope scope = new AuthScope( host, port );
+            client.getState().setCredentials( scope, creds );
         }
 
         HostConfiguration hc = new HostConfiguration();
@@ -207,8 +244,10 @@ public abstract class AbstractHttpClientWagon
                         creds = new UsernamePasswordCredentials( proxyUsername, proxyPassword );
                     }
 
-                    client.getState().setProxyCredentials( null, proxyHost, creds );
-                    client.getState().setAuthenticationPreemptive( true );
+                    int port = proxyInfo.getPort() > -1 ? proxyInfo.getPort() : AuthScope.ANY_PORT;
+                    
+                    AuthScope scope = new AuthScope( proxyHost, port );
+                    client.getState().setProxyCredentials( scope, creds );
                 }
             }
         }
@@ -234,22 +273,7 @@ public abstract class AbstractHttpClientWagon
         
         resource.setLastModified( source.lastModified() );
 
-        InputStream stream = null;
-        try
-        {
-            stream = new FileInputStream( source );
-            put( stream, resource, source );
-        }
-        catch ( FileNotFoundException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
-
-            throw new TransferFailedException( "Specified source file does not exist: " + source, e );
-        }
-        finally
-        {
-            IOUtil.close( stream );
-        }
+        put( null, resource, source );
     }
     
     public void putFromStream( final InputStream stream, String destination, long contentLength, long lastModified )
@@ -273,6 +297,8 @@ public abstract class AbstractHttpClientWagon
         String[] parts = StringUtils.split( resource.getName(), "/" );
         for ( int i = 0; i < parts.length; i++ )
         {
+            // TODO: Fix encoding...
+            // url += "/" + URLEncoder.encode( parts[i], System.getProperty("file.encoding") );
             url += "/" + URLEncoder.encode( parts[i] );
         }
 
@@ -288,12 +314,12 @@ public abstract class AbstractHttpClientWagon
 
         PutMethod putMethod = new PutMethod( url );
 
-        putMethod.setRequestEntity( new RequestEntityImplementation( stream, resource, this ) );
-
         firePutStarted( resource, source );
                 
         try
         {
+            putMethod.setRequestEntity( new RequestEntityImplementation( stream, resource, this, source ) );
+
             int statusCode;
             try
             {
@@ -611,7 +637,7 @@ public abstract class AbstractHttpClientWagon
         {
             try
             {
-                lastModified = DateParser.parseDate( lastModifiedHeader.getValue() ).getTime();
+                lastModified = DateUtil.parseDate( lastModifiedHeader.getValue() ).getTime();
 
                 resource.setLastModified( lastModified );
             }
