@@ -337,6 +337,7 @@ under the License.
                   <descriptors>
                     <descriptor>src/main/assembly/source-release.xml</descriptor>
                   </descriptors>
+                  <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
                   <tarLongFileMode>gnu</tarLongFileMode>
                 </configuration>
               </execution>

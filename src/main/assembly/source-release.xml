@@ -32,7 +32,7 @@
       <useDefaultExcludes>true</useDefaultExcludes>
       <excludes>
         <exclude>*.log</exclude>
-        <exclude>target/**</exclude>
+        <exclude>%regex[(?!.*src/).*${project.build.directory}.*]</exclude>
       </excludes>
     </fileSet>
     <fileSet>
