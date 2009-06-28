@@ -38,6 +38,9 @@
     <fileSet>
       <directory>${project.build.directory}/maven-shared-archive-resources/META-INF</directory>
       <outputDirectory>/</outputDirectory>
+      <excludes>
+        <exclude>DEPENDENCIES</exclude>
+      </excludes>
     </fileSet>
   </fileSets>
 </assembly>
