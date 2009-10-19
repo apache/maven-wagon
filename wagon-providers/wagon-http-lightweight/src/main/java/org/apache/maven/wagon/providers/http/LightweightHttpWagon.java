@@ -132,7 +132,7 @@ public class LightweightHttpWagon
         }
         catch ( MalformedURLException e )
         {
-            throw new ResourceDoesNotExistException( "Invalid repository URL", e );
+            throw new ResourceDoesNotExistException( "Invalid repository URL: " + e.getMessage(), e );
         }
         catch ( FileNotFoundException e )
         {
@@ -173,7 +173,7 @@ public class LightweightHttpWagon
         }
         catch ( IOException e )
         {
-            throw new TransferFailedException( "Error transferring file", e );
+            throw new TransferFailedException( "Error transferring file: " + e.getMessage(), e );
         }
     }
 
@@ -210,7 +210,7 @@ public class LightweightHttpWagon
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
 
-            throw new TransferFailedException( "Error transferring file", e );
+            throw new TransferFailedException( "Error transferring file: " + e.getMessage(), e );
         }
     }
 
@@ -381,7 +381,7 @@ public class LightweightHttpWagon
         }
         catch ( IOException e )
         {
-            throw new TransferFailedException( "Error transferring file", e );
+            throw new TransferFailedException( "Error transferring file: " + e.getMessage(), e );
         }
     }
 
