@@ -21,6 +21,7 @@ import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.jetty.webapp.WebAppContext;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 
 import javax.servlet.Filter;
@@ -47,7 +48,7 @@ public class ServerFixture
     private int filterCount = 0;;
 
     public ServerFixture( final int port, final boolean ssl )
-        throws URISyntaxException
+        throws URISyntaxException, IOException
     {
         server = new Server();
         if ( ssl )
@@ -92,6 +93,7 @@ public class ServerFixture
         webappContext.setContextPath( "/" );
 
         File base = getResource( SERVER_ROOT_RESOURCE_PATH );
+        System.out.println( "docroot: " + base );
         webappContext.setWar( base.getAbsolutePath() );
         webappContext.addHandler( securityHandler );
 
