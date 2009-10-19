@@ -163,6 +163,7 @@ under the License.
     <module>wagon-provider-api</module>
     <module>wagon-providers</module>
     <module>wagon-provider-test</module>
+    <module>wagon-tcks</module>
   </modules>
 
   <properties>
