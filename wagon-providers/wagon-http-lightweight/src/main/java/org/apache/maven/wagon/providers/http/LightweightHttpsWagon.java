@@ -40,6 +40,8 @@ public class LightweightHttpsWagon
     
     private String previousHttpsProxyPort;
 
+    private String previousHttpsProxyExclusions;
+
     public LightweightHttpsWagon()
     {
         super();
@@ -50,12 +52,19 @@ public class LightweightHttpsWagon
     {
         previousHttpsProxyHost = System.getProperty( "https.proxyHost" );
         previousHttpsProxyPort = System.getProperty( "https.proxyPort" );
+        previousHttpsProxyExclusions = System.getProperty( "https.nonProxyHosts" );
         
         final ProxyInfo proxyInfo = getProxyInfo( "https", getRepository().getHost() );
         if ( proxyInfo != null )
         {
-            System.setProperty( "https.proxyHost", proxyInfo.getHost() );
-            System.setProperty( "https.proxyPort", String.valueOf( proxyInfo.getPort() ) );
+            setSystemProperty( "https.proxyHost", proxyInfo.getHost() );
+            setSystemProperty( "https.proxyPort", String.valueOf( proxyInfo.getPort() ) );
+            setSystemProperty( "https.nonProxyHosts", proxyInfo.getNonProxyHosts() );
+        }
+        else
+        {
+            setSystemProperty( "https.proxyHost", null );
+            setSystemProperty( "https.proxyPort", null );
         }
         
         super.openConnection();
@@ -65,14 +74,9 @@ public class LightweightHttpsWagon
         throws ConnectionException
     {
         super.closeConnection();
-        
-        if ( previousHttpsProxyHost != null )
-        {
-            System.setProperty( "https.proxyHost", previousHttpsProxyHost );
-        }
-        if ( previousHttpsProxyPort != null )
-        {
-            System.setProperty( "https.proxyPort", previousHttpsProxyPort );
-        }
+
+        setSystemProperty( "https.proxyHost", previousHttpsProxyHost );
+        setSystemProperty( "https.proxyPort", previousHttpsProxyPort );
+        setSystemProperty( "https.nonProxyHosts", previousHttpsProxyExclusions );
     }
 }

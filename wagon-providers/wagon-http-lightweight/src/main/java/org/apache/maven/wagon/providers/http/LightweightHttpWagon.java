@@ -224,21 +224,14 @@ public class LightweightHttpWagon
         final ProxyInfo proxyInfo = getProxyInfo( "http", getRepository().getHost() );
         if ( proxyInfo != null )
         {
-            System.setProperty( "http.proxyHost", proxyInfo.getHost() );
-            System.setProperty( "http.proxyPort", String.valueOf( proxyInfo.getPort() ) );
-            if ( proxyInfo.getNonProxyHosts() != null )
-            {
-                System.setProperty( "http.nonProxyHosts", proxyInfo.getNonProxyHosts() );
-            }
-            else
-            {
-                System.getProperties().remove( "http.nonProxyHosts" );
-            }
+            setSystemProperty( "http.proxyHost", proxyInfo.getHost() );
+            setSystemProperty( "http.proxyPort", String.valueOf( proxyInfo.getPort() ) );
+            setSystemProperty( "http.nonProxyHosts", proxyInfo.getNonProxyHosts() );
         }
         else
         {
-            System.getProperties().remove( "http.proxyHost" );
-            System.getProperties().remove( "http.proxyPort" );
+            setSystemProperty( "http.proxyHost", null );
+            setSystemProperty( "http.proxyPort", null );
         }
 
         final boolean hasProxy = ( proxyInfo != null && proxyInfo.getUserName() != null );
@@ -288,30 +281,10 @@ public class LightweightHttpWagon
         {
             putConnection.disconnect();
         }
-        if ( previousHttpProxyHost != null )
-        {
-            System.setProperty( "http.proxyHost", previousHttpProxyHost );
-        }
-        else
-        {
-            System.getProperties().remove( "http.proxyHost" );
-        }
-        if ( previousHttpProxyPort != null )
-        {
-            System.setProperty( "http.proxyPort", previousHttpProxyPort );
-        }
-        else
-        {
-            System.getProperties().remove( "http.proxyPort" );
-        }
-        if ( previousProxyExclusions != null )
-        {
-            System.setProperty( "http.nonProxyHosts", previousProxyExclusions );
-        }
-        else
-        {
-            System.getProperties().remove( "http.nonProxyHosts" );
-        }
+
+        setSystemProperty( "http.proxyHost", previousHttpProxyHost );
+        setSystemProperty( "http.proxyPort", previousHttpProxyPort );
+        setSystemProperty( "http.nonProxyHosts", previousProxyExclusions );
     }
 
     public List getFileList( String destinationDirectory )
@@ -404,4 +377,17 @@ public class LightweightHttpWagon
     {
         this.httpHeaders = httpHeaders;
     }
+
+    void setSystemProperty( String key, String value )
+    {
+        if ( value != null )
+        {
+            System.setProperty( key, value );
+        }
+        else
+        {
+            System.getProperties().remove( key );
+        }
+    }
+
 }
