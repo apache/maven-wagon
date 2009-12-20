@@ -281,7 +281,7 @@ public class SftpWagon
         {
             String msg =
                 "Error occurred while deploying '" + sourceDirectory.getAbsolutePath() + "' " + "to remote repository: "
-                    + getRepository().getUrl();
+                    + getRepository().getUrl() + ": " + e.getMessage();
 
             throw new TransferFailedException( msg, e );
         }
@@ -401,7 +401,7 @@ public class SftpWagon
         {
             String msg =
                 "Error occurred while listing '" + destinationDirectory + "' " + "on remote repository: "
-                    + getRepository().getUrl();
+                    + getRepository().getUrl() + ": " + e.getMessage();
 
             throw new TransferFailedException( msg, e );
         }
@@ -434,7 +434,7 @@ public class SftpWagon
         {
             String msg =
                 "Error occurred while looking for '" + resourceName + "' " + "on remote repository: "
-                    + getRepository().getUrl();
+                    + getRepository().getUrl() + ": " + e.getMessage();
 
             throw new TransferFailedException( msg, e );
         }
@@ -530,7 +530,7 @@ public class SftpWagon
 
             String msg =
                 "Error occurred while deploying '" + resource.getName() + "' " + "to remote repository: "
-                    + getRepository().getUrl();
+                    + getRepository().getUrl() + ": " + e.getMessage();
 
             throw new TransferFailedException( msg, e );
         }
