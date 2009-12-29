@@ -62,6 +62,8 @@ import java.util.Stack;
  * possible, or the checkout directory needs to be a constant. Doing releases won't scale if you have to checkout the
  * whole repository structure in order to add 3 files.
  *
+ * @plexus.component role="org.apache.maven.wagon.Wagon" role-hint="scm" instantiation-strategy="per-lookup"
+ *
  * @author <a href="brett@apache.org">Brett Porter</a>
  * @author <a href="evenisse@apache.org">Emmanuel Venisse</a>
  * @author <a href="carlos@apache.org">Carlos Sanchez</a>
