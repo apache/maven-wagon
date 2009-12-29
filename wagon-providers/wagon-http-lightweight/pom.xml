@@ -35,9 +35,9 @@ under the License.
 
   <dependencies>
     <dependency>
-      <groupId>${pom.groupId}</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>wagon-http-shared</artifactId>
-      <version>${pom.version}</version>
+      <version>${project.version}</version>
       <exclusions>
         <exclusion>
           <groupId>commons-httpclient</groupId>

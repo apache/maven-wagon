@@ -46,7 +46,7 @@ under the License.
 
   <dependencies>
     <dependency>
-      <groupId>${pom.groupId}</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>wagon-http-shared</artifactId>
       <version>1.0-beta-7-SNAPSHOT</version>
     </dependency>
