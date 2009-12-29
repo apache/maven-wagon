@@ -102,6 +102,14 @@ under the License.
             </goals>
           </execution>
         </executions>
+        <dependencies>
+          <dependency>
+            <!-- Workaround for QDOX-148, see also MNG-3686 -->
+            <groupId>${project.groupId}</groupId>
+            <artifactId>wagon-http-shared</artifactId>
+            <version>1.0-beta-6</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>  
