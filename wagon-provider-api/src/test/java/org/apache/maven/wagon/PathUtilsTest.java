@@ -196,6 +196,21 @@ public class PathUtilsTest
         assertEquals( "/", PathUtils.basedir( "HTTP://www.codehaus.org/" ) );
     }
 
+    public void testEmptyProtocol()
+    {
+        assertEquals( "", PathUtils.protocol( "placeholder-only" ) );
+        assertEquals( "", PathUtils.protocol( "placeholder-only/module-a" ) );
+
+        assertEquals( "placeholder-only", PathUtils.authorization( "placeholder-only" ) );
+        assertEquals( "placeholder-only", PathUtils.authorization( "placeholder-only/module-a" ) );
+
+        assertEquals( -1, PathUtils.port( "placeholder-only" ) );
+        assertEquals( -1, PathUtils.port( "placeholder-only/module-a" ) );
+
+        assertEquals( "/", PathUtils.basedir( "placeholder-only" ) );
+        assertEquals( "/module-a", PathUtils.basedir( "placeholder-only/module-a" ) );
+    }
+
     public void testPortResolving()
     {
         assertEquals( 80, PathUtils.port( "http://www.codehause.org:80/maven" ) );

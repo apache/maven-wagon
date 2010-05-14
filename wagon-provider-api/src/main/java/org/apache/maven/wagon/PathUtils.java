@@ -145,7 +145,10 @@ public final class PathUtils
         }
     }
 
-    private static String authorization( final String url )
+    /**
+     * This was changed from private to package local so that it can be unit tested.
+     */
+    static String authorization( final String url )
     {
         if ( url == null )
         {
@@ -355,7 +358,7 @@ public final class PathUtils
 
             final int port = PathUtils.port( url );
 
-            int pos;
+            int pos = 0;
 
             if ( protocol.equalsIgnoreCase( "scm" ) )
             {
@@ -364,7 +367,10 @@ public final class PathUtils
             }
             else
             {
-                pos = url.indexOf( "://" ) + 3;
+                int index = url.indexOf( "://" );
+                if( index != -1 ) {
+                    pos = index + 3;
+                }
             }
 
             pos += authorization.length();
