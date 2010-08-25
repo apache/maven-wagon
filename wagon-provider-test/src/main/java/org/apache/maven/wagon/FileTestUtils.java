@@ -24,6 +24,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 
+import org.codehaus.plexus.util.FileUtils;
+
 /**
  * @author <a href="michal@apache.org>Michal Maczka</a>
  * @version $Id$
@@ -62,14 +64,18 @@ public class FileTestUtils
         final File baseDirectory = getTestOutputDir();
 
         final File retValue = new File( baseDirectory, name );
-
-        retValue.delete();
-
+       
+        if ( retValue.exists() )
+        {
+            FileUtils.cleanDirectory( retValue );
+            return retValue;
+        }
+        
         retValue.mkdirs();
 
         if ( !retValue.exists() )
         {
-            throw new IOException( "Unable to create the directory for testdata" );
+            throw new IOException( "Unable to create the directory for testdata " + retValue.getPath() );
         }
 
         return retValue;
