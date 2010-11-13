@@ -29,7 +29,7 @@ under the License.
 
   <groupId>org.apache.maven.wagon</groupId>
   <artifactId>wagon</artifactId>
-  <version>1.0-beta-7</version>
+  <version>1.0-beta-8-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Maven Wagon</name>
@@ -142,9 +142,9 @@ under the License.
   </mailingLists>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/wagon/tags/wagon-1.0-beta-7</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/tags/wagon-1.0-beta-7</developerConnection>
-    <url>http://svn.apache.org/viewvc/maven/wagon/tags/wagon-1.0-beta-7</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/wagon/trunk</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/trunk</developerConnection>
+    <url>http://svn.apache.org/viewvc/maven/wagon/trunk</url>
   </scm>
   <issueManagement>
     <system>jira</system>

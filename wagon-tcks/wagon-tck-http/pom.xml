@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon-tcks</artifactId>
-    <version>1.0-beta-7</version>
+    <version>1.0-beta-8-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
