@@ -34,7 +34,7 @@ under the License.
     <dependency>
       <groupId>com.jcraft</groupId>
       <artifactId>jsch</artifactId>
-      <version>0.1.38</version>
+      <version>0.1.44-1</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
