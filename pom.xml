@@ -153,6 +153,10 @@ under the License.
     <system>jira</system>
     <url>http://jira.codehaus.org/browse/WAGON</url>
   </issueManagement>
+  <ciManagement>
+    <system>Jenkins</system>
+    <url>https://builds.apache.org/hudson/job/maven-wagon/</url>
+  </ciManagement>
   <!-- TODO: point to ref location
     <distributionManagement>
       <site>
