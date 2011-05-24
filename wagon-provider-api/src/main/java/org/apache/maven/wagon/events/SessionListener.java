@@ -39,7 +39,7 @@ public interface SessionListener
     void sessionOpening( SessionEvent sessionEvent );
 
     /**
-     * This method will be called when Wagon has sucessfully connected to
+     * This method will be called when Wagon has successfully connected to
      * to the repository.
      * The type of the event should
      * be set to {@link SessionEvent.SESSION_OPENED}
@@ -80,7 +80,7 @@ public interface SessionListener
     void sessionConnectionRefused( SessionEvent sessionEvent );
 
     /**
-     * This method will be called by Wagon when Wagon manged
+     * This method will be called by Wagon when Wagon managed
      * to login to the repository.
      *
      * @param sessionEvent the session event
@@ -99,7 +99,7 @@ public interface SessionListener
     void sessionLoggedOff( SessionEvent sessionEvent );
 
     /**
-     * This method will be called by Wagon when an error occured.
+     * This method will be called by Wagon when an error occurred.
      * <p/>
      * The type of the event should
      * be set to {@link SessionEvent.SESSION_ERROR_OCCURRED}
@@ -109,9 +109,9 @@ public interface SessionListener
     void sessionError( SessionEvent sessionEvent );
 
     /**
-     * This methid allows to send arbitrary debug messages.
+     * This method allows to send arbitrary debug messages.
      *
-     * @param message the debug messgae
+     * @param message the debug message
      */
     void debug( String message );
 

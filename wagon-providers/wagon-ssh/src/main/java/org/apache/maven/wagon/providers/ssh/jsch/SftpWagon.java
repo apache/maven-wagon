@@ -19,19 +19,30 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  * under the License.
  */
 
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
+
+import org.apache.maven.wagon.InputData;
+import org.apache.maven.wagon.OutputData;
+import org.apache.maven.wagon.PathUtils;
+import org.apache.maven.wagon.ResourceDoesNotExistException;
+import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.authentication.AuthenticationException;
+import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.events.TransferEvent;
+import org.apache.maven.wagon.providers.ssh.ScpHelper;
+import org.apache.maven.wagon.repository.RepositoryPermissions;
+import org.apache.maven.wagon.resource.Resource;
+
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
-import org.apache.maven.wagon.PathUtils;
-import org.apache.maven.wagon.ResourceDoesNotExistException;
-import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.apache.maven.wagon.events.TransferEvent;
-import org.apache.maven.wagon.repository.RepositoryPermissions;
-import org.apache.maven.wagon.resource.Resource;
-
-import java.io.File;
 
 /**
  * SFTP protocol wagon.
@@ -39,6 +50,7 @@ import java.io.File;
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  * @version $Id$
  * @todo [BP] add compression flag
+ * @todo see if SftpProgressMonitor allows us to do streaming (without it, we can't do checksums as the input stream is lost)
  * 
  * @plexus.component role="org.apache.maven.wagon.Wagon" 
  *   role-hint="sftp"
@@ -53,50 +65,40 @@ public class SftpWagon
 
     private static final long MILLIS_PER_SEC = 1000L;
 
-    public void put( String basedir, Resource resource, File source )
-        throws TransferFailedException
+    private ChannelSftp channel;
+    
+    public void closeConnection()
     {
-        String resourceName = resource.getName();
-        String dir = getResourceDirectory( resourceName );
+        if ( channel != null )
+        {
+            channel.disconnect();
+        }
+        super.closeConnection();
+    }
 
-        String filename = getResourceFilename( resourceName );
-
-        ChannelSftp channel = null;
+    public void openConnectionInternal()
+        throws AuthenticationException
+    {
+        super.openConnectionInternal();
 
         try
         {
             channel = (ChannelSftp) session.openChannel( SFTP_CHANNEL );
 
             channel.connect();
+        }
+        catch ( JSchException e )
+        {
+            throw new AuthenticationException( "Error connecting to remote repository: " + getRepository().getUrl(),
+                                               e );
+        }
+    }
 
-            RepositoryPermissions permissions = getRepository().getPermissions();
-
-            int directoryMode = getDirectoryMode( permissions );
-
-            mkdirs( channel, basedir, directoryMode );
-
-            channel.cd( basedir );
-
-            mkdirs( channel, resourceName, directoryMode );
-
-            firePutStarted( resource, source );
-
-            channel.put( source.getAbsolutePath(), filename );
-
-            postProcessListeners( resource, source, TransferEvent.REQUEST_PUT );
-
-            if ( permissions != null && permissions.getGroup() != null )
-            {
-                setGroup( channel, filename, permissions );
-            }
-
-            if ( permissions != null && permissions.getFileMode() != null )
-            {
-                setFileMode( channel, filename, permissions );
-            }
-
-            firePutCompleted( resource, source );
-
+    private void returnToParentDirectory( Resource resource )
+    {
+        try
+        {
+            String dir = ScpHelper.getResourceDirectory( resource.getName() );
             String[] dirs = PathUtils.dirnames( dir );
             for ( int i = 0; i < dirs.length; i++ )
             {
@@ -105,29 +107,39 @@ public class SftpWagon
         }
         catch ( SftpException e )
         {
-            String msg = "Error occured while deploying '" + resourceName + "' " + "to remote repository: " +
-                getRepository().getUrl();
-
-            throw new TransferFailedException( msg, e );
-        }
-        catch ( JSchException e )
-        {
-            String msg = "Error occured while deploying '" + resourceName + "' " + "to remote repository: " +
-                getRepository().getUrl();
-
-            throw new TransferFailedException( msg, e );
-        }
-        finally
-        {
-            if ( channel != null )
-            {
-                channel.disconnect();
-            }
+            fireTransferDebug( "Error returning to parent directory: " + e.getMessage() );
         }
     }
 
-    private void setGroup( ChannelSftp channel, String filename, RepositoryPermissions permissions )
-        throws SftpException
+    private void putFile( File source, Resource resource, RepositoryPermissions permissions )
+        throws SftpException, TransferFailedException
+    {
+        resource.setContentLength( source.length() );
+        
+        resource.setLastModified( source.lastModified() );
+        
+        String filename = ScpHelper.getResourceFilename( resource.getName() );
+
+        firePutStarted( resource, source );
+
+        channel.put( source.getAbsolutePath(), filename );
+
+        postProcessListeners( resource, source, TransferEvent.REQUEST_PUT );
+
+        if ( permissions != null && permissions.getGroup() != null )
+        {
+            setGroup( filename, permissions );
+        }
+
+        if ( permissions != null && permissions.getFileMode() != null )
+        {
+            setFileMode( filename, permissions );
+        }
+
+        firePutCompleted( resource, source );
+    }
+
+    private void setGroup( String filename, RepositoryPermissions permissions )
     {
         try
         {
@@ -139,10 +151,13 @@ public class SftpWagon
             // TODO: warning level
             fireTransferDebug( "Not setting group: must be a numerical GID for SFTP" );
         }
+        catch ( SftpException e )
+        {
+            fireTransferDebug( "Not setting group: " + e.getMessage() );            
+        }
     }
 
-    private void setFileMode( ChannelSftp channel, String filename, RepositoryPermissions permissions )
-        throws SftpException
+    private void setFileMode( String filename, RepositoryPermissions permissions )
     {
         try
         {
@@ -154,21 +169,25 @@ public class SftpWagon
             // TODO: warning level
             fireTransferDebug( "Not setting mode: must be a numerical mode for SFTP" );
         }
+        catch ( SftpException e )
+        {
+            fireTransferDebug( "Not setting mode: " + e.getMessage() );            
+        }
     }
 
-    private void mkdirs( ChannelSftp channel, String resourceName, int mode )
-        throws TransferFailedException, SftpException
+    private void mkdirs( String resourceName, int mode )
+        throws SftpException, TransferFailedException
     {
         String[] dirs = PathUtils.dirnames( resourceName );
         for ( int i = 0; i < dirs.length; i++ )
         {
-            mkdir( channel, dirs[i], mode );
+            mkdir( dirs[i], mode );
 
             channel.cd( dirs[i] );
         }
     }
 
-    private void mkdir( ChannelSftp channel, String dir, int mode )
+    private void mkdir( String dir, int mode )
         throws TransferFailedException, SftpException
     {
         try
@@ -198,65 +217,7 @@ public class SftpWagon
         }
     }
 
-    public boolean getIfNewer( Resource resource, File destination, long timestamp )
-        throws ResourceDoesNotExistException, TransferFailedException
-    {
-        String filename = getResourceFilename( resource.getName() );
-
-        String dir = getResourceDirectory( resource.getName() );
-
-        // we already setuped the root directory. Ignore beginning /
-        if ( dir.length() > 0 && dir.charAt( 0 ) == PATH_SEPARATOR )
-        {
-            dir = dir.substring( 1 );
-        }
-
-        boolean bDownloaded = true;
-        try
-        {
-            ChannelSftp channel = (ChannelSftp) session.openChannel( SFTP_CHANNEL );
-
-            channel.connect();
-
-            SftpATTRS attrs = changeToRepositoryDirectory( channel, dir, filename );
-
-            if ( timestamp <= 0 || attrs.getMTime() * MILLIS_PER_SEC > timestamp )
-            {
-                fireGetStarted( resource, destination );
-
-                channel.get( filename, destination.getAbsolutePath() );
-
-                postProcessListeners( resource, destination, TransferEvent.REQUEST_GET );
-
-                fireGetCompleted( resource, destination );
-
-                String[] dirs = PathUtils.dirnames( dir );
-
-                for ( int i = 0; i < dirs.length; i++ )
-                {
-                    channel.cd( ".." );
-                }
-
-                bDownloaded = true;
-            }
-            else
-            {
-                bDownloaded = false;
-            }
-        }
-        catch ( SftpException e )
-        {
-            handleGetException( resource, e, destination );
-        }
-        catch ( JSchException e )
-        {
-            handleGetException( resource, e, destination );
-        }
-
-        return bDownloaded;
-    }
-
-    private SftpATTRS changeToRepositoryDirectory( ChannelSftp channel, String dir, String filename )
+    private SftpATTRS changeToRepositoryDirectory( String dir, String filename )
         throws ResourceDoesNotExistException, SftpException
     {
         // This must be called first to ensure that if the file doesn't exist it throws an exception
@@ -270,6 +231,11 @@ public class SftpWagon
                 channel.cd( dir );
             }
 
+            if ( filename.length() == 0 )
+            {
+                filename = ".";
+            }
+            
             attrs = channel.stat( filename );
         }
         catch ( SftpException e )
@@ -278,6 +244,10 @@ public class SftpWagon
             {
                 throw new ResourceDoesNotExistException( e.toString(), e );
             }
+            else if( e.toString().trim().indexOf( "Can't change directory" ) != -1  )
+            {
+                throw new ResourceDoesNotExistException( e.toString(), e );
+            }   
             else
             {
                 throw e;
@@ -286,33 +256,316 @@ public class SftpWagon
         return attrs;
     }
 
-    public void put( File source, String destination )
+    public void putDirectory( File sourceDirectory, String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        String basedir = getRepository().getBasedir();
+        final RepositoryPermissions permissions = repository.getPermissions();
 
-        Resource resource = getResource( destination );
+        try
+        {
+            channel.cd( "/" );
+            
+            String basedir = getRepository().getBasedir();
+            int directoryMode = getDirectoryMode( permissions );
+            
+            mkdirs( basedir + "/", directoryMode );
+            
+            fireTransferDebug( "Recursively uploading directory " + sourceDirectory.getAbsolutePath() + " as "
+                + destinationDirectory );
+            
+            mkdirs( destinationDirectory, directoryMode );
+            ftpRecursivePut( sourceDirectory, null, ScpHelper.getResourceFilename( destinationDirectory ),
+                             directoryMode );
+        }
+        catch ( SftpException e )
+        {
+            String msg =
+                "Error occurred while deploying '" + sourceDirectory.getAbsolutePath() + "' " + "to remote repository: "
+                    + getRepository().getUrl() + ": " + e.getMessage();
 
-        firePutInitiated( resource, source );
-
-        put( basedir, resource, source );
+            throw new TransferFailedException( msg, e );
+        }
     }
 
-    public void get( String resourceName, File destination )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    private void ftpRecursivePut( File sourceFile, String prefix, String fileName, int directoryMode )
+        throws TransferFailedException, SftpException
     {
-        getIfNewer( resourceName, destination, 0 );
+        final RepositoryPermissions permissions = repository.getPermissions();
+
+        if ( sourceFile.isDirectory() )
+        {
+            if ( !fileName.equals( "." ) )
+            {
+                prefix = getFileName( prefix, fileName );
+                mkdir( fileName, directoryMode );
+                channel.cd( fileName );
+            }
+
+            File[] files = sourceFile.listFiles();
+            if ( files != null && files.length > 0 )
+            {
+                // Directories first, then files. Let's go deep early.
+                for ( int i = 0; i < files.length; i++ )
+                {
+                    if ( files[i].isDirectory() )
+                    {
+                        ftpRecursivePut( files[i], prefix, files[i].getName(), directoryMode );
+                    }
+                }
+                for ( int i = 0; i < files.length; i++ )
+                {
+                    if ( !files[i].isDirectory() )
+                    {
+                        ftpRecursivePut( files[i], prefix, files[i].getName(), directoryMode );
+                    }
+                }
+            }
+            
+            channel.cd( ".." );
+        }
+        else
+        {
+            Resource resource = ScpHelper.getResource( getFileName( prefix, fileName ) );
+
+            firePutInitiated( resource, sourceFile );
+
+            putFile( sourceFile, resource, permissions );
+        }
     }
 
-    public boolean getIfNewer( String resourceName, File destination, long timestamp )
+    private String getFileName( String prefix, String fileName )
+    {
+        if ( prefix != null )
+        {
+            prefix = prefix + "/" + fileName;
+        }
+        else
+        {
+            prefix = fileName;
+        }
+        return prefix;
+    }
+    
+    public List getFileList( String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        createParentDirectories( destination );
+        if ( destinationDirectory.length() == 0 )
+        {
+            destinationDirectory = ".";
+        }
+        
+        String filename = ScpHelper.getResourceFilename( destinationDirectory );
 
-        Resource resource = getResource( resourceName );
+        String dir = ScpHelper.getResourceDirectory( destinationDirectory );
 
-        fireGetInitiated( resource, destination );
+        // we already setuped the root directory. Ignore beginning /
+        if ( dir.length() > 0 && dir.charAt( 0 ) == ScpHelper.PATH_SEPARATOR )
+        {
+            dir = dir.substring( 1 );
+        }
 
-        return getIfNewer( resource, destination, timestamp );
+        try
+        {
+            SftpATTRS attrs = changeToRepositoryDirectory( dir, filename );
+            if ( ( attrs.getPermissions() & S_IFDIR ) == 0 )
+            {
+                throw new TransferFailedException( "Remote path is not a directory:" + dir );
+            }
+
+            Vector fileList = channel.ls( filename );
+            List files = new ArrayList( fileList.size() );
+            for ( Iterator i = fileList.iterator(); i.hasNext(); )
+            {
+                ChannelSftp.LsEntry entry = (ChannelSftp.LsEntry) i.next();
+                
+                String name = entry.getFilename();
+                if ( entry.getAttrs().isDir() )
+                {
+                    if ( !name.equals( "." ) && !name.equals( ".." ) )
+                    {
+                        if ( !name.endsWith( "/" ) )
+                        {
+                            name += "/";
+                        }
+                        files.add( name );
+                    }
+                }
+                else
+                {
+                    files.add( name );
+                }
+            }
+            return files;
+        }
+        catch ( SftpException e )
+        {
+            String msg =
+                "Error occurred while listing '" + destinationDirectory + "' " + "on remote repository: "
+                    + getRepository().getUrl() + ": " + e.getMessage();
+
+            throw new TransferFailedException( msg, e );
+        }
+    }
+    
+    public boolean resourceExists( String resourceName )
+        throws TransferFailedException, AuthorizationException
+    {
+        String filename = ScpHelper.getResourceFilename( resourceName );
+
+        String dir = ScpHelper.getResourceDirectory( resourceName );
+
+        // we already setuped the root directory. Ignore beginning /
+        if ( dir.length() > 0 && dir.charAt( 0 ) == ScpHelper.PATH_SEPARATOR )
+        {
+            dir = dir.substring( 1 );
+        }
+
+        try
+        {
+            changeToRepositoryDirectory( dir, filename );
+            
+            return true;
+        }
+        catch ( ResourceDoesNotExistException e )
+        {
+            return false;
+        }
+        catch ( SftpException e )
+        {
+            String msg =
+                "Error occurred while looking for '" + resourceName + "' " + "on remote repository: "
+                    + getRepository().getUrl() + ": " + e.getMessage();
+
+            throw new TransferFailedException( msg, e );
+        }
+    }
+
+    protected void cleanupGetTransfer( Resource resource )
+    {
+        returnToParentDirectory( resource );
+    }
+    
+    protected void cleanupPutTransfer( Resource resource )
+    {
+        returnToParentDirectory( resource );
+    }
+
+    protected void finishPutTransfer( Resource resource, InputStream input, OutputStream output )
+        throws TransferFailedException
+    {
+        RepositoryPermissions permissions = getRepository().getPermissions();
+
+        String filename = ScpHelper.getResourceFilename( resource.getName() );
+        if ( permissions != null && permissions.getGroup() != null )
+        {
+            setGroup( filename, permissions );
+        }
+        
+        if ( permissions != null && permissions.getFileMode() != null )
+        {
+            setFileMode( filename, permissions );
+        }
+    }
+
+    public void fillInputData( InputData inputData )
+        throws TransferFailedException, ResourceDoesNotExistException
+    {
+        Resource resource = inputData.getResource();
+        
+        String filename = ScpHelper.getResourceFilename( resource.getName() );
+
+        String dir = ScpHelper.getResourceDirectory( resource.getName() );
+
+        // we already setuped the root directory. Ignore beginning /
+        if ( dir.length() > 0 && dir.charAt( 0 ) == ScpHelper.PATH_SEPARATOR )
+        {
+            dir = dir.substring( 1 );
+        }
+
+        try
+        {
+            SftpATTRS attrs = changeToRepositoryDirectory( dir, filename );
+
+            long lastModified = attrs.getMTime() * MILLIS_PER_SEC;
+            resource.setContentLength( attrs.getSize() );
+
+            resource.setLastModified( lastModified );
+            
+            inputData.setInputStream( channel.get( filename ) );
+        }
+        catch ( SftpException e )
+        {
+            handleGetException( resource, e );
+        }
+    }
+
+    public void fillOutputData( OutputData outputData )
+        throws TransferFailedException
+    {
+        int directoryMode = getDirectoryMode( getRepository().getPermissions() );
+
+        Resource resource = outputData.getResource();
+        
+        try
+        {
+            channel.cd( "/" );
+
+            String basedir = getRepository().getBasedir();
+            mkdirs( basedir + "/", directoryMode );
+
+            mkdirs( resource.getName(), directoryMode );
+
+            String filename = ScpHelper.getResourceFilename( resource.getName() );
+            outputData.setOutputStream( channel.put( filename ) );
+        }
+        catch ( TransferFailedException e )
+        {
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+
+            throw e;
+        }
+        catch ( SftpException e )
+        {
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+
+            String msg =
+                "Error occurred while deploying '" + resource.getName() + "' " + "to remote repository: "
+                    + getRepository().getUrl() + ": " + e.getMessage();
+
+            throw new TransferFailedException( msg, e );
+        }
+    }
+    
+    /**
+     * @param permissions repository's permissions
+     * @return the directory mode for the repository or <code>-1</code> if it
+     *         wasn't set
+     */
+    public int getDirectoryMode( RepositoryPermissions permissions )
+    {
+        int ret = -1;
+
+        if ( permissions != null )
+        {
+            ret = getOctalMode( permissions.getDirectoryMode() );
+        }
+
+        return ret;
+    }
+
+    public int getOctalMode( String mode )
+    {
+        int ret;
+        try
+        {
+            ret = Integer.valueOf( mode, 8 ).intValue();
+        }
+        catch ( NumberFormatException e )
+        {
+            // TODO: warning level
+            fireTransferDebug( "the file mode must be a numerical mode for SFTP" );
+            ret = -1;
+        }
+        return ret;
     }
 }

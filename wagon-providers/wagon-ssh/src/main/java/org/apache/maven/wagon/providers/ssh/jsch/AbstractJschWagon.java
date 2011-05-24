@@ -19,6 +19,42 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  * under the License.
  */
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.List;
+import java.util.Properties;
+
+import org.apache.maven.wagon.CommandExecutionException;
+import org.apache.maven.wagon.CommandExecutor;
+import org.apache.maven.wagon.ResourceDoesNotExistException;
+import org.apache.maven.wagon.StreamWagon;
+import org.apache.maven.wagon.Streams;
+import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.WagonConstants;
+import org.apache.maven.wagon.authentication.AuthenticationException;
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.events.TransferEvent;
+import org.apache.maven.wagon.providers.ssh.CommandExecutorStreamProcessor;
+import org.apache.maven.wagon.providers.ssh.ScpHelper;
+import org.apache.maven.wagon.providers.ssh.SshWagon;
+import org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo;
+import org.apache.maven.wagon.providers.ssh.interactive.NullInteractiveUserInfo;
+import org.apache.maven.wagon.providers.ssh.jsch.interactive.UserInfoUIKeyboardInteractiveProxy;
+import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostChangedException;
+import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
+import org.apache.maven.wagon.providers.ssh.knownhost.UnknownHostException;
+import org.apache.maven.wagon.proxy.ProxyInfo;
+import org.apache.maven.wagon.resource.Resource;
+import org.codehaus.plexus.util.IOUtil;
+import org.codehaus.plexus.util.StringInputStream;
+
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.HostKey;
 import com.jcraft.jsch.HostKeyRepository;
@@ -31,39 +67,17 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
 
-import org.apache.maven.wagon.CommandExecutionException;
-import org.apache.maven.wagon.Streams;
-import org.apache.maven.wagon.authentication.AuthenticationException;
-import org.apache.maven.wagon.providers.ssh.AbstractSshWagon;
-import org.apache.maven.wagon.providers.ssh.CommandExecutorStreamProcessor;
-import org.apache.maven.wagon.providers.ssh.SshWagon;
-import org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo;
-import org.apache.maven.wagon.providers.ssh.interactive.NullInteractiveUserInfo;
-import org.apache.maven.wagon.providers.ssh.jsch.interactive.UserInfoUIKeyboardInteractiveProxy;
-import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostChangedException;
-import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
-import org.apache.maven.wagon.providers.ssh.knownhost.UnknownHostException;
-import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.StringInputStream;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Properties;
-
 /**
  * AbstractJschWagon 
  *
  * @version $Id$
  */
 public abstract class AbstractJschWagon
-    extends AbstractSshWagon
-    implements SshWagon
+    extends StreamWagon
+    implements SshWagon, CommandExecutor
 {
+    protected ScpHelper sshTool = new ScpHelper( this );
+    
     protected Session session;
     
     /**
@@ -85,10 +99,13 @@ public abstract class AbstractJschWagon
 
     protected static final String EXEC_CHANNEL = "exec";
 
-    public void openConnection()
+    public void openConnectionInternal()
         throws AuthenticationException
     {
-        super.openConnection();
+        if ( authenticationInfo == null )
+        {
+            authenticationInfo = new AuthenticationInfo();
+        }
 
         if ( !interactive )
         {
@@ -98,10 +115,19 @@ public abstract class AbstractJschWagon
 
         JSch sch = new JSch();
 
-        File privateKey = getPrivateKey();
+        File privateKey;
+        try
+        {
+            privateKey = ScpHelper.getPrivateKey( authenticationInfo );
+        }
+        catch ( FileNotFoundException e )
+        {
+            throw new AuthenticationException( e.getMessage() );
+        }
 
         if ( privateKey != null && privateKey.exists() )
         {
+            fireSessionDebug( "Using private key: " + privateKey );
             try
             {
                 sch.addIdentity( privateKey.getAbsolutePath(), authenticationInfo.getPassphrase() );
@@ -113,40 +139,59 @@ public abstract class AbstractJschWagon
         }
 
         String host = getRepository().getHost();
-        int port = getPort();
+        int port =
+            repository.getPort() == WagonConstants.UNKNOWN_PORT ? ScpHelper.DEFAULT_SSH_PORT : repository.getPort();
         try
         {
-            session = sch.getSession( authenticationInfo.getUserName(), host, port );
+            String userName = authenticationInfo.getUserName();
+            if ( userName == null )
+            {
+                userName = System.getProperty( "user.name" );
+            }
+            session = sch.getSession( userName, host, port );
+            session.setTimeout( getTimeout() );
         }
         catch ( JSchException e )
         {
             throw new AuthenticationException( "Cannot connect. Reason: " + e.getMessage(), e );
         }
 
+        Proxy proxy = null;
+        ProxyInfo proxyInfo = getProxyInfo( ProxyInfo.PROXY_SOCKS5, getRepository().getHost() );
         if ( proxyInfo != null && proxyInfo.getHost() != null )
         {
-            Proxy proxy;
-
-            int proxyPort = proxyInfo.getPort();
-
-            // HACK: if port == 1080 we will use SOCKS5 Proxy, otherwise will use HTTP Proxy
-            if ( proxyPort == SOCKS5_PROXY_PORT )
-            {
-                proxy = new ProxySOCKS5( proxyInfo.getHost() );
-                ( (ProxySOCKS5) proxy ).setUserPasswd( proxyInfo.getUserName(), proxyInfo.getPassword() );
-            }
-            else
-            {
-                proxy = new ProxyHTTP( proxyInfo.getHost(), proxyPort );
-                ( (ProxyHTTP) proxy ).setUserPasswd( proxyInfo.getUserName(), proxyInfo.getPassword() );
-            }
-
-            session.setProxy( proxy );
+            proxy = new ProxySOCKS5( proxyInfo.getHost(), proxyInfo.getPort() );
+            ( (ProxySOCKS5) proxy ).setUserPasswd( proxyInfo.getUserName(), proxyInfo.getPassword() );
         }
         else
         {
-            session.setProxy( null );
+            proxyInfo = getProxyInfo( ProxyInfo.PROXY_HTTP, getRepository().getHost() );
+            if ( proxyInfo != null && proxyInfo.getHost() != null )
+            {
+                proxy = new ProxyHTTP( proxyInfo.getHost(), proxyInfo.getPort() );
+                ( (ProxyHTTP) proxy ).setUserPasswd( proxyInfo.getUserName(), proxyInfo.getPassword() );
+            }
+            else
+            {
+                // Backwards compatibility
+                proxyInfo = getProxyInfo( getRepository().getProtocol(), getRepository().getHost() );
+                if ( proxyInfo != null && proxyInfo.getHost() != null )
+                {
+                    // if port == 1080 we will use SOCKS5 Proxy, otherwise will use HTTP Proxy
+                    if ( proxyInfo.getPort() == SOCKS5_PROXY_PORT )
+                    {
+                        proxy = new ProxySOCKS5( proxyInfo.getHost(), proxyInfo.getPort() );
+                        ( (ProxySOCKS5) proxy ).setUserPasswd( proxyInfo.getUserName(), proxyInfo.getPassword() );
+                    }
+                    else
+                    {
+                        proxy = new ProxyHTTP( proxyInfo.getHost(), proxyInfo.getPort() );
+                        ( (ProxyHTTP) proxy ).setUserPasswd( proxyInfo.getUserName(), proxyInfo.getPassword() );
+                    }
+                }
+            }
         }
+        session.setProxy( proxy );
 
         // username and password will be given via UserInfo interface.
         UserInfo ui = new WagonUserInfo( authenticationInfo, getInteractiveUserInfo() );
@@ -174,6 +219,11 @@ public abstract class AbstractJschWagon
             config.setProperty( "StrictHostKeyChecking", getKnownHostsProvider().getHostKeyChecking() );
         }
 
+        if ( authenticationInfo.getPassword() != null )
+        {
+            config.setProperty( "PreferredAuthentications", "gssapi-with-mic,publickey,password,keyboard-interactive" );
+        }
+        
         config.setProperty( "BatchMode", interactive ? "no" : "yes" );
 
         session.setConfig( config );
@@ -192,7 +242,7 @@ public abstract class AbstractJschWagon
                 HostKeyRepository hkr = sch.getHostKeyRepository();
                 HostKey[] keys = hkr.getHostKey();
 
-                for ( int i = 0; i < keys.length; i++ )
+                for ( int i = 0; keys != null && i < keys.length; i++ )
                 {
                     HostKey key = keys[i];
                     w.println( key.getHost() + " " + key.getType() + " " + key.getKey() );
@@ -259,7 +309,7 @@ public abstract class AbstractJschWagon
 
             Streams streams = CommandExecutorStreamProcessor.processStreams( stderrReader, stdoutReader );
 
-            if ( streams.getErr().length() > 0 )
+            if ( streams.getErr().length() > 0 && !ignoreFailures )
             {
                 int exitCode = channel.getExitStatus();
                 throw new CommandExecutionException( "Exit code: " + exitCode + " - " + streams.getErr() );
@@ -284,6 +334,49 @@ public abstract class AbstractJschWagon
                 channel.disconnect();
             }
         }
+    }
+
+    protected void handleGetException( Resource resource, Exception e )
+        throws TransferFailedException
+    {
+        fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+
+        String msg =
+            "Error occurred while downloading '" + resource + "' from the remote repository:" + getRepository() + ": "
+                + e.getMessage();
+
+        throw new TransferFailedException( msg, e );
+    }
+
+    public List getFileList( String destinationDirectory )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        return sshTool.getFileList( destinationDirectory, repository );
+    }
+
+    public void putDirectory( File sourceDirectory, String destinationDirectory )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        sshTool.putDirectory( this, sourceDirectory, destinationDirectory );
+    }
+
+    public boolean resourceExists( String resourceName )
+        throws TransferFailedException, AuthorizationException
+    {
+        return sshTool.resourceExists( resourceName, repository );
+    }
+
+    public boolean supportsDirectoryCopy()
+    {
+        return true;
+    }
+
+    public void executeCommand( String command )
+        throws CommandExecutionException
+    {
+        fireTransferDebug( "Executing command: " + command );
+
+        executeCommand( command, false );
     }
 
     public InteractiveUserInfo getInteractiveUserInfo()

@@ -19,18 +19,20 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  * under the License.
  */
 
-import org.apache.maven.wagon.WagonTestCase;
+import java.io.File;
+
+import org.apache.maven.wagon.StreamingWagonTestCase;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.providers.ssh.TestData;
-
-import java.io.File;
+import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.resource.Resource;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  */
 public class ScpWagonTest
-    extends WagonTestCase
+    extends StreamingWagonTestCase
 {
     protected String getProtocol()
     {
@@ -58,6 +60,11 @@ public class ScpWagonTest
         }
 
         return authInfo;
+    }
+
+    protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
+    {
+        return new File( repository.getBasedir(), resource.getName() ).lastModified();
     }
 
 }

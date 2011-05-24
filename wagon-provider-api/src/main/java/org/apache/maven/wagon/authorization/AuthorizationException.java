@@ -23,7 +23,7 @@ import org.apache.maven.wagon.WagonException;
 
 /**
  * This exception is thrown when the user is not entitled to fetch from or deploy to
- * prticular place in the repository.
+ * particular place in the repository.
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$

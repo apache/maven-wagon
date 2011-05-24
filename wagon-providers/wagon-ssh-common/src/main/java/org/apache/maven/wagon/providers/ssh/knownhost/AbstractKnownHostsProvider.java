@@ -20,6 +20,8 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
  */
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Common base for known hosts providers.
@@ -41,6 +43,8 @@ public abstract class AbstractKnownHostsProvider
      * the known hosts, in the openssh format
      */
     protected String contents;
+    
+    protected Set knownHosts = new HashSet();
 
     public void setHostKeyChecking( String hostKeyChecking )
     {
@@ -56,9 +60,11 @@ public abstract class AbstractKnownHostsProvider
     {
         return contents;
     }
-
+    
     public void storeKnownHosts( String contents )
         throws IOException
     {
     }
+    
+    
 }

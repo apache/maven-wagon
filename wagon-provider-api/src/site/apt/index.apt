@@ -3,17 +3,17 @@
  ------
  Carlos Sanchez
  ------
- 16 April 2006
+ 2006-04-16
  ------
 
 Maven Wagon API
 
- The Wagon API project defines a simple API for transfering resources
+ The Wagon API project defines a simple API for transferring resources
  (artifacts) to and from repositories. The word repository is used in this context as
  it is commonly used in
  {{{http://maven.apache.org/maven-1.x/reference/glossary.html}Maven}}
- And means a storage of artifacts.
+ and means a storage of artifacts.
 
  It is also used to deploy the Maven generated site to a server.
 
- Maven Wagon API defines the contract between different Wagon implementations
+ Maven Wagon API defines the contract between different Wagon implementations.

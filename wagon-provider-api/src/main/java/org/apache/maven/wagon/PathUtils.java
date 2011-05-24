@@ -28,8 +28,12 @@ import java.util.StringTokenizer;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  */
-public class PathUtils
+public final class PathUtils
 {
+    private PathUtils()
+    {
+    }
+    
     /**
      * Returns the directory path portion of a file specification string.
      * Matches the equally named unix command.
@@ -141,7 +145,10 @@ public class PathUtils
         }
     }
 
-    private static String authorization( final String url )
+    /**
+     * This was changed from private to package local so that it can be unit tested.
+     */
+    static String authorization( final String url )
     {
         if ( url == null )
         {
@@ -150,13 +157,13 @@ public class PathUtils
 
         final String protocol = PathUtils.protocol( url );
 
-        if ( protocol == null || protocol.equals( "file" ) )
+        if ( protocol == null || protocol.equalsIgnoreCase( "file" ) )
         {
             return "localhost";
         }
 
         String host = url;
-        if ( protocol.equals( "scm" ) )
+        if ( protocol.equalsIgnoreCase( "scm" ) )
         {
             // skip over type
             host = host.substring( host.indexOf( ":", 4 ) + 1 ).trim();
@@ -217,14 +224,14 @@ public class PathUtils
 
     /**
      * @param url
-     * @return
+     * @return the port or {@link WagonConstants#UNKNOWN_PORT} if not existent
      */
     public static int port( String url )
     {
 
         final String protocol = PathUtils.protocol( url );
 
-        if ( protocol == null || protocol.equals( "file" ) )
+        if ( protocol == null || protocol.equalsIgnoreCase( "file" ) )
         {
             return WagonConstants.UNKNOWN_PORT;
         }
@@ -236,13 +243,13 @@ public class PathUtils
             return WagonConstants.UNKNOWN_PORT;
         }
 
-        if ( protocol.equals( "scm" ) )
+        if ( protocol.equalsIgnoreCase( "scm" ) )
         {
             // skip over type
             url = url.substring( url.indexOf( ":", 4 ) + 1 ).trim();
         }
 
-        if ( url.startsWith( "file:" ) || url.startsWith( "local:" ) )
+        if ( url.regionMatches( true, 0, "file:", 0, 5 ) || url.regionMatches( true, 0, "local:", 0, 6 ) )
         {
             return WagonConstants.UNKNOWN_PORT;
         }
@@ -281,8 +288,10 @@ public class PathUtils
     }
 
     /**
-     * @param url
-     * @return
+     * Derive the path portion of the given URL.
+     * 
+     * @param url the repository URL
+     * @return the basedir of the repository
      * @todo need to URL decode for spaces?
      */
     public static String basedir( String url )
@@ -291,19 +300,20 @@ public class PathUtils
 
         String retValue = null;
 
-        if ( protocol.equals( "scm" ) )
+        if ( protocol.equalsIgnoreCase( "scm" ) )
         {
             // skip over SCM bits
-            if ( url.startsWith( "scm:svn:" ) )
+            if ( url.regionMatches( true, 0, "scm:svn:", 0, 8 ) )
             {
                 url = url.substring( url.indexOf( ":", 4 ) + 1 );
                 protocol = PathUtils.protocol( url );
             }
         }
 
-        if ( protocol.equals( "file" ) )
+        if ( protocol.equalsIgnoreCase( "file" ) )
         {
             retValue = url.substring( protocol.length() + 1 );
+            retValue = decode( retValue );
             // special case: if omitted // on protocol, keep path as is
             if ( retValue.startsWith( "//" ) )
             {
@@ -348,16 +358,20 @@ public class PathUtils
 
             final int port = PathUtils.port( url );
 
-            int pos;
+            int pos = 0;
 
-            if ( protocol.equals( "scm" ) )
+            if ( protocol.equalsIgnoreCase( "scm" ) )
             {
                 pos = url.indexOf( ":", 4 ) + 1;
                 pos = url.indexOf( ":", pos ) + 1;
             }
             else
             {
-                pos = url.indexOf( "://" ) + 3;
+                int index = url.indexOf( "://" );
+                if ( index != -1 )
+                {
+                    pos = index + 3;
+                }
             }
 
             pos += authorization.length();
@@ -386,6 +400,32 @@ public class PathUtils
             retValue = "/";
         }
         return retValue.trim();
+    }
+
+    /**
+     * Decodes the specified (portion of a) URL. <strong>Note:</strong> This decoder assumes that ISO-8859-1 is used to
+     * convert URL-encoded octets to characters.
+     * 
+     * @param url The URL to decode, may be <code>null</code>.
+     * @return The decoded URL or <code>null</code> if the input was <code>null</code>.
+     */
+    private static String decode( String url )
+    {
+        String decoded = url;
+        if ( url != null )
+        {
+            int pos = -1;
+            while ( ( pos = decoded.indexOf( '%', pos + 1 ) ) >= 0 )
+            {
+                if ( pos + 2 < decoded.length() )
+                {
+                    String hexStr = decoded.substring( pos + 1, pos + 3 );
+                    char ch = (char) Integer.parseInt( hexStr, 16 );
+                    decoded = decoded.substring( 0, pos ) + ch + decoded.substring( pos + 3 );
+                }
+            }
+        }
+        return decoded;
     }
 
     public static String user( String url )
@@ -434,7 +474,15 @@ public class PathUtils
 
         if ( absolutePath.startsWith( basedirPath ) )
         {
-            relative = absolutePath.substring( basedirPath.length() + 1 );
+            relative = absolutePath.substring( basedirPath.length() );
+            if ( relative.startsWith( "/" ) )
+            {
+                relative = relative.substring( 1 );
+            }
+            if ( relative.length() <= 0 )
+            {
+                relative = ".";
+            }
         }
         else
         {

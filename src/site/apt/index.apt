@@ -1,0 +1,26 @@
+ ------
+ Maven Wagon
+ ------
+ Jason van Zyl
+ ------
+ 2005-10-25
+ ------
+
+Maven Wagon
+
+ Maven Wagon is a transport abstraction that is used in Maven's artifact and
+ repository handling code. Currently wagon has the following providers:
+ 
+ * {{{wagon-providers/wagon-file/}File}}
+ 
+ * {{{wagon-providers/wagon-http/}HTTP}}
+ 
+ * {{{wagon-providers/wagon-http-lightweight/}HTTP lightweight}}
+ 
+ * {{{wagon-providers/wagon-ftp/}FTP}}
+ 
+ * {{{wagon-providers/wagon-ssh/}SSH/SCP}}
+ 
+ * {{{wagon-providers/wagon-webdav-jackrabbit/}WebDAV}}
+
+ * {{{wagon-providers/wagon-scm/}SCM}} (in progress)

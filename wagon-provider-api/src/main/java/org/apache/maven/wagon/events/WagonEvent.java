@@ -19,10 +19,9 @@ package org.apache.maven.wagon.events;
  * under the License.
  */
 
-import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.repository.Repository;
-
 import java.util.EventObject;
+
+import org.apache.maven.wagon.Wagon;
 
 /**
  * Base class for all events emitted by <code>Wagon</code> objects.
@@ -34,13 +33,7 @@ public class WagonEvent
     extends EventObject
 {
     /**
-     * Repository to which the Wagon
-     * object which emitted this event is connected
-     */
-    protected Repository repository;
-
-    /**
-     * The time when event occured
+     * The time when event occurred
      */
     protected long timestamp;
 
@@ -63,7 +56,7 @@ public class WagonEvent
     }
 
     /**
-     * Returns the timestamp which indicated the time when this event has occured
+     * Returns the timestamp which indicated the time when this event has occurred
      *
      * @return Returns the timestamp.
      */
@@ -73,7 +66,7 @@ public class WagonEvent
     }
 
     /**
-     * Sets the timestamp which indicated the time when this event has occured
+     * Sets the timestamp which indicated the time when this event has occurred
      *
      * @param timestamp The timestamp to set.
      */

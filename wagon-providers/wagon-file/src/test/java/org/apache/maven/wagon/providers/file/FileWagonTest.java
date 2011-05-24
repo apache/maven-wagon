@@ -19,23 +19,23 @@ package org.apache.maven.wagon.providers.file;
  * under the License.
  */
 
+import java.io.File;
+import java.io.IOException;
+
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.FileTestUtils;
+import org.apache.maven.wagon.StreamingWagonTestCase;
 import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-
-import java.io.File;
-import java.io.IOException;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  */
 public class FileWagonTest
-    extends WagonTestCase
+    extends StreamingWagonTestCase
 {
     protected String getProtocol()
     {
@@ -64,5 +64,28 @@ public class FileWagonTest
         resource.setContentLength( 100000 );
         Repository repository = new Repository();
         wagon.connect( repository );
+    }
+
+    protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
+    {
+        return new File( repository.getBasedir(), resource.getName() ).lastModified();
+    }
+    
+    public void testResourceExists()
+        throws Exception
+    {
+        String url = "file://" + getBasedir();
+        
+        Wagon wagon = new FileWagon();
+        Repository repository = new Repository( "someID", url );
+        wagon.connect( repository );
+        
+        assertTrue( wagon.resourceExists( "target" ) );
+        assertTrue( wagon.resourceExists( "target/" ) );
+        assertTrue( wagon.resourceExists( "pom.xml" ) );
+        
+        assertFalse( wagon.resourceExists( "pom.xml/" ) );
+        
+        wagon.disconnect();
     }
 }

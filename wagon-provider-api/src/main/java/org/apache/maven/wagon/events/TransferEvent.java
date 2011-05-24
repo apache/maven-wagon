@@ -26,7 +26,7 @@ import java.io.File;
 
 /**
  * TransferEvent is used to notify TransferListeners about progress
- * in transfer of resources form/to the respository
+ * in transfer of resources form/to the repository
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
@@ -43,32 +43,32 @@ public class TransferEvent
     /**
      * A transfer was started.
      */
-    public final static int TRANSFER_STARTED = 1;
+    public static final int TRANSFER_STARTED = 1;
 
     /**
      * A transfer is completed.
      */
-    public final static int TRANSFER_COMPLETED = 2;
+    public static final int TRANSFER_COMPLETED = 2;
 
     /**
      * A transfer is in progress.
      */
-    public final static int TRANSFER_PROGRESS = 3;
+    public static final int TRANSFER_PROGRESS = 3;
 
     /**
-     * An error occured during transfer
+     * An error occurred during transfer
      */
-    public final static int TRANSFER_ERROR = 4;
+    public static final int TRANSFER_ERROR = 4;
 
     /**
      * Indicates GET transfer  (from the repository)
      */
-    public final static int REQUEST_GET = 5;
+    public static final int REQUEST_GET = 5;
 
     /**
      * Indicates PUT transfer (to the repository)
      */
-    public final static int REQUEST_PUT = 6;
+    public static final int REQUEST_PUT = 6;
 
     private Resource resource;
 
@@ -252,11 +252,72 @@ public class TransferEvent
 
         sb.append( "|" );
 
-        sb.append( this.repository ).append( "|" );
+        sb.append( this.getWagon().getRepository() ).append( "|" );
         sb.append( this.getLocalFile() ).append( "|" );
-        sb.append( this.getResource() );
+        sb.append( this.getResource().inspect() );
         sb.append( "]" );
 
         return sb.toString();
     }
+
+    public int hashCode()
+    {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + eventType;
+        result = prime * result + ( ( exception == null ) ? 0 : exception.hashCode() );
+        result = prime * result + ( ( localFile == null ) ? 0 : localFile.hashCode() );
+        result = prime * result + requestType;
+        result = prime * result + ( ( resource == null ) ? 0 : resource.hashCode() );
+        return result;
+    }
+
+    public boolean equals( Object obj )
+    {
+        if ( this == obj )
+        {
+            return true;
+        }
+        if ( ( obj == null ) || ( getClass() != obj.getClass() ) )
+        {
+            return false;
+        }
+        final TransferEvent other = (TransferEvent) obj;
+        if ( eventType != other.eventType )
+        {
+            return false;
+        }
+        if ( exception == null )
+        {
+            if ( other.exception != null )
+            {
+                return false;
+            }
+        }
+        else if ( !exception.getClass().equals( other.exception.getClass() ) )
+        {
+            return false;
+        }
+        if ( requestType != other.requestType )
+        {
+            return false;
+        }
+        if ( resource == null )
+        {
+            if ( other.resource != null )
+            {
+                return false;
+            }
+        }
+        else if ( !resource.equals( other.resource ) )
+        {
+            return false;
+        }
+        else if ( !source.equals( other.source ) )
+        {
+            return false;
+        }
+        return true;
+    }
+    
 }

@@ -19,17 +19,35 @@ package org.apache.maven.wagon.providers.ssh.external;
  * under the License.
  */
 
+import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.providers.ssh.TestData;
+import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.resource.Resource;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id: ScpWagonWithSshPrivateKeySearchTest.java 477248 2006-11-20 16:42:51Z brett $
+ * @version $Id$
  */
 public class ScpWagonWithSshPrivateKeySearchTest
     extends WagonTestCase
 {
+    protected boolean supportsGetIfNewer()
+    {
+        return false;
+    }
+
+    protected int getExpectedContentLengthOnGet( int expectedSize )
+    {
+        return WagonConstants.UNKNOWN_LENGTH;
+    }
+
+    protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
+    {
+        return 0;
+    }
+
     protected String getProtocol()
     {
         return "scpexe";

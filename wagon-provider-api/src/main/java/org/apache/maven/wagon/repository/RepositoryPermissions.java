@@ -44,7 +44,7 @@ public class RepositoryPermissions
 
     /**
      * Get the repository directory mode to which an artifact will belong to after
-     * deployment. Not all protolcols permit the changing of the mode.
+     * deployment. Not all protocols permit the changing of the mode.
      *
      * @return mode
      */
@@ -65,7 +65,7 @@ public class RepositoryPermissions
 
     /**
      * Get the repository file mode to which an artifact will belong to after
-     * deployment. Not all protolcols permit the changing of the artifact mode.
+     * deployment. Not all protocols permit the changing of the artifact mode.
      *
      * @return repository group name
      */
@@ -86,7 +86,7 @@ public class RepositoryPermissions
 
     /**
      * Get the repository group name to which an artifact will belong to after
-     * deployemnt. Not all protolcols permit the changing of the artifact
+     * deployment. Not all protocols permit the changing of the artifact
      * group.
      *
      * @return repository group name

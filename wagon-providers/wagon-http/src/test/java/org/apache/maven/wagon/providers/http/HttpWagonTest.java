@@ -19,21 +19,18 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
-import org.apache.maven.wagon.FileTestUtils;
-import org.apache.maven.wagon.WagonTestCase;
-import org.codehaus.plexus.jetty.Httpd;
+import java.util.Properties;
 
-import java.io.File;
+import org.apache.maven.wagon.StreamingWagon;
+import org.apache.maven.wagon.http.HttpWagonTestCase;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  */
 public class HttpWagonTest
-    extends WagonTestCase
+    extends HttpWagonTestCase
 {
-    private Httpd httpd;
-
     protected String getProtocol()
     {
         return "http";
@@ -41,53 +38,11 @@ public class HttpWagonTest
 
     protected String getTestRepositoryUrl()
     {
-        return "http://localhost:10007";
+        return getProtocol() + "://localhost:10007";
     }
 
-    protected void setupWagonTestingFixtures()
-        throws Exception
+    protected void setHttpHeaders( StreamingWagon wagon, Properties properties )
     {
-        // For a PUT the artifact must exist already which is how a PUT works by
-        // default so we must place a dummy artifact in the http repo first before
-        // the actual PUT operation.
-
-        // File round trip testing
-        
-        File file = FileTestUtils.createUniqueFile( "local-repository", "test-resource.txt" );
-
-        file.delete();
-
-        file.getParentFile().mkdirs();
-
-        FileTestUtils.generateFile( file.getAbsolutePath(), "file-dummy" );
-
-        // For a PUT the artifact must exist already which is how a PUT works by
-        // default so we must place a dummy artifact in the http repo first before
-        // the actual PUT operation.
-
-        File f = new File( FileTestUtils.createDir( "http-repository" ), "test-resource.txt" );
-
-        f.delete();
-
-        f.getParentFile().mkdirs();
-
-        FileTestUtils.generateFile( f.getAbsolutePath(), "artifact-dummy" );
-
-        httpd = (Httpd) lookup( Httpd.ROLE );
-    }
-
-    public void testWagonGetFileList()
-        throws Exception
-    {
-        File f = new File( FileTestUtils.createDir( "http-repository" ), "file-list" );
-        f.mkdirs();
-
-        super.testWagonGetFileList();
-    }
-
-    protected void tearDownWagonTestingFixtures()
-        throws Exception
-    {
-        release( httpd );
+        ( (HttpWagon) wagon ).setHttpHeaders( properties );
     }
 }

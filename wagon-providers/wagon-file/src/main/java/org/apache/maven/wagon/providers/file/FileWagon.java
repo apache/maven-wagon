@@ -19,6 +19,18 @@ package org.apache.maven.wagon.providers.file;
  * under the License.
  */
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.LazyFileOutputStream;
@@ -28,27 +40,15 @@ import org.apache.maven.wagon.StreamWagon;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.FileUtils;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
+import org.codehaus.plexus.util.StringUtils;
 
 /**
  * Wagon Provider for Local File System
- *
+ * 
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
- * 
- * @plexus.component role="org.apache.maven.wagon.Wagon" 
- *   role-hint="file"
- *   instantiation-strategy="per-lookup"
+ * @plexus.component role="org.apache.maven.wagon.Wagon" role-hint="file" instantiation-strategy="per-lookup"
  */
 public class FileWagon
     extends StreamWagon
@@ -72,7 +72,7 @@ public class FileWagon
 
         try
         {
-            InputStream in = new FileInputStream( file );
+            InputStream in = new BufferedInputStream( new FileInputStream( file ) );
 
             inputData.setInputStream( in );
 
@@ -93,19 +93,19 @@ public class FileWagon
         {
             throw new TransferFailedException( "Unable to operate with a null basedir." );
         }
-        
+
         Resource resource = outputData.getResource();
 
         File file = new File( getRepository().getBasedir(), resource.getName() );
 
         createParentDirectories( file );
 
-        OutputStream outputStream = new LazyFileOutputStream( file );
+        OutputStream outputStream = new BufferedOutputStream( new LazyFileOutputStream( file ) );
 
         outputData.setOutputStream( outputStream );
     }
 
-    public void openConnection()
+    protected void openConnectionInternal()
         throws ConnectionException
     {
         if ( getRepository() == null )
@@ -120,13 +120,14 @@ public class FileWagon
             return;
         }
 
-        // Check the File repository exists 
+        // Check the File repository exists
         File basedir = new File( getRepository().getBasedir() );
         if ( !basedir.exists() )
         {
             if ( !basedir.mkdirs() )
             {
-                throw new ConnectionException( "Repository path " + basedir + " does not exist, and cannot be created." );
+                throw new ConnectionException( "Repository path " + basedir + " does not exist,"
+                                               + " and cannot be created." );
             }
         }
 
@@ -158,16 +159,13 @@ public class FileWagon
 
         try
         {
-            /* Done to address issue found in HP-UX with regards to "." directory references.
-             * Details found in ..
-             * WAGON-30 - wagon-file failed when used by maven-site-plugin
-             * WAGON-33 - FileWagon#putDirectory() fails in HP-UX if destinationDirectory is "."
-             * http://www.nabble.com/With-maven-2.0.2-site%3Adeploy-doesn%27t-work-t934716.html for details.
-             * 
-             * Using path.getCanonicalFile() ensures that the path is fully 
-             * resolved before an attempt to create it.
-             * 
-             * TODO: consider moving this to FileUtils.mkdirs()
+            /*
+             * Done to address issue found in HP-UX with regards to "." directory references. Details found in ..
+             * WAGON-30 - wagon-file failed when used by maven-site-plugin WAGON-33 - FileWagon#putDirectory() fails in
+             * HP-UX if destinationDirectory is "."
+             * http://www.nabble.com/With-maven-2.0.2-site%3Adeploy-doesn%27t-work-t934716.html for details. Using
+             * path.getCanonicalFile() ensures that the path is fully resolved before an attempt to create it. TODO:
+             * consider moving this to FileUtils.mkdirs()
              */
             File realFile = path.getCanonicalFile();
             realFile.mkdirs();
@@ -223,13 +221,13 @@ public class FileWagon
     }
 
     public List getFileList( String destinationDirectory )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException 
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         if ( getRepository().getBasedir() == null )
         {
             throw new TransferFailedException( "Unable to getFileList() with a null basedir." );
         }
-        
+
         File path = resolveDestinationPath( destinationDirectory );
 
         if ( !path.exists() )
@@ -242,9 +240,19 @@ public class FileWagon
             throw new ResourceDoesNotExistException( "Path is not a directory: " + destinationDirectory );
         }
 
-        String files[] = path.list();
+        File[] files = path.listFiles();
 
-        return Arrays.asList( files );
+        List list = new ArrayList( files.length );
+        for ( int i = 0; i < files.length; i++ )
+        {
+            String name = files[i].getName();
+            if ( files[i].isDirectory() && !name.endsWith( "/" ) )
+            {
+                name += "/";
+            }
+            list.add( name );
+        }
+        return list;
     }
 
     public boolean resourceExists( String resourceName )
@@ -254,9 +262,14 @@ public class FileWagon
         {
             throw new TransferFailedException( "Unable to getFileList() with a null basedir." );
         }
-        
+
         File file = resolveDestinationPath( resourceName );
 
+        if ( resourceName.endsWith( "/" ) )
+        {
+            return file.isDirectory();
+        }
+        
         return file.exists();
     }
 }

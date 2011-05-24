@@ -25,6 +25,7 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.SessionListener;
 import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.proxy.ProxyInfo;
+import org.apache.maven.wagon.proxy.ProxyInfoProvider;
 import org.apache.maven.wagon.repository.Repository;
 
 import java.io.File;
@@ -52,9 +53,9 @@ public interface Wagon
 
     /**
      * Downloads specified resource from the repository
-     * if it was modfified since specified date.
+     * if it was modified since specified date.
      * The date is measured in milliseconds, between the current time and midnight, January 1, 1970 UTC
-     * and aliged to GMT timezone.
+     * and aligned to GMT timezone.
      *
      * @param resourceName
      * @param destination
@@ -64,8 +65,6 @@ public interface Wagon
      * @throws TransferFailedException
      * @throws ResourceDoesNotExistException
      * @throws AuthorizationException
-     * @todo michal: I have to learn more about timezones!
-     * Specifically how to convert time for UTC to time for GMT and if such conversioin is needed.
      */
     boolean getIfNewer( String resourceName, File destination, long timestamp )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
@@ -151,7 +150,7 @@ public interface Wagon
      * @param source the repository to connect to
      * @throws ConnectionException if there is a problem connecting
      * @throws org.apache.maven.wagon.authentication.AuthenticationException
-     *                             if ther credentials for connecting are not sufficient
+     *                             if the credentials for connecting are not sufficient
      */
     void connect( Repository source )
         throws ConnectionException, AuthenticationException;
@@ -162,9 +161,21 @@ public interface Wagon
      * @param source the repository to connect to
      * @throws ConnectionException if there is a problem connecting
      * @throws org.apache.maven.wagon.authentication.AuthenticationException
-     *                             if ther credentials for connecting are not sufficient
+     *                             if the credentials for connecting are not sufficient
      */
     void connect( Repository source, ProxyInfo proxyInfo )
+        throws ConnectionException, AuthenticationException;
+
+    /**
+     * Initiate the connection to the repository.
+     *
+     * @param source the repository to connect to
+     * @param proxyInfoProvider  the provider to obtain a network proxy to use to connect to the remote repository
+     * @throws ConnectionException if there is a problem connecting
+     * @throws org.apache.maven.wagon.authentication.AuthenticationException
+     *                             if the credentials for connecting are not sufficient
+     */
+    void connect( Repository source, ProxyInfoProvider proxyInfoProvider )
         throws ConnectionException, AuthenticationException;
 
     /**
@@ -174,7 +185,7 @@ public interface Wagon
      * @param authenticationInfo authentication credentials for connecting
      * @throws ConnectionException if there is a problem connecting
      * @throws org.apache.maven.wagon.authentication.AuthenticationException
-     *                             if ther credentials for connecting are not sufficient
+     *                             if the credentials for connecting are not sufficient
      */
     void connect( Repository source, AuthenticationInfo authenticationInfo )
         throws ConnectionException, AuthenticationException;
@@ -187,9 +198,22 @@ public interface Wagon
      * @param proxyInfo          the network proxy to use to connect to the remote repository
      * @throws ConnectionException if there is a problem connecting
      * @throws org.apache.maven.wagon.authentication.AuthenticationException
-     *                             if ther credentials for connecting are not sufficient
+     *                             if the credentials for connecting are not sufficient
      */
     void connect( Repository source, AuthenticationInfo authenticationInfo, ProxyInfo proxyInfo )
+        throws ConnectionException, AuthenticationException;
+
+    /**
+     * Initiate the connection to the repository.
+     *
+     * @param source             the repository to connect to
+     * @param authenticationInfo authentication credentials for connecting
+     * @param proxyInfoProvider  the provider to obtain a network proxy to use to connect to the remote repository
+     * @throws ConnectionException if there is a problem connecting
+     * @throws org.apache.maven.wagon.authentication.AuthenticationException
+     *                             if the credentials for connecting are not sufficient
+     */
+    void connect( Repository source, AuthenticationInfo authenticationInfo, ProxyInfoProvider proxyInfoProvider )
         throws ConnectionException, AuthenticationException;
 
     /**
@@ -199,7 +223,8 @@ public interface Wagon
      * @throws org.apache.maven.wagon.authentication.AuthenticationException
      *                             if ther credentials for connecting are not sufficient
      * @todo delegate this to a truly internal connection method
-     * @deprecated connect using the {@link #connect(org.apache.maven.wagon.repository.Repository)} or related methods - this is an internal method
+     * @deprecated connect using the {@link #connect(org.apache.maven.wagon.repository.Repository)} or related methods
+     *             - this is an internal method
      */
     void openConnection()
         throws ConnectionException, AuthenticationException;
@@ -211,6 +236,16 @@ public interface Wagon
      */
     void disconnect()
         throws ConnectionException;
+    
+    /**
+     * Set the connection timeout limit in milliseconds
+     */
+    void setTimeout( int timeoutValue );
+    
+    /**
+     * Get the connection timeout limit in milliseconds
+     */
+    int getTimeout();
 
     // ----------------------------------------------------------------------
     //  Session listener

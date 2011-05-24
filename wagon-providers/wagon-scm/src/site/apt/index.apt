@@ -1,0 +1,31 @@
+ ------
+ Introduction
+ ------
+ Carlos Sanchez
+ ------
+ 2006-03-07
+ ------
+
+Maven Wagon SCM
+
+ This project is an implementation of Wagon provider for SCM (Source Control Management) systems,
+ using {{{http://maven.apache.org/scm}Maven SCM}}.
+ 
+ It enables Maven to use remote repositories stored in SCM systems (Subversion, CVS, ...)
+ and to store Maven sites in SCMs.
+
+
+Features
+
+ * Deploy files and directories to several SCM using Maven SCM (only tested with CVS and SVN)
+ 
+ * Get files from several SCM using Maven SCM (only tested with CVS and SVN)
+
+
+Known issues
+
+ * If the file is changed by the SCM the checksum calculation may not work
+
+   * SVN: when a file has properties svn:eol-style or svn:keywords set
+
+   * CVS: when keywords are expanded

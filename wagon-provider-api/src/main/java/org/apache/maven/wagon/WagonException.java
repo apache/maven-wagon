@@ -29,7 +29,7 @@ public abstract class WagonException
     extends Exception
 {
     /**
-     * the throwable that caused this throwable to get thrown
+     * the throwable that caused this exception to get thrown
      */
     private Throwable cause;
 
@@ -60,25 +60,25 @@ public abstract class WagonException
 
     /**
      * Returns the cause of this throwable or null if the cause is nonexistent or unknown.
-     * (The cause is the throwable that caused this throwable to get thrown.)
+     * (The cause is the throwable that caused this exception to get thrown.)
      *
-     * @return the cause of this throwable or null if the cause is nonexistent or unknown.
+     * @return the cause of this exception or null if the cause is nonexistent or unknown.
      */
     public Throwable getCause()
     {
-//		try
-//		{
-//		   Class clazz = getClass().getSuperclass();
-//		   
-//		   Method method = clazz.getMethod( "gatCause" , null );
-//		   
-//		   Throwable retValue = (Throwable) method.invoke( this, null );
+//        try
+//        {
+//           Class clazz = getClass().getSuperclass();
+//           
+//           Method method = clazz.getMethod( "gatCause" , null );
+//           
+//           Throwable retValue = (Throwable) method.invoke( this, null );
 //         return retValue;
-//		}   
-//		catch( Exception e)
-//		{
+//        }   
+//        catch( Exception e)
+//        {
 //        
-//		}
+//        }
         
         return cause;
     }
@@ -100,7 +100,7 @@ public abstract class WagonException
 //        {
 //           Class clazz = getClass().getSuperclass();
 //           Class[] parameterTypes = new Class[1];
-//		   parameterTypes[0] = Throwable.class;
+//           parameterTypes[0] = Throwable.class;
 //           Method method = clazz.getMethod( "initCause" , parameterTypes);
 //           Object[] params = { cause };
 //           method.invoke( this, params );

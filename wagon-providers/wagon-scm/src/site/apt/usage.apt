@@ -1,0 +1,91 @@
+ ------
+ Maven Wagon SCM
+ ------
+ Carlos Sanchez
+ ------
+ 2006-03-07
+ ------
+
+Maven Wagon SCM Usage
+
+ You need to add some extensions
+ (wagon-scm, maven-scm-manager-plexus and the maven-scm-provider for your SCM system, see examples below)
+ to your pom and use URLs in the
+ {{{http://maven.apache.org/scm/scm-url-format.html}SCM format}}.
+
+
+Deploying your Maven site to Subversion
+
+ Add the following extensions to your pom and use a wagon-scm url in the distributionManagement site url.
+
+------
+  <build>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-scm</artifactId>
+        <version>1.0-alpha-7-SNAPSHOT</version>
+      </extension>
+      <extension>
+        <groupId>org.apache.maven.scm</groupId>
+        <artifactId>maven-scm-manager-plexus</artifactId>
+        <version>1.0-beta-3-SNAPSHOT</version>
+      </extension>
+      <extension>
+        <groupId>org.apache.maven.scm</groupId>
+        <artifactId>maven-scm-provider-svnexe</artifactId>
+        <version>1.0-beta-3-SNAPSHOT</version>
+      </extension>
+    </extensions>
+  </build>
+  <distributionManagement>
+    <site>
+      <id>my.svn.server</id>
+      <url>scm:svn:https://username@svn.apache.org/svn/root/module</url>
+    </site>
+  </distributionManagement>
+------
+
+
+Deploying your Maven site to CVS
+
+ Same as before, but changing svnexe to cvsexe and using a CVS svn url.
+
+------
+  <build>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-scm</artifactId>
+        <version>1.0-alpha-7-SNAPSHOT</version>
+      </extension>
+      <extension>
+        <groupId>org.apache.maven.scm</groupId>
+        <artifactId>maven-scm-manager-plexus</artifactId>
+        <version>1.0-beta-3-SNAPSHOT</version>
+      </extension>
+      <extension>
+        <groupId>org.apache.maven.scm</groupId>
+        <artifactId>maven-scm-provider-cvsexe</artifactId>
+        <version>1.0-beta-3-SNAPSHOT</version>
+      </extension>
+    </extensions>
+  </build>
+  <distributionManagement>
+    <site>
+      <id>my.cvs.server</id>
+      <url>scm:cvs:ext:username@cvs.apache.org:/cvs/root:module</url>
+    </site>
+  </distributionManagement>
+------
+
+
+
+Using a Subversion based remote repository in Maven 2
+
+ Not tested yet
+
+
+Using a CVS based remote repository in Maven 2
+
+ Not tested yet

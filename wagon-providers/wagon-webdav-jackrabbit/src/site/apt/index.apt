@@ -1,0 +1,18 @@
+ ------
+ Maven Wagon WebDAV
+ ------
+ Carlos Sanchez
+ ------
+ 2006-10-16
+ ------
+
+Maven Wagon WebDAV
+
+ This project is an implementation of Wagon provider for WebDAV server access.
+ 
+ It enables Maven to deploy artifacts and files to WebDAV enabled servers.
+ Getting files from WebDAV servers is not fully tested.
+
+Features
+
+ * Deploy files and directories to WebDAV enabled servers

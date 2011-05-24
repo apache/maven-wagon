@@ -1,0 +1,20 @@
+<component-set>
+  <!-- TODO: Split this out into a sample project that shows how to use this TCK. -->
+  <components>
+    <component>
+      <role>org.apache.maven.wagon.tck.http.WagonTestCaseConfigurator</role>
+      <implementation>org.apache.maven.wagon.tck.http.WagonTestCaseConfigurator</implementation>
+      <configuration>
+        <wagonHint>http</wagonHint>
+        <useCaseConfigs>
+          <highLatencyLowTimeout>
+            <unsupported/>
+          </highLatencyLowTimeout>
+          <inifiniteLatencyTimeout>
+            <unsupported/>
+          </inifiniteLatencyTimeout>
+        </useCaseConfigs>
+      </configuration>
+    </component>
+  </components>
+</component-set>

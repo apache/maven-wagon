@@ -18,12 +18,18 @@
   -->
 
 <component-set>
-  <components>
-    <component>
-      <role>org.apache.maven.wagon.Wagon</role>
-      <role-hint>http</role-hint>
-      <implementation>org.apache.maven.wagon.providers.http.HttpWagon</implementation>
-      <instantiation-strategy>per-lookup</instantiation-strategy>
-    </component>
-  </components>
+    <components>
+      <component>
+        <role>org.apache.maven.wagon.Wagon</role>
+        <role-hint>http</role-hint>
+        <implementation>org.apache.maven.wagon.providers.http.HttpWagon</implementation>
+        <instantiation-strategy>per-lookup</instantiation-strategy>
+      </component>
+      <component>
+        <role>org.apache.maven.wagon.Wagon</role>
+        <role-hint>https</role-hint>
+        <implementation>org.apache.maven.wagon.providers.http.HttpWagon</implementation>
+        <instantiation-strategy>per-lookup</instantiation-strategy>
+      </component>
+    </components>
 </component-set>

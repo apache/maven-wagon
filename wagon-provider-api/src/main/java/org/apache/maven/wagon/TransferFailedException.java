@@ -20,7 +20,7 @@ package org.apache.maven.wagon;
  */
 
 /**
- * Exception which should be thrown when IO error occures during
+ * Exception which should be thrown when IO error occurred during
  * a transfer from repository
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>

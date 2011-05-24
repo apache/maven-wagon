@@ -19,6 +19,14 @@ package org.apache.maven.wagon;
  * under the License.
  */
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
+
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
@@ -29,27 +37,18 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferEventSupport;
 import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.proxy.ProxyInfo;
+import org.apache.maven.wagon.proxy.ProxyInfoProvider;
+import org.apache.maven.wagon.proxy.ProxyUtils;
 import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
 /**
- * Implementation of common facilties for Wagon providers.
+ * Implementation of common facilities for Wagon providers.
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
- * @todo [BP] The proxy information should probably be validated to match the wagon type
  */
 public abstract class AbstractWagon
     implements Wagon
@@ -62,11 +61,18 @@ public abstract class AbstractWagon
 
     protected TransferEventSupport transferEventSupport = new TransferEventSupport();
 
-    protected ProxyInfo proxyInfo;
-
     protected AuthenticationInfo authenticationInfo;
 
     protected boolean interactive = true;
+    
+    private int connectionTimeout = 60000;
+    
+    private ProxyInfoProvider proxyInfoProvider;
+    
+    /** @deprecated */
+    protected ProxyInfo proxyInfo;
+    
+    private RepositoryPermissions permissionsOverride;
 
     // ----------------------------------------------------------------------
     // Accessors
@@ -79,7 +85,7 @@ public abstract class AbstractWagon
 
     public ProxyInfo getProxyInfo()
     {
-        return proxyInfo;
+        return proxyInfoProvider != null ? proxyInfoProvider.getProxyInfo( null ) : null;
     }
 
     public AuthenticationInfo getAuthenticationInfo()
@@ -91,10 +97,31 @@ public abstract class AbstractWagon
     // Connection
     // ----------------------------------------------------------------------
 
+    public void openConnection()
+        throws ConnectionException, AuthenticationException
+    {
+        try
+        {
+            openConnectionInternal();
+        }
+        catch ( ConnectionException e )
+        {
+            fireSessionConnectionRefused();
+            
+            throw e;
+        }
+        catch ( AuthenticationException e )
+        {
+            fireSessionConnectionRefused();
+            
+            throw e;
+        }
+    }
+
     public void connect( Repository repository )
         throws ConnectionException, AuthenticationException
     {
-        connect( repository, null, null );
+        connect( repository, null, (ProxyInfoProvider) null );
     }
 
     public void connect( Repository repository, ProxyInfo proxyInfo )
@@ -103,13 +130,41 @@ public abstract class AbstractWagon
         connect( repository, null, proxyInfo );
     }
 
+    public void connect( Repository repository, ProxyInfoProvider proxyInfoProvider )
+        throws ConnectionException, AuthenticationException
+    {
+        connect( repository, null, proxyInfoProvider );
+    }
+
     public void connect( Repository repository, AuthenticationInfo authenticationInfo )
         throws ConnectionException, AuthenticationException
     {
-        connect( repository, authenticationInfo, null );
+        connect( repository, authenticationInfo, (ProxyInfoProvider) null );
     }
 
     public void connect( Repository repository, AuthenticationInfo authenticationInfo, ProxyInfo proxyInfo )
+        throws ConnectionException, AuthenticationException
+    {
+        final ProxyInfo proxy = proxyInfo;
+        connect( repository, authenticationInfo, new ProxyInfoProvider()
+        {
+            public ProxyInfo getProxyInfo( String protocol )
+            {
+                if ( protocol == null || proxy == null || protocol.equalsIgnoreCase( proxy.getType() ) )
+                {
+                    return proxy;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        } );
+        this.proxyInfo = proxyInfo;
+    }
+    
+    public void connect( Repository repository, AuthenticationInfo authenticationInfo,
+                         ProxyInfoProvider proxyInfoProvider )
         throws ConnectionException, AuthenticationException
     {
         if ( repository == null )
@@ -117,6 +172,11 @@ public abstract class AbstractWagon
             throw new IllegalStateException( "The repository specified cannot be null." );
         }
 
+        if ( permissionsOverride != null )
+        {
+            repository.setPermissions( permissionsOverride );
+        }
+        
         this.repository = repository;
 
         if ( authenticationInfo == null )
@@ -139,8 +199,9 @@ public abstract class AbstractWagon
 
         // TODO: Do these needs to be fields, or are they only used in openConnection()?
         this.authenticationInfo = authenticationInfo;
-        this.proxyInfo = proxyInfo;
-
+        
+        this.proxyInfoProvider = proxyInfoProvider;
+        
         fireSessionOpening();
 
         openConnection();
@@ -148,12 +209,23 @@ public abstract class AbstractWagon
         fireSessionOpened();
     }
 
+    protected abstract void openConnectionInternal()
+        throws ConnectionException, AuthenticationException;
+
     public void disconnect()
         throws ConnectionException
     {
         fireSessionDisconnecting();
 
-        closeConnection();
+        try
+        {
+            closeConnection();
+        }
+        catch ( ConnectionException e )
+        {
+            fireSessionError( e );
+            throw e;
+        }
 
         fireSessionDisconnected();
     }
@@ -165,14 +237,33 @@ public abstract class AbstractWagon
         throws TransferFailedException
     {
         File destinationDirectory = destination.getParentFile();
+        try
+        {
+            destinationDirectory = destinationDirectory.getCanonicalFile();
+        }
+        catch ( IOException e )
+        {
+            // not essential to have a canonical file
+        }
         if ( destinationDirectory != null && !destinationDirectory.exists() )
         {
-            if ( !destinationDirectory.mkdirs() )
+            destinationDirectory.mkdirs();
+            if ( !destinationDirectory.exists() )
             {
                 throw new TransferFailedException(
                     "Specified destination directory cannot be created: " + destinationDirectory );
             }
         }
+    }
+    
+    public void setTimeout( int timeoutValue )
+    {
+        connectionTimeout = timeoutValue;
+    }
+    
+    public int getTimeout()
+    {
+        return connectionTimeout;
     }
 
     // ----------------------------------------------------------------------
@@ -185,6 +276,12 @@ public abstract class AbstractWagon
         getTransfer( resource, destination, input, true, Integer.MAX_VALUE );
     }
 
+    protected void getTransfer( Resource resource, OutputStream output, InputStream input )
+        throws TransferFailedException
+    {
+        getTransfer( resource, output, input, true, Integer.MAX_VALUE );
+    }
+
     protected void getTransfer( Resource resource, File destination, InputStream input, boolean closeInput,
                                 int maxSize )
         throws TransferFailedException
@@ -193,18 +290,16 @@ public abstract class AbstractWagon
         fireTransferDebug( "attempting to create parent directories for destination: " + destination.getName() );
         createParentDirectories( destination );
 
-        fireGetStarted( resource, destination );
-
         OutputStream output = new LazyFileOutputStream( destination );
+
+        fireGetStarted( resource, destination );
 
         try
         {
-            transfer( resource, input, output, TransferEvent.REQUEST_GET, maxSize );
+            getTransfer( resource, output, input, closeInput, maxSize );
         }
-        catch ( IOException e )
+        catch ( TransferFailedException e )
         {
-            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-
             if ( destination.exists() )
             {
                 boolean deleted = destination.delete();
@@ -214,11 +309,33 @@ public abstract class AbstractWagon
                     destination.deleteOnExit();
                 }
             }
+            throw e;
+        }
+        finally
+        {
+            IOUtil.close( output );
+        }
+
+        fireGetCompleted( resource, destination );
+    }
+
+    protected void getTransfer( Resource resource, OutputStream output, InputStream input, boolean closeInput,
+                                int maxSize )
+        throws TransferFailedException
+    {
+        try
+        {
+            transfer( resource, input, output, TransferEvent.REQUEST_GET, maxSize );
+            
+            finishGetTransfer( resource, input, output );
+        }
+        catch ( IOException e )
+        {
+            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
 
             String msg = "GET request of: " + resource.getName() + " from " + repository.getName() + " failed";
 
             throw new TransferFailedException( msg, e );
-
         }
         finally
         {
@@ -227,14 +344,21 @@ public abstract class AbstractWagon
                 IOUtil.close( input );
             }
 
-            IOUtil.close( output );
+            cleanupGetTransfer( resource );
         }
+    }
 
-        fireGetCompleted( resource, destination );
+    protected void finishGetTransfer( Resource resource, InputStream input, OutputStream output )
+        throws TransferFailedException
+    {
+    }
+
+    protected void cleanupGetTransfer( Resource resource )
+    {
     }
 
     protected void putTransfer( Resource resource, File source, OutputStream output, boolean closeOutput )
-        throws TransferFailedException
+        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
         firePutStarted( resource, source );
 
@@ -253,48 +377,73 @@ public abstract class AbstractWagon
      * @param output output stream
      * @param closeOutput whether the output stream should be closed or not
      * @throws TransferFailedException
+     * @throws ResourceDoesNotExistException 
+     * @throws AuthorizationException 
      */
     protected void transfer( Resource resource, File source, OutputStream output, boolean closeOutput )
-        throws TransferFailedException
+        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
-        resource.setContentLength( source.length() );
-
-        resource.setLastModified( source.lastModified() );
-
         InputStream input = null;
 
         try
         {
             input = new FileInputStream( source );
 
-            transfer( resource, input, output, TransferEvent.REQUEST_PUT );
+            putTransfer( resource, input, output, closeOutput );
         }
         catch ( FileNotFoundException e )
         {
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+
             throw new TransferFailedException( "Specified source file does not exist: " + source, e );
+        }
+        finally
+        {
+            IOUtil.close( input );
+        }
+    }
+
+    protected void putTransfer( Resource resource, InputStream input, OutputStream output, boolean closeOutput )
+        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
+    {
+        try
+        {
+            transfer( resource, input, output, TransferEvent.REQUEST_PUT );
+            
+            finishPutTransfer( resource, input, output );
         }
         catch ( IOException e )
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
 
-            String msg = "PUT request for: " + resource + " to " + source.getName() + "failed";
+            String msg = "PUT request to: " + resource.getName() + " in " + repository.getName() + " failed";
 
             throw new TransferFailedException( msg, e );
         }
         finally
         {
-            IOUtil.close( input );
-
             if ( closeOutput )
             {
                 IOUtil.close( output );
             }
+            
+            cleanupPutTransfer( resource );
         }
+    }
+
+    protected void cleanupPutTransfer( Resource resource )
+    {
+    }
+
+    protected void finishPutTransfer( Resource resource, InputStream input, OutputStream output )
+        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
+    {
     }
 
     /**
      * Write from {@link InputStream} to {@link OutputStream}.
-     * Equivalent to {@link #transfer(Resource, InputStream, OutputStream, int, int)} with a maxSize equal to {@link Integer#MAX_VALUE}
+     * Equivalent to {@link #transfer(Resource, InputStream, OutputStream, int, int)} with a maxSize equals to
+     * {@link Integer#MAX_VALUE}
      * 
      * @param resource resource to transfer
      * @param input input stream
@@ -310,7 +459,8 @@ public abstract class AbstractWagon
 
     /**
      * Write from {@link InputStream} to {@link OutputStream}.
-     * Equivalent to {@link #transfer(Resource, InputStream, OutputStream, int, int)} with a maxSize equal to {@link Integer#MAX_VALUE}
+     * Equivalent to {@link #transfer(Resource, InputStream, OutputStream, int, int)} with a maxSize equals to
+     * {@link Integer#MAX_VALUE}
      * 
      * @param resource resource to transfer
      * @param input input stream
@@ -325,6 +475,7 @@ public abstract class AbstractWagon
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
         TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_PROGRESS, requestType );
+        transferEvent.setTimestamp( System.currentTimeMillis() );
 
         int remaining = maxSize;
         while ( remaining > 0 )
@@ -342,6 +493,7 @@ public abstract class AbstractWagon
 
             remaining -= n;
         }
+        output.flush();
     }
 
     // ----------------------------------------------------------------------
@@ -505,7 +657,6 @@ public abstract class AbstractWagon
 
     protected void fireSessionConnectionRefused()
     {
-
         long timestamp = System.currentTimeMillis();
 
         SessionEvent sessionEvent = new SessionEvent( this, SessionEvent.SESSION_CONNECTION_REFUSED );
@@ -605,10 +756,13 @@ public abstract class AbstractWagon
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
         TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_PROGRESS, requestType );
+        transferEvent.setTimestamp( System.currentTimeMillis() );
+        transferEvent.setLocalFile( source );
 
+        InputStream input = null;
         try
         {
-            InputStream input = new FileInputStream( source );
+            input = new FileInputStream( source );
 
             while ( true )
             {
@@ -624,68 +778,25 @@ public abstract class AbstractWagon
         }
         catch ( IOException e )
         {
+            fireTransferError( resource, e, requestType );
+            
             throw new TransferFailedException( "Failed to post-process the source file", e );
+        }
+        finally
+        {
+            IOUtil.close( input );
         }
     }
 
     public void putDirectory( File sourceDirectory, String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        throw new TransferFailedException( "directory copy not supported for " + getClass().getName() );
+        throw new UnsupportedOperationException( "The wagon you are using has not implemented putDirectory()" );
     }
 
     public boolean supportsDirectoryCopy()
     {
         return false;
-    }
-
-    public void createZip( List files, File zipName, File basedir )
-        throws IOException
-    {
-        ZipOutputStream zos = new ZipOutputStream( new FileOutputStream( zipName ) );
-
-        try
-        {
-            for ( int i = 0; i < files.size(); i++ )
-            {
-                String file = (String) files.get( i );
-
-                file = file.replace( '\\', '/' );
-
-                writeZipEntry( zos, new File( basedir, file ), file );
-            }
-        }
-        finally
-        {
-            IOUtil.close( zos );
-        }
-    }
-
-    private void writeZipEntry( ZipOutputStream jar, File source, String entryName )
-        throws IOException
-    {
-        byte[] buffer = new byte[1024];
-
-        int bytesRead;
-
-        FileInputStream is = new FileInputStream( source );
-
-        try
-        {
-            ZipEntry entry = new ZipEntry( entryName );
-
-            jar.putNextEntry( entry );
-
-            while ( ( bytesRead = is.read( buffer ) ) != -1 )
-            {
-                jar.write( buffer, 0, bytesRead );
-            }
-        }
-
-        finally
-        {
-            is.close();
-        }
     }
 
     protected static String getPath( String basedir, String dir )
@@ -720,5 +831,28 @@ public abstract class AbstractWagon
         throws TransferFailedException, AuthorizationException
     {
         throw new UnsupportedOperationException( "The wagon you are using has not implemented resourceExists()" );
+    }
+
+    protected ProxyInfo getProxyInfo( String protocol, String host )
+    {
+        if ( proxyInfoProvider != null )
+        {
+            ProxyInfo proxyInfo = proxyInfoProvider.getProxyInfo( protocol );
+            if ( !ProxyUtils.validateNonProxyHosts( proxyInfo, host ) )
+            {
+                return proxyInfo;
+            }
+        }
+        return null;
+    }
+
+    public RepositoryPermissions getPermissionsOverride()
+    {
+        return permissionsOverride;
+    }
+
+    public void setPermissionsOverride( RepositoryPermissions permissionsOverride )
+    {
+        this.permissionsOverride = permissionsOverride;
     }
 }

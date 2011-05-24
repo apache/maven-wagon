@@ -37,14 +37,16 @@ public class LSParserTest
             + "-rw-r--r--  1 joakim joakim 1194 2006-12-11 09:25 pom.xml\n"
             + "-rw-r--r--  1 joakim joakim  662 2006-12-09 18:46 .project\n"
             + "drwxr-xr-x  4 joakim joakim 4096 2006-11-21 12:26 src\n"
+            + "drwxr-xr-x  4 joakim joakim 4096 2006-11-21 12:26 spaced out\n"
             + "drwxr-xr-x  7 joakim joakim 4096 2006-12-11 10:31 .svn\n"
             + "drwxr-xr-x  3 joakim joakim 4096 2006-12-11 08:39 target\n";
 
         LSParser parser = new LSParser();
         List files = parser.parseFiles( rawLS );
         assertNotNull( files );
-        assertEquals( 8, files.size() );
+        assertEquals( 9, files.size() );
         assertTrue( files.contains( "pom.xml" ) );
+        assertTrue( files.contains( "spaced out" ) );
     }
 
     public void testParseOSX() throws TransferFailedException
@@ -55,14 +57,16 @@ public class LSParserTest
             + "-rw-r--r--   1  joakim  joakim  1194 Dec 11 09:25 pom.xml\n"
             + "-rw-r--r--   1  joakim  joakim   662 May  9  2006 .project\n"
             + "drwxr-xr-x   4  joakim  joakim   204 Dec 11 12:26 src\n"
+            + "drwxr-xr-x   4  joakim  joakim   204 Dec 11 12:26 spaced out\n"
             + "drwxr-xr-x   7  joakim  joakim   476 Dec 11 10:31 .svn\n"
             + "drwxr-xr-x   3  joakim  joakim   238 Dec 11 08:39 target\n";
 
         LSParser parser = new LSParser();
         List files = parser.parseFiles( rawLS );
         assertNotNull( files );
-        assertEquals( 8, files.size() );
+        assertEquals( 9, files.size() );
         assertTrue( files.contains( "pom.xml" ) );
+        assertTrue( files.contains( "spaced out" ) );
     }
 
     public void testParseCygwin() throws TransferFailedException
@@ -73,14 +77,16 @@ public class LSParserTest
             + "-rw-r--r--+  1 joakim None 1194 Dec 11 09:25 pom.xml\n"
             + "-rw-r--r--+  1 joakim None  662 May  9  2006 .project\n"
             + "drwxr-xr-x+  4 joakim None    0 Dec 11 12:26 src\n"
+            + "drwxr-xr-x+  4 joakim None    0 Dec 11 12:26 spaced out\n"
             + "drwxr-xr-x+  7 joakim None    0 Dec 11 10:31 .svn\n"
             + "drwxr-xr-x+  3 joakim None    0 Dec 11 08:39 target\n";
         
         LSParser parser = new LSParser();
         List files = parser.parseFiles( rawLS );
         assertNotNull( files );
-        assertEquals( 8, files.size() );
+        assertEquals( 9, files.size() );
         assertTrue( files.contains( "pom.xml" ) );
+        assertTrue( files.contains( "spaced out" ) );
     }
 
     /**
@@ -93,12 +99,14 @@ public class LSParserTest
         String rawLS = "total 6\n"
             + "drwxr-xr-x  3 snicoll  snicoll  512 Feb  7 11:04 .\n"
             + "drwxr-xr-x  3 snicoll  snicoll  512 Feb  7 11:04 ..\n"
-            + "drwxr-xr-x  3 snicoll  snicoll  512 Feb  7 11:04 org\n";
+            + "drwxr-xr-x  3 snicoll  snicoll  512 Feb  7 11:04 org\n"
+            + "drwxr-xr-x  3 snicoll  snicoll  512 Feb  7 11:04 spaced out\n";
 
         LSParser parser = new LSParser();
         List files = parser.parseFiles( rawLS );
         assertNotNull( files );
-        assertEquals( 3, files.size() );
+        assertEquals( 4, files.size() );
         assertTrue( files.contains( "org" ) );
+        assertTrue( files.contains( "spaced out" ) );
     }
 }

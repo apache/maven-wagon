@@ -30,10 +30,10 @@ public final class WagonConstants
     /**
      * Indicates that port has not been set.
      */
-    public final static int UNKNOWN_PORT = -1;
+    public static final int UNKNOWN_PORT = -1;
 
     /**
      * Indicates that length has not been set.
      */
-    public final static int UNKNOWN_LENGTH = -1;
+    public static final int UNKNOWN_LENGTH = -1;
 }

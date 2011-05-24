@@ -66,6 +66,9 @@ public class Repository
 
     private String password = null;
 
+    /**
+     * @deprecated use {@link #Repository(String, String)}
+     */
     public Repository()
     {
 
@@ -73,8 +76,18 @@ public class Repository
 
     public Repository( String id, String url )
     {
+        if ( id == null )
+        {
+            throw new NullPointerException( "id can not be null" );
+        }
+        
         setId( id );
 
+        if ( url == null )
+        {
+            throw new NullPointerException( "url can not be null" );
+        }
+        
         setUrl( url );
     }
 
@@ -88,7 +101,12 @@ public class Repository
         this.id = id;
     }
 
-
+    /**
+     * Retrieve the base directory of the repository. This is derived from the full repository URL, and
+     * contains the entire path component.
+     * 
+     * @return the base directory
+     */
     public String getBasedir()
     {
         return basedir;
@@ -238,18 +256,41 @@ public class Repository
         this.parameters = parameters;
     }
 
-    // ========================================================================
-    // id is the unique identifier for Repositories, so let's enforce that.
-    // ========================================================================
-    public boolean equals( Object other )
-    {
-        return ( other == this ||
-            ( ( other instanceof Repository ) && ( (Repository) other ).getId().equals( getId() ) ) );
-    }
-
     public int hashCode()
     {
-        return getId().hashCode();
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ( ( id == null ) ? 0 : id.hashCode() );
+        return result;
+    }
+
+    public boolean equals( Object obj )
+    {
+        if ( this == obj )
+        {
+            return true;
+        }
+        if ( obj == null )
+        {
+            return false;
+        }
+        if ( getClass() != obj.getClass() )
+        {
+            return false;
+        }
+        final Repository other = (Repository) obj;
+        if ( id == null )
+        {
+            if ( other.id != null )
+            {
+                return false;
+            }
+        }
+        else if ( !id.equals( other.id ) )
+        {
+            return false;
+        }
+        return true;
     }
 
     public String getUsername()

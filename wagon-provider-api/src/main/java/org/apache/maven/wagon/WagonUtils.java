@@ -19,21 +19,23 @@ package org.apache.maven.wagon;
  * under the License.
  */
 
-import org.apache.maven.wagon.authentication.AuthenticationInfo;
-import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.codehaus.plexus.util.FileUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 
+import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.codehaus.plexus.util.FileUtils;
+
 /**
  * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a>
  * @version $Id$
+ * @deprecated
  */
-public class WagonUtils
+public final class WagonUtils
 {
-
+    private WagonUtils()
+    {
+    }
 
     public static String toString( String resource, Wagon wagon )
         throws IOException, TransferFailedException, ResourceDoesNotExistException, AuthorizationException
@@ -119,48 +121,4 @@ public class WagonUtils
         }
 
     }
-
-    public static AuthenticationInfo getAuthInfo()
-    {
-        // TODO: not used presently?
-
-        AuthenticationInfo authInfo = new AuthenticationInfo();
-
-        String userName = getUserName();
-
-        authInfo.setUserName( userName );
-
-        File privateKey = new File( System.getProperty( "user.home" ), "/.ssh/id_dsa" );
-
-        if ( privateKey.exists() )
-        {
-            authInfo.setPrivateKey( privateKey.getAbsolutePath() );
-
-            authInfo.setPassphrase( "" );
-        }
-
-        // TODO: what about modes?
-
-//        authInfo.setGroup( getUserGroup() );
-
-        return authInfo;
-    }
-
-    private static String getUserGroup()
-    {
-        // TODO: this isn't a normal system property
-        String retValue = System.getProperty( "user.group" );
-
-        return retValue;
-    }
-
-
-    public static String getUserName()
-    {
-        String retValue = System.getProperty( "user.name" );
-
-        return retValue;
-    }
-
-
 }

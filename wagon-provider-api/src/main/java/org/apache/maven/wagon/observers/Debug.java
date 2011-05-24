@@ -39,7 +39,6 @@ public class Debug
 
     long transfer;
 
-
     public Debug()
     {
         this( System.out );
@@ -135,8 +134,8 @@ public class Debug
 
         if ( transferEvent.getRequestType() == TransferEvent.REQUEST_GET )
         {
-            final String message = "Downloading: " + transferEvent.getResource().getName() + " from " +
-                transferEvent.getWagon().getRepository().getUrl();
+            final String message = "Downloading: " + transferEvent.getResource().getName() + " from "
+                + transferEvent.getWagon().getRepository().getUrl();
 
             out.println( message );
 
@@ -144,8 +143,8 @@ public class Debug
         }
         else
         {
-            final String message = "Uploading: " + transferEvent.getResource().getName() + " to " +
-                transferEvent.getWagon().getRepository().getUrl();
+            final String message = "Uploading: " + transferEvent.getResource().getName() + " to "
+                + transferEvent.getWagon().getRepository().getUrl();
 
             out.println( message );
 
@@ -197,6 +196,11 @@ public class Debug
     {
         out.println( " Session error: " + sessionEvent.getException() );
 
+    }
+
+    public PrintStream getOut()
+    {
+        return out;
     }
 
 }
