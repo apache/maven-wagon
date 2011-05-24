@@ -49,5 +49,13 @@ under the License.
         </exclusion>
       </exclusions>
     </dependency>
+
+    <!-- used fo the TCK -->
+    <dependency>
+      <groupId>org.apache.maven.wagon</groupId>
+      <artifactId>wagon-tck-http</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

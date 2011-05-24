@@ -65,6 +65,8 @@ public class LightweightHttpWagon
 
     private HttpURLConnection putConnection;
 
+    public static final int MAX_REDIRECTS = 5;
+
     /**
      * Whether to use any proxy cache or not.
      * 
@@ -101,6 +103,7 @@ public class LightweightHttpWagon
         Resource resource = inputData.getResource();
         try
         {
+            int redirectCount = 0;
             URL url = new URL( buildUrl( resource.getName() ) );
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestProperty( "Accept-Encoding", "gzip" );

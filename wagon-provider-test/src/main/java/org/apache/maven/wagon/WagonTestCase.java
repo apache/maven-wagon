@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -980,8 +979,9 @@ public abstract class WagonTestCase
         resource = new Resource( this.resource );
         resource.setContentLength( getExpectedContentLengthOnGet( expectedSize ) );
         resource.setLastModified( getExpectedLastModifiedOnGet( testRepository, resource ) );
-        mockTransferListener.transferStarted( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED,
-                                                                   TransferEvent.REQUEST_GET, destFile ) );
+        TransferEvent te = createTransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED,
+                                                                   TransferEvent.REQUEST_GET, null );
+        mockTransferListener.transferStarted( te );
         mockTransferListener.transferProgress( new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS,
                                                                   TransferEvent.REQUEST_GET ), new byte[] {}, 0 );
         ProgressArgumentMatcher progressArgumentMatcher = new ProgressArgumentMatcher();

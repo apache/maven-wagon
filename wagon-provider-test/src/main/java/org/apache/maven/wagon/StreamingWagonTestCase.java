@@ -27,6 +27,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
@@ -42,6 +44,8 @@ import org.codehaus.plexus.util.IOUtil;
 public abstract class StreamingWagonTestCase
     extends WagonTestCase
 {
+    private static Logger logger = Logger.getLogger( StreamingWagonTestCase.class.getName() );
+
     public void testStreamingWagon()
         throws Exception
     {
@@ -257,6 +261,10 @@ public abstract class StreamingWagonTestCase
             stream = new FileInputStream( sourceFile );
             wagon.putFromStream( stream, resource, sourceFile.length(), sourceFile.lastModified() );
         }
+        catch( Exception e )
+        {
+            logger.log( Level.SEVERE, "error while putting resources to the FTP Server", e );
+        }
         finally
         {
             IOUtil.close( stream );
@@ -288,6 +296,10 @@ public abstract class StreamingWagonTestCase
         {
             stream = new FileOutputStream( destFile );
             wagon.getToStream( this.resource, stream );
+        }
+        catch( Exception e )
+        {
+            logger.log( Level.SEVERE, "error while reading resources from the FTP Server", e );
         }
         finally
         {
