@@ -76,7 +76,7 @@ public class FtpWagonTest
     protected void setupWagonTestingFixtures()
         throws Exception
     {
-        File ftpHomeDir = new File( "target/test-output/local-repository/" );
+        File ftpHomeDir = getRepositoryDirectory();
         if ( !ftpHomeDir.exists() )
         {
             ftpHomeDir.mkdirs();
