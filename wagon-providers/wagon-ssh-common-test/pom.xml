@@ -47,7 +47,6 @@ under the License.
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.1</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

@@ -20,7 +20,7 @@ package org.apache.maven.wagon.tck.http;
  */
 
 import org.apache.maven.wagon.Wagon;
-import org.codehaus.classworlds.ClassRealm;
+import org.codehaus.plexus.classworlds.realm.ClassRealm;
 import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;

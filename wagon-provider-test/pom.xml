@@ -48,12 +48,11 @@ under the License.
     <dependency>
       <groupId>easymock</groupId>
       <artifactId>easymock</artifactId>
-      <version>1.2_Java1.5</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty</artifactId>
-      <version>6.1.11</version>
     </dependency>
   </dependencies>
 </project>
