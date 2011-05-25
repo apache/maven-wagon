@@ -61,12 +61,6 @@ under the License.
         </exclusion>
       </exclusions>
     </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-nop</artifactId>
-      <version>1.5.3</version>
-      <scope>runtime</scope>
-    </dependency>
 
     <!-- Test dependencies -->
     <dependency>
