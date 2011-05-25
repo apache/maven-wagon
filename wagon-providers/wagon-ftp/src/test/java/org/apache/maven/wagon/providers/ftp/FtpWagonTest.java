@@ -48,15 +48,6 @@ public class FtpWagonTest
     static private FtpServer server;
 
 
-    /**
-     * TODO: fix WAGON-329
-     * @throws Exception
-     */
-    @Override
-    public void testWagonPutDirectoryDeepDestination() throws Exception
-    {
-      //X TODO temporarily disabled
-    }
 
     /**
      * TODO: fix WAGON-329

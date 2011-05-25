@@ -49,6 +49,7 @@ import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
 
+
 /**
  * FtpWagon 
  *
@@ -529,7 +530,7 @@ public class FtpWagon
                     if ( !ftp.changeWorkingDirectory( fileName ) )
                     {
                         // first, try to create it
-                        if ( ftp.makeDirectory( fileName ) )
+                        if ( makeFtpDirectoryRecursive( fileName ) )
                         {
                             if ( permissions != null )
                             {
@@ -670,5 +671,62 @@ public class FtpWagon
         }
 
         fireTransferDebug( "completed = " + sourceFile.getAbsolutePath() );
+    }
+
+    /**
+     * Recursively create directories.
+     * @param fileName the path to create (might be nested)
+     * @return ok
+     * @throws IOException
+     */
+    private boolean makeFtpDirectoryRecursive( String fileName ) throws IOException
+    {
+        if ( fileName == null || fileName.length() == 0 )
+        {
+            return false;
+        }
+
+        int slashPos = fileName.indexOf( "/" );
+        String oldPwd = null;
+        boolean ok = false;
+
+        if ( slashPos == 0 )
+        {
+            // this is an absolute directory
+            oldPwd = ftp.printWorkingDirectory();
+
+            // start with the root
+            ftp.changeWorkingDirectory( "/" );
+            fileName = fileName.substring( 1 );
+        }
+
+        if (  slashPos > 0 && slashPos < fileName.length() - 1 )
+        {
+            if ( oldPwd == null)
+            {
+                oldPwd = ftp.printWorkingDirectory();
+            }
+
+            String nextDir = fileName.substring( 0, slashPos );
+            ok |= ftp.makeDirectory( nextDir );
+
+            ftp.changeWorkingDirectory( nextDir );
+
+            // now create the deeper directories
+            String remainingDirs = fileName.substring( slashPos + 1 );
+            ok |= makeFtpDirectoryRecursive( remainingDirs );
+        }
+        else
+        {
+            ok = ftp.makeDirectory( fileName );
+        }
+
+        if ( oldPwd != null )
+        {
+            // change back to the old working directory
+            ftp.changeWorkingDirectory( oldPwd );
+        }
+
+        return ok;
     }
 }
