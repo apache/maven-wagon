@@ -47,18 +47,6 @@ public class FtpWagonTest
 {
     static private FtpServer server;
 
-
-
-    /**
-     * TODO: fix WAGON-329
-     * @throws Exception
-     */
-    @Override
-    public void testWagonResourceExists() throws Exception
-    {
-      //X TODO temporarily disabled
-    }
-
     protected String getProtocol()
     {
         return "ftp";

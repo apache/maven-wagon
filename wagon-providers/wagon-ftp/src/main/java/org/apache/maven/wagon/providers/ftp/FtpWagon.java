@@ -474,7 +474,7 @@ public class FtpWagon
             int status = ftp.stat( filename );
 
             return ( ( status == FTPReply.FILE_STATUS ) || ( status == FTPReply.FILE_STATUS_OK )
-                            || ( status == FTPReply.SYSTEM_STATUS ) );
+                     || ( status == FTPReply.COMMAND_OK ) || ( status == FTPReply.SYSTEM_STATUS ) );
         }
         catch ( IOException e )
         {
