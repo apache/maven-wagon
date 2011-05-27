@@ -530,36 +530,8 @@ public class FtpWagon
                     if ( !ftp.changeWorkingDirectory( fileName ) )
                     {
                         // first, try to create it
-                        if ( makeFtpDirectoryRecursive( fileName ) )
+                        if ( makeFtpDirectoryRecursive( fileName, permissions ) )
                         {
-                            if ( permissions != null )
-                            {
-                                // Process permissions; note that if we get errors or exceptions here, they are ignored.
-                                // This appears to be a conscious decision, based on other parts of this code.
-                                String group = permissions.getGroup();
-                                if ( group != null )
-                                {
-                                    try
-                                    {
-                                        ftp.sendSiteCommand( "CHGRP " + permissions.getGroup() );
-                                    }
-                                    catch ( IOException e )
-                                    {
-                                    }
-                                }
-                                String mode = permissions.getDirectoryMode();
-                                if ( mode != null )
-                                {
-                                    try
-                                    {
-                                        ftp.sendSiteCommand( "CHMOD " + permissions.getDirectoryMode() );
-                                    }
-                                    catch ( IOException e )
-                                    {
-                                    }
-                                }
-                            }
-
                             if ( !ftp.changeWorkingDirectory( fileName ) )
                             {
                                 throw new TransferFailedException( "Unable to change cwd on ftp server to " + fileName
@@ -674,12 +646,52 @@ public class FtpWagon
     }
 
     /**
+     * Set the permissions (if given) for the underlying folder.
+     * Note: Since the FTP SITE command might be server dependent, we cannot
+     * rely on the functionality available on each FTP server!
+     * So we can only try and hope it works (and catch away all Exceptions).
+     *
+     * @param permissions group and directory permissions
+     */
+    private void setPermissions(RepositoryPermissions permissions) {
+        if ( permissions != null )
+        {
+            // Process permissions; note that if we get errors or exceptions here, they are ignored.
+            // This appears to be a conscious decision, based on other parts of this code.
+            String group = permissions.getGroup();
+            if ( group != null )
+            {
+                try
+                {
+                    ftp.sendSiteCommand( "CHGRP " + permissions.getGroup() );
+                }
+                catch ( IOException e )
+                {
+                }
+            }
+            String mode = permissions.getDirectoryMode();
+            if ( mode != null )
+            {
+                try
+                {
+                    ftp.sendSiteCommand( "CHMOD " + permissions.getDirectoryMode() );
+                }
+                catch ( IOException e )
+                {
+                }
+            }
+        }
+    }
+
+    /**
      * Recursively create directories.
+     *
      * @param fileName the path to create (might be nested)
+     * @param permissions
      * @return ok
      * @throws IOException
      */
-    private boolean makeFtpDirectoryRecursive( String fileName ) throws IOException
+    private boolean makeFtpDirectoryRecursive(String fileName, RepositoryPermissions permissions) throws IOException
     {
         if ( fileName == null || fileName.length() == 0 )
         {
@@ -710,11 +722,18 @@ public class FtpWagon
             String nextDir = fileName.substring( 0, slashPos );
             ok |= ftp.makeDirectory( nextDir );
 
-            ftp.changeWorkingDirectory( nextDir );
+            if ( ok )
+            {
+                // set the permissions for the freshly created directory
+                setPermissions( permissions );
 
-            // now create the deeper directories
-            String remainingDirs = fileName.substring( slashPos + 1 );
-            ok |= makeFtpDirectoryRecursive( remainingDirs );
+
+                ftp.changeWorkingDirectory( nextDir );
+
+                // now create the deeper directories
+                String remainingDirs = fileName.substring( slashPos + 1 );
+                ok |= makeFtpDirectoryRecursive( remainingDirs, permissions);
+            }
         }
         else
         {
