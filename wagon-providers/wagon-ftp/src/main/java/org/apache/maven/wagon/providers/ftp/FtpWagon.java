@@ -500,8 +500,19 @@ public class FtpWagon
         {
             if ( !ftp.changeWorkingDirectory( getRepository().getBasedir() ) )
             {
-                throw new TransferFailedException( "Required directory: '" + getRepository().getBasedir() + "' "
-                                + "is missing" );
+                RepositoryPermissions permissions = getRepository().getPermissions();
+                if ( !makeFtpDirectoryRecursive( getRepository().getBasedir() , permissions ) )
+                {
+                    throw new TransferFailedException( "Required directory: '" + getRepository().getBasedir() + "' "
+                                    + "could not get created" );
+                }
+
+                // try it again sam ...
+                if ( !ftp.changeWorkingDirectory( getRepository().getBasedir() ) )
+                {
+                    throw new TransferFailedException( "Required directory: '" + getRepository().getBasedir() + "' "
+                                    + "is missing and could not get created" );
+                }
             }
         }
         catch ( IOException e )
@@ -642,7 +653,7 @@ public class FtpWagon
 
         }
 
-        fireTransferDebug( "completed = " + sourceFile.getAbsolutePath() );
+        fireTransferDebug("completed = " + sourceFile.getAbsolutePath());
     }
 
     /**
@@ -693,14 +704,15 @@ public class FtpWagon
      */
     private boolean makeFtpDirectoryRecursive(String fileName, RepositoryPermissions permissions) throws IOException
     {
-        if ( fileName == null || fileName.length() == 0 )
+        if ( fileName == null || fileName.length() == 0 ||
+             fileName.replace('/',  '_').trim().length() == 0 ) // if a string is '/', '//' or similar
         {
             return false;
         }
 
         int slashPos = fileName.indexOf( "/" );
         String oldPwd = null;
-        boolean ok = false;
+        boolean ok = true;
 
         if ( slashPos == 0 )
         {
@@ -710,9 +722,13 @@ public class FtpWagon
             // start with the root
             ftp.changeWorkingDirectory( "/" );
             fileName = fileName.substring( 1 );
+
+            // look up the next path separator
+            slashPos = fileName.indexOf( "/" );
         }
 
-        if (  slashPos > 0 && slashPos < fileName.length() - 1 )
+        if ( slashPos >= 0 &&
+             slashPos < ( fileName.length() - 1 ) ) // not only a slash at the end, like in 'newDir/'
         {
             if ( oldPwd == null)
             {
@@ -720,19 +736,23 @@ public class FtpWagon
             }
 
             String nextDir = fileName.substring( 0, slashPos );
-            ok |= ftp.makeDirectory( nextDir );
+
+            // we only create the nextDir if it doesn't yet exist
+            if ( !ftp.changeWorkingDirectory( nextDir ) )
+            {
+                ok &= ftp.makeDirectory( nextDir );
+            }
 
             if ( ok )
             {
                 // set the permissions for the freshly created directory
                 setPermissions( permissions );
 
-
                 ftp.changeWorkingDirectory( nextDir );
 
                 // now create the deeper directories
                 String remainingDirs = fileName.substring( slashPos + 1 );
-                ok |= makeFtpDirectoryRecursive( remainingDirs, permissions);
+                ok &= makeFtpDirectoryRecursive( remainingDirs, permissions);
             }
         }
         else
