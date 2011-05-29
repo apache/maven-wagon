@@ -27,35 +27,43 @@ under the License.
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>wagon-http-lightweight</artifactId>
-  <name>Maven Wagon Lightweight HTTP Provider</name>
+  <artifactId>wagon-http-shared4</artifactId>
+  <name>Maven Wagon HTTP Shared Library 4</name>
   <description>
-    Wagon that gets and puts artifacts through http using standard Java library
+    Shared Library for the wagon-http, and wagon-http-lightweight wagon
+    providers based on httpclient-4.x.
   </description>
 
   <dependencies>
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>wagon-http-shared4</artifactId>
-      <version>${project.version}</version>
+      <groupId>nekohtml</groupId>
+      <artifactId>xercesMinimal</artifactId>
+      <version>1.9.6.2</version>
+    </dependency>
+    <dependency>
+      <groupId>nekohtml</groupId>
+      <artifactId>nekohtml</artifactId>
+      <version>1.9.6.2</version>
       <exclusions>
         <exclusion>
-          <groupId>commons-httpclient</groupId>
-          <artifactId>commons-httpclient</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>commons-logging</groupId>
-          <artifactId>commons-logging</artifactId>
+          <groupId>xerces</groupId>
+          <artifactId>xercesImpl</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
-
-    <!-- used fo the TCK -->
     <dependency>
-      <groupId>org.apache.maven.wagon</groupId>
-      <artifactId>wagon-tck-http</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.1.1</version>
+    </dependency>
+    <!--
+      This dependency is here to upgrade to a version of commons-logging that is
+      newer than the one that comes transitively from commons-httpclient above.
+    -->
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+      <version>1.1.1</version>
     </dependency>
   </dependencies>
 </project>

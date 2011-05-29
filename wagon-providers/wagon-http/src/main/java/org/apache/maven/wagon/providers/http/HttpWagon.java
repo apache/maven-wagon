@@ -23,8 +23,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.http.HttpException;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
@@ -48,11 +50,13 @@ public class HttpWagon
 
         String url = getRepository().getUrl() + "/" + destinationDirectory;
 
-        GetMethod getMethod = new GetMethod( url );
+        HttpGet getMethod = new HttpGet( url );
 
         try
         {
-            int statusCode = execute( getMethod );
+
+            HttpResponse response = execute( getMethod );
+            int statusCode = response.getStatusLine().getStatusCode();
 
             fireTransferDebug( url + " - Status code: " + statusCode );
 
@@ -83,9 +87,7 @@ public class HttpWagon
                         "Failed to transfer file: " + url + ". Return code is: " + statusCode );
             }
 
-            InputStream is = null;
-            
-            is = getMethod.getResponseBodyAsStream();
+            InputStream is = response.getEntity().getContent();
 
             return HtmlFileListParser.parseFileList( url, is );
         }
@@ -93,9 +95,12 @@ public class HttpWagon
         {
             throw new TransferFailedException( "Could not read response body.", e );
         }
+        catch (HttpException e) {
+            throw new TransferFailedException( "Could not read response body.", e );
+        }
         finally
         {
-            getMethod.releaseConnection();
+            getMethod.abort();
         }
     }
 }

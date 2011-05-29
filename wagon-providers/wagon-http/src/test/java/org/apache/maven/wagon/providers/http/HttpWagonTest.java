@@ -23,6 +23,8 @@ import java.util.Properties;
 
 import org.apache.maven.wagon.StreamingWagon;
 import org.apache.maven.wagon.http.HttpWagonTestCase;
+import org.apache.maven.wagon.shared.http.HttpConfiguration;
+import org.apache.maven.wagon.shared.http.HttpMethodConfiguration;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -43,6 +45,11 @@ public class HttpWagonTest
 
     protected void setHttpHeaders( StreamingWagon wagon, Properties properties )
     {
-        ( (HttpWagon) wagon ).setHttpHeaders( properties );
+        HttpConfiguration config = new HttpConfiguration();
+
+        HttpMethodConfiguration methodConfiguration = new HttpMethodConfiguration();
+        methodConfiguration.setHeaders( properties );
+        config.setAll( methodConfiguration );
+        ((HttpWagon) wagon).setHttpConfiguration( config );
     }
 }
