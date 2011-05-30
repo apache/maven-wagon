@@ -19,15 +19,6 @@ package org.apache.maven.wagon.providers.ftp;
  * under the License.
  */
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-
 import org.apache.commons.net.ProtocolCommandEvent;
 import org.apache.commons.net.ProtocolCommandListener;
 import org.apache.commons.net.ftp.FTP;
@@ -48,6 +39,15 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 
 /**
@@ -473,8 +473,10 @@ public class FtpWagon
             String filename = PathUtils.filename( resource.getName() );
             int status = ftp.stat( filename );
 
-            return ( ( status == FTPReply.FILE_STATUS ) || ( status == FTPReply.FILE_STATUS_OK )
-                     || ( status == FTPReply.COMMAND_OK ) || ( status == FTPReply.SYSTEM_STATUS ) );
+            return ( ( status == FTPReply.FILE_STATUS ) || ( status == FTPReply.DIRECTORY_STATUS )
+                     || ( status == FTPReply.FILE_STATUS_OK ) // not in the RFC but used by some FTP servers
+                     || ( status == FTPReply.COMMAND_OK )     // not in the RFC but used by some FTP servers
+                     || ( status == FTPReply.SYSTEM_STATUS ) );
         }
         catch ( IOException e )
         {
