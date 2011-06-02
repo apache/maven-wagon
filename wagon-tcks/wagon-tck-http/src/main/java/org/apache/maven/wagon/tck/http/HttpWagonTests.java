@@ -19,8 +19,6 @@ package org.apache.maven.wagon.tck.http;
  * under the License.
  */
 
-import static org.apache.maven.wagon.tck.http.util.TestUtil.getResource;
-
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
@@ -42,6 +40,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+
+import static org.apache.maven.wagon.tck.http.util.TestUtil.getResource;
 
 public abstract class HttpWagonTests
 {

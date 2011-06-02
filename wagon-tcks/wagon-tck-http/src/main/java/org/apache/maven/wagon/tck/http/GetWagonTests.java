@@ -19,10 +19,6 @@ package org.apache.maven.wagon.tck.http;
  * under the License.
  */
 
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
-import static org.apache.maven.wagon.tck.http.Assertions.assertFileContentsFromResource;
-
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.StreamWagon;
@@ -42,11 +38,14 @@ import org.codehaus.plexus.component.configurator.ComponentConfigurationExceptio
 import org.junit.Ignore;
 import org.junit.Test;
 
+import javax.servlet.Servlet;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 
-import javax.servlet.Servlet;
-import javax.servlet.http.HttpServletResponse;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
+import static org.apache.maven.wagon.tck.http.Assertions.assertFileContentsFromResource;
 
 public class GetWagonTests
     extends HttpWagonTests
@@ -193,7 +192,7 @@ public class GetWagonTests
         throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
         ResourceDoesNotExistException, AuthorizationException
     {
-        if ( !initTest( "http://dummy-host", null, null ) )
+        if ( !initTest( "http://dummy-host.invalid", null, null ) )
         {
             return;
         }
