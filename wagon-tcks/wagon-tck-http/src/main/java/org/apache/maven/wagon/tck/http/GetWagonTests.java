@@ -192,7 +192,10 @@ public class GetWagonTests
         throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
         ResourceDoesNotExistException, AuthorizationException
     {
-        if ( !initTest( "http://dummy-host.invalid", null, null ) )
+        // we use a invalid localhost URL since some Internet Service Providers lately
+        // use funny 'search-DNS' which don't handle explicitly marked testing DNS properly.
+        // According to RFC-2606 .test, .invalid TLDs etc should work, but in practice it doesn't :(
+        if ( !initTest( "http://localhost:65520", null, null ) )
         {
             return;
         }
@@ -239,8 +242,7 @@ public class GetWagonTests
         String myPath = "moved.txt";
         String targetPath = "/base.txt";
 
-        getServerFixture().addServlet(
-                                       "/" + myPath,
+        getServerFixture().addServlet( "/" + myPath + "/*",
                                        new RedirectionServlet( HttpServletResponse.SC_MOVED_PERMANENTLY, myPath,
                                                                targetPath, 6 ) );
 
@@ -255,8 +257,7 @@ public class GetWagonTests
         String myPath = "moved.txt";
         String targetPath = "/base.txt";
 
-        getServerFixture().addServlet(
-                                       "/" + myPath,
+        getServerFixture().addServlet( "/" + myPath + "/*",
                                        new RedirectionServlet( HttpServletResponse.SC_MOVED_TEMPORARILY, myPath,
                                                                targetPath, 6 ) );
 
