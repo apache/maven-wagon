@@ -19,9 +19,6 @@ package org.apache.maven.wagon.providers.file;
  * under the License.
  */
 
-import java.io.File;
-import java.io.IOException;
-
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.StreamingWagonTestCase;
@@ -29,6 +26,9 @@ import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -49,7 +49,13 @@ public class FileWagonTest
 
         return "file://" + file.getPath();
     }
-    
+
+    @Override
+    protected int getTestRepositoryPort() {
+        // file transfer dont needs a port
+        return 0;
+    }
+
     /**
      * This test is introduced to allow for null file wagons.
      * Which is used heavily in the maven component ITs.

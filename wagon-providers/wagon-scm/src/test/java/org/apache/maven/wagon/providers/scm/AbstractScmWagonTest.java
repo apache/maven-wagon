@@ -19,10 +19,6 @@ package org.apache.maven.wagon.providers.scm;
  * under the License.
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-
 import org.apache.maven.scm.manager.plexus.DefaultScmManager;
 import org.apache.maven.scm.provider.ScmProvider;
 import org.apache.maven.wagon.FileTestUtils;
@@ -35,6 +31,10 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Test for {@link ScmWagon}. You need a subclass for each SCM provider you want to test.
@@ -88,6 +88,11 @@ public abstract class AbstractScmWagonTest
     protected ScmProvider getScmProvider()
     {
         return null;
+    }
+
+    @Override
+    protected int getTestRepositoryPort() {
+        return 0;  // not used
     }
 
     protected Wagon getWagon()

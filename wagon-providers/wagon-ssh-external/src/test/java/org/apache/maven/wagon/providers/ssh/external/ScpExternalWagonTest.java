@@ -55,6 +55,12 @@ public class ScpExternalWagonTest
         return "scpexe";
     }
 
+    @Override
+    protected int getTestRepositoryPort() {
+        return 0;  // not used
+    }
+
+
     public String getTestRepositoryUrl()
     {
         return TestData.getTestRepositoryUrl();

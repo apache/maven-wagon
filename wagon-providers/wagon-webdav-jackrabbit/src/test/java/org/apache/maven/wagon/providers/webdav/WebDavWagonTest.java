@@ -16,12 +16,6 @@ package org.apache.maven.wagon.providers.webdav;
  */
 
 import it.could.webdav.DAVServlet;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Properties;
-
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.StreamingWagon;
 import org.apache.maven.wagon.Wagon;
@@ -31,6 +25,11 @@ import org.apache.maven.wagon.resource.Resource;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Properties;
 
 /*
  * WebDAV Wagon Test
@@ -45,12 +44,17 @@ public class WebDavWagonTest
     protected String getTestRepositoryUrl()
         throws IOException
     {
-        return getProtocol() + "://localhost:10007/newfolder/folder2";
+        return getProtocol() + "://localhost:" + getTestRepositoryPort() + "/newfolder/folder2";
     }
 
     protected String getProtocol()
     {
         return "dav";
+    }
+
+    @Override
+    protected int getTestRepositoryPort() {
+        return 10011;
     }
 
     protected void createContext( Server server, File repositoryDirectory )
@@ -87,7 +91,8 @@ public class WebDavWagonTest
      */
     public void testGetURLDavHttp()
     {
-        assertURL( "dav:http://localhost:10007/dav/", "http://localhost:10007/dav/" );
+        assertURL( "dav:http://localhost:" + getTestRepositoryPort() + "/dav/",
+                   "http://localhost:" + getTestRepositoryPort() + "/dav/" );
     }
 
     /**
@@ -95,7 +100,8 @@ public class WebDavWagonTest
      */
     public void testGetURLDavHttps()
     {
-        assertURL( "dav:https://localhost:10007/dav/", "https://localhost:10007/dav/" );
+        assertURL( "dav:https://localhost:" + getTestRepositoryPort() + "/dav/",
+                   "https://localhost:" + getTestRepositoryPort() + "/dav/" );
     }
 
     /**
@@ -103,7 +109,8 @@ public class WebDavWagonTest
      */
     public void testGetURLDavUri()
     {
-        assertURL( "dav://localhost:10007/dav/", "http://localhost:10007/dav/" );
+        assertURL( "dav://localhost:" + getTestRepositoryPort() + "/dav/",
+                   "http://localhost:" + getTestRepositoryPort() + "/dav/" );
     }
 
     /**
@@ -111,7 +118,8 @@ public class WebDavWagonTest
      */
     public void testGetURLDavUriWithSsl()
     {
-        assertURL( "davs://localhost:10007/dav/", "https://localhost:10007/dav/" );
+        assertURL( "davs://localhost:" + getTestRepositoryPort() + "/dav/",
+                   "https://localhost:" + getTestRepositoryPort() + "/dav/" );
     }
 
     /**
@@ -119,7 +127,8 @@ public class WebDavWagonTest
      */
     public void testGetURLDavPlusHttp()
     {
-        assertURL( "dav+https://localhost:10007/dav/", "https://localhost:10007/dav/" );
+        assertURL( "dav+https://localhost:" + getTestRepositoryPort() + "/dav/",
+                   "https://localhost:" + getTestRepositoryPort() + "/dav/" );
     }
 
     /**
@@ -127,7 +136,8 @@ public class WebDavWagonTest
      */
     public void testGetURLDavPlusHttps()
     {
-        assertURL( "dav+https://localhost:10007/dav/", "https://localhost:10007/dav/" );
+        assertURL( "dav+https://localhost:" + getTestRepositoryPort() + "/dav/",
+                   "https://localhost:" + getTestRepositoryPort() + "/dav/" );
     }
     
     public void testMkdirs() throws Exception

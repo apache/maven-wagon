@@ -20,7 +20,9 @@ package org.apache.maven.wagon.providers.http;
  */
 
 import org.apache.maven.wagon.tck.http.GetWagonTests;
+import org.apache.maven.wagon.tck.http.HttpWagonTests;
 import org.apache.maven.wagon.tck.http.HttpsGetWagonTests;
+import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -30,4 +32,10 @@ import org.junit.runners.Suite;
 @RunWith( Suite.class )
 @Suite.SuiteClasses( { GetWagonTests.class, HttpsGetWagonTests.class } )
 public class TckTest {
+
+    @BeforeClass
+    public static void setup()
+    {
+        HttpWagonTests.setDefaultPort(9082);
+    }
 }

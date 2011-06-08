@@ -19,14 +19,6 @@ package org.apache.maven.wagon;
  * under the License.
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
@@ -41,6 +33,14 @@ import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.util.FileUtils;
 import org.easymock.AbstractMatcher;
 import org.easymock.MockControl;
+
+import java.io.File;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
@@ -130,6 +130,13 @@ public abstract class WagonTestCase
      * @return the protocol id
      */
     protected abstract String getProtocol();
+
+    /**
+     * The number of the port which should get used to start the test server
+     *
+     * @return the port number for the test server
+     */
+    protected abstract int getTestRepositoryPort();
 
     // ----------------------------------------------------------------------
     // 1. Create a local file repository which mimic a users local file

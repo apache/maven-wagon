@@ -32,7 +32,7 @@ public class HttpsGetWagonTests
     @Override
     protected int getDefaultPort()
     {
-        return 9443;
+        return super.getDefaultPort() +  443;
     }
 
 }

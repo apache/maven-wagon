@@ -19,10 +19,6 @@ package org.apache.maven.wagon.providers.ftp;
  * under the License.
  */
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.ftpserver.FtpServer;
 import org.apache.ftpserver.FtpServerFactory;
 import org.apache.ftpserver.ftplet.Authority;
@@ -40,6 +36,10 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
@@ -52,6 +52,11 @@ public class FtpWagonTest
     protected String getProtocol()
     {
         return "ftp";
+    }
+
+    @Override
+    protected int getTestRepositoryPort() {
+        return 10023;
     }
 
     protected void setupWagonTestingFixtures()
@@ -70,7 +75,7 @@ public class FtpWagonTest
             ListenerFactory factory = new ListenerFactory();
 
             // set the port of the listener
-            factory.setPort(10023);
+            factory.setPort(getTestRepositoryPort());
 
             // replace the default listener
             serverFactory.addListener("default", factory.createListener());
@@ -118,7 +123,7 @@ public class FtpWagonTest
 
     protected String getTestRepositoryUrl()
     {
-        return "ftp://localhost:10023";
+        return "ftp://localhost:" + getTestRepositoryPort();
     }
 
     public AuthenticationInfo getAuthInfo()

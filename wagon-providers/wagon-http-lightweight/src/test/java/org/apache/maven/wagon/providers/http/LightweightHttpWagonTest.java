@@ -19,15 +19,15 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
-import java.io.File;
-import java.util.Properties;
-
 import org.apache.maven.wagon.StreamingWagon;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.http.HttpWagonTestCase;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.plexus.util.FileUtils;
+
+import java.io.File;
+import java.util.Properties;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -43,7 +43,12 @@ public class LightweightHttpWagonTest
 
     protected String getTestRepositoryUrl()
     {
-        return getProtocol() + "://localhost:10007/";
+        return getProtocol() + "://localhost:" + getTestRepositoryPort() + "/";
+    }
+
+    @Override
+    protected int getTestRepositoryPort() {
+        return 10017;
     }
 
     protected void setHttpHeaders( StreamingWagon wagon, Properties properties )

@@ -48,6 +48,8 @@ public abstract class HttpWagonTests
 
     private ServerFixture serverFixture;
 
+    private static int defaultPort = 9080;
+
     private static PlexusContainer container;
 
     private Wagon wagon;
@@ -282,7 +284,12 @@ public abstract class HttpWagonTests
 
     protected int getDefaultPort()
     {
-        return 9080;
+        return defaultPort;
+    }
+
+    public static void setDefaultPort( int defaultPort )
+    {
+        HttpWagonTests.defaultPort = defaultPort;
     }
 
     protected int getPortPropertyValue()
