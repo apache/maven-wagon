@@ -145,23 +145,14 @@ public class SessionEvent
     {
         switch ( eventType )
         {
-
             case SessionEvent.SESSION_CLOSED:
-                break;
             case SessionEvent.SESSION_DISCONNECTED:
-                break;
             case SessionEvent.SESSION_DISCONNECTING:
-                break;
             case SessionEvent.SESSION_ERROR_OCCURRED:
-                break;
             case SessionEvent.SESSION_LOGGED_IN:
-                break;
             case SessionEvent.SESSION_LOGGED_OFF:
-                break;
             case SessionEvent.SESSION_OPENED:
-                break;
             case SessionEvent.SESSION_OPENING:
-                break;
             case SessionEvent.SESSION_CONNECTION_REFUSED:
                 break;
             default :

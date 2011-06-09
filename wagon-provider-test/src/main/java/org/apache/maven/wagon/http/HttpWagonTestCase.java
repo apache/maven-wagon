@@ -628,18 +628,32 @@ public abstract class HttpWagonTestCase
         file.getParentFile().mkdirs();
         file.deleteOnExit();
         OutputStream out = new FileOutputStream( file );
-        out.write( child.getBytes() );
-        out.close();
+        try
+        {
+            out.write( child.getBytes() );
+        }
+        finally
+        {
+            out.close();
+        }
 
         file = new File( parent, child + ".gz" );
         file.deleteOnExit();
+        String content;
         out = new FileOutputStream( file );
         out = new GZIPOutputStream( out );
+        try
+        {
         // write out different data than non-gz file, so we can
         // assert the gz version was returned
-        String content = file.getAbsolutePath();
+        content = file.getAbsolutePath();
         out.write( content.getBytes() );
-        out.close();
+        }
+        finally
+        {
+            out.close();
+        }
+
         return content;
     }
 

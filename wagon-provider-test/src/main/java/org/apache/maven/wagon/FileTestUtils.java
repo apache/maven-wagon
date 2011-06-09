@@ -19,12 +19,12 @@ package org.apache.maven.wagon;
  * under the License.
  */
 
+import org.codehaus.plexus.util.FileUtils;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-
-import org.codehaus.plexus.util.FileUtils;
 
 /**
  * @author <a href="michal@apache.org>Michal Maczka</a>
@@ -107,9 +107,14 @@ public class FileTestUtils
 
         Writer writer = new FileWriter( f );
 
-        writer.write( content );
-
-        writer.close();
+        try
+        {
+            writer.write( content );
+        }
+        finally
+        {
+            writer.close();
+        }
 
         return f;
     }
