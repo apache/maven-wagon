@@ -268,25 +268,11 @@ public abstract class AbstractHttpClientWagon
                 client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
             }
         }
-
-        /*X original
-        hc.setHost( host );
-
-        //start a session with the webserver
-        client.setHostConfiguration( hc );
-        */
     }
 
     public void closeConnection()
     {
         connectionManager.shutdown();
-
-        /*X original
-        if ( connectionManager instanceof MultiThreadedHttpConnectionManager )
-        {
-            ( (MultiThreadedHttpConnectionManager) connectionManager ).shutdown();
-        }
-        */
     }
 
     public void put( File source, String resourceName )
@@ -417,6 +403,7 @@ public abstract class AbstractHttpClientWagon
     
     protected void mkdirs( String dirname ) throws HttpException, IOException
     {
+        // nothing to do
     }
 
     public boolean resourceExists( String resourceName )
@@ -479,7 +466,7 @@ public abstract class AbstractHttpClientWagon
     protected HttpResponse execute( HttpUriRequest httpMethod ) throws HttpException, IOException
     {
         int statusCode = SC_NULL;
-        
+
         setParameters( httpMethod );
         setHeaders( httpMethod );
         
@@ -537,18 +524,6 @@ public abstract class AbstractHttpClientWagon
     {
         return repository.getUrl();
     }
-
-/*X original
-    protected HttpClient getClient()
-    {
-        return client;
-    }
-
-    public void setConnectionManager( HttpConnectionManager connectionManager )
-    {
-        this.connectionManager = connectionManager;
-    }
-*/
 
     public HttpConfiguration getHttpConfiguration()
     {
@@ -644,7 +619,7 @@ public abstract class AbstractHttpClientWagon
             }
         }
 
-        InputStream is = null;
+        InputStream is;
 
         Header contentLengthHeader = response.getFirstHeader("Content-Length");
 
@@ -689,7 +664,6 @@ public abstract class AbstractHttpClientWagon
 
         try
         {
-            //X original is = getMethod.getResponseBodyAsStream();
             is = response.getEntity().getContent();
 
             if ( isGZipped )

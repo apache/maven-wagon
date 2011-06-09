@@ -288,8 +288,7 @@ public abstract class WagonTestCase
     }
 
     private void getIfNewer( long timestamp, boolean expectedResult, int expectedSize )
-        throws Exception, NoSuchAlgorithmException, IOException, ConnectionException, AuthenticationException,
-        TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+        throws Exception
     {
         Wagon wagon = getWagon();
 

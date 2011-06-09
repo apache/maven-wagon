@@ -102,7 +102,7 @@ public class WebDavWagon
      * @throws HttpException
      * @throws TransferFailedException
      */
-    protected void mkdirs( String dir ) throws HttpException, IOException
+    protected void mkdirs( String dir ) throws IOException
     {
         Repository repository = getRepository();
         String basedir = repository.getBasedir();
@@ -145,7 +145,7 @@ public class WebDavWagon
         }
     }
 
-    private int doMkCol( String url ) throws HttpException, IOException
+    private int doMkCol( String url ) throws IOException
     {
         MkColMethod method = null;
         try

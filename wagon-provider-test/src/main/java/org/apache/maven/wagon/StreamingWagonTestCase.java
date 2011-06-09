@@ -142,8 +142,7 @@ public abstract class StreamingWagonTestCase
     }
 
     private void getIfNewerToStream( long timestamp, boolean expectedResult, int expectedSize )
-        throws Exception, NoSuchAlgorithmException, IOException, ConnectionException, AuthenticationException,
-        TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+        throws Exception
     {
         StreamingWagon wagon = (StreamingWagon) getWagon();
 

@@ -24,7 +24,6 @@ import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpConnectionManager;
-import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
@@ -383,6 +382,7 @@ public abstract class AbstractHttpClientWagon
     
     protected void mkdirs( String dirname ) throws IOException
     {
+        // do nothing as default.
     }
 
     public boolean resourceExists( String resourceName )
@@ -438,7 +438,7 @@ public abstract class AbstractHttpClientWagon
 
     protected int execute( HttpMethod httpMethod ) throws IOException
     {
-        int statusCode = SC_NULL;
+        int statusCode;
         
         setParameters( httpMethod );
         setHeaders( httpMethod );
