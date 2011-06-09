@@ -19,14 +19,7 @@ package org.apache.maven.wagon;
  * under the License.
  */
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import junit.framework.TestCase;
-
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
@@ -42,6 +35,12 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.easymock.AbstractMatcher;
 import org.easymock.MockControl;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -78,7 +77,7 @@ public class AbstractWagonTest
             throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
         {
         }
-    };
+    }
 
     private String basedir;
 

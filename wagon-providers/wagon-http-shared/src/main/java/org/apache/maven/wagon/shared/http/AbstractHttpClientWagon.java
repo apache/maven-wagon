@@ -381,7 +381,7 @@ public abstract class AbstractHttpClientWagon
         }
     }
     
-    protected void mkdirs( String dirname ) throws HttpException, IOException
+    protected void mkdirs( String dirname ) throws IOException
     {
     }
 
@@ -436,7 +436,7 @@ public abstract class AbstractHttpClientWagon
         }
     }
 
-    protected int execute( HttpMethod httpMethod ) throws HttpException, IOException
+    protected int execute( HttpMethod httpMethod ) throws IOException
     {
         int statusCode = SC_NULL;
         
@@ -654,8 +654,7 @@ public abstract class AbstractHttpClientWagon
         }
 
         Header contentEncoding = getMethod.getResponseHeader( "Content-Encoding" );
-        boolean isGZipped =
-            contentEncoding == null ? false : "gzip".equalsIgnoreCase( contentEncoding.getValue() );
+        boolean isGZipped = contentEncoding != null && "gzip".equalsIgnoreCase( contentEncoding.getValue() );
 
         try
         {

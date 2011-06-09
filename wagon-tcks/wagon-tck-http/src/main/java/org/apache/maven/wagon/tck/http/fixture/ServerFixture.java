@@ -65,7 +65,7 @@ public class ServerFixture
 
     private final SecurityHandler securityHandler;
 
-    private int filterCount = 0;;
+    private int filterCount = 0;
 
     public ServerFixture( final int port, final boolean ssl )
         throws URISyntaxException, IOException

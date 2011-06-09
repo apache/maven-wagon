@@ -52,7 +52,7 @@ public class HttpMethodConfiguration
 
     public boolean isUseDefaultHeaders()
     {
-        return useDefaultHeaders == null ? true : useDefaultHeaders.booleanValue();
+        return useDefaultHeaders == null || useDefaultHeaders.booleanValue();
     }
 
     public HttpMethodConfiguration setUseDefaultHeaders( boolean useDefaultHeaders )

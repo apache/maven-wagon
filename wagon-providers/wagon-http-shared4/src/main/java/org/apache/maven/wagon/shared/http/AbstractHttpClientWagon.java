@@ -125,11 +125,13 @@ public abstract class AbstractHttpClientWagon
             return null;
         }
 
-        public Header getContentEncoding() {
-            return null;  //X TODO
+        public Header getContentEncoding()
+        {
+            return null;
         }
 
-        public InputStream getContent() throws IOException, IllegalStateException {
+        public InputStream getContent() throws IOException, IllegalStateException
+        {
             FileInputStream fis = new FileInputStream( source );
 
             return fis;
@@ -140,8 +142,9 @@ public abstract class AbstractHttpClientWagon
             return true;
         }
 
-        public boolean isChunked() {
-            return false;  //X TODO
+        public boolean isChunked()
+        {
+            return false;
         }
 
         public void writeTo( OutputStream output )
@@ -182,12 +185,13 @@ public abstract class AbstractHttpClientWagon
             output.flush();
         }
 
-        public boolean isStreaming() {
-            return false;  //X TODO
+        public boolean isStreaming()
+        {
+            return false;
         }
 
-        public void consumeContent() throws IOException {
-            //X TODO
+        public void consumeContent() throws IOException
+        {
         }
     }
 

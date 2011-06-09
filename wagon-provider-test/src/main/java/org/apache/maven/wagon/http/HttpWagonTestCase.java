@@ -208,8 +208,7 @@ public abstract class HttpWagonTestCase
     }
 
     private void runTestGet( int status )
-        throws Exception, ConnectionException, AuthenticationException, TransferFailedException,
-        ResourceDoesNotExistException, AuthorizationException
+        throws Exception
     {
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
@@ -277,8 +276,7 @@ public abstract class HttpWagonTestCase
     }
 
     private boolean runTestResourceExists( int status )
-        throws Exception, ConnectionException, AuthenticationException, TransferFailedException,
-        ResourceDoesNotExistException, AuthorizationException
+        throws Exception
     {
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
@@ -384,8 +382,7 @@ public abstract class HttpWagonTestCase
     }
 
     private void runTestProxiedRequest( ProxyInfo proxyInfo, TestHeaderHandler handler )
-        throws Exception, IOException, ConnectionException, AuthenticationException, ResourceDoesNotExistException,
-        TransferFailedException, AuthorizationException
+        throws Exception
     {
         Server proxyServer = new Server( getTestRepositoryPort() );
 
@@ -700,8 +697,7 @@ public abstract class HttpWagonTestCase
     }
 
     private void runTestPut( int status )
-        throws Exception, ConnectionException, AuthenticationException, TransferFailedException,
-        ResourceDoesNotExistException, AuthorizationException
+        throws Exception
     {
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
