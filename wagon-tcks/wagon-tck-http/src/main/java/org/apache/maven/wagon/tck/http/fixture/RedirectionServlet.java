@@ -41,10 +41,10 @@ public class RedirectionServlet
 
     private final String myPath;
 
-    public RedirectionServlet( final int code, final String path )
+    public RedirectionServlet( final int code, final String targetPath )
     {
         this.code = code;
-        this.targetPath = path;
+        this.targetPath = targetPath;
         this.maxRedirects = 1;
         this.myPath = null;
     }
