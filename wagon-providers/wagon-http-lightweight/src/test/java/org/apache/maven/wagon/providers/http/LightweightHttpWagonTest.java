@@ -153,7 +153,7 @@ public class LightweightHttpWagonTest
     public void disabledtestHttpRedirect() throws Exception
     {
         Repository repository = new Repository( "apache.releases",
-                                        "https://repository.apache.org/service/local/repositories/releases/content/" );
+                                        "http://repository.apache.org/service/local/repositories/releases/content/" );
 
         Wagon wagon = getWagon();
 

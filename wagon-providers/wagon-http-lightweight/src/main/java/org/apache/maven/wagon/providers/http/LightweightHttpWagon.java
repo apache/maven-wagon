@@ -42,6 +42,7 @@ import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -65,7 +66,7 @@ public class LightweightHttpWagon
 
     private HttpURLConnection putConnection;
 
-    public static final int MAX_REDIRECTS = 5;
+    public static final int MAX_REDIRECTS = 10;
 
     /**
      * Whether to use any proxy cache or not.
@@ -103,35 +104,53 @@ public class LightweightHttpWagon
         Resource resource = inputData.getResource();
         try
         {
-            int redirectCount = 0;
-            URL url = new URL( buildUrl( resource.getName() ) );
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestProperty( "Accept-Encoding", "gzip" );
-            if ( !useCache )
-            {
-                urlConnection.setRequestProperty( "Pragma", "no-cache" );
-            }
+            List<String> visitedUrls = new ArrayList<String>();
+            String visitingUrl = buildUrl( resource.getName() );
 
-            addHeaders( urlConnection );
-
-            // TODO: handle all response codes
-            int responseCode = urlConnection.getResponseCode();
-            if ( responseCode == HttpURLConnection.HTTP_FORBIDDEN
-                || responseCode == HttpURLConnection.HTTP_UNAUTHORIZED )
+            for ( int redirectCount = 0; redirectCount < MAX_REDIRECTS; redirectCount++ )
             {
-                throw new AuthorizationException( "Access denied to: " + buildUrl( resource.getName() ) );
-            }
+                if ( visitedUrls.contains( visitingUrl ) )
+                {
+                    throw new TransferFailedException( "Cyclic http redirect detected. Aborting! " + visitingUrl );
+                }
+                visitedUrls.add( visitingUrl );
 
-            InputStream is = urlConnection.getInputStream();
-            String contentEncoding = urlConnection.getHeaderField( "Content-Encoding" );
-            boolean isGZipped = contentEncoding != null && "gzip".equalsIgnoreCase( contentEncoding );
-            if ( isGZipped )
-            {
-                is = new GZIPInputStream( is );
+                URL url = new URL( visitingUrl );
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestProperty( "Accept-Encoding", "gzip" );
+                if ( !useCache )
+                {
+                    urlConnection.setRequestProperty( "Pragma", "no-cache" );
+                }
+
+                addHeaders( urlConnection );
+
+                // TODO: handle all response codes
+                int responseCode = urlConnection.getResponseCode();
+                if ( responseCode == HttpURLConnection.HTTP_FORBIDDEN
+                    || responseCode == HttpURLConnection.HTTP_UNAUTHORIZED )
+                {
+                    throw new AuthorizationException( "Access denied to: " + buildUrl( resource.getName() ) );
+                }
+                if ( responseCode == HttpURLConnection.HTTP_MOVED_PERM
+                     || responseCode == HttpURLConnection.HTTP_MOVED_TEMP )
+                {
+                    visitingUrl = urlConnection.getHeaderField( "Location" );
+                    continue;
+                }
+
+                InputStream is = urlConnection.getInputStream();
+                String contentEncoding = urlConnection.getHeaderField( "Content-Encoding" );
+                boolean isGZipped = contentEncoding != null && "gzip".equalsIgnoreCase( contentEncoding );
+                if ( isGZipped )
+                {
+                    is = new GZIPInputStream( is );
+                }
+                inputData.setInputStream( is );
+                resource.setLastModified( urlConnection.getLastModified() );
+                resource.setContentLength( urlConnection.getContentLength() );
+                break;
             }
-            inputData.setInputStream( is );
-            resource.setLastModified( urlConnection.getLastModified() );
-            resource.setContentLength( urlConnection.getContentLength() );
         }
         catch ( MalformedURLException e )
         {
