@@ -40,8 +40,8 @@ under the License.
       <version>${project.version}</version>
       <exclusions>
         <exclusion>
-          <groupId>commons-httpclient</groupId>
-          <artifactId>commons-httpclient</artifactId>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
         </exclusion>
         <exclusion>
           <groupId>commons-logging</groupId>
