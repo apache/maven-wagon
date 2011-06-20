@@ -42,6 +42,7 @@ import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
@@ -128,7 +129,7 @@ public class GetWagonTests
 
                     if ( getWagon() instanceof StreamWagon )
                     {
-                        System.out.println( "Connection timeout is: " + ( (StreamWagon) getWagon() ).getTimeout() );
+                        logger.info("Connection timeout is: " + ((StreamWagon) getWagon()).getTimeout());
                     }
 
                     File target = newTempFile();
@@ -173,7 +174,7 @@ public class GetWagonTests
 
         try
         {
-            System.out.println( "Waiting 60 seconds for wagon timeout." );
+            logger.info( "Waiting 60 seconds for wagon timeout." );
             t.join( 30000 );
         }
         catch ( InterruptedException e )
@@ -181,7 +182,7 @@ public class GetWagonTests
             e.printStackTrace();
         }
 
-        System.out.println( "Interrupting thread." );
+        logger.info( "Interrupting thread." );
         t.interrupt();
 
         assertTrue( "TransferFailedException should have been thrown.", holder.getValue() );
@@ -510,7 +511,7 @@ public class GetWagonTests
 
         if ( getWagon() instanceof StreamWagon )
         {
-            System.out.println( "Connection timeout is: " + ( (StreamWagon) getWagon() ).getTimeout() );
+            logger.info( "Connection timeout is: " + ( (StreamWagon) getWagon() ).getTimeout() );
         }
 
         File target = newTempFile();

@@ -18,12 +18,15 @@ package org.apache.maven.wagon.providers.http;
  * specific language governing permissions and limitations
  * under the License.
  */
- 
+
+import java.io.IOException;
+
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
-import java.io.IOException;
+
+import org.apache.log4j.Logger;
 
 /**
  * User: jdumay
@@ -31,10 +34,13 @@ import java.io.IOException;
  * Time: 17:25:27
  */
 public class WaitForeverServlet extends HttpServlet {
+
+    private static Logger logger = Logger.getLogger( WaitForeverServlet.class );
+
     public void service(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException
     {
-        System.out.println( "Calling WaitForeverServlet" );
+        logger.info( "Calling WaitForeverServlet" );
         try
         {
             Thread.sleep( 2000 );

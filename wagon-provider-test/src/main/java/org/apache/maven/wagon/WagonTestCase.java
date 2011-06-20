@@ -19,6 +19,15 @@ package org.apache.maven.wagon;
  * under the License.
  */
 
+import java.io.File;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.log4j.Logger;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
@@ -34,14 +43,6 @@ import org.codehaus.plexus.util.FileUtils;
 import org.easymock.AbstractMatcher;
 import org.easymock.MockControl;
 
-import java.io.File;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
  * @version $Id$
@@ -49,6 +50,9 @@ import java.util.List;
 public abstract class WagonTestCase
     extends PlexusTestCase
 {
+    protected static Logger logger = Logger.getLogger( WagonTestCase.class );
+
+
     static final class ProgressArgumentMatcher
         extends AbstractMatcher
     {
@@ -226,7 +230,7 @@ public abstract class WagonTestCase
 
     protected void message( String message )
     {
-        System.out.println( message );
+        logger.info( message );
     }
 
     // ----------------------------------------------------------------------

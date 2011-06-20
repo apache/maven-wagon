@@ -19,6 +19,12 @@ package org.apache.maven.wagon.tck.http;
  * under the License.
  */
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.apache.log4j.Logger;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
@@ -35,12 +41,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-
 import static org.apache.maven.wagon.tck.http.util.TestUtil.getResource;
 
 public abstract class HttpWagonTests
@@ -63,6 +63,8 @@ public abstract class HttpWagonTests
     private Repository repo;
 
     private final Set<Object> notificationTargets = new HashSet<Object>();
+
+    protected static Logger logger = Logger.getLogger( HttpWagonTests.class );
 
     @Before
     public void beforeEach()
@@ -214,8 +216,8 @@ public abstract class HttpWagonTests
 
         if ( testCaseId == null || !configurator.isSupported( testCaseId ) )
         {
-            System.out.println( "Cannot run test: " + testCaseId
-                + ". Wagon under test does not support this test case." );
+            logger.error( "Cannot run test: " + testCaseId
+                          + ". Wagon under test does not support this test case." );
             return false;
         }
 
@@ -249,8 +251,8 @@ public abstract class HttpWagonTests
 
         if ( testCaseId == null || !configurator.configureWagonForTest( wagon, testCaseId ) )
         {
-            System.out.println( "Cannot run test: " + testCaseId
-                + ". Wagon under test does not support this test case." );
+            logger.error( "Cannot run test: " + testCaseId
+                          + ". Wagon under test does not support this test case." );
 
             return false;
         }

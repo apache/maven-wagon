@@ -25,7 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.TestCase;
-
+import org.apache.log4j.Logger;
 import org.apache.maven.wagon.TransferFailedException;
 
 /**
@@ -34,6 +34,8 @@ import org.apache.maven.wagon.TransferFailedException;
 public class HtmlFileListParserTest
     extends TestCase
 {
+    private static Logger logger = Logger.getLogger( HtmlFileListParserTest.class );
+
     private void assertContainsExpected( List/*<String>*/links, String[] expected )
     {
         if ( expected.length != links.size() )
@@ -42,7 +44,7 @@ public class HtmlFileListParserTest
             for ( Iterator iterator = links.iterator(); iterator.hasNext(); )
             {
                 String link = (String) iterator.next();
-                System.out.println( "   \"" + link + "\", " );
+                logger.info( "   \"" + link + "\", " );
             }
             assertEquals( "Links to Expected size", expected.length, links.size() );
         }
@@ -76,7 +78,7 @@ public class HtmlFileListParserTest
             Iterator it = files.iterator();
             while ( it.hasNext() )
             {
-                System.out.println( "File: '" + it.next() + "'" );
+                logger.info( "File: '" + it.next() + "'" );
             }
         }
 

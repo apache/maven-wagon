@@ -19,6 +19,15 @@ package org.apache.maven.wagon.providers.scm;
  * under the License.
  */
 
+import java.io.File;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+import java.util.Stack;
+
 import org.apache.maven.scm.ScmException;
 import org.apache.maven.scm.ScmFile;
 import org.apache.maven.scm.ScmFileSet;
@@ -41,17 +50,9 @@ import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.resource.Resource;
+
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
-
-import java.io.File;
-import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
-import java.util.Stack;
 
 /**
  * Wagon provider to get and put files from and to SCM systems, using Maven-SCM as underlying transport.
@@ -648,7 +649,6 @@ public class ScmWagon
             {
                 ScmFile f = (ScmFile) it.next();
                 files.add( f.getPath() );
-                System.out.println( "LIST FILE: " + f + " (path=" + f.getPath() + ")" );
             }
 
             return files;

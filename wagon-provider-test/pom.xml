@@ -54,5 +54,6 @@ under the License.
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty</artifactId>
     </dependency>
+
   </dependencies>
 </project>

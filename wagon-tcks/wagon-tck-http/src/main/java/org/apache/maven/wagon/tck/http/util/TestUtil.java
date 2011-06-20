@@ -19,8 +19,6 @@ package org.apache.maven.wagon.tck.http.util;
  * under the License.
  */
 
-import org.codehaus.plexus.util.IOUtil;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -34,8 +32,13 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import org.apache.log4j.Logger;
+import org.codehaus.plexus.util.IOUtil;
+
 public final class TestUtil
 {
+    private static Logger logger = Logger.getLogger(TestUtil.class);
+
 
     private static final Map<String, File> bases = new HashMap<String, File>();
 
@@ -70,7 +73,7 @@ public final class TestUtil
                 base = new File( "target/tck-resources/" + urlFile.getName() );
                 base.getParentFile().mkdirs();
 
-                System.out.println( "unpacking test resources in jar: " + url );
+                logger.info("unpacking test resources in jar: " + url);
                 JarFile jf = null;
                 try
                 {

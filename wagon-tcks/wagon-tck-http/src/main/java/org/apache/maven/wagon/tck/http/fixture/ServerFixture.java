@@ -19,6 +19,14 @@ package org.apache.maven.wagon.tck.http.fixture;
  * under the License.
  */
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
+import javax.servlet.Filter;
+import javax.servlet.Servlet;
+
+import org.apache.log4j.Logger;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
@@ -36,18 +44,13 @@ import org.mortbay.jetty.servlet.FilterMapping;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.jetty.webapp.WebAppContext;
-
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.logging.Logger;
-
 import static org.apache.maven.wagon.tck.http.util.TestUtil.getResource;
 
 public class ServerFixture
 {
+    private static Logger logger = Logger.getLogger( ServerFixture.class );
+
+
     public static final String SERVER_ROOT_RESOURCE_PATH = "default-server-root";
 
     // it seems that some JDKs have a problem if you use different key stores
@@ -118,7 +121,7 @@ public class ServerFixture
         webappContext.setContextPath( "/" );
 
         File base = getResource( SERVER_ROOT_RESOURCE_PATH );
-        System.out.println( "docroot: " + base );
+        logger.info( "docroot: " + base );
         webappContext.setWar( base.getAbsolutePath() );
         webappContext.addHandler( securityHandler );
 
