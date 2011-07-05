@@ -31,21 +31,34 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.maven.wagon.TransferFailedException;
-import org.apache.xerces.xni.Augmentations;
-import org.apache.xerces.xni.QName;
-import org.apache.xerces.xni.XMLAttributes;
-import org.apache.xerces.xni.parser.XMLInputSource;
-import org.apache.xerces.xni.parser.XMLParserConfiguration;
 import org.codehaus.plexus.util.StringUtils;
-import org.cyberneko.html.HTMLConfiguration;
-import org.cyberneko.html.filters.DefaultFilter;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 /**
  * Html File List Parser.
  */
 public class HtmlFileListParser
 {
+    // Apache Fancy Index Sort Headers
+    private static final Pattern APACHE_INDEX_SKIP = Pattern.compile( "\\?[CDMNS]=.*" );
+
+    // URLs with excessive paths.
+    private static final Pattern URLS_WITH_PATHS = Pattern.compile( "/[^/]*/" );
+
+    // URLs that to a parent directory.
+    private static final Pattern URLS_TO_PARENT = Pattern.compile( "\\.\\./" );
+
+    // mailto urls
+    private static final Pattern MAILTO_URLS = Pattern.compile( "mailto:.*" );
+
+    private static final Pattern[] SKIPS = new Pattern[] { APACHE_INDEX_SKIP, URLS_WITH_PATHS, URLS_TO_PARENT,
+        MAILTO_URLS };
+
     /**
      * Fetches a raw HTML from a provided InputStream, parses it, and returns the file list.
      * 
@@ -58,126 +71,96 @@ public class HtmlFileListParser
     {
         try
         {
-            // Use URI object to get benefits of proper absolute and relative path resolution for free
             URI baseURI = new URI( baseurl );
+            // to make debugging easier, start with a string. This is assuming UTF-8, which might not be a safe
+            // assumption.
+            String content = IOUtils.toString( stream, "utf-8" );
+            Document doc = Jsoup.parse( content, baseurl );
+            Elements links = doc.getElementsByTag( "a" );
+            Set results = new HashSet();
+            for ( int lx = 0; lx < links.size(); lx++ )
+            {
+                Element link = links.get( lx );
+                /*
+                 * The abs:href loses directories, so we deal with absolute paths ourselves below in cleanLink
+                 */
+                String target = link.attr( "href" );
+                if ( target != null)
+                {
+                    String clean = cleanLink( baseURI, target );
+                    if ( isAcceptableLink( clean )) 
+                    {
+                        results.add( clean );
+                    }
+                }
 
-            Parser handler = new Parser( baseURI );
+            }
 
-            XMLParserConfiguration parser = new HTMLConfiguration();
-            parser.setDocumentHandler( handler );
-            parser.setFeature( "http://cyberneko.org/html/features/augmentations", true );
-            parser.setProperty( "http://cyberneko.org/html/properties/names/elems", "upper" );
-            parser.setProperty( "http://cyberneko.org/html/properties/names/attrs", "upper" );
-            parser.parse( new XMLInputSource( null, baseurl, baseURI.toString(), stream, "UTF-8" ) );
-
-            return new ArrayList( handler.getLinks() );
-
+            ArrayList resultsAsList = new ArrayList();
+            resultsAsList.addAll( results );
+            return resultsAsList;
         }
         catch ( URISyntaxException e )
         {
-            throw new TransferFailedException( "Unable to parse as URI: " + baseurl );
+            throw new TransferFailedException( "Unable to parse as base URI: " + baseurl );
         }
         catch ( IOException e )
         {
-            throw new TransferFailedException( "I/O error: " + e.getMessage(), e );
+            throw new TransferFailedException( "I/O error reading HTML listing of artifacts: " + e.getMessage(), e );
         }
     }
 
-    private static class Parser
-        extends DefaultFilter
+    private static String cleanLink( URI baseURI, String link )
     {
-        // Apache Fancy Index Sort Headers
-        private static final Pattern APACHE_INDEX_SKIP = Pattern.compile( "\\?[CDMNS]=.*" );
-
-        // URLs with excessive paths.
-        private static final Pattern URLS_WITH_PATHS = Pattern.compile( "/[^/]*/" );
-
-        // URLs that to a parent directory.
-        private static final Pattern URLS_TO_PARENT = Pattern.compile( "\\.\\./" );
-
-        // mailto urls
-        private static final Pattern MAILTO_URLS = Pattern.compile( "mailto:.*" );
-
-        private static final Pattern[] SKIPS =
-            new Pattern[] { APACHE_INDEX_SKIP, URLS_WITH_PATHS, URLS_TO_PARENT, MAILTO_URLS };
-        
-        private Set links = new HashSet();
-
-        private URI baseURI;
-
-        public Parser( URI baseURI )
+        if ( StringUtils.isEmpty( link ) )
         {
-            this.baseURI = baseURI.normalize();
+            return "";
         }
 
-        public Set getLinks()
+        String ret = link;
+
+        try
         {
-            return links;
+            URI linkuri = new URI( ret );
+            if ( link.startsWith( "/" )) 
+            {
+                linkuri =  baseURI.resolve( linkuri );
+            }
+            URI relativeURI = baseURI.relativize( linkuri ).normalize();
+            ret = relativeURI.toASCIIString();
+            if ( ret.startsWith( baseURI.getPath() ) )
+            {
+                ret = ret.substring( baseURI.getPath().length() );
+            }
+
+            ret = URLDecoder.decode( ret, "UTF-8" );
+        }
+        catch ( URISyntaxException e )
+        {
+        }
+        catch ( UnsupportedEncodingException e )
+        {
         }
 
-        public void startElement( QName element, XMLAttributes attrs, Augmentations augs )
+        return ret;
+    }
+
+    private static boolean isAcceptableLink( String link )
+    {
+        if ( StringUtils.isEmpty( link ) )
         {
-            if ( "A".equals( element.rawname ) )
-            {
-                String href = attrs.getValue( "HREF" );
-                if ( href != null )
-                {
-                    String link = cleanLink( baseURI, href );
-                    if ( isAcceptableLink( link ) )
-                    {
-                        links.add( link );
-                    }
-                }
-            }
+            return false;
         }
 
-        private static String cleanLink( URI baseURI, String link )
+        for ( int i = 0; i < SKIPS.length; i++ )
         {
-            if ( StringUtils.isEmpty( link ) )
-            {
-                return "";
-            }
-
-            String ret = link;
-
-            try
-            {
-                URI linkuri = new URI( ret );
-                URI relativeURI = baseURI.relativize( linkuri ).normalize();
-                ret = relativeURI.toASCIIString();
-                if ( ret.startsWith( baseURI.getPath() ) )
-                {
-                    ret = ret.substring( baseURI.getPath().length() );
-                }
-
-                ret = URLDecoder.decode( ret, "UTF-8" );
-            }
-            catch ( URISyntaxException e )
-            {
-            }
-            catch ( UnsupportedEncodingException e )
-            {
-            }
-
-            return ret;
-        }
-
-        private static boolean isAcceptableLink( String link )
-        {
-            if ( StringUtils.isEmpty( link ) )
+            if ( SKIPS[i].matcher( link ).find() )
             {
                 return false;
             }
-
-            for ( int i = 0; i < SKIPS.length; i++ )
-            {
-                if ( SKIPS[i].matcher( link ).find() )
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
+
+        return true;
     }
+
 }
