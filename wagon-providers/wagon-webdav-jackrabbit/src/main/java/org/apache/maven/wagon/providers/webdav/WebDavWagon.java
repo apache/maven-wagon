@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
@@ -102,7 +101,7 @@ public class WebDavWagon
      * @throws HttpException
      * @throws TransferFailedException
      */
-    protected void mkdirs( String dir ) throws IOException
+    protected void mkdirs( String dir ) throws HttpException, IOException
     {
         Repository repository = getRepository();
         String basedir = repository.getBasedir();
@@ -145,7 +144,7 @@ public class WebDavWagon
         }
     }
 
-    private int doMkCol( String url ) throws IOException
+    private int doMkCol( String url ) throws HttpException, IOException
     {
         MkColMethod method = null;
         try

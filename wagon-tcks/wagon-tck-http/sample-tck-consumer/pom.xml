@@ -13,18 +13,19 @@
     <dependency>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-http-lightweight</artifactId>
-        <version>1.0-beta-6</version>
+        <version>1.0-SNAPSHOT</version>
         <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>
       <artifactId>wagon-tck-http</artifactId>
-      <version>1.0-beta-7-SNAPSHOT</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+      <version>4.5</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

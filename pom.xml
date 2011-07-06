@@ -23,13 +23,13 @@ under the License.
   <parent>
     <artifactId>maven-parent</artifactId>
     <groupId>org.apache.maven</groupId>
-    <version>19</version>
+    <version>20</version>
     <relativePath>../pom/maven/pom.xml</relativePath>
   </parent>
 
   <groupId>org.apache.maven.wagon</groupId>
   <artifactId>wagon</artifactId>
-  <version>2.0-SNAPSHOT</version>
+  <version>1.0</version>
   <packaging>pom</packaging>
 
   <name>Maven Wagon</name>
@@ -43,14 +43,6 @@ under the License.
       <name>Michal Maczka</name>
       <email>michal@codehaus.org</email>
       <organization>Codehaus</organization>
-      <roles>
-        <role>Developer</role>
-      </roles>
-    </developer>
-    <developer>
-      <id>struberg</id>
-      <name>Mark Struberg</name>
-      <email>struberg@apache.org</email>
       <roles>
         <role>Developer</role>
       </roles>
@@ -114,73 +106,20 @@ under the License.
     <contributor>
       <name>Thorsten Heit</name>
     </contributor>
+    <contributor>
+      <name>Benson Margulies</name>
+      <email>bimargulies@apache.org</email>
+      <roles>
+        <role>Committer</role>
+      </roles>
+      <timezone>America/Boston</timezone>
+    </contributor>
   </contributors>
 
-  <mailingLists>
-    <mailingList>
-      <name>Maven Developer List</name>
-      <subscribe>dev-subscribe@maven.apache.org</subscribe>
-      <unsubscribe>dev-unsubscribe@maven.apache.org</unsubscribe>
-      <post>dev@maven.apache.org</post>
-      <archive>http://mail-archives.apache.org/mod_mbox/maven-dev</archive>
-      <otherArchives>
-        <otherArchive>http://www.mail-archive.com/dev@maven.apache.org/</otherArchive>
-        <otherArchive>http://old.nabble.com/Maven-Developers-f179.html</otherArchive>
-        <otherArchive>http://maven.dev.markmail.org/</otherArchive>
-      </otherArchives>
-    </mailingList>
-    <mailingList>
-      <name>Maven User List</name>
-      <subscribe>users-subscribe@maven.apache.org</subscribe>
-      <unsubscribe>users-unsubscribe@maven.apache.org</unsubscribe>
-      <post>users@maven.apache.org</post>
-      <archive>http://mail-archives.apache.org/mod_mbox/maven-users</archive>
-      <otherArchives>
-        <otherArchive>http://www.mail-archive.com/users@maven.apache.org/</otherArchive>
-        <otherArchive>http://old.nabble.com/Maven---Users-f178.html</otherArchive>
-        <otherArchive>http://maven.users.markmail.org/</otherArchive>
-      </otherArchives>
-    </mailingList>
-
-    <mailingList>
-      <name>LEGACY Wagon User List (deprecated)</name>
-      <post>wagon-users@maven.apache.org</post>
-      <subscribe>wagon-users-subscribe@maven.apache.org</subscribe>
-      <unsubscribe>wagon-users-unsubscribe@maven.apache.org</unsubscribe>
-      <archive>http://mail-archives.apache.org/mod_mbox/maven-wagon-users/</archive>
-      <otherArchives>
-        <otherArchive>http://www.mail-archive.com/wagon-users@maven.apache.org</otherArchive>
-        <otherArchive>http://old.nabble.com/Wagon---Users-f13870.html</otherArchive>
-        <otherArchive>http://maven.wagon.users.markmail.org/</otherArchive>
-      </otherArchives>
-    </mailingList>
-    <mailingList>
-      <name>LEGACY Wagon Developer List (deprecated)</name>
-      <post>wagon-dev@maven.apache.org</post>
-      <subscribe>wagon-dev-subscribe@maven.apache.org</subscribe>
-      <unsubscribe>wagon-dev-unsubscribe@maven.apache.org</unsubscribe>
-      <archive>http://mail-archives.apache.org/mod_mbox/maven-wagon-dev/</archive>
-      <otherArchives>
-        <otherArchive>http://www.mail-archive.com/wagon-dev@maven.apache.org</otherArchive>
-        <otherArchive>http://old.nabble.com/Wagon---Dev-f13871.html</otherArchive>
-        <otherArchive>http://maven.wagon.dev.markmail.org/</otherArchive>
-      </otherArchives>
-    </mailingList>
-    <mailingList>
-      <name>Wagon Commits List</name>
-      <subscribe>wagon-commits-subscribe@maven.apache.org</subscribe>
-      <unsubscribe>wagon-commits-unsubscribe@maven.apache.org</unsubscribe>
-      <archive>http://mail-archives.apache.org/mod_mbox/maven-wagon-commits/</archive>
-      <otherArchives>
-        <otherArchive>http://maven.wagon.commits.markmail.org/</otherArchive>
-      </otherArchives>
-    </mailingList>
-  </mailingLists>
-
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/wagon/trunk</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/trunk</developerConnection>
-    <url>http://svn.apache.org/viewvc/maven/wagon/trunk</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/wagon/tags/wagon-1.0</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/tags/wagon-1.0</developerConnection>
+    <url>http://svn.apache.org/viewvc/maven/wagon/tags/wagon-1.0</url>
   </scm>
   <issueManagement>
     <system>jira</system>
@@ -188,9 +127,8 @@ under the License.
   </issueManagement>
   <ciManagement>
     <system>Jenkins</system>
-    <url>https://builds.apache.org/job/maven-wagon/</url>
+    <url>https://builds.apache.org/hudson/job/maven-wagon/</url>
   </ciManagement>
-
 
   <modules>
     <module>wagon-provider-api</module>
@@ -210,7 +148,6 @@ under the License.
       <scope>test</scope>
     </dependency>
   </dependencies>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -236,7 +173,7 @@ under the License.
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.8.2</version>
+        <version>3.8.1</version>
       </dependency>
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
@@ -260,40 +197,13 @@ under the License.
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-container-default</artifactId>
-        <version>1.5.5</version>
+        <version>1.0-alpha-9</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-utils</artifactId>
-        <version>2.0.7</version>
-      </dependency>
-
-      <!-- for slf4j -->
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>1.6.1</version>
-      </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-simple</artifactId>
-        <version>1.6.1</version>
-        <scope>test</scope>
-      </dependency>
-
-
-      <dependency>
-        <groupId>easymock</groupId>
-        <artifactId>easymock</artifactId>
-        <version>1.2_Java1.5</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>jetty</artifactId>
-        <version>6.1.26</version>
+        <version>1.4.2</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -314,19 +224,15 @@ under the License.
             <stagingSiteURL>scp://people.apache.org/www/maven.apache.org/wagon-${project.version}</stagingSiteURL>
           </configuration>
         </plugin>
+        <plugin>
+          <groupId>org.codehaus.plexus</groupId>
+          <artifactId>plexus-maven-plugin</artifactId>
+          <!-- the one in maven-parent-10 and after is no longer backward compatible-->
+          <version>1.3.5</version>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
-        <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
-          <encoding>${project.build.sourceEncoding}</encoding>
-        </configuration>
-      </plugin>
       <plugin>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-maven-plugin</artifactId>
@@ -339,20 +245,13 @@ under the License.
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.8.1</version>
-      </plugin>
     </plugins>
   </build>
 
   <reporting>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.8</version>
         <configuration>
           <links>
             <link>http://java.sun.com/j2ee/1.4/docs/api</link>

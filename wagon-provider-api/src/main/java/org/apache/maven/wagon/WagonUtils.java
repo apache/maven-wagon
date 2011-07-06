@@ -19,12 +19,12 @@ package org.apache.maven.wagon;
  * under the License.
  */
 
-import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.codehaus.plexus.util.FileUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
+
+import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.codehaus.plexus.util.FileUtils;
 
 /**
  * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a>
@@ -49,7 +49,9 @@ public final class WagonUtils
 
             wagon.get( resource, file );
 
-            return FileUtils.fileRead( file );
+            String retValue = FileUtils.fileRead( file );
+
+            return retValue;
         }
         finally
         {

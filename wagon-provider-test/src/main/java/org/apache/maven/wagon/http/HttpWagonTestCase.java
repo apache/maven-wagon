@@ -19,12 +19,30 @@ package org.apache.maven.wagon.http;
  * under the License.
  */
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URLDecoder;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.zip.GZIPOutputStream;
+
+import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.StreamingWagon;
 import org.apache.maven.wagon.StreamingWagonTestCase;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.proxy.ProxyInfo;
@@ -46,21 +64,6 @@ import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.DefaultServlet;
 import org.mortbay.jetty.servlet.ServletHolder;
-
-import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URLDecoder;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * @version $Id: LightweightHttpWagonTest.java 680764 2008-07-29 16:45:51Z brett $
@@ -85,7 +88,7 @@ public abstract class HttpWagonTestCase
         FileUtils.deleteDirectory( repositoryDirectory );
         repositoryDirectory.mkdirs();
 
-        server = new Server( getTestRepositoryPort() );
+        server = new Server( 10007 );
 
         PutHandler putHandler = new PutHandler( repositoryDirectory );
         server.addHandler( putHandler );
@@ -206,7 +209,8 @@ public abstract class HttpWagonTestCase
     }
 
     private void runTestGet( int status )
-        throws Exception
+        throws Exception, ConnectionException, AuthenticationException, TransferFailedException,
+        ResourceDoesNotExistException, AuthorizationException
     {
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
@@ -274,7 +278,8 @@ public abstract class HttpWagonTestCase
     }
 
     private boolean runTestResourceExists( int status )
-        throws Exception
+        throws Exception, ConnectionException, AuthenticationException, TransferFailedException,
+        ResourceDoesNotExistException, AuthorizationException
     {
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
@@ -313,7 +318,7 @@ public abstract class HttpWagonTestCase
     public void testGzipGet()
         throws Exception
     {
-        Server server = new Server( getTestRepositoryPort() );
+        Server server = new Server( 10008 );
 
         String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
         Context root = new Context( server, "/", Context.SESSIONS );
@@ -380,14 +385,15 @@ public abstract class HttpWagonTestCase
     }
 
     private void runTestProxiedRequest( ProxyInfo proxyInfo, TestHeaderHandler handler )
-        throws Exception
+        throws Exception, IOException, ConnectionException, AuthenticationException, ResourceDoesNotExistException,
+        TransferFailedException, AuthorizationException
     {
-        Server proxyServer = new Server( getTestRepositoryPort() );
+        Server proxyServer = new Server( 10007 );
 
         proxyServer.setHandler( handler );
         proxyServer.start();
 
-        proxyInfo.setPort( getTestRepositoryPort() );
+        proxyInfo.setPort( 10007 );
 
         try
         {
@@ -623,32 +629,18 @@ public abstract class HttpWagonTestCase
         file.getParentFile().mkdirs();
         file.deleteOnExit();
         OutputStream out = new FileOutputStream( file );
-        try
-        {
-            out.write( child.getBytes() );
-        }
-        finally
-        {
-            out.close();
-        }
+        out.write( child.getBytes() );
+        out.close();
 
         file = new File( parent, child + ".gz" );
         file.deleteOnExit();
-        String content;
         out = new FileOutputStream( file );
         out = new GZIPOutputStream( out );
-        try
-        {
         // write out different data than non-gz file, so we can
         // assert the gz version was returned
-        content = file.getAbsolutePath();
+        String content = file.getAbsolutePath();
         out.write( content.getBytes() );
-        }
-        finally
-        {
-            out.close();
-        }
-
+        out.close();
         return content;
     }
 
@@ -695,7 +687,8 @@ public abstract class HttpWagonTestCase
     }
 
     private void runTestPut( int status )
-        throws Exception
+        throws Exception, ConnectionException, AuthenticationException, TransferFailedException,
+        ResourceDoesNotExistException, AuthorizationException
     {
         StreamingWagon wagon = (StreamingWagon) getWagon();
 

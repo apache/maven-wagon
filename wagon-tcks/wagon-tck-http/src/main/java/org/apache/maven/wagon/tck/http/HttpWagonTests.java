@@ -19,12 +19,8 @@ package org.apache.maven.wagon.tck.http;
  * under the License.
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
+import static org.apache.maven.wagon.tck.http.util.TestUtil.getResource;
 
-import org.apache.log4j.Logger;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
@@ -41,14 +37,16 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import static org.apache.maven.wagon.tck.http.util.TestUtil.getResource;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 public abstract class HttpWagonTests
 {
 
     private ServerFixture serverFixture;
-
-    private static int defaultPort = 9080;
 
     private static PlexusContainer container;
 
@@ -63,8 +61,6 @@ public abstract class HttpWagonTests
     private Repository repo;
 
     private final Set<Object> notificationTargets = new HashSet<Object>();
-
-    protected static Logger logger = Logger.getLogger( HttpWagonTests.class );
 
     @Before
     public void beforeEach()
@@ -216,8 +212,8 @@ public abstract class HttpWagonTests
 
         if ( testCaseId == null || !configurator.isSupported( testCaseId ) )
         {
-            logger.error( "Cannot run test: " + testCaseId
-                          + ". Wagon under test does not support this test case." );
+            System.out.println( "Cannot run test: " + testCaseId
+                + ". Wagon under test does not support this test case." );
             return false;
         }
 
@@ -251,8 +247,8 @@ public abstract class HttpWagonTests
 
         if ( testCaseId == null || !configurator.configureWagonForTest( wagon, testCaseId ) )
         {
-            logger.error( "Cannot run test: " + testCaseId
-                          + ". Wagon under test does not support this test case." );
+            System.out.println( "Cannot run test: " + testCaseId
+                + ". Wagon under test does not support this test case." );
 
             return false;
         }
@@ -286,12 +282,7 @@ public abstract class HttpWagonTests
 
     protected int getDefaultPort()
     {
-        return defaultPort;
-    }
-
-    public static void setDefaultPort( int defaultPort )
-    {
-        HttpWagonTests.defaultPort = defaultPort;
+        return 9080;
     }
 
     protected int getPortPropertyValue()

@@ -19,14 +19,8 @@ package org.apache.maven.wagon.tck.http.fixture;
  * under the License.
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
+import static org.apache.maven.wagon.tck.http.util.TestUtil.getResource;
 
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
-
-import org.apache.log4j.Logger;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
@@ -44,19 +38,21 @@ import org.mortbay.jetty.servlet.FilterMapping;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.jetty.webapp.WebAppContext;
-import static org.apache.maven.wagon.tck.http.util.TestUtil.getResource;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
+import javax.servlet.Filter;
+import javax.servlet.Servlet;
 
 public class ServerFixture
 {
-    private static Logger logger = Logger.getLogger( ServerFixture.class );
-
-
     public static final String SERVER_ROOT_RESOURCE_PATH = "default-server-root";
 
-    // it seems that some JDKs have a problem if you use different key stores
-    // so we gonna reuse the keystore which is is used in the wagon implementations already
     public static final String SERVER_SSL_KEYSTORE_RESOURCE_PATH = "ssl/keystore";
-    public static final String SERVER_SSL_KEYSTORE_PASSWORD = "wagonhttp";
+
+    public static final String SERVER_SSL_KEYSTORE_PASSWORD = "password";
 
     public static final String SERVER_HOST = "localhost";
 
@@ -68,7 +64,7 @@ public class ServerFixture
 
     private final SecurityHandler securityHandler;
 
-    private int filterCount = 0;
+    private int filterCount = 0;;
 
     public ServerFixture( final int port, final boolean ssl )
         throws URISyntaxException, IOException
@@ -78,11 +74,6 @@ public class ServerFixture
         {
             SslSocketConnector connector = new SslSocketConnector();
             String keystore = getResource( SERVER_SSL_KEYSTORE_RESOURCE_PATH ).getAbsolutePath();
-
-            Logger.getLogger(ServerFixture.class.getName()).info("TCK Keystore path: " + keystore);
-            System.setProperty( "javax.net.ssl.keyStore", keystore );
-            System.setProperty( "javax.net.ssl.trustStore", keystore );
-
 
             // connector.setHost( SERVER_HOST );
             connector.setPort( port );
@@ -121,7 +112,7 @@ public class ServerFixture
         webappContext.setContextPath( "/" );
 
         File base = getResource( SERVER_ROOT_RESOURCE_PATH );
-        logger.info( "docroot: " + base );
+        System.out.println( "docroot: " + base );
         webappContext.setWar( base.getAbsolutePath() );
         webappContext.addHandler( securityHandler );
 

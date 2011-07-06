@@ -31,12 +31,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.log4j.Logger;
-
 public class ProxyConnectionVerifierFilter
     implements Filter
 {
-    private static Logger logger = Logger.getLogger( ProxyConnectionVerifierFilter.class );
 
     public void destroy()
     {
@@ -62,7 +59,7 @@ public class ProxyConnectionVerifierFilter
             {
                 for ( String val : Collections.list( vEn ) )
                 {
-                    logger.info( key + ": " + val );
+                    System.out.println( key + ": " + val );
                 }
             }
         }

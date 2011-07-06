@@ -24,10 +24,10 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
@@ -50,9 +50,6 @@ import org.easymock.MockControl;
 public abstract class WagonTestCase
     extends PlexusTestCase
 {
-    protected static Logger logger = Logger.getLogger( WagonTestCase.class );
-
-
     static final class ProgressArgumentMatcher
         extends AbstractMatcher
     {
@@ -134,13 +131,6 @@ public abstract class WagonTestCase
      * @return the protocol id
      */
     protected abstract String getProtocol();
-
-    /**
-     * The number of the port which should get used to start the test server
-     *
-     * @return the port number for the test server
-     */
-    protected abstract int getTestRepositoryPort();
 
     // ----------------------------------------------------------------------
     // 1. Create a local file repository which mimic a users local file
@@ -230,7 +220,7 @@ public abstract class WagonTestCase
 
     protected void message( String message )
     {
-        logger.info( message );
+        System.out.println( message );
     }
 
     // ----------------------------------------------------------------------
@@ -292,7 +282,8 @@ public abstract class WagonTestCase
     }
 
     private void getIfNewer( long timestamp, boolean expectedResult, int expectedSize )
-        throws Exception
+        throws Exception, NoSuchAlgorithmException, IOException, ConnectionException, AuthenticationException,
+        TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         Wagon wagon = getWagon();
 
@@ -989,9 +980,8 @@ public abstract class WagonTestCase
         resource = new Resource( this.resource );
         resource.setContentLength( getExpectedContentLengthOnGet( expectedSize ) );
         resource.setLastModified( getExpectedLastModifiedOnGet( testRepository, resource ) );
-        TransferEvent te = createTransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED,
-                                                                   TransferEvent.REQUEST_GET, null );
-        mockTransferListener.transferStarted( te );
+        mockTransferListener.transferStarted( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED,
+                                                                   TransferEvent.REQUEST_GET, destFile ) );
         mockTransferListener.transferProgress( new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS,
                                                                   TransferEvent.REQUEST_GET ), new byte[] {}, 0 );
         ProgressArgumentMatcher progressArgumentMatcher = new ProgressArgumentMatcher();

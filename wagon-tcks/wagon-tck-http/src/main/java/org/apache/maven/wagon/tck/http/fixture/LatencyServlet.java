@@ -19,6 +19,8 @@ package org.apache.maven.wagon.tck.http.fixture;
  * under the License.
  */
 
+import org.codehaus.plexus.util.IOUtil;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -29,14 +31,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
-import org.codehaus.plexus.util.IOUtil;
-
 public class LatencyServlet
     extends HttpServlet
 {
-    private static Logger logger = Logger.getLogger(LatencyServlet.class);
-
 
     private static final long serialVersionUID = 1L;
 
@@ -55,7 +52,7 @@ public class LatencyServlet
     {
         if ( latencyMs < 0 )
         {
-            logger.info( "Starting infinite wait." );
+            System.out.println( "Starting infinite wait." );
             synchronized ( this )
             {
                 try
@@ -85,7 +82,7 @@ public class LatencyServlet
             in = new FileInputStream( f );
             OutputStream out = resp.getOutputStream();
 
-            logger.info( "Starting high-latency transfer. This should take about "
+            System.out.println( "Starting high-latency transfer. This should take about "
                 + ( ( f.length() / BUFFER_SIZE * latencyMs / 1000 ) + ( latencyMs / 1000 ) ) + " seconds." );
 
             int read = -1;
@@ -101,7 +98,7 @@ public class LatencyServlet
                     e.printStackTrace();
                 }
 
-                logger.info( "Writing bytes " + total + "-" + ( total + read - 1 ) + " of " + f.length()
+                System.out.println( "Writing bytes " + total + "-" + ( total + read - 1 ) + " of " + f.length()
                     + ". Elapsed time so far: " + ( ( System.currentTimeMillis() - start ) / 1000 ) + " seconds" );
 
                 out.write( buf, 0, read );
@@ -114,7 +111,7 @@ public class LatencyServlet
             IOUtil.close( in );
         }
 
-        logger.info( "High-latency transfer done in " + ( System.currentTimeMillis() - start ) + "ms" );
+        System.out.println( "High-latency transfer done in " + ( System.currentTimeMillis() - start ) + "ms" );
     }
 
 }

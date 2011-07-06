@@ -22,10 +22,14 @@ package org.apache.maven.wagon;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 
+import org.apache.maven.wagon.authentication.AuthenticationException;
+import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.observers.ChecksumObserver;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
@@ -134,7 +138,8 @@ public abstract class StreamingWagonTestCase
     }
 
     private void getIfNewerToStream( long timestamp, boolean expectedResult, int expectedSize )
-        throws Exception
+        throws Exception, NoSuchAlgorithmException, IOException, ConnectionException, AuthenticationException,
+        TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
@@ -252,10 +257,6 @@ public abstract class StreamingWagonTestCase
             stream = new FileInputStream( sourceFile );
             wagon.putFromStream( stream, resource, sourceFile.length(), sourceFile.lastModified() );
         }
-        catch( Exception e )
-        {
-            logger.error( "error while putting resources to the FTP Server", e );
-        }
         finally
         {
             IOUtil.close( stream );
@@ -287,10 +288,6 @@ public abstract class StreamingWagonTestCase
         {
             stream = new FileOutputStream( destFile );
             wagon.getToStream( this.resource, stream );
-        }
-        catch( Exception e )
-        {
-            logger.error( "error while reading resources from the FTP Server", e );
         }
         finally
         {

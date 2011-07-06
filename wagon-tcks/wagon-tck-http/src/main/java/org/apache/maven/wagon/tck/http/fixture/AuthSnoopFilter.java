@@ -19,6 +19,8 @@ package org.apache.maven.wagon.tck.http.fixture;
  * under the License.
  */
 
+import org.apache.commons.codec.binary.Base64;
+
 import java.io.IOException;
 
 import javax.servlet.Filter;
@@ -29,13 +31,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.Logger;
-
 public class AuthSnoopFilter
     implements Filter
 {
-    private static Logger logger = Logger.getLogger( AuthSnoopFilter.class );
 
     public void destroy()
     {
@@ -49,13 +47,13 @@ public class AuthSnoopFilter
 
         if ( authHeader != null )
         {
-            logger.info( "Authorization: " + authHeader );
+            System.out.println( "Authorization: " + authHeader );
             String data = authHeader.substring( "BASIC ".length() );
             String decoded = new String( Base64.decodeBase64( data ) );
-            logger.info( decoded );
+            System.out.println( decoded );
             String[] creds = decoded.split( ":" );
 
-            logger.info( "User: " + creds[0] + "\nPassword: " + creds[1] );
+            System.out.println( "User: " + creds[0] + "\nPassword: " + creds[1] );
         }
     }
 

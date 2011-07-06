@@ -19,33 +19,18 @@ package org.apache.maven.wagon.shared.http;
  * under the License.
  */
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Properties;
-import java.util.TimeZone;
-import java.util.zip.GZIPInputStream;
-
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpConnectionManager;
+import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.NTCredentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
@@ -67,6 +52,21 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.TimeZone;
+import java.util.zip.GZIPInputStream;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -195,10 +195,6 @@ public abstract class AbstractHttpClientWagon
     {
         repository.setUrl( getURL( repository ) );
         client = new HttpClient( connectionManager );
-
-        // WAGON-273: default the cookie-policy to browser compatible
-        client.getParams().setCookiePolicy( CookiePolicy.BROWSER_COMPATIBILITY );
-
         String username = null;
         String password = null;
 
@@ -385,9 +381,8 @@ public abstract class AbstractHttpClientWagon
         }
     }
     
-    protected void mkdirs( String dirname ) throws IOException
+    protected void mkdirs( String dirname ) throws HttpException, IOException
     {
-        // do nothing as default.
     }
 
     public boolean resourceExists( String resourceName )
@@ -441,9 +436,9 @@ public abstract class AbstractHttpClientWagon
         }
     }
 
-    protected int execute( HttpMethod httpMethod ) throws IOException
+    protected int execute( HttpMethod httpMethod ) throws HttpException, IOException
     {
-        int statusCode;
+        int statusCode = SC_NULL;
         
         setParameters( httpMethod );
         setHeaders( httpMethod );
@@ -659,7 +654,8 @@ public abstract class AbstractHttpClientWagon
         }
 
         Header contentEncoding = getMethod.getResponseHeader( "Content-Encoding" );
-        boolean isGZipped = contentEncoding != null && "gzip".equalsIgnoreCase( contentEncoding.getValue() );
+        boolean isGZipped =
+            contentEncoding == null ? false : "gzip".equalsIgnoreCase( contentEncoding.getValue() );
 
         try
         {

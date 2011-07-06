@@ -19,6 +19,10 @@ package org.apache.maven.wagon.tck.http;
  * under the License.
  */
 
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
+import static org.apache.maven.wagon.tck.http.Assertions.assertFileContentsFromResource;
+
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.StreamWagon;
@@ -38,15 +42,11 @@ import org.codehaus.plexus.component.configurator.ComponentConfigurationExceptio
 import org.junit.Ignore;
 import org.junit.Test;
 
-import javax.servlet.Servlet;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Logger;
 
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
-import static org.apache.maven.wagon.tck.http.Assertions.assertFileContentsFromResource;
+import javax.servlet.Servlet;
+import javax.servlet.http.HttpServletResponse;
 
 public class GetWagonTests
     extends HttpWagonTests
@@ -129,7 +129,7 @@ public class GetWagonTests
 
                     if ( getWagon() instanceof StreamWagon )
                     {
-                        logger.info("Connection timeout is: " + ((StreamWagon) getWagon()).getTimeout());
+                        System.out.println( "Connection timeout is: " + ( (StreamWagon) getWagon() ).getTimeout() );
                     }
 
                     File target = newTempFile();
@@ -174,7 +174,7 @@ public class GetWagonTests
 
         try
         {
-            logger.info( "Waiting 60 seconds for wagon timeout." );
+            System.out.println( "Waiting 60 seconds for wagon timeout." );
             t.join( 30000 );
         }
         catch ( InterruptedException e )
@@ -182,7 +182,7 @@ public class GetWagonTests
             e.printStackTrace();
         }
 
-        logger.info( "Interrupting thread." );
+        System.out.println( "Interrupting thread." );
         t.interrupt();
 
         assertTrue( "TransferFailedException should have been thrown.", holder.getValue() );
@@ -193,10 +193,7 @@ public class GetWagonTests
         throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
         ResourceDoesNotExistException, AuthorizationException
     {
-        // we use a invalid localhost URL since some Internet Service Providers lately
-        // use funny 'search-DNS' which don't handle explicitly marked testing DNS properly.
-        // According to RFC-2606 .test, .invalid TLDs etc should work, but in practice it doesn't :(
-        if ( !initTest( "http://localhost:65520", null, null ) )
+        if ( !initTest( "http://dummy-host", null, null ) )
         {
             return;
         }
@@ -243,7 +240,8 @@ public class GetWagonTests
         String myPath = "moved.txt";
         String targetPath = "/base.txt";
 
-        getServerFixture().addServlet( "/" + myPath + "/*",
+        getServerFixture().addServlet(
+                                       "/" + myPath,
                                        new RedirectionServlet( HttpServletResponse.SC_MOVED_PERMANENTLY, myPath,
                                                                targetPath, 6 ) );
 
@@ -258,7 +256,8 @@ public class GetWagonTests
         String myPath = "moved.txt";
         String targetPath = "/base.txt";
 
-        getServerFixture().addServlet( "/" + myPath + "/*",
+        getServerFixture().addServlet(
+                                       "/" + myPath,
                                        new RedirectionServlet( HttpServletResponse.SC_MOVED_TEMPORARILY, myPath,
                                                                targetPath, 6 ) );
 
@@ -511,7 +510,7 @@ public class GetWagonTests
 
         if ( getWagon() instanceof StreamWagon )
         {
-            logger.info( "Connection timeout is: " + ( (StreamWagon) getWagon() ).getTimeout() );
+            System.out.println( "Connection timeout is: " + ( (StreamWagon) getWagon() ).getTimeout() );
         }
 
         File target = newTempFile();

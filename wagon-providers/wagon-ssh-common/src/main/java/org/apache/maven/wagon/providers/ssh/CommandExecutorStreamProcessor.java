@@ -19,6 +19,7 @@ package org.apache.maven.wagon.providers.ssh;
  * under the License.
  */
 
+import org.apache.maven.wagon.CommandExecutionException;
 import org.apache.maven.wagon.Streams;
 
 import java.io.BufferedReader;
@@ -38,7 +39,7 @@ public class CommandExecutorStreamProcessor
     }
 
     public static Streams processStreams( BufferedReader stderrReader, BufferedReader stdoutReader )
-        throws IOException
+        throws IOException, CommandExecutionException
     {
         Streams streams = new Streams();
 

@@ -19,15 +19,13 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
+import java.util.Properties;
+
 import org.apache.maven.wagon.StreamingWagon;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.http.HttpWagonTestCase;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
-import org.codehaus.plexus.util.FileUtils;
-
-import java.io.File;
-import java.util.Properties;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -43,12 +41,7 @@ public class LightweightHttpWagonTest
 
     protected String getTestRepositoryUrl()
     {
-        return getProtocol() + "://localhost:" + getTestRepositoryPort() + "/";
-    }
-
-    @Override
-    protected int getTestRepositoryPort() {
-        return 10017;
+        return getProtocol() + "://localhost:10007/";
     }
 
     protected void setHttpHeaders( StreamingWagon wagon, Properties properties )
@@ -142,42 +135,5 @@ public class LightweightHttpWagonTest
         {
             System.getProperties().remove( "http.nonProxyHosts" );
         }
-    }
-
-    /**
-     * This unit test will verify the behaviour of WAGON-314.
-     * Handling a HTTP redirect (301) properly
-     *
-     * It is disabled by default because it needs an online connection to maven.central
-     */
-    public void disabledtestHttpRedirect() throws Exception
-    {
-        Repository repository = new Repository( "apache.releases",
-                                        "http://repository.apache.org/service/local/repositories/releases/content/" );
-
-        Wagon wagon = getWagon();
-
-        wagon.connect( repository );
-
-        File destinationDir = new File( "./target/" );
-        assertTrue( destinationDir.exists() );
-
-        File downloadedFile = new File( destinationDir, "downloadedFile.pom" );
-
-        if ( downloadedFile.exists() )
-        {
-            downloadedFile.delete();
-            assertFalse( downloadedFile.exists() );
-        }
-
-        wagon.get( "org/apache/maven/maven-parent/19/maven-parent-19.pom", downloadedFile );
-
-        assertTrue( downloadedFile.exists() );
-
-        String artifactContent = FileUtils.fileRead( downloadedFile, "UTF-8" );
-        assertNotNull( artifactContent );
-        assertTrue( artifactContent.contains( "<artifactId>maven-parent</artifactId>" ) );
-
-        wagon.disconnect();
     }
 }

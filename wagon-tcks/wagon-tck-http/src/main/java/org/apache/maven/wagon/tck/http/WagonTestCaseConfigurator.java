@@ -19,11 +19,10 @@ package org.apache.maven.wagon.tck.http;
  * under the License.
  */
 
-import org.apache.log4j.Logger;
 import org.apache.maven.wagon.Wagon;
+import org.codehaus.classworlds.ClassRealm;
 import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusContainer;
-import org.codehaus.plexus.classworlds.realm.ClassRealm;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.ComponentConfigurator;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
@@ -45,8 +44,6 @@ public class WagonTestCaseConfigurator
 
     private String wagonHint;
 
-    private static Logger logger = Logger.getLogger( WagonTestCaseConfigurator.class );
-
     public boolean isSupported( final String useCaseId )
     {
         if ( useCaseConfigs != null )
@@ -55,7 +52,7 @@ public class WagonTestCaseConfigurator
 
             if ( config != null && config.getChild( UNSUPPORTED_ELEMENT, false ) != null )
             {
-                logger.info( "Test case '" + useCaseId + "' is marked as unsupported by this wagon." );
+                System.out.println( "Test case '" + useCaseId + "' is marked as unsupported by this wagon." );
                 return false;
             }
         }
@@ -74,23 +71,23 @@ public class WagonTestCaseConfigurator
             {
                 if ( config.getChild( UNSUPPORTED_ELEMENT, false ) != null )
                 {
-                    logger.error( "Test case '" + useCaseId + "' is marked as unsupported by this wagon." );
+                    System.out.println( "Test case '" + useCaseId + "' is marked as unsupported by this wagon." );
                     return false;
                 }
                 else
                 {
-                    logger.info( "Configuring wagon for test case: " + useCaseId + " with:\n\n" + config );
+                    System.out.println( "Configuring wagon for test case: " + useCaseId + " with:\n\n" + config );
                     configurator.configureComponent( wagon, useCaseConfigs.getChild( useCaseId, false ), realm );
                 }
             }
             else
             {
-                logger.info( "No wagon configuration found for test case: " + useCaseId );
+                System.out.println( "No wagon configuration found for test case: " + useCaseId );
             }
         }
         else
         {
-            logger.info( "No test case configurations found." );
+            System.out.println( "No test case configurations found." );
         }
 
         return true;

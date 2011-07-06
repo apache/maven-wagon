@@ -19,6 +19,21 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Authenticator;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.PasswordAuthentication;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+import java.util.zip.GZIPInputStream;
+
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.OutputData;
@@ -31,22 +46,6 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.resource.Resource;
 import org.apache.maven.wagon.shared.http.HtmlFileListParser;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Authenticator;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.PasswordAuthentication;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
-import java.util.zip.GZIPInputStream;
 
 /**
  * LightweightHttpWagon
@@ -65,8 +64,6 @@ public class LightweightHttpWagon
     private String previousHttpProxyPort;
 
     private HttpURLConnection putConnection;
-
-    public static final int MAX_REDIRECTS = 10;
 
     /**
      * Whether to use any proxy cache or not.
@@ -104,53 +101,34 @@ public class LightweightHttpWagon
         Resource resource = inputData.getResource();
         try
         {
-            List<String> visitedUrls = new ArrayList<String>();
-            String visitingUrl = buildUrl( resource.getName() );
-
-            for ( int redirectCount = 0; redirectCount < MAX_REDIRECTS; redirectCount++ )
+            URL url = new URL( buildUrl( resource.getName() ) );
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestProperty( "Accept-Encoding", "gzip" );
+            if ( !useCache )
             {
-                if ( visitedUrls.contains( visitingUrl ) )
-                {
-                    throw new TransferFailedException( "Cyclic http redirect detected. Aborting! " + visitingUrl );
-                }
-                visitedUrls.add( visitingUrl );
-
-                URL url = new URL( visitingUrl );
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestProperty( "Accept-Encoding", "gzip" );
-                if ( !useCache )
-                {
-                    urlConnection.setRequestProperty( "Pragma", "no-cache" );
-                }
-
-                addHeaders( urlConnection );
-
-                // TODO: handle all response codes
-                int responseCode = urlConnection.getResponseCode();
-                if ( responseCode == HttpURLConnection.HTTP_FORBIDDEN
-                    || responseCode == HttpURLConnection.HTTP_UNAUTHORIZED )
-                {
-                    throw new AuthorizationException( "Access denied to: " + buildUrl( resource.getName() ) );
-                }
-                if ( responseCode == HttpURLConnection.HTTP_MOVED_PERM
-                     || responseCode == HttpURLConnection.HTTP_MOVED_TEMP )
-                {
-                    visitingUrl = urlConnection.getHeaderField( "Location" );
-                    continue;
-                }
-
-                InputStream is = urlConnection.getInputStream();
-                String contentEncoding = urlConnection.getHeaderField( "Content-Encoding" );
-                boolean isGZipped = contentEncoding != null && "gzip".equalsIgnoreCase( contentEncoding );
-                if ( isGZipped )
-                {
-                    is = new GZIPInputStream( is );
-                }
-                inputData.setInputStream( is );
-                resource.setLastModified( urlConnection.getLastModified() );
-                resource.setContentLength( urlConnection.getContentLength() );
-                break;
+                urlConnection.setRequestProperty( "Pragma", "no-cache" );
             }
+
+            addHeaders( urlConnection );
+
+            // TODO: handle all response codes
+            int responseCode = urlConnection.getResponseCode();
+            if ( responseCode == HttpURLConnection.HTTP_FORBIDDEN
+                || responseCode == HttpURLConnection.HTTP_UNAUTHORIZED )
+            {
+                throw new AuthorizationException( "Access denied to: " + buildUrl( resource.getName() ) );
+            }
+
+            InputStream is = urlConnection.getInputStream();
+            String contentEncoding = urlConnection.getHeaderField( "Content-Encoding" );
+            boolean isGZipped = contentEncoding == null ? false : "gzip".equalsIgnoreCase( contentEncoding );
+            if ( isGZipped )
+            {
+                is = new GZIPInputStream( is );
+            }
+            inputData.setInputStream( is );
+            resource.setLastModified( urlConnection.getLastModified() );
+            resource.setContentLength( urlConnection.getContentLength() );
         }
         catch ( MalformedURLException e )
         {

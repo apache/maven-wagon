@@ -19,14 +19,9 @@ package org.apache.maven.wagon.providers.ftp;
  * under the License.
  */
 
-import org.apache.ftpserver.FtpServer;
-import org.apache.ftpserver.FtpServerFactory;
-import org.apache.ftpserver.ftplet.Authority;
-import org.apache.ftpserver.ftplet.UserManager;
-import org.apache.ftpserver.listener.ListenerFactory;
-import org.apache.ftpserver.usermanager.PropertiesUserManagerFactory;
-import org.apache.ftpserver.usermanager.impl.BaseUser;
-import org.apache.ftpserver.usermanager.impl.WritePermission;
+import java.io.File;
+
+import org.apache.ftpserver.interfaces.FtpServerInterface;
 import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.StreamingWagonTestCase;
 import org.apache.maven.wagon.Wagon;
@@ -36,10 +31,6 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
@@ -47,63 +38,17 @@ import java.util.List;
 public class FtpWagonTest
     extends StreamingWagonTestCase
 {
-    static private FtpServer server;
+    private FtpServerInterface server;
 
     protected String getProtocol()
     {
         return "ftp";
     }
 
-    @Override
-    protected int getTestRepositoryPort() {
-        return 10023;
-    }
-
     protected void setupWagonTestingFixtures()
         throws Exception
     {
-        File ftpHomeDir = getRepositoryDirectory();
-        if ( !ftpHomeDir.exists() )
-        {
-            ftpHomeDir.mkdirs();
-        }
-
-        if (server == null)
-        {
-            FtpServerFactory serverFactory = new FtpServerFactory();
-
-            ListenerFactory factory = new ListenerFactory();
-
-            // set the port of the listener
-            factory.setPort(getTestRepositoryPort());
-
-            // replace the default listener
-            serverFactory.addListener("default", factory.createListener());
-
-            PropertiesUserManagerFactory userManagerFactory = new PropertiesUserManagerFactory();
-            UserManager um = userManagerFactory.createUserManager();
-
-            BaseUser user = new BaseUser();
-            user.setName("admin");
-            user.setPassword("admin");
-
-            List<Authority> authorities = new ArrayList<Authority>();
-            authorities.add( new WritePermission() );
-
-            user.setAuthorities( authorities );
-
-            user.setHomeDirectory( ftpHomeDir.getAbsolutePath() );
-
-
-            um.save(user);
-
-            serverFactory.setUserManager( um );
-
-            server = serverFactory.createServer();
-
-            // start the server
-            server.start();
-        }
+        server = (FtpServerInterface) lookup( FtpServerInterface.ROLE );
     }
 
     protected void createDirectory( Wagon wagon, String resourceToCreate, String dirName )
@@ -117,13 +62,12 @@ public class FtpWagonTest
     protected void tearDownWagonTestingFixtures()
         throws Exception
     {
-        server.stop();
-        server = null;
+        release( server );
     }
 
     protected String getTestRepositoryUrl()
     {
-        return "ftp://localhost:" + getTestRepositoryPort();
+        return "ftp://localhost:10023";
     }
 
     public AuthenticationInfo getAuthInfo()
@@ -180,56 +124,5 @@ public class FtpWagonTest
         {
             assertEquals( System.getProperty( "user.name" ), authenticationInfo.getUserName() );
         }
-    }
-
-    /**
-     * This is a unit test to show WAGON-265
-     */
-    public void testPutDirectoryCreation()
-        throws Exception
-    {
-        setupRepositories();
-
-        setupWagonTestingFixtures();
-
-        Wagon wagon = getWagon();
-
-        if ( wagon.supportsDirectoryCopy() )
-        {
-            // do the cleanup first
-            File destDir = new File( getRepositoryDirectory(), "dirExists" );
-            FileUtils.deleteDirectory(destDir);
-            destDir.mkdirs();
-            destDir = new File( destDir, "not_yet_existing/also_not" );
-
-            File sourceDir = new File( getRepositoryDirectory(), "testDirectory" );
-
-            FileUtils.deleteDirectory(sourceDir);
-            sourceDir.mkdir();
-
-            File testRes = new File( sourceDir, "test-resource-1.txt" );
-            testRes.createNewFile();
-
-            // This is the difference to our normal use case:
-            // the directory specified in the repo string doesn't yet exist!
-
-            testRepository.setUrl( testRepository.getUrl() + "/dirExists/not_yet_existing/also_not" );
-
-            wagon.connect( testRepository, getAuthInfo() );
-
-            wagon.putDirectory( sourceDir, "testDirectory" );
-
-            destFile = FileTestUtils.createUniqueFile(getName(), getName());
-
-            destFile.deleteOnExit();
-
-            wagon.get( "testDirectory/test-resource-1.txt", destFile );
-
-            wagon.disconnect();
-        }
-
-        tearDownWagonTestingFixtures();
-
-
     }
 }

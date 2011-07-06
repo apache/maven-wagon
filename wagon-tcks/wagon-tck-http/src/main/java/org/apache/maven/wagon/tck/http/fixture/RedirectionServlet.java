@@ -19,11 +19,12 @@ package org.apache.maven.wagon.tck.http.fixture;
  * under the License.
  */
 
+import java.io.IOException;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 public class RedirectionServlet
     extends HttpServlet
@@ -41,10 +42,10 @@ public class RedirectionServlet
 
     private final String myPath;
 
-    public RedirectionServlet( final int code, final String targetPath )
+    public RedirectionServlet( final int code, final String path )
     {
         this.code = code;
-        this.targetPath = targetPath;
+        this.targetPath = path;
         this.maxRedirects = 1;
         this.myPath = null;
     }
@@ -81,7 +82,7 @@ public class RedirectionServlet
         else if ( redirectCount <= maxRedirects )
         {
             resp.setStatus( code );
-            resp.setHeader( "Location", myPath + "/" + redirectCount );
+            resp.setHeader( "Location", myPath );
         }
         else
         {

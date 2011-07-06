@@ -140,6 +140,7 @@ public class TransferEvent
         {
 
             case REQUEST_PUT:
+                break;
             case REQUEST_GET:
                 break;
 
@@ -167,9 +168,13 @@ public class TransferEvent
         {
 
             case TRANSFER_INITIATED:
+                break;
             case TRANSFER_STARTED:
+                break;
             case TRANSFER_COMPLETED:
+                break;
             case TRANSFER_PROGRESS:
+                break;
             case TRANSFER_ERROR:
                 break;
             default :
