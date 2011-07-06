@@ -48,7 +48,7 @@ under the License.
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>wagon-http-shared</artifactId>
-      <version>1.0-beta-8-SNAPSHOT</version>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.jackrabbit</groupId>
@@ -107,7 +107,7 @@ under the License.
             <!-- Workaround for QDOX-148, see also MNG-3686 -->
             <groupId>${project.groupId}</groupId>
             <artifactId>wagon-http-shared</artifactId>
-            <version>1.0-beta-6</version>
+            <version>${project.version}</version>
           </dependency>
         </dependencies>
       </plugin>

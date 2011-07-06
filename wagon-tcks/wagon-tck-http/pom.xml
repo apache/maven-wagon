@@ -17,7 +17,7 @@
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>
       <artifactId>wagon-http-lightweight</artifactId>
-      <version>1.0-beta-6</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>

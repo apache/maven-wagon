@@ -37,7 +37,7 @@ under the License.
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>wagon-http-shared</artifactId>
-      <version>1.0-beta-8-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
     <!-- I believe we can shade this in Maven itself
