@@ -31,11 +31,12 @@ import org.junit.runners.Suite;
  */
 @RunWith( Suite.class )
 @Suite.SuiteClasses( { GetWagonTests.class, HttpsGetWagonTests.class } )
-public class TckTest {
+public class TckTest
+{
 
     @BeforeClass
     public static void setup()
     {
-        HttpWagonTests.setDefaultPort(9082);
+        HttpWagonTests.setDefaultPort( 9082 );
     }
 }

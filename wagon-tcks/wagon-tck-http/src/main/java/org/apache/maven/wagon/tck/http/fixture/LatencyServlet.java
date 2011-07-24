@@ -35,8 +35,7 @@ import org.codehaus.plexus.util.IOUtil;
 public class LatencyServlet
     extends HttpServlet
 {
-    private static Logger logger = Logger.getLogger(LatencyServlet.class);
-
+    private static Logger logger = Logger.getLogger( LatencyServlet.class );
 
     private static final long serialVersionUID = 1L;
 

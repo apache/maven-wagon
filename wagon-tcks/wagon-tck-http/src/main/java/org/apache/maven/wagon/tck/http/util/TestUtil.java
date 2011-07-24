@@ -37,8 +37,7 @@ import org.codehaus.plexus.util.IOUtil;
 
 public final class TestUtil
 {
-    private static Logger logger = Logger.getLogger(TestUtil.class);
-
+    private static Logger logger = Logger.getLogger( TestUtil.class );
 
     private static final Map<String, File> bases = new HashMap<String, File>();
 

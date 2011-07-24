@@ -42,7 +42,6 @@ import javax.servlet.Servlet;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Logger;
 
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
@@ -129,7 +128,7 @@ public class GetWagonTests
 
                     if ( getWagon() instanceof StreamWagon )
                     {
-                        logger.info("Connection timeout is: " + ((StreamWagon) getWagon()).getTimeout());
+                        logger.info( "Connection timeout is: " + ( (StreamWagon) getWagon() ).getTimeout() );
                     }
 
                     File target = newTempFile();

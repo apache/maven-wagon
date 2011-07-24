@@ -79,7 +79,7 @@ public class ServerFixture
             SslSocketConnector connector = new SslSocketConnector();
             String keystore = getResource( SERVER_SSL_KEYSTORE_RESOURCE_PATH ).getAbsolutePath();
 
-            Logger.getLogger(ServerFixture.class.getName()).info("TCK Keystore path: " + keystore);
+            Logger.getLogger( ServerFixture.class ).info( "TCK Keystore path: " + keystore );
             System.setProperty( "javax.net.ssl.keyStore", keystore );
             System.setProperty( "javax.net.ssl.trustStore", keystore );
 
