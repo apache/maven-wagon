@@ -52,29 +52,27 @@
                   <li>
                     <a
                         href="apidocs/org/apache/maven/wagon/providers/ssh/knownhost/NullKnownHostsProvider.html">
-                      NullKnownHostProvider</a>
-                    : Don't provide anything
+                      NullKnownHostProvider</a>:
+                    Don't provide anything
                   </li>
                   <li>
                     <a
                         href="apidocs/org/apache/maven/wagon/providers/ssh/knownhost/SingleKnownHostsProvider.html">
-                      SingleKnownHostProvider</a>
-                    : One host key can be setuped
+                      SingleKnownHostProvider</a>:
+                    One host key can be setuped
                   </li>
                   <li>
                     <a
                         href="apidocs/org/apache/maven/wagon/providers/ssh/knownhost/FileKnownHostsProvider.html">
-                      FileKnownHostProvider</a>
-                    :
-                    Load known hosts keys from a openssh's ~/.ssh/known_hosts
+                      FileKnownHostProvider</a>:
+                    Load known hosts keys from a openssh's <code>~/.ssh/known_hosts</code>
                     like stream
                   </li>
                   <li>
                     <a
                         href="apidocs/org/apache/maven/wagon/providers/ssh/knownhost/StreamKnownHostsProvider.html">
-                      StreamKnownHostProvider</a>
-                    :
-                    Load known hosts keys from ~/.ssh/known_hosts (you can
+                      StreamKnownHostProvider</a>:
+                    Load known hosts keys from <code>~/.ssh/known_hosts</code> (you can
                     set another location)
                   </li>
 
@@ -171,11 +169,11 @@
 		       href="apidocs/org/apache/maven/wagon/providers/ssh/knownhost/SingleKnownHostsProvider.html">SingleKnownHostProvider</a>: One host key can be setuped</li>
 		       <li> <a
 		       href="apidocs/org/apache/maven/wagon/providers/ssh/knownhost/FileKnownHostsProvider.html">FileKnownHostProvider</a>:
-		       Load known hosts keys from a openssh's ~/.ssh/known_hosts
+		       Load known hosts keys from a openssh's <code>~/.ssh/known_hosts</code>
 		       like stream</li>
 		       <li> <a
 		       href="apidocs/org/apache/maven/wagon/providers/ssh/knownhost/StreamKnownHostsProvider.html">StreamKnownHostProvider</a>:
-		       Load known hosts keys from ~/.ssh/known_hosts (you can
+		       Load known hosts keys from <code>~/.ssh/known_hosts</code> (you can
 		       set another location)</li>
 
 		     </ul>
