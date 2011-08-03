@@ -33,10 +33,5 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses( { GetWagonTests.class, HttpsGetWagonTests.class } )
 public class TckTest
 {
-    @BeforeClass
-    public static void setup()
-    {
-        HttpWagonTests.setDefaultPort(9083);
-    }
-
+    // no op
 }

@@ -19,13 +19,6 @@ package org.apache.maven.wagon.tck.http.fixture;
  * under the License.
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
-
 import org.apache.log4j.Logger;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
@@ -44,6 +37,13 @@ import org.mortbay.jetty.servlet.FilterMapping;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.jetty.webapp.WebAppContext;
+
+import javax.servlet.Filter;
+import javax.servlet.Servlet;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import static org.apache.maven.wagon.tck.http.util.TestUtil.getResource;
 
 public class ServerFixture
@@ -56,6 +56,7 @@ public class ServerFixture
     // it seems that some JDKs have a problem if you use different key stores
     // so we gonna reuse the keystore which is is used in the wagon implementations already
     public static final String SERVER_SSL_KEYSTORE_RESOURCE_PATH = "ssl/keystore";
+
     public static final String SERVER_SSL_KEYSTORE_PASSWORD = "wagonhttp";
 
     public static final String SERVER_HOST = "localhost";
@@ -70,7 +71,9 @@ public class ServerFixture
 
     private int filterCount = 0;
 
-    public ServerFixture( final int port, final boolean ssl )
+    private int httpPort;
+
+    public ServerFixture( final boolean ssl )
         throws URISyntaxException, IOException
     {
         server = new Server();
@@ -83,9 +86,8 @@ public class ServerFixture
             System.setProperty( "javax.net.ssl.keyStore", keystore );
             System.setProperty( "javax.net.ssl.trustStore", keystore );
 
-
             // connector.setHost( SERVER_HOST );
-            connector.setPort( port );
+            //connector.setPort( port );
             connector.setKeystore( keystore );
             connector.setPassword( SERVER_SSL_KEYSTORE_PASSWORD );
             connector.setKeyPassword( SERVER_SSL_KEYSTORE_PASSWORD );
@@ -96,14 +98,14 @@ public class ServerFixture
         {
             Connector connector = new SelectChannelConnector();
             connector.setHost( "localhost" );
-            connector.setPort( port );
+            //connector.setPort( port );
             server.addConnector( connector );
         }
 
         Constraint constraint = new Constraint();
         constraint.setName( Constraint.__BASIC_AUTH );
 
-        constraint.setRoles( new String[] { "allowed" } );
+        constraint.setRoles( new String[]{ "allowed" } );
         constraint.setAuthenticate( true );
 
         ConstraintMapping cm = new ConstraintMapping();
@@ -115,7 +117,7 @@ public class ServerFixture
         securityRealm = new HashUserRealm( "Test Server" );
 
         securityHandler.setUserRealm( securityRealm );
-        securityHandler.setConstraintMappings( new ConstraintMapping[] { cm } );
+        securityHandler.setConstraintMappings( new ConstraintMapping[]{ cm } );
 
         webappContext = new WebAppContext();
         webappContext.setContextPath( "/" );
@@ -129,7 +131,7 @@ public class ServerFixture
         ( (AbstractSessionManager) sessionHandler.getSessionManager() ).setUsingCookies( false );
 
         HandlerCollection handlers = new HandlerCollection();
-        handlers.setHandlers( new Handler[] { webappContext, new DefaultHandler() } );
+        handlers.setHandlers( new Handler[]{ webappContext, new DefaultHandler() } );
 
         server.setHandler( handlers );
     }
@@ -181,6 +183,10 @@ public class ServerFixture
     public void start()
         throws Exception
     {
+        if (server.isStarted() || server.isRunning())
+        {
+            return;
+        }
         server.start();
 
         int total = 0;
@@ -194,6 +200,11 @@ public class ServerFixture
         {
             throw new IllegalStateException( "Server didn't start in: " + total + "ms." );
         }
+        this.httpPort = server.getConnectors()[0].getLocalPort();
     }
 
+    public int getHttpPort()
+    {
+        return httpPort;
+    }
 }

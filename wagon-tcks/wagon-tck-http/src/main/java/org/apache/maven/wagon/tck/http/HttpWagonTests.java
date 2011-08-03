@@ -48,8 +48,6 @@ public abstract class HttpWagonTests
 
     private ServerFixture serverFixture;
 
-    private static int defaultPort = 9080;
-
     private static PlexusContainer container;
 
     private Wagon wagon;
@@ -70,7 +68,8 @@ public abstract class HttpWagonTests
     public void beforeEach()
         throws Exception
     {
-        serverFixture = new ServerFixture( getPort(), isSsl() );
+        serverFixture = new ServerFixture( isSsl() );
+        serverFixture.start();
         wagon = (Wagon) container.lookup( Wagon.ROLE, configurator.getWagonHint() );
     }
 
@@ -275,23 +274,7 @@ public abstract class HttpWagonTests
 
     protected int getPort()
     {
-        int port = getPortPropertyValue();
-        if ( port < 1 )
-        {
-            port = getDefaultPort();
-        }
-
-        return port;
-    }
-
-    protected int getDefaultPort()
-    {
-        return defaultPort;
-    }
-
-    public static void setDefaultPort( int defaultPort )
-    {
-        HttpWagonTests.defaultPort = defaultPort;
+        return serverFixture.getHttpPort();
     }
 
     protected int getPortPropertyValue()
