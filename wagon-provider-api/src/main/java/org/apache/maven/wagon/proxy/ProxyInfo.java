@@ -208,4 +208,11 @@ public class ProxyInfo
     {
         return ntlmDomain;
     }
+
+    @Override
+    public String toString()
+    {
+        return "ProxyInfo{" + "host='" + host + '\'' + ", userName='" + userName + '\'' + ", port=" + port + ", type='"
+            + type + '\'' + ", nonProxyHosts='" + nonProxyHosts + '\'' + '}';
+    }
 }

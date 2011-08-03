@@ -31,7 +31,7 @@ public interface StreamingWagon
      * Downloads specified resource from the repository to given output stream.
      * 
      * @param resourceName
-     * @param destination
+     * @param stream
      * @throws TransferFailedException
      * @throws ResourceDoesNotExistException
      * @throws AuthorizationException 
@@ -45,7 +45,7 @@ public interface StreamingWagon
      * milliseconds, between the current time and midnight, January 1, 1970 UTC and aligned to GMT timezone.
      * 
      * @param resourceName
-     * @param destination
+     * @param stream
      * @param timestamp
      * @return <code>true</code> if newer resource has been downloaded, <code>false</code> if resource in the
      *         repository is older or has the same age.
@@ -60,7 +60,7 @@ public interface StreamingWagon
     /**
      * Copy from a local input stream to remote.
      * 
-     * @param source the local file
+     * @param stream the local stream
      * @param destination the remote destination
      * @throws TransferFailedException
      * @throws ResourceDoesNotExistException
@@ -72,7 +72,7 @@ public interface StreamingWagon
     /**
      * Copy from a local input stream to remote.
      * 
-     * @param source the local file
+     * @param stream the local stream
      * @param destination the remote destination
      * @throws TransferFailedException
      * @throws ResourceDoesNotExistException

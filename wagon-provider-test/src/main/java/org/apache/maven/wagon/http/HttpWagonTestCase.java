@@ -85,7 +85,7 @@ public abstract class HttpWagonTestCase
         FileUtils.deleteDirectory( repositoryDirectory );
         repositoryDirectory.mkdirs();
 
-        server = new Server( getTestRepositoryPort() );
+        server = new Server( 0 );
 
         PutHandler putHandler = new PutHandler( repositoryDirectory );
         server.addHandler( putHandler );
@@ -95,6 +95,18 @@ public abstract class HttpWagonTestCase
         addConnectors( server );
 
         server.start();
+
+        testRepository.setUrl( getTestRepositoryUrl() );
+    }
+
+    @Override
+    protected final int getTestRepositoryPort()
+    {
+        if ( server == null )
+        {
+            return 0;
+        }
+        return server.getConnectors()[0].getLocalPort();
     }
 
     protected void createContext( Server server, File repositoryDirectory )
@@ -140,7 +152,8 @@ public abstract class HttpWagonTestCase
         addConnectors( server );
         server.start();
 
-        wagon.connect( new Repository( "id", getProtocol() + "://localhost:" + server.getConnectors()[0].getLocalPort() ) );
+        wagon.connect(
+            new Repository( "id", getProtocol() + "://localhost:" + server.getConnectors()[0].getLocalPort() ) );
 
         wagon.getToStream( "resource", new StringOutputStream() );
 
@@ -382,16 +395,28 @@ public abstract class HttpWagonTestCase
     private void runTestProxiedRequest( ProxyInfo proxyInfo, TestHeaderHandler handler )
         throws Exception
     {
-        Server proxyServer = new Server( getTestRepositoryPort() );
+        Server proxyServer = new Server( 0 );
 
         proxyServer.setHandler( handler );
+
         proxyServer.start();
 
-        proxyInfo.setPort( getTestRepositoryPort() );
+        proxyInfo.setPort( proxyServer.getConnectors()[0].getLocalPort() );
+
+        System.out.println(
+            "start proxy on host/port " + proxyInfo.getHost() + "/" + proxyInfo.getPort() + " with non proxyHosts "
+                + proxyInfo.getNonProxyHosts() );
+
+        while ( !proxyServer.isRunning() || !proxyServer.isStarted() )
+        {
+            Thread.sleep( 1 );
+        }
 
         try
         {
             StreamingWagon wagon = (StreamingWagon) getWagon();
+
+            System.out.println( " wagon hashCode " + wagon.hashCode() );
 
             Repository testRepository = new Repository( "id", "http://www.example.com/" );
 
@@ -410,6 +435,8 @@ public abstract class HttpWagonTestCase
             }
             finally
             {
+                System.setProperty( "http.proxyHost", "" );
+                System.setProperty( "http.proxyPort", "" );
                 wagon.disconnect();
             }
         }
@@ -600,7 +627,7 @@ public abstract class HttpWagonTestCase
     {
         Constraint constraint = new Constraint();
         constraint.setName( Constraint.__BASIC_AUTH );
-        constraint.setRoles( new String[] { "admin" } );
+        constraint.setRoles( new String[]{ "admin" } );
         constraint.setAuthenticate( true );
 
         ConstraintMapping cm = new ConstraintMapping();
@@ -612,7 +639,7 @@ public abstract class HttpWagonTestCase
         hashUserRealm.put( "user", "secret" );
         hashUserRealm.addUserToRole( "user", "admin" );
         sh.setUserRealm( hashUserRealm );
-        sh.setConstraintMappings( new ConstraintMapping[] { cm } );
+        sh.setConstraintMappings( new ConstraintMapping[]{ cm } );
         return sh;
     }
 
@@ -639,10 +666,10 @@ public abstract class HttpWagonTestCase
         out = new GZIPOutputStream( out );
         try
         {
-        // write out different data than non-gz file, so we can
-        // assert the gz version was returned
-        content = file.getAbsolutePath();
-        out.write( content.getBytes() );
+            // write out different data than non-gz file, so we can
+            // assert the gz version was returned
+            content = file.getAbsolutePath();
+            out.write( content.getBytes() );
         }
         finally
         {
@@ -778,7 +805,7 @@ public abstract class HttpWagonTestCase
         PutHandler handler = new PutHandler( new File( localRepositoryPath ) );
 
         HandlerCollection handlers = new HandlerCollection();
-        handlers.setHandlers( new Handler[] { sh, handler } );
+        handlers.setHandlers( new Handler[]{ sh, handler } );
 
         server.setHandler( handlers );
         addConnectors( server );
@@ -883,9 +910,11 @@ public abstract class HttpWagonTestCase
     private static class AuthorizingProxyHandler
         extends TestHeaderHandler
     {
+
         public void handle( String target, HttpServletRequest request, HttpServletResponse response, int dispatch )
             throws IOException, ServletException
         {
+            System.out.println( " handle proxy request" );
             if ( request.getHeader( "Proxy-Authorization" ) == null )
             {
                 response.setStatus( 407 );

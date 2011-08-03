@@ -46,10 +46,6 @@ public class LightweightHttpWagonTest
         return getProtocol() + "://localhost:" + getTestRepositoryPort() + "/";
     }
 
-    @Override
-    protected int getTestRepositoryPort() {
-        return 10017;
-    }
 
     protected void setHttpHeaders( StreamingWagon wagon, Properties properties )
     {

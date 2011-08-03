@@ -43,11 +43,6 @@ public class HttpWagonTest
         return getProtocol() + "://localhost:" + getTestRepositoryPort();
     }
 
-    @Override
-    protected int getTestRepositoryPort() {
-        return 10009;
-    }
-
     protected void setHttpHeaders( StreamingWagon wagon, Properties properties )
     {
         HttpConfiguration config = new HttpConfiguration();

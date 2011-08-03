@@ -52,11 +52,6 @@ public class WebDavWagonTest
         return "dav";
     }
 
-    @Override
-    protected int getTestRepositoryPort() {
-        return 10011;
-    }
-
     protected void createContext( Server server, File repositoryDirectory )
         throws IOException
     {

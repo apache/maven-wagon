@@ -50,7 +50,7 @@ import java.util.zip.GZIPInputStream;
 
 /**
  * LightweightHttpWagon
- * 
+ *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  * @plexus.component role="org.apache.maven.wagon.Wagon" role-hint="http" instantiation-strategy="per-lookup"
@@ -70,17 +70,26 @@ public class LightweightHttpWagon
 
     /**
      * Whether to use any proxy cache or not.
-     * 
+     *
      * @plexus.configuration default="false"
      */
     private boolean useCache;
 
-    /** @plexus.configuration */
+    /**
+     * @plexus.configuration
+     */
     private Properties httpHeaders;
+
+
+    private static final String HTTP_PROXY_HOST_SYSPROPS = "http.proxyHost";
+
+    private static final String HTTP_PROXY_PORT_SYSPROPS = "http.proxyPort";
+
+    private static final String HTTP_NON_PROXY_HOSTS_SYSPROPS = "http.nonProxyHosts";
 
     /**
      * Builds a complete URL string from the repository URL and the relative path passed.
-     * 
+     *
      * @param path the relative path
      * @return the complete URL
      */
@@ -102,10 +111,11 @@ public class LightweightHttpWagon
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         Resource resource = inputData.getResource();
+
+        String visitingUrl = buildUrl( resource.getName() );
         try
         {
             List<String> visitedUrls = new ArrayList<String>();
-            String visitingUrl = buildUrl( resource.getName() );
 
             for ( int redirectCount = 0; redirectCount < MAX_REDIRECTS; redirectCount++ )
             {
@@ -133,7 +143,7 @@ public class LightweightHttpWagon
                     throw new AuthorizationException( "Access denied to: " + buildUrl( resource.getName() ) );
                 }
                 if ( responseCode == HttpURLConnection.HTTP_MOVED_PERM
-                     || responseCode == HttpURLConnection.HTTP_MOVED_TEMP )
+                    || responseCode == HttpURLConnection.HTTP_MOVED_TEMP )
                 {
                     visitingUrl = urlConnection.getHeaderField( "Location" );
                     continue;
@@ -162,7 +172,16 @@ public class LightweightHttpWagon
         }
         catch ( IOException e )
         {
-            throw new TransferFailedException( "Error transferring file: " + e.getMessage(), e );
+            StringBuilder message = new StringBuilder( "Error transferring file: " );
+            message.append( e.getMessage() );
+            message.append( " from " + visitingUrl );
+            if ( getProxyInfo() != null && getProxyInfo().getHost() != null )
+            {
+                message.append( " with proxyInfo " ).append( getProxyInfo().toString() );
+                message.append( " , proxy sysprops current " + System.getProperty( HTTP_PROXY_HOST_SYSPROPS ) + "/"
+                                    + System.getProperty( HTTP_PROXY_PORT_SYSPROPS ) );
+            }
+            throw new TransferFailedException( message.toString(), e );
         }
     }
 
@@ -219,13 +238,14 @@ public class LightweightHttpWagon
                     throw new AuthorizationException( "Access denied to: " + buildUrl( resource.getName() ) );
 
                 case HttpURLConnection.HTTP_NOT_FOUND:
-                    throw new ResourceDoesNotExistException( "File: " + buildUrl( resource.getName() )
-                        + " does not exist" );
+                    throw new ResourceDoesNotExistException(
+                        "File: " + buildUrl( resource.getName() ) + " does not exist" );
 
                     // add more entries here
                 default:
-                    throw new TransferFailedException( "Failed to transfer file: " + buildUrl( resource.getName() )
-                        + ". Return code is: " + statusCode );
+                    throw new TransferFailedException(
+                        "Failed to transfer file: " + buildUrl( resource.getName() ) + ". Return code is: "
+                            + statusCode );
             }
         }
         catch ( IOException e )
@@ -239,21 +259,23 @@ public class LightweightHttpWagon
     protected void openConnectionInternal()
         throws ConnectionException, AuthenticationException
     {
-        previousHttpProxyHost = System.getProperty( "http.proxyHost" );
-        previousHttpProxyPort = System.getProperty( "http.proxyPort" );
-        previousProxyExclusions = System.getProperty( "http.nonProxyHosts" );
+
+        previousHttpProxyHost = System.getProperty( HTTP_PROXY_HOST_SYSPROPS );
+        previousHttpProxyPort = System.getProperty( HTTP_PROXY_PORT_SYSPROPS );
+        previousProxyExclusions = System.getProperty( HTTP_NON_PROXY_HOSTS_SYSPROPS );
 
         final ProxyInfo proxyInfo = getProxyInfo( "http", getRepository().getHost() );
         if ( proxyInfo != null )
         {
-            setSystemProperty( "http.proxyHost", proxyInfo.getHost() );
-            setSystemProperty( "http.proxyPort", String.valueOf( proxyInfo.getPort() ) );
-            setSystemProperty( "http.nonProxyHosts", proxyInfo.getNonProxyHosts() );
+            setSystemProperty( HTTP_PROXY_HOST_SYSPROPS, proxyInfo.getHost() );
+            setSystemProperty( HTTP_PROXY_PORT_SYSPROPS, String.valueOf( proxyInfo.getPort() ) );
+            setSystemProperty( HTTP_NON_PROXY_HOSTS_SYSPROPS, proxyInfo.getNonProxyHosts() );
+            System.out.println(" open connection with proxyInfo " + proxyInfo );
         }
         else
         {
-            setSystemProperty( "http.proxyHost", null );
-            setSystemProperty( "http.proxyPort", null );
+            setSystemProperty( HTTP_PROXY_HOST_SYSPROPS, null );
+            setSystemProperty( HTTP_PROXY_PORT_SYSPROPS, null );
         }
 
         final boolean hasProxy = ( proxyInfo != null && proxyInfo.getUserName() != null );
@@ -264,9 +286,7 @@ public class LightweightHttpWagon
             {
                 protected PasswordAuthentication getPasswordAuthentication()
                 {
-                    // TODO: ideally use getRequestorType() from JDK1.5 here...
-                    if ( hasProxy && getRequestingHost().equals( proxyInfo.getHost() )
-                        && getRequestingPort() == proxyInfo.getPort() )
+                    if ( getRequestorType() == RequestorType.PROXY )
                     {
                         String password = "";
                         if ( proxyInfo.getPassword() != null )
@@ -304,9 +324,9 @@ public class LightweightHttpWagon
             putConnection.disconnect();
         }
 
-        setSystemProperty( "http.proxyHost", previousHttpProxyHost );
-        setSystemProperty( "http.proxyPort", previousHttpProxyPort );
-        setSystemProperty( "http.nonProxyHosts", previousProxyExclusions );
+        setSystemProperty( HTTP_PROXY_HOST_SYSPROPS, previousHttpProxyHost );
+        setSystemProperty( HTTP_PROXY_PORT_SYSPROPS, previousHttpProxyPort );
+        setSystemProperty( HTTP_NON_PROXY_HOSTS_SYSPROPS, previousProxyExclusions );
     }
 
     public List getFileList( String destinationDirectory )
@@ -331,8 +351,8 @@ public class LightweightHttpWagon
 
         if ( is == null )
         {
-            throw new TransferFailedException( url + " - Could not open input stream for resource: '" + resource
-                                               + "'" );
+            throw new TransferFailedException(
+                url + " - Could not open input stream for resource: '" + resource + "'" );
         }
 
         return HtmlFileListParser.parseFileList( url, is );
@@ -370,8 +390,8 @@ public class LightweightHttpWagon
                     throw new AuthorizationException( "Access denied to: " + url );
 
                 default:
-                    throw new TransferFailedException( "Failed to look for file: " + buildUrl( resourceName )
-                        + ". Return code is: " + statusCode );
+                    throw new TransferFailedException(
+                        "Failed to look for file: " + buildUrl( resourceName ) + ". Return code is: " + statusCode );
             }
         }
         catch ( IOException e )
@@ -402,6 +422,7 @@ public class LightweightHttpWagon
 
     void setSystemProperty( String key, String value )
     {
+        //System.out.println(" set sys prop  " + key + "/" + value);
         if ( value != null )
         {
             System.setProperty( key, value );
