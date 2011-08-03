@@ -56,6 +56,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLDecoder;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -395,6 +396,11 @@ public abstract class HttpWagonTestCase
     private void runTestProxiedRequest( ProxyInfo proxyInfo, TestHeaderHandler handler )
         throws Exception
     {
+        // what an UGLY hack!
+        // but apparently jetty needs some time to free up resources
+        // <5s: broken test :(
+        Thread.sleep( 5001L );
+
         Server proxyServer = new Server( 0 );
 
         proxyServer.setHandler( handler );
@@ -409,7 +415,7 @@ public abstract class HttpWagonTestCase
 
         while ( !proxyServer.isRunning() || !proxyServer.isStarted() )
         {
-            Thread.sleep( 1 );
+            Thread.sleep( 10 );
         }
 
         try
@@ -930,7 +936,7 @@ public abstract class HttpWagonTestCase
     private static class TestHeaderHandler
         extends AbstractHandler
     {
-        private Map headers;
+        private Map headers = Collections.EMPTY_MAP;
 
         public TestHeaderHandler()
         {

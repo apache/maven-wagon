@@ -19,13 +19,15 @@ package org.apache.maven.wagon.repository;
  * under the License.
  */
 
+import java.io.Serializable;
+
 /**
  * Describes the permissions to set on files uploaded to the repository.
  *
  * @author Brett Porter
  * @version $Id$
  */
-public class RepositoryPermissions
+public class RepositoryPermissions implements Serializable
 {
     /**
      * Repository group name.
