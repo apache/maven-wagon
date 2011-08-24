@@ -217,11 +217,11 @@ public abstract class AbstractHttpClientWagon
     protected ClientConnectionManager clientConnectionManager = new SingleClientConnManager();
 
     // olamy make pool option disable by default remove ! to enable this by default
-    protected static boolean clientManagerSingle = !Boolean.getBoolean( "maven.wagon.httpconnectionManager.pool" );
+    protected static boolean useClientManagerSingle = !Boolean.getBoolean( "maven.wagon.httpconnectionManager.pool" );
 
     static
     {
-        if ( clientManagerSingle )
+        if ( useClientManagerSingle )
         {
             System.out.println( "http connection pool disabled in wagon http" );
         }
@@ -246,11 +246,21 @@ public abstract class AbstractHttpClientWagon
 
     protected ClientConnectionManager getConnectionManager()
     {
-        if (clientManagerSingle )
+        if ( useClientManagerSingle )
         {
            return clientConnectionManager;
         }
         return connectionManagerPooled;
+    }
+
+    public static void setConnectionManagerPooled( ClientConnectionManager clientConnectionManager )
+    {
+        connectionManagerPooled = clientConnectionManager;
+    }
+
+    public static void setUseNonPooledConnectionManager( boolean useNonPooledConnectionManager )
+    {
+        useClientManagerSingle = useNonPooledConnectionManager;
     }
 
     /**
@@ -326,7 +336,7 @@ public abstract class AbstractHttpClientWagon
 
     public void closeConnection()
     {
-        if ( clientManagerSingle )
+        if ( useClientManagerSingle )
         {
             getConnectionManager().shutdown();
         }
