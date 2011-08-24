@@ -30,7 +30,7 @@ under the License.
   <artifactId>wagon-http</artifactId>
   <name>Maven Wagon HTTP Provider</name>
   <description>
-    Wagon that gets and puts artifacts through http using Apache commons-httpclient
+    Wagon that gets and puts artifacts through http using Apache httpclient-4.x.
   </description>
 
   <properties>
