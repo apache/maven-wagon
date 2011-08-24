@@ -212,14 +212,22 @@ public abstract class AbstractHttpClientWagon
 
     private DefaultHttpClient client;
 
-    protected static ClientConnectionManager connectionManager = new SingleClientConnManager();
+    protected static ClientConnectionManager connectionManagerPooled;
 
-    protected static boolean useMultiThreaded = Boolean.getBoolean( "maven.wagon.http.connectionManager.multihreaded" );
+    protected ClientConnectionManager clientConnectionManager = new SingleClientConnManager();
+
+    // olamy make pool option disable by default remove ! to enable this by default
+    protected static boolean clientManagerSingle = !Boolean.getBoolean( "maven.wagon.httpconnectionManager.pool" );
 
     static
     {
-        if ( useMultiThreaded )
+        if ( clientManagerSingle )
         {
+            System.out.println( "http connection pool disabled in wagon http" );
+        }
+        else
+        {
+
             ThreadSafeClientConnManager threadSafeClientConnManager = new ThreadSafeClientConnManager();
             int maxPerRoute =
                 Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxPerRoute", "20" ) );
@@ -232,8 +240,17 @@ public abstract class AbstractHttpClientWagon
                                     + threadSafeClientConnManager.getDefaultMaxPerRoute() + ", max total "
                                     + threadSafeClientConnManager.getMaxTotal() );
 
-            connectionManager = threadSafeClientConnManager;
+            connectionManagerPooled = threadSafeClientConnManager;
         }
+    }
+
+    protected ClientConnectionManager getConnectionManager()
+    {
+        if (clientManagerSingle )
+        {
+           return clientConnectionManager;
+        }
+        return connectionManagerPooled;
     }
 
     /**
@@ -246,7 +263,7 @@ public abstract class AbstractHttpClientWagon
     public void openConnectionInternal()
     {
         repository.setUrl( getURL( repository ) );
-        client = new DefaultHttpClient( connectionManager );
+        client = new DefaultHttpClient( getConnectionManager() );
 
         // WAGON-273: default the cookie-policy to browser compatible
         client.getParams().setParameter( ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY );
@@ -309,9 +326,9 @@ public abstract class AbstractHttpClientWagon
 
     public void closeConnection()
     {
-        if ( !useMultiThreaded )
+        if ( clientManagerSingle )
         {
-            connectionManager.shutdown();
+            getConnectionManager().shutdown();
         }
     }
 

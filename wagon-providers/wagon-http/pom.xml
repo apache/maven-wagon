@@ -33,6 +33,12 @@ under the License.
     Wagon that gets and puts artifacts through http using Apache commons-httpclient
   </description>
 
+  <properties>
+    <!-- http connection -->
+    <http.pool>false</http.pool>
+  </properties>
+
+
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -101,7 +107,7 @@ under the License.
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <systemPropertyVariables>
-            <maven.wagon.http.connectionManager.multihreaded>true</maven.wagon.http.connectionManager.multihreaded>
+            <maven.wagon.httpconnectionManager.pool>${http.pool}</maven.wagon.httpconnectionManager.pool>
           </systemPropertyVariables>
         </configuration>
       </plugin>
