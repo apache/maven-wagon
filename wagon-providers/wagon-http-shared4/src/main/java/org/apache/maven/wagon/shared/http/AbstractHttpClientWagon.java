@@ -216,8 +216,8 @@ public abstract class AbstractHttpClientWagon
 
     protected ClientConnectionManager clientConnectionManager = new SingleClientConnManager();
 
-    // olamy make pool option disable by default remove ! to enable this by default
-    protected static boolean useClientManagerSingle = !Boolean.getBoolean( "maven.wagon.httpconnectionManager.pool" );
+    // olamy make pool option enable by default
+    protected static boolean useClientManagerSingle = Boolean.getBoolean( "maven.wagon.httpconnectionManager.notpooled" );
 
     static
     {
@@ -274,6 +274,7 @@ public abstract class AbstractHttpClientWagon
     {
         repository.setUrl( getURL( repository ) );
         client = new DefaultHttpClient( getConnectionManager() );
+        client.setr
 
         // WAGON-273: default the cookie-policy to browser compatible
         client.getParams().setParameter( ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY );

@@ -34,8 +34,8 @@ under the License.
   </description>
 
   <properties>
-    <!-- http connection -->
-    <http.pool>false</http.pool>
+    <!-- http pooled connection -->
+    <http.pool>true</http.pool>
   </properties>
 
 
@@ -112,7 +112,7 @@ under the License.
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <systemPropertyVariables>
-            <maven.wagon.httpconnectionManager.pool>${http.pool}</maven.wagon.httpconnectionManager.pool>
+            <maven.wagon.httpconnectionManager.notpooled>${http.pool}</maven.wagon.httpconnectionManager.notpooled>
           </systemPropertyVariables>
         </configuration>
       </plugin>
