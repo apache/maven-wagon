@@ -274,7 +274,7 @@ public abstract class AbstractHttpClientWagon
     {
         repository.setUrl( getURL( repository ) );
         client = new DefaultHttpClient( getConnectionManager() );
-        client.setr
+
 
         // WAGON-273: default the cookie-policy to browser compatible
         client.getParams().setParameter( ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY );
