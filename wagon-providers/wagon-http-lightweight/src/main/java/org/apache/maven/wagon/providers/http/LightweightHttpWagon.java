@@ -38,8 +38,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
+import java.net.Proxy;
+import java.net.Proxy.Type;
+import java.net.SocketAddress;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -58,13 +62,9 @@ import java.util.zip.GZIPInputStream;
 public class LightweightHttpWagon
     extends StreamWagon
 {
-    private String previousProxyExclusions;
-
-    private String previousHttpProxyHost;
-
-    private String previousHttpProxyPort;
-
     private HttpURLConnection putConnection;
+
+    private Proxy proxy = Proxy.NO_PROXY;
 
     public static final int MAX_REDIRECTS = 10;
 
@@ -79,13 +79,6 @@ public class LightweightHttpWagon
      * @plexus.configuration
      */
     private Properties httpHeaders;
-
-
-    private static final String HTTP_PROXY_HOST_SYSPROPS = "http.proxyHost";
-
-    private static final String HTTP_PROXY_PORT_SYSPROPS = "http.proxyPort";
-
-    private static final String HTTP_NON_PROXY_HOSTS_SYSPROPS = "http.nonProxyHosts";
 
     /**
      * Builds a complete URL string from the repository URL and the relative path passed.
@@ -126,7 +119,7 @@ public class LightweightHttpWagon
                 visitedUrls.add( visitingUrl );
 
                 URL url = new URL( visitingUrl );
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection( this.proxy );
                 urlConnection.setRequestProperty( "Accept-Encoding", "gzip" );
                 if ( !useCache )
                 {
@@ -178,8 +171,6 @@ public class LightweightHttpWagon
             if ( getProxyInfo() != null && getProxyInfo().getHost() != null )
             {
                 message.append( " with proxyInfo " ).append( getProxyInfo().toString() );
-                message.append( " , proxy sysprops current " + System.getProperty( HTTP_PROXY_HOST_SYSPROPS ) + "/"
-                                    + System.getProperty( HTTP_PROXY_PORT_SYSPROPS ) );
             }
             throw new TransferFailedException( message.toString(), e );
         }
@@ -204,7 +195,7 @@ public class LightweightHttpWagon
         try
         {
             URL url = new URL( buildUrl( resource.getName() ) );
-            putConnection = (HttpURLConnection) url.openConnection();
+            putConnection = (HttpURLConnection) url.openConnection( this.proxy );
 
             addHeaders( putConnection );
 
@@ -259,23 +250,10 @@ public class LightweightHttpWagon
     protected void openConnectionInternal()
         throws ConnectionException, AuthenticationException
     {
-
-        previousHttpProxyHost = System.getProperty( HTTP_PROXY_HOST_SYSPROPS );
-        previousHttpProxyPort = System.getProperty( HTTP_PROXY_PORT_SYSPROPS );
-        previousProxyExclusions = System.getProperty( HTTP_NON_PROXY_HOSTS_SYSPROPS );
-
         final ProxyInfo proxyInfo = getProxyInfo( "http", getRepository().getHost() );
         if ( proxyInfo != null )
         {
-            setSystemProperty( HTTP_PROXY_HOST_SYSPROPS, proxyInfo.getHost() );
-            setSystemProperty( HTTP_PROXY_PORT_SYSPROPS, String.valueOf( proxyInfo.getPort() ) );
-            setSystemProperty( HTTP_NON_PROXY_HOSTS_SYSPROPS, proxyInfo.getNonProxyHosts() );
-            System.out.println(" open connection with proxyInfo " + proxyInfo );
-        }
-        else
-        {
-            setSystemProperty( HTTP_PROXY_HOST_SYSPROPS, null );
-            setSystemProperty( HTTP_PROXY_PORT_SYSPROPS, null );
+            this.proxy = getProxy( proxyInfo );
         }
 
         final boolean hasProxy = ( proxyInfo != null && proxyInfo.getUserName() != null );
@@ -316,6 +294,24 @@ public class LightweightHttpWagon
         }
     }
 
+    private Proxy getProxy( ProxyInfo proxyInfo )
+    {
+        return new Proxy( getProxyType( proxyInfo ), getSocketAddress( proxyInfo ) );
+    }
+
+    private Type getProxyType( ProxyInfo proxyInfo ) {
+        if ( ProxyInfo.PROXY_SOCKS4.equals( proxyInfo.getType() ) || ProxyInfo.PROXY_SOCKS5.equals( proxyInfo.getType() ) )
+        {
+            return Type.SOCKS;
+        }
+        else return Type.HTTP;
+    }
+
+    public SocketAddress getSocketAddress( ProxyInfo proxyInfo )
+    {
+        return InetSocketAddress.createUnresolved(proxyInfo.getHost(), proxyInfo.getPort());
+    }
+
     public void closeConnection()
         throws ConnectionException
     {
@@ -323,10 +319,6 @@ public class LightweightHttpWagon
         {
             putConnection.disconnect();
         }
-
-        setSystemProperty( HTTP_PROXY_HOST_SYSPROPS, previousHttpProxyHost );
-        setSystemProperty( HTTP_PROXY_PORT_SYSPROPS, previousHttpProxyPort );
-        setSystemProperty( HTTP_NON_PROXY_HOSTS_SYSPROPS, previousProxyExclusions );
     }
 
     public List getFileList( String destinationDirectory )
@@ -366,7 +358,7 @@ public class LightweightHttpWagon
         try
         {
             URL url = new URL( buildUrl( new Resource( resourceName ).getName() ) );
-            headConnection = (HttpURLConnection) url.openConnection();
+            headConnection = (HttpURLConnection) url.openConnection( this.proxy );
 
             addHeaders( headConnection );
 
@@ -422,7 +414,6 @@ public class LightweightHttpWagon
 
     void setSystemProperty( String key, String value )
     {
-        //System.out.println(" set sys prop  " + key + "/" + value);
         if ( value != null )
         {
             System.setProperty( key, value );
