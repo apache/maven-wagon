@@ -36,7 +36,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
@@ -79,6 +78,11 @@ public class LightweightHttpWagon
      * @plexus.configuration
      */
     private Properties httpHeaders;
+
+    /** 
+     * @plexus.requirement 
+     */
+    private LightweightHttpWagonAuthenticator authenticator;
 
     /**
      * Builds a complete URL string from the repository URL and the relative path passed.
@@ -255,43 +259,35 @@ public class LightweightHttpWagon
         {
             this.proxy = getProxy( proxyInfo );
         }
+        authenticator.setWagon( this );
+    }
 
-        final boolean hasProxy = ( proxyInfo != null && proxyInfo.getUserName() != null );
-        final boolean hasAuthentication = ( authenticationInfo != null && authenticationInfo.getUserName() != null );
-        if ( hasProxy || hasAuthentication )
+    public PasswordAuthentication requestProxyAuthentication()
+    {
+        if ( proxyInfo != null && proxyInfo.getUserName() != null )
         {
-            Authenticator.setDefault( new Authenticator()
+            String password = "";
+            if ( proxyInfo.getPassword() != null )
             {
-                protected PasswordAuthentication getPasswordAuthentication()
-                {
-                    if ( getRequestorType() == RequestorType.PROXY )
-                    {
-                        String password = "";
-                        if ( proxyInfo.getPassword() != null )
-                        {
-                            password = proxyInfo.getPassword();
-                        }
-                        return new PasswordAuthentication( proxyInfo.getUserName(), password.toCharArray() );
-                    }
-
-                    if ( hasAuthentication )
-                    {
-                        String password = "";
-                        if ( authenticationInfo.getPassword() != null )
-                        {
-                            password = authenticationInfo.getPassword();
-                        }
-                        return new PasswordAuthentication( authenticationInfo.getUserName(), password.toCharArray() );
-                    }
-
-                    return super.getPasswordAuthentication();
-                }
-            } );
+                password = proxyInfo.getPassword();
+            }
+            return new PasswordAuthentication( proxyInfo.getUserName(), password.toCharArray() );
         }
-        else
+        return null;
+    }
+
+    public PasswordAuthentication requestServerAuthentication()
+    {
+        if ( authenticationInfo != null && authenticationInfo.getUserName() != null )
         {
-            Authenticator.setDefault( null );
+            String password = "";
+            if ( authenticationInfo.getPassword() != null )
+            {
+                password = authenticationInfo.getPassword();
+            }
+            return new PasswordAuthentication( authenticationInfo.getUserName(), password.toCharArray() );
         }
+        return null;
     }
 
     private Proxy getProxy( ProxyInfo proxyInfo )
@@ -319,6 +315,7 @@ public class LightweightHttpWagon
         {
             putConnection.disconnect();
         }
+        authenticator.resetWagon();
     }
 
     public List getFileList( String destinationDirectory )
@@ -423,5 +420,4 @@ public class LightweightHttpWagon
             System.getProperties().remove( key );
         }
     }
-
 }
