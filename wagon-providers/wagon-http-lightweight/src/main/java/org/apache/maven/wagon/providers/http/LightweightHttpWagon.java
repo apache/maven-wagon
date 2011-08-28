@@ -28,7 +28,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -46,6 +45,7 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.resource.Resource;
 import org.apache.maven.wagon.shared.http.HtmlFileListParser;
+import org.codehaus.plexus.util.Base64;
 
 /**
  * LightweightHttpWagon
@@ -57,6 +57,8 @@ import org.apache.maven.wagon.shared.http.HtmlFileListParser;
 public class LightweightHttpWagon
     extends StreamWagon
 {
+    private boolean preemptiveAuthentication;
+
     private String previousProxyExclusions;
 
     private String previousHttpProxyHost;
@@ -144,7 +146,7 @@ public class LightweightHttpWagon
         }
     }
 
-    private void addHeaders( URLConnection urlConnection )
+    private void addHeaders( HttpURLConnection urlConnection )
     {
         if ( httpHeaders != null )
         {
@@ -153,6 +155,17 @@ public class LightweightHttpWagon
                 String header = (String) i.next();
                 urlConnection.setRequestProperty( header, httpHeaders.getProperty( header ) );
             }
+        }
+        setAuthorization( urlConnection );
+    }
+
+    private void setAuthorization( HttpURLConnection urlConnection )
+    {
+        if ( preemptiveAuthentication && authenticationInfo != null && authenticationInfo.getUserName() != null )
+        {
+            String credentials = authenticationInfo.getUserName() + ":" + authenticationInfo.getPassword();
+            String encoded = new String( Base64.encodeBase64( credentials.getBytes() ) );
+            urlConnection.setRequestProperty( "Authorization", "Basic " + encoded );
         }
     }
 
@@ -233,6 +246,10 @@ public class LightweightHttpWagon
             setSystemProperty( "http.proxyHost", null );
             setSystemProperty( "http.proxyPort", null );
         }
+
+        setPreemptiveAuthentication(
+                Boolean.getBoolean( "maven.wagon.http.preemptiveAuthentication" )
+             || Boolean.parseBoolean( repository.getParameter( "preemptiveAuthentication" ) ) );
 
         final boolean hasProxy = ( proxyInfo != null && proxyInfo.getUserName() != null );
         final boolean hasAuthentication = ( authenticationInfo != null && authenticationInfo.getUserName() != null );
@@ -390,4 +407,8 @@ public class LightweightHttpWagon
         }
     }
 
+    public void setPreemptiveAuthentication( boolean preemptiveAuthentication )
+    {
+        this.preemptiveAuthentication |= preemptiveAuthentication;
+    }
 }
