@@ -31,6 +31,7 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.resource.Resource;
 import org.apache.maven.wagon.shared.http.HtmlFileListParser;
+import org.codehaus.plexus.util.Base64;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -45,11 +46,24 @@ import java.net.Proxy.Type;
 import java.net.SocketAddress;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.zip.GZIPInputStream;
+
+import org.apache.maven.wagon.ConnectionException;
+import org.apache.maven.wagon.InputData;
+import org.apache.maven.wagon.OutputData;
+import org.apache.maven.wagon.ResourceDoesNotExistException;
+import org.apache.maven.wagon.StreamWagon;
+import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.authentication.AuthenticationException;
+import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.events.TransferEvent;
+import org.apache.maven.wagon.proxy.ProxyInfo;
+import org.apache.maven.wagon.resource.Resource;
+import org.apache.maven.wagon.shared.http.HtmlFileListParser;
 
 /**
  * LightweightHttpWagon
@@ -61,6 +75,8 @@ import java.util.zip.GZIPInputStream;
 public class LightweightHttpWagon
     extends StreamWagon
 {
+    private boolean preemptiveAuthentication;
+
     private HttpURLConnection putConnection;
 
     private Proxy proxy = Proxy.NO_PROXY;
@@ -180,7 +196,7 @@ public class LightweightHttpWagon
         }
     }
 
-    private void addHeaders( URLConnection urlConnection )
+    private void addHeaders( HttpURLConnection urlConnection )
     {
         if ( httpHeaders != null )
         {
@@ -189,6 +205,17 @@ public class LightweightHttpWagon
                 String header = (String) i.next();
                 urlConnection.setRequestProperty( header, httpHeaders.getProperty( header ) );
             }
+        }
+        setAuthorization( urlConnection );
+    }
+
+    private void setAuthorization( HttpURLConnection urlConnection )
+    {
+        if ( preemptiveAuthentication && authenticationInfo != null && authenticationInfo.getUserName() != null )
+        {
+            String credentials = authenticationInfo.getUserName() + ":" + authenticationInfo.getPassword();
+            String encoded = new String( Base64.encodeBase64( credentials.getBytes() ) );
+            urlConnection.setRequestProperty( "Authorization", "Basic " + encoded );
         }
     }
 
@@ -259,7 +286,11 @@ public class LightweightHttpWagon
         {
             this.proxy = getProxy( proxyInfo );
         }
-        authenticator.setWagon( this );
+        authenticator.setWagon(this);
+
+        setPreemptiveAuthentication(
+                Boolean.getBoolean( "maven.wagon.http.preemptiveAuthentication" )
+             || Boolean.parseBoolean( repository.getParameter( "preemptiveAuthentication" ) ) );
     }
 
     public PasswordAuthentication requestProxyAuthentication()
@@ -419,5 +450,10 @@ public class LightweightHttpWagon
         {
             System.getProperties().remove( key );
         }
+    }
+
+    public void setPreemptiveAuthentication( boolean preemptiveAuthentication )
+    {
+        this.preemptiveAuthentication |= preemptiveAuthentication;
     }
 }
