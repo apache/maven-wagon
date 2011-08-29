@@ -34,37 +34,37 @@ under the License.
   </description>
 
   <properties>
-    <maven.scm.version>1.5</maven.scm.version>
+    <mavenScmVersion>1.5</mavenScmVersion>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.apache.maven.scm</groupId>
       <artifactId>maven-scm-api</artifactId>
-      <version>${maven.scm.version}</version>
+      <version>${mavenScmVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.scm</groupId>
       <artifactId>maven-scm-manager-plexus</artifactId>
-      <version>${maven.scm.version}</version>
+      <version>${mavenScmVersion}</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.scm</groupId>
       <artifactId>maven-scm-test</artifactId>
-      <version>${maven.scm.version}</version>
+      <version>${mavenScmVersion}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.scm</groupId>
       <artifactId>maven-scm-provider-cvsexe</artifactId>
-      <version>${maven.scm.version}</version>
+      <version>${mavenScmVersion}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.scm</groupId>
       <artifactId>maven-scm-provider-svnexe</artifactId>
-      <version>${maven.scm.version}</version>
+      <version>${mavenScmVersion}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
