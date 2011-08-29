@@ -231,7 +231,8 @@ public abstract class AbstractHttpClientWagon
     protected ClientConnectionManager clientConnectionManager = new SingleClientConnManager();
 
     /**
-     * olamy make pool option enable by default
+     * use http(s) connection pool mechanism.
+     * <b>enabled by default</b>
      *
      * @since 2.0
      */
@@ -239,17 +240,26 @@ public abstract class AbstractHttpClientWagon
         Boolean.valueOf( System.getProperty( "maven.wagon.http.pool", "true" ) );
 
     /**
+     * skip failure on certificate validity checks.
+     * <b>enabled by default</b>
+     *
      * @since 2.0
      */
     protected static boolean sslEasy = Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.easy", "true" ) );
 
     /**
+     * ssl hostname verifier is allow all by default. Disable this will use a browser compat hostname verifier
+     * <b>enabled by default</b>
+     *
      * @since 2.0
      */
     protected static boolean sslAllowAll =
         Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.allowall", "true" ) );
 
     /**
+     * if using sslEasy certificate date issues will be ignored
+     * <b>enabled by default</b>
+     *
      * @since 2.0
      */
     protected static boolean IGNORE_SSL_VALIDITY_DATES =
@@ -299,6 +309,7 @@ public abstract class AbstractHttpClientWagon
 
     /**
      * disable all host name verification
+     *
      * @since 2.0
      */
     private static class EasyHostNameVerifier
