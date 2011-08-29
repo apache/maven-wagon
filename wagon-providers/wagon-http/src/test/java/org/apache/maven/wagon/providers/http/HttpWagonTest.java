@@ -19,7 +19,9 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.maven.wagon.StreamingWagon;
+import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.http.HttpWagonTestCase;
 import org.apache.maven.wagon.shared.http.HttpConfiguration;
 import org.apache.maven.wagon.shared.http.HttpMethodConfiguration;
@@ -50,6 +52,14 @@ public class HttpWagonTest
         HttpMethodConfiguration methodConfiguration = new HttpMethodConfiguration();
         methodConfiguration.setHeaders( properties );
         config.setAll( methodConfiguration );
-        ((HttpWagon) wagon).setHttpConfiguration( config );
+        ( (HttpWagon) wagon ).setHttpConfiguration( config );
+    }
+
+    public void testDefaultPooledConnectionManager()
+        throws Exception
+    {
+        HttpWagon wagon = (HttpWagon) lookup( Wagon.class, "http" );
+        assertTrue( wagon.getConnectionManager() instanceof ThreadSafeClientConnManager );
+
     }
 }

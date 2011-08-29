@@ -112,7 +112,7 @@ under the License.
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <systemPropertyVariables>
-            <maven.wagon.httpconnectionManager.notpooled>${http.pool}</maven.wagon.httpconnectionManager.notpooled>
+            <maven.wagon.http.pool>${http.pool}</maven.wagon.http.pool>
           </systemPropertyVariables>
         </configuration>
       </plugin>

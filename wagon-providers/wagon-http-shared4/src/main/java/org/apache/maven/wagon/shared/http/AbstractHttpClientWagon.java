@@ -37,6 +37,10 @@ import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
@@ -60,6 +64,9 @@ import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -67,6 +74,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -212,16 +220,44 @@ public abstract class AbstractHttpClientWagon
 
     private DefaultHttpClient client;
 
+    /**
+     * @since 2.0
+     */
     protected static ClientConnectionManager connectionManagerPooled;
 
+    /**
+     * @since 2.0
+     */
     protected ClientConnectionManager clientConnectionManager = new SingleClientConnManager();
 
-    // olamy make pool option enable by default
-    protected static boolean useClientManagerSingle = Boolean.getBoolean( "maven.wagon.httpconnectionManager.notpooled" );
+    /**
+     * olamy make pool option enable by default
+     *
+     * @since 2.0
+     */
+    protected static boolean useClientManagerPooled =
+        Boolean.valueOf( System.getProperty( "maven.wagon.http.pool", "true" ) );
+
+    /**
+     * @since 2.0
+     */
+    protected static boolean sslEasy = Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.easy", "true" ) );
+
+    /**
+     * @since 2.0
+     */
+    protected static boolean sslAllowAll =
+        Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.allowall", "true" ) );
+
+    /**
+     * @since 2.0
+     */
+    protected static boolean IGNORE_SSL_VALIDITY_DATES =
+        Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.ignore.validity.dates", "true" ) );
 
     static
     {
-        if ( useClientManagerSingle )
+        if ( !useClientManagerPooled )
         {
             System.out.println( "http connection pool disabled in wagon http" );
         }
@@ -236,6 +272,23 @@ public abstract class AbstractHttpClientWagon
             threadSafeClientConnManager.setDefaultMaxPerRoute( maxPerRoute );
             threadSafeClientConnManager.setMaxTotal( maxTotal );
 
+            if ( sslEasy )
+            {
+                try
+                {
+                    SSLSocketFactory sslSocketFactory =
+                        new SSLSocketFactory( EasyX509TrustManager.createEasySSLContext(), sslAllowAll
+                            ? new EasyHostNameVerifier()
+                            : new BrowserCompatHostnameVerifier() );
+                    Scheme httpsScheme = new Scheme( "https", 443, sslSocketFactory );
+
+                    threadSafeClientConnManager.getSchemeRegistry().register( httpsScheme );
+                }
+                catch ( IOException e )
+                {
+                    throw new RuntimeException( "failed to init SSLSocket Factory " + e.getMessage(), e );
+                }
+            }
             System.out.println( " wagon http use multi threaded http connection manager maxPerRoute "
                                     + threadSafeClientConnManager.getDefaultMaxPerRoute() + ", max total "
                                     + threadSafeClientConnManager.getMaxTotal() );
@@ -244,11 +297,42 @@ public abstract class AbstractHttpClientWagon
         }
     }
 
-    protected ClientConnectionManager getConnectionManager()
+    /**
+     * disable all host name verification
+     * @since 2.0
+     */
+    private static class EasyHostNameVerifier
+        implements X509HostnameVerifier
     {
-        if ( useClientManagerSingle )
+        public void verify( String s, SSLSocket sslSocket )
+            throws IOException
         {
-           return clientConnectionManager;
+            //no op
+        }
+
+        public void verify( String s, X509Certificate x509Certificate )
+            throws SSLException
+        {
+            //no op
+        }
+
+        public void verify( String s, String[] strings, String[] strings1 )
+            throws SSLException
+        {
+            //no op
+        }
+
+        public boolean verify( String s, SSLSession sslSession )
+        {
+            return true;
+        }
+    }
+
+    public ClientConnectionManager getConnectionManager()
+    {
+        if ( !useClientManagerPooled )
+        {
+            return clientConnectionManager;
         }
         return connectionManagerPooled;
     }
@@ -258,9 +342,9 @@ public abstract class AbstractHttpClientWagon
         connectionManagerPooled = clientConnectionManager;
     }
 
-    public static void setUseNonPooledConnectionManager( boolean useNonPooledConnectionManager )
+    public static void setUseClientManagerPooled( boolean pooledClientManager )
     {
-        useClientManagerSingle = useNonPooledConnectionManager;
+        useClientManagerPooled = pooledClientManager;
     }
 
     /**
@@ -274,7 +358,6 @@ public abstract class AbstractHttpClientWagon
     {
         repository.setUrl( getURL( repository ) );
         client = new DefaultHttpClient( getConnectionManager() );
-
 
         // WAGON-273: default the cookie-policy to browser compatible
         client.getParams().setParameter( ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY );
@@ -337,7 +420,7 @@ public abstract class AbstractHttpClientWagon
 
     public void closeConnection()
     {
-        if ( useClientManagerSingle )
+        if ( !useClientManagerPooled )
         {
             getConnectionManager().shutdown();
         }
