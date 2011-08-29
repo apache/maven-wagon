@@ -10,7 +10,7 @@
 
   <artifactId>wagon-tck-http</artifactId>
   
-  <name>Wagon HTTP Test Compatibility Kit</name>
+  <name>Apache Maven Wagon :: HTTP Test Compatibility Kit</name>
 
   <dependencies>
     <dependency>

@@ -28,7 +28,7 @@ under the License.
   </parent>
 
   <artifactId>wagon-ssh-common-test</artifactId>
-  <name>Maven Wagon SSH Common Tests</name>
+  <name>Apache Maven Wagon :: Providers :: SSH Common Tests</name>
 
   <dependencies>
     <dependency>

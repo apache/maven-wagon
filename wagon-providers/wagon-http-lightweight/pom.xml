@@ -28,7 +28,7 @@ under the License.
   </parent>
 
   <artifactId>wagon-http-lightweight</artifactId>
-  <name>Maven Wagon Lightweight HTTP Provider</name>
+  <name>Apache Maven Wagon :: Providers :: Lightweight HTTP Provider</name>
   <description>
     Wagon that gets and puts artifacts through http using standard Java library
   </description>

@@ -28,7 +28,7 @@ under the License.
   </parent>
 
   <artifactId>wagon-provider-test</artifactId>
-  <name>Maven Wagon Provider Test</name>
+  <name>Apache Maven Wagon :: Provider Test</name>
   <description>Suite of tests for Wagon implementations</description>
 
   <dependencies>

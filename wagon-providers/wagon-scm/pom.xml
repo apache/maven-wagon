@@ -28,7 +28,7 @@ under the License.
   </parent>
 
   <artifactId>wagon-scm</artifactId>
-  <name>Maven Wagon SCM Provider</name>
+  <name>Apache Maven Wagon :: Providers :: SCM Provider</name>
   <description>
     Wagon that gets and puts artifacts using a Source Control Management system
   </description>

@@ -28,7 +28,7 @@ under the License.
   </parent>
 
   <artifactId>wagon-http-shared4</artifactId>
-  <name>Maven Wagon HTTP Shared Library 4</name>
+  <name>Apache Maven Wagon :: Providers :: HTTP Shared Library 4</name>
   <description>
     Shared Library for the wagon-http, and wagon-http-lightweight wagon
     providers based on httpclient-4.x.

@@ -28,7 +28,7 @@ under the License.
   </parent>
 
   <artifactId>wagon-ftp</artifactId>
-  <name>Maven Wagon FTP Provider</name>
+  <name>Apache Maven Wagon :: Providers :: FTP Provider</name>
   <description>
     Wagon that gets and puts artifacts from and to remote server using FTP protocol
   </description>

@@ -28,7 +28,7 @@ under the License.
   </parent>
 
   <artifactId>wagon-http</artifactId>
-  <name>Maven Wagon HTTP Provider</name>
+  <name>Apache Maven Wagon :: Providers :: HTTP Provider</name>
   <description>
     Wagon that gets and puts artifacts through http using Apache httpclient-4.x.
   </description>

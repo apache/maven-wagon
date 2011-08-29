@@ -29,7 +29,7 @@ under the License.
 
   <artifactId>wagon-providers</artifactId>
   <packaging>pom</packaging>
-  <name>Maven Wagon Providers</name>
+  <name>Apache Maven Wagon :: Providers</name>
 
   <modules>
     <module>wagon-file</module>

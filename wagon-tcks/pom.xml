@@ -29,7 +29,7 @@ under the License.
 
   <artifactId>wagon-tcks</artifactId>
   <packaging>pom</packaging>
-  <name>Maven Test Compatibility Kits</name>
+  <name>Apache Maven Wagon :: Test Compatibility Kits</name>
 
   <modules>
     <module>wagon-tck-http</module>

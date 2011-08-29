@@ -28,7 +28,7 @@ under the License.
   </parent>
 
   <artifactId>wagon-ssh</artifactId>
-  <name>Maven Wagon SSH Provider</name>
+  <name>Apache Maven Wagon :: Providers :: SSH Provider</name>
 
   <dependencies>
     <dependency>

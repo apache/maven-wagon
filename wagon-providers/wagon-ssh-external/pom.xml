@@ -28,7 +28,7 @@ under the License.
   </parent>
 
   <artifactId>wagon-ssh-external</artifactId>
-  <name>Maven Wagon SSH External Provider</name>
+  <name>Apache Maven Wagon :: Providers :: SSH External Provider</name>
   <description>
     Wagon that gets and puts artifacts using SSH protocol with a preinstalled SSH client
   </description>

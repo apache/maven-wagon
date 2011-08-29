@@ -28,7 +28,7 @@ under the License.
   </parent>
 
   <artifactId>wagon-provider-api</artifactId>
-  <name>Maven Wagon API</name>
+  <name>Apache Maven Wagon :: API</name>
   <description>Maven Wagon API that defines the contract between different Wagon implementations</description>
 
   <dependencies>

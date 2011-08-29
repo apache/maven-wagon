@@ -28,7 +28,7 @@ under the License.
   </parent>
 
   <artifactId>wagon-http-shared</artifactId>
-  <name>Maven Wagon HTTP Shared Library</name>
+  <name>Apache Maven Wagon :: Providers :: HTTP Shared Library</name>
   <description>
     Shared Library for the wagon-http, and wagon-http-lightweight wagon
     providers.

@@ -28,7 +28,7 @@ under the License.
   </parent>
 
   <artifactId>wagon-webdav-jackrabbit</artifactId>
-  <name>Maven Wagon WebDav Provider</name>
+  <name>Apache Maven Wagon :: Providers :: WebDav Provider</name>
   <description>
     Wagon that gets and puts artifacts through webdav protocol
   </description>

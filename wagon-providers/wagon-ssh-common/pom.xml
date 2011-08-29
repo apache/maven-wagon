@@ -28,7 +28,7 @@ under the License.
   </parent>
 
   <artifactId>wagon-ssh-common</artifactId>
-  <name>Maven Wagon SSH Common Library</name>
+  <name>Apache Maven Wagon :: Providers :: SSH Common Library</name>
 
   <dependencies>
     <dependency>

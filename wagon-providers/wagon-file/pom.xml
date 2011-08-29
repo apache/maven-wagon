@@ -28,7 +28,7 @@ under the License.
   </parent>
 
   <artifactId>wagon-file</artifactId>
-  <name>Maven Wagon File Provider</name>
+  <name>Apache Maven Wagon :: Providers :: File Provider</name>
   <description>
     Wagon that gets and puts artifacts using file system protocol
   </description>
