@@ -1,0 +1,111 @@
+ ------
+ Maven Wagon SCM
+ ------
+ Carlos Sanchez
+ ------
+ 2006-03-07
+ ------
+
+ ~~ Licensed to the Apache Software Foundation (ASF) under one
+ ~~ or more contributor license agreements.  See the NOTICE file
+ ~~ distributed with this work for additional information
+ ~~ regarding copyright ownership.  The ASF licenses this file
+ ~~ to you under the Apache License, Version 2.0 (the
+ ~~ "License"); you may not use this file except in compliance
+ ~~ with the License.  You may obtain a copy of the License at
+ ~~
+ ~~   http://www.apache.org/licenses/LICENSE-2.0
+ ~~
+ ~~ Unless required by applicable law or agreed to in writing,
+ ~~ software distributed under the License is distributed on an
+ ~~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ ~~ KIND, either express or implied.  See the License for the
+ ~~ specific language governing permissions and limitations
+ ~~ under the License.
+
+ ~~ NOTE: For help with the syntax of this file, see:
+ ~~ http://maven.apache.org/doxia/references/apt-format.html
+
+Maven Wagon SCM Usage
+
+ You need to add some extensions
+ (wagon-scm, maven-scm-manager-plexus and the maven-scm-provider for your SCM system, see examples below)
+ to your pom and use URLs in the
+ {{{http://maven.apache.org/scm/scm-url-format.html}SCM format}}.
+
+
+Deploying your Maven site to Subversion
+
+ Add the following extensions to your pom and use a wagon-scm url in the distributionManagement site url.
+
+------
+  <build>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-scm</artifactId>
+        <version>${project.version}</version>
+      </extension>
+      <extension>
+        <groupId>org.apache.maven.scm</groupId>
+        <artifactId>maven-scm-manager-plexus</artifactId>
+        <version>${mavenScmVersion}</version>
+      </extension>
+      <extension>
+        <groupId>org.apache.maven.scm</groupId>
+        <artifactId>maven-scm-provider-svnexe</artifactId>
+        <version>${mavenScmVersion}</version>
+      </extension>
+    </extensions>
+  </build>
+  <distributionManagement>
+    <site>
+      <id>my.svn.server</id>
+      <url>scm:svn:https://username@svn.apache.org/svn/root/module</url>
+    </site>
+  </distributionManagement>
+------
+
+
+Deploying your Maven site to CVS
+
+ Same as before, but changing svnexe to cvsexe and using a CVS svn url.
+
+------
+  <build>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-scm</artifactId>
+        <version>${project.version}</version>
+      </extension>
+      <extension>
+        <groupId>org.apache.maven.scm</groupId>
+        <artifactId>maven-scm-manager-plexus</artifactId>
+        <version>${mavenScmVersion}</version>
+      </extension>
+      <extension>
+        <groupId>org.apache.maven.scm</groupId>
+        <artifactId>maven-scm-provider-cvsexe</artifactId>
+        <version>${mavenScmVersion}</version>
+      </extension>
+    </extensions>
+  </build>
+  <distributionManagement>
+    <site>
+      <id>my.cvs.server</id>
+      <url>scm:cvs:ext:username@cvs.apache.org:/cvs/root:module</url>
+    </site>
+  </distributionManagement>
+------
+
+
+
+Using a Subversion based remote repository in Maven 2
+
+ Not tested yet
+
+
+Using a CVS based remote repository in Maven 2
+
+ Not tested yet
