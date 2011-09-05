@@ -100,49 +100,65 @@ public class LightweightHttpWagon
     public void fillInputData( InputData inputData )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        Resource resource = inputData.getResource();
-        try
+        synchronized ( LightweightHttpWagon.class )
         {
-            URL url = new URL( buildUrl( resource.getName() ) );
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestProperty( "Accept-Encoding", "gzip" );
-            if ( !useCache )
+            try
             {
-                urlConnection.setRequestProperty( "Pragma", "no-cache" );
+                Resource resource = inputData.getResource();
+                URL url = new URL( buildUrl( resource.getName() ) );
+                prepareOpenConnection();
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestProperty( "Accept-Encoding", "gzip" );
+                if ( !useCache )
+                {
+                    urlConnection.setRequestProperty( "Pragma", "no-cache" );
+                }
+
+                addHeaders( urlConnection );
+
+                // TODO: handle all response codes
+                int responseCode = urlConnection.getResponseCode();
+                if ( responseCode == HttpURLConnection.HTTP_FORBIDDEN
+                        || responseCode == HttpURLConnection.HTTP_UNAUTHORIZED )
+                {
+                    throw new AuthorizationException( "Access denied to: " + buildUrl( resource.getName() ) );
+                }
+
+                InputStream is = urlConnection.getInputStream();
+                String contentEncoding = urlConnection.getHeaderField( "Content-Encoding" );
+                boolean isGZipped = contentEncoding == null ? false : "gzip".equalsIgnoreCase( contentEncoding );
+                if ( isGZipped )
+                {
+                    is = new GZIPInputStream( is );
+                }
+                inputData.setInputStream( is );
+                resource.setLastModified( urlConnection.getLastModified() );
+                resource.setContentLength( urlConnection.getContentLength() );
             }
-
-            addHeaders( urlConnection );
-
-            // TODO: handle all response codes
-            int responseCode = urlConnection.getResponseCode();
-            if ( responseCode == HttpURLConnection.HTTP_FORBIDDEN
-                || responseCode == HttpURLConnection.HTTP_UNAUTHORIZED )
+            catch ( MalformedURLException e )
             {
-                throw new AuthorizationException( "Access denied to: " + buildUrl( resource.getName() ) );
+                throw new ResourceDoesNotExistException( "Invalid repository URL: " + e.getMessage(), e );
             }
-
-            InputStream is = urlConnection.getInputStream();
-            String contentEncoding = urlConnection.getHeaderField( "Content-Encoding" );
-            boolean isGZipped = contentEncoding == null ? false : "gzip".equalsIgnoreCase( contentEncoding );
-            if ( isGZipped )
+            catch ( FileNotFoundException e )
             {
-                is = new GZIPInputStream( is );
+                throw new ResourceDoesNotExistException( "Unable to locate resource in repository", e );
             }
-            inputData.setInputStream( is );
-            resource.setLastModified( urlConnection.getLastModified() );
-            resource.setContentLength( urlConnection.getContentLength() );
-        }
-        catch ( MalformedURLException e )
-        {
-            throw new ResourceDoesNotExistException( "Invalid repository URL: " + e.getMessage(), e );
-        }
-        catch ( FileNotFoundException e )
-        {
-            throw new ResourceDoesNotExistException( "Unable to locate resource in repository", e );
-        }
-        catch ( IOException e )
-        {
-            throw new TransferFailedException( "Error transferring file: " + e.getMessage(), e );
+            catch ( IOException e )
+            {
+                throw new TransferFailedException( "Error transferring file: " + e.getMessage(), e );
+            }
+            catch (ConnectionException e)
+            {
+                throw new TransferFailedException( "Error transferring file: " + e.getMessage(), e );
+            }
+            catch (AuthenticationException e)
+            {
+                throw new TransferFailedException( "Error transferring file: " + e.getMessage(), e );
+            }
+            finally
+            {
+                cleanupAfterOpenConnection();
+            }
         }
     }
 
@@ -172,21 +188,37 @@ public class LightweightHttpWagon
     public void fillOutputData( OutputData outputData )
         throws TransferFailedException
     {
-        Resource resource = outputData.getResource();
-        try
+        synchronized ( LightweightHttpWagon.class )
         {
-            URL url = new URL( buildUrl( resource.getName() ) );
-            putConnection = (HttpURLConnection) url.openConnection();
+            try
+            {
+                Resource resource = outputData.getResource();
+                URL url = new URL( buildUrl( resource.getName() ) );
+                prepareOpenConnection();
+                putConnection = (HttpURLConnection) url.openConnection();
 
-            addHeaders( putConnection );
+                addHeaders( putConnection );
 
-            putConnection.setRequestMethod( "PUT" );
-            putConnection.setDoOutput( true );
-            outputData.setOutputStream( putConnection.getOutputStream() );
-        }
-        catch ( IOException e )
-        {
-            throw new TransferFailedException( "Error transferring file: " + e.getMessage(), e );
+                putConnection.setRequestMethod( "PUT" );
+                putConnection.setDoOutput( true );
+                outputData.setOutputStream( putConnection.getOutputStream() );
+            }
+            catch ( IOException e )
+            {
+                throw new TransferFailedException( "Error transferring file: " + e.getMessage(), e );
+            }
+            catch (ConnectionException e)
+            {
+                throw new TransferFailedException( "Error transferring file: " + e.getMessage(), e );
+            }
+            catch (AuthenticationException e)
+            {
+                throw new TransferFailedException( "Error transferring file: " + e.getMessage(), e );
+            } finally
+            {
+                cleanupAfterOpenConnection();
+            }
+
         }
     }
 
@@ -228,6 +260,15 @@ public class LightweightHttpWagon
     }
 
     protected void openConnectionInternal()
+        throws ConnectionException, AuthenticationException
+    {
+    }
+
+    /**
+     * Prepare a call to URL.openConnection.
+     * This method requires a exclusive access to the JVM
+     */
+    private final void prepareOpenConnection()
         throws ConnectionException, AuthenticationException
     {
         previousHttpProxyHost = System.getProperty( "http.proxyHost" );
@@ -291,6 +332,13 @@ public class LightweightHttpWagon
         }
     }
 
+    private final void cleanupAfterOpenConnection()
+    {
+        setSystemProperty( "http.proxyHost", previousHttpProxyHost );
+        setSystemProperty( "http.proxyPort", previousHttpProxyPort );
+        setSystemProperty( "http.nonProxyHosts", previousProxyExclusions );
+    }
+
     public void closeConnection()
         throws ConnectionException
     {
@@ -298,10 +346,6 @@ public class LightweightHttpWagon
         {
             putConnection.disconnect();
         }
-
-        setSystemProperty( "http.proxyHost", previousHttpProxyHost );
-        setSystemProperty( "http.proxyPort", previousHttpProxyPort );
-        setSystemProperty( "http.nonProxyHosts", previousProxyExclusions );
     }
 
     public List getFileList( String destinationDirectory )
@@ -336,42 +380,58 @@ public class LightweightHttpWagon
     public boolean resourceExists( String resourceName )
         throws TransferFailedException, AuthorizationException
     {
-        HttpURLConnection headConnection;
-
-        try
+        synchronized ( LightweightHttpWagon.class )
         {
-            URL url = new URL( buildUrl( new Resource( resourceName ).getName() ) );
-            headConnection = (HttpURLConnection) url.openConnection();
-
-            addHeaders( headConnection );
-
-            headConnection.setRequestMethod( "HEAD" );
-            headConnection.setDoOutput( true );
-
-            int statusCode = headConnection.getResponseCode();
-
-            switch ( statusCode )
+            try
             {
-                case HttpURLConnection.HTTP_OK:
-                    return true;
+                HttpURLConnection headConnection;
+                String s = buildUrl(new Resource(resourceName).getName());
+                URL url = new URL(s);
+                prepareOpenConnection();
+                headConnection = (HttpURLConnection) url.openConnection();
 
-                case HttpURLConnection.HTTP_FORBIDDEN:
-                    throw new AuthorizationException( "Access denied to: " + url );
+                addHeaders( headConnection );
 
-                case HttpURLConnection.HTTP_NOT_FOUND:
-                    return false;
+                headConnection.setRequestMethod( "HEAD" );
+                headConnection.setDoOutput( true );
 
-                case HttpURLConnection.HTTP_UNAUTHORIZED:
-                    throw new AuthorizationException( "Access denied to: " + url );
+                int statusCode = headConnection.getResponseCode();
 
-                default:
-                    throw new TransferFailedException( "Failed to look for file: " + buildUrl( resourceName )
-                        + ". Return code is: " + statusCode );
+                switch ( statusCode )
+                {
+                    case HttpURLConnection.HTTP_OK:
+                        return true;
+
+                    case HttpURLConnection.HTTP_FORBIDDEN:
+                        throw new AuthorizationException( "Access denied to: " + url );
+
+                    case HttpURLConnection.HTTP_NOT_FOUND:
+                        return false;
+
+                    case HttpURLConnection.HTTP_UNAUTHORIZED:
+                        throw new AuthorizationException( "Access denied to: " + url );
+
+                    default:
+                        throw new TransferFailedException( "Failed to look for file: " + buildUrl( resourceName )
+                            + ". Return code is: " + statusCode );
+                }
             }
-        }
-        catch ( IOException e )
-        {
-            throw new TransferFailedException( "Error transferring file: " + e.getMessage(), e );
+            catch ( IOException e )
+            {
+                throw new TransferFailedException( "Error transferring file: " + e.getMessage(), e );
+            }
+            catch (ConnectionException e)
+            {
+                throw new TransferFailedException( "Error transferring file: " + e.getMessage(), e );
+            }
+            catch (AuthenticationException e)
+            {
+                throw new TransferFailedException( "Error transferring file: " + e.getMessage(), e );
+            }
+            finally
+            {
+                cleanupAfterOpenConnection();
+            }
         }
     }
 

@@ -26,6 +26,7 @@ import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.http.HttpWagonTestCase;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
+import org.mortbay.jetty.Server;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -57,59 +58,57 @@ public class LightweightHttpWagonTest
         proxyInfo.setHost( "proxyhost" );
         proxyInfo.setPort( 1234 );
         proxyInfo.setNonProxyHosts( "non" );
-
-        Repository repository = new Repository();
+        Server server = new Server( 0 );
+        addConnectors( server );
+        server.start();
 
         String proxyHost = System.getProperty( "http.proxyHost" );
         String proxyPort = System.getProperty( "http.proxyPort" );
         String nonProxyHosts = System.getProperty( "http.nonProxyHosts" );
+        try
+        {
+            Repository repository = new Repository( "test", getRepositoryUrl( server ) );
 
-        System.getProperties().remove( "http.proxyHost" );
-        System.getProperties().remove( "http.proxyPort" );
+            System.getProperties().remove( "http.proxyHost" );
+            System.getProperties().remove( "http.proxyPort" );
 
-        Wagon wagon = getWagon();
+            Wagon wagon = getWagon();
 
-        wagon.connect( repository, proxyInfo );
+            wagon.connect( repository, proxyInfo );
+            wagon.resourceExists( "/test"  );
+            wagon.disconnect();
 
-        assertEquals( "proxyhost", System.getProperty( "http.proxyHost" ) );
-        assertEquals( "1234", System.getProperty( "http.proxyPort" ) );
-        assertEquals( "non", System.getProperty( "http.nonProxyHosts" ) );
+            assertNull( System.getProperty( "http.proxyHost" ) );
+            assertNull( System.getProperty( "http.proxyPort" ) );
 
-        wagon.disconnect();
+            System.setProperty( "http.proxyHost", "host" );
+            System.setProperty( "http.proxyPort", "port" );
+            System.setProperty( "http.nonProxyHosts", "hosts" );
 
-        assertNull( System.getProperty( "http.proxyHost" ) );
-        assertNull( System.getProperty( "http.proxyPort" ) );
+            wagon = getWagon();
 
-        System.setProperty( "http.proxyHost", "host" );
-        System.setProperty( "http.proxyPort", "port" );
-        System.setProperty( "http.nonProxyHosts", "hosts" );
+            wagon.connect( repository, proxyInfo );
+            wagon.resourceExists( "/test"  );
+            wagon.disconnect();
 
-        wagon = getWagon();
+            assertEquals( "host", System.getProperty( "http.proxyHost" ) );
+            assertEquals( "port", System.getProperty( "http.proxyPort" ) );
+            assertEquals( "hosts", System.getProperty( "http.nonProxyHosts" ) );
 
-        wagon.connect( repository, proxyInfo );
+            wagon = getWagon();
 
-        assertEquals( "proxyhost", System.getProperty( "http.proxyHost" ) );
-        assertEquals( "1234", System.getProperty( "http.proxyPort" ) );
-        assertEquals( "non", System.getProperty( "http.nonProxyHosts" ) );
+            wagon.connect( repository );
+            wagon.resourceExists( "/test"  );
+            wagon.disconnect();
 
-        wagon.disconnect();
-
-        assertEquals( "host", System.getProperty( "http.proxyHost" ) );
-        assertEquals( "port", System.getProperty( "http.proxyPort" ) );
-        assertEquals( "hosts", System.getProperty( "http.nonProxyHosts" ) );
-
-        wagon = getWagon();
-
-        wagon.connect( repository );
-
-        assertNull( System.getProperty( "http.proxyHost" ) );
-        assertNull( System.getProperty( "http.proxyPort" ) );
-
-        wagon.disconnect();
-
-        assertEquals( "host", System.getProperty( "http.proxyHost" ) );
-        assertEquals( "port", System.getProperty( "http.proxyPort" ) );
-        assertEquals( "hosts", System.getProperty( "http.nonProxyHosts" ) );
+            assertEquals( "host", System.getProperty( "http.proxyHost" ) );
+            assertEquals( "port", System.getProperty( "http.proxyPort" ) );
+            assertEquals( "hosts", System.getProperty( "http.nonProxyHosts" ) );
+        }
+        finally
+        {
+            server.stop();
+        }
 
         if ( proxyHost != null )
         {
