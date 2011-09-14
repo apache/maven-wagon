@@ -19,6 +19,16 @@ package org.apache.maven.wagon.shared.http;
  * under the License.
  */
 
+import org.apache.maven.wagon.TransferFailedException;
+import org.apache.xerces.xni.Augmentations;
+import org.apache.xerces.xni.QName;
+import org.apache.xerces.xni.XMLAttributes;
+import org.apache.xerces.xni.parser.XMLInputSource;
+import org.apache.xerces.xni.parser.XMLParserConfiguration;
+import org.codehaus.plexus.util.StringUtils;
+import org.cyberneko.html.HTMLConfiguration;
+import org.cyberneko.html.filters.DefaultFilter;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -31,16 +41,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.apache.maven.wagon.TransferFailedException;
-import org.apache.xerces.xni.Augmentations;
-import org.apache.xerces.xni.QName;
-import org.apache.xerces.xni.XMLAttributes;
-import org.apache.xerces.xni.parser.XMLInputSource;
-import org.apache.xerces.xni.parser.XMLParserConfiguration;
-import org.codehaus.plexus.util.StringUtils;
-import org.cyberneko.html.HTMLConfiguration;
-import org.cyberneko.html.filters.DefaultFilter;
-
 /**
  * Html File List Parser.
  */
@@ -48,12 +48,11 @@ public class HtmlFileListParser
 {
     /**
      * Fetches a raw HTML from a provided InputStream, parses it, and returns the file list.
-     * 
-     * @param is the input stream.
+     *
      * @return the file list.
      * @throws TransferFailedException if there was a problem fetching the raw html.
      */
-    public static List/* <String> */parseFileList( String baseurl, InputStream stream )
+    public static List<String> parseFileList( String baseurl, InputStream stream )
         throws TransferFailedException
     {
         try
@@ -70,7 +69,7 @@ public class HtmlFileListParser
             parser.setProperty( "http://cyberneko.org/html/properties/names/attrs", "upper" );
             parser.parse( new XMLInputSource( null, baseurl, baseURI.toString(), stream, "UTF-8" ) );
 
-            return new ArrayList( handler.getLinks() );
+            return new ArrayList<String>( handler.getLinks() );
 
         }
         catch ( URISyntaxException e )
@@ -99,9 +98,9 @@ public class HtmlFileListParser
         private static final Pattern MAILTO_URLS = Pattern.compile( "mailto:.*" );
 
         private static final Pattern[] SKIPS =
-            new Pattern[] { APACHE_INDEX_SKIP, URLS_WITH_PATHS, URLS_TO_PARENT, MAILTO_URLS };
-        
-        private Set links = new HashSet();
+            new Pattern[]{ APACHE_INDEX_SKIP, URLS_WITH_PATHS, URLS_TO_PARENT, MAILTO_URLS };
+
+        private Set<String> links = new HashSet<String>();
 
         private URI baseURI;
 
@@ -110,7 +109,7 @@ public class HtmlFileListParser
             this.baseURI = baseURI.normalize();
         }
 
-        public Set getLinks()
+        public Set<String> getLinks()
         {
             return links;
         }

@@ -19,6 +19,14 @@ package org.apache.maven.wagon.shared.http;
  * under the License.
  */
 
+import org.apache.commons.io.IOUtils;
+import org.apache.maven.wagon.TransferFailedException;
+import org.codehaus.plexus.util.StringUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -30,14 +38,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.maven.wagon.TransferFailedException;
-import org.codehaus.plexus.util.StringUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 /**
  * Html File List Parser.
@@ -56,12 +56,12 @@ public class HtmlFileListParser
     // mailto urls
     private static final Pattern MAILTO_URLS = Pattern.compile( "mailto:.*" );
 
-    private static final Pattern[] SKIPS = new Pattern[] { APACHE_INDEX_SKIP, URLS_WITH_PATHS, URLS_TO_PARENT,
-        MAILTO_URLS };
+    private static final Pattern[] SKIPS =
+        new Pattern[]{ APACHE_INDEX_SKIP, URLS_WITH_PATHS, URLS_TO_PARENT, MAILTO_URLS };
 
     /**
      * Fetches a raw HTML from a provided InputStream, parses it, and returns the file list.
-     * 
+     *
      * @param stream the input stream.
      * @return the file list.
      * @throws TransferFailedException if there was a problem fetching the raw html.
@@ -85,10 +85,10 @@ public class HtmlFileListParser
                  * The abs:href loses directories, so we deal with absolute paths ourselves below in cleanLink
                  */
                 String target = link.attr( "href" );
-                if ( target != null)
+                if ( target != null )
                 {
                     String clean = cleanLink( baseURI, target );
-                    if ( isAcceptableLink( clean )) 
+                    if ( isAcceptableLink( clean ) )
                     {
                         results.add( clean );
                     }
@@ -96,7 +96,7 @@ public class HtmlFileListParser
 
             }
 
-            return new ArrayList<String>(results);
+            return new ArrayList<String>( results );
         }
         catch ( URISyntaxException e )
         {
@@ -120,9 +120,9 @@ public class HtmlFileListParser
         try
         {
             URI linkuri = new URI( ret );
-            if ( link.startsWith( "/" )) 
+            if ( link.startsWith( "/" ) )
             {
-                linkuri =  baseURI.resolve( linkuri );
+                linkuri = baseURI.resolve( linkuri );
             }
             URI relativeURI = baseURI.relativize( linkuri ).normalize();
             ret = relativeURI.toASCIIString();
