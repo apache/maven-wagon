@@ -66,7 +66,7 @@ public class HtmlFileListParser
      * @return the file list.
      * @throws TransferFailedException if there was a problem fetching the raw html.
      */
-    public static List/* <String> */parseFileList( String baseurl, InputStream stream )
+    public static List<String> parseFileList( String baseurl, InputStream stream )
         throws TransferFailedException
     {
         try
@@ -77,7 +77,7 @@ public class HtmlFileListParser
             String content = IOUtils.toString( stream, "utf-8" );
             Document doc = Jsoup.parse( content, baseurl );
             Elements links = doc.getElementsByTag( "a" );
-            Set results = new HashSet();
+            Set<String> results = new HashSet<String>();
             for ( int lx = 0; lx < links.size(); lx++ )
             {
                 Element link = links.get( lx );
@@ -96,9 +96,7 @@ public class HtmlFileListParser
 
             }
 
-            ArrayList resultsAsList = new ArrayList();
-            resultsAsList.addAll( results );
-            return resultsAsList;
+            return new ArrayList<String>(results);
         }
         catch ( URISyntaxException e )
         {

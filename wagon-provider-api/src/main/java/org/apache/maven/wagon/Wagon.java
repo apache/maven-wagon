@@ -128,7 +128,7 @@ public interface Wagon
      * @throws ResourceDoesNotExistException if destinationDirectory does not exist or is not a directory
      * @throws AuthorizationException        if not authorized to list the contents of the directory
      */
-    List getFileList( String destinationDirectory )
+    List<String> getFileList( String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
 
     /**

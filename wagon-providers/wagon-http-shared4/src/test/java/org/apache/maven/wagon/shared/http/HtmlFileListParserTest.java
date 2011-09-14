@@ -67,7 +67,7 @@ public class HtmlFileListParserTest
         throws TransferFailedException
     {
         InputStream is = this.getClass().getResourceAsStream( "/filelistings/" + filename );
-        List files = HtmlFileListParser.parseFileList( url, is );
+        List<String> files = HtmlFileListParser.parseFileList( url, is );
 
         assertNotNull( "file list should not be null.", files );
         assertFalse( "file list should not be empty.", files.isEmpty() );

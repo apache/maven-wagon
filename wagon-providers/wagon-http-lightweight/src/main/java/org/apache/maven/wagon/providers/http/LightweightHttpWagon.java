@@ -349,7 +349,7 @@ public class LightweightHttpWagon
         authenticator.resetWagon();
     }
 
-    public List getFileList( String destinationDirectory )
+    public List<String> getFileList( String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         InputData inputData = new InputData();

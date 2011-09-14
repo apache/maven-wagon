@@ -40,7 +40,7 @@ import org.apache.maven.wagon.shared.http.HtmlFileListParser;
 public class HttpWagon
     extends AbstractHttpClientWagon
 { 
-    public List getFileList( String destinationDirectory )
+    public List<String> getFileList( String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException 
     {
         if ( destinationDirectory.length() > 0 && !destinationDirectory.endsWith( "/" ) )
