@@ -624,7 +624,7 @@ public class ScmWagon
      * @return a List&lt;String&gt; with filenames/directories at the resourcepath.
      * @see org.apache.maven.wagon.AbstractWagon#getFileList(java.lang.String)
      */
-    public List getFileList( String resourcePath )
+    public List<String> getFileList( String resourcePath )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         try
@@ -642,12 +642,11 @@ public class ScmWagon
                 throw new ResourceDoesNotExistException( result.getProviderMessage() );
             }
 
-            // List<String>
-            List files = new ArrayList();
+            List<String> files = new ArrayList<String>();
 
-            for ( Iterator it = result.getFiles().iterator(); it.hasNext(); )
+            for ( Iterator<ScmFile> it = result.getFiles().iterator(); it.hasNext(); )
             {
-                ScmFile f = (ScmFile) it.next();
+                ScmFile f = it.next();
                 files.add( f.getPath() );
             }
 

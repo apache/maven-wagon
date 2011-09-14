@@ -457,7 +457,7 @@ public class ScpExternalWagon
     // method on a Wagon.
     //
 
-    public List getFileList( String destinationDirectory )
+    public List<String> getFileList( String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         return sshTool.getFileList( destinationDirectory, repository );

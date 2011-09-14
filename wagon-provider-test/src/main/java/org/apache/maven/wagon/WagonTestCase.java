@@ -747,7 +747,7 @@ public abstract class WagonTestCase
 
         wagon.connect( testRepository, getAuthInfo() );
 
-        List list = wagon.getFileList( dirName );
+        List<String> list = wagon.getFileList( dirName );
         assertNotNull( "file list should not be null.", list );
         assertTrue( "file list should contain more items (actually contains '" + list + "').",
                     list.size() >= filenames.length );

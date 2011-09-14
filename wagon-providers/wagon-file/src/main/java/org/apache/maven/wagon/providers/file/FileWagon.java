@@ -220,7 +220,7 @@ public class FileWagon
         return path;
     }
 
-    public List getFileList( String destinationDirectory )
+    public List<String> getFileList( String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         if ( getRepository().getBasedir() == null )
@@ -242,7 +242,7 @@ public class FileWagon
 
         File[] files = path.listFiles();
 
-        List list = new ArrayList( files.length );
+        List<String> list = new ArrayList<String>( files.length );
         for ( int i = 0; i < files.length; i++ )
         {
             String name = files[i].getName();

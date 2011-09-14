@@ -49,10 +49,10 @@ public class LSParser
      * @return the list of files found.
      * @throws TransferFailedException
      */
-    public List parseFiles( String rawLS )
+    public List<String> parseFiles( String rawLS )
         throws TransferFailedException
     {
-        List ret = new ArrayList();
+        List<String> ret = new ArrayList<String>();
         try
         {
             BufferedReader br = new BufferedReader( new StringReader( rawLS ) );

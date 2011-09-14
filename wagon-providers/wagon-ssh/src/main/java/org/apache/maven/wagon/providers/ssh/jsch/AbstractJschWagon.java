@@ -348,7 +348,7 @@ public abstract class AbstractJschWagon
         throw new TransferFailedException( msg, e );
     }
 
-    public List getFileList( String destinationDirectory )
+    public List<String> getFileList( String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         return sshTool.getFileList( destinationDirectory, repository );

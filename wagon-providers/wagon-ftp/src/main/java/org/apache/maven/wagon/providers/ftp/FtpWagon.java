@@ -423,7 +423,7 @@ public class FtpWagon
         super.fireSessionDebug( msg );
     }
 
-    public List getFileList( String destinationDirectory )
+    public List<String> getFileList( String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         Resource resource = new Resource( destinationDirectory );
@@ -440,7 +440,7 @@ public class FtpWagon
                 throw new ResourceDoesNotExistException( "Could not find file: '" + resource + "'" );
             }
             
-            List ret = new ArrayList();
+            List<String> ret = new ArrayList<String>();
             for( int i=0; i < ftpFiles.length; i++ )
             {
                 String name = ftpFiles[i].getName();

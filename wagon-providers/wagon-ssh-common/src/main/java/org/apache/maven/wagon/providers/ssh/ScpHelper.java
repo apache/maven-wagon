@@ -273,7 +273,7 @@ public class ScpHelper
         }
     }
 
-    public List getFileList( String destinationDirectory, Repository repository )
+    public List<String> getFileList( String destinationDirectory, Repository repository )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         try

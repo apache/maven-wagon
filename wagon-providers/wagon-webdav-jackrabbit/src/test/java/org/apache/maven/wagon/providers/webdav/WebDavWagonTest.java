@@ -260,7 +260,7 @@ public class WebDavWagonTest
 
         wagon.connect( testRepository, getAuthInfo() );
 
-        List list = wagon.getFileList( dirName );
+        List<String> list = wagon.getFileList( dirName );
 
         assertNotNull( "file list should not be null.", list );
         assertEquals( "file list should contain 6 items", 6, list.size() );
