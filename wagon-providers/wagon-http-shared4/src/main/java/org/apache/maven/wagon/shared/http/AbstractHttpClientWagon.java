@@ -48,6 +48,7 @@ import org.apache.http.impl.cookie.DateParseException;
 import org.apache.http.impl.cookie.DateUtils;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.params.CoreConnectionPNames;
+import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.OutputData;
@@ -78,6 +79,8 @@ import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
 import java.util.TimeZone;
 import java.util.zip.GZIPInputStream;
 
@@ -359,6 +362,12 @@ public abstract class AbstractHttpClientWagon
     }
 
     /**
+     * @plexus.configuration
+     * @deprecated Use httpConfiguration instead.
+     */
+    private Properties httpHeaders;
+
+    /**
      * @since 1.0-beta-6
      */
     private HttpConfiguration httpConfiguration;
@@ -634,6 +643,7 @@ public abstract class AbstractHttpClientWagon
 
         setParameters( httpMethod );
         setHeaders( httpMethod );
+        client.getParams().setParameter( CoreProtocolPNames.USER_AGENT, getUserAgent( httpMethod ) );
 
         return client.execute( httpMethod );
     }
@@ -671,6 +681,14 @@ public abstract class AbstractHttpClientWagon
             method.addHeader( "Accept-Encoding", "gzip" );
         }
 
+        if ( httpHeaders != null )
+        {
+            for ( Map.Entry<Object, Object> entry : httpHeaders.entrySet() )
+            {
+                method.addHeader( (String) entry.getKey(), (String) entry.getValue() );
+            }
+        }
+
         Header[] headers = config == null ? null : config.asRequestHeaders();
         if ( headers != null )
         {
@@ -679,6 +697,26 @@ public abstract class AbstractHttpClientWagon
                 method.addHeader( headers[i] );
             }
         }
+    }
+
+    protected String getUserAgent( HttpUriRequest method )
+    {
+        if ( httpHeaders != null )
+        {
+            String value = (String) httpHeaders.get( "User-Agent" );
+            if ( value != null )
+            {
+                return value;
+            }
+        }
+        HttpMethodConfiguration config =
+            httpConfiguration == null ? null : httpConfiguration.getMethodConfiguration( method );
+
+        if ( config != null )
+        {
+            return (String) config.getHeaders().get( "User-Agent" );
+        }
+        return null;
     }
 
     /**
@@ -863,5 +901,15 @@ public abstract class AbstractHttpClientWagon
         throws TransferFailedException
     {
         throw new IllegalStateException( "Should not be using the streaming wagon for HTTP PUT" );
+    }
+
+    public Properties getHttpHeaders()
+    {
+        return httpHeaders;
+    }
+
+    public void setHttpHeaders( Properties httpHeaders )
+    {
+        this.httpHeaders = httpHeaders;
     }
 }
