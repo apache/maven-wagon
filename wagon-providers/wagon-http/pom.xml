@@ -49,7 +49,10 @@ under the License.
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
     </dependency>
-
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore</artifactId>
+    </dependency>
 
     <!-- used fo the TCK -->
     <dependency>
@@ -61,13 +64,13 @@ under the License.
 
   </dependencies>
 
-  <!-- I believe we can shade this in Maven itself
+
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>1.0</version>
+        <version>1.4</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -75,11 +78,15 @@ under the License.
               <goal>shade</goal>
             </goals>
             <configuration>
+              <shadedArtifactAttached>true</shadedArtifactAttached>
+              <shadedClassifierName>shaded</shadedClassifierName>
               <artifactSet>
                 <includes>
-                  <include>commons-httpclient:commons-httpclient</include>
+                  <include>org.apache.httpcomponents:httpclient</include>
+                  <include>org.apache.httpcomponents:httpcore</include>
                   <include>commons-logging:commons-logging</include>
                   <include>commons-codec:commons-codec</include>
+                  <include>${project.groupId}:wagon-http-shared4</include>
                 </includes>
               </artifactSet>
               <shadedArtifactAttached>true</shadedArtifactAttached>
@@ -87,14 +94,14 @@ under the License.
               <relocations>
                 <relocation>
                   <pattern>org.apache.commons.codec</pattern>
-                  <shadedPattern>org.apache.maven.wagon.providers.http.codec</shadedPattern>
+                  <shadedPattern>org.apache.maven.wagon.providers.http.commons.codec</shadedPattern>
                 </relocation>
                 <relocation>
                   <pattern>org.apache.commons.logging</pattern>
-                  <shadedPattern>org.apache.maven.wagon.providers.http.logging</shadedPattern>
+                  <shadedPattern>org.apache.maven.wagon.providers.http.commons.logging</shadedPattern>
                 </relocation>
                 <relocation>
-                  <pattern>org.apache.commons.httpclient</pattern>
+                  <pattern>org.apache.http</pattern>
                   <shadedPattern>org.apache.maven.wagon.providers.http.httpclient</shadedPattern>
                 </relocation>
               </relocations>
@@ -102,11 +109,6 @@ under the License.
           </execution>
         </executions>
       </plugin>
-    </plugins>
-  </build>
-    -->
-  <build>
-    <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>

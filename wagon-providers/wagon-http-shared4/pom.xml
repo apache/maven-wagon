@@ -45,10 +45,10 @@ under the License.
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
     </dependency>
-    <!--
-      This dependency is here to upgrade to a version of commons-logging that is
-      newer than the one that comes transitively from commons-httpclient above.
-    -->
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore</artifactId>
+    </dependency>
     <dependency>
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging</artifactId>
