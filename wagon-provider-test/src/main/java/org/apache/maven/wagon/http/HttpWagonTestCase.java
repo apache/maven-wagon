@@ -165,6 +165,7 @@ public abstract class HttpWagonTestCase
         assertEquals( "Maven-Wagon/1.0", handler.headers.get( "User-Agent" ) );
     }
 
+
     protected abstract void setHttpHeaders( StreamingWagon wagon, Properties properties );
 
     protected void addConnectors( Server server )
