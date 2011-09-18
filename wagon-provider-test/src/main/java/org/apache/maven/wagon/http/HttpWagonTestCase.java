@@ -55,6 +55,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -165,6 +166,34 @@ public abstract class HttpWagonTestCase
         assertEquals( "Maven-Wagon/1.0", handler.headers.get( "User-Agent" ) );
     }
 
+    public void testHttpHeadersWithCommonMethods()
+        throws Exception
+    {
+        Properties properties = new Properties();
+        properties.setProperty( "User-Agent", "Maven-Wagon/1.0" );
+
+        StreamingWagon wagon = (StreamingWagon) getWagon();
+
+        Method setHttpHeaders = wagon.getClass().getMethod( "setHttpHeaders", Properties.class );
+        setHttpHeaders.invoke( wagon, properties );
+
+        Server server = new Server( 0 );
+        TestHeaderHandler handler = new TestHeaderHandler();
+        server.setHandler( handler );
+        addConnectors( server );
+        server.start();
+
+        wagon.connect(
+            new Repository( "id", getProtocol() + "://localhost:" + server.getConnectors()[0].getLocalPort() ) );
+
+        wagon.getToStream( "resource", new StringOutputStream() );
+
+        wagon.disconnect();
+
+        server.stop();
+
+        assertEquals( "Maven-Wagon/1.0", handler.headers.get( "User-Agent" ) );
+    }
 
     protected abstract void setHttpHeaders( StreamingWagon wagon, Properties properties );
 
