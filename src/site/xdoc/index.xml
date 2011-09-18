@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+
+<!--
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+  <properties>
+    <title>Introduction</title>
+    <author>Jason van Zyl</author>
+    <author email="hboutemy_AT_apache_DOT_org">Hervé Boutemy</author>
+  </properties>
+
+  <body>
+
+    <section name="Maven Wagon">
+
+      <p>Maven Wagon is a transport abstraction that is used in Maven's artifact and
+ repository handling code.</p>
+ 
+      <p>Wagon defines a <a href="./wagon-provider-api/">unified API</a>, and it currently has the following providers:</p>
+      <ul> 
+       <li><a href="./wagon-providers/wagon-file/">File</a></li>
+       <li><a href="./wagon-providers/wagon-http/">HTTP</a></li>
+       <li><a href="./wagon-providers/wagon-http-lightweight/">HTTP lightweight</a></li>
+       <li><a href="./wagon-providers/wagon-ftp/">FTP</a></li>
+       <li><a href="./wagon-providers/wagon-ssh/">SSH/SCP</a></li>
+       <li><a href="./wagon-providers/wagon-webdav-jackrabbit/">WebDAV</a></li>
+       <li><a href="./wagon-providers/wagon-scm/">SCM</a> (in progress)</li>
+      </ul>
+
+      <p>
+        <img src="images/wagon-deps.png" width="529" height="398" border="0" usemap="#Wagon_dependencies" alt="Wagon Dependencies"/>
+        <map name="Wagon_dependencies" id="Wagon_dependencies">
+          <area shape="rect" coords="94,0,221,32"     alt="wagon-provider-api" href="./wagon-provider-api/" />
+          <area shape="rect" coords="330,0,459,32"    alt="wagon-provider-test" href="./wagon-provider-test/" />
+          <area shape="rect" coords="329,37,425,70"   alt="wagon-tck-http" href="./wagon-tcks/wagon-tck-http/" />
+          <area shape="rect" coords="159,68,226,100"  alt="wagon-file" href="./wagon-providers/wagon-file/" />
+          <area shape="rect" coords="13,133,138,164"  alt="wagon-http-shared4" href="./wagon-providers/wagon-http-shared4/" />
+          <area shape="rect" coords="159,110,304,141" alt="wagon-http-lightweight" href="./wagon-providers/wagon-http-lightweight/" />
+          <area shape="rect" coords="159,151,226,183" alt="wagon-http" href="./wagon-providers/wagon-http/" />
+          <area shape="rect" coords="13,193,138,225"  alt="wagon-http-shared" href="./wagon-providers/wagon-http-shared/" />
+          <area shape="rect" coords="159,193,257,225" alt="wagon-webdav-jackrabbit" href="./wagon-providers/wagon-webdav-jackrabbit/" />
+          <area shape="rect" coords="159,234,226,266" alt="wagon-ftp" href="./wagon-providers/wagon-ftp/" />
+          <area shape="rect" coords="12,298,134,330"  alt="wagon-ssh-common" href="./wagon-providers/wagon-ssh-common/" />
+          <area shape="rect" coords="159,276,282,308" alt="wagon-ssh-external" href="./wagon-providers/wagon-ssh-external/" />
+          <area shape="rect" coords="159,317,226,349" alt="wagon-ssh" href="./wagon-providers/wagon-ssh/" />
+          <area shape="rect" coords="159,359,226,391" alt="wagon-scm" href="./wagon-providers/wagon-scm/" />
+          <area shape="rect" coords="0,61,315,397"    alt="wagon-providers" href="./wagon-providers/" />
+          <area shape="rect" coords="339,150,528,183" alt="HttpComponents" href="http://hc.apache.org/" />
+          <area shape="rect" coords="340,193,455,225" alt="Jackrabbit" href="http://jackrabbit.apache.org/" />
+          <area shape="rect" coords="340,234,480,266" alt="Commons Net" href="http://commons.apache.org/net/" />
+          <area shape="rect" coords="340,318,405,350" alt="jsch" href="http://www.jcraft.com/jsch/" />
+          <area shape="rect" coords="340,358,493,391" alt="maven-scm-api" href="/scm/maven-scm-api/" />
+        </map>
+      </p>
+
+    </section>
+
+  </body>
+
+</document>
