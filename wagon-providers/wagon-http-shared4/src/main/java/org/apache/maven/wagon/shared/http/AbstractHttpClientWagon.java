@@ -581,7 +581,7 @@ public abstract class AbstractHttpClientWagon
     public boolean resourceExists( String resourceName )
         throws TransferFailedException, AuthorizationException
     {
-        String url = getRepository().getUrl() + "/" + resourceName;
+        String url = getRepository().getUrl() + ( repository.getUrl().endsWith( "/" ) ? "" : "/" ) + resourceName;
         HttpHead headMethod = new HttpHead( url );
         HttpResponse response = null;
         int statusCode;
@@ -746,7 +746,7 @@ public abstract class AbstractHttpClientWagon
     {
         Resource resource = inputData.getResource();
 
-        String url = getRepository().getUrl() + "/" + resource.getName();
+        String url = getRepository().getUrl() + ( repository.getUrl().endsWith( "/" ) ? "" : "/" ) + resource.getName();
         getMethod = new HttpGet( url );
         long timestamp = resource.getLastModified();
         if ( timestamp > 0 )
