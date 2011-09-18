@@ -166,6 +166,9 @@ public abstract class HttpWagonTestCase
         assertEquals( "Maven-Wagon/1.0", handler.headers.get( "User-Agent" ) );
     }
 
+    /**
+     * test set of User-Agent as it's done by aether wagon connector with using setHttpHeaders
+     */
     public void testHttpHeadersWithCommonMethods()
         throws Exception
     {
