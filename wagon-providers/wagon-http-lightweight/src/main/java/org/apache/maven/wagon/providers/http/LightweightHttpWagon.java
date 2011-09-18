@@ -45,25 +45,11 @@ import java.net.Proxy;
 import java.net.Proxy.Type;
 import java.net.SocketAddress;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.zip.GZIPInputStream;
-
-import org.apache.maven.wagon.ConnectionException;
-import org.apache.maven.wagon.InputData;
-import org.apache.maven.wagon.OutputData;
-import org.apache.maven.wagon.ResourceDoesNotExistException;
-import org.apache.maven.wagon.StreamWagon;
-import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.authentication.AuthenticationException;
-import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.apache.maven.wagon.events.TransferEvent;
-import org.apache.maven.wagon.proxy.ProxyInfo;
-import org.apache.maven.wagon.resource.Resource;
-import org.apache.maven.wagon.shared.http.HtmlFileListParser;
 
 /**
  * LightweightHttpWagon
@@ -200,7 +186,7 @@ public class LightweightHttpWagon
     {
         if ( httpHeaders != null )
         {
-            for ( Iterator i = httpHeaders.keySet().iterator(); i.hasNext(); )
+            for ( Iterator<?> i = httpHeaders.keySet().iterator(); i.hasNext(); )
             {
                 String header = (String) i.next();
                 urlConnection.setRequestProperty( header, httpHeaders.getProperty( header ) );
@@ -293,6 +279,7 @@ public class LightweightHttpWagon
              || Boolean.parseBoolean( repository.getParameter( "preemptiveAuthentication" ) ) );
     }
 
+    @SuppressWarnings( "deprecation" )
     public PasswordAuthentication requestProxyAuthentication()
     {
         if ( proxyInfo != null && proxyInfo.getUserName() != null )
