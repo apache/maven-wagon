@@ -29,18 +29,22 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.NTCredentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.AuthCache;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.CookiePolicy;
+import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
@@ -50,6 +54,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.BasicHttpContext;
 import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.PathUtils;
@@ -91,6 +96,8 @@ import java.util.zip.GZIPInputStream;
 public abstract class AbstractHttpClientWagon
     extends StreamWagon
 {
+
+    private BasicHttpContext localContext;
     private final class RequestEntityImplementation
         implements HttpEntity
     {
@@ -400,6 +407,15 @@ public abstract class AbstractHttpClientWagon
             int port = getRepository().getPort() > -1 ? getRepository().getPort() : AuthScope.ANY_PORT;
 
             client.getCredentialsProvider().setCredentials( new AuthScope( host, port ), creds );
+
+
+            AuthCache authCache = new BasicAuthCache();
+            BasicScheme basicAuth = new BasicScheme();
+            HttpHost targetHost = new HttpHost( repository.getHost(), repository.getPort(), repository.getProtocol() );
+            authCache.put( targetHost, basicAuth );
+
+            localContext = new BasicHttpContext();
+            localContext.setAttribute( ClientContext.AUTH_CACHE, authCache );
         }
 
         ProxyInfo proxyInfo = getProxyInfo( getRepository().getProtocol(), getRepository().getHost() );
@@ -646,7 +662,7 @@ public abstract class AbstractHttpClientWagon
         setHeaders( httpMethod );
         client.getParams().setParameter( CoreProtocolPNames.USER_AGENT, getUserAgent( httpMethod ) );
 
-        return client.execute( httpMethod );
+        return client.execute( httpMethod, localContext );
     }
 
     protected void setParameters( HttpUriRequest method )

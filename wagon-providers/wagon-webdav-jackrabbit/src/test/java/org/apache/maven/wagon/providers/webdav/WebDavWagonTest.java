@@ -301,4 +301,31 @@ public class WebDavWagonTest
 
         tearDownWagonTestingFixtures();
     }
+
+    @Override
+    protected boolean supportPreemptiveAuthentication()
+    {
+        return false;
+    }
+
+    protected void testPreemptiveAuthentication( TestSecurityHandler sh )
+    {
+
+        if ( supportPreemptiveAuthentication() )
+        {
+            assertEquals( "not 2 security handler use " + sh.securityHandlerRequestReponses, 2,
+                          sh.securityHandlerRequestReponses.size() );
+            assertEquals( 200, sh.securityHandlerRequestReponses.get( 0 ).responseCode );
+        }
+        else
+        {
+            assertEquals( "not 4 security handler use " + sh.securityHandlerRequestReponses, 4,
+                          sh.securityHandlerRequestReponses.size() );
+            assertEquals( 401, sh.securityHandlerRequestReponses.get( 0 ).responseCode );
+            assertEquals( 200, sh.securityHandlerRequestReponses.get( 1 ).responseCode );
+            assertEquals( 401, sh.securityHandlerRequestReponses.get( 2 ).responseCode );
+            assertEquals( 200, sh.securityHandlerRequestReponses.get( 3 ).responseCode );
+
+        }
+    }
 }

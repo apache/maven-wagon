@@ -126,6 +126,7 @@ public class LightweightHttpWagon
 
                 URL url = new URL( visitingUrl );
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection( this.proxy );
+
                 urlConnection.setRequestProperty( "Accept-Encoding", "gzip" );
                 if ( !useCache )
                 {
