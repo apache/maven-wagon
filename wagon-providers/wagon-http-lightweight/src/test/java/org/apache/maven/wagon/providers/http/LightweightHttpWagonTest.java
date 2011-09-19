@@ -135,4 +135,10 @@ public class LightweightHttpWagonTest
             System.getProperties().remove( "http.nonProxyHosts" );
         }
     }
+
+    @Override
+    protected boolean supportPreemptiveAuthentication()
+    {
+        return false;
+    }
 }

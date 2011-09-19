@@ -34,4 +34,10 @@ public class LightweightHttpWagonWithPreemptiveAuthenticationTest
         wagon.setPreemptiveAuthentication( true );
         return wagon;
     }
+
+    @Override
+    protected boolean supportPreemptiveAuthentication()
+    {
+        return true;
+    }
 }

@@ -45,4 +45,10 @@ public class HttpWagonTest
     {
         ( (HttpWagon) wagon ).setHttpHeaders( properties );
     }
+
+    @Override
+    protected boolean supportPreemptiveAuthentication()
+    {
+        return false;
+    }
 }
