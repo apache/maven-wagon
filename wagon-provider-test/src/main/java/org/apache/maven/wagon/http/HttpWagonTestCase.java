@@ -804,6 +804,7 @@ public abstract class HttpWagonTestCase
             }
 
             assertEquals( "put top secret", FileUtils.fileRead( sourceFile.getAbsolutePath() ) );
+            assertEquals( 1, handler.fileUploaded );
         }
         finally
         {
@@ -837,6 +838,8 @@ public abstract class HttpWagonTestCase
     {
         private final File resourceBase;
 
+        private int fileUploaded = 0;
+
         public PutHandler( File repositoryDirectory )
         {
             this.resourceBase = repositoryDirectory;
@@ -862,6 +865,7 @@ public abstract class HttpWagonTestCase
             try
             {
                 IOUtil.copy( in, out );
+                fileUploaded++;
             }
             finally
             {
