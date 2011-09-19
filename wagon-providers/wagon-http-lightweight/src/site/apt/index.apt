@@ -31,9 +31,12 @@ Maven Wagon HTTP lightweight
  This project is an implementation of Wagon provider for HTTP access.
  It uses standard JDK classes as lower lever layer.
  
- It enables Maven to use remote repositories stored in HTTP servers. It doesn't allow deployment.
+ It enables Maven to use remote repositories stored in HTTP servers.
 
 
 Features
 
  * Get files from HTTP Server
+
+ * Put files to HTTP Server
+ 
