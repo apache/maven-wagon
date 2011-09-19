@@ -29,9 +29,17 @@ public class LightweightHttpWagonWithPreemptiveAuthenticationTest
     extends LightweightHttpWagonTest
 {
     @Override
-    protected Wagon getWagon() throws Exception {
+    protected Wagon getWagon()
+        throws Exception
+    {
         LightweightHttpWagon wagon = (LightweightHttpWagon) super.getWagon();
         wagon.setPreemptiveAuthentication( true );
         return wagon;
+    }
+
+    @Override
+    protected boolean supportPreemptiveAuthentication()
+    {
+        return true;
     }
 }

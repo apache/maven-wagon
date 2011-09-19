@@ -45,4 +45,5 @@ public class HttpsWagonTest
         connector.setTrustPassword( "wagonhttp" );
         server.setConnectors( new Connector[] { connector } );
     }
+
 }

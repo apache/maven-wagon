@@ -33,11 +33,6 @@ under the License.
     Wagon that gets and puts artifacts through http using Apache httpclient-4.x.
   </description>
 
-  <properties>
-    <!-- http pooled connection -->
-    <http.pool>true</http.pool>
-  </properties>
-
 
   <dependencies>
     <dependency>
@@ -108,15 +103,6 @@ under the License.
             </configuration>
           </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <systemPropertyVariables>
-            <maven.wagon.http.pool>${http.pool}</maven.wagon.http.pool>
-          </systemPropertyVariables>
-        </configuration>
       </plugin>
     </plugins>
   </build>

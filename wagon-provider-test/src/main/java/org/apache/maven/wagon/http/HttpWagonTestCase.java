@@ -36,6 +36,7 @@ import org.codehaus.plexus.util.StringOutputStream;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
+import org.mortbay.jetty.Response;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
@@ -57,9 +58,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
@@ -662,25 +665,6 @@ public abstract class HttpWagonTestCase
         return server;
     }
 
-    protected SecurityHandler createSecurityHandler()
-    {
-        Constraint constraint = new Constraint();
-        constraint.setName( Constraint.__BASIC_AUTH );
-        constraint.setRoles( new String[]{ "admin" } );
-        constraint.setAuthenticate( true );
-
-        ConstraintMapping cm = new ConstraintMapping();
-        cm.setConstraint( constraint );
-        cm.setPathSpec( "/*" );
-
-        SecurityHandler sh = new SecurityHandler();
-        HashUserRealm hashUserRealm = new HashUserRealm( "MyRealm" );
-        hashUserRealm.put( "user", "secret" );
-        hashUserRealm.addUserToRole( "user", "admin" );
-        sh.setUserRealm( hashUserRealm );
-        sh.setConstraintMappings( new ConstraintMapping[]{ cm } );
-        return sh;
-    }
 
     private String writeTestFileGzip( File parent, String child )
         throws IOException
@@ -836,51 +820,80 @@ public abstract class HttpWagonTestCase
     public void runTestSecuredPut( AuthenticationInfo authInfo )
         throws Exception
     {
+        runTestSecuredPut( authInfo, 1 );
+    }
+
+    public void runTestSecuredPut( AuthenticationInfo authInfo, int putNumber )
+        throws Exception
+    {
         String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
         Server server = new Server( 0 );
 
-        SecurityHandler sh = createSecurityHandler();
+        TestSecurityHandler sh = createSecurityHandler();
 
-        PutHandler handler = new PutHandler( new File( localRepositoryPath ) );
+        PutHandler putHandler = new PutHandler( new File( localRepositoryPath ) );
 
         HandlerCollection handlers = new HandlerCollection();
-        handlers.setHandlers( new Handler[]{ sh, handler } );
+        handlers.setHandlers( new Handler[]{ sh, putHandler } );
 
         server.setHandler( handlers );
         addConnectors( server );
         server.start();
 
+        StreamingWagon wagon = (StreamingWagon) getWagon();
+        Repository testRepository = new Repository( "id", getRepositoryUrl( server ) );
+        wagon.connect( testRepository, authInfo );
         try
         {
-            StreamingWagon wagon = (StreamingWagon) getWagon();
-
-            Repository testRepository = new Repository( "id", getRepositoryUrl( server ) );
-
-            wagon.connect( testRepository, authInfo );
-
-            File sourceFile = new File( localRepositoryPath, "test-secured-put-resource" );
-            sourceFile.delete();
-            assertFalse( sourceFile.exists() );
-
-            File tempFile = File.createTempFile( "wagon", "tmp" );
-            tempFile.deleteOnExit();
-            FileUtils.fileWrite( tempFile.getAbsolutePath(), "put top secret" );
-
-            try
+            for ( int i = 0; i < putNumber; i++ )
             {
-                wagon.put( tempFile, "test-secured-put-resource" );
-            }
-            finally
-            {
-                wagon.disconnect();
-                tempFile.delete();
-            }
+                File sourceFile = new File( localRepositoryPath, "test-secured-put-resource" );
+                sourceFile.delete();
+                assertFalse( sourceFile.exists() );
 
-            assertEquals( "put top secret", FileUtils.fileRead( sourceFile.getAbsolutePath() ) );
+                File tempFile = File.createTempFile( "wagon", "tmp" );
+                tempFile.deleteOnExit();
+                FileUtils.fileWrite( tempFile.getAbsolutePath(), "put top secret" );
+
+                try
+                {
+                    wagon.put( tempFile, "test-secured-put-resource" );
+                }
+                finally
+                {
+                    tempFile.delete();
+                }
+
+                assertEquals( "put top secret", FileUtils.fileRead( sourceFile.getAbsolutePath() ) );
+            }
         }
         finally
         {
+            wagon.disconnect();
             server.stop();
+        }
+        assertEquals( putNumber, putHandler.putCallNumber );
+        testPreemptiveAuthentication( sh );
+    }
+
+    protected abstract boolean supportPreemptiveAuthentication();
+
+    protected void testPreemptiveAuthentication( TestSecurityHandler sh )
+    {
+
+        if ( supportPreemptiveAuthentication() )
+        {
+            assertEquals( "not 1 security handler use " + sh.securityHandlerRequestReponses, 1,
+                          sh.securityHandlerRequestReponses.size() );
+            assertEquals( 200, sh.securityHandlerRequestReponses.get( 0 ).responseCode );
+        }
+        else
+        {
+            assertEquals( "not 2 security handler use " + sh.securityHandlerRequestReponses, 2,
+                          sh.securityHandlerRequestReponses.size() );
+            assertEquals( 401, sh.securityHandlerRequestReponses.get( 0 ).responseCode );
+            assertEquals( 200, sh.securityHandlerRequestReponses.get( 1 ).responseCode );
+
         }
     }
 
@@ -909,6 +922,8 @@ public abstract class HttpWagonTestCase
         extends AbstractHandler
     {
         private final File resourceBase;
+
+        public int putCallNumber = 0;
 
         public PutHandler( File repositoryDirectory )
         {
@@ -941,7 +956,8 @@ public abstract class HttpWagonTestCase
                 in.close();
                 out.close();
             }
-
+            System.out.println( "put file " + request.getPathInfo() );
+            putCallNumber++;
             response.setStatus( HttpServletResponse.SC_CREATED );
         }
     }
@@ -992,5 +1008,70 @@ public abstract class HttpWagonTestCase
             ( (Request) request ).setHandled( true );
         }
 
+    }
+
+    protected TestSecurityHandler createSecurityHandler()
+    {
+        Constraint constraint = new Constraint();
+        constraint.setName( Constraint.__BASIC_AUTH );
+        constraint.setRoles( new String[]{ "admin" } );
+        constraint.setAuthenticate( true );
+
+        ConstraintMapping cm = new ConstraintMapping();
+        cm.setConstraint( constraint );
+        cm.setPathSpec( "/*" );
+
+        TestSecurityHandler sh = new TestSecurityHandler();
+        HashUserRealm hashUserRealm = new HashUserRealm( "MyRealm" );
+        hashUserRealm.put( "user", "secret" );
+        hashUserRealm.addUserToRole( "user", "admin" );
+        sh.setUserRealm( hashUserRealm );
+        sh.setConstraintMappings( new ConstraintMapping[]{ cm } );
+        return sh;
+    }
+
+    public static class TestSecurityHandler
+        extends SecurityHandler
+    {
+
+        public List<SecurityHandlerRequestReponse> securityHandlerRequestReponses =
+            new ArrayList<SecurityHandlerRequestReponse>();
+
+        @Override
+        public void handle( String target, HttpServletRequest request, HttpServletResponse response, int dispatch )
+            throws IOException, ServletException
+        {
+            String method = request.getMethod();
+            super.handle( target, request, response, dispatch );
+            System.out.println( "method in SecurityHandler: " + method );
+
+            securityHandlerRequestReponses.add(
+                new SecurityHandlerRequestReponse( method, ( (Response) response ).getStatus() ) );
+        }
+
+    }
+
+    public static class SecurityHandlerRequestReponse
+    {
+        public String method;
+
+        public int responseCode;
+
+        private SecurityHandlerRequestReponse( String method, int responseCode )
+        {
+            this.method = method;
+            this.responseCode = responseCode;
+        }
+
+        @Override
+        public String toString()
+        {
+            final StringBuilder sb = new StringBuilder();
+            sb.append( "SecurityHandlerRequestReponse" );
+            sb.append( "{method='" ).append( method ).append( '\'' );
+            sb.append( ", responseCode=" ).append( responseCode );
+            sb.append( '}' );
+            return sb.toString();
+        }
     }
 }

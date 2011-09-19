@@ -62,4 +62,10 @@ public class HttpWagonTest
         assertTrue( wagon.getConnectionManager() instanceof ThreadSafeClientConnManager );
 
     }
+
+    @Override
+    protected boolean supportPreemptiveAuthentication()
+    {
+        return true;
+    }
 }

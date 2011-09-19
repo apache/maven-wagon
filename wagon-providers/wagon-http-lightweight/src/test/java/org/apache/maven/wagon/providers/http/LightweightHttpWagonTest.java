@@ -50,4 +50,9 @@ public class LightweightHttpWagonTest
         ( (LightweightHttpWagon) wagon ).setHttpHeaders( properties );
     }
 
+    @Override
+    protected boolean supportPreemptiveAuthentication()
+    {
+        return false;
+    }
 }
