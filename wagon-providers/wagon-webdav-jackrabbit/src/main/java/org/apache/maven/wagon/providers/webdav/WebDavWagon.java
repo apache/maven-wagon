@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
@@ -102,7 +101,8 @@ public class WebDavWagon
      * @throws HttpException
      * @throws TransferFailedException
      */
-    protected void mkdirs( String dir ) throws IOException
+    protected void mkdirs( String dir )
+        throws IOException
     {
         Repository repository = getRepository();
         String basedir = repository.getBasedir();
@@ -116,7 +116,7 @@ public class WebDavWagon
         // create relative path that will always have a leading and trailing slash
         String relpath = FileUtils.normalize( getPath( basedir, dir ) + "/" );
 
-        PathNavigator navigator = new PathNavigator(relpath);
+        PathNavigator navigator = new PathNavigator( relpath );
 
         // traverse backwards until we hit a directory that already exists (OK/NOT_ALLOWED), or that we were able to
         // create (CREATED), or until we get to the top of the path
@@ -145,7 +145,8 @@ public class WebDavWagon
         }
     }
 
-    private int doMkCol( String url ) throws IOException
+    private int doMkCol( String url )
+        throws IOException
     {
         MkColMethod method = null;
         try
@@ -192,7 +193,8 @@ public class WebDavWagon
 
     }
 
-    private boolean isDirectory( String url ) throws IOException, DavException
+    private boolean isDirectory( String url )
+        throws IOException, DavException
     {
         DavPropertyNameSet nameSet = new DavPropertyNameSet();
         nameSet.add( DavPropertyName.create( DavConstants.PROPERTY_RESOURCETYPE ) );
@@ -225,7 +227,7 @@ public class WebDavWagon
         }
     }
 
-    public List getFileList( String destinationDirectory )
+    public List<String> getFileList( String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         String url = getRepository().getUrl() + '/' + destinationDirectory;
@@ -242,7 +244,7 @@ public class WebDavWagon
                 int status = execute( method );
                 if ( method.succeeded() )
                 {
-                    ArrayList dirs = new ArrayList();
+                    ArrayList<String> dirs = new ArrayList<String>();
                     MultiStatus multiStatus = method.getResponseBodyAsMultiStatus();
 
                     for ( int i = 0; i < multiStatus.getResponses().length; i++ )

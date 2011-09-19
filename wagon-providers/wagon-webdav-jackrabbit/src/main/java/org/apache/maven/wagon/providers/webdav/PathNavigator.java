@@ -29,7 +29,7 @@ import java.util.Arrays;
  */
 public class PathNavigator
 {
-    final private List list;
+    private final List<String> list;
 
     private int currentPosition;
 
@@ -41,7 +41,7 @@ public class PathNavigator
 
     public String getPath()
     {
-        List currentPathList = list.subList( 0, currentPosition );
+        List<String> currentPathList = list.subList( 0, currentPosition );
         StringBuffer sb = new StringBuffer();
         for ( int i = 0; i < currentPathList.size(); i++ )
         {

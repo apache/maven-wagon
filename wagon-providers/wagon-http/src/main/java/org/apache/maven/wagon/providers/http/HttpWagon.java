@@ -95,7 +95,8 @@ public class HttpWagon
         {
             throw new TransferFailedException( "Could not read response body.", e );
         }
-        catch (HttpException e) {
+        catch ( HttpException e )
+        {
             throw new TransferFailedException( "Could not read response body.", e );
         }
         finally

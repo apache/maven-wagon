@@ -56,7 +56,7 @@ public abstract class HttpWagonTests
 
     private String baseUrl;
 
-    private final static Set<File> tmpFiles = new HashSet<File>();
+    private static final Set<File> tmpFiles = new HashSet<File>();
 
     private Repository repo;
 

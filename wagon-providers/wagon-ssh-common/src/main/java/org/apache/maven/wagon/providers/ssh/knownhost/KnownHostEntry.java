@@ -30,7 +30,6 @@ public class KnownHostEntry
 
     public KnownHostEntry()
     {
-
     }
 
     public KnownHostEntry( String hostName, String keyType, String keyValue )
@@ -83,33 +82,56 @@ public class KnownHostEntry
     public boolean equals( Object obj )
     {
         if ( this == obj )
+        {
             return true;
+        }
+
         if ( obj == null )
+        {
             return false;
+        }
+
         if ( getClass() != obj.getClass() )
+        {
             return false;
+        }
+
         KnownHostEntry other = (KnownHostEntry) obj;
         if ( hostName == null )
         {
             if ( other.hostName != null )
+            {
                 return false;
+            }
         }
         else if ( !hostName.equals( other.hostName ) )
+        {
             return false;
+        }
+
         if ( keyType == null )
         {
             if ( other.keyType != null )
+            {
                 return false;
+            }
         }
         else if ( !keyType.equals( other.keyType ) )
+        {
             return false;
+        }
+
         if ( keyValue == null )
         {
             if ( other.keyValue != null )
+            {
                 return false;
+            }
         }
         else if ( !keyValue.equals( other.keyValue ) )
+        {
             return false;
+        }
         return true;
     }
 

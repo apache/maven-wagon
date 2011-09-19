@@ -50,7 +50,6 @@ public class ServerFixture
 {
     private static Logger logger = Logger.getLogger( ServerFixture.class );
 
-
     public static final String SERVER_ROOT_RESOURCE_PATH = "default-server-root";
 
     // it seems that some JDKs have a problem if you use different key stores
@@ -183,7 +182,7 @@ public class ServerFixture
     public void start()
         throws Exception
     {
-        if (server.isStarted() || server.isRunning())
+        if ( server.isStarted() || server.isRunning() )
         {
             return;
         }

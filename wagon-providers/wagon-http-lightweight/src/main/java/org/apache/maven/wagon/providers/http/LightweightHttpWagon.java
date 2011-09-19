@@ -272,7 +272,7 @@ public class LightweightHttpWagon
         {
             this.proxy = getProxy( proxyInfo );
         }
-        authenticator.setWagon(this);
+        authenticator.setWagon( this );
 
         setPreemptiveAuthentication(
                 Boolean.getBoolean( "maven.wagon.http.preemptiveAuthentication" )
@@ -313,17 +313,22 @@ public class LightweightHttpWagon
         return new Proxy( getProxyType( proxyInfo ), getSocketAddress( proxyInfo ) );
     }
 
-    private Type getProxyType( ProxyInfo proxyInfo ) {
-        if ( ProxyInfo.PROXY_SOCKS4.equals( proxyInfo.getType() ) || ProxyInfo.PROXY_SOCKS5.equals( proxyInfo.getType() ) )
+    private Type getProxyType( ProxyInfo proxyInfo )
+    {
+        if ( ProxyInfo.PROXY_SOCKS4.equals( proxyInfo.getType() )
+            || ProxyInfo.PROXY_SOCKS5.equals( proxyInfo.getType() ) )
         {
             return Type.SOCKS;
         }
-        else return Type.HTTP;
+        else
+        {
+            return Type.HTTP;
+        }
     }
 
     public SocketAddress getSocketAddress( ProxyInfo proxyInfo )
     {
-        return InetSocketAddress.createUnresolved(proxyInfo.getHost(), proxyInfo.getPort());
+        return InetSocketAddress.createUnresolved( proxyInfo.getHost(), proxyInfo.getPort() );
     }
 
     public void closeConnection()

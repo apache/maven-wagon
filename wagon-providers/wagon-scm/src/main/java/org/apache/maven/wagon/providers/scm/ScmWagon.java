@@ -178,7 +178,7 @@ public class ScmWagon
     private void removeCheckoutDirectory()
         throws ConnectionException
     {
-        if( checkoutDirectory == null )
+        if ( checkoutDirectory == null )
         {
             return; // Silently return.
         }

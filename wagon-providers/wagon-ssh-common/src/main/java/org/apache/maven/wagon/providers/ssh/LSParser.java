@@ -37,7 +37,7 @@ import org.apache.maven.wagon.TransferFailedException;
  */
 public class LSParser
 {
-    private final static Pattern PATTERN = Pattern.compile( ".+\\s+[0-9]+\\s+.+\\s+.+\\s+[0-9]+\\s+"
+    private static final Pattern PATTERN = Pattern.compile( ".+\\s+[0-9]+\\s+.+\\s+.+\\s+[0-9]+\\s+"
                                                    + "([0-9]{4}-[0-9]{2}-[0-9]{2}|.+\\s+[0-9]+)\\s+[0-9:]+\\s+(.+?)" );
     
     /**

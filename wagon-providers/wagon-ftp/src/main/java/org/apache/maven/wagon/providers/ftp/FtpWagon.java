@@ -49,7 +49,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-
 /**
  * FtpWagon 
  *
@@ -441,7 +440,7 @@ public class FtpWagon
             }
             
             List<String> ret = new ArrayList<String>();
-            for( int i=0; i < ftpFiles.length; i++ )
+            for ( int i = 0; i < ftpFiles.length; i++ )
             {
                 String name = ftpFiles[i].getName();
                 
@@ -617,6 +616,7 @@ public class FtpWagon
                         // This appears to be a conscious decision, based on other parts of this code.
                         String group = permissions.getGroup();
                         if ( group != null )
+                        {
                             try
                             {
                                 ftp.sendSiteCommand( "CHGRP " + permissions.getGroup() );
@@ -624,8 +624,10 @@ public class FtpWagon
                             catch ( IOException e )
                             {
                             }
+                        }
                         String mode = permissions.getFileMode();
                         if ( mode != null )
+                        {
                             try
                             {
                                 ftp.sendSiteCommand( "CHMOD " + permissions.getDirectoryMode() );
@@ -633,6 +635,7 @@ public class FtpWagon
                             catch ( IOException e )
                             {
                             }
+                        }
                     }
                 }
                 else
@@ -655,7 +658,7 @@ public class FtpWagon
 
         }
 
-        fireTransferDebug("completed = " + sourceFile.getAbsolutePath());
+        fireTransferDebug( "completed = " + sourceFile.getAbsolutePath() );
     }
 
     /**
@@ -666,7 +669,8 @@ public class FtpWagon
      *
      * @param permissions group and directory permissions
      */
-    private void setPermissions(RepositoryPermissions permissions) {
+    private void setPermissions( RepositoryPermissions permissions )
+    {
         if ( permissions != null )
         {
             // Process permissions; note that if we get errors or exceptions here, they are ignored.
@@ -704,10 +708,11 @@ public class FtpWagon
      * @return ok
      * @throws IOException
      */
-    private boolean makeFtpDirectoryRecursive(String fileName, RepositoryPermissions permissions) throws IOException
+    private boolean makeFtpDirectoryRecursive( String fileName, RepositoryPermissions permissions )
+        throws IOException
     {
-        if ( fileName == null || fileName.length() == 0 ||
-             fileName.replace('/',  '_').trim().length() == 0 ) // if a string is '/', '//' or similar
+        if ( fileName == null || fileName.length() == 0
+            || fileName.replace('/',  '_').trim().length() == 0 ) // if a string is '/', '//' or similar
         {
             return false;
         }
@@ -729,10 +734,10 @@ public class FtpWagon
             slashPos = fileName.indexOf( "/" );
         }
 
-        if ( slashPos >= 0 &&
-             slashPos < ( fileName.length() - 1 ) ) // not only a slash at the end, like in 'newDir/'
+        if ( slashPos >= 0
+             && slashPos < ( fileName.length() - 1 ) ) // not only a slash at the end, like in 'newDir/'
         {
-            if ( oldPwd == null)
+            if ( oldPwd == null )
             {
                 oldPwd = ftp.printWorkingDirectory();
             }
@@ -754,7 +759,7 @@ public class FtpWagon
 
                 // now create the deeper directories
                 String remainingDirs = fileName.substring( slashPos + 1 );
-                ok &= makeFtpDirectoryRecursive( remainingDirs, permissions);
+                ok &= makeFtpDirectoryRecursive( remainingDirs, permissions );
             }
         }
         else

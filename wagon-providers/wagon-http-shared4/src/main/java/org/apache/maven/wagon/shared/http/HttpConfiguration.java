@@ -30,13 +30,13 @@ public class HttpConfiguration
     
     private static final HttpMethodConfiguration DEFAULT_PUT =
         new HttpMethodConfiguration().addParam( HTTP.EXPECT_CONTINUE, "%b,true" );
-    
+
     private HttpMethodConfiguration all;
-    
+
     private HttpMethodConfiguration get;
-    
+
     private HttpMethodConfiguration put;
-    
+
     private HttpMethodConfiguration head;
 
     public HttpMethodConfiguration getAll()
@@ -54,7 +54,7 @@ public class HttpConfiguration
     {
         return get;
     }
-    
+
     public HttpConfiguration setGet( HttpMethodConfiguration get )
     {
         this.get = get;
@@ -82,22 +82,22 @@ public class HttpConfiguration
         this.head = head;
         return this;
     }
-    
+
     public HttpMethodConfiguration getMethodConfiguration( HttpUriRequest method )
     {
         if ( method instanceof HttpGet )
         {
             return HttpMethodConfiguration.merge( all, get );
         }
-        else if ( method instanceof HttpPut)
+        else if ( method instanceof HttpPut )
         {
             return HttpMethodConfiguration.merge( DEFAULT_PUT, all, put );
         }
-        else if ( method instanceof HttpHead)
+        else if ( method instanceof HttpHead )
         {
             return HttpMethodConfiguration.merge( all, head );
         }
-        
+
         return all;
     }
 

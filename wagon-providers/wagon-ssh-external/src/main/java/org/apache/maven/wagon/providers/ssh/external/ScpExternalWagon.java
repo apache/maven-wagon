@@ -312,8 +312,8 @@ public class ScpExternalWagon
             int exitCode = CommandLineUtils.executeCommandLine( cl, null, err );
             if ( exitCode != 0 )
             {
-                if ( !put && 
-                    err.getOutput().trim().toLowerCase( Locale.ENGLISH ).indexOf( "no such file or directory" ) != -1 )
+                if ( !put
+                    && err.getOutput().trim().toLowerCase( Locale.ENGLISH ).indexOf( "no such file or directory" ) != -1 )
                 {
                     throw new ResourceDoesNotExistException( err.getOutput() );
                 }

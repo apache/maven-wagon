@@ -244,7 +244,7 @@ public class SftpWagon
             {
                 throw new ResourceDoesNotExistException( e.toString(), e );
             }
-            else if( e.toString().trim().indexOf( "Can't change directory" ) != -1  )
+            else if ( e.toString().trim().indexOf( "Can't change directory" ) != -1 )
             {
                 throw new ResourceDoesNotExistException( e.toString(), e );
             }   

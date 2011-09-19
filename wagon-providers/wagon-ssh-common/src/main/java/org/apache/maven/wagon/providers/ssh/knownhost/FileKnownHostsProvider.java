@@ -71,7 +71,7 @@ public class FileKnownHostsProvider
     public void storeKnownHosts( String contents )
         throws IOException
     {
-        Set hosts = this.loadKnownHosts( contents );
+        Set<KnownHostEntry> hosts = this.loadKnownHosts( contents );
         
         if ( ! this.knownHosts.equals( hosts ) )
         {

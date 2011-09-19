@@ -1,3 +1,5 @@
+package org.apache.jackrabbit.webdav.client.methods;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -14,7 +16,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.jackrabbit.webdav.client.methods;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,14 +37,16 @@ import javax.xml.transform.stream.StreamResult;
 /**
  * <code>XmlRequestEntity</code>...
  */
-public class XmlRequestEntity implements RequestEntity
+public class XmlRequestEntity
+    implements RequestEntity
 {
 
     private static Logger log = LoggerFactory.getLogger( XmlRequestEntity.class );
 
     private final RequestEntity delegatee;
 
-    public XmlRequestEntity( Document xmlDocument ) throws IOException
+    public XmlRequestEntity( Document xmlDocument )
+        throws IOException
     {
         super();
         ByteArrayOutputStream out = new ByteArrayOutputStream();

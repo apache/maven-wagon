@@ -44,7 +44,7 @@ public abstract class AbstractKnownHostsProvider
      */
     protected String contents;
     
-    protected Set knownHosts = new HashSet();
+    protected Set<KnownHostEntry> knownHosts = new HashSet<KnownHostEntry>();
 
     public void setHostKeyChecking( String hostKeyChecking )
     {

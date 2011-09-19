@@ -140,17 +140,15 @@ public class ScpHelper
         return privateKey;
     }
     
-    public static void createZip( List files, File zipName, File basedir )
+    public static void createZip( List<String> files, File zipName, File basedir )
         throws IOException
     {
         ZipOutputStream zos = new ZipOutputStream( new FileOutputStream( zipName ) );
 
         try
         {
-            for ( int i = 0; i < files.size(); i++ )
+            for ( String file : files )
             {
-                String file = (String) files.get( i );
-
                 file = file.replace( '\\', '/' );
 
                 writeZipEntry( zos, new File( basedir, file ), file );
@@ -238,7 +236,7 @@ public class ScpHelper
             zipFile = File.createTempFile( "wagon", ".zip" );
             zipFile.deleteOnExit();
 
-            List files = FileUtils.getFileNames( sourceDirectory, "**/**", "", false );
+            List<String> files = FileUtils.getFileNames( sourceDirectory, "**/**", "", false );
 
             createZip( files, zipFile, sourceDirectory );
         }
@@ -251,7 +249,8 @@ public class ScpHelper
 
         try
         {
-            executor.executeCommand( "cd " + path + "; unzip -q -o " + zipFile.getName() + "; rm -f " + zipFile.getName() );
+            executor.executeCommand( "cd " + path + "; unzip -q -o " + zipFile.getName() + "; rm -f "
+                + zipFile.getName() );
 
             zipFile.delete();
 

@@ -1,3 +1,5 @@
+package org.apache.jackrabbit.webdav;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -14,7 +16,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.jackrabbit.webdav;
 
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.xml.DomUtil;
@@ -23,7 +24,6 @@ import org.apache.jackrabbit.webdav.xml.XmlSerializable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.Iterator;
 import java.util.Map;
 import java.util.LinkedHashMap;
 
@@ -31,14 +31,15 @@ import java.util.LinkedHashMap;
  * MultiStatus representing the content of a multistatus response body and
  * allows to retrieve the Xml representation.
  */
-public class MultiStatus implements DavConstants, XmlSerializable
+public class MultiStatus
+    implements DavConstants, XmlSerializable
 {
 
     /**
      * Map collecting the responses for this multistatus, where every href must
-     * only occure one single time.
+     * only occur one single time.
      */
-    private Map responses = new LinkedHashMap();
+    private Map<String, MultiStatusResponse> responses = new LinkedHashMap<String, MultiStatusResponse>();
 
     /**
      * A general response description at the multistatus top level is used to
@@ -161,10 +162,9 @@ public class MultiStatus implements DavConstants, XmlSerializable
     public Element toXml( Document document )
     {
         Element multistatus = DomUtil.createElement( document, XML_MULTISTATUS, NAMESPACE );
-        Iterator it = responses.values().iterator();
-        while ( it.hasNext() )
+        for ( MultiStatusResponse response :  responses.values() )
         {
-            multistatus.appendChild( ( (MultiStatusResponse) it.next() ).toXml( document ) );
+            multistatus.appendChild( response.toXml( document ) );
         }
         if ( responseDescription != null )
         {

@@ -57,10 +57,10 @@ public class StreamKnownHostsProvider
         }
     }
     
-    protected Set loadKnownHosts( String contents )
+    protected Set<KnownHostEntry> loadKnownHosts( String contents )
         throws IOException
     {
-        Set hosts = new HashSet();
+        Set<KnownHostEntry> hosts = new HashSet<KnownHostEntry>();
         
         BufferedReader br = new BufferedReader( new StringReader( contents ) );
         
@@ -78,7 +78,8 @@ public class StreamKnownHostsProvider
                 }
             }
             
-        }while ( line != null );   
+        }
+        while ( line != null );
         
         return hosts;
     }

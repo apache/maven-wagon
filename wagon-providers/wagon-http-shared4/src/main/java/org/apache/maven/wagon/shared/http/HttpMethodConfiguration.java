@@ -118,7 +118,7 @@ public class HttpMethodConfiguration
             return null;
         }
         
-        DefaultedHttpParams p = new DefaultedHttpParams( new BasicHttpParams(), defaults);
+        DefaultedHttpParams p = new DefaultedHttpParams( new BasicHttpParams(), defaults );
 
         fillParams( p );
         
@@ -151,12 +151,12 @@ public class HttpMethodConfiguration
         {
             Pattern coercePattern = Pattern.compile( COERCE_PATTERN );
             
-            for ( Iterator it = params.entrySet().iterator(); it.hasNext(); )
+            for ( Iterator<?> it = params.entrySet().iterator(); it.hasNext(); )
             {
-                Map.Entry entry = (Map.Entry) it.next();
+                Map.Entry<String, String> entry = (Map.Entry) it.next();
                 
-                String key = (String) entry.getKey();
-                String value = (String) entry.getValue();
+                String key = entry.getKey();
+                String value = entry.getValue();
                 
                 Matcher matcher = coercePattern.matcher( value );
                 if ( matcher.matches() )
@@ -189,7 +189,7 @@ public class HttpMethodConfiguration
                         case 'c':
                         {
                             String[] entries = value.split( "," );
-                            List collection = new ArrayList();
+                            List<String> collection = new ArrayList<String>();
                             for ( int i = 0; i < entries.length; i++ )
                             {
                                 collection.add( entries[i].trim() );
@@ -202,7 +202,7 @@ public class HttpMethodConfiguration
                         {
                             String[] entries = value.split( "," );
                             
-                            Map map = new LinkedHashMap();
+                            Map<String, String> map = new LinkedHashMap<String, String>();
                             for ( int i = 0; i < entries.length; i++ )
                             {
                                 int idx = entries[i].indexOf( "=>" );
@@ -239,9 +239,9 @@ public class HttpMethodConfiguration
         Header[] result = new Header[headers.size()];
         
         int index = 0;
-        for ( Iterator it = headers.entrySet().iterator(); it.hasNext(); )
+        for ( Iterator<?> it = headers.entrySet().iterator(); it.hasNext(); )
         {
-            Map.Entry entry = (Map.Entry) it.next();
+            Map.Entry<String, String> entry = (Map.Entry) it.next();
             
             String key = (String) entry.getKey();
             String value = (String) entry.getValue();

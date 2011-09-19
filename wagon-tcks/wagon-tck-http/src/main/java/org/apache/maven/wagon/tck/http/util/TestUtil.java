@@ -72,7 +72,7 @@ public final class TestUtil
                 base = new File( "target/tck-resources/" + urlFile.getName() );
                 base.getParentFile().mkdirs();
 
-                logger.info("unpacking test resources in jar: " + url);
+                logger.info( "unpacking test resources in jar: " + url );
                 JarFile jf = null;
                 try
                 {
