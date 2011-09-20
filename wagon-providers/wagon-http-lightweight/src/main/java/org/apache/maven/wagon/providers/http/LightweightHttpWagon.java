@@ -52,11 +52,12 @@ import java.util.Properties;
 import java.util.zip.GZIPInputStream;
 
 /**
- * LightweightHttpWagon
+ * LightweightHttpWagon, using JDK's HttpURLConnection.
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  * @plexus.component role="org.apache.maven.wagon.Wagon" role-hint="http" instantiation-strategy="per-lookup"
+ * @see HttpURLConnection
  */
 public class LightweightHttpWagon
     extends StreamWagon

@@ -24,7 +24,7 @@ import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 
 /**
- * LIghtweightHttpsWagon 
+ * LightweightHttpsWagon, using JDK's HttpURLConnection.
  *
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
  * @version $Id$
