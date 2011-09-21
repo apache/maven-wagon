@@ -74,7 +74,7 @@ public class HtmlFileListParser
         }
         catch ( URISyntaxException e )
         {
-            throw new TransferFailedException( "Unable to parse as URI: " + baseurl );
+            throw new TransferFailedException( "Unable to parse as URI: " + baseurl, e );
         }
         catch ( IOException e )
         {

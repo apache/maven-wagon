@@ -50,20 +50,21 @@ import java.util.Calendar;
 import java.util.List;
 
 /**
- * FtpWagon 
+ * FtpWagon
  *
  * @version $Id$
- * 
- * @plexus.component role="org.apache.maven.wagon.Wagon" 
- *   role-hint="ftp"
- *   instantiation-strategy="per-lookup"
+ * @plexus.component role="org.apache.maven.wagon.Wagon"
+ * role-hint="ftp"
+ * instantiation-strategy="per-lookup"
  */
 public class FtpWagon
     extends StreamWagon
 {
     private FTPClient ftp;
-    
-    /** @plexus.configuration default-value="true" */
+
+    /**
+     * @plexus.configuration default-value="true"
+     */
     private boolean passiveMode = true;
 
     public boolean isPassiveMode()
@@ -109,7 +110,7 @@ public class FtpWagon
         ftp = new FTPClient();
         ftp.setDefaultTimeout( getTimeout() );
         ftp.setDataTimeout( getTimeout() );
-        
+
         ftp.addProtocolCommandListener( new PrintCommandListener( this ) );
 
         try
@@ -170,7 +171,7 @@ public class FtpWagon
             // Use passive mode as default because most of us are
             // behind firewalls these days.
             if ( isPassiveMode() )
-            {                
+            {
                 ftp.enterLocalPassiveMode();
             }
         }
@@ -307,8 +308,9 @@ public class FtpWagon
 
             if ( os == null )
             {
-                String msg = "Cannot transfer resource:  '" + resource
-                    + "'. Output stream is null. FTP Server response: " + ftp.getReplyString();
+                String msg =
+                    "Cannot transfer resource:  '" + resource + "'. Output stream is null. FTP Server response: "
+                        + ftp.getReplyString();
 
                 throw new TransferFailedException( msg );
 
@@ -426,32 +428,32 @@ public class FtpWagon
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         Resource resource = new Resource( destinationDirectory );
-        
-        try 
+
+        try
         {
             ftpChangeDirectory( resource );
-    
+
             String filename = PathUtils.filename( resource.getName() );
             FTPFile[] ftpFiles = ftp.listFiles( filename );
-    
+
             if ( ftpFiles == null || ftpFiles.length <= 0 )
             {
                 throw new ResourceDoesNotExistException( "Could not find file: '" + resource + "'" );
             }
-            
+
             List<String> ret = new ArrayList<String>();
             for ( int i = 0; i < ftpFiles.length; i++ )
             {
                 String name = ftpFiles[i].getName();
-                
+
                 if ( ftpFiles[i].isDirectory() && !name.endsWith( "/" ) )
                 {
                     name += "/";
                 }
-                
+
                 ret.add( name );
             }
-            
+
             return ret;
         }
         catch ( IOException e )
@@ -473,9 +475,9 @@ public class FtpWagon
             int status = ftp.stat( filename );
 
             return ( ( status == FTPReply.FILE_STATUS ) || ( status == FTPReply.DIRECTORY_STATUS )
-                     || ( status == FTPReply.FILE_STATUS_OK ) // not in the RFC but used by some FTP servers
-                     || ( status == FTPReply.COMMAND_OK )     // not in the RFC but used by some FTP servers
-                     || ( status == FTPReply.SYSTEM_STATUS ) );
+                || ( status == FTPReply.FILE_STATUS_OK ) // not in the RFC but used by some FTP servers
+                || ( status == FTPReply.COMMAND_OK )     // not in the RFC but used by some FTP servers
+                || ( status == FTPReply.SYSTEM_STATUS ) );
         }
         catch ( IOException e )
         {
@@ -486,7 +488,7 @@ public class FtpWagon
             return false;
         }
     }
-    
+
     public boolean supportsDirectoryCopy()
     {
         return true;
@@ -502,31 +504,32 @@ public class FtpWagon
             if ( !ftp.changeWorkingDirectory( getRepository().getBasedir() ) )
             {
                 RepositoryPermissions permissions = getRepository().getPermissions();
-                if ( !makeFtpDirectoryRecursive( getRepository().getBasedir() , permissions ) )
+                if ( !makeFtpDirectoryRecursive( getRepository().getBasedir(), permissions ) )
                 {
-                    throw new TransferFailedException( "Required directory: '" + getRepository().getBasedir() + "' "
-                                    + "could not get created" );
+                    throw new TransferFailedException(
+                        "Required directory: '" + getRepository().getBasedir() + "' " + "could not get created" );
                 }
 
                 // try it again sam ...
                 if ( !ftp.changeWorkingDirectory( getRepository().getBasedir() ) )
                 {
                     throw new TransferFailedException( "Required directory: '" + getRepository().getBasedir() + "' "
-                                    + "is missing and could not get created" );
+                                                           + "is missing and could not get created" );
                 }
             }
         }
         catch ( IOException e )
         {
-            throw new TransferFailedException( "Cannot change to root path " + getRepository().getBasedir() );
+            throw new TransferFailedException( "Cannot change to root path " + getRepository().getBasedir(), e );
         }
 
-        fireTransferDebug( "Recursively uploading directory " + sourceDirectory.getAbsolutePath() + " as "
-                        + destinationDirectory );
+        fireTransferDebug(
+            "Recursively uploading directory " + sourceDirectory.getAbsolutePath() + " as " + destinationDirectory );
         ftpRecursivePut( sourceDirectory, destinationDirectory );
     }
 
-    private void ftpRecursivePut( File sourceFile, String fileName ) throws TransferFailedException
+    private void ftpRecursivePut( File sourceFile, String fileName )
+        throws TransferFailedException
     {
         final RepositoryPermissions permissions = repository.getPermissions();
 
@@ -546,21 +549,23 @@ public class FtpWagon
                         {
                             if ( !ftp.changeWorkingDirectory( fileName ) )
                             {
-                                throw new TransferFailedException( "Unable to change cwd on ftp server to " + fileName
-                                                + " when processing " + sourceFile.getAbsolutePath() );
+                                throw new TransferFailedException(
+                                    "Unable to change cwd on ftp server to " + fileName + " when processing "
+                                        + sourceFile.getAbsolutePath() );
                             }
                         }
                         else
                         {
-                            throw new TransferFailedException( "Unable to create directory " + fileName
-                                            + " when processing " + sourceFile.getAbsolutePath() );
+                            throw new TransferFailedException(
+                                "Unable to create directory " + fileName + " when processing "
+                                    + sourceFile.getAbsolutePath() );
                         }
                     }
                 }
                 catch ( IOException e )
                 {
-                    throw new TransferFailedException( "IOException caught while processing path at "
-                                    + sourceFile.getAbsolutePath(), e );
+                    throw new TransferFailedException(
+                        "IOException caught while processing path at " + sourceFile.getAbsolutePath(), e );
                 }
             }
 
@@ -594,19 +599,19 @@ public class FtpWagon
             catch ( IOException e )
             {
                 throw new TransferFailedException( "IOException caught while attempting to step up to parent directory"
-                                                   + " after successfully processing " + sourceFile.getAbsolutePath(),
-                                                   e );
+                                                       + " after successfully processing "
+                                                       + sourceFile.getAbsolutePath(), e );
             }
         }
         else
         {
             // Oh how I hope and pray, in denial, but today I am still just a file.
-            
+
             FileInputStream sourceFileStream = null;
             try
             {
                 sourceFileStream = new FileInputStream( sourceFile );
-                
+
                 // It's a file. Upload it in the current directory.
                 if ( ftp.storeFile( fileName, sourceFileStream ) )
                 {
@@ -642,14 +647,14 @@ public class FtpWagon
                 {
                     String msg =
                         "Cannot transfer resource:  '" + sourceFile.getAbsolutePath() + "' FTP Server response: "
-                                        + ftp.getReplyString();
+                            + ftp.getReplyString();
                     throw new TransferFailedException( msg );
                 }
             }
             catch ( IOException e )
             {
-                throw new TransferFailedException( "IOException caught while attempting to upload "
-                                + sourceFile.getAbsolutePath(), e );
+                throw new TransferFailedException(
+                    "IOException caught while attempting to upload " + sourceFile.getAbsolutePath(), e );
             }
             finally
             {
@@ -703,7 +708,7 @@ public class FtpWagon
     /**
      * Recursively create directories.
      *
-     * @param fileName the path to create (might be nested)
+     * @param fileName    the path to create (might be nested)
      * @param permissions
      * @return ok
      * @throws IOException
@@ -712,7 +717,7 @@ public class FtpWagon
         throws IOException
     {
         if ( fileName == null || fileName.length() == 0
-            || fileName.replace('/',  '_').trim().length() == 0 ) // if a string is '/', '//' or similar
+            || fileName.replace( '/', '_' ).trim().length() == 0 ) // if a string is '/', '//' or similar
         {
             return false;
         }
@@ -734,8 +739,7 @@ public class FtpWagon
             slashPos = fileName.indexOf( "/" );
         }
 
-        if ( slashPos >= 0
-             && slashPos < ( fileName.length() - 1 ) ) // not only a slash at the end, like in 'newDir/'
+        if ( slashPos >= 0 && slashPos < ( fileName.length() - 1 ) ) // not only a slash at the end, like in 'newDir/'
         {
             if ( oldPwd == null )
             {

@@ -19,11 +19,6 @@ package org.apache.maven.wagon.providers.ssh.external;
  * under the License.
  */
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.List;
-import java.util.Locale;
-
 import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.CommandExecutionException;
 import org.apache.maven.wagon.CommandExecutor;
@@ -45,6 +40,11 @@ import org.codehaus.plexus.util.cli.CommandLineException;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
 import org.codehaus.plexus.util.cli.Commandline;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.List;
+import java.util.Locale;
+
 /**
  * SCP deployer using "external" scp program.  To allow for
  * ssh-agent type behavior, until we can construct a Java SSH Agent and interface for JSch.
@@ -52,10 +52,9 @@ import org.codehaus.plexus.util.cli.Commandline;
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  * @version $Id:ScpExternalWagon.java 477260 2006-11-20 17:11:39Z brett $
  * @todo [BP] add compression flag
- * 
- * @plexus.component role="org.apache.maven.wagon.Wagon" 
- *   role-hint="scpexe"
- *   instantiation-strategy="per-lookup"
+ * @plexus.component role="org.apache.maven.wagon.Wagon"
+ * role-hint="scpexe"
+ * instantiation-strategy="per-lookup"
  */
 public class ScpExternalWagon
     extends AbstractWagon
@@ -130,7 +129,7 @@ public class ScpExternalWagon
         {
             username = authenticationInfo.getUserName();
         }
-        
+
         if ( username == null )
         {
             return getRepository().getHost();
@@ -140,7 +139,7 @@ public class ScpExternalWagon
             return username + "@" + getRepository().getHost();
         }
     }
-    
+
     public void executeCommand( String command )
         throws CommandExecutionException
     {
@@ -161,7 +160,7 @@ public class ScpExternalWagon
         }
         catch ( FileNotFoundException e )
         {
-            throw new CommandExecutionException( e.getMessage() );
+            throw new CommandExecutionException( e.getMessage(), e );
         }
         Commandline cl = createBaseCommandLine( putty, sshExecutable, privateKey );
 
@@ -183,7 +182,7 @@ public class ScpExternalWagon
         {
             cl.createArgument().setLine( sshArgs );
         }
-        
+
         String remoteHost = this.buildRemoteHost();
 
         cl.createArgument().setValue( remoteHost );
@@ -268,7 +267,7 @@ public class ScpExternalWagon
         catch ( FileNotFoundException e )
         {
             fireSessionConnectionRefused();
-            
+
             throw new AuthorizationException( e.getMessage() );
         }
         Commandline cl = createBaseCommandLine( putty, scpExecutable, privateKey );
@@ -286,12 +285,12 @@ public class ScpExternalWagon
         {
             cl.createArgument().setLine( scpArgs );
         }
-        
+
         String resourceName = normalizeResource( resource );
         String remoteFile = getRepository().getBasedir() + "/" + resourceName;
-        
+
         remoteFile = StringUtils.replace( remoteFile, " ", "\\ " );
-        
+
         String qualifiedRemoteFile = this.buildRemoteHost() + ":" + remoteFile;
         if ( put )
         {
@@ -312,15 +311,15 @@ public class ScpExternalWagon
             int exitCode = CommandLineUtils.executeCommandLine( cl, null, err );
             if ( exitCode != 0 )
             {
-                if ( !put
-                    && err.getOutput().trim().toLowerCase( Locale.ENGLISH ).indexOf( "no such file or directory" ) != -1 )
+                if ( !put && err.getOutput().trim().toLowerCase( Locale.ENGLISH ).indexOf( "no such file or directory" )
+                    != -1 )
                 {
                     throw new ResourceDoesNotExistException( err.getOutput() );
                 }
                 else
                 {
-                    TransferFailedException e = new TransferFailedException( "Exit code: " + exitCode + " - "
-                                                                             + err.getOutput() );
+                    TransferFailedException e =
+                        new TransferFailedException( "Exit code: " + exitCode + " - " + err.getOutput() );
 
                     fireTransferError( resource, e, put ? TransferEvent.REQUEST_PUT : TransferEvent.REQUEST_GET );
 
@@ -391,12 +390,12 @@ public class ScpExternalWagon
         catch ( CommandExecutionException e )
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
-            
+
             throw new TransferFailedException( "Error executing command for transfer", e );
         }
-        
+
         resource.setContentLength( source.length() );
-        
+
         resource.setLastModified( source.lastModified() );
 
         firePutStarted( resource, source );
@@ -438,7 +437,7 @@ public class ScpExternalWagon
         Resource resource = new Resource( path );
 
         fireGetInitiated( resource, destination );
-        
+
         createParentDirectories( destination );
 
         fireGetStarted( resource, destination );
