@@ -125,16 +125,6 @@ public class EmbeddedScpWagonTest
         authInfo.setUserName( TestData.getUserName() );
         authInfo.setPassword( TestData.getUserPassword() );
 
-        /*
-        File privateKey = TestData.getPrivateKey();
-
-        if ( privateKey.exists() )
-        {
-            authInfo.setPrivateKey( privateKey.getAbsolutePath() );
-
-            authInfo.setPassphrase( "" );
-        }*/
-
         return authInfo;
     }
 
@@ -149,4 +139,6 @@ public class EmbeddedScpWagonTest
     {
         return false;
     }
+
+
 }

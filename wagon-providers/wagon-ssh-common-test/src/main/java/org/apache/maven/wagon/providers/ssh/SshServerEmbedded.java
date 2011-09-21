@@ -21,7 +21,6 @@ package org.apache.maven.wagon.providers.ssh;
 import org.apache.mina.core.session.IoSession;
 import org.apache.sshd.SshServer;
 import org.apache.sshd.common.Session;
-import org.apache.sshd.common.keyprovider.ResourceKeyPairProvider;
 import org.apache.sshd.common.session.AbstractSession;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.CommandFactory;
@@ -31,12 +30,14 @@ import org.apache.sshd.server.SshFile;
 import org.apache.sshd.server.auth.UserAuthPassword;
 import org.apache.sshd.server.auth.UserAuthPublicKey;
 import org.apache.sshd.server.filesystem.NativeSshFile;
+import org.apache.sshd.server.keyprovider.PEMGeneratorHostKeyProvider;
 import org.apache.sshd.server.session.SessionFactory;
 import org.apache.sshd.server.shell.ProcessShellFactory;
 import org.codehaus.plexus.util.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -60,6 +61,7 @@ public class SshServerEmbedded
 
     private boolean keyAuthz;
 
+
     /**
      * @param wagonProtocol    scp scpexe
      * @param sshKeysResources paths in the classlaoder with ssh keys
@@ -71,6 +73,8 @@ public class SshServerEmbedded
         this.sshKeysResources = sshKeysResources;
 
         this.sshd = SshServer.setUpDefaultServer();
+
+        //this.sshd.setKeyExchangeFactories(  );
 
         this.keyAuthz = keyAuthz;
 
@@ -93,10 +97,20 @@ public class SshServerEmbedded
 
         sshd.setUserAuthFactories( Arrays.asList( new UserAuthPublicKey.Factory(), new UserAuthPassword.Factory() ) );
 
-        ResourceKeyPairProvider resourceKeyPairProvider =
-            new ResourceKeyPairProvider( sshKeysResources.toArray( new String[sshKeysResources.size()] ) );
+        //ResourceKeyPairProvider resourceKeyPairProvider =
+        //    new ResourceKeyPairProvider( sshKeysResources.toArray( new String[sshKeysResources.size()] ) );
 
-        sshd.setKeyPairProvider( resourceKeyPairProvider );
+        File path = new File( "target/keys" );
+        path.mkdirs();
+        path = new File( path, "simple.key" );
+        path.delete();
+
+        PEMGeneratorHostKeyProvider provider = new PEMGeneratorHostKeyProvider();
+        provider.setAlgorithm( "RSA" );
+        provider.setKeySize( 512 );
+        provider.setPath( path.getPath() );
+
+        sshd.setKeyPairProvider( provider );
         SessionFactory sessionFactory = new SessionFactory()
         {
             @Override

@@ -18,10 +18,20 @@ package org.apache.maven.wagon.providers.ssh;
  * under the License.
  */
 
+import org.apache.mina.util.Base64;
 import org.apache.sshd.server.PublickeyAuthenticator;
 import org.apache.sshd.server.session.ServerSession;
+import org.codehaus.plexus.util.IOUtil;
 
+import javax.crypto.Cipher;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.DSAPublicKeySpec;
+import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,8 +57,29 @@ public class TestPublickeyAuthenticator
         {
             return false;
         }
-        publickeyAuthenticatorRequests.add( new PublickeyAuthenticatorRequest( username, key ) );
-        return true;
+        try
+        {
+            InputStream is =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream( "ssh-keys/id_rsa.pub" );
+            PublicKey publicKey = decodePublicKey( IOUtil.toString( is ) );
+            publickeyAuthenticatorRequests.add( new PublickeyAuthenticatorRequest( username, key ) );
+
+            return ( (RSAPublicKey) publicKey ).getModulus().equals( ( (RSAPublicKey) publicKey ).getModulus() );
+        }
+        catch ( Exception e )
+        {
+            throw new RuntimeException( e.getMessage(), e );
+        }
+    }
+
+    public static byte[] decrypt( byte[] text, PrivateKey key )
+        throws Exception
+    {
+        byte[] dectyptedText = null;
+        Cipher cipher = Cipher.getInstance( "RSA/ECB/PKCS1Padding" );
+        cipher.init( Cipher.DECRYPT_MODE, key );
+        dectyptedText = cipher.doFinal( text );
+        return dectyptedText;
     }
 
     public static class PublickeyAuthenticatorRequest
@@ -74,4 +105,74 @@ public class TestPublickeyAuthenticator
             return sb.toString();
         }
     }
+
+    private byte[] bytes;
+
+    private int pos;
+
+    public PublicKey decodePublicKey( String keyLine )
+        throws Exception
+    {
+        bytes = null;
+        pos = 0;
+
+        for ( String part : keyLine.split( " " ) )
+        {
+            if ( part.startsWith( "AAAA" ) )
+            {
+                bytes = Base64.decodeBase64( part.getBytes() );
+                break;
+            }
+        }
+        if ( bytes == null )
+        {
+            throw new IllegalArgumentException( "no Base64 part to decode" );
+        }
+
+        String type = decodeType();
+        if ( type.equals( "ssh-rsa" ) )
+        {
+            BigInteger e = decodeBigInt();
+            BigInteger m = decodeBigInt();
+            RSAPublicKeySpec spec = new RSAPublicKeySpec( m, e );
+            return KeyFactory.getInstance( "RSA" ).generatePublic( spec );
+        }
+        else if ( type.equals( "ssh-dss" ) )
+        {
+            BigInteger p = decodeBigInt();
+            BigInteger q = decodeBigInt();
+            BigInteger g = decodeBigInt();
+            BigInteger y = decodeBigInt();
+            DSAPublicKeySpec spec = new DSAPublicKeySpec( y, p, q, g );
+            return KeyFactory.getInstance( "DSA" ).generatePublic( spec );
+        }
+        else
+        {
+            throw new IllegalArgumentException( "unknown type " + type );
+        }
+    }
+
+    private String decodeType()
+    {
+        int len = decodeInt();
+        String type = new String( bytes, pos, len );
+        pos += len;
+        return type;
+    }
+
+    private int decodeInt()
+    {
+        return ( ( bytes[pos++] & 0xFF ) << 24 ) | ( ( bytes[pos++] & 0xFF ) << 16 ) | ( ( bytes[pos++] & 0xFF ) << 8 )
+            | ( bytes[pos++] & 0xFF );
+    }
+
+    private BigInteger decodeBigInt()
+    {
+        int len = decodeInt();
+        byte[] bigIntBytes = new byte[len];
+        System.arraycopy( bytes, pos, bigIntBytes, 0, len );
+        pos += len;
+        return new BigInteger( bigIntBytes );
+    }
+
 }
