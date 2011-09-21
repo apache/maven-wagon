@@ -22,34 +22,14 @@ package org.apache.maven.wagon.providers.ssh.jsch;
 import org.apache.maven.wagon.StreamingWagonTestCase;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
-import org.apache.maven.wagon.providers.ssh.ShellCommand;
 import org.apache.maven.wagon.providers.ssh.SshServerEmbedded;
 import org.apache.maven.wagon.providers.ssh.TestData;
 import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.apache.mina.core.session.IoSession;
-import org.apache.sshd.SshServer;
-import org.apache.sshd.common.Session;
-import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
-import org.apache.sshd.common.session.AbstractSession;
-import org.apache.sshd.server.Command;
-import org.apache.sshd.server.CommandFactory;
-import org.apache.sshd.server.FileSystemFactory;
-import org.apache.sshd.server.FileSystemView;
-import org.apache.sshd.server.PublickeyAuthenticator;
-import org.apache.sshd.server.SshFile;
-import org.apache.sshd.server.auth.UserAuthPassword;
-import org.apache.sshd.server.auth.UserAuthPublicKey;
-import org.apache.sshd.server.filesystem.NativeSshFile;
-import org.apache.sshd.server.session.ServerSession;
-import org.apache.sshd.server.session.SessionFactory;
-import org.apache.sshd.server.shell.ProcessShellFactory;
-import org.codehaus.plexus.util.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.PublicKey;
 import java.util.Arrays;
 
 /**
@@ -99,9 +79,9 @@ public class ScpWagonTest
     {
         super.setUp();
 
-        File sshKey = new File( System.getProperty( "sshKeysPath", "src/test/ssh-keys" ), "id_rsa" );
+        String sshKeyResource = "ssh-keys/id_rsa";
 
-        sshServerEmbedded = new SshServerEmbedded( getProtocol(), Arrays.asList( sshKey.getPath() ) );
+        sshServerEmbedded = new SshServerEmbedded( getProtocol(), Arrays.asList( sshKeyResource ) );
 
         sshServerEmbedded.start();
         System.out.println( "sshd on port " + sshServerEmbedded.getPort() );
@@ -153,8 +133,6 @@ public class ScpWagonTest
     {
         return new File( repository.getBasedir(), resource.getName() ).lastModified();
     }
-
-
 
 
 }

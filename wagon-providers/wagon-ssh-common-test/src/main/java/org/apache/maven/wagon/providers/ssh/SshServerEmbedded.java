@@ -21,7 +21,7 @@ package org.apache.maven.wagon.providers.ssh;
 import org.apache.mina.core.session.IoSession;
 import org.apache.sshd.SshServer;
 import org.apache.sshd.common.Session;
-import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
+import org.apache.sshd.common.keyprovider.ResourceKeyPairProvider;
 import org.apache.sshd.common.session.AbstractSession;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.CommandFactory;
@@ -55,13 +55,17 @@ public class SshServerEmbedded
 
     private SshServer sshd;
 
-    private List<String> sshKeysFiles = new ArrayList<String>();
+    private List<String> sshKeysResources = new ArrayList<String>();
 
-    public SshServerEmbedded( String wagonProtocol, List<String> sshKeysFiles )
+    /**
+     * @param wagonProtocol    scp scpexe
+     * @param sshKeysResources paths in the classlaoder with ssh keys
+     */
+    public SshServerEmbedded( String wagonProtocol, List<String> sshKeysResources )
     {
         this.wagonProtocol = wagonProtocol;
 
-        this.sshKeysFiles = sshKeysFiles;
+        this.sshKeysResources = sshKeysResources;
 
         this.sshd = SshServer.setUpDefaultServer();
 
@@ -86,11 +90,10 @@ public class SshServerEmbedded
             }
         } );
 
-        FileKeyPairProvider fileKeyPairProvider = new FileKeyPairProvider();
+        ResourceKeyPairProvider resourceKeyPairProvider =
+            new ResourceKeyPairProvider( sshKeysResources.toArray( new String[sshKeysResources.size()] ) );
 
-        fileKeyPairProvider.setFiles( sshKeysFiles.toArray( new String[sshKeysFiles.size()] ) );
-
-        sshd.setKeyPairProvider( fileKeyPairProvider );
+        sshd.setKeyPairProvider( resourceKeyPairProvider );
         SessionFactory sessionFactory = new SessionFactory()
         {
             @Override

@@ -107,5 +107,10 @@ under the License.
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>windauze</id>
+
+
+    </profile>
   </profiles>
 </project>
