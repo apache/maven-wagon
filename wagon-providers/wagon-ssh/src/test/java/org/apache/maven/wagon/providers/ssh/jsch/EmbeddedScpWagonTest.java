@@ -20,20 +20,79 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  */
 
 import org.apache.maven.wagon.StreamingWagonTestCase;
+import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.providers.ssh.SshServerEmbedded;
 import org.apache.maven.wagon.providers.ssh.TestData;
+import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  */
-public class ScpWagonTest
+public class EmbeddedScpWagonTest
     extends StreamingWagonTestCase
 {
+
+    SshServerEmbedded sshServerEmbedded;
+
+    @Override
+    protected Wagon getWagon()
+        throws Exception
+    {
+        ScpWagon scpWagon = (ScpWagon) super.getWagon();
+        scpWagon.setInteractive( false );
+        scpWagon.setKnownHostsProvider( new KnownHostsProvider()
+        {
+            public void storeKnownHosts( String contents )
+                throws IOException
+            {
+
+            }
+
+            public void setHostKeyChecking( String hostKeyChecking )
+            {
+            }
+
+            public String getHostKeyChecking()
+            {
+                return "no";
+            }
+
+            public String getContents()
+            {
+                return null;
+            }
+        } );
+        return scpWagon;
+    }
+
+    @Override
+    protected void setUp()
+        throws Exception
+    {
+        super.setUp();
+
+        String sshKeyResource = "ssh-keys/id_rsa";
+
+        sshServerEmbedded = new SshServerEmbedded( getProtocol(), Arrays.asList( sshKeyResource ) );
+
+        sshServerEmbedded.start();
+        System.out.println( "sshd on port " + sshServerEmbedded.getPort() );
+    }
+
+    @Override
+    protected void tearDownWagonTestingFixtures()
+        throws Exception
+    {
+        sshServerEmbedded.stop( true );
+    }
 
     protected String getProtocol()
     {
@@ -43,12 +102,13 @@ public class ScpWagonTest
     @Override
     protected int getTestRepositoryPort()
     {
-        return 0;  // not used
+        return sshServerEmbedded.getPort();
     }
+
 
     public String getTestRepositoryUrl()
     {
-        return TestData.getTestRepositoryUrl( getTestRepositoryPort() );
+        return TestData.getTestRepositoryUrl( sshServerEmbedded.getPort() );
     }
 
     protected AuthenticationInfo getAuthInfo()
@@ -72,5 +132,12 @@ public class ScpWagonTest
     protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
     {
         return new File( repository.getBasedir(), resource.getName() ).lastModified();
+    }
+
+
+    public void testStreamingWagon()
+        throws Exception
+    {
+        super.testStreamingWagon();
     }
 }

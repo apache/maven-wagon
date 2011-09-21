@@ -17,7 +17,8 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -90,16 +91,15 @@ under the License.
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
-              <!-- Tests that require an ssh server on localhost -->
+              <!-- Tests that currently doesn't work with embedded ssh server -->
               <excludes>
                 <exclude>**/SftpWagonTest.*</exclude>
                 <exclude>**/SshCommandExecutorTest.*</exclude>
                 <exclude>**/KnownHostsProviderTest.*</exclude>
-                <exclude>**/ScpWagonW*Test.*</exclude>
+                <exclude>**/ScpWagon*Test.*</exclude>
               </excludes>
               <systemPropertyVariables>
                 <java.io.tmpdir>${project.build.outputDirectory}</java.io.tmpdir>
-                <sshKeysPath>${basedir}/src/test/ssh-keys</sshKeysPath>
                 <test.user>olamy</test.user>
               </systemPropertyVariables>
             </configuration>
@@ -109,8 +109,32 @@ under the License.
     </profile>
     <profile>
       <id>windauze</id>
-
-
+      <activation>
+        <os>
+          <family>windows</family>
+        </os>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <!-- Tests that currently doesn't work with embedded ssh server and embedded as won't work on a windauze env -->
+              <excludes>
+                <exclude>**/SftpWagonTest.*</exclude>
+                <exclude>**/SshCommandExecutorTest.*</exclude>
+                <exclude>**/KnownHostsProviderTest.*</exclude>
+                <exclude>**/ScpWagon*Test.*</exclude>
+                <exclude>**/Embedded*Test.*</exclude>
+              </excludes>
+              <systemPropertyVariables>
+                <java.io.tmpdir>${project.build.outputDirectory}</java.io.tmpdir>
+                <test.user>olamy</test.user>
+              </systemPropertyVariables>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 </project>
