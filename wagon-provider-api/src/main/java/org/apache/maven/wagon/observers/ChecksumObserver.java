@@ -69,7 +69,7 @@ public class ChecksumObserver
     }
 
     /**
-     * @see org.apache.maven.wagon.events.TransferListener#transferProgress(org.apache.maven.wagon.events.TransferEvent,byte[],int)
+     * @see org.apache.maven.wagon.events.TransferListener#transferProgress(org.apache.maven.wagon.events.TransferEvent, byte[], int)
      */
     public void transferProgress( TransferEvent transferEvent, byte[] buffer, int length )
     {
@@ -84,7 +84,7 @@ public class ChecksumObserver
     public void transferError( TransferEvent transferEvent )
     {
         digester.reset();
-        
+
         actualChecksum = null;
     }
 
@@ -117,7 +117,7 @@ public class ChecksumObserver
             throw new IllegalArgumentException( "Unrecognised length for binary data: " + bitLength + " bits" );
         }
 
-        String retValue = "";
+        StringBuilder retValue = new StringBuilder();
 
         for ( int i = 0; i < binaryData.length; i++ )
         {
@@ -125,15 +125,15 @@ public class ChecksumObserver
 
             if ( t.length() == 1 )
             {
-                retValue += ( "0" + t );
+                retValue.append( '0' ).append( t );
             }
             else
             {
-                retValue += t;
+                retValue.append( t );
             }
         }
 
-        return retValue.trim();
+        return retValue.toString().trim();
     }
 
 

@@ -98,6 +98,7 @@ public abstract class AbstractHttpClientWagon
 {
 
     private BasicHttpContext localContext;
+
     private final class RequestEntityImplementation
         implements HttpEntity
     {
@@ -408,7 +409,6 @@ public abstract class AbstractHttpClientWagon
 
             client.getCredentialsProvider().setCredentials( new AuthScope( host, port ), creds );
 
-
             AuthCache authCache = new BasicAuthCache();
             BasicScheme basicAuth = new BasicScheme();
             HttpHost targetHost = new HttpHost( repository.getHost(), repository.getPort(), repository.getProtocol() );
@@ -493,13 +493,13 @@ public abstract class AbstractHttpClientWagon
     private void put( final InputStream stream, Resource resource, File source )
         throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
-        String url = getRepository().getUrl();
+        StringBuilder url = new StringBuilder( getRepository().getUrl() );
         String[] parts = StringUtils.split( resource.getName(), "/" );
-        for ( int i = 0; i < parts.length; i++ )
+        for ( String part : parts )
         {
             // TODO: Fix encoding...
             // url += "/" + URLEncoder.encode( parts[i], System.getProperty("file.encoding") );
-            url += "/" + URLEncoder.encode( parts[i] );
+            url.append( '/' ).append( URLEncoder.encode( part ) );
         }
 
         //Parent directories need to be created before posting
@@ -516,7 +516,7 @@ public abstract class AbstractHttpClientWagon
             fireTransferError( resource, e, TransferEvent.REQUEST_GET );
         }
 
-        HttpPut putMethod = new HttpPut( url );
+        HttpPut putMethod = new HttpPut( url.toString() );
 
         firePutStarted( resource, source );
 
