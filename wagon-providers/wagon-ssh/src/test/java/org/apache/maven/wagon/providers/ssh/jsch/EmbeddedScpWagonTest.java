@@ -135,9 +135,9 @@ public class EmbeddedScpWagonTest
     }
 
 
-    public void testStreamingWagon()
-        throws Exception
+    @Override
+    protected boolean supportsGetIfNewer()
     {
-        super.testStreamingWagon();
+        return false;
     }
 }
