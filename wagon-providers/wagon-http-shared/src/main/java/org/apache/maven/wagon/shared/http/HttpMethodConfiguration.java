@@ -33,17 +33,17 @@ import java.util.regex.Pattern;
 
 public class HttpMethodConfiguration
 {
-    
+
     public static final int DEFAULT_CONNECTION_TIMEOUT = 60000;
 
     private static final String COERCE_PATTERN = "%(\\w+),(.+)";
-    
+
     private Boolean useDefaultHeaders;
-    
+
     private Properties headers = new Properties();
-    
+
     private Properties params = new Properties();
-    
+
     private int connectionTimeout = DEFAULT_CONNECTION_TIMEOUT;
 
     public boolean isUseDefaultHeaders()
@@ -56,12 +56,12 @@ public class HttpMethodConfiguration
         this.useDefaultHeaders = Boolean.valueOf( useDefaultHeaders );
         return this;
     }
-    
+
     public Boolean getUseDefaultHeaders()
     {
         return useDefaultHeaders;
     }
-    
+
     public HttpMethodConfiguration addHeader( String header, String value )
     {
         headers.setProperty( header, value );
@@ -78,7 +78,7 @@ public class HttpMethodConfiguration
         this.headers = headers;
         return this;
     }
-    
+
     public HttpMethodConfiguration addParam( String param, String value )
     {
         params.setProperty( param, value );
@@ -113,12 +113,12 @@ public class HttpMethodConfiguration
         {
             return null;
         }
-        
+
         HttpMethodParams p = new HttpMethodParams();
         p.setDefaults( defaults );
-        
+
         fillParams( p );
-        
+
         return p;
     }
 
@@ -128,7 +128,7 @@ public class HttpMethodConfiguration
         {
             return false;
         }
-        
+
         return true;
     }
 
@@ -138,30 +138,30 @@ public class HttpMethodConfiguration
         {
             return;
         }
-        
+
         if ( connectionTimeout > 0 )
         {
             p.setSoTimeout( connectionTimeout );
         }
-        
+
         if ( params != null )
         {
             Pattern coercePattern = Pattern.compile( COERCE_PATTERN );
-            
+
             for ( Iterator it = params.entrySet().iterator(); it.hasNext(); )
             {
                 Map.Entry entry = (Map.Entry) it.next();
-                
+
                 String key = (String) entry.getKey();
                 String value = (String) entry.getValue();
-                
+
                 Matcher matcher = coercePattern.matcher( value );
                 if ( matcher.matches() )
                 {
                     char type = matcher.group( 1 ).charAt( 0 );
                     value = matcher.group( 2 );
-                    
-                    switch( type )
+
+                    switch ( type )
                     {
                         case 'i':
                         {
@@ -191,14 +191,14 @@ public class HttpMethodConfiguration
                             {
                                 collection.add( entries[i].trim() );
                             }
-                            
+
                             p.setParameter( key, collection );
                             break;
                         }
                         case 'm':
                         {
                             String[] entries = value.split( "," );
-                            
+
                             Map map = new LinkedHashMap();
                             for ( int i = 0; i < entries.length; i++ )
                             {
@@ -207,12 +207,12 @@ public class HttpMethodConfiguration
                                 {
                                     break;
                                 }
-                                
+
                                 String mapKey = entries[i].substring( 0, idx );
                                 String mapVal = entries[i].substring( idx + 1, entries[i].length() );
                                 map.put( mapKey.trim(), mapVal.trim() );
                             }
-                            
+
                             p.setParameter( key, map );
                             break;
                         }
@@ -230,52 +230,53 @@ public class HttpMethodConfiguration
     {
         if ( headers == null )
         {
-            return null;
+            return new Header[0];
         }
-        
+
         Header[] result = new Header[headers.size()];
-        
+
         int index = 0;
         for ( Iterator it = headers.entrySet().iterator(); it.hasNext(); )
         {
             Map.Entry entry = (Map.Entry) it.next();
-            
+
             String key = (String) entry.getKey();
             String value = (String) entry.getValue();
-            
+
             Header header = new Header( key, value );
             result[index++] = header;
         }
-        
+
         return result;
     }
-    
+
     private HttpMethodConfiguration copy()
     {
         HttpMethodConfiguration copy = new HttpMethodConfiguration();
-        
+
         copy.setConnectionTimeout( getConnectionTimeout() );
         if ( getHeaders() != null )
         {
             copy.setHeaders( getHeaders() );
         }
-        
+
         if ( getParams() != null )
         {
             copy.setParams( getParams() );
         }
 
         copy.setUseDefaultHeaders( isUseDefaultHeaders() );
-        
+
         return copy;
     }
 
-    public static HttpMethodConfiguration merge( HttpMethodConfiguration defaults, HttpMethodConfiguration base, HttpMethodConfiguration local )
+    public static HttpMethodConfiguration merge( HttpMethodConfiguration defaults, HttpMethodConfiguration base,
+                                                 HttpMethodConfiguration local )
     {
         HttpMethodConfiguration result = merge( defaults, base );
         return merge( result, local );
     }
-    
+
     public static HttpMethodConfiguration merge( HttpMethodConfiguration base, HttpMethodConfiguration local )
     {
         if ( base == null && local == null )
@@ -293,29 +294,29 @@ public class HttpMethodConfiguration
         else
         {
             HttpMethodConfiguration result = base.copy();
-            
+
             if ( local.getConnectionTimeout() != DEFAULT_CONNECTION_TIMEOUT )
             {
                 result.setConnectionTimeout( local.getConnectionTimeout() );
             }
-            
+
             if ( local.getHeaders() != null )
             {
                 result.getHeaders().putAll( local.getHeaders() );
             }
-            
+
             if ( local.getParams() != null )
             {
                 result.getParams().putAll( local.getParams() );
             }
-            
+
             if ( local.getUseDefaultHeaders() != null )
             {
                 result.setUseDefaultHeaders( local.isUseDefaultHeaders() );
             }
-            
+
             return result;
         }
     }
-    
+
 }
