@@ -54,14 +54,15 @@ public class ScpWagonWithSshPrivateKeySearchTest
     }
 
     @Override
-    protected int getTestRepositoryPort() {
+    protected int getTestRepositoryPort()
+    {
         return 0;  // not used
     }
 
 
     public String getTestRepositoryUrl()
     {
-        return TestData.getTestRepositoryUrl();
+        return TestData.getTestRepositoryUrl( getTestRepositoryPort() );
     }
 
 

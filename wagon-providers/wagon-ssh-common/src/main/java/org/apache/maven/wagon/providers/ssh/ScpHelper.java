@@ -280,7 +280,12 @@ public class ScpHelper
             String path = getPath( repository.getBasedir(), destinationDirectory );
             Streams streams = executor.executeCommand( "ls -FlA " + path, false );
 
-            return new LSParser().parseFiles( streams.getOut() );
+            List<String> ret = new LSParser().parseFiles( streams.getOut() );
+            if (ret == null || ret.isEmpty())
+            {
+                throw new ResourceDoesNotExistException( "No such file or directory" );
+            }
+            return ret;
         }
         catch ( CommandExecutionException e )
         {
@@ -305,7 +310,7 @@ public class ScpHelper
         try
         {
             String path = getPath( repository.getBasedir(), resourceName );
-            executor.executeCommand( "ls " + path );
+            executor.executeCommand( "ls " + path, false );
 
             // Parsing of output not really needed.  As a failed ls results in a
             // CommandExectionException on the 'ls' command.

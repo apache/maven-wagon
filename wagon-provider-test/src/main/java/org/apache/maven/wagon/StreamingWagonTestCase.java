@@ -19,17 +19,17 @@ package org.apache.maven.wagon;
  * under the License.
  */
 
+import org.apache.maven.wagon.observers.ChecksumObserver;
+import org.apache.maven.wagon.resource.Resource;
+import org.codehaus.plexus.util.FileUtils;
+import org.codehaus.plexus.util.IOUtil;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
-
-import org.apache.maven.wagon.observers.ChecksumObserver;
-import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.util.IOUtil;
 
 /**
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
@@ -41,13 +41,16 @@ public abstract class StreamingWagonTestCase
     public void testStreamingWagon()
         throws Exception
     {
-        setupRepositories();
+        if ( supportsGetIfNewer() )
+        {
+            setupRepositories();
 
-        setupWagonTestingFixtures();
+            setupWagonTestingFixtures();
 
-        streamRoundTripTesting();
+            streamRoundTripTesting();
 
-        tearDownWagonTestingFixtures();
+            tearDownWagonTestingFixtures();
+        }
     }
 
     public void testFailedGetToStream()
@@ -102,8 +105,8 @@ public abstract class StreamingWagonTestCase
             setupRepositories();
             setupWagonTestingFixtures();
             int expectedSize = putFile();
-            getIfNewerToStream( getExpectedLastModifiedOnGet( testRepository, new Resource( resource ) ) + 30000,
-                                false, expectedSize );
+            getIfNewerToStream( getExpectedLastModifiedOnGet( testRepository, new Resource( resource ) ) + 30000, false,
+                                expectedSize );
         }
     }
 
@@ -143,7 +146,7 @@ public abstract class StreamingWagonTestCase
         connectWagon( wagon );
 
         OutputStream stream = new LazyFileOutputStream( destFile );
-        
+
         try
         {
             boolean result = wagon.getIfNewerToStream( this.resource, stream, timestamp );
@@ -153,7 +156,7 @@ public abstract class StreamingWagonTestCase
         {
             IOUtil.close( stream );
         }
-        
+
         disconnectWagon( wagon );
 
         assertGetIfNewerTest( progressArgumentMatcher, expectedResult, expectedSize );
@@ -252,7 +255,7 @@ public abstract class StreamingWagonTestCase
             stream = new FileInputStream( sourceFile );
             wagon.putFromStream( stream, resource, sourceFile.length(), sourceFile.lastModified() );
         }
-        catch( Exception e )
+        catch ( Exception e )
         {
             logger.error( "error while putting resources to the FTP Server", e );
         }
@@ -288,7 +291,7 @@ public abstract class StreamingWagonTestCase
             stream = new FileOutputStream( destFile );
             wagon.getToStream( this.resource, stream );
         }
-        catch( Exception e )
+        catch ( Exception e )
         {
             logger.error( "error while reading resources from the FTP Server", e );
         }

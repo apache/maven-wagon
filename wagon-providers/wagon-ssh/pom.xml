@@ -103,7 +103,7 @@ under the License.
                 <exclude>**/SftpWagonTest.*</exclude>
                 <exclude>**/SshCommandExecutorTest.*</exclude>
                 <exclude>**/KnownHostsProviderTest.*</exclude>
-                <exclude>**/ScpWagon*Test.*</exclude>
+                <exclude>**/ScpWagonW*Test.*</exclude>
               </excludes>
               <systemPropertyVariables>
                 <java.io.tmpdir>${project.build.outputDirectory}</java.io.tmpdir>

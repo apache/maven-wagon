@@ -287,6 +287,8 @@ public class ScpWagonTest
         public void start( Environment env )
             throws IOException
         {
+            File tmpFile = File.createTempFile( "wagon", "test-sh" );
+            tmpFile.deleteOnExit();
             int exitValue = 0;
             SystemLogOutputStream systemOut = new SystemLogOutputStream( 1 );
             SystemLogOutputStream errOut = new SystemLogOutputStream( 1 );
@@ -298,54 +300,86 @@ public class ScpWagonTest
                 Executor exec = new DefaultExecutor();
                 exec.setStreamHandler( new PumpStreamHandler( systemOut, errOut ) );
                 // hackhish defaut commandline tools not support ; or && so write a file with the script
-                // and /bin/sh -xe file
-                File tmpFile = File.createTempFile( "wagon", "test-sh" );
+                // and "/bin/sh -e " + tmpFile.getPath();
+
                 FileUtils.fileWrite( tmpFile, commandLine );
 
-                String execScript = "/bin/sh -e " + tmpFile.getPath();
-
-                /*
-            CommandLine cl = CommandLine.parse( execScript );
-            exitValue = exec.execute( cl );*/
                 Commandline cl = new Commandline();
-
                 cl.setExecutable( "/bin/sh" );
-                cl.createArg().setValue( "-e" );
-                cl.createArg().setValue( tmpFile.getPath() );
+                //cl.createArg().setValue( "-e" );
+                //cl.createArg().setValue( tmpFile.getPath() );
+                cl.createArg().setFile( tmpFile );
 
                 exitValue = CommandLineUtils.executeCommandLine( cl, stdout, stderr );
+                System.out.println( "exit value " + exitValue );
+                /*
+                if ( exitValue == 0 )
+                {
+                    out.write( stdout.getOutput().getBytes() );
+                    out.write( '\n' );
+                    out.flush();
 
-                tmpFile.deleteOnExit();
+                }
+                else
+                {
+                    out.write( stderr.getOutput().getBytes() );
+                    out.write( '\n' );
+                    out.flush();
 
-                out.write( stdout.getOutput().getBytes() );
-                out.write( '\n' );
-                out.flush();
-                this.callback.onExit( exitValue, stdout.getOutput() );
+                }*/
 
             }
             catch ( Exception e )
             {
                 exitValue = ERROR;
                 e.printStackTrace();
-                err.write( stderr.getOutput().getBytes() );
-
             }
             finally
             {
-                callback.onExit( exitValue, stderr.getOutput() );
-            }
+                deleteQuietly( tmpFile );
+                if ( exitValue != 0 )
+                {
+                    err.write( stderr.getOutput().getBytes() );
+                    err.write( '\n' );
+                    err.flush();
+                    callback.onExit( exitValue, stderr.getOutput() );
+                }
+                else
+                {
+                    out.write( stdout.getOutput().getBytes() );
+                    out.write( '\n' );
+                    out.flush();
+                    callback.onExit( exitValue, stdout.getOutput() );
+                }
 
+            }
+            /*
             out.write( exitValue );
             out.write( '\n' );
-            out.flush();
 
+            */
+            out.flush();
         }
 
         public void destroy()
         {
 
         }
+
+        private void deleteQuietly( File f )
+        {
+
+            try
+            {
+                f.delete();
+            }
+            catch ( Exception e )
+            {
+                // ignore
+            }
+        }
     }
+
 
     static class TestSshFile
         extends NativeSshFile
@@ -374,10 +408,16 @@ public class ScpWagonTest
         }
     }
 
-    public void testWagonGetFileList()
-        throws Exception
+    // file lastModified not return so don't support
+    protected boolean supportsGetIfNewer()
     {
-        super.testWagonGetFileList();
+        return false;
     }
+
+    public void testWagon() throws Exception
+    {
+        super.testWagon();
+    }
+
 
 }

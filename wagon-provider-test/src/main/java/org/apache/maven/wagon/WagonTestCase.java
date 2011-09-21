@@ -19,14 +19,6 @@ package org.apache.maven.wagon;
  * under the License.
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
@@ -42,6 +34,14 @@ import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.util.FileUtils;
 import org.easymock.AbstractMatcher;
 import org.easymock.MockControl;
+
+import java.io.File;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
@@ -130,7 +130,7 @@ public abstract class WagonTestCase
 
     /**
      * Protocol id of the Wagon to use, eg. <code>scp</code>, <code>ftp</code>
-     * 
+     *
      * @return the protocol id
      */
     protected abstract String getProtocol();
@@ -240,13 +240,16 @@ public abstract class WagonTestCase
     public void testWagon()
         throws Exception
     {
-        setupRepositories();
+        if ( supportsGetIfNewer() )
+        {
+            setupRepositories();
 
-        setupWagonTestingFixtures();
+            setupWagonTestingFixtures();
 
-        fileRoundTripTesting();
+            fileRoundTripTesting();
 
-        tearDownWagonTestingFixtures();
+            tearDownWagonTestingFixtures();
+        }
     }
 
     public void testWagonGetIfNewerIsNewer()
@@ -320,7 +323,8 @@ public abstract class WagonTestCase
 
             assertNotNull( "check checksum is not null", checksumObserver.getActualChecksum() );
 
-            assertEquals( "compare checksums", "6b144b7285ffd6b0bc8300da162120b9", checksumObserver.getActualChecksum() );
+            assertEquals( "compare checksums", "6b144b7285ffd6b0bc8300da162120b9",
+                          checksumObserver.getActualChecksum() );
 
             // Now compare the contents of the artifact that was placed in
             // the repository with the contents of the artifact that was
@@ -367,8 +371,9 @@ public abstract class WagonTestCase
     private void replaceMockForSkippedGetIfNewer( Wagon wagon, int expectedSize )
     {
         Resource resource = new Resource( this.resource );
-        mockTransferListener.transferInitiated( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_INITIATED,
-                                                                     TransferEvent.REQUEST_GET, destFile ) );
+        mockTransferListener.transferInitiated(
+            createTransferEvent( wagon, resource, TransferEvent.TRANSFER_INITIATED, TransferEvent.REQUEST_GET,
+                                 destFile ) );
         resource = new Resource( this.resource );
         resource.setContentLength( getExpectedContentLengthOnGet( expectedSize ) );
         resource.setLastModified( getExpectedLastModifiedOnGet( testRepository, resource ) );
@@ -427,7 +432,7 @@ public abstract class WagonTestCase
     /**
      * Test for putting a directory with a destination that multiple directories deep, all of which haven't been
      * created.
-     * 
+     *
      * @throws Exception
      * @since 1.0-beta-2
      */
@@ -474,7 +479,7 @@ public abstract class WagonTestCase
 
     /**
      * Test that when putting a directory that already exists new files get also copied
-     * 
+     *
      * @throws Exception
      * @since 1.0-beta-1
      */
@@ -529,7 +534,7 @@ public abstract class WagonTestCase
 
     /**
      * Test that when putting a directory that already exists new files get also copied and destination is "."
-     * 
+     *
      * @throws Exception
      * @since 1.0-beta-1
      */
@@ -581,10 +586,10 @@ public abstract class WagonTestCase
 
     /**
      * Create a directory with a resource and check that the other ones don't exist
-     * 
+     *
      * @param wagon
      * @param resourceToCreate name of the resource to be created
-     * @param dirName directory name to create
+     * @param dirName          directory name to create
      * @throws Exception
      */
     protected void createDirectory( Wagon wagon, String resourceToCreate, String dirName )
@@ -611,10 +616,10 @@ public abstract class WagonTestCase
 
     /**
      * Assert that a resource does not exist in the remote wagon system
-     * 
-     * @param wagon wagon to get the resource from
+     *
+     * @param wagon        wagon to get the resource from
      * @param resourceName name of the resource
-     * @throws IOException if a temp file can't be created
+     * @throws IOException             if a temp file can't be created
      * @throws AuthorizationException
      * @throws TransferFailedException
      * @since 1.0-beta-1
@@ -721,7 +726,7 @@ public abstract class WagonTestCase
 
     /**
      * Test {@link Wagon#getFileList(String)}.
-     * 
+     *
      * @throws Exception
      * @since 1.0-beta-2
      */
@@ -735,7 +740,7 @@ public abstract class WagonTestCase
         String dirName = "file-list";
 
         String filenames[] =
-            new String[] { "test-resource.txt", "test-resource.pom", "test-resource b.txt", "more-resources.dat",
+            new String[]{ "test-resource.txt", "test-resource.pom", "test-resource b.txt", "more-resources.dat",
                 ".index.txt" };
 
         for ( int i = 0; i < filenames.length; i++ )
@@ -756,7 +761,7 @@ public abstract class WagonTestCase
         {
             assertTrue( "Filename '" + filenames[i] + "' should be in list.", list.contains( filenames[i] ) );
         }
-        
+
         // WAGON-250
         list = wagon.getFileList( "" );
         assertNotNull( "file list should not be null.", list );
@@ -775,7 +780,7 @@ public abstract class WagonTestCase
 
     /**
      * Test {@link Wagon#getFileList(String)} when the directory does not exist.
-     * 
+     *
      * @throws Exception
      * @since 1.0-beta-2
      */
@@ -811,7 +816,7 @@ public abstract class WagonTestCase
 
     /**
      * Test for an existing resource.
-     * 
+     *
      * @throws Exception
      * @since 1.0-beta-2
      */
@@ -837,7 +842,7 @@ public abstract class WagonTestCase
 
     /**
      * Test for an invalid resource.
-     * 
+     *
      * @throws Exception
      * @since 1.0-beta-2
      */
@@ -891,16 +896,18 @@ public abstract class WagonTestCase
     protected ProgressArgumentMatcher replayMockForPut( String resourceName, String content, Wagon wagon )
     {
         Resource resource = new Resource( resourceName );
-        mockTransferListener.transferInitiated( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_INITIATED,
-                                                                     TransferEvent.REQUEST_PUT, sourceFile ) );
+        mockTransferListener.transferInitiated(
+            createTransferEvent( wagon, resource, TransferEvent.TRANSFER_INITIATED, TransferEvent.REQUEST_PUT,
+                                 sourceFile ) );
         resource = new Resource( resourceName );
         resource.setContentLength( content.length() );
         resource.setLastModified( sourceFile.lastModified() );
-        mockTransferListener.transferStarted( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED,
-                                                                   TransferEvent.REQUEST_PUT, sourceFile ) );
-        mockTransferListener.transferProgress( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS,
-                                                                    TransferEvent.REQUEST_PUT, sourceFile ),
-                                               new byte[] {}, 0 );
+        mockTransferListener.transferStarted(
+            createTransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_PUT,
+                                 sourceFile ) );
+        mockTransferListener.transferProgress(
+            createTransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT,
+                                 sourceFile ), new byte[]{ }, 0 );
         ProgressArgumentMatcher progressArgumentMatcher = new ProgressArgumentMatcher();
         mockTransferListenerControl.setMatcher( progressArgumentMatcher );
 
@@ -908,8 +915,9 @@ public abstract class WagonTestCase
         mockTransferListenerControl.setMatcher( MockControl.ALWAYS_MATCHER );
         mockTransferListenerControl.setVoidCallable( MockControl.ZERO_OR_MORE );
 
-        mockTransferListener.transferCompleted( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_COMPLETED,
-                                                                     TransferEvent.REQUEST_PUT, sourceFile ) );
+        mockTransferListener.transferCompleted(
+            createTransferEvent( wagon, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_PUT,
+                                 sourceFile ) );
 
         mockTransferListenerControl.replay();
         return progressArgumentMatcher;
@@ -984,16 +992,18 @@ public abstract class WagonTestCase
     protected ProgressArgumentMatcher replaceMockForGet( Wagon wagon, int expectedSize )
     {
         Resource resource = new Resource( this.resource );
-        mockTransferListener.transferInitiated( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_INITIATED,
-                                                                     TransferEvent.REQUEST_GET, destFile ) );
+        mockTransferListener.transferInitiated(
+            createTransferEvent( wagon, resource, TransferEvent.TRANSFER_INITIATED, TransferEvent.REQUEST_GET,
+                                 destFile ) );
         resource = new Resource( this.resource );
         resource.setContentLength( getExpectedContentLengthOnGet( expectedSize ) );
         resource.setLastModified( getExpectedLastModifiedOnGet( testRepository, resource ) );
-        TransferEvent te = createTransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED,
-                                                                   TransferEvent.REQUEST_GET, null );
+        TransferEvent te =
+            createTransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_GET, null );
         mockTransferListener.transferStarted( te );
-        mockTransferListener.transferProgress( new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS,
-                                                                  TransferEvent.REQUEST_GET ), new byte[] {}, 0 );
+        mockTransferListener.transferProgress(
+            new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_GET ),
+            new byte[]{ }, 0 );
         ProgressArgumentMatcher progressArgumentMatcher = new ProgressArgumentMatcher();
         mockTransferListenerControl.setMatcher( progressArgumentMatcher );
 
@@ -1001,8 +1011,9 @@ public abstract class WagonTestCase
         mockTransferListenerControl.setMatcher( MockControl.ALWAYS_MATCHER );
         mockTransferListenerControl.setVoidCallable( MockControl.ZERO_OR_MORE );
 
-        mockTransferListener.transferCompleted( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_COMPLETED,
-                                                                     TransferEvent.REQUEST_GET, destFile ) );
+        mockTransferListener.transferCompleted(
+            createTransferEvent( wagon, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_GET,
+                                 destFile ) );
 
         mockTransferListenerControl.replay();
         return progressArgumentMatcher;

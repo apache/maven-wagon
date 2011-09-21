@@ -56,14 +56,15 @@ public class ScpExternalWagonTest
     }
 
     @Override
-    protected int getTestRepositoryPort() {
+    protected int getTestRepositoryPort()
+    {
         return 0;  // not used
     }
 
 
     public String getTestRepositoryUrl()
     {
-        return TestData.getTestRepositoryUrl();
+        return TestData.getTestRepositoryUrl( getTestRepositoryPort() );
     }
 
     protected AuthenticationInfo getAuthInfo()
@@ -85,8 +86,9 @@ public class ScpExternalWagonTest
 
         return authInfo;
     }
-    
-    public void testIsPuTTY() throws Exception
+
+    public void testIsPuTTY()
+        throws Exception
     {
         ScpExternalWagon wagon = (ScpExternalWagon) getWagon();
 
