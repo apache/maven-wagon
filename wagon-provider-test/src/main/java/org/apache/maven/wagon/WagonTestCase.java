@@ -317,7 +317,7 @@ public abstract class WagonTestCase
                                          int expectedSize )
         throws IOException
     {
-        if ( expectedResult == true )
+        if ( expectedResult )
         {
             verifyMock( progressArgumentMatcher, expectedSize );
 
@@ -357,7 +357,7 @@ public abstract class WagonTestCase
         destFile.deleteOnExit();
 
         ProgressArgumentMatcher progressArgumentMatcher = null;
-        if ( expectedResult == true )
+        if ( expectedResult )
         {
             progressArgumentMatcher = replaceMockForGet( wagon, expectedSize );
         }
