@@ -563,7 +563,7 @@ public abstract class WagonTestCase
 
             wagon.putDirectory( sourceFile, "." );
 
-            List resourceNames = new ArrayList( resources.length + 1 );
+            List<String> resourceNames = new ArrayList<String>( resources.length + 1 );
 
             resourceNames.add( resourceToCreate );
             for ( int i = 0; i < resources.length; i++ )
@@ -593,13 +593,13 @@ public abstract class WagonTestCase
         writeTestFile( resourceToCreate );
     }
 
-    protected void assertResourcesAreInRemoteSide( Wagon wagon, List resourceNames )
+    protected void assertResourcesAreInRemoteSide( Wagon wagon, List<String> resourceNames )
         throws IOException, TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        Iterator iter = resourceNames.iterator();
+        Iterator<String> iter = resourceNames.iterator();
         while ( iter.hasNext() )
         {
-            String resourceName = (String) iter.next();
+            String resourceName = iter.next();
 
             File destFile = FileTestUtils.createUniqueFile( getName(), resourceName );
 

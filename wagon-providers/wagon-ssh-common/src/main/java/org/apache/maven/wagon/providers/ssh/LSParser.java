@@ -19,6 +19,8 @@ package org.apache.maven.wagon.providers.ssh;
  * under the License.
  */
 
+import org.apache.maven.wagon.TransferFailedException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -27,31 +29,29 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.maven.wagon.TransferFailedException;
-
 /**
- * LSParser 
+ * LSParser
  *
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
  * @version $Id$
  */
 public class LSParser
 {
-    private static final Pattern PATTERN = Pattern.compile( ".+\\s+[0-9]+\\s+.+\\s+.+\\s+[0-9]+\\s+"
-                                                   + "([0-9]{4}-[0-9]{2}-[0-9]{2}|.+\\s+[0-9]+)\\s+[0-9:]+\\s+(.+?)" );
-    
+    private static final Pattern PATTERN = Pattern.compile(
+        ".+\\s+[0-9]+\\s+.+\\s+.+\\s+[0-9]+\\s+" + "([0-9]{4}-[0-9]{2}-[0-9]{2}|.+\\s+[0-9]+)\\s+[0-9:]+\\s+(.+?)" );
+
     /**
      * Parse a raw "ls -la", and obtain the list of files.
-     * 
-     * @todo use ls -1a and do away with the method all together
-     * 
+     *
      * @param rawLS the raw LS to parse.
      * @return the list of files found.
      * @throws TransferFailedException
+     * @todo use ls -1a and do away with the method all together
      */
     public List<String> parseFiles( String rawLS )
         throws TransferFailedException
     {
+        System.out.println( "LSParser raw : " + rawLS );
         List<String> ret = new ArrayList<String>();
         try
         {
@@ -62,7 +62,7 @@ public class LSParser
             while ( line != null )
             {
                 line = line.trim();
-                
+
                 Matcher m = PATTERN.matcher( line );
                 if ( m.matches() )
                 {

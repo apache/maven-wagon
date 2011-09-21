@@ -19,11 +19,8 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  * under the License.
  */
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.JSchException;
 import org.apache.maven.wagon.CommandExecutionException;
 import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.OutputData;
@@ -34,25 +31,26 @@ import org.apache.maven.wagon.providers.ssh.ScpHelper;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSchException;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * SCP protocol wagon.
- * 
+ * <p/>
  * Note that this implementation is <i>not</i> thread-safe, and multiple channels can not be used on the session at
  * the same time.
- * 
+ * <p/>
  * See <a href="http://blogs.sun.com/janp/entry/how_the_scp_protocol_works">
  * http://blogs.sun.com/janp/entry/how_the_scp_protocol_works</a>
  * for information on how the SCP protocol works.
  *
  * @version $Id$
  * @todo [BP] add compression flag
- * 
- * @plexus.component role="org.apache.maven.wagon.Wagon" 
- *   role-hint="scp"
- *   instantiation-strategy="per-lookup"
+ * @plexus.component role="org.apache.maven.wagon.Wagon"
+ * role-hint="scp"
+ * instantiation-strategy="per-lookup"
  */
 public class ScpWagon
     extends AbstractJschWagon
@@ -144,7 +142,7 @@ public class ScpWagon
         {
             throw new IOException( "SCP terminated with unknown error code" );
         }
-    }    
+    }
 
     protected void finishGetTransfer( Resource resource, InputStream input, OutputStream output )
         throws TransferFailedException
@@ -152,7 +150,7 @@ public class ScpWagon
         try
         {
             checkAck( input );
-    
+
             sendEom( channelOutputStream );
         }
         catch ( IOException e )
@@ -160,7 +158,7 @@ public class ScpWagon
             handleGetException( resource, e );
         }
     }
-    
+
     protected void cleanupGetTransfer( Resource resource )
     {
         if ( channel != null )
@@ -168,14 +166,14 @@ public class ScpWagon
             channel.disconnect();
         }
     }
-    
+
     protected void getTransfer( Resource resource, OutputStream output, InputStream input, boolean closeInput,
                                 int maxSize )
         throws TransferFailedException
     {
         super.getTransfer( resource, output, input, closeInput, (int) resource.getContentLength() );
     }
-    
+
     protected String readLine( InputStream in )
         throws IOException
     {
@@ -217,7 +215,7 @@ public class ScpWagon
         throws TransferFailedException, ResourceDoesNotExistException
     {
         Resource resource = inputData.getResource();
-        
+
         String path = getPath( getRepository().getBasedir(), resource.getName() );
         String cmd = "scp -p -f " + path;
 
@@ -231,7 +229,7 @@ public class ScpWagon
 
             // get I/O streams for remote scp
             channelOutputStream = channel.getOutputStream();
-            
+
             InputStream in = channel.getInputStream();
             inputData.setInputStream( in );
 
@@ -244,13 +242,13 @@ public class ScpWagon
             if ( exitCode == 'T' )
             {
                 String line = readLine( in );
-                
+
                 String[] times = line.split( " " );
-                
+
                 resource.setLastModified( Long.valueOf( times[0] ).longValue() * 1000 );
 
                 sendEom( channelOutputStream );
-                
+
                 exitCode = in.read();
             }
 
@@ -258,7 +256,8 @@ public class ScpWagon
 
             if ( exitCode != COPY_START_CHAR )
             {
-                if ( exitCode == 1 && line.indexOf( "No such file or directory" ) != -1 )
+                if ( exitCode == 1 && ( line.indexOf( "No such file or directory" ) != -1
+                    || line.indexOf( "no such file or directory" ) != 1 ) )
                 {
                     throw new ResourceDoesNotExistException( line );
                 }
@@ -311,7 +310,7 @@ public class ScpWagon
         throws TransferFailedException
     {
         Resource resource = outputData.getResource();
-        
+
         String basedir = getRepository().getBasedir();
 
         String path = getPath( basedir, resource.getName() );
@@ -328,9 +327,9 @@ public class ScpWagon
 
             throw new TransferFailedException( e.getMessage(), e );
         }
-        
+
         String octalMode = getOctalMode( getRepository().getPermissions() );
-        
+
         // exec 'scp -p -t rfile' remotely
         String command = "scp";
         if ( octalMode != null )
@@ -385,8 +384,8 @@ public class ScpWagon
         }
         catch ( JSchException e )
         {
-            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );            
-            
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+
             String msg = "Error occurred while deploying '" + resourceName + "' to remote repository: "
                 + getRepository().getUrl() + ": " + e.getMessage();
 
@@ -403,15 +402,15 @@ public class ScpWagon
     {
         if ( e.getMessage().indexOf( "set mode: Operation not permitted" ) >= 0 )
         {
-            fireTransferDebug( e.getMessage() );                
+            fireTransferDebug( e.getMessage() );
         }
         else
         {
-            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );            
-            
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+
             String msg = "Error occurred while deploying '" + resource.getName() + "' to remote repository: "
                 + getRepository().getUrl() + ": " + e.getMessage();
-   
+
             throw new TransferFailedException( msg, e );
         }
     }

@@ -54,6 +54,35 @@ under the License.
       <artifactId>jetty</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.apache.sshd</groupId>
+      <artifactId>sshd-core</artifactId>
+      <version>0.6.0</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.6.1</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>bouncycastle</groupId>
+      <artifactId>bcprov-jdk15</artifactId>
+      <version>140</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-exec</artifactId>
+      <version>1.1</version>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <profiles>
@@ -76,6 +105,11 @@ under the License.
                 <exclude>**/KnownHostsProviderTest.*</exclude>
                 <exclude>**/ScpWagon*Test.*</exclude>
               </excludes>
+              <systemPropertyVariables>
+                <java.io.tmpdir>${project.build.outputDirectory}</java.io.tmpdir>
+                <sshKeysPath>${basedir}/src/test/ssh-keys</sshKeysPath>
+                <test.user>olamy</test.user>
+              </systemPropertyVariables>
             </configuration>
           </plugin>
         </plugins>

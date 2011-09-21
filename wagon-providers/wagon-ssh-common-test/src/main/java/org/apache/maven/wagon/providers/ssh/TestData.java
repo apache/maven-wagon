@@ -32,12 +32,12 @@ public class TestData
 {
     public static String getTempDirectory()
     {
-        return System.getProperty( "java.io.tmpdir", "/tmp" );
+        return System.getProperty( "java.io.tmpdir", "target" );
     }
-    
-    public static String getTestRepositoryUrl()
+
+    public static String getTestRepositoryUrl( int port )
     {
-        return "scp://" + getHostname() + getTempDirectory() + "/wagon-ssh-test/" + getUserName();
+        return "scp://" + getHostname() + ":" + port + getTempDirectory() + "/wagon-ssh-test/" + getUserName();
     }
 
     public static String getUserName()
@@ -47,7 +47,7 @@ public class TestData
 
     public static File getPrivateKey()
     {
-        return new File( System.getProperty( "user.home" ), "/.ssh/id_dsa" );
+        return new File( System.getProperty( "sshKeysPath", "src/test/ssh-keys" ), "id_rsa" );
     }
 
     public static String getHostname()
@@ -59,7 +59,9 @@ public class TestData
     {
         try
         {
-            return FileUtils.fileRead( "/etc/ssh_host_rsa_key.pub" ).substring( "ssh-rsa".length() ).trim();
+            return FileUtils.fileRead(
+                new File( System.getProperty( "sshKeysPath" ), "id_rsa.pub" ).getPath() ).substring(
+                "ssh-rsa".length() ).trim();
         }
         catch ( IOException e )
         {

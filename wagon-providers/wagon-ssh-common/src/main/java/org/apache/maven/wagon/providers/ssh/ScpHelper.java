@@ -279,7 +279,7 @@ public class ScpHelper
         {
             String path = getPath( repository.getBasedir(), destinationDirectory );
             Streams streams = executor.executeCommand( "ls -FlA " + path, false );
-            
+
             return new LSParser().parseFiles( streams.getOut() );
         }
         catch ( CommandExecutionException e )

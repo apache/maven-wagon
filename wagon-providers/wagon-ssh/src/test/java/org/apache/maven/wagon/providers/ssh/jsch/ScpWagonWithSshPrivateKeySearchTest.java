@@ -49,7 +49,7 @@ public class ScpWagonWithSshPrivateKeySearchTest
 
     public String getTestRepositoryUrl()
     {
-        return TestData.getTestRepositoryUrl();
+        return TestData.getTestRepositoryUrl(0);
     }
 
     protected AuthenticationInfo getAuthInfo()
