@@ -20,6 +20,7 @@ package org.apache.maven.wagon.providers.ssh;
 
 import org.apache.sshd.server.PasswordAuthenticator;
 import org.apache.sshd.server.session.ServerSession;
+import org.codehaus.plexus.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,8 @@ public class TestPasswordAuthenticator
     public boolean authenticate( String username, String password, ServerSession session )
     {
         passwordAuthenticatorRequests.add( new PasswordAuthenticatorRequest( username, password ) );
-        return true;
+        return StringUtils.equals( username, TestData.getUserName() ) && StringUtils.equals( password,
+                                                                                             TestData.getUserPassword() );
     }
 
     public static class PasswordAuthenticatorRequest
