@@ -37,11 +37,27 @@ import java.util.regex.Pattern;
  */
 public class LSParser
 {
-    private static final Pattern PATTERN = Pattern.compile(
-        ".+\\s+[0-9]+\\s+.+\\s+.+\\s+[0-9]+\\s+" + "([0-9]{4}-[0-9]{2}-[0-9]{2}|.+\\s+[0-9]+)\\s+[0-9:]+\\s+(.+?)" );
+    /**
+     * output samples see LSParserTest:
+     * <ul></ul>
+     * <li>osx      "-rw-r--r--   1 joakim  joakim  1194 Dec 11     09:25 pom.xml"</li>
+     * <li>osx fr : "-rw-r--r--   1 olamy   staff   19   21  sep    00:34 more-resources.dat"</li>
+     * <li>cygwin : "drwxr-xr-x+  5 joakim  None    0    Dec 11     10:30 pom.xml"</li>
+     * <li>linux :  "-rw-r--r--   1 joakim  joakim  1194 2006-12-11 09:25 pom.xml"</li>
+     * </ul>
+     */
+    private static final Pattern PATTERN = Pattern.compile( ".+\\s+[0-9]+\\s+.+\\s+.+\\s+[0-9]+\\s+"
+                                                                //2006-12-11
+                                                                + "([0-9]{4}-[0-9]{2}-[0-9]{2}"
+                                                                // Dec 11
+                                                                + "|.+\\s+[0-9]+"
+                                                                // 21 sep
+                                                                + "|.+\\s+.+)"
+                                                                // 09:25 pom.xml
+                                                                + "\\s+[0-9:]+\\s+(.+?)" );
 
     /**
-     * Parse a raw "ls -la", and obtain the list of files.
+     * Parse a raw "ls -FlA", and obtain the list of files.
      *
      * @param rawLS the raw LS to parse.
      * @return the list of files found.

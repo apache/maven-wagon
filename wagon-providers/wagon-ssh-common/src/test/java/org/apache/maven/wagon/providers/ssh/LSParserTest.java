@@ -61,13 +61,6 @@ public class LSParserTest
             + "drwxr-xr-x   7  joakim  joakim   476 Dec 11 10:31 .svn\n"
             + "drwxr-xr-x   3  joakim  joakim   238 Dec 11 08:39 target\n";
 
-                total 40
-                -rw-r--r--  1 olamy  staff  11 21 sep 00:34 .index.txt
-                -rw-r--r--  1 olamy  staff  19 21 sep 00:34 more-resources.dat
-                -rw-r--r--  1 olamy  staff  20 21 sep 00:34 test-resource b.txt
-                -rw-r--r--  1 olamy  staff  18 21 sep 00:34 test-resource.pom
-                -rw-r--r--  1 olamy  staff  18 21 sep 00:34 test-resource.txt
-
         LSParser parser = new LSParser();
         List files = parser.parseFiles( rawLS );
         assertNotNull( files );
@@ -75,6 +68,24 @@ public class LSParserTest
         assertTrue( files.contains( "pom.xml" ) );
         assertTrue( files.contains( "spaced out" ) );
     }
+
+    public void testParseOSXFrLocale() throws TransferFailedException
+    {
+        String rawLS = "total 40\n" + "-rw-r--r--  1 olamy  staff  11 21 sep 00:34 .index.txt\n"
+                + "-rw-r--r--  1 olamy  staff  19 21 sep 00:34 more-resources.dat\n"
+                + "-rw-r--r--  1 olamy  staff  20 21 sep 00:34 test-resource b.txt\n"
+                +"-rw-r--r--  1 olamy  staff  18 21 sep 00:34 test-resource.pom\n"
+                + "-rw-r--r--  1 olamy  staff  18 21 sep 00:34 test-resource.txt\n";
+
+        LSParser parser = new LSParser();
+        List files = parser.parseFiles( rawLS );
+        assertNotNull( files );
+        assertEquals( 5, files.size() );
+        assertTrue( files.contains( "more-resources.dat" ) );
+        assertTrue( files.contains( ".index.txt" ) );
+    }
+
+
 
     public void testParseCygwin() throws TransferFailedException
     {
