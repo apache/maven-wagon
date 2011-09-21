@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.ssh.jsch;
+package org.apache.maven.wagon.providers.ssh;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one

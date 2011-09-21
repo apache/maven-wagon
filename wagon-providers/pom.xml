@@ -58,6 +58,12 @@ under the License.
         <artifactId>httpcore</artifactId>
         <version>4.1.2</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.sshd</groupId>
+        <artifactId>sshd-core</artifactId>
+        <version>0.6.0</version>
+        <scope>test</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 

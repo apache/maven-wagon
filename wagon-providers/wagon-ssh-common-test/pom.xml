@@ -49,5 +49,10 @@ under the License.
       <artifactId>junit</artifactId>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.sshd</groupId>
+      <artifactId>sshd-core</artifactId>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 </project>

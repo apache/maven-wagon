@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.ssh.jsch;
+package org.apache.maven.wagon.providers.ssh;
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,11 +18,11 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  * under the License.
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.CommandFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This <code>CommandFactory</code> can be used as a standalone command factory
@@ -33,24 +33,25 @@ import org.apache.sshd.server.CommandFactory;
  *
  * @author <a href="mailto:dev@mina.apache.org">Apache MINA SSHD Project</a>
  */
-public class ScpCommandFactory implements CommandFactory {
+public class ScpCommandFactory
+    implements CommandFactory {
 
     private CommandFactory delegate;
 
     public ScpCommandFactory() {
     }
 
-    public ScpCommandFactory(CommandFactory delegate) {
+    public ScpCommandFactory( CommandFactory delegate ) {
         this.delegate = delegate;
     }
 
     /**
      * Parses a command string and verifies that the basic syntax is
      * correct. If parsing fails the responsibility is delegated to
-     * the configured {@link CommandFactory} instance; if one exist.
+     * the configured {@link org.apache.sshd.server.CommandFactory} instance; if one exist.
      *
-     * @param command command to parse 
-     * @return configured {@link Command} instance
+     * @param command command to parse
+     * @return configured {@link org.apache.sshd.server.Command} instance
      * @throws IllegalArgumentException
      */
     public Command createCommand(String command) {
