@@ -45,6 +45,11 @@ public class TestData
         return System.getProperty( "test.user", System.getProperty( "user.name" ) );
     }
 
+    public static String getUserPassword()
+    {
+        return "comeonFrance!:-)";
+    }
+
     public static File getPrivateKey()
     {
         return new File( System.getProperty( "sshKeysPath", "src/test/ssh-keys" ), "id_rsa" );

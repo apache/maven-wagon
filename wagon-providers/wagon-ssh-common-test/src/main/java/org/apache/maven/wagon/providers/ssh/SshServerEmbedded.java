@@ -27,19 +27,16 @@ import org.apache.sshd.server.Command;
 import org.apache.sshd.server.CommandFactory;
 import org.apache.sshd.server.FileSystemFactory;
 import org.apache.sshd.server.FileSystemView;
-import org.apache.sshd.server.PublickeyAuthenticator;
 import org.apache.sshd.server.SshFile;
 import org.apache.sshd.server.auth.UserAuthPassword;
 import org.apache.sshd.server.auth.UserAuthPublicKey;
 import org.apache.sshd.server.filesystem.NativeSshFile;
-import org.apache.sshd.server.session.ServerSession;
 import org.apache.sshd.server.session.SessionFactory;
 import org.apache.sshd.server.shell.ProcessShellFactory;
 import org.codehaus.plexus.util.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -57,11 +54,17 @@ public class SshServerEmbedded
 
     private List<String> sshKeysResources = new ArrayList<String>();
 
+    public TestPublickeyAuthenticator publickeyAuthenticator;
+
+    public TestPasswordAuthenticator passwordAuthenticator = new TestPasswordAuthenticator();
+
+    private boolean keyAuthz;
+
     /**
      * @param wagonProtocol    scp scpexe
      * @param sshKeysResources paths in the classlaoder with ssh keys
      */
-    public SshServerEmbedded( String wagonProtocol, List<String> sshKeysResources )
+    public SshServerEmbedded( String wagonProtocol, List<String> sshKeysResources, boolean keyAuthz )
     {
         this.wagonProtocol = wagonProtocol;
 
@@ -69,7 +72,9 @@ public class SshServerEmbedded
 
         this.sshd = SshServer.setUpDefaultServer();
 
+        this.keyAuthz = keyAuthz;
 
+        publickeyAuthenticator = new TestPublickeyAuthenticator( this.keyAuthz );
     }
 
     /**
@@ -82,13 +87,11 @@ public class SshServerEmbedded
 
         sshd.setUserAuthFactories( Arrays.asList( new UserAuthPublicKey.Factory(), new UserAuthPassword.Factory() ) );
 
-        sshd.setPublickeyAuthenticator( new PublickeyAuthenticator()
-        {
-            public boolean authenticate( String s, PublicKey publicKey, ServerSession serverSession )
-            {
-                return true;
-            }
-        } );
+        sshd.setPublickeyAuthenticator( this.publickeyAuthenticator );
+
+        sshd.setPasswordAuthenticator( this.passwordAuthenticator );
+
+        sshd.setUserAuthFactories( Arrays.asList( new UserAuthPublicKey.Factory(), new UserAuthPassword.Factory() ) );
 
         ResourceKeyPairProvider resourceKeyPairProvider =
             new ResourceKeyPairProvider( sshKeysResources.toArray( new String[sshKeysResources.size()] ) );
@@ -100,7 +103,6 @@ public class SshServerEmbedded
             protected AbstractSession doCreateSession( IoSession ioSession )
                 throws Exception
             {
-                System.out.println( "doCreateSession" );
                 return super.doCreateSession( ioSession );
             }
         };
@@ -180,4 +182,5 @@ public class SshServerEmbedded
             super( FileUtils.normalize( fileName ), file, userName );
         }
     }
+
 }

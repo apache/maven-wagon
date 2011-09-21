@@ -24,6 +24,7 @@ import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.providers.ssh.SshServerEmbedded;
 import org.apache.maven.wagon.providers.ssh.TestData;
+import org.apache.maven.wagon.providers.ssh.TestPasswordAuthenticator;
 import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
@@ -81,7 +82,7 @@ public class EmbeddedScpWagonTest
 
         String sshKeyResource = "ssh-keys/id_rsa";
 
-        sshServerEmbedded = new SshServerEmbedded( getProtocol(), Arrays.asList( sshKeyResource ) );
+        sshServerEmbedded = new SshServerEmbedded( getProtocol(), Arrays.asList( sshKeyResource ), false );
 
         sshServerEmbedded.start();
         System.out.println( "sshd on port " + sshServerEmbedded.getPort() );
@@ -91,6 +92,12 @@ public class EmbeddedScpWagonTest
     protected void tearDownWagonTestingFixtures()
         throws Exception
     {
+
+        for ( TestPasswordAuthenticator.PasswordAuthenticatorRequest passwordAuthenticatorRequest : sshServerEmbedded.passwordAuthenticator.passwordAuthenticatorRequests )
+        {
+            assertEquals( TestData.getUserName(), passwordAuthenticatorRequest.username );
+            assertEquals( TestData.getUserPassword(), passwordAuthenticatorRequest.password );
+        }
         sshServerEmbedded.stop( true );
     }
 
@@ -116,7 +123,9 @@ public class EmbeddedScpWagonTest
         AuthenticationInfo authInfo = super.getAuthInfo();
 
         authInfo.setUserName( TestData.getUserName() );
+        authInfo.setPassword( TestData.getUserPassword() );
 
+        /*
         File privateKey = TestData.getPrivateKey();
 
         if ( privateKey.exists() )
@@ -124,7 +133,7 @@ public class EmbeddedScpWagonTest
             authInfo.setPrivateKey( privateKey.getAbsolutePath() );
 
             authInfo.setPassphrase( "" );
-        }
+        }*/
 
         return authInfo;
     }
