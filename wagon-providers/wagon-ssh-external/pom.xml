@@ -92,6 +92,7 @@ under the License.
               <excludes>
                 <exclude>**/SshCommandExecutorTest.*</exclude>
                 <exclude>**/Scp*Test.*</exclude>
+                <exclude>**/EmbeddedScp*WagonWithKeyTest.*</exclude>
               </excludes>
             </configuration>
           </plugin>
