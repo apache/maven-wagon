@@ -233,7 +233,7 @@ public class WebDavWagon
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         String repositoryUrl = repository.getUrl();
-        String url = ( repositoryUrl.endsWith( "/" ) ? "" : "/" ) + destinationDirectory;
+        String url = repositoryUrl + ( repositoryUrl.endsWith( "/" ) ? "" : "/" ) + destinationDirectory;
 
         PropFindMethod method = null;
         try
