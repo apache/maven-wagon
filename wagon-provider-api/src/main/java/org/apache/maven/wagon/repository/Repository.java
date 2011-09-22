@@ -19,12 +19,12 @@ package org.apache.maven.wagon.repository;
  * under the License.
  */
 
-import java.io.Serializable;
-import java.util.Properties;
-
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.WagonConstants;
 import org.codehaus.plexus.util.StringUtils;
+
+import java.io.Serializable;
+import java.util.Properties;
 
 /**
  * This class is an abstraction of the location from/to resources
@@ -34,7 +34,8 @@ import org.codehaus.plexus.util.StringUtils;
  * @version $Id$
  * @todo [BP] some things are specific to certain wagons (eg key stuff in authInfo, permissions)
  */
-public class Repository implements Serializable
+public class Repository
+    implements Serializable
 {
     private static final long serialVersionUID = 1312227676322136247L;
 
@@ -77,16 +78,16 @@ public class Repository implements Serializable
     {
         if ( id == null )
         {
-            throw new NullPointerException( "id can not be null" );
+            throw new NullPointerException( "id can not be null for Repository with url=" + url );
         }
-        
+
         setId( id );
 
         if ( url == null )
         {
-            throw new NullPointerException( "url can not be null" );
+            throw new NullPointerException( "url can not be null for Repository with id=" + id );
         }
-        
+
         setUrl( url );
     }
 
@@ -103,7 +104,7 @@ public class Repository implements Serializable
     /**
      * Retrieve the base directory of the repository. This is derived from the full repository URL, and
      * contains the entire path component.
-     * 
+     *
      * @return the base directory
      */
     public String getBasedir()
