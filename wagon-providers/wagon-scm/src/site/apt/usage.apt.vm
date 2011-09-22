@@ -3,7 +3,7 @@
  ------
  Carlos Sanchez
  ------
- 2006-03-07
+ 2011-09-22
  ------
 
  ~~ Licensed to the Apache Software Foundation (ASF) under one
@@ -32,6 +32,11 @@ Maven Wagon SCM Usage
  (wagon-scm, maven-scm-manager-plexus and the maven-scm-provider for your SCM system, see examples below)
  to your pom and use URLs in the
  {{{http://maven.apache.org/scm/scm-url-format.html}SCM format}}.
+ 
+ For non-subversion SCM, in your settings.xml file you can include the elements <<<scmVersionType>>> and <<<scmVersion>>> to
+ specify a branch or tag to use. The value of <<<scmVersionType>>> must be one of <<<branch>>> or <<<tag>>>.
+ There is no default value for <<<scmVersionType>>> so you <MUST> specify it with <<<scmVersion>>> in order
+ to have any effect.
 
 
 Deploying your Maven site to Subversion
@@ -97,6 +102,50 @@ Deploying your Maven site to CVS
       <url>scm:cvs:ext:username@cvs.apache.org:/cvs/root:module</url>
     </site>
   </distributionManagement>
+------
+
+
+Deploying your Maven site to GitHub's gh-pages
+
+ Same as before, but changing svnexe to gitexe and using a Git svn url.
+
+------
+  <build>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-scm</artifactId>
+        <version>${project.version}</version>
+      </extension>
+      <extension>
+        <groupId>org.apache.maven.scm</groupId>
+        <artifactId>maven-scm-manager-plexus</artifactId>
+        <version>${project.version}</version>
+      </extension>
+      <extension>
+        <groupId>org.apache.maven.scm</groupId>
+        <artifactId>maven-scm-provider-gitexe</artifactId>
+        <version>${project.version}</version>
+      </extension>
+    </extensions>
+  </build>
+  <distributionManagement>
+    <site>
+      <id>my.git.server</id>
+      <url>scm:git:ssh://git@github.com/myuser/myproject.git</url>
+    </site>
+  </distributionManagement>
+------
+
+ And in your settings.xml file:
+
+------
+  <server>
+    <id>my.git.server</id>
+    <username>git</username>
+    <scmVersionType>branch</scmVersionType>
+    <scmVersion>gh-pages</scmVersion>
+  </server>
 ------
 
 

@@ -19,19 +19,13 @@ package org.apache.maven.wagon.providers.scm;
  * under the License.
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
-import java.util.Stack;
-
+import org.apache.maven.scm.ScmBranch;
 import org.apache.maven.scm.ScmException;
 import org.apache.maven.scm.ScmFile;
 import org.apache.maven.scm.ScmFileSet;
 import org.apache.maven.scm.ScmResult;
+import org.apache.maven.scm.ScmRevision;
+import org.apache.maven.scm.ScmTag;
 import org.apache.maven.scm.ScmVersion;
 import org.apache.maven.scm.command.add.AddScmResult;
 import org.apache.maven.scm.command.checkout.CheckOutScmResult;
@@ -50,9 +44,17 @@ import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.resource.Resource;
-
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+import java.util.Stack;
 
 /**
  * Wagon provider to get and put files from and to SCM systems, using Maven-SCM as underlying transport.
@@ -63,13 +65,12 @@ import org.codehaus.plexus.util.StringUtils;
  * possible, or the checkout directory needs to be a constant. Doing releases won't scale if you have to checkout the
  * whole repository structure in order to add 3 files.
  *
- * @plexus.component role="org.apache.maven.wagon.Wagon" role-hint="scm" instantiation-strategy="per-lookup"
- *
  * @author <a href="brett@apache.org">Brett Porter</a>
  * @author <a href="evenisse@apache.org">Emmanuel Venisse</a>
  * @author <a href="carlos@apache.org">Carlos Sanchez</a>
  * @author Jason van Zyl
  * @version $Id$
+ * @plexus.component role="org.apache.maven.wagon.Wagon" role-hint="scm" instantiation-strategy="per-lookup"
  */
 public class ScmWagon
     extends AbstractWagon
@@ -78,6 +79,20 @@ public class ScmWagon
      * @plexus.requirement
      */
     private ScmManager scmManager;
+
+    /**
+     * The SCM version, if any.
+     *
+     * @parameter
+     */
+    private String scmVersion;
+
+    /**
+     * The SCM version type, if any. Defaults to "branch".
+     *
+     * @parameter
+     */
+    private String scmVersionType;
 
     private File checkoutDirectory;
 
@@ -99,6 +114,46 @@ public class ScmWagon
     public void setScmManager( ScmManager scmManager )
     {
         this.scmManager = scmManager;
+    }
+
+    /**
+     * Get the scmVersion used in this Wagon
+     *
+     * @return the scmVersion
+     */
+    public String getScmVersion()
+    {
+        return scmVersion;
+    }
+
+    /**
+     * Set the scmVersion
+     *
+     * @param scmVersion the scmVersion to set
+     */
+    public void setScmVersion( String scmVersion )
+    {
+        this.scmVersion = scmVersion;
+    }
+
+    /**
+     * Get the scmVersionType used in this Wagon
+     *
+     * @return the scmVersionType
+     */
+    public String getScmVersionType()
+    {
+        return scmVersionType;
+    }
+
+    /**
+     * Set the scmVersionType
+     *
+     * @param scmVersionType the scmVersionType to set
+     */
+    public void setScmVersionType( String scmVersionType )
+    {
+        this.scmVersionType = scmVersionType;
     }
 
     /**
@@ -193,6 +248,37 @@ public class ScmWagon
         }
     }
 
+    /**
+     * Construct the ScmVersion to use for operations.
+     * <p/>
+     * <p>If scmVersion is supplied, scmVersionType must also be supplied to
+     * take effect.</p>
+     */
+    private ScmVersion makeScmVersion()
+    {
+        if ( StringUtils.isBlank( scmVersion ) )
+        {
+            return null;
+        }
+        if ( scmVersion.length() > 0 )
+        {
+            if ( "revision".equals( scmVersionType ) )
+            {
+                return new ScmRevision( scmVersion );
+            }
+            else if ( "tag".equals( scmVersionType ) )
+            {
+                return new ScmTag( scmVersion );
+            }
+            else if ( "branch".equals( scmVersionType ) )
+            {
+                return new ScmBranch( scmVersion );
+            }
+        }
+
+        return null;
+    }
+
     private ScmRepository getScmRepository( String url )
         throws ScmRepositoryException, NoSuchScmProviderException
     {
@@ -277,7 +363,7 @@ public class ScmWagon
 
             target.setContentLength( source.length() );
             target.setLastModified( source.lastModified() );
-            
+
             firePutStarted( target, source );
 
             String msg = "Wagon: Adding " + source.getName() + " to repository";
@@ -289,8 +375,7 @@ public class ScmWagon
 
             File newCheckoutDirectory = new File( checkoutDirectory, relPath );
 
-            File scmFile =
-                new File( newCheckoutDirectory, source.isDirectory() ? "" : getFilename( targetName ) );
+            File scmFile = new File( newCheckoutDirectory, source.isDirectory() ? "" : getFilename( targetName ) );
 
             boolean fileAlreadyInScm = scmFile.exists();
 
@@ -318,21 +403,21 @@ public class ScmWagon
                 }
             }
 
-            ScmResult result = scmProvider.checkIn( scmRepository, new ScmFileSet( checkoutDirectory ),
-                                                    (ScmVersion) null, msg );
+            ScmResult result =
+                scmProvider.checkIn( scmRepository, new ScmFileSet( checkoutDirectory ), makeScmVersion(), msg );
 
             checkScmResult( result );
         }
         catch ( ScmException e )
         {
             fireTransferError( target, e, TransferEvent.REQUEST_GET );
-            
+
             throw new TransferFailedException( "Error interacting with SCM: " + e.getMessage(), e );
         }
         catch ( IOException e )
         {
             fireTransferError( target, e, TransferEvent.REQUEST_GET );
-            
+
             throw new TransferFailedException( "Error interacting with SCM: " + e.getMessage(), e );
         }
 
@@ -371,9 +456,9 @@ public class ScmWagon
 
         try
         {
-            while ( target.length() > 0 && !scmProvider
-                .list( scmRepository, new ScmFileSet( new File( "." ), new File( target ) ), false, (ScmVersion) null )
-                .isSuccess() )
+            while ( target.length() > 0 && !scmProvider.list( scmRepository,
+                                                              new ScmFileSet( new File( "." ), new File( target ) ),
+                                                              false, makeScmVersion() ).isSuccess() )
             {
                 stack.push( getFilename( target ) );
                 target = getDirname( target );
@@ -382,7 +467,7 @@ public class ScmWagon
         catch ( ScmException e )
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
-            
+
             throw new TransferFailedException( "Error listing repository: " + e.getMessage(), e );
         }
 
@@ -393,18 +478,24 @@ public class ScmWagon
 
         try
         {
-            scmRepository = getScmRepository( getRepository().getUrl() + "/" + target.replace( '\\', '/' ) );
-
-            CheckOutScmResult ret = scmProvider.checkOut( scmRepository,
-                                                          new ScmFileSet( new File( checkoutDirectory, "" ) ),
-                                                          (ScmVersion) null, false );
+            String repoUrl = getRepository().getUrl();
+            if ( "svn".equals( scmProvider.getScmType() ) )
+            {
+                // Subversion is the only SCM that adds path structure to represent tags and branches.
+                // The rest use scmVersion and scmVersionType.
+                repoUrl += "/" + target.replace( '\\', '/' );
+            }
+            scmRepository = getScmRepository( repoUrl );
+            CheckOutScmResult ret =
+                scmProvider.checkOut( scmRepository, new ScmFileSet( new File( checkoutDirectory, "" ) ),
+                                      makeScmVersion(), false );
 
             checkScmResult( ret );
         }
         catch ( ScmException e )
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
-            
+
             throw new TransferFailedException( "Error checking out: " + e.getMessage(), e );
         }
 
@@ -420,8 +511,9 @@ public class ScmWagon
             File newDir = new File( checkoutDirectory, relPath );
             if ( !newDir.mkdirs() )
             {
-                throw new TransferFailedException( "Failed to create directory " + newDir.getAbsolutePath()
-                    + "; parent should exist: " + checkoutDirectory );
+                throw new TransferFailedException(
+                    "Failed to create directory " + newDir.getAbsolutePath() + "; parent should exist: "
+                        + checkoutDirectory );
             }
 
             try
@@ -431,7 +523,7 @@ public class ScmWagon
             catch ( ScmException e )
             {
                 fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
-                
+
                 throw new TransferFailedException( "Failed to add directory " + newDir + " to working copy", e );
             }
         }
@@ -485,8 +577,9 @@ public class ScmWagon
             {
                 if ( reservedScmFile != null && !reservedScmFile.equals( files[i].getName() ) )
                 {
-                    addedFiles += addFiles( scmProvider, scmRepository, basedir, ( scmFilePath.length() == 0 ? ""
-                        : scmFilePath + "/" ) + files[i].getName() );
+                    addedFiles += addFiles( scmProvider, scmRepository, basedir,
+                                            ( scmFilePath.length() == 0 ? "" : scmFilePath + "/" )
+                                                + files[i].getName() );
                 }
             }
         }
@@ -518,15 +611,17 @@ public class ScmWagon
      *
      * @param result
      * @throws TransferFailedException if result was not a successful operation
-     * @throws ScmException 
+     * @throws ScmException
      */
     private void checkScmResult( ScmResult result )
         throws ScmException
     {
         if ( !result.isSuccess() )
         {
-            throw new ScmException( "Unable to commit file. " + result.getProviderMessage() + " "
-                + ( result.getCommandOutput() == null ? "" : result.getCommandOutput() ) );
+            throw new ScmException(
+                "Unable to commit file. " + result.getProviderMessage() + " " + ( result.getCommandOutput() == null
+                    ? ""
+                    : result.getCommandOutput() ) );
         }
     }
 
@@ -582,14 +677,14 @@ public class ScmWagon
 
             if ( reservedScmFile != null && new File( basedir, reservedScmFile ).exists() )
             {
-                scmProvider.update( scmRepository, new ScmFileSet( basedir ), (ScmVersion) null );
+                scmProvider.update( scmRepository, new ScmFileSet( basedir ), makeScmVersion() );
             }
             else
             {
                 // TODO: this should be checking out a full hierarchy (requires the -d equiv)
                 basedir.mkdirs();
 
-                scmProvider.checkOut( scmRepository, new ScmFileSet( basedir ), (ScmVersion) null );
+                scmProvider.checkOut( scmRepository, new ScmFileSet( basedir ), makeScmVersion() );
             }
 
             if ( !scmFile.exists() )
@@ -605,13 +700,13 @@ public class ScmWagon
         catch ( ScmException e )
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-            
+
             throw new TransferFailedException( "Error getting file from SCM", e );
         }
         catch ( IOException e )
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-            
+
             throw new TransferFailedException( "Error getting file from SCM", e );
         }
 
@@ -633,9 +728,9 @@ public class ScmWagon
 
             ScmProvider provider = getScmProvider( repository.getProvider() );
 
-            ListScmResult result = provider.list( repository,
-                                                  new ScmFileSet( new File( "." ), new File( resourcePath ) ), false,
-                                                  (ScmVersion) null );
+            ListScmResult result =
+                provider.list( repository, new ScmFileSet( new File( "." ), new File( resourcePath ) ), false,
+                               makeScmVersion() );
 
             if ( !result.isSuccess() )
             {
