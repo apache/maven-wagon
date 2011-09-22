@@ -232,7 +232,8 @@ public class WebDavWagon
     public List<String> getFileList( String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        String url = getRepository().getUrl() + '/' + destinationDirectory;
+        String repositoryUrl = repository.getUrl();
+        String url = ( repositoryUrl.endsWith( "/" ) ? "" : "/" ) + destinationDirectory;
 
         PropFindMethod method = null;
         try

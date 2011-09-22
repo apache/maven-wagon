@@ -499,7 +499,11 @@ public abstract class AbstractHttpClientWagon
         {
             // TODO: Fix encoding...
             // url += "/" + URLEncoder.encode( parts[i], System.getProperty("file.encoding") );
-            url.append( '/' ).append( URLEncoder.encode( part ) );
+            if (!url.toString().endsWith( "/" ))
+            {
+                url.append( '/' );
+            }
+            url.append( URLEncoder.encode( part ) );
         }
 
         //Parent directories need to be created before posting
