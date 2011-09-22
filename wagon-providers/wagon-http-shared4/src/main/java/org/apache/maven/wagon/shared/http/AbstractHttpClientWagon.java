@@ -499,7 +499,7 @@ public abstract class AbstractHttpClientWagon
         {
             // TODO: Fix encoding...
             // url += "/" + URLEncoder.encode( parts[i], System.getProperty("file.encoding") );
-            if (!url.toString().endsWith( "/" ))
+            if ( !url.toString().endsWith( "/" ) )
             {
                 url.append( '/' );
             }
@@ -801,6 +801,19 @@ public abstract class AbstractHttpClientWagon
 
         statusCode = response.getStatusLine().getStatusCode();
 
+        Header[] reasonPhraseHeaders = response.getHeaders( "Reason-Phrase" );
+        StringBuilder reasonPhrase = new StringBuilder();
+        boolean foundReasonPhrase = false;
+        if ( reasonPhraseHeaders != null && reasonPhraseHeaders.length > 0 )
+        {
+            reasonPhrase.append( ", Reason-Phrase: " );
+            foundReasonPhrase = true;
+            for ( Header header : reasonPhraseHeaders )
+            {
+                reasonPhrase.append( header.getValue() ).append( " " );
+            }
+        }
+
         fireTransferDebug( url + " - Status code: " + statusCode );
 
         // TODO [BP]: according to httpclient docs, really should swallow the output on error. verify if that is
@@ -816,32 +829,33 @@ public abstract class AbstractHttpClientWagon
 
             case SC_NULL:
             {
-                TransferFailedException e = new TransferFailedException( "Failed to transfer file: " + url );
+                TransferFailedException e = new TransferFailedException(
+                    "Failed to transfer file: " + url + ( foundReasonPhrase ? reasonPhrase.toString() : "" ) );
                 fireTransferError( resource, e, TransferEvent.REQUEST_GET );
                 throw e;
             }
 
             case HttpStatus.SC_FORBIDDEN:
                 fireSessionConnectionRefused();
-                throw new AuthorizationException( "Access denied to: " + url );
+                throw new AuthorizationException( "Access denied to: " + url+ ( foundReasonPhrase ? reasonPhrase.toString() : "" ) );
 
             case HttpStatus.SC_UNAUTHORIZED:
                 fireSessionConnectionRefused();
-                throw new AuthorizationException( "Not authorized." );
+                throw new AuthorizationException( "Not authorized" + ( foundReasonPhrase ? reasonPhrase.toString() : "." ) );
 
             case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
                 fireSessionConnectionRefused();
-                throw new AuthorizationException( "Not authorized by proxy." );
+                throw new AuthorizationException( "Not authorized by proxy" + ( foundReasonPhrase ? reasonPhrase.toString() : "." ) );
 
             case HttpStatus.SC_NOT_FOUND:
-                throw new ResourceDoesNotExistException( "File: " + url + " does not exist" );
+                throw new ResourceDoesNotExistException( "File: " + url + " does not exist"+ ( foundReasonPhrase ? reasonPhrase.toString() : "" ) );
 
                 // add more entries here
             default:
             {
                 cleanupGetTransfer( resource );
                 TransferFailedException e = new TransferFailedException(
-                    "Failed to transfer file: " + url + ". Return code is: " + statusCode );
+                    "Failed to transfer file: " + url + ". Return code is: " + statusCode+ ( foundReasonPhrase ? reasonPhrase.toString() : "" ) );
                 fireTransferError( resource, e, TransferEvent.REQUEST_GET );
                 throw e;
             }

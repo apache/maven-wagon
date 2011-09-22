@@ -32,23 +32,32 @@ import java.io.IOException;
  * Date: 24/01/2008
  * Time: 17:25:27
  */
-public class WaitForeverServlet
+public class ErrorWithReasonPhaseServlet
     extends HttpServlet
 {
+    public static final String REASON = "it sucks!";
 
-    private Logger logger = Logger.getLogger( WaitForeverServlet.class );
+    private Logger logger = Logger.getLogger( ErrorWithReasonPhaseServlet.class );
 
     public void service( HttpServletRequest request, HttpServletResponse response )
         throws ServletException, IOException
     {
-        logger.info( "Calling WaitForeverServlet" );
-        try
+        if ( request.getRequestURL().toString().contains( "401" ) )
         {
-            Thread.sleep( 2000 );
+            response.setStatus( 401 );
         }
-        catch ( InterruptedException e )
+        else if ( request.getRequestURL().toString().contains( "403" ) )
         {
-            //eat
+            response.setStatus( 403 );
         }
+        else if ( request.getRequestURL().toString().contains( "407" ) )
+        {
+            response.setStatus( 407 );
+        }
+        else if ( request.getRequestURL().toString().contains( "500" ) )
+        {
+            response.setStatus( 500 );
+        }
+        response.addHeader( "Reason-Phrase", REASON );
     }
 }

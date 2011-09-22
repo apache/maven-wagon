@@ -43,7 +43,7 @@ public class HttpsWagonTest
         connector.setKeyPassword( "wagonhttp" );
         connector.setTruststore( getTestPath( "src/test/resources/ssl/keystore" ) );
         connector.setTrustPassword( "wagonhttp" );
-        server.setConnectors( new Connector[] { connector } );
+        server.setConnectors( new Connector[]{ connector } );
     }
 
 }
