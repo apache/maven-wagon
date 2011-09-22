@@ -65,9 +65,10 @@ public class EmbeddedScpExternalWagonWithKeyTest
             AuthenticationInfo authInfo = super.getAuthInfo();
             // user : guest/guest123 -  passphrase : toto01
             authInfo.setUserName( "guest" );
-            //authInfo.setPassword( TestData.getUserPassword() );
             File sshKeysTarget = new File( "target/ssh-keys" );
             FileUtils.copyDirectory( new File( "src/test/ssh-keys" ), sshKeysTarget );
+            // ssh keys need to 700 permissions
+            // to prevent WARNING: UNPROTECTED PRIVATE KEY FILE!
             Commandline commandline = new Commandline( "chmod" );
             commandline.createArg().setValue( "-R" );
             commandline.createArg().setValue( "700" );
