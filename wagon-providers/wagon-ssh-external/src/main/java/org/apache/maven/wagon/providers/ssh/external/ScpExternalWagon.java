@@ -170,24 +170,24 @@ public class ScpExternalWagon
         {
             if ( putty )
             {
-                cl.createArgument().setLine( "-P " + port );
+                cl.createArg().setLine( "-P " + port );
             }
             else
             {
-                cl.createArgument().setLine( "-p " + port );
+                cl.createArg().setLine( "-p " + port );
             }
         }
 
         if ( sshArgs != null )
         {
-            cl.createArgument().setLine( sshArgs );
+            cl.createArg().setLine( sshArgs );
         }
 
         String remoteHost = this.buildRemoteHost();
 
-        cl.createArgument().setValue( remoteHost );
+        cl.createArg().setValue( remoteHost );
 
-        cl.createArgument().setValue( command );
+        cl.createArg().setValue( command );
 
         fireSessionDebug( "Executing command: " + cl.toString() );
 
@@ -229,26 +229,26 @@ public class ScpExternalWagon
 
         if ( privateKey != null )
         {
-            cl.createArgument().setValue( "-i" );
-            cl.createArgument().setFile( privateKey );
+            cl.createArg().setValue( "-i" );
+            cl.createArg().setFile( privateKey );
         }
 
         String password = authenticationInfo.getPassword();
         if ( putty && password != null )
         {
-            cl.createArgument().setValue( "-pw" );
-            cl.createArgument().setValue( password );
+            cl.createArg().setValue( "-pw" );
+            cl.createArg().setValue( password );
         }
 
         // should check interactive flag, but scpexe never works in interactive mode right now due to i/o streams
         if ( putty )
         {
-            cl.createArgument().setValue( "-batch" );
+            cl.createArg().setValue( "-batch" );
         }
         else
         {
-            cl.createArgument().setValue( "-o" );
-            cl.createArgument().setValue( "BatchMode yes" );
+            cl.createArg().setValue( "-o" );
+            cl.createArg().setValue( "BatchMode yes" );
         }
         return cl;
     }
@@ -278,12 +278,12 @@ public class ScpExternalWagon
             repository.getPort() == WagonConstants.UNKNOWN_PORT ? ScpHelper.DEFAULT_SSH_PORT : repository.getPort();
         if ( port != ScpHelper.DEFAULT_SSH_PORT )
         {
-            cl.createArgument().setLine( "-P " + port );
+            cl.createArg().setLine( "-P " + port );
         }
 
         if ( scpArgs != null )
         {
-            cl.createArgument().setLine( scpArgs );
+            cl.createArg().setLine( scpArgs );
         }
 
         String resourceName = normalizeResource( resource );
@@ -294,13 +294,13 @@ public class ScpExternalWagon
         String qualifiedRemoteFile = this.buildRemoteHost() + ":" + remoteFile;
         if ( put )
         {
-            cl.createArgument().setValue( localFile.getName() );
-            cl.createArgument().setValue( qualifiedRemoteFile );
+            cl.createArg().setValue( localFile.getName() );
+            cl.createArg().setValue( qualifiedRemoteFile );
         }
         else
         {
-            cl.createArgument().setValue( qualifiedRemoteFile );
-            cl.createArgument().setValue( localFile.getName() );
+            cl.createArg().setValue( qualifiedRemoteFile );
+            cl.createArg().setValue( localFile.getName() );
         }
 
         fireSessionDebug( "Executing command: " + cl.toString() );
