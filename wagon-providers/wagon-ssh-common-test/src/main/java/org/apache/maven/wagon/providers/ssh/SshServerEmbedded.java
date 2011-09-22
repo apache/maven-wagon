@@ -107,7 +107,7 @@ public class SshServerEmbedded
 
         PEMGeneratorHostKeyProvider provider = new PEMGeneratorHostKeyProvider();
         provider.setAlgorithm( "RSA" );
-        provider.setKeySize( 512 );
+        provider.setKeySize( 1024 );
         provider.setPath( path.getPath() );
 
         sshd.setKeyPairProvider( provider );

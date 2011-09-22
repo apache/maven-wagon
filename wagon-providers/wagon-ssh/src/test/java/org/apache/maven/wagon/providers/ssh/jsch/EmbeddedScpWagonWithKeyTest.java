@@ -19,28 +19,22 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  * under the License.
  */
 
-import org.apache.maven.wagon.StreamingWagonTestCase;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
-import org.apache.maven.wagon.providers.ssh.SshServerEmbedded;
-import org.apache.maven.wagon.providers.ssh.TestData;
+import org.apache.maven.wagon.providers.ssh.AbstractEmbeddedScpWagonWithKeyTest;
 import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
-import org.apache.maven.wagon.repository.Repository;
-import org.apache.maven.wagon.resource.Resource;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  */
 public class EmbeddedScpWagonWithKeyTest
-    extends StreamingWagonTestCase
+    extends AbstractEmbeddedScpWagonWithKeyTest
 {
 
-    SshServerEmbedded sshServerEmbedded;
 
     @Override
     protected Wagon getWagon()
@@ -73,44 +67,12 @@ public class EmbeddedScpWagonWithKeyTest
         return scpWagon;
     }
 
-    @Override
-    protected void setUp()
-        throws Exception
-    {
-        super.setUp();
-
-        String sshKeyResource = "ssh-keys/id_rsa.pub";
-
-        sshServerEmbedded = new SshServerEmbedded( getProtocol(), Arrays.asList( sshKeyResource ), true );
-
-        sshServerEmbedded.start();
-        System.out.println( "sshd on port " + sshServerEmbedded.getPort() );
-    }
-
-    @Override
-    protected void tearDownWagonTestingFixtures()
-        throws Exception
-    {
-
-        sshServerEmbedded.stop( true );
-    }
 
     protected String getProtocol()
     {
         return "scp";
     }
 
-    @Override
-    protected int getTestRepositoryPort()
-    {
-        return sshServerEmbedded.getPort();
-    }
-
-
-    public String getTestRepositoryUrl()
-    {
-        return TestData.getTestRepositoryUrl( sshServerEmbedded.getPort() );
-    }
 
     protected AuthenticationInfo getAuthInfo()
     {
@@ -123,24 +85,5 @@ public class EmbeddedScpWagonWithKeyTest
         return authInfo;
     }
 
-    protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
-    {
-        return new File( repository.getBasedir(), resource.getName() ).lastModified();
-    }
 
-    public void testConnect()
-        throws Exception
-    {
-        getWagon().connect( new Repository( "foo", getTestRepositoryUrl() ), getAuthInfo() );
-        assertTrue( true );
-    }
-
-
-    @Override
-    protected boolean supportsGetIfNewer()
-    {
-        return false;
-    }
-
-    // user : guest/guest123 -  passphrase : toto01
 }
