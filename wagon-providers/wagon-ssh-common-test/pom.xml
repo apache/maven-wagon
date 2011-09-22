@@ -42,6 +42,10 @@ under the License.
     </dependency>
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>
+      <artifactId>wagon-provider-test</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.wagon</groupId>
       <artifactId>wagon-ssh-common</artifactId>
     </dependency>
     <dependency>
