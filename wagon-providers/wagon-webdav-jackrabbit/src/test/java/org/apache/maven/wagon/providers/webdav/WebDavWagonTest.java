@@ -16,8 +16,11 @@ package org.apache.maven.wagon.providers.webdav;
  */
 
 import it.could.webdav.DAVServlet;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.HttpMethod;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.StreamingWagon;
+import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.http.HttpWagonTestCase;
 import org.apache.maven.wagon.repository.Repository;
@@ -28,6 +31,7 @@ import org.mortbay.jetty.servlet.ServletHolder;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.List;
 import java.util.Properties;
 
@@ -68,7 +72,7 @@ public class WebDavWagonTest
         return ( file.lastModified() / 1000 ) * 1000;
     }
 
-    
+
     private File getDavRepository()
     {
         return getTestFile( "target/test-output/http-repository/newfolder/folder2" );
@@ -134,8 +138,9 @@ public class WebDavWagonTest
         assertURL( "dav+https://localhost:" + getTestRepositoryPort() + "/dav/",
                    "https://localhost:" + getTestRepositoryPort() + "/dav/" );
     }
-    
-    public void testMkdirs() throws Exception
+
+    public void testMkdirs()
+        throws Exception
     {
         setupRepositories();
 
@@ -143,33 +148,33 @@ public class WebDavWagonTest
 
         WebDavWagon wagon = (WebDavWagon) getWagon();
         wagon.connect( testRepository, getAuthInfo() );
-        
+
         try
         {
             File dir = getRepositoryDirectory();
-            
+
             // check basedir also doesn't exist and will need to be created
             dir = new File( dir, testRepository.getBasedir() );
             assertFalse( dir.exists() );
-            
+
             // test leading /
             assertFalse( new File( dir, "foo" ).exists() );
             wagon.mkdirs( "/foo" );
             assertTrue( new File( dir, "foo" ).exists() );
-            
+
             // test trailing /
             assertFalse( new File( dir, "bar" ).exists() );
             wagon.mkdirs( "bar/" );
             assertTrue( new File( dir, "bar" ).exists() );
-            
+
             // test when already exists
             wagon.mkdirs( "bar" );
-            
+
             // test several parts
             assertFalse( new File( dir, "1/2/3/4" ).exists() );
             wagon.mkdirs( "1/2/3/4" );
             assertTrue( new File( dir, "1/2/3/4" ).exists() );
-            
+
             // test additional part and trailing /
             assertFalse( new File( dir, "1/2/3/4/5" ).exists() );
             wagon.mkdirs( "1/2/3/4/5/" );
@@ -178,12 +183,13 @@ public class WebDavWagonTest
         finally
         {
             wagon.disconnect();
-            
+
             tearDownWagonTestingFixtures();
         }
     }
 
-    public void testMkdirsWithNoBasedir() throws Exception
+    public void testMkdirsWithNoBasedir()
+        throws Exception
     {
         // WAGON-244
         setupRepositories();
@@ -191,29 +197,29 @@ public class WebDavWagonTest
         setupWagonTestingFixtures();
 
         // reconstruct with no basedir
-        testRepository.setUrl( testRepository.getProtocol() + "://" + testRepository.getHost() + ":"
-            + testRepository.getPort() );
+        testRepository.setUrl(
+            testRepository.getProtocol() + "://" + testRepository.getHost() + ":" + testRepository.getPort() );
 
         WebDavWagon wagon = (WebDavWagon) getWagon();
         wagon.connect( testRepository, getAuthInfo() );
-        
+
         try
         {
             File dir = getRepositoryDirectory();
-            
+
             // check basedir also doesn't exist and will need to be created
             dir = new File( dir, testRepository.getBasedir() );
             assertTrue( dir.exists() );
-            
+
             // test leading /
             assertFalse( new File( dir, "foo" ).exists() );
             wagon.mkdirs( "/foo" );
-            assertTrue( new File( dir, "foo" ).exists() );            
+            assertTrue( new File( dir, "foo" ).exists() );
         }
         finally
         {
             wagon.disconnect();
-            
+
             tearDownWagonTestingFixtures();
         }
     }
@@ -225,6 +231,7 @@ public class WebDavWagonTest
 
     /**
      * Make sure wagon webdav can detect remote directory
+     *
      * @throws Exception
      */
     public void testWagonWebDavGetFileList()
@@ -236,20 +243,15 @@ public class WebDavWagonTest
 
         String dirName = "file-list";
 
-        String filenames[] = new String[] {
-            "test-resource.txt",
-            "test-resource.pom",
-            "test-resource b.txt",
-            "more-resources.dat" };
+        String filenames[] =
+            new String[]{ "test-resource.txt", "test-resource.pom", "test-resource b.txt", "more-resources.dat" };
 
         for ( int i = 0; i < filenames.length; i++ )
         {
             putFile( dirName + "/" + filenames[i], dirName + "/" + filenames[i], filenames[i] + "\n" );
         }
 
-        String dirnames[] = new String[] {
-            "test-dir1",
-            "test-dir2"};
+        String dirnames[] = new String[]{ "test-dir1", "test-dir2" };
 
         for ( int i = 0; i < dirnames.length; i++ )
         {
@@ -293,11 +295,10 @@ public class WebDavWagonTest
         }
         catch ( ResourceDoesNotExistException e )
         {
-        
+
         }
-        
+
         wagon.disconnect();
-        
 
         tearDownWagonTestingFixtures();
     }
@@ -328,4 +329,99 @@ public class WebDavWagonTest
 
         }
     }
+
+    public void testWagonFailsOnPutFailureByDefault()
+        throws Exception
+    {
+        setupRepositories();
+
+        setupWagonTestingFixtures();
+
+        File testFile = getTempFile();
+
+        System.clearProperty( WebDavWagon.CONTINUE_ON_FAILURE_PROPERTY );
+
+        WebDavWagon wagon = new TimeoutSimulatingWagon();
+        wagon.connect( testRepository, getAuthInfo() );
+
+        try
+        {
+            String filename = TimeoutSimulatingWagon.TIMEOUT_TRIGGER + ".txt";
+
+            try
+            {
+                wagon.put( testFile, filename );
+                fail( "Exception expected" );
+            }
+            catch ( TransferFailedException e )
+            {
+
+            }
+        }
+        finally
+        {
+            wagon.disconnect();
+
+            tearDownWagonTestingFixtures();
+        }
+    }
+
+    private File getTempFile()
+        throws IOException
+    {
+        File inputFile = File.createTempFile( "test-resource", ".txt" );
+        inputFile.deleteOnExit();
+        return inputFile;
+    }
+
+    private static class TimeoutSimulatingWagon
+        extends WebDavWagon
+    {
+        private static final String TIMEOUT_TRIGGER = "timeout";
+
+        protected int execute( HttpMethod httpMethod )
+            throws HttpException, IOException
+        {
+            if ( httpMethod.getPath().contains( TIMEOUT_TRIGGER ) )
+            {
+                throw new SocketTimeoutException( "Timeout triggered by request for '" + httpMethod.getPath() + "'" );
+            }
+            else
+            {
+                return super.execute( httpMethod );
+            }
+        }
+    }
+
+    public void testWagonContinuesOnPutFailureIfPropertySet()
+        throws Exception
+    {
+        setupRepositories();
+
+        setupWagonTestingFixtures();
+
+        File testFile = getTempFile();
+
+        String continueOnFailureProperty = WebDavWagon.CONTINUE_ON_FAILURE_PROPERTY;
+        System.setProperty( continueOnFailureProperty, "true" );
+
+        WebDavWagon wagon = new TimeoutSimulatingWagon();
+        wagon.connect( testRepository, getAuthInfo() );
+
+        try
+        {
+            String filename = TimeoutSimulatingWagon.TIMEOUT_TRIGGER + ".txt";
+
+            wagon.put( testFile, filename );
+        }
+        finally
+        {
+            wagon.disconnect();
+
+            System.clearProperty( continueOnFailureProperty );
+
+            tearDownWagonTestingFixtures();
+        }
+    }
+
 }

@@ -19,12 +19,6 @@ package org.apache.maven.wagon.providers.webdav;
  * under the License.
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.jackrabbit.webdav.DavConstants;
@@ -48,6 +42,12 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.w3c.dom.Node;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * <p>WebDavWagon</p>
  * <p/>
@@ -57,30 +57,32 @@ import org.w3c.dom.Node;
  * @author <a href="mailto:joakime@apache.org">Joakim Erdfelt</a>
  * @author <a href="mailto:carlos@apache.org">Carlos Sanchez</a>
  * @author <a href="mailto:james@atlassian.com">James William Dumay</a>
- *
  * @plexus.component role="org.apache.maven.wagon.Wagon"
- *   role-hint="dav"
- *   instantiation-strategy="per-lookup"
+ * role-hint="dav"
+ * instantiation-strategy="per-lookup"
  */
 public class WebDavWagon
     extends AbstractHttpClientWagon
 {
+    protected static final String CONTINUE_ON_FAILURE_PROPERTY = "wagon.webdav.continueOnFailure";
+
+    private final boolean continueOnFailure = Boolean.getBoolean( CONTINUE_ON_FAILURE_PROPERTY );
+
     /**
      * Defines the protocol mapping to use.
-     *
+     * <p/>
      * First string is the user definition way to define a webdav url,
      * the second string is the internal representation of that url.
-     *
+     * <p/>
      * NOTE: The order of the mapping becomes the search order.
      */
-    private static final String[][] protocolMap = new String[][] {
-        { "dav:http://", "http://" },    /* maven 2.0.x url string format. (violates URI spec) */
-        { "dav:https://", "https://" },  /* maven 2.0.x url string format. (violates URI spec) */
-        { "dav+http://", "http://" },    /* URI spec compliant (protocol+transport) */
-        { "dav+https://", "https://" },  /* URI spec compliant (protocol+transport) */
-        { "dav://", "http://" },         /* URI spec compliant (protocol only) */
-        { "davs://", "https://" }        /* URI spec compliant (protocol only) */
-    };
+    private static final String[][] protocolMap =
+        new String[][]{ { "dav:http://", "http://" },    /* maven 2.0.x url string format. (violates URI spec) */
+            { "dav:https://", "https://" },  /* maven 2.0.x url string format. (violates URI spec) */
+            { "dav+http://", "http://" },    /* URI spec compliant (protocol+transport) */
+            { "dav+https://", "https://" },  /* URI spec compliant (protocol+transport) */
+            { "dav://", "http://" },         /* URI spec compliant (protocol only) */
+            { "davs://", "https://" }        /* URI spec compliant (protocol only) */ };
 
     /**
      * This wagon supports directory copying
@@ -112,7 +114,7 @@ public class WebDavWagon
         {
             baseUrl += ":" + repository.getPort();
         }
-        
+
         // create relative path that will always have a leading and trailing slash
         String relpath = FileUtils.normalize( getPath( basedir, dir ) + "/" );
 
@@ -252,7 +254,7 @@ public class WebDavWagon
 
                         MultiStatusResponse response = multiStatus.getResponses()[i];
 
-                        String entryUrl =  response.getHref();
+                        String entryUrl = response.getHref();
                         String fileName = PathUtils.filename( URLDecoder.decode( entryUrl ) );
                         if ( entryUrl.endsWith( "/" ) )
                         {
@@ -298,8 +300,8 @@ public class WebDavWagon
                 method.releaseConnection();
             }
         }
-        throw new ResourceDoesNotExistException( "Destination path exists but is not a "
-                        + "WebDAV collection (directory): " + url );
+        throw new ResourceDoesNotExistException(
+            "Destination path exists but is not a " + "WebDAV collection (directory): " + url );
     }
 
     public String getURL( Repository repository )
@@ -318,5 +320,29 @@ public class WebDavWagon
 
         // No mapping trigger? then just return as-is.
         return url;
+    }
+
+
+    public void put( File source, String resourceName )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        try
+        {
+            super.put( source, resourceName );
+        }
+        catch ( TransferFailedException e )
+        {
+            if ( continueOnFailure )
+            {
+                // TODO use a logging mechanism here or a fireTransferWarning
+                System.out.println(
+                    "WARN: Skip unable to transfer '" + resourceName + "' from '" + source.getPath() + "' due to "
+                        + e.getMessage() );
+            }
+            else
+            {
+                throw e;
+            }
+        }
     }
 }

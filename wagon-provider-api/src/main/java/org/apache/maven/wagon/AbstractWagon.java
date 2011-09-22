@@ -721,7 +721,6 @@ public abstract class AbstractWagon
     protected void fireTransferError( Resource resource, Exception e, int requestType )
     {
         TransferEvent transferEvent = new TransferEvent( this, resource, e, requestType );
-
         transferEventSupport.fireTransferError( transferEvent );
     }
 
