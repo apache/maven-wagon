@@ -76,7 +76,8 @@ public class ScpWagon
     {
         if ( permissions != null && permissions.getGroup() != null )
         {
-            executeCommand( "chgrp -f " + permissions.getGroup() + " " + getPath( basedir, resource.getName() ) );
+            //executeCommand( "chgrp -f " + permissions.getGroup() + " " + getPath( basedir, resource.getName() ) );
+            executeCommand( "chgrp -f " + permissions.getGroup() + " \"" + getPath( basedir, resource.getName() ) + "\"" );
         }
     }
 
@@ -217,7 +218,8 @@ public class ScpWagon
         Resource resource = inputData.getResource();
 
         String path = getPath( getRepository().getBasedir(), resource.getName() );
-        String cmd = "scp -p -f " + path;
+        //String cmd = "scp -p -f " + path;
+        String cmd = "scp -p -f \"" + path + "\"";
 
         fireTransferDebug( "Executing command: " + cmd );
 

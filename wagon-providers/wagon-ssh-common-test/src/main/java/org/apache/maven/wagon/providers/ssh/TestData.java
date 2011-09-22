@@ -37,7 +37,12 @@ public class TestData
 
     public static String getTestRepositoryUrl( int port )
     {
-        return "scp://" + getHostname() + ":" + port + getTempDirectory() + "/wagon-ssh-test/" + getUserName();
+        return "scp://" + getHostname() + ":" + port + getRepoPath();
+    }
+
+    public static String getRepoPath()
+    {
+        return getTempDirectory() + "/wagon-ssh-test/" + getUserName();
     }
 
     public static String getUserName()

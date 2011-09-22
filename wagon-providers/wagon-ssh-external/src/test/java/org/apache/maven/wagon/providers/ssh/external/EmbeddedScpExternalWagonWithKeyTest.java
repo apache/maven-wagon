@@ -24,10 +24,13 @@ import org.apache.maven.wagon.Streams;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.providers.ssh.AbstractEmbeddedScpWagonWithKeyTest;
+import org.apache.maven.wagon.providers.ssh.TestData;
+import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
 import org.codehaus.plexus.util.cli.Commandline;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -102,6 +105,8 @@ public class EmbeddedScpExternalWagonWithKeyTest
     {
         // ignore this test as it need a stream wagon
     }
+
+
 
 
 }
