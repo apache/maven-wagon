@@ -20,14 +20,11 @@ package org.apache.maven.wagon.providers.ssh;
  */
 
 import org.apache.maven.wagon.StreamingWagonTestCase;
-import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
-import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -64,7 +61,7 @@ public abstract class AbstractEmbeddedScpWagonTest
             assertEquals( TestData.getUserName(), passwordAuthenticatorRequest.username );
             assertEquals( TestData.getUserPassword(), passwordAuthenticatorRequest.password );
         }
-        sshServerEmbedded.stop( true );
+        sshServerEmbedded.stop();
     }
 
     protected abstract String getProtocol();

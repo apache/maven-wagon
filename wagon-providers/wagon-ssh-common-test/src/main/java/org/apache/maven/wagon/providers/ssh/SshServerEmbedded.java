@@ -37,7 +37,6 @@ import org.codehaus.plexus.util.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -176,10 +175,10 @@ public class SshServerEmbedded
     }
 
 
-    public void stop( boolean immediately )
+    public void stop()
         throws InterruptedException
     {
-        sshd.stop( immediately );
+        sshd.stop( Boolean.getBoolean( "sshd.stopImmediatly" ) );
     }
 
     public int getPort()

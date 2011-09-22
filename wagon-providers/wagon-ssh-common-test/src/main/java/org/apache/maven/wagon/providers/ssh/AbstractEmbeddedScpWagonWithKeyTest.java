@@ -60,7 +60,7 @@ public abstract class AbstractEmbeddedScpWagonWithKeyTest
         throws Exception
     {
 
-        sshServerEmbedded.stop( true );
+        sshServerEmbedded.stop();
     }
 
     protected abstract String getProtocol();
