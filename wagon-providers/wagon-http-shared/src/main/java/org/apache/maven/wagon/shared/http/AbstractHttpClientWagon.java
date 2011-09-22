@@ -308,7 +308,11 @@ public abstract class AbstractHttpClientWagon
         {
             // TODO: Fix encoding...
             // url += "/" + URLEncoder.encode( parts[i], System.getProperty("file.encoding") );
-            url.append( '/' ).append( URLEncoder.encode( part ) );
+            if ( !url.toString().endsWith( "/" ) )
+            {
+                url.append( '/' );
+            }
+            url.append( URLEncoder.encode( part ) );
         }
 
         //Parent directories need to be created before posting
@@ -394,8 +398,13 @@ public abstract class AbstractHttpClientWagon
     public boolean resourceExists( String resourceName )
         throws TransferFailedException, AuthorizationException
     {
-        String url = getRepository().getUrl() + "/" + resourceName;
-        HeadMethod headMethod = new HeadMethod( url );
+        StringBuilder url = new StringBuilder( getRepository().getUrl() );
+        if ( !url.toString().endsWith( "/" ) )
+        {
+            url.append( '/' );
+        }
+        url.append( resourceName );
+        HeadMethod headMethod = new HeadMethod( url.toString() );
         int statusCode;
         try
         {
@@ -553,8 +562,14 @@ public abstract class AbstractHttpClientWagon
     {
         Resource resource = inputData.getResource();
 
-        String url = getRepository().getUrl() + "/" + resource.getName();
-        getMethod = new GetMethod( url );
+        StringBuilder url = new StringBuilder( getRepository().getUrl() );
+        if ( !url.toString().endsWith( "/" ) )
+        {
+            url.append( '/' );
+        }
+        url.append( resource.getName() );
+
+        getMethod = new GetMethod( url.toString() );
         long timestamp = resource.getLastModified();
         if ( timestamp > 0 )
         {

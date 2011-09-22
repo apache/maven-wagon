@@ -44,7 +44,7 @@ public class WebDavWagonTest
     protected String getTestRepositoryUrl()
         throws IOException
     {
-        return getProtocol() + "://localhost:" + getTestRepositoryPort() + "/newfolder/folder2";
+        return getProtocol() + "://localhost:" + getTestRepositoryPort() + "/newfolder/folder2/";
     }
 
     protected String getProtocol()
