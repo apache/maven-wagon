@@ -36,3 +36,7 @@ Maven Wagon WebDAV
 Features
 
  * Deploy files and directories to WebDAV enabled servers
+
+System Properties
+
+ Using -Dwagon.webdav.continueOnFailure=true will continue deploying other files even if one fail.
