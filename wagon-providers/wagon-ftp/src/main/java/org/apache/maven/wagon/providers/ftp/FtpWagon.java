@@ -67,6 +67,11 @@ public class FtpWagon
      */
     private boolean passiveMode = true;
 
+    /**
+     * @plexus.configuration default-value="ISO-8859-1"
+     */
+    private String controlEncoding = FTP.DEFAULT_CONTROL_ENCODING;
+
     public boolean isPassiveMode()
     {
         return passiveMode;
@@ -110,6 +115,7 @@ public class FtpWagon
         ftp = new FTPClient();
         ftp.setDefaultTimeout( getTimeout() );
         ftp.setDataTimeout( getTimeout() );
+        ftp.setControlEncoding( getControlEncoding() );
 
         ftp.addProtocolCommandListener( new PrintCommandListener( this ) );
 
@@ -474,8 +480,8 @@ public class FtpWagon
             String filename = PathUtils.filename( resource.getName() );
             int status = ftp.stat( filename );
 
-            return ( ( status == FTPReply.FILE_STATUS ) || ( status == FTPReply.DIRECTORY_STATUS )
-                || ( status == FTPReply.FILE_STATUS_OK ) // not in the RFC but used by some FTP servers
+            return ( ( status == FTPReply.FILE_STATUS ) || ( status == FTPReply.DIRECTORY_STATUS ) || ( status
+                == FTPReply.FILE_STATUS_OK ) // not in the RFC but used by some FTP servers
                 || ( status == FTPReply.COMMAND_OK )     // not in the RFC but used by some FTP servers
                 || ( status == FTPReply.SYSTEM_STATUS ) );
         }
@@ -778,5 +784,15 @@ public class FtpWagon
         }
 
         return ok;
+    }
+
+    public String getControlEncoding()
+    {
+        return controlEncoding;
+    }
+
+    public void setControlEncoding( String controlEncoding )
+    {
+        this.controlEncoding = controlEncoding;
     }
 }
