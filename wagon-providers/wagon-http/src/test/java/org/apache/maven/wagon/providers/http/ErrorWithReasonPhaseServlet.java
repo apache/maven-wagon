@@ -44,20 +44,20 @@ public class ErrorWithReasonPhaseServlet
     {
         if ( request.getRequestURL().toString().contains( "401" ) )
         {
-            response.setStatus( 401 );
+            response.sendError( 401, REASON );
         }
         else if ( request.getRequestURL().toString().contains( "403" ) )
         {
-            response.setStatus( 403 );
+            response.sendError( 403, REASON );
         }
         else if ( request.getRequestURL().toString().contains( "407" ) )
         {
-            response.setStatus( 407 );
+            response.sendError( 407, REASON );
         }
         else if ( request.getRequestURL().toString().contains( "500" ) )
         {
-            response.setStatus( 500 );
+            response.sendError( 500, REASON );
         }
-        response.addHeader( "Reason-Phrase", REASON );
+
     }
 }
