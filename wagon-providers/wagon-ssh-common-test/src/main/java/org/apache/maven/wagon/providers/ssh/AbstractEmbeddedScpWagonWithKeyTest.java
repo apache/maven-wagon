@@ -132,7 +132,7 @@ public abstract class AbstractEmbeddedScpWagonWithKeyTest
         String url = getTestRepositoryUrl() + "/" + dir;
         Repository repo = new Repository( "foo", url );
         Wagon wagon = getWagon();
-        wagon.connect( repo );
+        wagon.connect( repo, getAuthInfo() );
         List<String> files = wagon.getFileList( subDir );
         assertNotNull( files );
         assertEquals( 1, files.size() );
