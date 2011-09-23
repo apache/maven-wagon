@@ -37,25 +37,6 @@ under the License.
   <url>http://maven.apache.org/wagon</url>
   <inceptionYear>2003</inceptionYear>
 
-  <developers>
-    <developer>
-      <id>michal</id>
-      <name>Michal Maczka</name>
-      <email>michal@codehaus.org</email>
-      <organization>Codehaus</organization>
-      <roles>
-        <role>Developer</role>
-      </roles>
-    </developer>
-    <developer>
-      <id>struberg</id>
-      <name>Mark Struberg</name>
-      <email>struberg@apache.org</email>
-      <roles>
-        <role>Developer</role>
-      </roles>
-    </developer>
-  </developers>
   <contributors>
     <contributor>
       <name>James William Dumay</name>
@@ -113,6 +94,14 @@ under the License.
     </contributor>
     <contributor>
       <name>Thorsten Heit</name>
+    </contributor>
+    <contributor>
+      <name>Michal Maczka</name>
+      <email>michal@codehaus.org</email>
+      <organization>Codehaus</organization>
+      <roles>
+        <role>Developer</role>
+      </roles>
     </contributor>
   </contributors>
 
