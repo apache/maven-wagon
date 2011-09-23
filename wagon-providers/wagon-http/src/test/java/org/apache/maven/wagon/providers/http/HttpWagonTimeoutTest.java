@@ -19,13 +19,16 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
-import java.io.File;
-
 import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.shared.http.HttpConfiguration;
+import org.apache.maven.wagon.shared.http.HttpMethodConfiguration;
 import org.mortbay.jetty.servlet.ServletHolder;
+
+import java.io.File;
+import java.util.Random;
 
 /**
  * User: jdumay Date: 24/01/2008 Time: 17:17:34
@@ -162,6 +165,44 @@ public class HttpWagonTimeoutTest
             wagon.put( destFile, "/timeoutfile" );
 
             wagon.disconnect();
+        }
+        catch ( Exception e )
+        {
+            thrown = e;
+        }
+        finally
+        {
+            stopServer();
+        }
+
+        assertNotNull( thrown );
+        assertEquals( TransferFailedException.class, thrown.getClass() );
+    }
+
+    public void testConnectionTimeout()
+        throws Exception
+    {
+        Exception thrown = null;
+
+        try
+        {
+            HttpWagon wagon = (HttpWagon) getWagon();
+            wagon.setHttpConfiguration(
+                new HttpConfiguration().setAll( new HttpMethodConfiguration().setConnectionTimeout( 500 ) ) );
+
+            Repository testRepository = new Repository();
+            Random random = new Random( );
+            testRepository.setUrl( "http://localhost:" + random.nextInt( 2048 ));
+
+            wagon.connect( testRepository );
+
+            long start = System.currentTimeMillis();
+            wagon.getFileList( "/foobar" );
+            long end = System.currentTimeMillis();
+
+            // validate we have a default time out 60000
+            assertTrue( (end - start) >= 500 && (end - start) < 1000 );
+
         }
         catch ( Exception e )
         {
