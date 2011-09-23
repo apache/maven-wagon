@@ -448,6 +448,6 @@ public class LightweightHttpWagon
 
     public void setPreemptiveAuthentication( boolean preemptiveAuthentication )
     {
-        this.preemptiveAuthentication |= preemptiveAuthentication;
+        this.preemptiveAuthentication = preemptiveAuthentication;
     }
 }
