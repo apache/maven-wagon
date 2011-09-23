@@ -40,6 +40,8 @@ public class HttpMethodConfiguration
 
     public static final int DEFAULT_CONNECTION_TIMEOUT = 60000;
 
+    public static final int DEFAULT_READ_TIMEOUT = 60000;
+
     private static final String COERCE_PATTERN = "%(\\w+),(.+)";
 
     private Boolean useDefaultHeaders;
@@ -49,6 +51,8 @@ public class HttpMethodConfiguration
     private Properties params = new Properties();
 
     private int connectionTimeout = DEFAULT_CONNECTION_TIMEOUT;
+
+    private int readTimeout = DEFAULT_READ_TIMEOUT;
 
     public boolean isUseDefaultHeaders()
     {
@@ -111,6 +115,17 @@ public class HttpMethodConfiguration
         return this;
     }
 
+    public int getReadTimeout()
+    {
+        return readTimeout;
+    }
+
+    public HttpMethodConfiguration setReadTimeout( int readTimeout )
+    {
+        this.readTimeout = readTimeout;
+        return this;
+    }
+
     public HttpParams asMethodParams( HttpParams defaults )
     {
         if ( !hasParams() )
@@ -127,7 +142,7 @@ public class HttpMethodConfiguration
 
     private boolean hasParams()
     {
-        if ( connectionTimeout < 1 && params == null )
+        if ( connectionTimeout < 1 && params == null && readTimeout < 1 )
         {
             return false;
         }
@@ -144,7 +159,12 @@ public class HttpMethodConfiguration
 
         if ( connectionTimeout > 0 )
         {
-            p.setParameter( CoreConnectionPNames.SO_TIMEOUT, connectionTimeout );
+            p.setParameter( CoreConnectionPNames.CONNECTION_TIMEOUT, connectionTimeout );
+        }
+
+        if ( readTimeout > 0 )
+        {
+            p.setParameter( CoreConnectionPNames.SO_TIMEOUT, readTimeout );
         }
 
         if ( params != null )
@@ -243,8 +263,8 @@ public class HttpMethodConfiguration
         {
             Map.Entry<String, String> entry = (Map.Entry) it.next();
 
-            String key = (String) entry.getKey();
-            String value = (String) entry.getValue();
+            String key = entry.getKey();
+            String value = entry.getValue();
 
             Header header = new BasicHeader( key, value );
             result[index++] = header;
@@ -258,6 +278,7 @@ public class HttpMethodConfiguration
         HttpMethodConfiguration copy = new HttpMethodConfiguration();
 
         copy.setConnectionTimeout( getConnectionTimeout() );
+        copy.setReadTimeout( getReadTimeout() );
         if ( getHeaders() != null )
         {
             copy.setHeaders( getHeaders() );
@@ -301,6 +322,11 @@ public class HttpMethodConfiguration
             if ( local.getConnectionTimeout() != DEFAULT_CONNECTION_TIMEOUT )
             {
                 result.setConnectionTimeout( local.getConnectionTimeout() );
+            }
+
+            if ( local.getReadTimeout() != DEFAULT_READ_TIMEOUT )
+            {
+                result.setReadTimeout( local.getReadTimeout() );
             }
 
             if ( local.getHeaders() != null )

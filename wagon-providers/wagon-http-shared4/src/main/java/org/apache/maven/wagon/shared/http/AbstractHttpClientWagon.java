@@ -684,7 +684,7 @@ public abstract class AbstractHttpClientWagon
             }
         }
 
-        if ( config == null || config.getConnectionTimeout() == HttpMethodConfiguration.DEFAULT_CONNECTION_TIMEOUT )
+        if ( config == null || config.getReadTimeout() == HttpMethodConfiguration.DEFAULT_CONNECTION_TIMEOUT )
         {
             method.getParams().setParameter( CoreConnectionPNames.SO_TIMEOUT, getTimeout() );
         }
