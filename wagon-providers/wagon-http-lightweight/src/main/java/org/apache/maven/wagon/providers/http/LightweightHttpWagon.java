@@ -45,8 +45,8 @@ import java.net.Proxy;
 import java.net.Proxy.Type;
 import java.net.SocketAddress;
 import java.net.URL;
-import java.util.Iterator;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.zip.GZIPInputStream;
@@ -82,8 +82,8 @@ public class LightweightHttpWagon
      */
     private Properties httpHeaders;
 
-    /** 
-     * @plexus.requirement 
+    /**
+     * @plexus.requirement
      */
     private LightweightHttpWagonAuthenticator authenticator;
 
@@ -276,9 +276,11 @@ public class LightweightHttpWagon
         }
         authenticator.setWagon( this );
 
-        setPreemptiveAuthentication(
-                Boolean.getBoolean( "maven.wagon.http.preemptiveAuthentication" )
-             || Boolean.parseBoolean( repository.getParameter( "preemptiveAuthentication" ) ) );
+        boolean usePreemptiveAuthentication =
+            Boolean.getBoolean( "maven.wagon.http.preemptiveAuthentication" ) || Boolean.parseBoolean(
+                repository.getParameter( "preemptiveAuthentication" ) ) || this.preemptiveAuthentication;
+
+        setPreemptiveAuthentication( usePreemptiveAuthentication );
     }
 
     @SuppressWarnings( "deprecation" )
@@ -317,8 +319,8 @@ public class LightweightHttpWagon
 
     private Type getProxyType( ProxyInfo proxyInfo )
     {
-        if ( ProxyInfo.PROXY_SOCKS4.equals( proxyInfo.getType() )
-            || ProxyInfo.PROXY_SOCKS5.equals( proxyInfo.getType() ) )
+        if ( ProxyInfo.PROXY_SOCKS4.equals( proxyInfo.getType() ) || ProxyInfo.PROXY_SOCKS5.equals(
+            proxyInfo.getType() ) )
         {
             return Type.SOCKS;
         }
