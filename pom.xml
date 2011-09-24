@@ -324,7 +324,7 @@ under the License.
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.9</version>
           <configuration>
-            <forkedProcessTimeoutInSeconds>300</forkedProcessTimeoutInSeconds>
+            <forkedProcessTimeoutInSeconds>400</forkedProcessTimeoutInSeconds>
             <systemPropertyVariables>
               <java.io.tmpdir>${project.build.outputDirectory}</java.io.tmpdir>
             </systemPropertyVariables>

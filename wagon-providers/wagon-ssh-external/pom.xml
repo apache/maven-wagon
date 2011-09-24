@@ -33,6 +33,10 @@ under the License.
     Wagon that gets and puts artifacts using SSH protocol with a preinstalled SSH client
   </description>
 
+  <properties>
+    <sshd.stopImmediatly>false</sshd.stopImmediatly>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
@@ -94,6 +98,11 @@ under the License.
                 <exclude>**/Scp*Test.*</exclude>
                 <exclude>**/EmbeddedScp*WagonWithKeyTest.*</exclude>
               </excludes>
+              <systemPropertyVariables>
+                <java.io.tmpdir>${project.build.outputDirectory}</java.io.tmpdir>
+                <test.user>olamy</test.user>
+                <sshd.stopImmediatly>${sshd.stopImmediatly}</sshd.stopImmediatly>
+              </systemPropertyVariables>
             </configuration>
           </plugin>
         </plugins>
