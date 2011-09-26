@@ -109,11 +109,12 @@ under the License.
       </build>
     </profile>
     <profile>
-      <id>ssh-tests</id>
+      <id>ssh-embedded</id>
       <activation>
-        <file>
-          <exists>/usr/bin/scp</exists>
-        </file>
+        <property>
+          <name>ssh-embedded</name>
+          <value>true</value>
+        </property>
       </activation>
       <build>
         <plugins>

@@ -100,6 +100,7 @@ under the License.
                 <exclude>**/SshCommandExecutorTest.*</exclude>
                 <exclude>**/KnownHostsProviderTest.*</exclude>
                 <exclude>**/ScpWagon*Test.*</exclude>
+                <exclude>**/Embedded*Test.*</exclude>
               </excludes>
               <systemPropertyVariables>
                 <java.io.tmpdir>${project.build.outputDirectory}</java.io.tmpdir>
@@ -134,6 +135,36 @@ under the License.
               <systemPropertyVariables>
                 <java.io.tmpdir>${project.build.outputDirectory}</java.io.tmpdir>
                 <test.user>olamy</test.user>
+              </systemPropertyVariables>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>ssh-embedded</id>
+      <activation>
+        <property>
+          <name>ssh-embedded</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <!-- Tests that currently doesn't work with embedded ssh server -->
+              <excludes>
+                <exclude>**/SftpWagonTest.*</exclude>
+                <exclude>**/SshCommandExecutorTest.*</exclude>
+                <exclude>**/KnownHostsProviderTest.*</exclude>
+                <exclude>**/ScpWagon*Test.*</exclude>
+              </excludes>
+              <systemPropertyVariables>
+                <java.io.tmpdir>${project.build.outputDirectory}</java.io.tmpdir>
+                <test.user>olamy</test.user>
+                <sshd.stopImmediatly>${sshd.stopImmediatly}</sshd.stopImmediatly>
               </systemPropertyVariables>
             </configuration>
           </plugin>
