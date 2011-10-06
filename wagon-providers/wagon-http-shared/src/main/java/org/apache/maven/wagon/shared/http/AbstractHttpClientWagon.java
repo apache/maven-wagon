@@ -709,9 +709,25 @@ public abstract class AbstractHttpClientWagon
         }
     }
 
+    @Override
+    public void putFromStream( InputStream stream, String destination )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        putFromStream( stream, destination, -1, -1 );
+    }
+
+    @Override
+    protected void putFromStream( InputStream stream, Resource resource )
+        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
+    {
+        putFromStream( stream, resource.getName( ), -1, -1 );
+    }
+
+    @Override
     public void fillOutputData( OutputData outputData )
         throws TransferFailedException
     {
-        throw new IllegalStateException( "Should not be using the streaming wagon for HTTP PUT" );
+        // no needed in this implementation but throw an Exception if used
+        throw new IllegalStateException( "this wagon http client must not use fillOutputData" );
     }
 }

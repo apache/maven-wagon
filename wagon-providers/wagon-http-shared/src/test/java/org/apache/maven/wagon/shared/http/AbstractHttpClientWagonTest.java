@@ -25,6 +25,8 @@ import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 
 import junit.framework.TestCase;
+import org.apache.maven.wagon.OutputData;
+import org.apache.maven.wagon.TransferFailedException;
 
 public class AbstractHttpClientWagonTest
     extends TestCase
@@ -145,6 +147,12 @@ public class AbstractHttpClientWagonTest
     private static final class TestWagon
         extends AbstractHttpClientWagon
     {
+        @Override
+        public void fillOutputData( OutputData outputData )
+            throws TransferFailedException
+        {
+
+        }
     }
 
 }

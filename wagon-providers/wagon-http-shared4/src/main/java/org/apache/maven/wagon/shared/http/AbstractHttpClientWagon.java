@@ -108,7 +108,6 @@ public abstract class AbstractHttpClientWagon
 
         private final File source;
 
-
         private RequestEntityImplementation( final InputStream stream, final Resource resource, final Wagon wagon,
                                              final File source )
             throws TransferFailedException
@@ -123,9 +122,10 @@ public abstract class AbstractHttpClientWagon
                 try
                 {
                     this.source = File.createTempFile( "http-wagon.", ".tmp" );
-                    this.source.deleteOnExit();
+                    this.source.deleteOnExit( );
 
                     fos = new FileOutputStream( this.source );
+                    System.out.println( "write to file " + this.source.getAbsolutePath( ) );
                     IOUtil.copy( stream, fos );
                 }
                 catch ( IOException e )
@@ -143,22 +143,22 @@ public abstract class AbstractHttpClientWagon
             this.wagon = wagon;
         }
 
-        public long getContentLength()
+        public long getContentLength( )
         {
-            return resource.getContentLength();
+            return resource.getContentLength( );
         }
 
-        public Header getContentType()
-        {
-            return null;
-        }
-
-        public Header getContentEncoding()
+        public Header getContentType( )
         {
             return null;
         }
 
-        public InputStream getContent()
+        public Header getContentEncoding( )
+        {
+            return null;
+        }
+
+        public InputStream getContent( )
             throws IOException, IllegalStateException
         {
             FileInputStream fis = new FileInputStream( source );
@@ -166,12 +166,12 @@ public abstract class AbstractHttpClientWagon
             return fis;
         }
 
-        public boolean isRepeatable()
+        public boolean isRepeatable( )
         {
             return true;
         }
 
-        public boolean isChunked()
+        public boolean isChunked( )
         {
             return false;
         }
@@ -183,7 +183,7 @@ public abstract class AbstractHttpClientWagon
 
             TransferEvent transferEvent =
                 new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT );
-            transferEvent.setTimestamp( System.currentTimeMillis() );
+            transferEvent.setTimestamp( System.currentTimeMillis( ) );
 
             FileInputStream fin = null;
             try
@@ -211,15 +211,15 @@ public abstract class AbstractHttpClientWagon
                 IOUtil.close( fin );
             }
 
-            output.flush();
+            output.flush( );
         }
 
-        public boolean isStreaming()
+        public boolean isStreaming( )
         {
             return false;
         }
 
-        public void consumeContent()
+        public void consumeContent( )
             throws IOException
         {
         }
@@ -239,7 +239,7 @@ public abstract class AbstractHttpClientWagon
     /**
      * @since 2.0
      */
-    protected ClientConnectionManager clientConnectionManager = new SingleClientConnManager();
+    protected ClientConnectionManager clientConnectionManager = new SingleClientConnManager( );
 
     /**
      * use http(s) connection pool mechanism.
@@ -285,7 +285,7 @@ public abstract class AbstractHttpClientWagon
         else
         {
 
-            ThreadSafeClientConnManager threadSafeClientConnManager = new ThreadSafeClientConnManager();
+            ThreadSafeClientConnManager threadSafeClientConnManager = new ThreadSafeClientConnManager( );
             int maxPerRoute =
                 Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxPerRoute", "20" ) );
             threadSafeClientConnManager.setDefaultMaxPerRoute( maxPerRoute );
@@ -298,21 +298,21 @@ public abstract class AbstractHttpClientWagon
                 try
                 {
                     SSLSocketFactory sslSocketFactory =
-                        new SSLSocketFactory( EasyX509TrustManager.createEasySSLContext(), sslAllowAll
-                            ? new EasyHostNameVerifier()
-                            : new BrowserCompatHostnameVerifier() );
+                        new SSLSocketFactory( EasyX509TrustManager.createEasySSLContext( ), sslAllowAll
+                            ? new EasyHostNameVerifier( )
+                            : new BrowserCompatHostnameVerifier( ) );
                     Scheme httpsScheme = new Scheme( "https", 443, sslSocketFactory );
 
-                    threadSafeClientConnManager.getSchemeRegistry().register( httpsScheme );
+                    threadSafeClientConnManager.getSchemeRegistry( ).register( httpsScheme );
                 }
                 catch ( IOException e )
                 {
-                    throw new RuntimeException( "failed to init SSLSocket Factory " + e.getMessage(), e );
+                    throw new RuntimeException( "failed to init SSLSocket Factory " + e.getMessage( ), e );
                 }
             }
             System.out.println( " wagon http use multi threaded http connection manager maxPerRoute "
-                                    + threadSafeClientConnManager.getDefaultMaxPerRoute() + ", max total "
-                                    + threadSafeClientConnManager.getMaxTotal() );
+                                    + threadSafeClientConnManager.getDefaultMaxPerRoute( ) + ", max total "
+                                    + threadSafeClientConnManager.getMaxTotal( ) );
 
             connectionManagerPooled = threadSafeClientConnManager;
         }
@@ -350,7 +350,7 @@ public abstract class AbstractHttpClientWagon
         }
     }
 
-    public ClientConnectionManager getConnectionManager()
+    public ClientConnectionManager getConnectionManager( )
     {
         if ( !useClientManagerPooled )
         {
@@ -382,51 +382,52 @@ public abstract class AbstractHttpClientWagon
 
     private HttpGet getMethod;
 
-    public void openConnectionInternal()
+    public void openConnectionInternal( )
     {
         repository.setUrl( getURL( repository ) );
-        client = new DefaultHttpClient( getConnectionManager() );
+        client = new DefaultHttpClient( getConnectionManager( ) );
 
         // WAGON-273: default the cookie-policy to browser compatible
-        client.getParams().setParameter( ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY );
+        client.getParams( ).setParameter( ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY );
 
         String username = null;
         String password = null;
 
         if ( authenticationInfo != null )
         {
-            username = authenticationInfo.getUserName();
+            username = authenticationInfo.getUserName( );
 
-            password = authenticationInfo.getPassword();
+            password = authenticationInfo.getPassword( );
         }
 
         if ( StringUtils.isNotEmpty( username ) && StringUtils.isNotEmpty( password ) )
         {
             Credentials creds = new UsernamePasswordCredentials( username, password );
 
-            String host = getRepository().getHost();
-            int port = getRepository().getPort() > -1 ? getRepository().getPort() : AuthScope.ANY_PORT;
+            String host = getRepository( ).getHost( );
+            int port = getRepository( ).getPort( ) > -1 ? getRepository( ).getPort( ) : AuthScope.ANY_PORT;
 
-            client.getCredentialsProvider().setCredentials( new AuthScope( host, port ), creds );
+            client.getCredentialsProvider( ).setCredentials( new AuthScope( host, port ), creds );
 
-            AuthCache authCache = new BasicAuthCache();
-            BasicScheme basicAuth = new BasicScheme();
-            HttpHost targetHost = new HttpHost( repository.getHost(), repository.getPort(), repository.getProtocol() );
+            AuthCache authCache = new BasicAuthCache( );
+            BasicScheme basicAuth = new BasicScheme( );
+            HttpHost targetHost =
+                new HttpHost( repository.getHost( ), repository.getPort( ), repository.getProtocol( ) );
             authCache.put( targetHost, basicAuth );
 
-            localContext = new BasicHttpContext();
+            localContext = new BasicHttpContext( );
             localContext.setAttribute( ClientContext.AUTH_CACHE, authCache );
         }
 
-        ProxyInfo proxyInfo = getProxyInfo( getRepository().getProtocol(), getRepository().getHost() );
+        ProxyInfo proxyInfo = getProxyInfo( getRepository( ).getProtocol( ), getRepository( ).getHost( ) );
         if ( proxyInfo != null )
         {
-            String proxyUsername = proxyInfo.getUserName();
-            String proxyPassword = proxyInfo.getPassword();
-            String proxyHost = proxyInfo.getHost();
-            int proxyPort = proxyInfo.getPort();
-            String proxyNtlmHost = proxyInfo.getNtlmHost();
-            String proxyNtlmDomain = proxyInfo.getNtlmDomain();
+            String proxyUsername = proxyInfo.getUserName( );
+            String proxyPassword = proxyInfo.getPassword( );
+            String proxyHost = proxyInfo.getHost( );
+            int proxyPort = proxyInfo.getPort( );
+            String proxyNtlmHost = proxyInfo.getNtlmHost( );
+            String proxyNtlmDomain = proxyInfo.getNtlmDomain( );
             if ( proxyHost != null )
             {
                 HttpHost proxy = new HttpHost( proxyHost, proxyPort );
@@ -443,22 +444,22 @@ public abstract class AbstractHttpClientWagon
                         creds = new UsernamePasswordCredentials( proxyUsername, proxyPassword );
                     }
 
-                    int port = proxyInfo.getPort() > -1 ? proxyInfo.getPort() : AuthScope.ANY_PORT;
+                    int port = proxyInfo.getPort( ) > -1 ? proxyInfo.getPort( ) : AuthScope.ANY_PORT;
 
                     AuthScope authScope = new AuthScope( proxyHost, port );
-                    client.getCredentialsProvider().setCredentials( authScope, creds );
+                    client.getCredentialsProvider( ).setCredentials( authScope, creds );
                 }
 
-                client.getParams().setParameter( ConnRoutePNames.DEFAULT_PROXY, proxy );
+                client.getParams( ).setParameter( ConnRoutePNames.DEFAULT_PROXY, proxy );
             }
         }
     }
 
-    public void closeConnection()
+    public void closeConnection( )
     {
         if ( !useClientManagerPooled )
         {
-            getConnectionManager().shutdown();
+            getConnectionManager( ).shutdown( );
         }
     }
 
@@ -469,9 +470,9 @@ public abstract class AbstractHttpClientWagon
 
         firePutInitiated( resource, source );
 
-        resource.setContentLength( source.length() );
+        resource.setContentLength( source.length( ) );
 
-        resource.setLastModified( source.lastModified() );
+        resource.setLastModified( source.lastModified( ) );
 
         put( null, resource, source );
     }
@@ -493,13 +494,19 @@ public abstract class AbstractHttpClientWagon
     private void put( final InputStream stream, Resource resource, File source )
         throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
-        StringBuilder url = new StringBuilder( getRepository().getUrl() );
-        String[] parts = StringUtils.split( resource.getName(), "/" );
+        put( resource, source, new RequestEntityImplementation( stream, resource, this, source ) );
+    }
+
+    private void put( Resource resource, File source, HttpEntity httpEntity )
+        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
+    {
+        StringBuilder url = new StringBuilder( getRepository( ).getUrl( ) );
+        String[] parts = StringUtils.split( resource.getName( ), "/" );
         for ( String part : parts )
         {
             // TODO: Fix encoding...
             // url += "/" + URLEncoder.encode( parts[i], System.getProperty("file.encoding") );
-            if ( !url.toString().endsWith( "/" ) )
+            if ( !url.toString( ).endsWith( "/" ) )
             {
                 url.append( '/' );
             }
@@ -509,7 +516,7 @@ public abstract class AbstractHttpClientWagon
         //Parent directories need to be created before posting
         try
         {
-            mkdirs( PathUtils.dirname( resource.getName() ) );
+            mkdirs( PathUtils.dirname( resource.getName( ) ) );
         }
         catch ( HttpException he )
         {
@@ -520,13 +527,13 @@ public abstract class AbstractHttpClientWagon
             fireTransferError( resource, e, TransferEvent.REQUEST_GET );
         }
 
-        HttpPut putMethod = new HttpPut( url.toString() );
+        HttpPut putMethod = new HttpPut( url.toString( ) );
 
         firePutStarted( resource, source );
 
         try
         {
-            putMethod.setEntity( new RequestEntityImplementation( stream, resource, this, source ) );
+            putMethod.setEntity( httpEntity );
 
             HttpResponse response;
             try
@@ -537,17 +544,17 @@ public abstract class AbstractHttpClientWagon
             {
                 fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
 
-                throw new TransferFailedException( e.getMessage(), e );
+                throw new TransferFailedException( e.getMessage( ), e );
             }
             catch ( HttpException e )
             {
                 fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
 
-                throw new TransferFailedException( e.getMessage(), e );
+                throw new TransferFailedException( e.getMessage( ), e );
             }
 
-            int statusCode = response.getStatusLine().getStatusCode();
-            String reasonPhrase = ", ReasonPhrase:" + response.getStatusLine().getReasonPhrase() + ".";
+            int statusCode = response.getStatusLine( ).getStatusCode( );
+            String reasonPhrase = ", ReasonPhrase:" + response.getStatusLine( ).getReasonPhrase( ) + ".";
             fireTransferDebug( url + " - Status code: " + statusCode + reasonPhrase );
 
             // Check that we didn't run out of retries.
@@ -569,7 +576,7 @@ public abstract class AbstractHttpClientWagon
                 }
 
                 case HttpStatus.SC_FORBIDDEN:
-                    fireSessionConnectionRefused();
+                    fireSessionConnectionRefused( );
                     throw new AuthorizationException( "Access denied to: " + url + reasonPhrase );
 
                 case HttpStatus.SC_NOT_FOUND:
@@ -589,7 +596,7 @@ public abstract class AbstractHttpClientWagon
         }
         finally
         {
-            putMethod.abort();
+            putMethod.abort( );
         }
     }
 
@@ -602,7 +609,7 @@ public abstract class AbstractHttpClientWagon
     public boolean resourceExists( String resourceName )
         throws TransferFailedException, AuthorizationException
     {
-        String repositoryUrl = getRepository().getUrl();
+        String repositoryUrl = getRepository( ).getUrl( );
         String url = repositoryUrl + ( repositoryUrl.endsWith( "/" ) ? "" : "/" ) + resourceName;
         HttpHead headMethod = new HttpHead( url );
         HttpResponse response = null;
@@ -613,17 +620,17 @@ public abstract class AbstractHttpClientWagon
         }
         catch ( IOException e )
         {
-            throw new TransferFailedException( e.getMessage(), e );
+            throw new TransferFailedException( e.getMessage( ), e );
         }
         catch ( HttpException e )
         {
-            throw new TransferFailedException( e.getMessage(), e );
+            throw new TransferFailedException( e.getMessage( ), e );
         }
 
         try
         {
-            statusCode = response.getStatusLine().getStatusCode();
-            String reasonPhrase = ", ReasonPhrase:" + response.getStatusLine().getReasonPhrase() + ".";
+            statusCode = response.getStatusLine( ).getStatusCode( );
+            String reasonPhrase = ", ReasonPhrase:" + response.getStatusLine( ).getReasonPhrase( ) + ".";
             switch ( statusCode )
             {
                 case HttpStatus.SC_OK:
@@ -655,18 +662,16 @@ public abstract class AbstractHttpClientWagon
         }
         finally
         {
-            headMethod.abort();
+            headMethod.abort( );
         }
     }
 
     protected HttpResponse execute( HttpUriRequest httpMethod )
         throws HttpException, IOException
     {
-        int statusCode = SC_NULL;
-
         setParameters( httpMethod );
         setHeaders( httpMethod );
-        client.getParams().setParameter( CoreProtocolPNames.USER_AGENT, getUserAgent( httpMethod ) );
+        client.getParams( ).setParameter( CoreProtocolPNames.USER_AGENT, getUserAgent( httpMethod ) );
 
         return client.execute( httpMethod, localContext );
     }
@@ -677,16 +682,16 @@ public abstract class AbstractHttpClientWagon
             httpConfiguration == null ? null : httpConfiguration.getMethodConfiguration( method );
         if ( config != null )
         {
-            HttpParams params = config.asMethodParams( method.getParams() );
+            HttpParams params = config.asMethodParams( method.getParams( ) );
             if ( params != null )
             {
                 method.setParams( params );
             }
         }
 
-        if ( config == null || config.getReadTimeout() == HttpMethodConfiguration.DEFAULT_CONNECTION_TIMEOUT )
+        if ( config == null || config.getReadTimeout( ) == HttpMethodConfiguration.DEFAULT_CONNECTION_TIMEOUT )
         {
-            method.getParams().setParameter( CoreConnectionPNames.SO_TIMEOUT, getTimeout() );
+            method.getParams( ).setParameter( CoreConnectionPNames.SO_TIMEOUT, getTimeout( ) );
         }
     }
 
@@ -694,7 +699,7 @@ public abstract class AbstractHttpClientWagon
     {
         HttpMethodConfiguration config =
             httpConfiguration == null ? null : httpConfiguration.getMethodConfiguration( method );
-        if ( config == null || config.isUseDefaultHeaders() )
+        if ( config == null || config.isUseDefaultHeaders( ) )
         {
             // TODO: merge with the other headers and have some better defaults, unify with lightweight headers
             method.addHeader( "Cache-control", "no-cache" );
@@ -706,13 +711,13 @@ public abstract class AbstractHttpClientWagon
 
         if ( httpHeaders != null )
         {
-            for ( Map.Entry<Object, Object> entry : httpHeaders.entrySet() )
+            for ( Map.Entry<Object, Object> entry : httpHeaders.entrySet( ) )
             {
-                method.addHeader( (String) entry.getKey(), (String) entry.getValue() );
+                method.addHeader( (String) entry.getKey( ), (String) entry.getValue( ) );
             }
         }
 
-        Header[] headers = config == null ? null : config.asRequestHeaders();
+        Header[] headers = config == null ? null : config.asRequestHeaders( );
         if ( headers != null )
         {
             for ( int i = 0; i < headers.length; i++ )
@@ -737,7 +742,7 @@ public abstract class AbstractHttpClientWagon
 
         if ( config != null )
         {
-            return (String) config.getHeaders().get( "User-Agent" );
+            return (String) config.getHeaders( ).get( "User-Agent" );
         }
         return null;
     }
@@ -751,10 +756,10 @@ public abstract class AbstractHttpClientWagon
      */
     protected String getURL( Repository repository )
     {
-        return repository.getUrl();
+        return repository.getUrl( );
     }
 
-    public HttpConfiguration getHttpConfiguration()
+    public HttpConfiguration getHttpConfiguration( )
     {
         return httpConfiguration;
     }
@@ -767,12 +772,12 @@ public abstract class AbstractHttpClientWagon
     public void fillInputData( InputData inputData )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        Resource resource = inputData.getResource();
+        Resource resource = inputData.getResource( );
 
-        String repositoryUrl = getRepository().getUrl();
-        String url = repositoryUrl + ( repositoryUrl.endsWith( "/" ) ? "" : "/" ) + resource.getName();
+        String repositoryUrl = getRepository( ).getUrl( );
+        String url = repositoryUrl + ( repositoryUrl.endsWith( "/" ) ? "" : "/" ) + resource.getName( );
         getMethod = new HttpGet( url );
-        long timestamp = resource.getLastModified();
+        long timestamp = resource.getLastModified( );
         if ( timestamp > 0 )
         {
             SimpleDateFormat fmt = new SimpleDateFormat( "EEE, dd-MMM-yy HH:mm:ss zzz", Locale.US );
@@ -792,18 +797,18 @@ public abstract class AbstractHttpClientWagon
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_GET );
 
-            throw new TransferFailedException( e.getMessage(), e );
+            throw new TransferFailedException( e.getMessage( ), e );
         }
         catch ( HttpException e )
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_GET );
 
-            throw new TransferFailedException( e.getMessage(), e );
+            throw new TransferFailedException( e.getMessage( ), e );
         }
 
-        statusCode = response.getStatusLine().getStatusCode();
+        statusCode = response.getStatusLine( ).getStatusCode( );
 
-        String reasonPhrase = ", ReasonPhrase:" + response.getStatusLine().getReasonPhrase() + ".";
+        String reasonPhrase = ", ReasonPhrase:" + response.getStatusLine( ).getReasonPhrase( ) + ".";
 
         fireTransferDebug( url + " - Status code: " + statusCode + reasonPhrase );
 
@@ -827,15 +832,15 @@ public abstract class AbstractHttpClientWagon
             }
 
             case HttpStatus.SC_FORBIDDEN:
-                fireSessionConnectionRefused();
+                fireSessionConnectionRefused( );
                 throw new AuthorizationException( "Access denied to: " + url + reasonPhrase );
 
             case HttpStatus.SC_UNAUTHORIZED:
-                fireSessionConnectionRefused();
+                fireSessionConnectionRefused( );
                 throw new AuthorizationException( "Not authorized" + reasonPhrase );
 
             case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
-                fireSessionConnectionRefused();
+                fireSessionConnectionRefused( );
                 throw new AuthorizationException( "Not authorized by proxy" + reasonPhrase );
 
             case HttpStatus.SC_NOT_FOUND:
@@ -860,14 +865,14 @@ public abstract class AbstractHttpClientWagon
         {
             try
             {
-                long contentLength = Integer.valueOf( contentLengthHeader.getValue() ).intValue();
+                long contentLength = Integer.valueOf( contentLengthHeader.getValue( ) ).intValue( );
 
                 resource.setContentLength( contentLength );
             }
             catch ( NumberFormatException e )
             {
                 fireTransferDebug(
-                    "error parsing content length header '" + contentLengthHeader.getValue() + "' " + e );
+                    "error parsing content length header '" + contentLengthHeader.getValue( ) + "' " + e );
             }
         }
 
@@ -879,7 +884,7 @@ public abstract class AbstractHttpClientWagon
         {
             try
             {
-                lastModified = DateUtils.parseDate( lastModifiedHeader.getValue() ).getTime();
+                lastModified = DateUtils.parseDate( lastModifiedHeader.getValue( ) ).getTime( );
 
                 resource.setLastModified( lastModified );
             }
@@ -888,15 +893,15 @@ public abstract class AbstractHttpClientWagon
                 fireTransferDebug( "Unable to parse last modified header" );
             }
 
-            fireTransferDebug( "last-modified = " + lastModifiedHeader.getValue() + " (" + lastModified + ")" );
+            fireTransferDebug( "last-modified = " + lastModifiedHeader.getValue( ) + " (" + lastModified + ")" );
         }
 
         Header contentEncoding = response.getFirstHeader( "Content-Encoding" );
-        boolean isGZipped = contentEncoding == null ? false : "gzip".equalsIgnoreCase( contentEncoding.getValue() );
+        boolean isGZipped = contentEncoding == null ? false : "gzip".equalsIgnoreCase( contentEncoding.getValue( ) );
 
         try
         {
-            is = response.getEntity().getContent();
+            is = response.getEntity( ).getContent( );
 
             if ( isGZipped )
             {
@@ -908,7 +913,7 @@ public abstract class AbstractHttpClientWagon
             fireTransferError( resource, e, TransferEvent.REQUEST_GET );
 
             String msg =
-                "Error occurred while retrieving from remote repository:" + getRepository() + ": " + e.getMessage();
+                "Error occurred while retrieving from remote repository:" + getRepository( ) + ": " + e.getMessage( );
 
             throw new TransferFailedException( msg, e );
         }
@@ -920,17 +925,26 @@ public abstract class AbstractHttpClientWagon
     {
         if ( getMethod != null )
         {
-            getMethod.abort();
+            getMethod.abort( );
         }
     }
 
-    public void fillOutputData( OutputData outputData )
-        throws TransferFailedException
+
+    @Override
+    public void putFromStream( InputStream stream, String destination )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        throw new IllegalStateException( "Should not be using the streaming wagon for HTTP PUT" );
+        putFromStream( stream, destination, -1, -1 );
     }
 
-    public Properties getHttpHeaders()
+    @Override
+    protected void putFromStream( InputStream stream, Resource resource )
+        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
+    {
+        putFromStream( stream, resource.getName( ), -1, -1 );
+    }
+
+    public Properties getHttpHeaders( )
     {
         return httpHeaders;
     }
@@ -938,5 +952,13 @@ public abstract class AbstractHttpClientWagon
     public void setHttpHeaders( Properties httpHeaders )
     {
         this.httpHeaders = httpHeaders;
+    }
+
+    @Override
+    public void fillOutputData( OutputData outputData )
+        throws TransferFailedException
+    {
+        // no needed in this implementation but throw an Exception if used
+        throw new IllegalStateException( "this wagon http client must not use fillOutputData" );
     }
 }

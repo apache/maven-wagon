@@ -266,7 +266,7 @@ public abstract class StreamWagon
         putFromStream( stream, resource );
     }
 
-    private void putFromStream( InputStream stream, Resource resource )
+    protected void putFromStream( InputStream stream, Resource resource )
         throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
         OutputStream os = getOutputStream( resource );
