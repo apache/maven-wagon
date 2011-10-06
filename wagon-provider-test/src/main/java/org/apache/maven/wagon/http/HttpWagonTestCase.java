@@ -877,16 +877,25 @@ public abstract class HttpWagonTestCase
         testPreemptiveAuthentication( sh );
     }
 
+    public void testNonSecuredPutFromStream( )
+        throws Exception
+    {
+        AuthenticationInfo authInfo = new AuthenticationInfo( );
+        authInfo.setUserName( "user" );
+        authInfo.setPassword( "secret" );
+        runTestSecuredPutFromStream( authInfo, 1, false );
+    }
+
     public void testSecuredPutFromStream( )
         throws Exception
     {
         AuthenticationInfo authInfo = new AuthenticationInfo( );
         authInfo.setUserName( "user" );
         authInfo.setPassword( "secret" );
-        runTestSecuredPutFromStream( authInfo, 1 );
+        runTestSecuredPutFromStream( authInfo, 1, true );
     }
 
-    public void runTestSecuredPutFromStream( AuthenticationInfo authInfo, int putNumber )
+    public void runTestSecuredPutFromStream( AuthenticationInfo authInfo, int putNumber, boolean addSecurityHandler )
         throws Exception
     {
         String localRepositoryPath = FileTestUtils.getTestOutputDir( ).toString( );
@@ -897,7 +906,7 @@ public abstract class HttpWagonTestCase
         PutHandler putHandler = new PutHandler( new File( localRepositoryPath ) );
 
         HandlerCollection handlers = new HandlerCollection( );
-        handlers.setHandlers( new Handler[]{ sh, putHandler } );
+        handlers.setHandlers( addSecurityHandler ? new Handler[]{ sh, putHandler } : new Handler[]{ putHandler } );
 
         server.setHandler( handlers );
         addConnectors( server );
@@ -905,7 +914,14 @@ public abstract class HttpWagonTestCase
 
         StreamingWagon wagon = (StreamingWagon) getWagon( );
         Repository testRepository = new Repository( "id", getRepositoryUrl( server ) );
-        wagon.connect( testRepository, authInfo );
+        if ( addSecurityHandler )
+        {
+            wagon.connect( testRepository, authInfo );
+        }
+        else
+        {
+            wagon.connect( testRepository );
+        }
         try
         {
             for ( int i = 0; i < putNumber; i++ )
@@ -925,7 +941,7 @@ public abstract class HttpWagonTestCase
                 }
                 finally
                 {
-                    fileInputStream.close();
+                    fileInputStream.close( );
                     tempFile.delete( );
 
                 }
@@ -939,7 +955,10 @@ public abstract class HttpWagonTestCase
             server.stop( );
         }
         assertEquals( putNumber, putHandler.putCallNumber );
-        testPreemptiveAuthentication( sh );
+        if ( addSecurityHandler )
+        {
+            testPreemptiveAuthentication( sh );
+        }
     }
 
 
