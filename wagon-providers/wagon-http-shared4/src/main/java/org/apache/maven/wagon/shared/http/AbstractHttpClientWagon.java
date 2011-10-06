@@ -125,7 +125,6 @@ public abstract class AbstractHttpClientWagon
                     this.source.deleteOnExit( );
 
                     fos = new FileOutputStream( this.source );
-                    System.out.println( "write to file " + this.source.getAbsolutePath( ) );
                     IOUtil.copy( stream, fos );
                 }
                 catch ( IOException e )
