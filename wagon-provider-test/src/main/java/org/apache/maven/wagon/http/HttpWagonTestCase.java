@@ -76,20 +76,20 @@ public abstract class HttpWagonTestCase
 {
     private Server server;
 
-    protected void setupWagonTestingFixtures( )
+    protected void setupWagonTestingFixtures()
         throws Exception
     {
         // File round trip testing
 
         File file = FileTestUtils.createUniqueFile( "local-repository", "test-resource" );
 
-        file.delete( );
+        file.delete();
 
-        file.getParentFile( ).mkdirs( );
+        file.getParentFile().mkdirs();
 
-        File repositoryDirectory = getRepositoryDirectory( );
+        File repositoryDirectory = getRepositoryDirectory();
         FileUtils.deleteDirectory( repositoryDirectory );
-        repositoryDirectory.mkdirs( );
+        repositoryDirectory.mkdirs();
 
         server = new Server( 0 );
 
@@ -100,72 +100,72 @@ public abstract class HttpWagonTestCase
 
         addConnectors( server );
 
-        server.start( );
+        server.start();
 
-        testRepository.setUrl( getTestRepositoryUrl( ) );
+        testRepository.setUrl( getTestRepositoryUrl() );
     }
 
     @Override
-    protected final int getTestRepositoryPort( )
+    protected final int getTestRepositoryPort()
     {
         if ( server == null )
         {
             return 0;
         }
-        return server.getConnectors( )[0].getLocalPort( );
+        return server.getConnectors()[0].getLocalPort();
     }
 
     protected void createContext( Server server, File repositoryDirectory )
         throws IOException
     {
         Context root = new Context( server, "/", Context.SESSIONS );
-        root.setResourceBase( repositoryDirectory.getAbsolutePath( ) );
-        ServletHolder servletHolder = new ServletHolder( new DefaultServlet( ) );
+        root.setResourceBase( repositoryDirectory.getAbsolutePath() );
+        ServletHolder servletHolder = new ServletHolder( new DefaultServlet() );
         root.addServlet( servletHolder, "/*" );
     }
 
-    protected void tearDownWagonTestingFixtures( )
+    protected void tearDownWagonTestingFixtures()
         throws Exception
     {
-        server.stop( );
+        server.stop();
     }
 
-    public void testWagonGetFileList( )
+    public void testWagonGetFileList()
         throws Exception
     {
-        File dir = getRepositoryDirectory( );
+        File dir = getRepositoryDirectory();
         FileUtils.deleteDirectory( dir );
 
         File f = new File( dir, "file-list" );
-        f.mkdirs( );
+        f.mkdirs();
 
-        super.testWagonGetFileList( );
+        super.testWagonGetFileList();
     }
 
-    public void testHttpHeaders( )
+    public void testHttpHeaders()
         throws Exception
     {
-        Properties properties = new Properties( );
+        Properties properties = new Properties();
         properties.setProperty( "User-Agent", "Maven-Wagon/1.0" );
 
-        StreamingWagon wagon = (StreamingWagon) getWagon( );
+        StreamingWagon wagon = (StreamingWagon) getWagon();
 
         setHttpHeaders( wagon, properties );
 
         Server server = new Server( 0 );
-        TestHeaderHandler handler = new TestHeaderHandler( );
+        TestHeaderHandler handler = new TestHeaderHandler();
         server.setHandler( handler );
         addConnectors( server );
-        server.start( );
+        server.start();
 
         wagon.connect(
-            new Repository( "id", getProtocol( ) + "://localhost:" + server.getConnectors( )[0].getLocalPort( ) ) );
+            new Repository( "id", getProtocol() + "://localhost:" + server.getConnectors()[0].getLocalPort() ) );
 
-        wagon.getToStream( "resource", new StringOutputStream( ) );
+        wagon.getToStream( "resource", new StringOutputStream() );
 
-        wagon.disconnect( );
+        wagon.disconnect();
 
-        server.stop( );
+        server.stop();
 
         assertEquals( "Maven-Wagon/1.0", handler.headers.get( "User-Agent" ) );
     }
@@ -173,31 +173,31 @@ public abstract class HttpWagonTestCase
     /**
      * test set of User-Agent as it's done by aether wagon connector with using setHttpHeaders
      */
-    public void testHttpHeadersWithCommonMethods( )
+    public void testHttpHeadersWithCommonMethods()
         throws Exception
     {
-        Properties properties = new Properties( );
+        Properties properties = new Properties();
         properties.setProperty( "User-Agent", "Maven-Wagon/1.0" );
 
-        StreamingWagon wagon = (StreamingWagon) getWagon( );
+        StreamingWagon wagon = (StreamingWagon) getWagon();
 
-        Method setHttpHeaders = wagon.getClass( ).getMethod( "setHttpHeaders", Properties.class );
+        Method setHttpHeaders = wagon.getClass().getMethod( "setHttpHeaders", Properties.class );
         setHttpHeaders.invoke( wagon, properties );
 
         Server server = new Server( 0 );
-        TestHeaderHandler handler = new TestHeaderHandler( );
+        TestHeaderHandler handler = new TestHeaderHandler();
         server.setHandler( handler );
         addConnectors( server );
-        server.start( );
+        server.start();
 
         wagon.connect(
-            new Repository( "id", getProtocol( ) + "://localhost:" + server.getConnectors( )[0].getLocalPort( ) ) );
+            new Repository( "id", getProtocol() + "://localhost:" + server.getConnectors()[0].getLocalPort() ) );
 
-        wagon.getToStream( "resource", new StringOutputStream( ) );
+        wagon.getToStream( "resource", new StringOutputStream() );
 
-        wagon.disconnect( );
+        wagon.disconnect();
 
-        server.stop( );
+        server.stop();
 
         assertEquals( "Maven-Wagon/1.0", handler.headers.get( "User-Agent" ) );
     }
@@ -210,17 +210,17 @@ public abstract class HttpWagonTestCase
 
     protected String getRepositoryUrl( Server server )
     {
-        int localPort = server.getConnectors( )[0].getLocalPort( );
-        return getProtocol( ) + "://localhost:" + localPort;
+        int localPort = server.getConnectors()[0].getLocalPort();
+        return getProtocol() + "://localhost:" + localPort;
     }
 
-    public void testGetForbidden( )
+    public void testGetForbidden()
         throws Exception
     {
         try
         {
             runTestGet( HttpServletResponse.SC_FORBIDDEN );
-            fail( );
+            fail();
         }
         catch ( AuthorizationException e )
         {
@@ -228,13 +228,13 @@ public abstract class HttpWagonTestCase
         }
     }
 
-    public void testGet404( )
+    public void testGet404()
         throws Exception
     {
         try
         {
             runTestGet( HttpServletResponse.SC_NOT_FOUND );
-            fail( );
+            fail();
         }
         catch ( ResourceDoesNotExistException e )
         {
@@ -242,13 +242,13 @@ public abstract class HttpWagonTestCase
         }
     }
 
-    public void testGet500( )
+    public void testGet500()
         throws Exception
     {
         try
         {
             runTestGet( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
-            fail( );
+            fail();
         }
         catch ( TransferFailedException e )
         {
@@ -259,37 +259,37 @@ public abstract class HttpWagonTestCase
     private void runTestGet( int status )
         throws Exception
     {
-        StreamingWagon wagon = (StreamingWagon) getWagon( );
+        StreamingWagon wagon = (StreamingWagon) getWagon();
 
         Server server = new Server( 0 );
-        StatusHandler handler = new StatusHandler( );
+        StatusHandler handler = new StatusHandler();
         handler.setStatusToReturn( status );
         server.setHandler( handler );
         addConnectors( server );
-        server.start( );
+        server.start();
 
         wagon.connect( new Repository( "id", getRepositoryUrl( server ) ) );
 
         try
         {
-            wagon.getToStream( "resource", new StringOutputStream( ) );
-            fail( );
+            wagon.getToStream( "resource", new StringOutputStream() );
+            fail();
         }
         finally
         {
-            wagon.disconnect( );
+            wagon.disconnect();
 
-            server.stop( );
+            server.stop();
         }
     }
 
-    public void testResourceExistsForbidden( )
+    public void testResourceExistsForbidden()
         throws Exception
     {
         try
         {
             runTestResourceExists( HttpServletResponse.SC_FORBIDDEN );
-            fail( );
+            fail();
         }
         catch ( AuthorizationException e )
         {
@@ -297,7 +297,7 @@ public abstract class HttpWagonTestCase
         }
     }
 
-    public void testResourceExists404( )
+    public void testResourceExists404()
         throws Exception
     {
         try
@@ -310,13 +310,13 @@ public abstract class HttpWagonTestCase
         }
     }
 
-    public void testResourceExists500( )
+    public void testResourceExists500()
         throws Exception
     {
         try
         {
             runTestResourceExists( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
-            fail( );
+            fail();
         }
         catch ( TransferFailedException e )
         {
@@ -327,14 +327,14 @@ public abstract class HttpWagonTestCase
     private boolean runTestResourceExists( int status )
         throws Exception
     {
-        StreamingWagon wagon = (StreamingWagon) getWagon( );
+        StreamingWagon wagon = (StreamingWagon) getWagon();
 
         Server server = new Server( 0 );
-        StatusHandler handler = new StatusHandler( );
+        StatusHandler handler = new StatusHandler();
         handler.setStatusToReturn( status );
         server.setHandler( handler );
         addConnectors( server );
-        server.start( );
+        server.start();
 
         wagon.connect( new Repository( "id", getRepositoryUrl( server ) ) );
 
@@ -344,59 +344,59 @@ public abstract class HttpWagonTestCase
         }
         finally
         {
-            wagon.disconnect( );
+            wagon.disconnect();
 
-            server.stop( );
+            server.stop();
         }
     }
 
     protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
     {
-        File file = new File( getRepositoryDirectory( ), resource.getName( ) );
-        return ( file.lastModified( ) / 1000 ) * 1000;
+        File file = new File( getRepositoryDirectory(), resource.getName() );
+        return ( file.lastModified() / 1000 ) * 1000;
     }
 
-    protected File getRepositoryDirectory( )
+    protected File getRepositoryDirectory()
     {
         return getTestFile( "target/test-output/http-repository" );
     }
 
-    public void testGzipGet( )
+    public void testGzipGet()
         throws Exception
     {
-        Server server = new Server( getTestRepositoryPort( ) );
+        Server server = new Server( getTestRepositoryPort() );
 
-        String localRepositoryPath = FileTestUtils.getTestOutputDir( ).toString( );
+        String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
         Context root = new Context( server, "/", Context.SESSIONS );
         root.setResourceBase( localRepositoryPath );
-        ServletHolder servletHolder = new ServletHolder( new DefaultServlet( ) );
+        ServletHolder servletHolder = new ServletHolder( new DefaultServlet() );
         servletHolder.setInitParameter( "gzip", "true" );
         root.addServlet( servletHolder, "/*" );
         addConnectors( server );
-        server.start( );
+        server.start();
 
         try
         {
-            Wagon wagon = getWagon( );
+            Wagon wagon = getWagon();
 
             Repository testRepository = new Repository( "id", getRepositoryUrl( server ) );
 
             File sourceFile = new File( localRepositoryPath + "/gzip" );
 
-            sourceFile.deleteOnExit( );
+            sourceFile.deleteOnExit();
 
             String resName = "gzip-res.txt";
             String sourceContent = writeTestFileGzip( sourceFile, resName );
 
             wagon.connect( testRepository );
 
-            File destFile = FileTestUtils.createUniqueFile( getName( ), getName( ) );
+            File destFile = FileTestUtils.createUniqueFile( getName(), getName() );
 
-            destFile.deleteOnExit( );
+            destFile.deleteOnExit();
 
             wagon.get( "gzip/" + resName, destFile );
 
-            wagon.disconnect( );
+            wagon.disconnect();
 
             String destContent = FileUtils.fileRead( destFile );
 
@@ -404,26 +404,26 @@ public abstract class HttpWagonTestCase
         }
         finally
         {
-            server.stop( );
+            server.stop();
         }
     }
 
-    public void testProxiedRequest( )
+    public void testProxiedRequest()
         throws Exception
     {
-        ProxyInfo proxyInfo = createProxyInfo( );
-        TestHeaderHandler handler = new TestHeaderHandler( );
+        ProxyInfo proxyInfo = createProxyInfo();
+        TestHeaderHandler handler = new TestHeaderHandler();
 
         runTestProxiedRequest( proxyInfo, handler );
     }
 
-    public void testProxiedRequestWithAuthentication( )
+    public void testProxiedRequestWithAuthentication()
         throws Exception
     {
-        ProxyInfo proxyInfo = createProxyInfo( );
+        ProxyInfo proxyInfo = createProxyInfo();
         proxyInfo.setUserName( "user" );
         proxyInfo.setPassword( "secret" );
-        TestHeaderHandler handler = new AuthorizingProxyHandler( );
+        TestHeaderHandler handler = new AuthorizingProxyHandler();
 
         runTestProxiedRequest( proxyInfo, handler );
 
@@ -442,34 +442,34 @@ public abstract class HttpWagonTestCase
 
         proxyServer.setHandler( handler );
 
-        proxyServer.start( );
+        proxyServer.start();
 
-        proxyInfo.setPort( proxyServer.getConnectors( )[0].getLocalPort( ) );
+        proxyInfo.setPort( proxyServer.getConnectors()[0].getLocalPort() );
 
         System.out.println(
-            "start proxy on host/port " + proxyInfo.getHost( ) + "/" + proxyInfo.getPort( ) + " with non proxyHosts "
-                + proxyInfo.getNonProxyHosts( ) );
+            "start proxy on host/port " + proxyInfo.getHost() + "/" + proxyInfo.getPort() + " with non proxyHosts "
+                + proxyInfo.getNonProxyHosts() );
 
-        while ( !proxyServer.isRunning( ) || !proxyServer.isStarted( ) )
+        while ( !proxyServer.isRunning() || !proxyServer.isStarted() )
         {
             Thread.sleep( 10 );
         }
 
         try
         {
-            StreamingWagon wagon = (StreamingWagon) getWagon( );
+            StreamingWagon wagon = (StreamingWagon) getWagon();
 
-            System.out.println( " wagon hashCode " + wagon.hashCode( ) );
+            System.out.println( " wagon hashCode " + wagon.hashCode() );
 
             Repository testRepository = new Repository( "id", "http://www.example.com/" );
 
-            String localRepositoryPath = FileTestUtils.getTestOutputDir( ).toString( );
+            String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
             File sourceFile = new File( localRepositoryPath, "test-proxied-resource" );
-            FileUtils.fileWrite( sourceFile.getAbsolutePath( ), "content" );
+            FileUtils.fileWrite( sourceFile.getAbsolutePath(), "content" );
 
             wagon.connect( testRepository, proxyInfo );
 
-            StringOutputStream out = new StringOutputStream( );
+            StringOutputStream out = new StringOutputStream();
             try
             {
                 wagon.getToStream( "test-proxied-resource", out );
@@ -480,31 +480,31 @@ public abstract class HttpWagonTestCase
             {
                 System.setProperty( "http.proxyHost", "" );
                 System.setProperty( "http.proxyPort", "" );
-                wagon.disconnect( );
+                wagon.disconnect();
             }
         }
         finally
         {
-            proxyServer.stop( );
+            proxyServer.stop();
         }
     }
 
-    private ProxyInfo createProxyInfo( )
+    private ProxyInfo createProxyInfo()
     {
-        ProxyInfo proxyInfo = new ProxyInfo( );
+        ProxyInfo proxyInfo = new ProxyInfo();
         proxyInfo.setHost( "localhost" );
         proxyInfo.setNonProxyHosts( null );
         proxyInfo.setType( "http" );
         return proxyInfo;
     }
 
-    public void testSecuredGetUnauthorized( )
+    public void testSecuredGetUnauthorized()
         throws Exception
     {
         try
         {
             runTestSecuredGet( null );
-            fail( );
+            fail();
         }
         catch ( AuthorizationException e )
         {
@@ -512,16 +512,16 @@ public abstract class HttpWagonTestCase
         }
     }
 
-    public void testSecuredGetWrongPassword( )
+    public void testSecuredGetWrongPassword()
         throws Exception
     {
         try
         {
-            AuthenticationInfo authInfo = new AuthenticationInfo( );
+            AuthenticationInfo authInfo = new AuthenticationInfo();
             authInfo.setUserName( "user" );
             authInfo.setPassword( "admin" );
             runTestSecuredGet( authInfo );
-            fail( );
+            fail();
         }
         catch ( AuthorizationException e )
         {
@@ -529,10 +529,10 @@ public abstract class HttpWagonTestCase
         }
     }
 
-    public void testSecuredGet( )
+    public void testSecuredGet()
         throws Exception
     {
-        AuthenticationInfo authInfo = new AuthenticationInfo( );
+        AuthenticationInfo authInfo = new AuthenticationInfo();
         authInfo.setUserName( "user" );
         authInfo.setPassword( "secret" );
         runTestSecuredGet( authInfo );
@@ -541,46 +541,46 @@ public abstract class HttpWagonTestCase
     public void runTestSecuredGet( AuthenticationInfo authInfo )
         throws Exception
     {
-        String localRepositoryPath = FileTestUtils.getTestOutputDir( ).toString( );
+        String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
         Server server = createSecurityServer( localRepositoryPath );
-        server.start( );
+        server.start();
 
         try
         {
-            StreamingWagon wagon = (StreamingWagon) getWagon( );
+            StreamingWagon wagon = (StreamingWagon) getWagon();
 
             Repository testRepository = new Repository( "id", getRepositoryUrl( server ) );
 
             File sourceFile = new File( localRepositoryPath, "test-secured-resource" );
-            FileUtils.fileWrite( sourceFile.getAbsolutePath( ), "top secret" );
+            FileUtils.fileWrite( sourceFile.getAbsolutePath(), "top secret" );
 
             wagon.connect( testRepository, authInfo );
 
-            StringOutputStream out = new StringOutputStream( );
+            StringOutputStream out = new StringOutputStream();
             try
             {
                 wagon.getToStream( "test-secured-resource", out );
             }
             finally
             {
-                wagon.disconnect( );
+                wagon.disconnect();
             }
 
-            assertEquals( "top secret", out.toString( ) );
+            assertEquals( "top secret", out.toString() );
         }
         finally
         {
-            server.stop( );
+            server.stop();
         }
     }
 
-    public void testSecuredResourceExistsUnauthorized( )
+    public void testSecuredResourceExistsUnauthorized()
         throws Exception
     {
         try
         {
             runTestSecuredResourceExists( null );
-            fail( );
+            fail();
         }
         catch ( AuthorizationException e )
         {
@@ -588,12 +588,12 @@ public abstract class HttpWagonTestCase
         }
     }
 
-    public void testSecuredResourceExistsWrongPassword( )
+    public void testSecuredResourceExistsWrongPassword()
         throws Exception
     {
         try
         {
-            AuthenticationInfo authInfo = new AuthenticationInfo( );
+            AuthenticationInfo authInfo = new AuthenticationInfo();
             authInfo.setUserName( "user" );
             authInfo.setPassword( "admin" );
             runTestSecuredResourceExists( authInfo );
@@ -604,10 +604,10 @@ public abstract class HttpWagonTestCase
         }
     }
 
-    public void testSecuredResourceExists( )
+    public void testSecuredResourceExists()
         throws Exception
     {
-        AuthenticationInfo authInfo = new AuthenticationInfo( );
+        AuthenticationInfo authInfo = new AuthenticationInfo();
         authInfo.setUserName( "user" );
         authInfo.setPassword( "secret" );
         runTestSecuredResourceExists( authInfo );
@@ -616,18 +616,18 @@ public abstract class HttpWagonTestCase
     public void runTestSecuredResourceExists( AuthenticationInfo authInfo )
         throws Exception
     {
-        String localRepositoryPath = FileTestUtils.getTestOutputDir( ).toString( );
+        String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
         Server server = createSecurityServer( localRepositoryPath );
-        server.start( );
+        server.start();
 
         try
         {
-            StreamingWagon wagon = (StreamingWagon) getWagon( );
+            StreamingWagon wagon = (StreamingWagon) getWagon();
 
             Repository testRepository = new Repository( "id", getRepositoryUrl( server ) );
 
             File sourceFile = new File( localRepositoryPath, "test-secured-resource-exists" );
-            FileUtils.fileWrite( sourceFile.getAbsolutePath( ), "top secret" );
+            FileUtils.fileWrite( sourceFile.getAbsolutePath(), "top secret" );
 
             wagon.connect( testRepository, authInfo );
 
@@ -639,12 +639,12 @@ public abstract class HttpWagonTestCase
             }
             finally
             {
-                wagon.disconnect( );
+                wagon.disconnect();
             }
         }
         finally
         {
-            server.stop( );
+            server.stop();
         }
     }
 
@@ -652,13 +652,13 @@ public abstract class HttpWagonTestCase
     {
         Server server = new Server( 0 );
 
-        SecurityHandler sh = createSecurityHandler( );
+        SecurityHandler sh = createSecurityHandler();
 
         Context root = new Context( Context.SESSIONS );
         root.setContextPath( "/" );
         root.addHandler( sh );
         root.setResourceBase( localRepositoryPath );
-        ServletHolder servletHolder = new ServletHolder( new DefaultServlet( ) );
+        ServletHolder servletHolder = new ServletHolder( new DefaultServlet() );
         root.addServlet( servletHolder, "/*" );
 
         server.setHandler( root );
@@ -671,20 +671,20 @@ public abstract class HttpWagonTestCase
         throws IOException
     {
         File file = new File( parent, child );
-        file.getParentFile( ).mkdirs( );
-        file.deleteOnExit( );
+        file.getParentFile().mkdirs();
+        file.deleteOnExit();
         OutputStream out = new FileOutputStream( file );
         try
         {
-            out.write( child.getBytes( ) );
+            out.write( child.getBytes() );
         }
         finally
         {
-            out.close( );
+            out.close();
         }
 
         file = new File( parent, child + ".gz" );
-        file.deleteOnExit( );
+        file.deleteOnExit();
         String content;
         out = new FileOutputStream( file );
         out = new GZIPOutputStream( out );
@@ -692,24 +692,24 @@ public abstract class HttpWagonTestCase
         {
             // write out different data than non-gz file, so we can
             // assert the gz version was returned
-            content = file.getAbsolutePath( );
-            out.write( content.getBytes( ) );
+            content = file.getAbsolutePath();
+            out.write( content.getBytes() );
         }
         finally
         {
-            out.close( );
+            out.close();
         }
 
         return content;
     }
 
-    public void testPutForbidden( )
+    public void testPutForbidden()
         throws Exception
     {
         try
         {
             runTestPut( HttpServletResponse.SC_FORBIDDEN );
-            fail( );
+            fail();
         }
         catch ( AuthorizationException e )
         {
@@ -717,13 +717,13 @@ public abstract class HttpWagonTestCase
         }
     }
 
-    public void testPut404( )
+    public void testPut404()
         throws Exception
     {
         try
         {
             runTestPut( HttpServletResponse.SC_NOT_FOUND );
-            fail( );
+            fail();
         }
         catch ( ResourceDoesNotExistException e )
         {
@@ -731,13 +731,13 @@ public abstract class HttpWagonTestCase
         }
     }
 
-    public void testPut500( )
+    public void testPut500()
         throws Exception
     {
         try
         {
             runTestPut( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
-            fail( );
+            fail();
         }
         catch ( TransferFailedException e )
         {
@@ -748,43 +748,43 @@ public abstract class HttpWagonTestCase
     private void runTestPut( int status )
         throws Exception
     {
-        StreamingWagon wagon = (StreamingWagon) getWagon( );
+        StreamingWagon wagon = (StreamingWagon) getWagon();
 
         Server server = new Server( 0 );
-        StatusHandler handler = new StatusHandler( );
+        StatusHandler handler = new StatusHandler();
         handler.setStatusToReturn( status );
         server.setHandler( handler );
         addConnectors( server );
-        server.start( );
+        server.start();
 
         wagon.connect( new Repository( "id", getRepositoryUrl( server ) ) );
 
         File tempFile = File.createTempFile( "wagon", "tmp" );
-        tempFile.deleteOnExit( );
-        FileUtils.fileWrite( tempFile.getAbsolutePath( ), "content" );
+        tempFile.deleteOnExit();
+        FileUtils.fileWrite( tempFile.getAbsolutePath(), "content" );
 
         try
         {
             wagon.put( tempFile, "resource" );
-            fail( );
+            fail();
         }
         finally
         {
-            wagon.disconnect( );
+            wagon.disconnect();
 
-            server.stop( );
+            server.stop();
 
-            tempFile.delete( );
+            tempFile.delete();
         }
     }
 
-    public void testSecuredPutUnauthorized( )
+    public void testSecuredPutUnauthorized()
         throws Exception
     {
         try
         {
             runTestSecuredPut( null );
-            fail( );
+            fail();
         }
         catch ( TransferFailedException e )
         {
@@ -792,16 +792,16 @@ public abstract class HttpWagonTestCase
         }
     }
 
-    public void testSecuredPutWrongPassword( )
+    public void testSecuredPutWrongPassword()
         throws Exception
     {
         try
         {
-            AuthenticationInfo authInfo = new AuthenticationInfo( );
+            AuthenticationInfo authInfo = new AuthenticationInfo();
             authInfo.setUserName( "user" );
             authInfo.setPassword( "admin" );
             runTestSecuredPut( authInfo );
-            fail( );
+            fail();
         }
         catch ( TransferFailedException e )
         {
@@ -809,10 +809,10 @@ public abstract class HttpWagonTestCase
         }
     }
 
-    public void testSecuredPut( )
+    public void testSecuredPut()
         throws Exception
     {
-        AuthenticationInfo authInfo = new AuthenticationInfo( );
+        AuthenticationInfo authInfo = new AuthenticationInfo();
         authInfo.setUserName( "user" );
         authInfo.setPassword( "secret" );
         runTestSecuredPut( authInfo );
@@ -827,21 +827,21 @@ public abstract class HttpWagonTestCase
     public void runTestSecuredPut( AuthenticationInfo authInfo, int putNumber )
         throws Exception
     {
-        String localRepositoryPath = FileTestUtils.getTestOutputDir( ).toString( );
+        String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
         Server server = new Server( 0 );
 
-        TestSecurityHandler sh = createSecurityHandler( );
+        TestSecurityHandler sh = createSecurityHandler();
 
         PutHandler putHandler = new PutHandler( new File( localRepositoryPath ) );
 
-        HandlerCollection handlers = new HandlerCollection( );
+        HandlerCollection handlers = new HandlerCollection();
         handlers.setHandlers( new Handler[]{ sh, putHandler } );
 
         server.setHandler( handlers );
         addConnectors( server );
-        server.start( );
+        server.start();
 
-        StreamingWagon wagon = (StreamingWagon) getWagon( );
+        StreamingWagon wagon = (StreamingWagon) getWagon();
         Repository testRepository = new Repository( "id", getRepositoryUrl( server ) );
         wagon.connect( testRepository, authInfo );
         try
@@ -849,12 +849,12 @@ public abstract class HttpWagonTestCase
             for ( int i = 0; i < putNumber; i++ )
             {
                 File sourceFile = new File( localRepositoryPath, "test-secured-put-resource" );
-                sourceFile.delete( );
-                assertFalse( sourceFile.exists( ) );
+                sourceFile.delete();
+                assertFalse( sourceFile.exists() );
 
                 File tempFile = File.createTempFile( "wagon", "tmp" );
-                tempFile.deleteOnExit( );
-                FileUtils.fileWrite( tempFile.getAbsolutePath( ), "put top secret" );
+                tempFile.deleteOnExit();
+                FileUtils.fileWrite( tempFile.getAbsolutePath(), "put top secret" );
 
                 try
                 {
@@ -862,34 +862,34 @@ public abstract class HttpWagonTestCase
                 }
                 finally
                 {
-                    tempFile.delete( );
+                    tempFile.delete();
                 }
 
-                assertEquals( "put top secret", FileUtils.fileRead( sourceFile.getAbsolutePath( ) ) );
+                assertEquals( "put top secret", FileUtils.fileRead( sourceFile.getAbsolutePath() ) );
             }
         }
         finally
         {
-            wagon.disconnect( );
-            server.stop( );
+            wagon.disconnect();
+            server.stop();
         }
         assertEquals( putNumber, putHandler.putCallNumber );
         testPreemptiveAuthentication( sh );
     }
 
-    public void testNonSecuredPutFromStream( )
+    public void testNonSecuredPutFromStream()
         throws Exception
     {
-        AuthenticationInfo authInfo = new AuthenticationInfo( );
+        AuthenticationInfo authInfo = new AuthenticationInfo();
         authInfo.setUserName( "user" );
         authInfo.setPassword( "secret" );
         runTestSecuredPutFromStream( authInfo, 1, false );
     }
 
-    public void testSecuredPutFromStream( )
+    public void testSecuredPutFromStream()
         throws Exception
     {
-        AuthenticationInfo authInfo = new AuthenticationInfo( );
+        AuthenticationInfo authInfo = new AuthenticationInfo();
         authInfo.setUserName( "user" );
         authInfo.setPassword( "secret" );
         runTestSecuredPutFromStream( authInfo, 1, true );
@@ -898,21 +898,21 @@ public abstract class HttpWagonTestCase
     public void runTestSecuredPutFromStream( AuthenticationInfo authInfo, int putNumber, boolean addSecurityHandler )
         throws Exception
     {
-        String localRepositoryPath = FileTestUtils.getTestOutputDir( ).toString( );
+        String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
         Server server = new Server( 0 );
 
-        TestSecurityHandler sh = createSecurityHandler( );
+        TestSecurityHandler sh = createSecurityHandler();
 
         PutHandler putHandler = new PutHandler( new File( localRepositoryPath ) );
 
-        HandlerCollection handlers = new HandlerCollection( );
+        HandlerCollection handlers = new HandlerCollection();
         handlers.setHandlers( addSecurityHandler ? new Handler[]{ sh, putHandler } : new Handler[]{ putHandler } );
 
         server.setHandler( handlers );
         addConnectors( server );
-        server.start( );
+        server.start();
 
-        StreamingWagon wagon = (StreamingWagon) getWagon( );
+        StreamingWagon wagon = (StreamingWagon) getWagon();
         Repository testRepository = new Repository( "id", getRepositoryUrl( server ) );
         if ( addSecurityHandler )
         {
@@ -927,12 +927,12 @@ public abstract class HttpWagonTestCase
             for ( int i = 0; i < putNumber; i++ )
             {
                 File sourceFile = new File( localRepositoryPath, "test-secured-put-resource" );
-                sourceFile.delete( );
-                assertFalse( sourceFile.exists( ) );
+                sourceFile.delete();
+                assertFalse( sourceFile.exists() );
 
                 File tempFile = File.createTempFile( "wagon", "tmp" );
-                tempFile.deleteOnExit( );
-                FileUtils.fileWrite( tempFile.getAbsolutePath( ), "put top secret" );
+                tempFile.deleteOnExit();
+                FileUtils.fileWrite( tempFile.getAbsolutePath(), "put top secret" );
 
                 FileInputStream fileInputStream = new FileInputStream( tempFile );
                 try
@@ -941,18 +941,18 @@ public abstract class HttpWagonTestCase
                 }
                 finally
                 {
-                    fileInputStream.close( );
-                    tempFile.delete( );
+                    fileInputStream.close();
+                    tempFile.delete();
 
                 }
 
-                assertEquals( "put top secret", FileUtils.fileRead( sourceFile.getAbsolutePath( ) ) );
+                assertEquals( "put top secret", FileUtils.fileRead( sourceFile.getAbsolutePath() ) );
             }
         }
         finally
         {
-            wagon.disconnect( );
-            server.stop( );
+            wagon.disconnect();
+            server.stop();
         }
         assertEquals( putNumber, putHandler.putCallNumber );
         if ( addSecurityHandler )
@@ -962,21 +962,21 @@ public abstract class HttpWagonTestCase
     }
 
 
-    protected abstract boolean supportPreemptiveAuthentication( );
+    protected abstract boolean supportPreemptiveAuthentication();
 
     protected void testPreemptiveAuthentication( TestSecurityHandler sh )
     {
 
-        if ( supportPreemptiveAuthentication( ) )
+        if ( supportPreemptiveAuthentication() )
         {
             assertEquals( "not 1 security handler use " + sh.securityHandlerRequestReponses, 1,
-                          sh.securityHandlerRequestReponses.size( ) );
+                          sh.securityHandlerRequestReponses.size() );
             assertEquals( 200, sh.securityHandlerRequestReponses.get( 0 ).responseCode );
         }
         else
         {
             assertEquals( "not 2 security handler use " + sh.securityHandlerRequestReponses, 2,
-                          sh.securityHandlerRequestReponses.size( ) );
+                          sh.securityHandlerRequestReponses.size() );
             assertEquals( 401, sh.securityHandlerRequestReponses.get( 0 ).responseCode );
             assertEquals( 200, sh.securityHandlerRequestReponses.get( 1 ).responseCode );
 
@@ -1020,29 +1020,29 @@ public abstract class HttpWagonTestCase
             throws IOException, ServletException
         {
             Request base_request =
-                request instanceof Request ? (Request) request : HttpConnection.getCurrentConnection( ).getRequest( );
+                request instanceof Request ? (Request) request : HttpConnection.getCurrentConnection().getRequest();
 
-            if ( base_request.isHandled( ) || !"PUT".equals( base_request.getMethod( ) ) )
+            if ( base_request.isHandled() || !"PUT".equals( base_request.getMethod() ) )
             {
                 return;
             }
 
             base_request.setHandled( true );
 
-            File file = new File( resourceBase, URLDecoder.decode( request.getPathInfo( ) ) );
-            file.getParentFile( ).mkdirs( );
+            File file = new File( resourceBase, URLDecoder.decode( request.getPathInfo() ) );
+            file.getParentFile().mkdirs();
             FileOutputStream out = new FileOutputStream( file );
-            ServletInputStream in = request.getInputStream( );
+            ServletInputStream in = request.getInputStream();
             try
             {
                 IOUtil.copy( in, out );
             }
             finally
             {
-                in.close( );
-                out.close( );
+                in.close();
+                out.close();
             }
-            System.out.println( "put file " + request.getPathInfo( ) );
+            System.out.println( "put file " + request.getPathInfo() );
             putCallNumber++;
             response.setStatus( HttpServletResponse.SC_CREATED );
         }
@@ -1073,41 +1073,41 @@ public abstract class HttpWagonTestCase
     {
         private Map headers = Collections.EMPTY_MAP;
 
-        public TestHeaderHandler( )
+        public TestHeaderHandler()
         {
         }
 
         public void handle( String target, HttpServletRequest request, HttpServletResponse response, int dispatch )
             throws IOException, ServletException
         {
-            headers = new HashMap( );
-            for ( Enumeration e = request.getHeaderNames( ); e.hasMoreElements( ); )
+            headers = new HashMap();
+            for ( Enumeration e = request.getHeaderNames(); e.hasMoreElements(); )
             {
-                String name = (String) e.nextElement( );
+                String name = (String) e.nextElement();
                 headers.put( name, request.getHeader( name ) );
             }
 
             response.setContentType( "text/plain" );
             response.setStatus( HttpServletResponse.SC_OK );
-            response.getWriter( ).println( "Hello, World!" );
+            response.getWriter().println( "Hello, World!" );
 
             ( (Request) request ).setHandled( true );
         }
 
     }
 
-    protected TestSecurityHandler createSecurityHandler( )
+    protected TestSecurityHandler createSecurityHandler()
     {
-        Constraint constraint = new Constraint( );
+        Constraint constraint = new Constraint();
         constraint.setName( Constraint.__BASIC_AUTH );
         constraint.setRoles( new String[]{ "admin" } );
         constraint.setAuthenticate( true );
 
-        ConstraintMapping cm = new ConstraintMapping( );
+        ConstraintMapping cm = new ConstraintMapping();
         cm.setConstraint( constraint );
         cm.setPathSpec( "/*" );
 
-        TestSecurityHandler sh = new TestSecurityHandler( );
+        TestSecurityHandler sh = new TestSecurityHandler();
         HashUserRealm hashUserRealm = new HashUserRealm( "MyRealm" );
         hashUserRealm.put( "user", "secret" );
         hashUserRealm.addUserToRole( "user", "admin" );
@@ -1121,18 +1121,18 @@ public abstract class HttpWagonTestCase
     {
 
         public List<SecurityHandlerRequestReponse> securityHandlerRequestReponses =
-            new ArrayList<SecurityHandlerRequestReponse>( );
+            new ArrayList<SecurityHandlerRequestReponse>();
 
         @Override
         public void handle( String target, HttpServletRequest request, HttpServletResponse response, int dispatch )
             throws IOException, ServletException
         {
-            String method = request.getMethod( );
+            String method = request.getMethod();
             super.handle( target, request, response, dispatch );
             System.out.println( "method in SecurityHandler: " + method );
 
             securityHandlerRequestReponses.add(
-                new SecurityHandlerRequestReponse( method, ( (Response) response ).getStatus( ) ) );
+                new SecurityHandlerRequestReponse( method, ( (Response) response ).getStatus() ) );
         }
 
     }
@@ -1150,14 +1150,14 @@ public abstract class HttpWagonTestCase
         }
 
         @Override
-        public String toString( )
+        public String toString()
         {
-            final StringBuilder sb = new StringBuilder( );
+            final StringBuilder sb = new StringBuilder();
             sb.append( "SecurityHandlerRequestReponse" );
             sb.append( "{method='" ).append( method ).append( '\'' );
             sb.append( ", responseCode=" ).append( responseCode );
             sb.append( '}' );
-            return sb.toString( );
+            return sb.toString();
         }
     }
 }
