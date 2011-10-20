@@ -19,10 +19,6 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -33,15 +29,19 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;
 import org.apache.maven.wagon.shared.http.HtmlFileListParser;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @version $Id$
  */
 public class HttpWagon
     extends AbstractHttpClientWagon
-{ 
+{
     public List<String> getFileList( String destinationDirectory )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException 
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         if ( destinationDirectory.length() > 0 && !destinationDirectory.endsWith( "/" ) )
         {
@@ -82,7 +82,7 @@ public class HttpWagon
                     throw new ResourceDoesNotExistException( "File: " + url + " does not exist" );
 
                     //add more entries here
-                default :
+                default:
                     throw new TransferFailedException(
                         "Failed to transfer file: " + url + ". Return code is: " + statusCode );
             }
