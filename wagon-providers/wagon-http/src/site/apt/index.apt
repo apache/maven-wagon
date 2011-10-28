@@ -30,7 +30,7 @@
 Maven Wagon HTTP
 
  This project is an implementation of Wagon provider for HTTP access.
- It uses {{{http://hc.apache.org/httpcomponents-client-ga/}Apache HttpComponents client}} as lower lever layer.
+ It uses {{{http://hc.apache.org/httpcomponents-client-ga/}Apache HttpComponents client}} as lower level layer.
  
  It enables Maven to use remote repositories stored in HTTP servers.
 
