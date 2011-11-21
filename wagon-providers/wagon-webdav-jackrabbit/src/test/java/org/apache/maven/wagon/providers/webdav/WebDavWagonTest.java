@@ -306,7 +306,7 @@ public class WebDavWagonTest
     @Override
     protected boolean supportPreemptiveAuthentication()
     {
-        return false;
+        return true;
     }
 
     protected void testPreemptiveAuthentication( TestSecurityHandler sh )

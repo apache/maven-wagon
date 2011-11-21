@@ -208,6 +208,8 @@ public abstract class AbstractHttpClientWagon
             username = authenticationInfo.getUserName();
 
             password = authenticationInfo.getPassword();
+
+            client.getParams().setAuthenticationPreemptive( true );
         }
 
         String host = getRepository().getHost();
