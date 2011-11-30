@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.shared.http;
+package org.apache.maven.wagon.shared.http4;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -27,6 +27,9 @@ import org.apache.http.client.params.ClientPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.shared.http4.AbstractHttpClientWagon;
+import org.apache.maven.wagon.shared.http4.HttpConfiguration;
+import org.apache.maven.wagon.shared.http4.HttpMethodConfiguration;
 
 public class AbstractHttpClientWagonTest
     extends TestCase
