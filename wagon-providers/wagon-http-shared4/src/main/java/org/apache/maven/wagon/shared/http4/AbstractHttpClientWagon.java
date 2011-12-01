@@ -43,6 +43,7 @@ import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -67,7 +68,6 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 
 import javax.net.ssl.SSLException;
@@ -75,7 +75,6 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -100,13 +99,20 @@ public abstract class AbstractHttpClientWagon
     private BasicHttpContext localContext;
 
     private final class RequestEntityImplementation
-        implements HttpEntity
+        extends AbstractHttpEntity//implements HttpEntity
     {
+
+        private final static int BUFFER_SIZE = 2048;
+
         private final Resource resource;
 
         private final Wagon wagon;
 
-        private final File source;
+        private InputStream stream;
+
+        private File source;
+
+        private long length;
 
         private RequestEntityImplementation( final InputStream stream, final Resource resource, final Wagon wagon,
                                              final File source )
@@ -118,63 +124,79 @@ public abstract class AbstractHttpClientWagon
             }
             else
             {
-                FileOutputStream fos = null;
-                try
-                {
-                    this.source = File.createTempFile( "http-wagon.", ".tmp" );
-                    this.source.deleteOnExit();
-
-                    fos = new FileOutputStream( this.source );
-                    IOUtil.copy( stream, fos );
-                }
-                catch ( IOException e )
-                {
-                    fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
-                    throw new TransferFailedException( "Failed to buffer stream contents to temp file for upload.", e );
-                }
-                finally
-                {
-                    IOUtil.close( fos );
-                }
+                this.stream = stream;
             }
-
             this.resource = resource;
+            this.length = resource == null ? -1 : resource.getContentLength();
             this.wagon = wagon;
         }
 
         public long getContentLength()
         {
-            return resource.getContentLength();
+            return length;
         }
 
-        public Header getContentType()
-        {
-            return null;
-        }
-
-        public Header getContentEncoding()
-        {
-            return null;
-        }
 
         public InputStream getContent()
             throws IOException, IllegalStateException
         {
-            FileInputStream fis = new FileInputStream( source );
-
-            return fis;
+            return this.source != null ? new FileInputStream( this.source ) : this.stream;
         }
 
         public boolean isRepeatable()
         {
-            return true;
-        }
-
-        public boolean isChunked()
-        {
             return false;
         }
 
+
+        public void writeTo( final OutputStream outstream )
+            throws IOException
+        {
+            if ( outstream == null )
+            {
+                throw new IllegalArgumentException( "Output stream may not be null" );
+            }
+            TransferEvent transferEvent =
+                new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT );
+            transferEvent.setTimestamp( System.currentTimeMillis() );
+            InputStream instream = this.source != null ? new FileInputStream( this.source ) : this.stream;
+            try
+            {
+                byte[] buffer = new byte[BUFFER_SIZE];
+                int l;
+                if ( this.length < 0 )
+                {
+                    // until EOF
+                    while ( ( l = instream.read( buffer ) ) != -1 )
+                    {
+                        fireTransferProgress( transferEvent, buffer, -1 );
+                        outstream.write( buffer, 0, l );
+                    }
+                }
+                else
+                {
+                    // no need to consume more than length
+                    long remaining = this.length;
+                    while ( remaining > 0 )
+                    {
+                        l = instream.read( buffer, 0, (int) Math.min( BUFFER_SIZE, remaining ) );
+                        if ( l == -1 )
+                        {
+                            break;
+                        }
+                        fireTransferProgress( transferEvent, buffer, (int) Math.min( BUFFER_SIZE, remaining ) );
+                        outstream.write( buffer, 0, l );
+                        remaining -= l;
+                    }
+                }
+            }
+            finally
+            {
+                instream.close();
+            }
+        }
+
+        /*
         public void writeTo( OutputStream output )
             throws IOException
         {
@@ -212,16 +234,14 @@ public abstract class AbstractHttpClientWagon
 
             output.flush();
         }
+        */
 
         public boolean isStreaming()
         {
-            return false;
+            return true;
         }
 
-        public void consumeContent()
-            throws IOException
-        {
-        }
+
     }
 
     protected static final int SC_NULL = -1;

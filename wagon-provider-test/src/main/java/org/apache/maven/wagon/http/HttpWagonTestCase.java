@@ -33,6 +33,7 @@ import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringOutputStream;
+import org.codehaus.plexus.util.StringUtils;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
@@ -932,12 +933,13 @@ public abstract class HttpWagonTestCase
 
                 File tempFile = File.createTempFile( "wagon", "tmp" );
                 tempFile.deleteOnExit();
-                FileUtils.fileWrite( tempFile.getAbsolutePath(), "put top secret" );
+                String content = "put top secret";
+                FileUtils.fileWrite( tempFile.getAbsolutePath(), content );
 
                 FileInputStream fileInputStream = new FileInputStream( tempFile );
                 try
                 {
-                    wagon.putFromStream( fileInputStream, "test-secured-put-resource" );
+                    wagon.putFromStream( fileInputStream, "test-secured-put-resource", content.length(), -1 );
                 }
                 finally
                 {
@@ -946,7 +948,7 @@ public abstract class HttpWagonTestCase
 
                 }
 
-                assertEquals( "put top secret", FileUtils.fileRead( sourceFile.getAbsolutePath() ) );
+                assertEquals( content, FileUtils.fileRead( sourceFile.getAbsolutePath() ) );
             }
         }
         finally
@@ -958,6 +960,15 @@ public abstract class HttpWagonTestCase
         if ( addSecurityHandler )
         {
             testPreemptiveAuthentication( sh );
+        }
+
+        // ensure we didn't use chuncked transfer which doesn't work on ngnix
+        for ( DeployedResource deployedResource : putHandler.deployedResources )
+        {
+            if ( StringUtils.equalsIgnoreCase( "chuncked", deployedResource.transferEncoding ) )
+            {
+                fail( "deployedResource use chuncked: " + deployedResource );
+            }
         }
     }
 
@@ -1004,10 +1015,41 @@ public abstract class HttpWagonTestCase
         }
     }
 
+    static class DeployedResource
+    {
+        String httpMethod;
+
+        String requestUri;
+
+        String contentLength;
+
+        String transferEncoding;
+
+        public DeployedResource()
+        {
+            // no op
+        }
+
+        @Override
+        public String toString()
+        {
+            final StringBuilder sb = new StringBuilder();
+            sb.append( "DeployedResource" );
+            sb.append( "{httpMethod='" ).append( httpMethod ).append( '\'' );
+            sb.append( ", requestUri='" ).append( requestUri ).append( '\'' );
+            sb.append( ", contentLength='" ).append( contentLength ).append( '\'' );
+            sb.append( ", transferEncoding='" ).append( transferEncoding ).append( '\'' );
+            sb.append( '}' );
+            return sb.toString();
+        }
+    }
+
     static class PutHandler
         extends AbstractHandler
     {
         private final File resourceBase;
+
+        public List<DeployedResource> deployedResources = new ArrayList<DeployedResource>();
 
         public int putCallNumber = 0;
 
@@ -1044,6 +1086,14 @@ public abstract class HttpWagonTestCase
             }
             System.out.println( "put file " + request.getPathInfo() );
             putCallNumber++;
+            DeployedResource deployedResource = new DeployedResource();
+
+            deployedResource.httpMethod = request.getMethod();
+            deployedResource.requestUri = request.getRequestURI();
+            deployedResource.transferEncoding = request.getHeader( "Transfer-Encoding" );
+            deployedResource.contentLength = request.getHeader( "Content-Length" );
+            deployedResources.add( deployedResource );
+
             response.setStatus( HttpServletResponse.SC_CREATED );
         }
     }
