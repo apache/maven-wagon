@@ -962,12 +962,12 @@ public abstract class HttpWagonTestCase
             testPreemptiveAuthentication( sh );
         }
 
-        // ensure we didn't use chuncked transfer which doesn't work on ngnix
+        // ensure we didn't use chunked transfer which doesn't work on ngnix
         for ( DeployedResource deployedResource : putHandler.deployedResources )
         {
-            if ( StringUtils.equalsIgnoreCase( "chuncked", deployedResource.transferEncoding ) )
+            if ( StringUtils.equalsIgnoreCase( "chunked", deployedResource.transferEncoding ) )
             {
-                fail( "deployedResource use chuncked: " + deployedResource );
+                fail( "deployedResource use chunked: " + deployedResource );
             }
         }
     }
