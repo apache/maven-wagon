@@ -329,10 +329,6 @@ public abstract class AbstractHttpClientWagon
                     throw new RuntimeException( "failed to init SSLSocket Factory " + e.getMessage(), e );
                 }
             }
-            System.out.println( " wagon http use multi threaded http connection manager maxPerRoute "
-                                    + threadSafeClientConnManager.getDefaultMaxPerRoute() + ", max total "
-                                    + threadSafeClientConnManager.getMaxTotal() );
-
             connectionManagerPooled = threadSafeClientConnManager;
         }
     }
