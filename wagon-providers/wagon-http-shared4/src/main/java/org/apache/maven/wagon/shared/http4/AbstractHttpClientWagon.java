@@ -196,46 +196,6 @@ public abstract class AbstractHttpClientWagon
             }
         }
 
-        /*
-        public void writeTo( OutputStream output )
-            throws IOException
-        {
-            byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
-
-            TransferEvent transferEvent =
-                new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT );
-            transferEvent.setTimestamp( System.currentTimeMillis() );
-
-            FileInputStream fin = null;
-            try
-            {
-                fin = new FileInputStream( source );
-                int remaining = Integer.MAX_VALUE;
-                while ( remaining > 0 )
-                {
-                    int n = fin.read( buffer, 0, Math.min( buffer.length, remaining ) );
-
-                    if ( n == -1 )
-                    {
-                        break;
-                    }
-
-                    fireTransferProgress( transferEvent, buffer, n );
-
-                    output.write( buffer, 0, n );
-
-                    remaining -= n;
-                }
-            }
-            finally
-            {
-                IOUtil.close( fin );
-            }
-
-            output.flush();
-        }
-        */
-
         public boolean isStreaming()
         {
             return true;
