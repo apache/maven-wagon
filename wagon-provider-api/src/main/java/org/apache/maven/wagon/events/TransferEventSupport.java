@@ -20,7 +20,6 @@ package org.apache.maven.wagon.events;
  */
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -36,7 +35,7 @@ public final class TransferEventSupport
     /**
      * registered listeners
      */
-    private final List listeners = new ArrayList();
+    private final List<TransferListener> listeners = new ArrayList<TransferListener>();
 
     /**
      * Adds the listener to the collection of listeners
@@ -100,9 +99,8 @@ public final class TransferEventSupport
      */
     public synchronized void fireTransferStarted( final TransferEvent transferEvent )
     {
-        for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
+        for ( TransferListener listener : listeners )
         {
-            final TransferListener listener = (TransferListener) iter.next();
             listener.transferStarted( transferEvent );
         }
     }
@@ -118,9 +116,8 @@ public final class TransferEventSupport
      */
     public synchronized void fireTransferProgress( final TransferEvent transferEvent, byte[] buffer, int length )
     {
-        for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
+        for ( TransferListener listener : listeners )
         {
-            final TransferListener listener = (TransferListener) iter.next();
             listener.transferProgress( transferEvent, buffer, length );
 
         }
@@ -135,9 +132,8 @@ public final class TransferEventSupport
      */
     public synchronized void fireTransferCompleted( final TransferEvent transferEvent )
     {
-        for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
+        for ( TransferListener listener : listeners )
         {
-            final TransferListener listener = (TransferListener) iter.next();
             listener.transferCompleted( transferEvent );
 
         }
@@ -153,9 +149,8 @@ public final class TransferEventSupport
      */
     public synchronized void fireTransferError( final TransferEvent transferEvent )
     {
-        for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
+        for ( TransferListener listener : listeners )
         {
-            final TransferListener listener = (TransferListener) iter.next();
             listener.transferError( transferEvent );
 
         }
@@ -170,9 +165,8 @@ public final class TransferEventSupport
     public synchronized void fireDebug( final String message )
     {
 
-        for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
+        for ( TransferListener listener : listeners )
         {
-            final TransferListener listener = (TransferListener) iter.next();
             listener.debug( message );
 
         }
@@ -187,9 +181,8 @@ public final class TransferEventSupport
      */
     public synchronized void fireTransferInitiated( final TransferEvent transferEvent )
     {
-        for ( Iterator iter = listeners.iterator(); iter.hasNext(); )
+        for ( TransferListener listener : listeners )
         {
-            final TransferListener listener = (TransferListener) iter.next();
             listener.transferInitiated( transferEvent );
         }
     }

@@ -99,7 +99,7 @@ public abstract class AbstractHttpClientWagon
     private BasicHttpContext localContext;
 
     private final class RequestEntityImplementation
-        extends AbstractHttpEntity//implements HttpEntity
+        extends AbstractHttpEntity
     {
 
         private final static int BUFFER_SIZE = 2048;
