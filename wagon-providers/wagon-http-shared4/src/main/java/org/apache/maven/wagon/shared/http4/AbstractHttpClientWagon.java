@@ -647,6 +647,30 @@ public abstract class AbstractHttpClientWagon
         setHeaders( httpMethod );
         client.getParams().setParameter( CoreProtocolPNames.USER_AGENT, getUserAgent( httpMethod ) );
 
+        ProxyInfo proxyInfo = getProxyInfo( getRepository().getProtocol(), getRepository().getHost() );
+
+        if ( proxyInfo != null )
+        {
+            if ( proxyInfo.getUserName() != null && proxyInfo.getPassword() != null )
+            {
+                Credentials creds;
+                if ( proxyInfo.getNtlmHost() != null || proxyInfo.getNtlmDomain() != null )
+                {
+                    creds =
+                        new NTCredentials( proxyInfo.getUserName(), proxyInfo.getPassword(), proxyInfo.getNtlmHost(),
+                                           proxyInfo.getNtlmDomain() );
+                }
+                else
+                {
+                    creds = new UsernamePasswordCredentials( proxyInfo.getUserName(), proxyInfo.getPassword() );
+                }
+
+                Header bs = new BasicScheme().authenticate( creds, httpMethod );
+                httpMethod.addHeader( "Proxy-Authorization", bs.getValue() );
+            }
+
+        }
+
         return client.execute( httpMethod, localContext );
     }
 
