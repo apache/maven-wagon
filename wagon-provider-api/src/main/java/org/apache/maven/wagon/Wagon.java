@@ -35,6 +35,18 @@ public interface Wagon
 {
     String ROLE = Wagon.class.getName();
 
+    /**
+     * default 60s approximately 1 minute
+     */
+    public static final int DEFAULT_CONNECTION_TIMEOUT = 60000;
+
+    /**
+     * default 1800s approximately 30 minutes
+     *
+     * @since 2.2
+     */
+    public static final int DEFAULT_READ_TIMEOUT = 1800000;
+
     // ----------------------------------------------------------------------
     // File/File handling
     // ----------------------------------------------------------------------

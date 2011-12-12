@@ -19,14 +19,6 @@ package org.apache.maven.wagon;
  * under the License.
  */
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.List;
-
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
@@ -43,6 +35,14 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
 
 /**
  * Implementation of common facilities for Wagon providers.
@@ -65,22 +65,24 @@ public abstract class AbstractWagon
 
     protected boolean interactive = true;
 
-    /**
-     * default 60s approximately 1 minute
-     */
-    private int connectionTimeout = 60000;
+
+    private int connectionTimeout = DEFAULT_CONNECTION_TIMEOUT;
 
     /**
-     * default 1800s approximately 30 minutes
+     * read timeout value
+     *
      * @since 2.2
      */
-    private int readTimeout = 1800000;
-    
+    private int readTimeout =
+        Integer.parseInt( System.getProperty( "maven.wagon.rto", Integer.toString( Wagon.DEFAULT_READ_TIMEOUT ) ) );
+
     private ProxyInfoProvider proxyInfoProvider;
-    
-    /** @deprecated */
+
+    /**
+     * @deprecated
+     */
     protected ProxyInfo proxyInfo;
-    
+
     private RepositoryPermissions permissionsOverride;
 
     // ----------------------------------------------------------------------
@@ -116,13 +118,13 @@ public abstract class AbstractWagon
         catch ( ConnectionException e )
         {
             fireSessionConnectionRefused();
-            
+
             throw e;
         }
         catch ( AuthenticationException e )
         {
             fireSessionConnectionRefused();
-            
+
             throw e;
         }
     }
@@ -171,7 +173,7 @@ public abstract class AbstractWagon
         } );
         this.proxyInfo = proxyInfo;
     }
-    
+
     public void connect( Repository repository, AuthenticationInfo authenticationInfo,
                          ProxyInfoProvider proxyInfoProvider )
         throws ConnectionException, AuthenticationException
@@ -185,7 +187,7 @@ public abstract class AbstractWagon
         {
             repository.setPermissions( permissionsOverride );
         }
-        
+
         this.repository = repository;
 
         if ( authenticationInfo == null )
@@ -208,9 +210,9 @@ public abstract class AbstractWagon
 
         // TODO: Do these needs to be fields, or are they only used in openConnection()?
         this.authenticationInfo = authenticationInfo;
-        
+
         this.proxyInfoProvider = proxyInfoProvider;
-        
+
         fireSessionOpening();
 
         openConnection();
@@ -264,12 +266,12 @@ public abstract class AbstractWagon
             }
         }
     }
-    
+
     public void setTimeout( int timeoutValue )
     {
         connectionTimeout = timeoutValue;
     }
-    
+
     public int getTimeout()
     {
         return connectionTimeout;
@@ -335,7 +337,7 @@ public abstract class AbstractWagon
         try
         {
             transfer( resource, input, output, TransferEvent.REQUEST_GET, maxSize );
-            
+
             finishGetTransfer( resource, input, output );
         }
         catch ( IOException e )
@@ -378,16 +380,15 @@ public abstract class AbstractWagon
 
     /**
      * Write from {@link File} to {@link OutputStream}
-     * 
-     * @since 1.0-beta-1
-     * 
-     * @param resource resource to transfer
-     * @param source file to read from
-     * @param output output stream
+     *
+     * @param resource    resource to transfer
+     * @param source      file to read from
+     * @param output      output stream
      * @param closeOutput whether the output stream should be closed or not
      * @throws TransferFailedException
-     * @throws ResourceDoesNotExistException 
-     * @throws AuthorizationException 
+     * @throws ResourceDoesNotExistException
+     * @throws AuthorizationException
+     * @since 1.0-beta-1
      */
     protected void transfer( Resource resource, File source, OutputStream output, boolean closeOutput )
         throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
@@ -418,7 +419,7 @@ public abstract class AbstractWagon
         try
         {
             transfer( resource, input, output, TransferEvent.REQUEST_PUT );
-            
+
             finishPutTransfer( resource, input, output );
         }
         catch ( IOException e )
@@ -435,7 +436,7 @@ public abstract class AbstractWagon
             {
                 IOUtil.close( output );
             }
-            
+
             cleanupPutTransfer( resource );
         }
     }
@@ -453,10 +454,10 @@ public abstract class AbstractWagon
      * Write from {@link InputStream} to {@link OutputStream}.
      * Equivalent to {@link #transfer(Resource, InputStream, OutputStream, int, int)} with a maxSize equals to
      * {@link Integer#MAX_VALUE}
-     * 
-     * @param resource resource to transfer
-     * @param input input stream
-     * @param output output stream
+     *
+     * @param resource    resource to transfer
+     * @param input       input stream
+     * @param output      output stream
      * @param requestType one of {@link TransferEvent#REQUEST_GET} or {@link TransferEvent#REQUEST_PUT}
      * @throws IOException
      */
@@ -470,12 +471,12 @@ public abstract class AbstractWagon
      * Write from {@link InputStream} to {@link OutputStream}.
      * Equivalent to {@link #transfer(Resource, InputStream, OutputStream, int, int)} with a maxSize equals to
      * {@link Integer#MAX_VALUE}
-     * 
-     * @param resource resource to transfer
-     * @param input input stream
-     * @param output output stream
+     *
+     * @param resource    resource to transfer
+     * @param input       input stream
+     * @param output      output stream
      * @param requestType one of {@link TransferEvent#REQUEST_GET} or {@link TransferEvent#REQUEST_PUT}
-     * @param maxSize size of the buffer
+     * @param maxSize     size of the buffer
      * @throws IOException
      */
     protected void transfer( Resource resource, InputStream input, OutputStream output, int requestType, int maxSize )
@@ -518,8 +519,8 @@ public abstract class AbstractWagon
     {
         long timestamp = System.currentTimeMillis();
 
-        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_COMPLETED,
-                                                         TransferEvent.REQUEST_GET );
+        TransferEvent transferEvent =
+            new TransferEvent( this, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_GET );
 
         transferEvent.setTimestamp( timestamp );
 
@@ -532,8 +533,8 @@ public abstract class AbstractWagon
     {
         long timestamp = System.currentTimeMillis();
 
-        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_STARTED,
-                                                         TransferEvent.REQUEST_GET );
+        TransferEvent transferEvent =
+            new TransferEvent( this, resource, TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_GET );
 
         transferEvent.setTimestamp( timestamp );
 
@@ -546,8 +547,8 @@ public abstract class AbstractWagon
     {
         long timestamp = System.currentTimeMillis();
 
-        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_INITIATED,
-                                                         TransferEvent.REQUEST_GET );
+        TransferEvent transferEvent =
+            new TransferEvent( this, resource, TransferEvent.TRANSFER_INITIATED, TransferEvent.REQUEST_GET );
 
         transferEvent.setTimestamp( timestamp );
 
@@ -560,8 +561,8 @@ public abstract class AbstractWagon
     {
         long timestamp = System.currentTimeMillis();
 
-        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_INITIATED,
-                                                         TransferEvent.REQUEST_PUT );
+        TransferEvent transferEvent =
+            new TransferEvent( this, resource, TransferEvent.TRANSFER_INITIATED, TransferEvent.REQUEST_PUT );
 
         transferEvent.setTimestamp( timestamp );
 
@@ -574,8 +575,8 @@ public abstract class AbstractWagon
     {
         long timestamp = System.currentTimeMillis();
 
-        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_COMPLETED,
-                                                         TransferEvent.REQUEST_PUT );
+        TransferEvent transferEvent =
+            new TransferEvent( this, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_PUT );
 
         transferEvent.setTimestamp( timestamp );
 
@@ -588,8 +589,8 @@ public abstract class AbstractWagon
     {
         long timestamp = System.currentTimeMillis();
 
-        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_STARTED,
-                                                         TransferEvent.REQUEST_PUT );
+        TransferEvent transferEvent =
+            new TransferEvent( this, resource, TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_PUT );
 
         transferEvent.setTimestamp( timestamp );
 
@@ -787,7 +788,7 @@ public abstract class AbstractWagon
         catch ( IOException e )
         {
             fireTransferError( resource, e, requestType );
-            
+
             throw new TransferFailedException( "Failed to post-process the source file", e );
         }
         finally

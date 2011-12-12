@@ -25,6 +25,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.DefaultedHttpParams;
 import org.apache.http.params.HttpParams;
+import org.apache.maven.wagon.Wagon;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -38,10 +39,6 @@ import java.util.regex.Pattern;
 public class HttpMethodConfiguration
 {
 
-    public static final int DEFAULT_CONNECTION_TIMEOUT = 60000;
-
-    public static final int DEFAULT_READ_TIMEOUT = 1800000;
-
     private static final String COERCE_PATTERN = "%(\\w+),(.+)";
 
     private Boolean useDefaultHeaders;
@@ -50,9 +47,10 @@ public class HttpMethodConfiguration
 
     private Properties params = new Properties();
 
-    private int connectionTimeout = DEFAULT_CONNECTION_TIMEOUT;
+    private int connectionTimeout = Wagon.DEFAULT_CONNECTION_TIMEOUT;
 
-    private int readTimeout = DEFAULT_READ_TIMEOUT;
+    private int readTimeout =
+        Integer.parseInt( System.getProperty( "maven.wagon.rto", Integer.toString( Wagon.DEFAULT_READ_TIMEOUT ) ) );
 
     public boolean isUseDefaultHeaders()
     {
@@ -319,12 +317,12 @@ public class HttpMethodConfiguration
         {
             HttpMethodConfiguration result = base.copy();
 
-            if ( local.getConnectionTimeout() != DEFAULT_CONNECTION_TIMEOUT )
+            if ( local.getConnectionTimeout() != Wagon.DEFAULT_CONNECTION_TIMEOUT )
             {
                 result.setConnectionTimeout( local.getConnectionTimeout() );
             }
 
-            if ( local.getReadTimeout() != DEFAULT_READ_TIMEOUT )
+            if ( local.getReadTimeout() != Wagon.DEFAULT_READ_TIMEOUT )
             {
                 result.setReadTimeout( local.getReadTimeout() );
             }
