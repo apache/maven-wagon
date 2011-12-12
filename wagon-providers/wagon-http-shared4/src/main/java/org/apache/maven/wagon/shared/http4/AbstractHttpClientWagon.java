@@ -663,9 +663,10 @@ public abstract class AbstractHttpClientWagon
             }
         }
 
-        if ( config == null || config.getReadTimeout() == HttpMethodConfiguration.DEFAULT_CONNECTION_TIMEOUT )
+        if ( config == null || config.getReadTimeout() == HttpMethodConfiguration.DEFAULT_READ_TIMEOUT )
         {
-            method.getParams().setParameter( CoreConnectionPNames.SO_TIMEOUT, getTimeout() );
+            int readTimeout = getReadTimeout();
+            method.getParams().setParameter( CoreConnectionPNames.SO_TIMEOUT, readTimeout );
         }
     }
 

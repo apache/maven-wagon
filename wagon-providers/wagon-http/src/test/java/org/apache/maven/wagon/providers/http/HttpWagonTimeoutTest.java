@@ -53,7 +53,7 @@ public class HttpWagonTimeoutTest
         try
         {
             Wagon wagon = getWagon();
-            wagon.setTimeout( 1000 );
+            wagon.setReadTimeout( 1000 );
 
             Repository testRepository = new Repository();
             testRepository.setUrl( "http://localhost:" + httpServerPort );
@@ -88,7 +88,7 @@ public class HttpWagonTimeoutTest
         try
         {
             Wagon wagon = getWagon();
-            wagon.setTimeout( 1000 );
+            wagon.setReadTimeout( 1000 );
 
             Repository testRepository = new Repository();
             testRepository.setUrl( "http://localhost:" + httpServerPort );
@@ -120,7 +120,7 @@ public class HttpWagonTimeoutTest
         try
         {
             Wagon wagon = getWagon();
-            wagon.setTimeout( 1000 );
+            wagon.setReadTimeout( 1000 );
 
             Repository testRepository = new Repository();
             testRepository.setUrl( "http://localhost:" + httpServerPort );
@@ -152,7 +152,7 @@ public class HttpWagonTimeoutTest
         try
         {
             Wagon wagon = getWagon();
-            wagon.setTimeout( 1000 );
+            wagon.setReadTimeout( 1000 );
 
             Repository testRepository = new Repository();
             testRepository.setUrl( "http://localhost:" + httpServerPort );

@@ -40,7 +40,7 @@ public class HttpMethodConfiguration
 
     public static final int DEFAULT_CONNECTION_TIMEOUT = 60000;
 
-    public static final int DEFAULT_READ_TIMEOUT = 60000;
+    public static final int DEFAULT_READ_TIMEOUT = 1800000;
 
     private static final String COERCE_PATTERN = "%(\\w+),(.+)";
 
