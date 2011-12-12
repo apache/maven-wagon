@@ -52,4 +52,9 @@ public class WebDavsWagonTest
         connector.setTrustPassword( "wagonhttp" );
         server.setConnectors( new Connector[] { connector } );
     }
+
+    protected boolean supportProxyPreemptiveAuthentication()
+    {
+        return true;
+    }
 }

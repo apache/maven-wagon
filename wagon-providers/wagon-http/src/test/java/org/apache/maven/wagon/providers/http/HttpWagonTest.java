@@ -68,4 +68,9 @@ public class HttpWagonTest
     {
         return true;
     }
+
+    protected boolean supportProxyPreemptiveAuthentication()
+    {
+        return true;
+    }
 }

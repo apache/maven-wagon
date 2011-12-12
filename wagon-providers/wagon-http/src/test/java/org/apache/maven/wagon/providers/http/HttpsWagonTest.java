@@ -46,4 +46,9 @@ public class HttpsWagonTest
         server.setConnectors( new Connector[]{ connector } );
     }
 
+    protected boolean supportProxyPreemptiveAuthentication()
+    {
+        return true;
+    }
+
 }

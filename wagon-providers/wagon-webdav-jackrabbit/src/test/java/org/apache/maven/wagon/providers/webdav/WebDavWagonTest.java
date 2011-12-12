@@ -424,4 +424,9 @@ public class WebDavWagonTest
         }
     }
 
+    protected boolean supportProxyPreemptiveAuthentication()
+    {
+        return true;
+    }
+
 }

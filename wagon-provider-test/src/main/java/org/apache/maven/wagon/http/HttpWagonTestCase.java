@@ -424,11 +424,22 @@ public abstract class HttpWagonTestCase
         ProxyInfo proxyInfo = createProxyInfo();
         proxyInfo.setUserName( "user" );
         proxyInfo.setPassword( "secret" );
-        TestHeaderHandler handler = new AuthorizingProxyHandler();
+        AuthorizingProxyHandler handler = new AuthorizingProxyHandler();
 
         runTestProxiedRequest( proxyInfo, handler );
 
         assertTrue( handler.headers.containsKey( "Proxy-Authorization" ) );
+
+        if ( supportProxyPreemptiveAuthentication() )
+        {
+            assertEquals( 200, handler.securityHandlerRequestReponses.get( 0 ).responseCode );
+        }
+        else
+        {
+            assertEquals( 407, handler.securityHandlerRequestReponses.get( 0 ).responseCode );
+            assertEquals( 200, handler.securityHandlerRequestReponses.get( 1 ).responseCode );
+        }
+
     }
 
     private void runTestProxiedRequest( ProxyInfo proxyInfo, TestHeaderHandler handler )
@@ -975,6 +986,11 @@ public abstract class HttpWagonTestCase
 
     protected abstract boolean supportPreemptiveAuthentication();
 
+    protected boolean supportProxyPreemptiveAuthentication()
+    {
+        return false;
+    }
+
     protected void testPreemptiveAuthentication( TestSecurityHandler sh )
     {
 
@@ -1102,18 +1118,23 @@ public abstract class HttpWagonTestCase
         extends TestHeaderHandler
     {
 
+        List<SecurityHandlerRequestReponse> securityHandlerRequestReponses =
+            new ArrayList<SecurityHandlerRequestReponse>();
+
         public void handle( String target, HttpServletRequest request, HttpServletResponse response, int dispatch )
             throws IOException, ServletException
         {
             System.out.println( " handle proxy request" );
             if ( request.getHeader( "Proxy-Authorization" ) == null )
             {
+                securityHandlerRequestReponses.add( new SecurityHandlerRequestReponse( request.getMethod(), 407 ) );
                 response.setStatus( 407 );
                 response.addHeader( "Proxy-Authenticate", "Basic realm=\"Squid proxy-caching web server\"" );
 
                 ( (Request) request ).setHandled( true );
                 return;
             }
+            securityHandlerRequestReponses.add( new SecurityHandlerRequestReponse( request.getMethod(), 200 ) );
             super.handle( target, request, response, dispatch );
         }
     }
@@ -1121,7 +1142,7 @@ public abstract class HttpWagonTestCase
     private static class TestHeaderHandler
         extends AbstractHandler
     {
-        private Map headers = Collections.EMPTY_MAP;
+        public Map headers = Collections.EMPTY_MAP;
 
         public TestHeaderHandler()
         {
