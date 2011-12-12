@@ -247,6 +247,18 @@ public interface Wagon
      */
     int getTimeout();
 
+    /**
+     * Set the read timeout limit in milliseconds
+     * @since 2.2
+     */
+    void setReadTimeout( int timeoutValue );
+
+    /**
+     * Get the read timeout limit in milliseconds
+     * @since 2.2
+     */
+    int getReadTimeout();
+
     // ----------------------------------------------------------------------
     //  Session listener
     // ----------------------------------------------------------------------

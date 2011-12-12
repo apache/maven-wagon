@@ -64,8 +64,17 @@ public abstract class AbstractWagon
     protected AuthenticationInfo authenticationInfo;
 
     protected boolean interactive = true;
-    
+
+    /**
+     * default 60s approximately 1 minute
+     */
     private int connectionTimeout = 60000;
+
+    /**
+     * default 1800s approximately 30 minutes
+     * @since 2.2
+     */
+    private int readTimeout = 1800000;
     
     private ProxyInfoProvider proxyInfoProvider;
     
@@ -853,5 +862,15 @@ public abstract class AbstractWagon
     public void setPermissionsOverride( RepositoryPermissions permissionsOverride )
     {
         this.permissionsOverride = permissionsOverride;
+    }
+
+    public void setReadTimeout( int readTimeout )
+    {
+        this.readTimeout = readTimeout;
+    }
+
+    public int getReadTimeout()
+    {
+        return this.readTimeout;
     }
 }
