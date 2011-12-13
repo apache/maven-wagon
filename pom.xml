@@ -34,8 +34,14 @@ under the License.
 
   <name>Apache Maven Wagon</name>
   <description>Tools to manage artifacts and deployment</description>
-  <url>http://maven.apache.org/wagon</url>
+  <url>${siteUrl}</url>
   <inceptionYear>2003</inceptionYear>
+
+  <properties>
+    <siteDeployUrl>scp://people.apache.org/www/maven.apache.org/wagon/</siteDeployUrl>
+    <siteUrl>http://maven.apache.org/wagon/</siteUrl>
+    <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
+  </properties>
 
   <contributors>
     <contributor>
@@ -180,6 +186,12 @@ under the License.
     <url>https://builds.apache.org/job/maven-wagon/</url>
   </ciManagement>
 
+  <distributionManagement>
+    <site>
+      <id>apache.website</id>
+      <url>${siteDeployUrl}</url>
+    </site>
+  </distributionManagement>
 
   <modules>
     <module>wagon-provider-api</module>
@@ -188,9 +200,7 @@ under the License.
     <module>wagon-tcks</module>
   </modules>
 
-  <properties>
-    <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
-  </properties>
+
 
   <dependencies>
     <dependency>
