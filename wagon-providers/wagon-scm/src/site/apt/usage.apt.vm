@@ -38,6 +38,10 @@ Maven Wagon SCM Usage
  There is no default value for <<<scmVersionType>>> so you <MUST> specify it with <<<scmVersion>>> in order
  to have any effect.
 
+ <<Note for Maven 3 users:>> The site plugin behaves differently, require these
+ be added as dependencies instead of extensions. See
+ {{{http://maven.apache.org/plugins/maven-site-plugin/examples/adding-deploy-protocol.html}
+ Adding a Protocol to Deploy the Site}}.
 
 Deploying your Maven site to Subversion
 
