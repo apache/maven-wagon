@@ -19,14 +19,21 @@ package org.apache.maven.wagon.shared.http;
  * under the License.
  */
 
+import junit.framework.TestCase;
+import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.NTCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.httpclient.params.HttpMethodParams;
-
-import junit.framework.TestCase;
+import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.authentication.AuthenticationException;
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.proxy.ProxyInfo;
+import org.apache.maven.wagon.repository.Repository;
 
 public class AbstractHttpClientWagonTest
     extends TestCase
@@ -142,6 +149,78 @@ public class AbstractHttpClientWagonTest
 
         header = method.getRequestHeader( "Accept-Encoding" );
         assertNull( header );
+    }
+
+    public void testNTCredentialsWithUsernameNull()
+        throws AuthenticationException, ConnectionException
+    {
+        TestWagon wagon = new TestWagon();
+
+        Repository repository = new Repository( "mockRepoId", "mockRepoURL" );
+        wagon.connect( repository );
+
+        wagon.openConnection();
+
+        assertNull( wagon.getAuthenticationInfo().getUserName() );
+        assertNull( wagon.getAuthenticationInfo().getPassword() );
+
+        assertFalse( wagon.getClient().getState().getCredentials( new AuthScope( null, 0 ) ) instanceof NTCredentials );
+    }
+
+    public void testNTCredentialsNoNTDomain()
+        throws AuthenticationException, ConnectionException
+    {
+        TestWagon wagon = new TestWagon();
+
+        AuthenticationInfo authenticationInfo = new AuthenticationInfo();
+        String myUsernameNoNTDomain = "myUserNameNoNTDomain";
+        authenticationInfo.setUserName( myUsernameNoNTDomain );
+
+        String myPassword = "myPassword";
+        authenticationInfo.setPassword( myPassword );
+
+        Repository repository = new Repository( "mockRepoId", "mockRepoURL" );
+
+        wagon.connect( repository, authenticationInfo, (ProxyInfo) null );
+
+        wagon.openConnection();
+
+        assertEquals( myUsernameNoNTDomain, wagon.getAuthenticationInfo().getUserName() );
+        assertEquals( myPassword, wagon.getAuthenticationInfo().getPassword() );
+
+        assertFalse( wagon.getClient().getState().getCredentials( new AuthScope( null, 0 ) ) instanceof NTCredentials );
+    }
+
+    public void testNTCredentialsWithNTDomain()
+        throws AuthenticationException, ConnectionException
+    {
+        TestWagon wagon = new TestWagon();
+
+        AuthenticationInfo authenticationInfo = new AuthenticationInfo();
+        String myNTDomain = "myNTDomain";
+        String myUsername = "myUsername";
+        String myNTDomainAndUser = myNTDomain + "\\" + myUsername;
+        authenticationInfo.setUserName( myNTDomainAndUser );
+
+        String myPassword = "myPassword";
+        authenticationInfo.setPassword( myPassword );
+
+        Repository repository = new Repository( "mockRepoId", "mockRepoURL" );
+
+        wagon.connect( repository, authenticationInfo, (ProxyInfo) null );
+
+        wagon.openConnection();
+
+        assertEquals( myNTDomainAndUser, wagon.getAuthenticationInfo().getUserName() );
+        assertEquals( myPassword, wagon.getAuthenticationInfo().getPassword() );
+
+        Credentials credentials = wagon.getClient().getState().getCredentials( new AuthScope( null, 0 ) );
+        assertTrue( credentials instanceof NTCredentials );
+
+        NTCredentials ntCredentials = (NTCredentials) credentials;
+        assertEquals( myNTDomain, ntCredentials.getDomain() );
+        assertEquals( myUsername, ntCredentials.getUserName() );
+        assertEquals( myPassword, ntCredentials.getPassword() );
     }
 
     private static final class TestWagon

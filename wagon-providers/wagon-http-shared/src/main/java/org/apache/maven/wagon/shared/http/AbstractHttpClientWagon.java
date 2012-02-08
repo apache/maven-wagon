@@ -202,10 +202,18 @@ public abstract class AbstractHttpClientWagon
 
         String username = null;
         String password = null;
+        String domain = null;
 
         if ( authenticationInfo != null )
         {
             username = authenticationInfo.getUserName();
+
+            if ( StringUtils.contains( username, "\\" ) )
+            {
+                String[] domainAndUsername = username.split( "\\\\" );
+                domain = domainAndUsername[0];
+                username = domainAndUsername[1];
+            }
 
             password = authenticationInfo.getPassword();
 
@@ -216,7 +224,15 @@ public abstract class AbstractHttpClientWagon
 
         if ( StringUtils.isNotEmpty( username ) && StringUtils.isNotEmpty( password ) )
         {
-            Credentials creds = new UsernamePasswordCredentials( username, password );
+            Credentials creds;
+            if ( domain != null )
+            {
+                creds = new NTCredentials( username, password, host, domain );
+            }
+            else
+            {
+                creds = new UsernamePasswordCredentials( username, password );
+            }
 
             int port = getRepository().getPort() > -1 ? getRepository().getPort() : AuthScope.ANY_PORT;
 
@@ -722,7 +738,7 @@ public abstract class AbstractHttpClientWagon
     protected void putFromStream( InputStream stream, Resource resource )
         throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
-        putFromStream( stream, resource.getName( ), -1, -1 );
+        putFromStream( stream, resource.getName(), -1, -1 );
     }
 
     @Override
