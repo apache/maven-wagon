@@ -432,15 +432,82 @@ public abstract class HttpWagonTestCase
 
         if ( supportProxyPreemptiveAuthentication() )
         {
-            assertEquals( 200, handler.securityHandlerRequestReponses.get( 0 ).responseCode );
+            assertEquals( 200, handler.handlerRequestResponses.get( 0 ).responseCode );
         }
         else
         {
-            assertEquals( 407, handler.securityHandlerRequestReponses.get( 0 ).responseCode );
-            assertEquals( 200, handler.securityHandlerRequestReponses.get( 1 ).responseCode );
+            assertEquals( 407, handler.handlerRequestResponses.get( 0 ).responseCode );
+            assertEquals( 200, handler.handlerRequestResponses.get( 1 ).responseCode );
         }
 
     }
+
+    public void testRedirectGet()
+        throws Exception
+    {
+        StreamingWagon wagon = (StreamingWagon) getWagon();
+
+        Server server = new Server( 0 );
+        TestHeaderHandler handler = new TestHeaderHandler();
+
+        server.setHandler( handler );
+        addConnectors( server );
+        server.start();
+
+        Server redirectServer = new Server( 0 );
+
+        addConnectors( redirectServer );
+
+        String protocol = getProtocol();
+
+        // protocol is wagon protocol but in fact dav is http(s)
+        if ( protocol.equals( "dav" ) )
+        {
+            protocol = "http";
+        }
+
+        if ( protocol.equals( "davs" ) )
+        {
+            protocol = "https";
+        }
+
+        String redirectUrl = protocol + "://localhost:" + server.getConnectors()[0].getLocalPort();
+
+        RedirectHandler redirectHandler = new RedirectHandler( "Found", 303, redirectUrl, null );
+
+        redirectServer.setHandler( redirectHandler );
+
+        redirectServer.start();
+
+        wagon.connect( new Repository( "id", getRepositoryUrl( redirectServer ) ) );
+
+        File tmpResult = File.createTempFile( "foo", "get" );
+
+        FileOutputStream fileOutputStream = new FileOutputStream( tmpResult );
+
+        try
+        {
+            wagon.getToStream( "resource", fileOutputStream );
+            fileOutputStream.flush();
+            fileOutputStream.close();
+            String found = FileUtils.fileRead( tmpResult );
+            assertEquals( "found:'" + found + "'", "Hello, World!", found );
+
+            assertEquals( 1, handler.handlerRequestResponses.size() );
+            assertEquals( 200, handler.handlerRequestResponses.get( 0 ).responseCode );
+            assertEquals( 1, redirectHandler.handlerRequestResponses.size() );
+            assertEquals( 302, redirectHandler.handlerRequestResponses.get( 0 ).responseCode );
+        }
+        finally
+        {
+            wagon.disconnect();
+
+            server.stop();
+
+            tmpResult.delete();
+        }
+    }
+
 
     public void testRedirectPutFromStreamWithFullUrl()
         throws Exception
@@ -513,12 +580,25 @@ public abstract class HttpWagonTestCase
 
             assertEquals( content, FileUtils.fileRead( sourceFile.getAbsolutePath() ) );
 
+            checkRequestResponseForRedirectPutFromStreamWithFullUrl( putHandler, redirectHandler );
         }
         finally
         {
             realServer.stop();
             redirectServer.stop();
         }
+    }
+
+    protected void checkRequestResponseForRedirectPutFromStreamWithFullUrl( PutHandler putHandler,
+                                                                            RedirectHandler redirectHandler )
+    {
+        assertEquals( "found:" + putHandler.handlerRequestResponses, 1, putHandler.handlerRequestResponses.size() );
+        assertEquals( "found:" + putHandler.handlerRequestResponses, 201,
+                      putHandler.handlerRequestResponses.get( 0 ).responseCode );
+        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 1,
+                      redirectHandler.handlerRequestResponses.size() );
+        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 302,
+                      redirectHandler.handlerRequestResponses.get( 0 ).responseCode );
     }
 
     public void testRedirectPutFromStreamRelativeUrl()
@@ -576,12 +656,28 @@ public abstract class HttpWagonTestCase
 
             assertEquals( content, FileUtils.fileRead( sourceFile.getAbsolutePath() ) );
 
+            checkRequestResponseForRedirectPutFromStreamWithRelativeUrl( putHandler, redirectHandler );
+
         }
         finally
         {
             realServer.stop();
             redirectServer.stop();
         }
+    }
+
+    protected void checkRequestResponseForRedirectPutFromStreamWithRelativeUrl( PutHandler putHandler,
+                                                                                RedirectHandler redirectHandler )
+    {
+        assertEquals( "found:" + putHandler.handlerRequestResponses, 0, putHandler.handlerRequestResponses.size() );
+
+        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 2,
+                      redirectHandler.handlerRequestResponses.size() );
+        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 302,
+                      redirectHandler.handlerRequestResponses.get( 0 ).responseCode );
+        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 201,
+                      redirectHandler.handlerRequestResponses.get( 1 ).responseCode );
+
     }
 
     public void testRedirectPutFileWithFullUrl()
@@ -733,6 +829,8 @@ public abstract class HttpWagonTestCase
 
         File repositoryDirectory;
 
+        public List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<HandlerRequestResponse>();
+
         RedirectHandler( String reason, int retCode, String redirectUrl, File repositoryDirectory )
         {
             this.reason = reason;
@@ -748,10 +846,15 @@ public abstract class HttpWagonTestCase
             {
                 PutHandler putHandler = new PutHandler( this.repositoryDirectory );
                 putHandler.handle( s, req, resp, i );
+                handlerRequestResponses.add(
+                    new HandlerRequestResponse( req.getMethod(), ( (Response) resp ).getStatus(),
+                                                req.getRequestURI() ) );
                 return;
             }
             resp.setStatus( this.retCode );
             resp.sendRedirect( this.redirectUrl + "/" + req.getRequestURI() );
+            handlerRequestResponses.add(
+                new HandlerRequestResponse( req.getMethod(), ( (Response) resp ).getStatus(), req.getRequestURI() ) );
         }
     }
 
@@ -1310,16 +1413,16 @@ public abstract class HttpWagonTestCase
 
         if ( supportPreemptiveAuthentication() )
         {
-            assertEquals( "not 1 security handler use " + sh.securityHandlerRequestReponses, 1,
-                          sh.securityHandlerRequestReponses.size() );
-            assertEquals( 200, sh.securityHandlerRequestReponses.get( 0 ).responseCode );
+            assertEquals( "not 1 security handler use " + sh.handlerRequestResponses, 1,
+                          sh.handlerRequestResponses.size() );
+            assertEquals( 200, sh.handlerRequestResponses.get( 0 ).responseCode );
         }
         else
         {
-            assertEquals( "not 2 security handler use " + sh.securityHandlerRequestReponses, 2,
-                          sh.securityHandlerRequestReponses.size() );
-            assertEquals( 401, sh.securityHandlerRequestReponses.get( 0 ).responseCode );
-            assertEquals( 200, sh.securityHandlerRequestReponses.get( 1 ).responseCode );
+            assertEquals( "not 2 security handler use " + sh.handlerRequestResponses, 2,
+                          sh.handlerRequestResponses.size() );
+            assertEquals( 401, sh.handlerRequestResponses.get( 0 ).responseCode );
+            assertEquals( 200, sh.handlerRequestResponses.get( 1 ).responseCode );
 
         }
     }
@@ -1374,7 +1477,7 @@ public abstract class HttpWagonTestCase
         }
     }
 
-    static class PutHandler
+    public static class PutHandler
         extends AbstractHandler
     {
         private final File resourceBase;
@@ -1382,6 +1485,8 @@ public abstract class HttpWagonTestCase
         public List<DeployedResource> deployedResources = new ArrayList<DeployedResource>();
 
         public int putCallNumber = 0;
+
+        public List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<HandlerRequestResponse>();
 
         public PutHandler( File repositoryDirectory )
         {
@@ -1414,7 +1519,6 @@ public abstract class HttpWagonTestCase
                 in.close();
                 out.close();
             }
-            System.out.println( "put file " + request.getPathInfo() );
             putCallNumber++;
             DeployedResource deployedResource = new DeployedResource();
 
@@ -1425,6 +1529,10 @@ public abstract class HttpWagonTestCase
             deployedResources.add( deployedResource );
 
             response.setStatus( HttpServletResponse.SC_CREATED );
+
+            handlerRequestResponses.add(
+                new HandlerRequestResponse( request.getMethod(), ( (Response) response ).getStatus(),
+                                            request.getRequestURI() ) );
         }
     }
 
@@ -1432,8 +1540,7 @@ public abstract class HttpWagonTestCase
         extends TestHeaderHandler
     {
 
-        List<SecurityHandlerRequestReponse> securityHandlerRequestReponses =
-            new ArrayList<SecurityHandlerRequestReponse>();
+        List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<HandlerRequestResponse>();
 
         public void handle( String target, HttpServletRequest request, HttpServletResponse response, int dispatch )
             throws IOException, ServletException
@@ -1441,14 +1548,16 @@ public abstract class HttpWagonTestCase
             System.out.println( " handle proxy request" );
             if ( request.getHeader( "Proxy-Authorization" ) == null )
             {
-                securityHandlerRequestReponses.add( new SecurityHandlerRequestReponse( request.getMethod(), 407 ) );
+                handlerRequestResponses.add(
+                    new HandlerRequestResponse( request.getMethod(), 407, request.getRequestURI() ) );
                 response.setStatus( 407 );
                 response.addHeader( "Proxy-Authenticate", "Basic realm=\"Squid proxy-caching web server\"" );
 
                 ( (Request) request ).setHandled( true );
                 return;
             }
-            securityHandlerRequestReponses.add( new SecurityHandlerRequestReponse( request.getMethod(), 200 ) );
+            handlerRequestResponses.add(
+                new HandlerRequestResponse( request.getMethod(), 200, request.getRequestURI() ) );
             super.handle( target, request, response, dispatch );
         }
     }
@@ -1456,7 +1565,9 @@ public abstract class HttpWagonTestCase
     private static class TestHeaderHandler
         extends AbstractHandler
     {
-        public Map headers = Collections.EMPTY_MAP;
+        public Map<String, String> headers = Collections.emptyMap();
+
+        public List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<HandlerRequestResponse>();
 
         public TestHeaderHandler()
         {
@@ -1474,7 +1585,11 @@ public abstract class HttpWagonTestCase
 
             response.setContentType( "text/plain" );
             response.setStatus( HttpServletResponse.SC_OK );
-            response.getWriter().println( "Hello, World!" );
+            response.getWriter().print( "Hello, World!" );
+
+            handlerRequestResponses.add(
+                new HandlerRequestResponse( request.getMethod(), ( (Response) response ).getStatus(),
+                                            request.getRequestURI() ) );
 
             ( (Request) request ).setHandled( true );
         }
@@ -1505,8 +1620,7 @@ public abstract class HttpWagonTestCase
         extends SecurityHandler
     {
 
-        public List<SecurityHandlerRequestReponse> securityHandlerRequestReponses =
-            new ArrayList<SecurityHandlerRequestReponse>();
+        public List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<HandlerRequestResponse>();
 
         @Override
         public void handle( String target, HttpServletRequest request, HttpServletResponse response, int dispatch )
@@ -1514,33 +1628,36 @@ public abstract class HttpWagonTestCase
         {
             String method = request.getMethod();
             super.handle( target, request, response, dispatch );
-            System.out.println( "method in SecurityHandler: " + method );
 
-            securityHandlerRequestReponses.add(
-                new SecurityHandlerRequestReponse( method, ( (Response) response ).getStatus() ) );
+            handlerRequestResponses.add(
+                new HandlerRequestResponse( method, ( (Response) response ).getStatus(), request.getRequestURI() ) );
         }
 
     }
 
-    public static class SecurityHandlerRequestReponse
+    public static class HandlerRequestResponse
     {
         public String method;
 
         public int responseCode;
 
-        private SecurityHandlerRequestReponse( String method, int responseCode )
+        public String requestUri;
+
+        private HandlerRequestResponse( String method, int responseCode, String requestUri )
         {
             this.method = method;
             this.responseCode = responseCode;
+            this.requestUri = requestUri;
         }
 
         @Override
         public String toString()
         {
             final StringBuilder sb = new StringBuilder();
-            sb.append( "SecurityHandlerRequestReponse" );
+            sb.append( "HandlerRequestResponse" );
             sb.append( "{method='" ).append( method ).append( '\'' );
             sb.append( ", responseCode=" ).append( responseCode );
+            sb.append( ", requestUri='" ).append( requestUri ).append( '\'' );
             sb.append( '}' );
             return sb.toString();
         }

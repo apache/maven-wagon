@@ -314,18 +314,18 @@ public class WebDavWagonTest
 
         if ( supportPreemptiveAuthentication() )
         {
-            assertEquals( "not 2 security handler use " + sh.securityHandlerRequestReponses, 2,
-                          sh.securityHandlerRequestReponses.size() );
-            assertEquals( 200, sh.securityHandlerRequestReponses.get( 0 ).responseCode );
+            assertEquals( "not 2 security handler use " + sh.handlerRequestResponses, 2,
+                          sh.handlerRequestResponses.size() );
+            assertEquals( 200, sh.handlerRequestResponses.get( 0 ).responseCode );
         }
         else
         {
-            assertEquals( "not 4 security handler use " + sh.securityHandlerRequestReponses, 4,
-                          sh.securityHandlerRequestReponses.size() );
-            assertEquals( 401, sh.securityHandlerRequestReponses.get( 0 ).responseCode );
-            assertEquals( 200, sh.securityHandlerRequestReponses.get( 1 ).responseCode );
-            assertEquals( 401, sh.securityHandlerRequestReponses.get( 2 ).responseCode );
-            assertEquals( 200, sh.securityHandlerRequestReponses.get( 3 ).responseCode );
+            assertEquals( "not 4 security handler use " + sh.handlerRequestResponses, 4,
+                          sh.handlerRequestResponses.size() );
+            assertEquals( 401, sh.handlerRequestResponses.get( 0 ).responseCode );
+            assertEquals( 200, sh.handlerRequestResponses.get( 1 ).responseCode );
+            assertEquals( 401, sh.handlerRequestResponses.get( 2 ).responseCode );
+            assertEquals( 200, sh.handlerRequestResponses.get( 3 ).responseCode );
 
         }
     }
@@ -427,6 +427,34 @@ public class WebDavWagonTest
     protected boolean supportProxyPreemptiveAuthentication()
     {
         return true;
+    }
+
+    protected void checkRequestResponseForRedirectPutFromStreamWithFullUrl( PutHandler putHandler,
+                                                                            RedirectHandler redirectHandler )
+    {
+        assertEquals( "found:" + putHandler.handlerRequestResponses, 1, putHandler.handlerRequestResponses.size() );
+        assertEquals( "found:" + putHandler.handlerRequestResponses, 201,
+                      putHandler.handlerRequestResponses.get( 0 ).responseCode );
+        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 3,
+                      redirectHandler.handlerRequestResponses.size() );
+        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 302,
+                      redirectHandler.handlerRequestResponses.get( 0 ).responseCode );
+    }
+
+    protected void checkRequestResponseForRedirectPutFromStreamWithRelativeUrl( PutHandler putHandler,
+                                                                                RedirectHandler redirectHandler )
+    {
+        assertEquals( "found:" + putHandler.handlerRequestResponses, 0, putHandler.handlerRequestResponses.size() );
+
+        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 4,
+                      redirectHandler.handlerRequestResponses.size() );
+        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 302,
+                      redirectHandler.handlerRequestResponses.get( 0 ).responseCode );
+        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 302,
+                      redirectHandler.handlerRequestResponses.get( 1 ).responseCode );
+        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 201,
+                      redirectHandler.handlerRequestResponses.get( 3 ).responseCode );
+
     }
 
 }
