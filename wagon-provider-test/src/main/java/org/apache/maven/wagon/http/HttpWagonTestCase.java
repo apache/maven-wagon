@@ -442,6 +442,183 @@ public abstract class HttpWagonTestCase
 
     }
 
+    public void testRedirectPutFromStreamWithFullUrl()
+        throws Exception
+    {
+        Server realServer = new Server( 0 );
+
+        addConnectors( realServer );
+
+        File repositoryDirectory = getRepositoryDirectory();
+        FileUtils.deleteDirectory( repositoryDirectory );
+        repositoryDirectory.mkdirs();
+
+        PutHandler putHandler = new PutHandler( repositoryDirectory );
+
+        realServer.setHandler( putHandler );
+
+        realServer.start();
+
+        Server redirectServer = new Server( 0 );
+
+        addConnectors( redirectServer );
+
+        String protocol = getProtocol();
+
+        // protocol is wagon protocol but in fact dav is http(s)
+        if ( protocol.equals( "dav" ) )
+        {
+            protocol = "http";
+        }
+
+        if ( protocol.equals( "davs" ) )
+        {
+            protocol = "https";
+        }
+
+        String redirectUrl = protocol + "://localhost:" + realServer.getConnectors()[0].getLocalPort();
+
+        RedirectHandler redirectHandler = new RedirectHandler( "Found", 303, redirectUrl, repositoryDirectory );
+
+        redirectServer.setHandler( redirectHandler );
+
+        redirectServer.start();
+
+        try
+        {
+            StreamingWagon wagon = (StreamingWagon) getWagon();
+            Repository repository = new Repository( "foo", getRepositoryUrl( redirectServer ) );
+            wagon.connect( repository );
+
+            File sourceFile = new File( repositoryDirectory, "test-secured-put-resource" );
+            sourceFile.delete();
+            assertFalse( sourceFile.exists() );
+
+            File tempFile = File.createTempFile( "wagon", "tmp" );
+            tempFile.deleteOnExit();
+            String content = "put top secret";
+            FileUtils.fileWrite( tempFile.getAbsolutePath(), content );
+
+            FileInputStream fileInputStream = new FileInputStream( tempFile );
+            try
+            {
+                wagon.putFromStream( fileInputStream, "test-secured-put-resource", content.length(), -1 );
+            }
+            finally
+            {
+                fileInputStream.close();
+                tempFile.delete();
+
+            }
+
+            assertEquals( content, FileUtils.fileRead( sourceFile.getAbsolutePath() ) );
+
+        }
+        finally
+        {
+            realServer.stop();
+            redirectServer.stop();
+        }
+    }
+
+    public void testRedirectPutFromStreamRelativeUrl()
+        throws Exception
+    {
+        Server realServer = new Server( 0 );
+        addConnectors( realServer );
+        File repositoryDirectory = getRepositoryDirectory();
+        FileUtils.deleteDirectory( repositoryDirectory );
+        repositoryDirectory.mkdirs();
+
+        PutHandler putHandler = new PutHandler( repositoryDirectory );
+
+        realServer.setHandler( putHandler );
+
+        realServer.start();
+
+        Server redirectServer = new Server( 0 );
+
+        addConnectors( redirectServer );
+
+        RedirectHandler redirectHandler =
+            new RedirectHandler( "Found", 303, "/redirectRequest/foo", repositoryDirectory );
+
+        redirectServer.setHandler( redirectHandler );
+
+        redirectServer.start();
+
+        try
+        {
+            StreamingWagon wagon = (StreamingWagon) getWagon();
+            Repository repository = new Repository( "foo", getRepositoryUrl( redirectServer ) );
+            wagon.connect( repository );
+
+            File sourceFile = new File( repositoryDirectory, "/redirectRequest/foo/test-secured-put-resource" );
+            sourceFile.delete();
+            assertFalse( sourceFile.exists() );
+
+            File tempFile = File.createTempFile( "wagon", "tmp" );
+            tempFile.deleteOnExit();
+            String content = "put top secret";
+            FileUtils.fileWrite( tempFile.getAbsolutePath(), content );
+
+            FileInputStream fileInputStream = new FileInputStream( tempFile );
+            try
+            {
+                wagon.putFromStream( fileInputStream, "test-secured-put-resource", content.length(), -1 );
+            }
+            finally
+            {
+                fileInputStream.close();
+                tempFile.delete();
+
+            }
+
+            assertEquals( content, FileUtils.fileRead( sourceFile.getAbsolutePath() ) );
+
+        }
+        finally
+        {
+            realServer.stop();
+            redirectServer.stop();
+        }
+    }
+
+
+    public static class RedirectHandler
+        extends AbstractHandler
+    {
+        String reason;
+
+        int retCode;
+
+        String redirectUrl;
+
+        File repositoryDirectory;
+
+        RedirectHandler( String reason, int retCode, String redirectUrl, File repositoryDirectory )
+        {
+            this.reason = reason;
+            this.retCode = retCode;
+            this.redirectUrl = redirectUrl;
+            this.repositoryDirectory = repositoryDirectory;
+        }
+
+        public void handle( String s, HttpServletRequest req, HttpServletResponse resp, int i )
+            throws IOException, ServletException
+        {
+            if ( req.getRequestURI().contains( "redirectRequest" ) )
+            {
+                PutHandler putHandler = new PutHandler( this.repositoryDirectory );
+                putHandler.handle( s, req, resp, i );
+                return;
+            }
+            resp.setStatus( this.retCode );
+            resp.sendRedirect( this.redirectUrl + "/" + req.getRequestURI() );
+        }
+    }
+
+
     private void runTestProxiedRequest( ProxyInfo proxyInfo, TestHeaderHandler handler )
         throws Exception
     {

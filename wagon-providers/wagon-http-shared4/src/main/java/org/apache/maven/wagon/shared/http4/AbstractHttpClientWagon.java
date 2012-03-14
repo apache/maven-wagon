@@ -19,6 +19,7 @@ package org.apache.maven.wagon.shared.http4;
  * under the License.
  */
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
@@ -73,6 +74,7 @@ import org.codehaus.plexus.util.StringUtils;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -108,11 +110,13 @@ public abstract class AbstractHttpClientWagon
 
         private final Wagon wagon;
 
-        private InputStream stream;
+        //private InputStream stream;
+
+        private byte[] bytes;
 
         private File source;
 
-        private long length;
+        private long length = -1;
 
         private RequestEntityImplementation( final InputStream stream, final Resource resource, final Wagon wagon,
                                              final File source )
@@ -124,10 +128,18 @@ public abstract class AbstractHttpClientWagon
             }
             else
             {
-                this.stream = stream;
+                try
+                {
+                    this.bytes = IOUtils.toByteArray( stream );
+                }
+                catch ( IOException e )
+                {
+                    throw new TransferFailedException( e.getMessage(), e );
+                }
             }
             this.resource = resource;
             this.length = resource == null ? -1 : resource.getContentLength();
+
             this.wagon = wagon;
         }
 
@@ -140,12 +152,16 @@ public abstract class AbstractHttpClientWagon
         public InputStream getContent()
             throws IOException, IllegalStateException
         {
-            return this.source != null ? new FileInputStream( this.source ) : this.stream;
+            if ( this.source != null )
+            {
+                return new FileInputStream( this.source );
+            }
+            return new ByteArrayInputStream( this.bytes );// this.stream;
         }
 
         public boolean isRepeatable()
         {
-            return false;
+            return true;
         }
 
 
@@ -159,7 +175,8 @@ public abstract class AbstractHttpClientWagon
             TransferEvent transferEvent =
                 new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT );
             transferEvent.setTimestamp( System.currentTimeMillis() );
-            InputStream instream = this.source != null ? new FileInputStream( this.source ) : this.stream;
+            InputStream instream =
+                this.source != null ? new FileInputStream( this.source ) : new ByteArrayInputStream( this.bytes );
             try
             {
                 byte[] buffer = new byte[BUFFER_SIZE];
@@ -474,7 +491,8 @@ public abstract class AbstractHttpClientWagon
     private void put( Resource resource, File source, HttpEntity httpEntity )
         throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
-        StringBuilder url = new StringBuilder( getRepository().getUrl() );
+
+        StringBuilder url = new StringBuilder( getURL( getRepository() ) );
         String[] parts = StringUtils.split( resource.getName(), "/" );
         for ( String part : parts )
         {
@@ -486,6 +504,12 @@ public abstract class AbstractHttpClientWagon
             }
             url.append( URLEncoder.encode( part ) );
         }
+        put( resource, source, httpEntity, url.toString() );
+    }
+
+    private void put( Resource resource, File source, HttpEntity httpEntity, String url )
+        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
+    {
 
         //Parent directories need to be created before posting
         try
@@ -501,7 +525,7 @@ public abstract class AbstractHttpClientWagon
             fireTransferError( resource, e, TransferEvent.REQUEST_GET );
         }
 
-        HttpPut putMethod = new HttpPut( url.toString() );
+        HttpPut putMethod = new HttpPut( url );
 
         firePutStarted( resource, source );
 
@@ -540,7 +564,12 @@ public abstract class AbstractHttpClientWagon
                 case HttpStatus.SC_ACCEPTED: // 202
                 case HttpStatus.SC_NO_CONTENT:  // 204
                     break;
-
+                // handle all redirect even if http specs says " the user agent MUST NOT automatically redirect the request unless it can be confirmed by the user"
+                case HttpStatus.SC_MOVED_PERMANENTLY: // 301
+                case HttpStatus.SC_MOVED_TEMPORARILY: // 302
+                case HttpStatus.SC_SEE_OTHER: // 303
+                    put( resource, source, httpEntity, calculateRelocatedUrl( response ) );
+                    return;
                 case SC_NULL:
                 {
                     TransferFailedException e =
@@ -572,6 +601,14 @@ public abstract class AbstractHttpClientWagon
         {
             putMethod.abort();
         }
+    }
+
+    protected String calculateRelocatedUrl( HttpResponse response )
+    {
+        Header locationHeader = response.getFirstHeader( "Location" );
+        String locationField = locationHeader.getValue();
+        // is it a relative Location or a full ?
+        return locationField.startsWith( "http" ) ? locationField : getURL( getRepository() ) + '/' + locationField;
     }
 
     protected void mkdirs( String dirname )

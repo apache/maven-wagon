@@ -31,6 +31,7 @@ import org.apache.commons.httpclient.NTCredentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
+import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
@@ -322,16 +323,25 @@ public abstract class AbstractHttpClientWagon
     {
         StringBuilder url = new StringBuilder( getRepository().getUrl() );
         String[] parts = StringUtils.split( resource.getName(), "/" );
-        for ( String part : parts )// int i = 0; i < parts.length; i++ )
+        for ( String part : parts )
         {
             // TODO: Fix encoding...
-            // url += "/" + URLEncoder.encode( parts[i], System.getProperty("file.encoding") );
             if ( !url.toString().endsWith( "/" ) )
             {
                 url.append( '/' );
             }
             url.append( URLEncoder.encode( part ) );
         }
+        RequestEntityImplementation requestEntityImplementation =
+            new RequestEntityImplementation( stream, resource, this, source );
+        put( resource, source, requestEntityImplementation, url.toString() );
+
+    }
+
+    private void put( Resource resource, File source, RequestEntityImplementation requestEntityImplementation,
+                      String url )
+        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
+    {
 
         //Parent directories need to be created before posting
         try
@@ -343,18 +353,19 @@ public abstract class AbstractHttpClientWagon
             fireTransferError( resource, e, TransferEvent.REQUEST_GET );
         }
 
-        PutMethod putMethod = new PutMethod( url.toString() );
+        PutMethod putMethod = new PutMethod( url );
 
         firePutStarted( resource, source );
 
         try
         {
-            putMethod.setRequestEntity( new RequestEntityImplementation( stream, resource, this, source ) );
+            putMethod.setRequestEntity( requestEntityImplementation );
 
             int statusCode;
             try
             {
                 statusCode = execute( putMethod );
+
             }
             catch ( IOException e )
             {
@@ -374,6 +385,15 @@ public abstract class AbstractHttpClientWagon
                 case HttpStatus.SC_ACCEPTED: // 202
                 case HttpStatus.SC_NO_CONTENT:  // 204
                     break;
+
+                // handle all redirect even if http specs says " the user agent MUST NOT automatically redirect the request unless it can be confirmed by the user"
+                case HttpStatus.SC_MOVED_PERMANENTLY: // 301
+                case HttpStatus.SC_MOVED_TEMPORARILY: // 302
+                case HttpStatus.SC_SEE_OTHER: // 303
+                    String relocatedUrl = calculateRelocatedUrl( putMethod );
+                    fireTransferDebug( "relocate to " + relocatedUrl );
+                    put( resource, source, requestEntityImplementation, relocatedUrl );
+                    return;
 
                 case SC_NULL:
                 {
@@ -407,6 +427,14 @@ public abstract class AbstractHttpClientWagon
         }
     }
 
+    protected String calculateRelocatedUrl( EntityEnclosingMethod method )
+    {
+        Header locationHeader = method.getResponseHeader( "Location" );
+        String locationField = locationHeader.getValue();
+        // is it a relative Location or a full ?
+        return locationField.startsWith( "http" ) ? locationField : getURL( getRepository() ) + '/' + locationField;
+    }
+
     protected void mkdirs( String dirname )
         throws IOException
     {
@@ -423,6 +451,7 @@ public abstract class AbstractHttpClientWagon
         }
         url.append( resourceName );
         HeadMethod headMethod = new HeadMethod( url.toString() );
+
         int statusCode;
         try
         {
@@ -588,6 +617,7 @@ public abstract class AbstractHttpClientWagon
         url.append( resource.getName() );
 
         getMethod = new GetMethod( url.toString() );
+
         long timestamp = resource.getLastModified();
         if ( timestamp > 0 )
         {
