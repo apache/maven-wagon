@@ -54,9 +54,9 @@ import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -83,7 +83,9 @@ public abstract class AbstractHttpClientWagon
 
         private final Wagon wagon;
 
-        private final File source;
+        private File source;
+
+        private byte[] bytes;
 
         private RequestEntityImplementation( final InputStream stream, final Resource resource, final Wagon wagon,
                                              final File source )
@@ -95,23 +97,13 @@ public abstract class AbstractHttpClientWagon
             }
             else
             {
-                FileOutputStream fos = null;
                 try
                 {
-                    this.source = File.createTempFile( "http-wagon.", ".tmp" );
-                    this.source.deleteOnExit();
-
-                    fos = new FileOutputStream( this.source );
-                    IOUtil.copy( stream, fos );
+                    this.bytes = IOUtil.toByteArray( stream );
                 }
                 catch ( IOException e )
                 {
-                    fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
-                    throw new TransferFailedException( "Failed to buffer stream contents to temp file for upload.", e );
-                }
-                finally
-                {
-                    IOUtil.close( fos );
+                    throw new TransferFailedException( e.getMessage(), e );
                 }
             }
 
@@ -143,10 +135,10 @@ public abstract class AbstractHttpClientWagon
                 new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT );
             transferEvent.setTimestamp( System.currentTimeMillis() );
 
-            FileInputStream fin = null;
+            InputStream fin = null;
             try
             {
-                fin = new FileInputStream( source );
+                fin = this.source != null ? new FileInputStream( source ) : new ByteArrayInputStream( this.bytes );
                 int remaining = Integer.MAX_VALUE;
                 while ( remaining > 0 )
                 {

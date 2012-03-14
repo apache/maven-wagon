@@ -19,7 +19,6 @@ package org.apache.maven.wagon.shared.http4;
  * under the License.
  */
 
-import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
@@ -69,6 +68,7 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
+import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 
 import javax.net.ssl.SSLException;
@@ -110,8 +110,6 @@ public abstract class AbstractHttpClientWagon
 
         private final Wagon wagon;
 
-        //private InputStream stream;
-
         private byte[] bytes;
 
         private File source;
@@ -130,7 +128,7 @@ public abstract class AbstractHttpClientWagon
             {
                 try
                 {
-                    this.bytes = IOUtils.toByteArray( stream );
+                    this.bytes = IOUtil.toByteArray( stream );
                 }
                 catch ( IOException e )
                 {
@@ -156,7 +154,7 @@ public abstract class AbstractHttpClientWagon
             {
                 return new FileInputStream( this.source );
             }
-            return new ByteArrayInputStream( this.bytes );// this.stream;
+            return new ByteArrayInputStream( this.bytes );
         }
 
         public boolean isRepeatable()
