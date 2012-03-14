@@ -584,6 +584,143 @@ public abstract class HttpWagonTestCase
         }
     }
 
+    public void testRedirectPutFileWithFullUrl()
+        throws Exception
+    {
+        Server realServer = new Server( 0 );
+
+        addConnectors( realServer );
+
+        File repositoryDirectory = getRepositoryDirectory();
+        FileUtils.deleteDirectory( repositoryDirectory );
+        repositoryDirectory.mkdirs();
+
+        PutHandler putHandler = new PutHandler( repositoryDirectory );
+
+        realServer.setHandler( putHandler );
+
+        realServer.start();
+
+        Server redirectServer = new Server( 0 );
+
+        addConnectors( redirectServer );
+
+        String protocol = getProtocol();
+
+        // protocol is wagon protocol but in fact dav is http(s)
+        if ( protocol.equals( "dav" ) )
+        {
+            protocol = "http";
+        }
+
+        if ( protocol.equals( "davs" ) )
+        {
+            protocol = "https";
+        }
+
+        String redirectUrl = protocol + "://localhost:" + realServer.getConnectors()[0].getLocalPort();
+
+        RedirectHandler redirectHandler = new RedirectHandler( "Found", 303, redirectUrl, repositoryDirectory );
+
+        redirectServer.setHandler( redirectHandler );
+
+        redirectServer.start();
+
+        try
+        {
+            StreamingWagon wagon = (StreamingWagon) getWagon();
+            Repository repository = new Repository( "foo", getRepositoryUrl( redirectServer ) );
+            wagon.connect( repository );
+
+            File sourceFile = new File( repositoryDirectory, "test-secured-put-resource" );
+            sourceFile.delete();
+            assertFalse( sourceFile.exists() );
+
+            File tempFile = File.createTempFile( "wagon", "tmp" );
+            tempFile.deleteOnExit();
+            String content = "put top secret";
+            FileUtils.fileWrite( tempFile.getAbsolutePath(), content );
+
+            try
+            {
+                wagon.put( tempFile, "test-secured-put-resource" );
+            }
+            finally
+            {
+                tempFile.delete();
+            }
+
+            assertEquals( content, FileUtils.fileRead( sourceFile.getAbsolutePath() ) );
+
+        }
+        finally
+        {
+            realServer.stop();
+            redirectServer.stop();
+        }
+    }
+
+
+    public void testRedirectPutFileRelativeUrl()
+        throws Exception
+    {
+        Server realServer = new Server( 0 );
+        addConnectors( realServer );
+        File repositoryDirectory = getRepositoryDirectory();
+        FileUtils.deleteDirectory( repositoryDirectory );
+        repositoryDirectory.mkdirs();
+
+        PutHandler putHandler = new PutHandler( repositoryDirectory );
+
+        realServer.setHandler( putHandler );
+
+        realServer.start();
+
+        Server redirectServer = new Server( 0 );
+
+        addConnectors( redirectServer );
+
+        RedirectHandler redirectHandler =
+            new RedirectHandler( "Found", 303, "/redirectRequest/foo", repositoryDirectory );
+
+        redirectServer.setHandler( redirectHandler );
+
+        redirectServer.start();
+
+        try
+        {
+            StreamingWagon wagon = (StreamingWagon) getWagon();
+            Repository repository = new Repository( "foo", getRepositoryUrl( redirectServer ) );
+            wagon.connect( repository );
+
+            File sourceFile = new File( repositoryDirectory, "/redirectRequest/foo/test-secured-put-resource" );
+            sourceFile.delete();
+            assertFalse( sourceFile.exists() );
+
+            File tempFile = File.createTempFile( "wagon", "tmp" );
+            tempFile.deleteOnExit();
+            String content = "put top secret";
+            FileUtils.fileWrite( tempFile.getAbsolutePath(), content );
+
+            try
+            {
+                wagon.put( tempFile, "test-secured-put-resource" );
+            }
+            finally
+            {
+                tempFile.delete();
+            }
+
+            assertEquals( content, FileUtils.fileRead( sourceFile.getAbsolutePath() ) );
+
+        }
+        finally
+        {
+            realServer.stop();
+            redirectServer.stop();
+        }
+    }
+
 
     public static class RedirectHandler
         extends AbstractHandler
