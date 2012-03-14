@@ -81,6 +81,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.nio.ByteBuffer;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -110,7 +111,7 @@ public abstract class AbstractHttpClientWagon
 
         private final Wagon wagon;
 
-        private byte[] bytes;
+        private ByteBuffer byteBuffer;
 
         private File source;
 
@@ -128,7 +129,9 @@ public abstract class AbstractHttpClientWagon
             {
                 try
                 {
-                    this.bytes = IOUtil.toByteArray( stream );
+                    byte[] bytes = IOUtil.toByteArray( stream );
+                    byteBuffer = ByteBuffer.allocate( bytes.length );
+                    byteBuffer.put( bytes );
                 }
                 catch ( IOException e )
                 {
@@ -154,7 +157,7 @@ public abstract class AbstractHttpClientWagon
             {
                 return new FileInputStream( this.source );
             }
-            return new ByteArrayInputStream( this.bytes );
+            return new ByteArrayInputStream( this.byteBuffer.array() );
         }
 
         public boolean isRepeatable()
@@ -173,8 +176,9 @@ public abstract class AbstractHttpClientWagon
             TransferEvent transferEvent =
                 new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT );
             transferEvent.setTimestamp( System.currentTimeMillis() );
-            InputStream instream =
-                this.source != null ? new FileInputStream( this.source ) : new ByteArrayInputStream( this.bytes );
+            InputStream instream = this.source != null
+                ? new FileInputStream( this.source )
+                : new ByteArrayInputStream( this.byteBuffer.array() );
             try
             {
                 byte[] buffer = new byte[BUFFER_SIZE];

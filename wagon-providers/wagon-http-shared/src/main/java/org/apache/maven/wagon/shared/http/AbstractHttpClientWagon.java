@@ -61,6 +61,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
@@ -85,7 +86,7 @@ public abstract class AbstractHttpClientWagon
 
         private File source;
 
-        private byte[] bytes;
+        private ByteBuffer byteBuffer;
 
         private RequestEntityImplementation( final InputStream stream, final Resource resource, final Wagon wagon,
                                              final File source )
@@ -99,7 +100,9 @@ public abstract class AbstractHttpClientWagon
             {
                 try
                 {
-                    this.bytes = IOUtil.toByteArray( stream );
+                    byte[] bytes = IOUtil.toByteArray( stream );
+                    this.byteBuffer = ByteBuffer.allocate( bytes.length );
+                    this.byteBuffer.put( bytes );
                 }
                 catch ( IOException e )
                 {
@@ -138,7 +141,9 @@ public abstract class AbstractHttpClientWagon
             InputStream fin = null;
             try
             {
-                fin = this.source != null ? new FileInputStream( source ) : new ByteArrayInputStream( this.bytes );
+                fin = this.source != null
+                    ? new FileInputStream( source )
+                    : new ByteArrayInputStream( this.byteBuffer.array() );
                 int remaining = Integer.MAX_VALUE;
                 while ( remaining > 0 )
                 {
