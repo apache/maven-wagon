@@ -1027,46 +1027,6 @@ public abstract class HttpWagonTestCase
         runTestSecuredGet( authInfo );
     }
 
-    public void runTestSecuredGetToStream( AuthenticationInfo authInfo )
-        throws Exception
-    {
-        String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
-        Server server = createSecurityServer( localRepositoryPath );
-
-        server.start();
-
-        try
-        {
-            StreamingWagon wagon = (StreamingWagon) getWagon();
-
-            Repository testRepository = new Repository( "id", getRepositoryUrl( server ) );
-
-            File sourceFile = new File( localRepositoryPath, "test-secured-resource" );
-            FileUtils.fileWrite( sourceFile.getAbsolutePath(), "top secret" );
-
-            wagon.connect( testRepository, authInfo );
-
-            StringOutputStream out = new StringOutputStream();
-            try
-            {
-                wagon.getToStream( "test-secured-resource", out );
-            }
-            finally
-            {
-                wagon.disconnect();
-            }
-
-            assertEquals( "top secret", out.toString() );
-
-            TestSecurityHandler securityHandler = (TestSecurityHandler) ( (Context) server.getHandler() ).getHandler();
-            assertEquals( 2, securityHandler.handlerRequestResponses.size() );
-            testPreemptiveAuthenticationGet( securityHandler, supportPreemptiveAuthenticationGet() );
-        }
-        finally
-        {
-            server.stop();
-        }
-    }
 
     public void runTestSecuredGet( AuthenticationInfo authInfo )
         throws Exception
@@ -1105,6 +1065,56 @@ public abstract class HttpWagonTestCase
             TestSecurityHandler securityHandler = (TestSecurityHandler) ( (Context) server.getHandler() ).getHandler();
             testPreemptiveAuthenticationGet( securityHandler, supportPreemptiveAuthenticationGet() );
 
+        }
+        finally
+        {
+            server.stop();
+        }
+    }
+
+
+    public void testSecuredGetToStream()
+        throws Exception
+    {
+        AuthenticationInfo authInfo = new AuthenticationInfo();
+        authInfo.setUserName( "user" );
+        authInfo.setPassword( "secret" );
+        runTestSecuredGetToStream( authInfo );
+    }
+
+    public void runTestSecuredGetToStream( AuthenticationInfo authInfo )
+        throws Exception
+    {
+        String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
+        Server server = createSecurityServer( localRepositoryPath );
+
+        server.start();
+
+        try
+        {
+            StreamingWagon wagon = (StreamingWagon) getWagon();
+
+            Repository testRepository = new Repository( "id", getRepositoryUrl( server ) );
+
+            File sourceFile = new File( localRepositoryPath, "test-secured-resource" );
+            FileUtils.fileWrite( sourceFile.getAbsolutePath(), "top secret" );
+
+            wagon.connect( testRepository, authInfo );
+
+            StringOutputStream out = new StringOutputStream();
+            try
+            {
+                wagon.getToStream( "test-secured-resource", out );
+            }
+            finally
+            {
+                wagon.disconnect();
+            }
+
+            assertEquals( "top secret", out.toString() );
+
+            TestSecurityHandler securityHandler = (TestSecurityHandler) ( (Context) server.getHandler() ).getHandler();
+            testPreemptiveAuthenticationGet( securityHandler, supportPreemptiveAuthenticationGet() );
         }
         finally
         {
