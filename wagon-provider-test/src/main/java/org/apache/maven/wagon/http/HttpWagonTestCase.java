@@ -442,7 +442,7 @@ public abstract class HttpWagonTestCase
 
     }
 
-    public void testRedirectGet()
+    public void testRedirectGetToStream()
         throws Exception
     {
         StreamingWagon wagon = (StreamingWagon) getWagon();
@@ -490,6 +490,68 @@ public abstract class HttpWagonTestCase
             wagon.getToStream( "resource", fileOutputStream );
             fileOutputStream.flush();
             fileOutputStream.close();
+            String found = FileUtils.fileRead( tmpResult );
+            assertEquals( "found:'" + found + "'", "Hello, World!", found );
+
+            assertEquals( 1, handler.handlerRequestResponses.size() );
+            assertEquals( 200, handler.handlerRequestResponses.get( 0 ).responseCode );
+            assertEquals( 1, redirectHandler.handlerRequestResponses.size() );
+            assertEquals( 302, redirectHandler.handlerRequestResponses.get( 0 ).responseCode );
+        }
+        finally
+        {
+            wagon.disconnect();
+
+            server.stop();
+
+            tmpResult.delete();
+        }
+    }
+
+    public void testRedirectGet()
+        throws Exception
+    {
+        StreamingWagon wagon = (StreamingWagon) getWagon();
+
+        Server server = new Server( 0 );
+        TestHeaderHandler handler = new TestHeaderHandler();
+
+        server.setHandler( handler );
+        addConnectors( server );
+        server.start();
+
+        Server redirectServer = new Server( 0 );
+
+        addConnectors( redirectServer );
+
+        String protocol = getProtocol();
+
+        // protocol is wagon protocol but in fact dav is http(s)
+        if ( protocol.equals( "dav" ) )
+        {
+            protocol = "http";
+        }
+
+        if ( protocol.equals( "davs" ) )
+        {
+            protocol = "https";
+        }
+
+        String redirectUrl = protocol + "://localhost:" + server.getConnectors()[0].getLocalPort();
+
+        RedirectHandler redirectHandler = new RedirectHandler( "Found", 303, redirectUrl, null );
+
+        redirectServer.setHandler( redirectHandler );
+
+        redirectServer.start();
+
+        wagon.connect( new Repository( "id", getRepositoryUrl( redirectServer ) ) );
+
+        File tmpResult = File.createTempFile( "foo", "get" );
+
+        try
+        {
+            wagon.get( "resource", tmpResult );
             String found = FileUtils.fileRead( tmpResult );
             assertEquals( "found:'" + found + "'", "Hello, World!", found );
 
