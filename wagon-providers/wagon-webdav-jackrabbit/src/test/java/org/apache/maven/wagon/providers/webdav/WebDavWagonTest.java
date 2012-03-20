@@ -303,32 +303,6 @@ public class WebDavWagonTest
         tearDownWagonTestingFixtures();
     }
 
-    @Override
-    protected boolean supportPreemptiveAuthentication()
-    {
-        return true;
-    }
-
-    protected void testPreemptiveAuthentication( TestSecurityHandler sh )
-    {
-
-        if ( supportPreemptiveAuthentication() )
-        {
-            assertEquals( "not 2 security handler use " + sh.handlerRequestResponses, 2,
-                          sh.handlerRequestResponses.size() );
-            assertEquals( 200, sh.handlerRequestResponses.get( 0 ).responseCode );
-        }
-        else
-        {
-            assertEquals( "not 4 security handler use " + sh.handlerRequestResponses, 4,
-                          sh.handlerRequestResponses.size() );
-            assertEquals( 401, sh.handlerRequestResponses.get( 0 ).responseCode );
-            assertEquals( 200, sh.handlerRequestResponses.get( 1 ).responseCode );
-            assertEquals( 401, sh.handlerRequestResponses.get( 2 ).responseCode );
-            assertEquals( 200, sh.handlerRequestResponses.get( 3 ).responseCode );
-
-        }
-    }
 
     public void testWagonFailsOnPutFailureByDefault()
         throws Exception
@@ -424,9 +398,77 @@ public class WebDavWagonTest
         }
     }
 
-    protected boolean supportProxyPreemptiveAuthentication()
+    @Override
+    protected boolean supportPreemptiveAuthenticationPut()
     {
         return true;
+    }
+
+    @Override
+    protected boolean supportPreemptiveAuthenticationGet()
+    {
+        return false;
+    }
+
+    @Override
+    protected boolean supportProxyPreemptiveAuthentication()
+    {
+        return false;
+    }
+
+    protected void testPreemptiveAuthenticationGet( TestSecurityHandler sh, boolean preemptive )
+    {
+        if ( preemptive )
+        {
+            assertEquals( "testPreemptiveAuthenticationGet not 1 security handler use " + sh.handlerRequestResponses, 1,
+                          sh.handlerRequestResponses.size() );
+            assertEquals( 200, sh.handlerRequestResponses.get( 0 ).responseCode );
+        }
+        else
+        {
+            assertEquals( "testPreemptiveAuthenticationGet not 2 security handler use " + sh.handlerRequestResponses, 2,
+                          sh.handlerRequestResponses.size() );
+            assertEquals( 401, sh.handlerRequestResponses.get( 0 ).responseCode );
+            assertEquals( 200, sh.handlerRequestResponses.get( 1 ).responseCode );
+        }
+    }
+
+    protected void testPreemptiveAuthenticationPut( TestSecurityHandler sh, boolean preemptive )
+    {
+        if ( preemptive )
+        {
+            assertEquals( "testPreemptiveAuthenticationPut not 2 security handler use " + sh.handlerRequestResponses, 2,
+                          sh.handlerRequestResponses.size() );
+            assertEquals( 200, sh.handlerRequestResponses.get( 0 ).responseCode );
+        }
+        else
+        {
+            assertEquals( "testPreemptiveAuthenticationPut not 3 security handler use " + sh.handlerRequestResponses, 3,
+                          sh.handlerRequestResponses.size() );
+            assertEquals( 401, sh.handlerRequestResponses.get( 0 ).responseCode );
+            assertEquals( 200, sh.handlerRequestResponses.get( 1 ).responseCode );
+        }
+    }
+
+
+    @Override
+    protected void testPreemptiveAuthentication( TestSecurityHandler sh, boolean preemptive )
+    {
+        if ( preemptive )
+        {
+            assertEquals( "testPreemptiveAuthentication not 2 security handler use " + sh.handlerRequestResponses, 2,
+                          sh.handlerRequestResponses.size() );
+            assertEquals( 200, sh.handlerRequestResponses.get( 0 ).responseCode );
+        }
+        else
+        {
+            assertEquals( "testPreemptiveAuthentication not 3 security handler use " + sh.handlerRequestResponses, 3,
+                          sh.handlerRequestResponses.size() );
+            assertEquals( 401, sh.handlerRequestResponses.get( 0 ).responseCode );
+            assertEquals( 200, sh.handlerRequestResponses.get( 1 ).responseCode );
+            assertEquals( 200, sh.handlerRequestResponses.get( 2 ).responseCode );
+
+        }
     }
 
     protected void checkRequestResponseForRedirectPutFromStreamWithFullUrl( PutHandler putHandler,

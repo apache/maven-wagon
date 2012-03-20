@@ -198,6 +198,8 @@ public abstract class AbstractHttpClientWagon
         // WAGON-273: default the cookie-policy to browser compatible
         client.getParams().setCookiePolicy( CookiePolicy.BROWSER_COMPATIBILITY );
 
+
+
         String username = null;
         String password = null;
         String domain = null;
@@ -215,7 +217,7 @@ public abstract class AbstractHttpClientWagon
 
             password = authenticationInfo.getPassword();
 
-            client.getParams().setAuthenticationPreemptive( true );
+
         }
 
         String host = getRepository().getHost();
@@ -339,6 +341,9 @@ public abstract class AbstractHttpClientWagon
                       String url )
         throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
+
+        // preemptive true for put
+        client.getParams().setAuthenticationPreemptive( true );
 
         //Parent directories need to be created before posting
         try

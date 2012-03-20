@@ -52,6 +52,8 @@ public class HttpMethodConfiguration
     private int readTimeout =
         Integer.parseInt( System.getProperty( "maven.wagon.rto", Integer.toString( Wagon.DEFAULT_READ_TIMEOUT ) ) );
 
+    private boolean usePreemptive = false;
+
     public boolean isUseDefaultHeaders()
     {
         return useDefaultHeaders == null || useDefaultHeaders.booleanValue();
@@ -146,6 +148,17 @@ public class HttpMethodConfiguration
         }
 
         return true;
+    }
+
+    public boolean isUsePreemptive()
+    {
+        return usePreemptive;
+    }
+
+    public HttpMethodConfiguration setUsePreemptive( boolean usePreemptive )
+    {
+        this.usePreemptive = usePreemptive;
+        return this;
     }
 
     private void fillParams( HttpParams p )

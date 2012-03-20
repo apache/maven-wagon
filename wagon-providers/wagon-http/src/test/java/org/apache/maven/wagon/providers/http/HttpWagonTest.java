@@ -64,11 +64,18 @@ public class HttpWagonTest
     }
 
     @Override
-    protected boolean supportPreemptiveAuthentication()
+    protected boolean supportPreemptiveAuthenticationPut()
     {
         return true;
     }
 
+    @Override
+    protected boolean supportPreemptiveAuthenticationGet()
+    {
+        return false;
+    }
+
+    @Override
     protected boolean supportProxyPreemptiveAuthentication()
     {
         return true;

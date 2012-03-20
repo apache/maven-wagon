@@ -38,7 +38,13 @@ public class LightweightHttpWagonWithPreemptiveAuthenticationTest
     }
 
     @Override
-    protected boolean supportPreemptiveAuthentication()
+    protected boolean supportPreemptiveAuthenticationGet()
+    {
+        return true;
+    }
+
+    @Override
+    protected boolean supportPreemptiveAuthenticationPut()
     {
         return true;
     }

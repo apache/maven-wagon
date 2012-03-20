@@ -384,32 +384,32 @@ public abstract class AbstractHttpClientWagon
         // WAGON-273: default the cookie-policy to browser compatible
         client.getParams().setParameter( ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY );
 
-        String username = null;
-        String password = null;
-
         if ( authenticationInfo != null )
         {
-            username = authenticationInfo.getUserName();
 
-            password = authenticationInfo.getPassword();
-        }
+            String username = authenticationInfo.getUserName();
+            String password = authenticationInfo.getPassword();
 
-        if ( StringUtils.isNotEmpty( username ) && StringUtils.isNotEmpty( password ) )
-        {
-            Credentials creds = new UsernamePasswordCredentials( username, password );
+            if ( StringUtils.isNotEmpty( username ) && StringUtils.isNotEmpty( password ) )
+            {
+                Credentials creds = new UsernamePasswordCredentials( username, password );
 
-            String host = getRepository().getHost();
-            int port = getRepository().getPort() > -1 ? getRepository().getPort() : AuthScope.ANY_PORT;
+                String host = getRepository().getHost();
+                int port = getRepository().getPort() > -1 ? getRepository().getPort() : AuthScope.ANY_PORT;
 
-            client.getCredentialsProvider().setCredentials( new AuthScope( host, port ), creds );
+                client.getCredentialsProvider().setCredentials( new AuthScope( host, port ), creds );
+                // preemptive off by default
+                /*
+                AuthCache authCache = new BasicAuthCache();
+                BasicScheme basicAuth = new BasicScheme();
+                HttpHost targetHost =
+                    new HttpHost( repository.getHost(), repository.getPort(), repository.getProtocol() );
+                authCache.put( targetHost, basicAuth );
 
-            AuthCache authCache = new BasicAuthCache();
-            BasicScheme basicAuth = new BasicScheme();
-            HttpHost targetHost = new HttpHost( repository.getHost(), repository.getPort(), repository.getProtocol() );
-            authCache.put( targetHost, basicAuth );
-
-            localContext = new BasicHttpContext();
-            localContext.setAttribute( ClientContext.AUTH_CACHE, authCache );
+                localContext = new BasicHttpContext();
+                localContext.setAttribute( ClientContext.AUTH_CACHE, authCache );
+                */
+            }
         }
 
         ProxyInfo proxyInfo = getProxyInfo( getRepository().getProtocol(), getRepository().getHost() );
@@ -525,6 +525,26 @@ public abstract class AbstractHttpClientWagon
         catch ( IOException e )
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+        }
+
+        if ( authenticationInfo != null )
+        {
+
+            String username = authenticationInfo.getUserName();
+            String password = authenticationInfo.getPassword();
+            // preemptive for put
+            if ( StringUtils.isNotEmpty( username ) && StringUtils.isNotEmpty( password ) )
+            {
+
+                AuthCache authCache = new BasicAuthCache();
+                BasicScheme basicAuth = new BasicScheme();
+                HttpHost targetHost =
+                    new HttpHost( repository.getHost(), repository.getPort(), repository.getProtocol() );
+                authCache.put( targetHost, basicAuth );
+
+                localContext = new BasicHttpContext();
+                localContext.setAttribute( ClientContext.AUTH_CACHE, authCache );
+            }
         }
 
         HttpPut putMethod = new HttpPut( url );

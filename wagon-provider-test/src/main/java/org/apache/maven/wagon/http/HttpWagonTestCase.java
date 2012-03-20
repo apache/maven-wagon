@@ -950,8 +950,6 @@ public abstract class HttpWagonTestCase
         {
             StreamingWagon wagon = (StreamingWagon) getWagon();
 
-            System.out.println( " wagon hashCode " + wagon.hashCode() );
-
             Repository testRepository = new Repository( "id", "http://www.example.com/" );
 
             String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
@@ -1029,11 +1027,12 @@ public abstract class HttpWagonTestCase
         runTestSecuredGet( authInfo );
     }
 
-    public void runTestSecuredGet( AuthenticationInfo authInfo )
+    public void runTestSecuredGetToStream( AuthenticationInfo authInfo )
         throws Exception
     {
         String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
         Server server = createSecurityServer( localRepositoryPath );
+
         server.start();
 
         try
@@ -1058,6 +1057,54 @@ public abstract class HttpWagonTestCase
             }
 
             assertEquals( "top secret", out.toString() );
+
+            TestSecurityHandler securityHandler = (TestSecurityHandler) ( (Context) server.getHandler() ).getHandler();
+            assertEquals( 2, securityHandler.handlerRequestResponses.size() );
+            testPreemptiveAuthenticationGet( securityHandler, supportPreemptiveAuthenticationGet() );
+        }
+        finally
+        {
+            server.stop();
+        }
+    }
+
+    public void runTestSecuredGet( AuthenticationInfo authInfo )
+        throws Exception
+    {
+        String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
+        Server server = createSecurityServer( localRepositoryPath );
+
+        server.start();
+
+        try
+        {
+            StreamingWagon wagon = (StreamingWagon) getWagon();
+
+            Repository testRepository = new Repository( "id", getRepositoryUrl( server ) );
+
+            File sourceFile = new File( localRepositoryPath, "test-secured-resource" );
+            FileUtils.fileWrite( sourceFile.getAbsolutePath(), "top secret" );
+
+            wagon.connect( testRepository, authInfo );
+
+            File file = File.createTempFile( "wagon-test", "txt" );
+
+            try
+            {
+                wagon.get( "test-secured-resource", file );
+            }
+            finally
+            {
+                wagon.disconnect();
+            }
+
+            FileInputStream in = new FileInputStream( file );
+
+            assertEquals( "top secret", IOUtil.toString( in ) );
+
+            TestSecurityHandler securityHandler = (TestSecurityHandler) ( (Context) server.getHandler() ).getHandler();
+            testPreemptiveAuthenticationGet( securityHandler, supportPreemptiveAuthenticationGet() );
+
         }
         finally
         {
@@ -1109,6 +1156,7 @@ public abstract class HttpWagonTestCase
     {
         String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
         Server server = createSecurityServer( localRepositoryPath );
+
         server.start();
 
         try
@@ -1365,7 +1413,7 @@ public abstract class HttpWagonTestCase
             server.stop();
         }
         assertEquals( putNumber, putHandler.putCallNumber );
-        testPreemptiveAuthentication( sh );
+        testPreemptiveAuthenticationPut( sh, supportPreemptiveAuthenticationPut() );
     }
 
     public void testNonSecuredPutFromStream()
@@ -1449,7 +1497,7 @@ public abstract class HttpWagonTestCase
         assertEquals( putNumber, putHandler.putCallNumber );
         if ( addSecurityHandler )
         {
-            testPreemptiveAuthentication( sh );
+            testPreemptiveAuthenticationPut( sh, supportPreemptiveAuthenticationPut() );
         }
 
         // ensure we didn't use chunked transfer which doesn't work on ngnix
@@ -1463,17 +1511,26 @@ public abstract class HttpWagonTestCase
     }
 
 
-    protected abstract boolean supportPreemptiveAuthentication();
+    protected abstract boolean supportPreemptiveAuthenticationPut();
 
-    protected boolean supportProxyPreemptiveAuthentication()
+    protected abstract boolean supportPreemptiveAuthenticationGet();
+
+    protected abstract boolean supportProxyPreemptiveAuthentication();
+
+    protected void testPreemptiveAuthenticationGet( TestSecurityHandler sh, boolean preemptive )
     {
-        return false;
+        testPreemptiveAuthentication( sh, preemptive );
     }
 
-    protected void testPreemptiveAuthentication( TestSecurityHandler sh )
+    protected void testPreemptiveAuthenticationPut( TestSecurityHandler sh, boolean preemptive )
+    {
+        testPreemptiveAuthentication( sh, preemptive );
+    }
+
+    protected void testPreemptiveAuthentication( TestSecurityHandler sh, boolean preemptive )
     {
 
-        if ( supportPreemptiveAuthentication() )
+        if ( preemptive )
         {
             assertEquals( "not 1 security handler use " + sh.handlerRequestResponses, 1,
                           sh.handlerRequestResponses.size() );

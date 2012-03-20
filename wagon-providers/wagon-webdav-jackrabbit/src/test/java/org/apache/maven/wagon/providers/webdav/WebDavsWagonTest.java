@@ -53,8 +53,4 @@ public class WebDavsWagonTest
         server.setConnectors( new Connector[] { connector } );
     }
 
-    protected boolean supportProxyPreemptiveAuthentication()
-    {
-        return true;
-    }
 }

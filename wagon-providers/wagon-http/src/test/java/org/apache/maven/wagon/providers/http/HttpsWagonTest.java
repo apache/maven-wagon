@@ -45,10 +45,4 @@ public class HttpsWagonTest
         connector.setTrustPassword( "wagonhttp" );
         server.setConnectors( new Connector[]{ connector } );
     }
-
-    protected boolean supportProxyPreemptiveAuthentication()
-    {
-        return true;
-    }
-
 }
