@@ -740,6 +740,27 @@ public abstract class AbstractHttpClientWagon
         if ( config != null )
         {
             HttpParams params = config.asMethodParams( method.getParams() );
+
+            if ( config.isUsePreemptive() && authenticationInfo != null )
+            {
+                String username = authenticationInfo.getUserName();
+                String password = authenticationInfo.getPassword();
+
+                if ( StringUtils.isNotEmpty( username ) && StringUtils.isNotEmpty( password ) )
+                {
+
+                    AuthCache authCache = new BasicAuthCache();
+                    BasicScheme basicAuth = new BasicScheme();
+                    HttpHost targetHost =
+                        new HttpHost( repository.getHost(), repository.getPort(), repository.getProtocol() );
+                    authCache.put( targetHost, basicAuth );
+
+                    localContext = new BasicHttpContext();
+                    localContext.setAttribute( ClientContext.AUTH_CACHE, authCache );
+                }
+
+            }
+
             if ( params != null )
             {
                 method.setParams( params );
