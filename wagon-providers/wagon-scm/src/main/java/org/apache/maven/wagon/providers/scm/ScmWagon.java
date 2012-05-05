@@ -51,7 +51,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Stack;
@@ -61,7 +60,7 @@ import java.util.Stack;
  * <p/>
  * TODO it probably creates problems if the same wagon is used in two different SCM protocols, as instance variables can
  * keep incorrect state.
- * TODO: For doing releases we either have to be able to add files with checking out the repository structure which may not be
+ * TODO: For doing releases, we either have to be able to add files with checking out the repository structure which may not be
  * possible, or the checkout directory needs to be a constant. Doing releases won't scale if you have to checkout the
  * whole repository structure in order to add 3 files.
  *
@@ -445,7 +444,7 @@ public class ScmWagon
     {
         checkoutDirectory = createCheckoutDirectory();
 
-        Stack stack = new Stack();
+        Stack<String> stack = new Stack<String>();
 
         String target = targetName;
 
@@ -739,9 +738,8 @@ public class ScmWagon
 
             List<String> files = new ArrayList<String>();
 
-            for ( Iterator<ScmFile> it = result.getFiles().iterator(); it.hasNext(); )
+            for ( ScmFile f : result.getFiles() )
             {
-                ScmFile f = it.next();
                 files.add( f.getPath() );
             }
 
