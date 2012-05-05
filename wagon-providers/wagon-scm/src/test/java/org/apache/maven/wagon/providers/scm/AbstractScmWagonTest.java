@@ -91,8 +91,9 @@ public abstract class AbstractScmWagonTest
     }
 
     @Override
-    protected int getTestRepositoryPort() {
-        return 0;  // not used
+    protected int getTestRepositoryPort()
+    {
+        return 0; // not used
     }
 
     protected Wagon getWagon()
@@ -135,7 +136,7 @@ public abstract class AbstractScmWagonTest
         FileUtils.deleteDirectory( getCheckoutDirectory() );
     }
 
-    protected void assertResourcesAreInRemoteSide( Wagon wagon, List resourceNames )
+    protected void assertResourcesAreInRemoteSide( Wagon wagon, List<String> resourceNames )
         throws IOException, TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         FileUtils.deleteDirectory( getCheckoutDirectory() );
