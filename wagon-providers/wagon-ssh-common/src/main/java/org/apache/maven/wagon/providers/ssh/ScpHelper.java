@@ -45,6 +45,10 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+/**
+ * Scp helper for general algorithms on ssh server.
+ * See {@link #putDirectory(Wagon, File, String) putDirectory(...)} for more info on bulk directory upload. 
+ */
 public class ScpHelper
 {
     public static final char PATH_SEPARATOR = '/';
@@ -198,6 +202,10 @@ public class ScpHelper
         return path;
     }
 
+    /**
+     * Put a whole directory content, by transferring a unique zip file and uncompressing it
+     * on the target ssh server with <code>unzip</code> command.
+     */
     public void putDirectory( Wagon wagon, File sourceDirectory, String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
