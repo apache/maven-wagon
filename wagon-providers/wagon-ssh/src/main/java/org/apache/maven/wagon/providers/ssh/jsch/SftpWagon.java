@@ -23,9 +23,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.OutputData;
@@ -179,11 +177,11 @@ public class SftpWagon
         throws SftpException, TransferFailedException
     {
         String[] dirs = PathUtils.dirnames( resourceName );
-        for ( int i = 0; i < dirs.length; i++ )
+        for ( String dir : dirs )
         {
-            mkdir( dirs[i], mode );
+            mkdir( dir, mode );
 
-            channel.cd( dirs[i] );
+            channel.cd( dir );
         }
     }
 
@@ -195,7 +193,7 @@ public class SftpWagon
             SftpATTRS attrs = channel.stat( dir );
             if ( ( attrs.getPermissions() & S_IFDIR ) == 0 )
             {
-                throw new TransferFailedException( "Remote path is not a directory:" + dir );
+                throw new TransferFailedException( "Remote path is not a directory: " + dir );
             }
         }
         catch ( SftpException e )
@@ -305,18 +303,18 @@ public class SftpWagon
             if ( files != null && files.length > 0 )
             {
                 // Directories first, then files. Let's go deep early.
-                for ( int i = 0; i < files.length; i++ )
+                for ( File file : files )
                 {
-                    if ( files[i].isDirectory() )
+                    if ( file.isDirectory() )
                     {
-                        ftpRecursivePut( files[i], prefix, files[i].getName(), directoryMode );
+                        ftpRecursivePut( file, prefix, file.getName(), directoryMode );
                     }
                 }
-                for ( int i = 0; i < files.length; i++ )
+                for ( File file : files )
                 {
-                    if ( !files[i].isDirectory() )
+                    if ( !file.isDirectory() )
                     {
-                        ftpRecursivePut( files[i], prefix, files[i].getName(), directoryMode );
+                        ftpRecursivePut( file, prefix, file.getName(), directoryMode );
                     }
                 }
             }
@@ -346,7 +344,7 @@ public class SftpWagon
         return prefix;
     }
     
-    public List getFileList( String destinationDirectory )
+    public List<String> getFileList( String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         if ( destinationDirectory.length() == 0 )
@@ -372,12 +370,11 @@ public class SftpWagon
                 throw new TransferFailedException( "Remote path is not a directory:" + dir );
             }
 
-            Vector fileList = channel.ls( filename );
-            List files = new ArrayList( fileList.size() );
-            for ( Iterator i = fileList.iterator(); i.hasNext(); )
+            @SuppressWarnings( "unchecked" )
+            List<ChannelSftp.LsEntry> fileList = channel.ls( filename );
+            List<String> files = new ArrayList<String>( fileList.size() );
+            for ( ChannelSftp.LsEntry entry : fileList )
             {
-                ChannelSftp.LsEntry entry = (ChannelSftp.LsEntry) i.next();
-                
                 String name = entry.getFilename();
                 if ( entry.getAttrs().isDir() )
                 {
