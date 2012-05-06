@@ -42,7 +42,7 @@ public class LSParserTest
             + "drwxr-xr-x  3 joakim joakim 4096 2006-12-11 08:39 target\n";
 
         LSParser parser = new LSParser();
-        List files = parser.parseFiles( rawLS );
+        List<String> files = parser.parseFiles( rawLS );
         assertNotNull( files );
         assertEquals( 9, files.size() );
         assertTrue( files.contains( "pom.xml" ) );
@@ -62,7 +62,7 @@ public class LSParserTest
             + "drwxr-xr-x   3  joakim  joakim   238 Dec 11 08:39 target\n";
 
         LSParser parser = new LSParser();
-        List files = parser.parseFiles( rawLS );
+        List<String> files = parser.parseFiles( rawLS );
         assertNotNull( files );
         assertEquals( 9, files.size() );
         assertTrue( files.contains( "pom.xml" ) );
@@ -78,7 +78,7 @@ public class LSParserTest
                 + "-rw-r--r--  1 olamy  staff  18 21 sep 00:34 test-resource.txt\n";
 
         LSParser parser = new LSParser();
-        List files = parser.parseFiles( rawLS );
+        List<String> files = parser.parseFiles( rawLS );
         assertNotNull( files );
         assertEquals( 5, files.size() );
         assertTrue( files.contains( "more-resources.dat" ) );
@@ -100,7 +100,7 @@ public class LSParserTest
             + "drwxr-xr-x+  3 joakim None    0 Dec 11 08:39 target\n";
         
         LSParser parser = new LSParser();
-        List files = parser.parseFiles( rawLS );
+        List<String> files = parser.parseFiles( rawLS );
         assertNotNull( files );
         assertEquals( 9, files.size() );
         assertTrue( files.contains( "pom.xml" ) );
@@ -121,7 +121,7 @@ public class LSParserTest
             + "drwxr-xr-x  3 snicoll  snicoll  512 Feb  7 11:04 spaced out\n";
 
         LSParser parser = new LSParser();
-        List files = parser.parseFiles( rawLS );
+        List<String> files = parser.parseFiles( rawLS );
         assertNotNull( files );
         assertEquals( 4, files.size() );
         assertTrue( files.contains( "org" ) );
