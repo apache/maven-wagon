@@ -19,6 +19,7 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
+import org.apache.commons.io.IOUtils;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.OutputData;
@@ -338,10 +339,11 @@ public class LightweightHttpWagon
     public void closeConnection()
         throws ConnectionException
     {
-        if ( putConnection != null )
+        // use persistent connection feature provided by the jdk
+        /*if ( putConnection != null )
         {
             putConnection.disconnect();
-        }
+        }*/
         authenticator.resetWagon();
     }
 
@@ -365,13 +367,21 @@ public class LightweightHttpWagon
 
         InputStream is = inputData.getInputStream();
 
-        if ( is == null )
+        try
         {
-            throw new TransferFailedException(
-                url + " - Could not open input stream for resource: '" + resource + "'" );
-        }
 
-        return HtmlFileListParser.parseFileList( url, is );
+            if ( is == null )
+            {
+                throw new TransferFailedException(
+                    url + " - Could not open input stream for resource: '" + resource + "'" );
+            }
+
+            return HtmlFileListParser.parseFileList( url, is );
+        }
+        finally
+        {
+            IOUtils.closeQuietly( is );
+        }
     }
 
     public boolean resourceExists( String resourceName )
