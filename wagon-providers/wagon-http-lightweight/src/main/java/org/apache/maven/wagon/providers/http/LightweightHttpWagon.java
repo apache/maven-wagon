@@ -339,11 +339,11 @@ public class LightweightHttpWagon
     public void closeConnection()
         throws ConnectionException
     {
-        // use persistent connection feature provided by the jdk
-        /*if ( putConnection != null )
+        //FIXME WAGON-375 use persistent connection feature provided by the jdk
+        if ( putConnection != null )
         {
             putConnection.disconnect();
-        }*/
+        }
         authenticator.resetWagon();
     }
 
