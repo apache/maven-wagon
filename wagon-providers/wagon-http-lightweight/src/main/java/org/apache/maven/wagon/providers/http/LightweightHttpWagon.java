@@ -462,4 +462,14 @@ public class LightweightHttpWagon
     {
         this.preemptiveAuthentication = preemptiveAuthentication;
     }
+
+    public LightweightHttpWagonAuthenticator getAuthenticator()
+    {
+        return authenticator;
+    }
+
+    public void setAuthenticator( LightweightHttpWagonAuthenticator authenticator )
+    {
+        this.authenticator = authenticator;
+    }
 }
