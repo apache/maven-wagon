@@ -48,6 +48,10 @@ Maven Wagon SCM Usage
 
 Deploying your Maven site to SCM
 
+ Generated site may have inconsistent newlines (see {{{http://jira.codehaus.org/browse/MSITE-121}MSITE-121}}),
+ preventing SCM check-in: prefer {{{http://maven.apache.org/plugins/maven-scm-publish-plugin/}maven-scm-publish-plugin}} to
+ publish your site to SCM.
+
  <<Note for Maven 3 users:>> The site plugin behaves differently, require these
  be added as dependencies instead of extensions. See
  {{{http://maven.apache.org/plugins/maven-site-plugin/examples/adding-deploy-protocol.html}
