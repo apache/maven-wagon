@@ -181,10 +181,11 @@ under the License.
   </mailingLists>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/wagon/trunk</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/wagon/trunk</developerConnection>
-    <url>http://svn.apache.org/viewvc/maven/wagon/trunk</url>
+    <connection>scm:git:https://git-wip-us.apache.org/repos/asf/maven-wagon.git</connection>
+    <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/maven-wagon.git</developerConnection>
+    <url>https://git-wip-us.apache.org/repos/asf?p=maven-wagon</url>
   </scm>
+
   <issueManagement>
     <system>jira</system>
     <url>http://jira.codehaus.org/browse/WAGON</url>
