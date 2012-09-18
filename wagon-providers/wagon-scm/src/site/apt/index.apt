@@ -34,7 +34,6 @@ Maven Wagon SCM
  It enables Maven to use remote repositories stored in SCM systems (Subversion, CVS, ...)
  and to store Maven sites in SCMs.
 
-
 Features
 
  * Deploy files and directories to several SCM using Maven SCM (only tested with CVS and SVN)
@@ -44,8 +43,12 @@ Features
 
 Known issues
 
- * If the file is changed by the SCM the checksum calculation may not work
+ * If the file is changed by the SCM, the checksum calculation may not work
 
    * SVN: when a file has properties svn:eol-style or svn:keywords set
 
    * CVS: when keywords are expanded
+
+ * Generated site may have inconsistent newlines (see {{{http://jira.codehaus.org/browse/MSITE-121}MSITE-121}}),
+ preventing SCM check-in: prefer {{{http://maven.apache.org/plugins/maven-scm-publish-plugin/}maven-scm-publish-plugin}} to
+ publish site to SCM
