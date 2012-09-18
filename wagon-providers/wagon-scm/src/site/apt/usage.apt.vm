@@ -28,22 +28,32 @@
 
 Maven Wagon SCM Usage
 
- You need to add some extensions
- (wagon-scm, maven-scm-manager-plexus and the maven-scm-provider for your SCM system, see examples below)
- to your pom and use URLs in the
- {{{http://maven.apache.org/scm/scm-url-format.html}SCM format}}.
+ You need to add some extensions to your pom:
+
+ * <<<wagon-scm>>>,
+
+ * {{{http://maven.apache.org/scm/maven-scm-managers/maven-scm-manager-plexus/index.html}<<<maven-scm-manager-plexus>>>}}
+
+ * and the {{{http://maven.apache.org/scm/maven-scm-providers/index.html}Maven SCM Provider}} for your SCM system,
+
+ []
+
+ and use URLs in the {{{http://maven.apache.org/scm/scm-url-format.html}SCM format}}.
  
- For non-subversion SCM, in your settings.xml file you can include the elements <<<scmVersionType>>> and <<<scmVersion>>> to
+ For non-subversion SCM, you can include the elements <<<scmVersionType>>> and <<<scmVersion>>> in your <<<settings.xml>>> file to
  specify a branch or tag to use. The value of <<<scmVersionType>>> must be one of <<<branch>>> or <<<tag>>>.
  There is no default value for <<<scmVersionType>>> so you <MUST> specify it with <<<scmVersion>>> in order
  to have any effect.
+
+
+Deploying your Maven site to SCM
 
  <<Note for Maven 3 users:>> The site plugin behaves differently, require these
  be added as dependencies instead of extensions. See
  {{{http://maven.apache.org/plugins/maven-site-plugin/examples/adding-deploy-protocol.html}
  Adding a Protocol to Deploy the Site}}.
 
-Deploying your Maven site to Subversion
+* Deploying your Maven site to Subversion
 
  Add the following extensions to your pom and use a wagon-scm url in the distributionManagement site url.
 
@@ -76,7 +86,7 @@ Deploying your Maven site to Subversion
 ------
 
 
-Deploying your Maven site to CVS
+* Deploying your Maven site to CVS
 
  Same as before, but changing svnexe to cvsexe and using a CVS svn url.
 
@@ -109,7 +119,7 @@ Deploying your Maven site to CVS
 ------
 
 
-Deploying your Maven site to GitHub's gh-pages
+* Deploying your Maven site to GitHub's gh-pages
 
  Same as before, but changing svnexe to gitexe and using a Git svn url.
 
@@ -153,12 +163,14 @@ Deploying your Maven site to GitHub's gh-pages
 ------
 
 
+Using a SCM-based remote repository in Maven 2
 
-Using a Subversion based remote repository in Maven 2
+
+* Using a Subversion-based remote repository in Maven 2
 
  Not tested yet
 
 
-Using a CVS based remote repository in Maven 2
+* Using a CVS-based remote repository in Maven 2
 
  Not tested yet
