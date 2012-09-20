@@ -24,7 +24,7 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
- * @version $Id$
+ *
  */
 public class NotAuthorizedExceptionTest
     extends TestCase

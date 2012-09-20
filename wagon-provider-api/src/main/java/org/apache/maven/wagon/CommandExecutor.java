@@ -21,7 +21,7 @@ package org.apache.maven.wagon;
 
 /**
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
- * @version $Id$
+ *
  */
 public interface CommandExecutor
     extends Wagon

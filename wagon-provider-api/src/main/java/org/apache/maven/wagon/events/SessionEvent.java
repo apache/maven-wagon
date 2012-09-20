@@ -37,7 +37,7 @@ import org.apache.maven.wagon.Wagon;
  * </ul>
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public class SessionEvent
     extends WagonEvent

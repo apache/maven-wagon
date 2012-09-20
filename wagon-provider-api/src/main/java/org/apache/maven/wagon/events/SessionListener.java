@@ -23,7 +23,7 @@ package org.apache.maven.wagon.events;
  * Interface for classes which wants to receive and respond to any session update events.
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public interface SessionListener
 {

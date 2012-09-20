@@ -40,7 +40,7 @@ import java.util.List;
  * Test for {@link ScmWagon}. You need a subclass for each SCM provider you want to test.
  *
  * @author <a href="carlos@apache.org">Carlos Sanchez</a>
- * @version $Id$
+ *
  */
 public abstract class AbstractScmWagonTest
     extends WagonTestCase

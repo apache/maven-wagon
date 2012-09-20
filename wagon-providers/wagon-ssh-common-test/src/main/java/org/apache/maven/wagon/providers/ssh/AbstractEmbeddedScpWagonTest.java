@@ -29,7 +29,7 @@ import java.util.Arrays;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public abstract class AbstractEmbeddedScpWagonTest
     extends StreamingWagonTestCase

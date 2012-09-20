@@ -27,7 +27,7 @@ import org.apache.maven.wagon.Wagon;
  * Base class for all events emitted by <code>Wagon</code> objects.
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public class WagonEvent
     extends EventObject

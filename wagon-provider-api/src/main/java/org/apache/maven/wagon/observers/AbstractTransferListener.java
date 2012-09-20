@@ -26,7 +26,7 @@ import org.apache.maven.wagon.events.TransferListener;
  * TransferListeners which computes MD5 checksum on the fly when files are transfered.
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public abstract class AbstractTransferListener
     implements TransferListener

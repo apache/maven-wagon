@@ -21,7 +21,7 @@ package org.apache.maven.wagon.events;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public class SessionListenerMock
     implements SessionListener

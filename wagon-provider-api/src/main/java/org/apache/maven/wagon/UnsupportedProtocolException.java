@@ -23,7 +23,7 @@ package org.apache.maven.wagon;
  * This exception is thrown when no Wagon provider is supporting protocol required by some repository
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public class UnsupportedProtocolException
     extends WagonException

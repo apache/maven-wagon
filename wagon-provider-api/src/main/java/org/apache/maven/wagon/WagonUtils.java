@@ -28,7 +28,7 @@ import java.util.LinkedList;
 
 /**
  * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a>
- * @version $Id$
+ *
  * @deprecated
  */
 public final class WagonUtils

@@ -23,7 +23,7 @@ package org.apache.maven.wagon;
  * Exception which should be thrown when a command fails to execute on the repository.
  *
  * @author <a href="brett@apache.org">Brett Porter</a>
- * @version $Id$
+ *
  */
 public class CommandExecutionException
     extends WagonException

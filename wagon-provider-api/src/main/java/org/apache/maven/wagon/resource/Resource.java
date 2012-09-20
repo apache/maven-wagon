@@ -29,7 +29,7 @@ import org.apache.maven.wagon.WagonConstants;
  * are needed to reuse wagon in maven 1.
  *
  * @author <a href="michal@codehaus.org">Michal Maczka</a>
- * @version $Id$
+ *
  */
 
 public class Resource

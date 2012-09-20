@@ -26,7 +26,7 @@ import java.io.IOException;
 
 /**
  * @author <a href="michal@codehaus.org">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public class TestData
 {

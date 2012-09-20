@@ -24,7 +24,7 @@ package org.apache.maven.wagon;
  * a transfer from repository
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public class TransferFailedException
     extends WagonException

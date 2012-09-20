@@ -23,7 +23,7 @@ package org.apache.maven.wagon;
  * This class contains constants used in Wagon API.
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public final class WagonConstants
 {

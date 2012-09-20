@@ -27,7 +27,7 @@ import java.util.List;
  * TransferListener and dispatch of those events to those listeners
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public final class TransferEventSupport
 {

@@ -25,7 +25,7 @@ import java.io.Serializable;
  * Describes the permissions to set on files uploaded to the repository.
  *
  * @author Brett Porter
- * @version $Id$
+ *
  */
 public class RepositoryPermissions implements Serializable
 {

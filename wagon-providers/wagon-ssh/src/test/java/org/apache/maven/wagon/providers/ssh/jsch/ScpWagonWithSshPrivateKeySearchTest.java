@@ -32,7 +32,7 @@ import org.apache.maven.wagon.resource.Resource;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public class ScpWagonWithSshPrivateKeySearchTest
     extends StreamingWagonTestCase

@@ -24,7 +24,7 @@ import java.io.OutputStream;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public class OutputStreamMock
     extends OutputStream

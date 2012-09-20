@@ -25,7 +25,7 @@ import org.apache.maven.wagon.shared.http4.HttpMethodConfiguration;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public class HttpWagonPreemptiveTest
     extends HttpWagonTest

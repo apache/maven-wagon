@@ -56,7 +56,7 @@ import java.util.zip.GZIPInputStream;
  * LightweightHttpWagon, using JDK's HttpURLConnection.
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  * @plexus.component role="org.apache.maven.wagon.Wagon" role-hint="http" instantiation-strategy="per-lookup"
  * @see HttpURLConnection
  */

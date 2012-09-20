@@ -23,7 +23,7 @@ import junit.framework.TestCase;
 
 /**
  * @author <a href="mailto:jvanzyl@maven.org">Jason van Zyl</a>
- * @version $Id$
+ *
  */
 public class ProxyInfoTest
     extends TestCase

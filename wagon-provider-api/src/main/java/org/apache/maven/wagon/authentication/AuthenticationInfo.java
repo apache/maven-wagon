@@ -26,7 +26,7 @@ import java.io.Serializable;
  * will use during login operation.
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public class AuthenticationInfo
     implements Serializable

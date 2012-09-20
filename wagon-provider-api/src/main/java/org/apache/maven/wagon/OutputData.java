@@ -25,7 +25,7 @@ import java.io.OutputStream;
 
 /**
  * @author <a href="mailto:michal@codehaus.org">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public class OutputData
 {

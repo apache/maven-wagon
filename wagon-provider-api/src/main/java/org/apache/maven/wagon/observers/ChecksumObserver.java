@@ -29,7 +29,7 @@ import java.security.NoSuchAlgorithmException;
  * TransferListeners which computes MD5 checksum on the fly when files are transfered.
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public class ChecksumObserver
     implements TransferListener

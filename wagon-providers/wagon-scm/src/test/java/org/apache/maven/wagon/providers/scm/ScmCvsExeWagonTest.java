@@ -26,7 +26,7 @@ import org.apache.maven.scm.provider.cvslib.cvsexe.CvsExeScmProvider;
  * Test for ScmWagon using CVS Exe as underlying SCM
  *
  * @author <a href="carlos@apache.org">Carlos Sanchez</a>
- * @version $Id$
+ *
  */
 public class ScmCvsExeWagonTest
     extends AbstractScmCvsWagonTest

@@ -24,7 +24,7 @@ package org.apache.maven.wagon;
  * to repository cannot be established or open connection cannot be closed.
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public class ConnectionException
     extends WagonException

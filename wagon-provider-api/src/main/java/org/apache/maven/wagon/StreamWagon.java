@@ -32,7 +32,7 @@ import org.codehaus.plexus.util.IOUtil;
  * Base class for wagon which provide stream based API.
  *
  * @author <a href="mailto:michal@codehaus.org">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public abstract class StreamWagon
     extends AbstractWagon

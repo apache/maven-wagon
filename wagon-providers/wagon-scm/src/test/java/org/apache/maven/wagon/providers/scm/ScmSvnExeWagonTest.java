@@ -26,7 +26,7 @@ import org.apache.maven.scm.provider.svn.svnexe.SvnExeScmProvider;
  * Test for ScmWagon using SVN Exe as underlying SCM
  * 
  * @author <a href="carlos@apache.org">Carlos Sanchez</a>
- * @version $Id$
+ *
  */
 public class ScmSvnExeWagonTest
     extends AbstractScmSvnWagonTest

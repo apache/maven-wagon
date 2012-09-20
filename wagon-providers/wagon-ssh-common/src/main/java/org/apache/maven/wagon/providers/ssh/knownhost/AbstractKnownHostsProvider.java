@@ -27,7 +27,7 @@ import java.util.Set;
  * Common base for known hosts providers.
  *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
- * @version $Id$
+ *
  */
 public abstract class AbstractKnownHostsProvider
     implements KnownHostsProvider

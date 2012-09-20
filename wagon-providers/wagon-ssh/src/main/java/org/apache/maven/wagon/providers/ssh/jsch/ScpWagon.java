@@ -46,7 +46,7 @@ import java.io.OutputStream;
  * http://blogs.sun.com/janp/entry/how_the_scp_protocol_works</a>
  * for information on how the SCP protocol works.
  *
- * @version $Id$
+ *
  * @todo [BP] add compression flag
  * @plexus.component role="org.apache.maven.wagon.Wagon"
  * role-hint="scp"

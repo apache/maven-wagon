@@ -27,7 +27,7 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
  * LightweightHttpsWagon, using JDK's HttpURLConnection.
  *
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
- * @version $Id$
+ *
  * 
  * @plexus.component role="org.apache.maven.wagon.Wagon" 
  *   role-hint="https"

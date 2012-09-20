@@ -23,7 +23,7 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
  * Base class for command executor tests.
  *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
- * @version $Id$
+ *
  */
 public abstract class CommandExecutorTestCase
     extends PlexusTestCase

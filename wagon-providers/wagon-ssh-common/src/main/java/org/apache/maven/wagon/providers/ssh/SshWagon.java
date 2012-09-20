@@ -28,7 +28,7 @@ import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
  * NOTE: External or native ssh implementations cannot use this interface.
  *
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
- * @version $Id$
+ *
  */
 public interface SshWagon
     extends Wagon

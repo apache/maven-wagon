@@ -25,7 +25,7 @@ import java.io.IOException;
  * Test for ScmWagon using CVS as underlying SCM
  * 
  * @author <a href="brett@apache.org">Brett Porter</a>
- * @version $Id$
+ *
  */
 public abstract class AbstractScmCvsWagonTest
     extends AbstractScmWagonTest

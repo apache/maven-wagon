@@ -26,7 +26,7 @@ import org.apache.maven.wagon.repository.Repository;
  * Test the command executor.
  *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
- * @version $Id$
+ *
  */
 public class SshCommandExecutorTest
     extends CommandExecutorTestCase

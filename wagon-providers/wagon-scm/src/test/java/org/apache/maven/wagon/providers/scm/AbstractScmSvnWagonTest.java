@@ -27,7 +27,7 @@ import org.codehaus.plexus.util.FileUtils;
  * Test for ScmWagon using SVN as underlying SCM
  *
  * @author <a href="brett@apache.org">Brett Porter</a>
- * @version $Id$
+ *
  */
 public abstract class AbstractScmSvnWagonTest
     extends AbstractScmWagonTest

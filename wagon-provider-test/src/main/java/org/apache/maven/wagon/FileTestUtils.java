@@ -28,7 +28,7 @@ import java.io.Writer;
 
 /**
  * @author <a href="michal@apache.org>Michal Maczka</a>
- * @version $Id$
+ *
  */
 public class FileTestUtils
 {

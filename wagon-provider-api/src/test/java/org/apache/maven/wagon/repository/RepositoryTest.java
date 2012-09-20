@@ -25,7 +25,7 @@ import org.apache.maven.wagon.WagonConstants;
 
 /**
  * @author <a href="mailto:jvanzyl@maven.org">Jason van Zyl</a>
- * @version $Id$
+ *
  */
 public class RepositoryTest
     extends TestCase

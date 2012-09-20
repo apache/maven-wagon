@@ -32,7 +32,7 @@ import java.util.List;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public abstract class AbstractEmbeddedScpWagonWithKeyTest
     extends StreamingWagonTestCase

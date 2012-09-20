@@ -26,7 +26,7 @@ import java.util.StringTokenizer;
  * Various path (URL) manipulation routines
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public final class PathUtils
 {

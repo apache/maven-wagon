@@ -23,7 +23,7 @@ package org.apache.maven.wagon;
  * Root class for all exception in Wagon API
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public abstract class WagonException
     extends Exception

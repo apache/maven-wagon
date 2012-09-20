@@ -26,7 +26,7 @@ import org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo;
 /**
  * WagonUserInfo 
  *
- * @version $Id$
+ *
  */
 class WagonUserInfo
     implements UserInfo

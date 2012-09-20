@@ -23,7 +23,7 @@ import org.apache.maven.wagon.Wagon;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public class LightweightHttpWagonWithPreemptiveAuthenticationTest
     extends LightweightHttpWagonTest

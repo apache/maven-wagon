@@ -46,7 +46,7 @@ import com.jcraft.jsch.SftpException;
  * SFTP protocol wagon.
  *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
- * @version $Id$
+ *
  * @todo [BP] add compression flag
  * @todo see if SftpProgressMonitor allows us to do streaming (without it, we can't do checksums as the input stream is lost)
  * 

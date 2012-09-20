@@ -68,7 +68,7 @@ import java.util.Stack;
  * @author <a href="evenisse@apache.org">Emmanuel Venisse</a>
  * @author <a href="carlos@apache.org">Carlos Sanchez</a>
  * @author Jason van Zyl
- * @version $Id$
+ *
  * @plexus.component role="org.apache.maven.wagon.Wagon" role-hint="scm" instantiation-strategy="per-lookup"
  */
 public class ScmWagon

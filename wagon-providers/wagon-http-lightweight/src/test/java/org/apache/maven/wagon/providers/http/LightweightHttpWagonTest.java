@@ -29,7 +29,7 @@ import java.util.Properties;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public class LightweightHttpWagonTest
     extends HttpWagonTestCase

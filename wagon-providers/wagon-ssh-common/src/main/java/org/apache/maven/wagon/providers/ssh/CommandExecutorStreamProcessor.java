@@ -28,7 +28,7 @@ import java.io.IOException;
  * CommandExecutorStreamProcessor 
  *
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
- * @version $Id$
+ *
  */
 public class CommandExecutorStreamProcessor
 {

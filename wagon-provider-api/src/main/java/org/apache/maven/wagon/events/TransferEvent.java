@@ -29,7 +29,7 @@ import java.io.File;
  * in transfer of resources form/to the repository
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public class TransferEvent
     extends WagonEvent

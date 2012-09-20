@@ -27,7 +27,7 @@ import java.util.List;
  * The class allows registration and deregistration of session listeners
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public final class SessionEventSupport
 {

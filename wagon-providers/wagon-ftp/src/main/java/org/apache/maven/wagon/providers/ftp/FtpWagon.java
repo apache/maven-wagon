@@ -52,7 +52,7 @@ import java.util.List;
 /**
  * FtpWagon
  *
- * @version $Id$
+ *
  * @plexus.component role="org.apache.maven.wagon.Wagon"
  * role-hint="ftp"
  * instantiation-strategy="per-lookup"

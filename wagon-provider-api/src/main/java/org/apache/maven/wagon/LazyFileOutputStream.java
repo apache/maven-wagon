@@ -33,7 +33,7 @@ import java.nio.channels.FileChannel;
  * of data is written.
  *
  * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public class LazyFileOutputStream
     extends OutputStream

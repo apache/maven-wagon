@@ -28,7 +28,7 @@ import java.io.Serializable;
  * while connection to the repository must go thru a proxy server.
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  * @todo Propose standard types of proxy servers (e.g. <i>SOCKSv4</i>),
  * which can be shared between wagon api and providers
  */

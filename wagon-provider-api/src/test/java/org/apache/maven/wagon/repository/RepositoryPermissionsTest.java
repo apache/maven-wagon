@@ -23,7 +23,7 @@ import junit.framework.TestCase;
 
 /**
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
- * @version $Id$
+ *
  * @todo test defaults
  */
 public class RepositoryPermissionsTest

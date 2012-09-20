@@ -70,7 +70,7 @@ import com.jcraft.jsch.UserInfo;
 /**
  * AbstractJschWagon 
  *
- * @version $Id$
+ *
  */
 public abstract class AbstractJschWagon
     extends StreamWagon

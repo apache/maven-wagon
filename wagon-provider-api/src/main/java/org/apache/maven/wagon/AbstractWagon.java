@@ -48,7 +48,7 @@ import java.util.List;
  * Implementation of common facilities for Wagon providers.
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public abstract class AbstractWagon
     implements Wagon

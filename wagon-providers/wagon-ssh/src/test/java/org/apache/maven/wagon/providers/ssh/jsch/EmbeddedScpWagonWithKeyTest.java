@@ -29,7 +29,7 @@ import java.io.IOException;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public class EmbeddedScpWagonWithKeyTest
     extends AbstractEmbeddedScpWagonWithKeyTest

@@ -46,7 +46,7 @@ import org.codehaus.plexus.util.StringUtils;
  * Wagon Provider for Local File System
  * 
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  * @plexus.component role="org.apache.maven.wagon.Wagon" role-hint="file" instantiation-strategy="per-lookup"
  */
 public class FileWagon

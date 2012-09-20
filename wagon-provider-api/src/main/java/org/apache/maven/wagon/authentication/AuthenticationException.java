@@ -28,7 +28,7 @@ import org.apache.maven.wagon.WagonException;
  * when the credentials supplied by the user are invalid
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public class AuthenticationException
     extends WagonException

@@ -26,7 +26,7 @@ import java.io.File;
 
 /**
  * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public class LazyFileOutputStreamTest
     extends TestCase

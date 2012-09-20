@@ -28,7 +28,7 @@ import java.io.PrintStream;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public class Debug
     implements SessionListener, TransferListener

@@ -28,7 +28,7 @@ import org.easymock.MockControl;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id$
+ *
  */
 public class SessionEventTest
     extends TestCase

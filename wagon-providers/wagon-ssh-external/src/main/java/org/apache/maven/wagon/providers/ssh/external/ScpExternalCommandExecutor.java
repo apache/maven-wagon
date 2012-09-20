@@ -23,7 +23,7 @@ package org.apache.maven.wagon.providers.ssh.external;
  * ScpExternalCommandExecutor - bridge class for plexus:descriptor 
  *
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
- * @version $Id$
+ *
  * 
  * @todo is this even needed anymore?
  * 
