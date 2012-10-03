@@ -39,6 +39,19 @@ under the License.
     <version>1.3.0</version>
   </skin>
 
+  <custom>
+    <fluidoSkin>
+      <topBarEnabled>true</topBarEnabled>
+      <sideBarEnabled>false</sideBarEnabled>
+      <leftColumnClass>span2</leftColumnClass>
+      <bodyColumnClass>span10</bodyColumnClass>
+      <googleSearch>
+        <sitesearch>${project.url}</sitesearch>
+      </googleSearch>
+    </fluidoSkin>
+
+  </custom>
+
   <body>
     <breadcrumbs>
       <item name="Wagon" href="http://maven.apache.org/wagon/index.html" />
