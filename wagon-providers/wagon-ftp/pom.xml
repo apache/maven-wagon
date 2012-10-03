@@ -37,13 +37,13 @@ under the License.
     <dependency>
       <groupId>commons-net</groupId>
       <artifactId>commons-net</artifactId>
-      <version>3.0.1</version>
+      <version>3.1</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.ftpserver</groupId>
       <artifactId>ftpserver-core</artifactId>
-      <version>1.0.5</version>
+      <version>1.0.6</version>
       <scope>test</scope>
     </dependency>
     <dependency>

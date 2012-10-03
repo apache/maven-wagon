@@ -103,6 +103,7 @@ public class FtpWagonTest
 
             // start the server
             server.start();
+
         }
     }
 
