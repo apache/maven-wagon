@@ -76,7 +76,7 @@ public class HtmlFileListParser
             // assumption.
             String content = IOUtils.toString( stream, "utf-8" );
             Document doc = Jsoup.parse( content, baseurl );
-            Elements links = doc.getElementsByTag( "a" );
+            Elements links = doc.select("a[href]");
             Set<String> results = new HashSet<String>();
             for ( int lx = 0; lx < links.size(); lx++ )
             {
