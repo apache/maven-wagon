@@ -41,7 +41,7 @@ under the License.
     <siteDeployUrl>scp://people.apache.org/www/maven.apache.org/wagon/</siteDeployUrl>
     <siteUrl>http://maven.apache.org/wagon/</siteUrl>
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
-    <slf4jVersion>1.6.6</slf4jVersion>
+    <slf4jVersion>1.7.1</slf4jVersion>
   </properties>
 
   <contributors>
