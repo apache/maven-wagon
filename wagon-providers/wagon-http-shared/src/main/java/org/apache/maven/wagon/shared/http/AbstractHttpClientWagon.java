@@ -39,6 +39,8 @@ import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.util.DateParseException;
 import org.apache.commons.httpclient.util.DateUtil;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.PathUtils;
@@ -51,8 +53,6 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.StringUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -100,7 +100,7 @@ public abstract class AbstractHttpClientWagon
             {
                 try
                 {
-                    byte[] bytes = IOUtil.toByteArray( stream );
+                    byte[] bytes = IOUtils.toByteArray( stream );
                     this.byteBuffer = ByteBuffer.allocate( bytes.length );
                     this.byteBuffer.put( bytes );
                 }
@@ -163,7 +163,7 @@ public abstract class AbstractHttpClientWagon
             }
             finally
             {
-                IOUtil.close( fin );
+                IOUtils.closeQuietly( fin );
             }
 
             output.flush();
