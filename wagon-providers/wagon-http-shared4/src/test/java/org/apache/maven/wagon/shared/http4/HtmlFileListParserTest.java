@@ -36,14 +36,14 @@ public class HtmlFileListParserTest
 {
     private static Logger logger = Logger.getLogger( HtmlFileListParserTest.class );
 
-    private void assertContainsExpected( List/*<String>*/links, String[] expected )
+    private void assertContainsExpected( List<String>links, String[] expected )
     {
         if ( expected.length != links.size() )
         {
             Collections.sort( links );
-            for ( Iterator iterator = links.iterator(); iterator.hasNext(); )
+            for ( Iterator<String> iterator = links.iterator(); iterator.hasNext(); )
             {
-                String link = (String) iterator.next();
+                String link = iterator.next();
                 logger.info( "   \"" + link + "\", " );
             }
             assertEquals( "Links to Expected size", expected.length, links.size() );
@@ -55,7 +55,7 @@ public class HtmlFileListParserTest
         }
     }
 
-    private void assertNotContainingAvoided( List/*<String>*/links, String[] avoided )
+    private void assertNotContainingAvoided( List<String> links, String[] avoided )
     {
         for ( int i = 0; i < avoided.length; i++ )
         {
@@ -63,7 +63,7 @@ public class HtmlFileListParserTest
         }
     }
 
-    private List/*<String>*/parseLinks( String url, String filename )
+    private List<String> parseLinks( String url, String filename )
         throws TransferFailedException
     {
         InputStream is = this.getClass().getResourceAsStream( "/filelistings/" + filename );
@@ -86,14 +86,14 @@ public class HtmlFileListParserTest
     }
 
     /**
-     * Example showing jetty directory browsing of commons-lang 
-     * 
+     * Example showing jetty directory browsing of commons-lang
+     *
      * @throws TransferFailedException
      */
     public void testParseCommonsLang()
         throws TransferFailedException
     {
-        List/*<String>*/links = parseLinks( "http://localhost/repository/commons-lang/commons-lang/2.3",
+        List<String> links = parseLinks( "http://localhost/repository/commons-lang/commons-lang/2.3",
                                              "commons-lang.html" );
 
         String[] expected = new String[] {
@@ -126,7 +126,7 @@ public class HtmlFileListParserTest
     public void testParseIbiblio()
         throws Exception
     {
-        List/*<String>*/links = parseLinks( "http://www.ibiblio.org/maven2/org/apache/maven/wagon/",
+        List<String> links = parseLinks( "http://www.ibiblio.org/maven2/org/apache/maven/wagon/",
                                              "ibiblio-wagon.html" );
 
         String[] expected = new String[] {
@@ -200,7 +200,7 @@ public class HtmlFileListParserTest
     public void testParseJetty()
         throws Exception
     {
-        List/*<String>*/links = parseLinks( "http://www.ibiblio.org/maven2/org/apache/maven/wagon/",
+        List<String> links = parseLinks( "http://www.ibiblio.org/maven2/org/apache/maven/wagon/",
                                              "jetty-wagon.html" );
 
         String[] expected = new String[] {
@@ -274,7 +274,7 @@ public class HtmlFileListParserTest
     public void testParseJettyWithNonNormalizedBaseURI()
         throws Exception
     {
-        List/*<String>*/links = parseLinks( "http://www.ibiblio.org/maven2/org/apache/maven/wagon//",
+        List<String> links = parseLinks( "http://www.ibiblio.org/maven2/org/apache/maven/wagon//",
                                              "jetty-wagon.html" );
 
         String[] expected = new String[] {
@@ -345,13 +345,13 @@ public class HtmlFileListParserTest
      * Using repository.codehaus.org output as an example.
      * This is an example of an older RHEL installation of apache httpd with old fancy indexing output
      * This example tests how to detect directories properly.
-     * 
+     *
      * @throws TransferFailedException
      */
     public void testParseMevenIde()
         throws TransferFailedException
     {
-        List/*<String>*/links = parseLinks( "http://repository.codehaus.org/org/codehaus/mevenide/", "mevenide.html" );
+        List<String> links = parseLinks( "http://repository.codehaus.org/org/codehaus/mevenide/", "mevenide.html" );
 
         String[] expected = new String[] {
             "apisupport/",
@@ -396,7 +396,7 @@ public class HtmlFileListParserTest
     public void testParseMirror()
         throws Exception
     {
-        List/*<String>*/links = parseLinks( "http://www.ibiblio.org/maven2/org/apache/maven/wagon/",
+        List<String> links = parseLinks( "http://www.ibiblio.org/maven2/org/apache/maven/wagon/",
                                              "mirror-wagon.html" );
 
         String[] expected = new String[] {
@@ -471,13 +471,13 @@ public class HtmlFileListParserTest
     /**
      * Example of output from repo1.maven.org
      * This example is of nekohtml specifically.
-     * 
+     *
      * @throws TransferFailedException
      */
     public void testParseNekoHtml()
         throws TransferFailedException
     {
-        List/*<String>*/links = parseLinks( "http://repo1.maven.org//maven2/nekohtml/nekohtml/1.9.6/", "nekohtml.html" );
+        List<String> links = parseLinks( "http://repo1.maven.org//maven2/nekohtml/nekohtml/1.9.6/", "nekohtml.html" );
 
         String[] expected = new String[] {
             "nekohtml-1.9.6-javadoc.jar",
@@ -502,13 +502,13 @@ public class HtmlFileListParserTest
 
     /**
      * Example of detecting directories on repo1.maven.org
-     * 
+     *
      * @throws TransferFailedException
      */
     public void testParseNetSourceforge()
         throws TransferFailedException
     {
-        List/*<String>*/links = parseLinks( "http://repo1.maven.org/maven2/net/sf/", "net_sf.html" );
+        List<String> links = parseLinks( "http://repo1.maven.org/maven2/net/sf/", "net_sf.html" );
 
         String[] expected = new String[] {
             "a2j/",
@@ -581,13 +581,13 @@ public class HtmlFileListParserTest
 
     /**
      * Another larger example of the directory link detection on repository.codehaus.org
-     * 
+     *
      * @throws TransferFailedException
      */
     public void testParseOrgCodehaus()
         throws TransferFailedException
     {
-        List/*<String>*/links = parseLinks( "http://repository.codehaus.org/org/codehaus", "org.codehaus.html" );
+        List<String> links = parseLinks( "http://repository.codehaus.org/org/codehaus", "org.codehaus.html" );
 
         String[] expected = new String[] {
             "agilifier/",
@@ -672,13 +672,13 @@ public class HtmlFileListParserTest
     /**
      * Test the output found from apache httpd with fancy indexing and dav module.
      * Using people.apache.org output as source material.
-     * 
+     *
      * @throws TransferFailedException
      */
     public void testParsePeopleApacheOrg()
         throws TransferFailedException
     {
-        List/*<String>*/links = parseLinks(
+        List<String> links = parseLinks(
                                              "http://people.apache.org/repo/m2-ibiblio-rsync-repository/org/apache/maven/archiva/archiva-plexus-runtime/1.0.1/",
                                              "org.apache.maven.html" );
 
