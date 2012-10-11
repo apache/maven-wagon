@@ -368,12 +368,13 @@ under the License.
     <plugins>
       <plugin>
         <groupId>org.codehaus.plexus</groupId>
-        <artifactId>plexus-maven-plugin</artifactId>
+        <artifactId>plexus-component-metadata</artifactId>
+        <version>1.5.5</version>
         <executions>
           <execution>
             <id>generate</id>
             <goals>
-              <goal>descriptor</goal>
+              <goal>generate-metadata</goal>
             </goals>
           </execution>
         </executions>
