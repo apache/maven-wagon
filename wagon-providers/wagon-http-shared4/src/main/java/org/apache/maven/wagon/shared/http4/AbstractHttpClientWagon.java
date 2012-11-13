@@ -944,7 +944,7 @@ public abstract class AbstractHttpClientWagon
         {
             try
             {
-                long contentLength = Integer.valueOf( contentLengthHeader.getValue() ).intValue();
+                long contentLength = Long.parseLong( contentLengthHeader.getValue() );
 
                 resource.setContentLength( contentLength );
             }
