@@ -3,7 +3,7 @@
  ------
  Carlos Sanchez
  ------
- 2006-10-16
+ 2012-11-19
  ------
 
  ~~ Licensed to the Apache Software Foundation (ASF) under one
@@ -29,14 +29,15 @@
 Maven Wagon WebDAV
 
  This project is an implementation of Wagon provider for WebDAV server access.
+ You will need to use at least Java 1.6 if you want to use this Wagon provider.
  
  It enables Maven to deploy artifacts and files to WebDAV enabled servers.
  Getting files from WebDAV servers is not fully tested.
 
-Features
+* Features
 
  * Deploy files and directories to WebDAV enabled servers
 
-System Properties
+* System Properties
 
- Using -Dwagon.webdav.continueOnFailure=true will continue deploying other files even if one fail.
+ Using <<<-Dwagon.webdav.continueOnFailure=true>>> will continue deploying other files even if one fail.
