@@ -29,7 +29,7 @@ under the License.
 
   <groupId>org.apache.maven.wagon</groupId>
   <artifactId>wagon</artifactId>
-  <version>2.3-SNAPSHOT</version>
+  <version>2.3</version>
   <packaging>pom</packaging>
 
   <name>Apache Maven Wagon</name>
@@ -111,7 +111,7 @@ under the License.
       </roles>
     </contributor>
     <contributor>
-      <name>Adri&#225;n Boimvaser</name>
+      <name>Adrián Boimvaser</name>
       <organization>Application Security, Inc.</organization>
       <roles>
         <role>Developer</role>
@@ -184,6 +184,7 @@ under the License.
     <connection>scm:git:https://git-wip-us.apache.org/repos/asf/maven-wagon.git</connection>
     <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/maven-wagon.git</developerConnection>
     <url>https://git-wip-us.apache.org/repos/asf?p=maven-wagon.git</url>
+    <tag>wagon-2.3</tag>
   </scm>
 
   <issueManagement>
