@@ -83,17 +83,17 @@ public abstract class AbstractJschWagon
     /**
      * @plexus.requirement role-hint="file"
      */
-    private KnownHostsProvider knownHostsProvider;
+    private volatile KnownHostsProvider knownHostsProvider;
     
     /**
      * @plexus.requirement
      */
-    private InteractiveUserInfo interactiveUserInfo;
+    private volatile InteractiveUserInfo interactiveUserInfo;
 
     /**
      * @plexus.requirement
      */
-    private UIKeyboardInteractive uIKeyboardInteractive;
+    private volatile UIKeyboardInteractive uIKeyboardInteractive;
 
     private static final int SOCKS5_PROXY_PORT = 1080;
 

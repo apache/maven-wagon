@@ -41,7 +41,7 @@ public class PrompterUIKeyboardInteractive
     /**
      * @plexus.requirement role-hint="default"
      */
-    private Prompter prompter;
+    private volatile Prompter prompter;
 
     public PrompterUIKeyboardInteractive()
     {

@@ -86,7 +86,7 @@ public class LightweightHttpWagon
     /**
      * @plexus.requirement
      */
-    private LightweightHttpWagonAuthenticator authenticator;
+    private volatile LightweightHttpWagonAuthenticator authenticator;
 
     /**
      * Builds a complete URL string from the repository URL and the relative path passed.

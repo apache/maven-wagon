@@ -77,7 +77,7 @@ public class ScmWagon
     /**
      * @plexus.requirement
      */
-    private ScmManager scmManager;
+    private volatile ScmManager scmManager;
 
     /**
      * The SCM version, if any.

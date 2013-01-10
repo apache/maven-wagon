@@ -39,7 +39,7 @@ public class ConsoleInteractiveUserInfo
     /**
      * @plexus.requirement role-hint="default"
      */
-    private Prompter prompter;
+    private volatile Prompter prompter;
 
     public ConsoleInteractiveUserInfo()
     {
