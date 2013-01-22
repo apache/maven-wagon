@@ -295,10 +295,11 @@ public abstract class AbstractHttpClientWagon
             {
                 try
                 {
-                    SSLSocketFactory sslSocketFactory =
-                        new SSLSocketFactory( EasyX509TrustManager.createEasySSLContext(), sslAllowAll
+                    ConfigurableSSLSocketFactory sslSocketFactory =
+                        new ConfigurableSSLSocketFactory( EasyX509TrustManager.createEasySSLContext(), sslAllowAll
                             ? new EasyHostNameVerifier()
                             : new BrowserCompatHostnameVerifier() );
+
                     Scheme httpsScheme = new Scheme( "https", 443, sslSocketFactory );
 
                     threadSafeClientConnManager.getSchemeRegistry().register( httpsScheme );
