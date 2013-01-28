@@ -250,11 +250,11 @@ public abstract class AbstractHttpClientWagon
 
     /**
      * skip failure on certificate validity checks.
-     * <b>enabled by default</b>
+     * <b>disabled by default</b>
      *
      * @since 2.0
      */
-    protected static boolean sslEasy = Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.easy", "true" ) );
+    protected static boolean sslEasy = Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.insecure", "false" ) );
 
     /**
      * ssl hostname verifier is allow all by default. Disable this will use a browser compat hostname verifier
