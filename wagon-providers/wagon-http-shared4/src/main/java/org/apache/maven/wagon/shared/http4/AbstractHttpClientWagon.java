@@ -259,7 +259,7 @@ public abstract class AbstractHttpClientWagon
      *
      * @since 2.0
      */
-    protected static boolean sslInsecure =
+    protected static boolean sslEasy =
         Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.insecure", "false" ) );
 
     /**
@@ -291,7 +291,7 @@ public abstract class AbstractHttpClientWagon
             SchemeRegistry schemeRegistry = new SchemeRegistry();
             schemeRegistry.register( new Scheme( "http", 80, PlainSocketFactory.getSocketFactory() ) );
             SSLSocketFactory sslSocketFactory;
-            if ( sslInsecure )
+            if ( sslEasy )
             {
                 try
                 {
