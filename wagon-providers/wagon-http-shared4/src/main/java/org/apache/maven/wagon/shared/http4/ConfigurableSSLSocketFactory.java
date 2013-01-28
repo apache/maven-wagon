@@ -36,7 +36,6 @@ import java.net.UnknownHostException;
  * @author Olivier Lamy
  * @since 2.4
  */
-@Deprecated
 public class ConfigurableSSLSocketFactory
     extends SSLSocketFactory
 {
