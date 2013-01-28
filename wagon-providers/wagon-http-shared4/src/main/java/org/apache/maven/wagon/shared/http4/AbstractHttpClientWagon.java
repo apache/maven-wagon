@@ -259,7 +259,7 @@ public abstract class AbstractHttpClientWagon
      *
      * @since 2.0
      */
-    protected static boolean sslEasy = Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.insecure", "false" ) );
+    protected static boolean sslInsecure = Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.insecure", "false" ) );
 
     /**
      * ssl hostname verifier is allow all by default. Disable this will use a browser compat hostname verifier
@@ -271,7 +271,7 @@ public abstract class AbstractHttpClientWagon
         Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.allowall", "false" ) );
 
     /**
-     * if using sslEasy certificate date issues will be ignored
+     * if using sslInsecure certificate date issues will be ignored
      * <b>disabled by default</b>
      *
      * @since 2.0
@@ -290,7 +290,7 @@ public abstract class AbstractHttpClientWagon
             SchemeRegistry schemeRegistry = new SchemeRegistry();
             schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
             SSLSocketFactory sslSocketFactory;
-            if ( sslEasy )
+            if ( sslInsecure )
             {
                 try
                 {
