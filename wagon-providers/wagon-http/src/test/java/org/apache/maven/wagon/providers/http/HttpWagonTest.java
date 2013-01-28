@@ -19,6 +19,7 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.maven.wagon.StreamingWagon;
 import org.apache.maven.wagon.Wagon;
@@ -59,7 +60,7 @@ public class HttpWagonTest
         throws Exception
     {
         HttpWagon wagon = (HttpWagon) lookup( Wagon.class, "http" );
-        assertTrue( wagon.getConnectionManager() instanceof ThreadSafeClientConnManager );
+        assertTrue( wagon.getConnectionManager() instanceof PoolingClientConnectionManager );
 
     }
 
