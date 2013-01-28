@@ -267,12 +267,12 @@ public abstract class AbstractHttpClientWagon
 
     /**
      * if using sslEasy certificate date issues will be ignored
-     * <b>enabled by default</b>
+     * <b>disabled by default</b>
      *
      * @since 2.0
      */
     protected static boolean IGNORE_SSL_VALIDITY_DATES =
-        Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.ignore.validity.dates", "true" ) );
+        Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.ignore.validity.dates", "false" ) );
 
     static
     {
