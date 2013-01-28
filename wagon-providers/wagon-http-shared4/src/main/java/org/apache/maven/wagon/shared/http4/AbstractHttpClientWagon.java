@@ -258,12 +258,12 @@ public abstract class AbstractHttpClientWagon
 
     /**
      * ssl hostname verifier is allow all by default. Disable this will use a browser compat hostname verifier
-     * <b>enabled by default</b>
+     * <b>disabled by default</b>
      *
      * @since 2.0
      */
     protected static boolean sslAllowAll =
-        Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.allowall", "true" ) );
+        Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.allowall", "false" ) );
 
     /**
      * if using sslEasy certificate date issues will be ignored
