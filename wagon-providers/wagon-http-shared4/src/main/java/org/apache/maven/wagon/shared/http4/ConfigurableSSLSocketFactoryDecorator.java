@@ -18,60 +18,56 @@ package org.apache.maven.wagon.shared.http4;
  * under the License.
  */
 
-import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
-import org.apache.http.params.HttpParams;
-import org.codehaus.plexus.util.StringUtils;
-
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
 import java.io.IOException;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-/**
- * @author Olivier Lamy
- * @since 2.4
- */
-@Deprecated
-public class ConfigurableSSLSocketFactory
-    extends SSLSocketFactory
+import javax.net.ssl.SSLSocket;
+
+import org.apache.http.conn.ConnectTimeoutException;
+import org.apache.http.conn.scheme.SchemeLayeredSocketFactory;
+import org.apache.http.params.HttpParams;
+import org.codehaus.plexus.util.StringUtils;
+
+class ConfigurableSSLSocketFactoryDecorator implements SchemeLayeredSocketFactory
 {
-    public ConfigurableSSLSocketFactory( SSLContext sslContext, X509HostnameVerifier hostnameVerifier )
+
+    private final SchemeLayeredSocketFactory sslSocketFactory;
+
+    public ConfigurableSSLSocketFactoryDecorator( SchemeLayeredSocketFactory sslSocketFactory )
     {
-        super( sslContext, hostnameVerifier );
+        super();
+        this.sslSocketFactory = sslSocketFactory;
     }
 
-    @Override
-    public Socket createSocket()
-        throws IOException
+    public Socket createSocket(final HttpParams params) throws IOException
     {
-        return enableSslProtocols( super.createSocket() );
+        return enableSslProtocols( this.sslSocketFactory.createSocket(params) );
     }
 
-    @Override
-    public Socket createSocket( HttpParams params )
-        throws IOException
+    public Socket createLayeredSocket(
+            final Socket socket,
+            final String target,
+            int port,
+            final HttpParams params) throws IOException, UnknownHostException
     {
-        return enableSslProtocols( super.createSocket( params ) );
+        return enableSslProtocols(
+            this.sslSocketFactory.createLayeredSocket(socket, target, port, params));
     }
 
-    @Override
-    public Socket createSocket( Socket socket, String host, int port, boolean autoClose )
-        throws IOException, UnknownHostException
+    public Socket connectSocket(
+            final Socket sock,
+            final InetSocketAddress remoteAddress,
+            final InetSocketAddress localAddress,
+            final HttpParams params) throws IOException, UnknownHostException, ConnectTimeoutException
     {
-        return enableSslProtocols( super.createSocket( socket, host, port, autoClose ) );
+        return this.sslSocketFactory.connectSocket(sock, remoteAddress, localAddress, params);
     }
 
-    @Override
-    public Socket connectSocket( Socket socket, String host, int port, InetAddress localAddress, int localPort,
-                                 HttpParams params )
-        throws IOException, UnknownHostException, ConnectTimeoutException
+    public boolean isSecure(final Socket sock) throws IllegalArgumentException
     {
-        return enableSslProtocols( super.connectSocket( socket, host, port, localAddress, localPort, params ) );
+        return this.sslSocketFactory.isSecure(sock);
     }
 
     protected Socket enableSslProtocols( Socket socket )
@@ -88,6 +84,5 @@ public class ConfigurableSSLSocketFactory
 
         return socket;
     }
-
 
 }

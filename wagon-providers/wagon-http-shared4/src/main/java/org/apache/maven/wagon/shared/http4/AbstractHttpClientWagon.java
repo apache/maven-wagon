@@ -19,6 +19,27 @@ package org.apache.maven.wagon.shared.http4;
  * under the License.
  */
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.nio.ByteBuffer;
+import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TimeZone;
+import java.util.zip.GZIPInputStream;
+
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
+
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
@@ -39,7 +60,9 @@ import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
@@ -47,9 +70,9 @@ import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.BasicClientConnectionManager;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.http.impl.conn.SingleClientConnManager;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.impl.conn.SchemeRegistryFactory;
 import org.apache.http.impl.cookie.DateParseException;
 import org.apache.http.impl.cookie.DateUtils;
 import org.apache.http.message.BasicHeader;
@@ -71,26 +94,6 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
-
-import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocket;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URLEncoder;
-import java.nio.ByteBuffer;
-import java.security.cert.X509Certificate;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.TimeZone;
-import java.util.zip.GZIPInputStream;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -238,7 +241,8 @@ public abstract class AbstractHttpClientWagon
     /**
      * @since 2.0
      */
-    protected ClientConnectionManager clientConnectionManager = new SingleClientConnManager();
+    protected ClientConnectionManager clientConnectionManager = new BasicClientConnectionManager(
+            SchemeRegistryFactory.createDefault());
 
     /**
      * use http(s) connection pool mechanism.
@@ -283,8 +287,32 @@ public abstract class AbstractHttpClientWagon
         }
         else
         {
+            SchemeRegistry schemeRegistry = new SchemeRegistry();
+            schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+            SSLSocketFactory sslSocketFactory;
+            if ( sslEasy )
+            {
+                try
+                {
+                    sslSocketFactory = new SSLSocketFactory(
+                        EasyX509TrustManager.createEasySSLContext(),
+                        sslAllowAll ? new EasyHostNameVerifier() : new BrowserCompatHostnameVerifier() );
+                }
+                catch ( IOException e )
+                {
+                    throw new RuntimeException( "failed to init SSLSocket Factory " + e.getMessage(), e );
+                }
+            }
+            else
+            {
+                sslSocketFactory = SSLSocketFactory.getSocketFactory();
+            }
+            Scheme httpsScheme = new Scheme( "https", 443,
+                new ConfigurableSSLSocketFactoryDecorator( sslSocketFactory ));
+            schemeRegistry.register(httpsScheme);
 
-            PoolingClientConnectionManager poolingClientConnectionManager = new PoolingClientConnectionManager();
+            PoolingClientConnectionManager poolingClientConnectionManager = new PoolingClientConnectionManager(
+                schemeRegistry);
             int maxPerRoute =
                 Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxPerRoute", "20" ) );
             poolingClientConnectionManager.setDefaultMaxPerRoute( maxPerRoute );
@@ -292,24 +320,6 @@ public abstract class AbstractHttpClientWagon
             poolingClientConnectionManager.setDefaultMaxPerRoute( maxPerRoute );
             poolingClientConnectionManager.setMaxTotal( maxTotal );
 
-            if ( sslEasy )
-            {
-                try
-                {
-                    ConfigurableSSLSocketFactory sslSocketFactory =
-                        new ConfigurableSSLSocketFactory( EasyX509TrustManager.createEasySSLContext(), sslAllowAll
-                            ? new EasyHostNameVerifier()
-                            : new BrowserCompatHostnameVerifier() );
-
-                    Scheme httpsScheme = new Scheme( "https", 443, sslSocketFactory );
-
-                    poolingClientConnectionManager.getSchemeRegistry().register( httpsScheme );
-                }
-                catch ( IOException e )
-                {
-                    throw new RuntimeException( "failed to init SSLSocket Factory " + e.getMessage(), e );
-                }
-            }
             connectionManagerPooled = poolingClientConnectionManager;
         }
     }
