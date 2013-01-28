@@ -241,8 +241,8 @@ public abstract class AbstractHttpClientWagon
     /**
      * @since 2.0
      */
-    protected ClientConnectionManager clientConnectionManager =
-        new BasicClientConnectionManager( SchemeRegistryFactory.createSystemDefault() );
+    protected ClientConnectionManager clientConnectionManager = new BasicClientConnectionManager(
+            SchemeRegistryFactory.createSystemDefault());
 
     /**
      * use http(s) connection pool mechanism.
@@ -259,8 +259,7 @@ public abstract class AbstractHttpClientWagon
      *
      * @since 2.0
      */
-    protected static boolean sslEasy =
-        Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.insecure", "false" ) );
+    protected static boolean sslEasy = Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.insecure", "false" ) );
 
     /**
      * ssl hostname verifier is allow all by default. Disable this will use a browser compat hostname verifier
@@ -289,15 +288,15 @@ public abstract class AbstractHttpClientWagon
         else
         {
             SchemeRegistry schemeRegistry = new SchemeRegistry();
-            schemeRegistry.register( new Scheme( "http", 80, PlainSocketFactory.getSocketFactory() ) );
+            schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
             SSLSocketFactory sslSocketFactory;
             if ( sslEasy )
             {
                 try
                 {
-                    sslSocketFactory = new SSLSocketFactory( EasyX509TrustManager.createEasySSLContext(), sslAllowAll
-                        ? new EasyHostNameVerifier()
-                        : new BrowserCompatHostnameVerifier() );
+                    sslSocketFactory = new SSLSocketFactory(
+                        EasyX509TrustManager.createEasySSLContext(),
+                        sslAllowAll ? new EasyHostNameVerifier() : new BrowserCompatHostnameVerifier() );
                 }
                 catch ( IOException e )
                 {
@@ -308,12 +307,12 @@ public abstract class AbstractHttpClientWagon
             {
                 sslSocketFactory = SSLSocketFactory.getSystemSocketFactory();
             }
-            Scheme httpsScheme =
-                new Scheme( "https", 443, new ConfigurableSSLSocketFactoryDecorator( sslSocketFactory ) );
-            schemeRegistry.register( httpsScheme );
+            Scheme httpsScheme = new Scheme( "https", 443,
+                new ConfigurableSSLSocketFactoryDecorator( sslSocketFactory ));
+            schemeRegistry.register(httpsScheme);
 
-            PoolingClientConnectionManager poolingClientConnectionManager =
-                new PoolingClientConnectionManager( schemeRegistry );
+            PoolingClientConnectionManager poolingClientConnectionManager = new PoolingClientConnectionManager(
+                schemeRegistry);
             int maxPerRoute =
                 Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxPerRoute", "20" ) );
             poolingClientConnectionManager.setDefaultMaxPerRoute( maxPerRoute );
@@ -411,7 +410,7 @@ public abstract class AbstractHttpClientWagon
                 int port = getRepository().getPort() > -1 ? getRepository().getPort() : AuthScope.ANY_PORT;
 
                 client.getCredentialsProvider().setCredentials( new AuthScope( host, port ), creds );
-                // preemptive off by default for get
+                // preemptive off by default
                 /*
                 AuthCache authCache = new BasicAuthCache();
                 BasicScheme basicAuth = new BasicScheme();

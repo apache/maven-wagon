@@ -30,11 +30,7 @@ import org.apache.http.conn.scheme.SchemeLayeredSocketFactory;
 import org.apache.http.params.HttpParams;
 import org.codehaus.plexus.util.StringUtils;
 
-/**
- * @since 2.4
- */
-class ConfigurableSSLSocketFactoryDecorator
-    implements SchemeLayeredSocketFactory
+class ConfigurableSSLSocketFactoryDecorator implements SchemeLayeredSocketFactory
 {
 
     private final SchemeLayeredSocketFactory sslSocketFactory;
@@ -45,29 +41,33 @@ class ConfigurableSSLSocketFactoryDecorator
         this.sslSocketFactory = sslSocketFactory;
     }
 
-    public Socket createSocket( final HttpParams params )
-        throws IOException
+    public Socket createSocket(final HttpParams params) throws IOException
     {
-        return enableSslProtocols( this.sslSocketFactory.createSocket( params ) );
+        return enableSslProtocols( this.sslSocketFactory.createSocket(params) );
     }
 
-    public Socket createLayeredSocket( final Socket socket, final String target, int port, final HttpParams params )
-        throws IOException, UnknownHostException
+    public Socket createLayeredSocket(
+            final Socket socket,
+            final String target,
+            int port,
+            final HttpParams params) throws IOException, UnknownHostException
     {
-        return enableSslProtocols( this.sslSocketFactory.createLayeredSocket( socket, target, port, params ) );
+        return enableSslProtocols(
+            this.sslSocketFactory.createLayeredSocket(socket, target, port, params));
     }
 
-    public Socket connectSocket( final Socket sock, final InetSocketAddress remoteAddress,
-                                 final InetSocketAddress localAddress, final HttpParams params )
-        throws IOException, UnknownHostException, ConnectTimeoutException
+    public Socket connectSocket(
+            final Socket sock,
+            final InetSocketAddress remoteAddress,
+            final InetSocketAddress localAddress,
+            final HttpParams params) throws IOException, UnknownHostException, ConnectTimeoutException
     {
-        return this.sslSocketFactory.connectSocket( sock, remoteAddress, localAddress, params );
+        return this.sslSocketFactory.connectSocket(sock, remoteAddress, localAddress, params);
     }
 
-    public boolean isSecure( final Socket sock )
-        throws IllegalArgumentException
+    public boolean isSecure(final Socket sock) throws IllegalArgumentException
     {
-        return this.sslSocketFactory.isSecure( sock );
+        return this.sslSocketFactory.isSecure(sock);
     }
 
     protected Socket enableSslProtocols( Socket socket )
