@@ -47,6 +47,7 @@ import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.impl.cookie.DateParseException;
@@ -283,13 +284,13 @@ public abstract class AbstractHttpClientWagon
         else
         {
 
-            ThreadSafeClientConnManager threadSafeClientConnManager = new ThreadSafeClientConnManager();
+            PoolingClientConnectionManager poolingClientConnectionManager = new PoolingClientConnectionManager();
             int maxPerRoute =
                 Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxPerRoute", "20" ) );
-            threadSafeClientConnManager.setDefaultMaxPerRoute( maxPerRoute );
+            poolingClientConnectionManager.setDefaultMaxPerRoute( maxPerRoute );
             int maxTotal = Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxTotal", "40" ) );
-            threadSafeClientConnManager.setDefaultMaxPerRoute( maxPerRoute );
-            threadSafeClientConnManager.setMaxTotal( maxTotal );
+            poolingClientConnectionManager.setDefaultMaxPerRoute( maxPerRoute );
+            poolingClientConnectionManager.setMaxTotal( maxTotal );
 
             if ( sslEasy )
             {
@@ -302,14 +303,14 @@ public abstract class AbstractHttpClientWagon
 
                     Scheme httpsScheme = new Scheme( "https", 443, sslSocketFactory );
 
-                    threadSafeClientConnManager.getSchemeRegistry().register( httpsScheme );
+                    poolingClientConnectionManager.getSchemeRegistry().register( httpsScheme );
                 }
                 catch ( IOException e )
                 {
                     throw new RuntimeException( "failed to init SSLSocket Factory " + e.getMessage(), e );
                 }
             }
-            connectionManagerPooled = threadSafeClientConnManager;
+            connectionManagerPooled = poolingClientConnectionManager;
         }
     }
 
