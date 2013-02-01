@@ -998,7 +998,7 @@ public abstract class WagonTestCase
      */
     protected boolean assertOnTransferProgress()
     {
-        return true;
+        return false;
     }
 
     protected ProgressArgumentMatcher replaceMockForGet( Wagon wagon, int expectedSize )
