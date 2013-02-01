@@ -45,4 +45,10 @@ public class LightweightHttpsWagonTest
         connector.setTrustPassword( "wagonhttp" );
         server.setConnectors( new Connector[] { connector } );
     }
+
+    @Override
+    protected boolean assertOnTransferProgress()
+    {
+        return false;
+    }
 }
