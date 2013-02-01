@@ -31,6 +31,11 @@ public class HttpsWagonTest
         return "https";
     }
 
+    protected boolean assertOnTransferProgress()
+    {
+        return false;
+    }
+
     protected void addConnectors( Server server )
     {
         System.setProperty( "javax.net.ssl.trustStore",

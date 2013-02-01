@@ -76,4 +76,10 @@ public class HttpsWagonPreemptiveTest
     {
         return true;
     }
+
+    @Override
+    protected boolean assertOnTransferProgress()
+    {
+        return false;
+    }
 }

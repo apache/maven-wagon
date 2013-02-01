@@ -45,7 +45,6 @@ import java.util.List;
 
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
- *
  */
 public abstract class WagonTestCase
     extends PlexusTestCase
@@ -270,17 +269,6 @@ public abstract class WagonTestCase
         return true;
     }
 
-    public void testWagonGetIfNewerIsOlder()
-        throws Exception
-    {
-        if ( supportsGetIfNewer() )
-        {
-            setupRepositories();
-            setupWagonTestingFixtures();
-            int expectedSize = putFile();
-            getIfNewer( new SimpleDateFormat( "yyyy-MM-dd" ).parse( "2006-01-01" ).getTime(), true, expectedSize );
-        }
-    }
 
     public void testWagonGetIfNewerIsSame()
         throws Exception
@@ -291,6 +279,18 @@ public abstract class WagonTestCase
             setupWagonTestingFixtures();
             int expectedSize = putFile();
             getIfNewer( getExpectedLastModifiedOnGet( testRepository, new Resource( resource ) ), false, expectedSize );
+        }
+    }
+
+    public void testWagonGetIfNewerIsOlder()
+        throws Exception
+    {
+        if ( supportsGetIfNewer() )
+        {
+            setupRepositories();
+            setupWagonTestingFixtures();
+            int expectedSize = putFile();
+            getIfNewer( new SimpleDateFormat( "yyyy-MM-dd" ).parse( "2006-01-01" ).getTime(), true, expectedSize );
         }
     }
 
@@ -311,6 +311,28 @@ public abstract class WagonTestCase
         assertGetIfNewerTest( progressArgumentMatcher, expectedResult, expectedSize );
 
         tearDownWagonTestingFixtures();
+    }
+
+    protected ProgressArgumentMatcher setupGetIfNewerTest( Wagon wagon, boolean expectedResult, int expectedSize )
+        throws NoSuchAlgorithmException, IOException
+    {
+        checksumObserver = new ChecksumObserver();
+
+        destFile = FileTestUtils.createUniqueFile( getName(), getName() );
+        destFile.delete();
+        assertFalse( destFile.exists() );
+        destFile.deleteOnExit();
+
+        ProgressArgumentMatcher progressArgumentMatcher = null;
+        if ( expectedResult )
+        {
+            progressArgumentMatcher = replaceMockForGet( wagon, expectedSize );
+        }
+        else
+        {
+            replaceMockForSkippedGetIfNewer( wagon, expectedSize );
+        }
+        return progressArgumentMatcher;
     }
 
     protected void assertGetIfNewerTest( ProgressArgumentMatcher progressArgumentMatcher, boolean expectedResult,
@@ -346,27 +368,6 @@ public abstract class WagonTestCase
         }
     }
 
-    protected ProgressArgumentMatcher setupGetIfNewerTest( Wagon wagon, boolean expectedResult, int expectedSize )
-        throws NoSuchAlgorithmException, IOException
-    {
-        checksumObserver = new ChecksumObserver();
-
-        destFile = FileTestUtils.createUniqueFile( getName(), getName() );
-        destFile.delete();
-        assertFalse( destFile.exists() );
-        destFile.deleteOnExit();
-
-        ProgressArgumentMatcher progressArgumentMatcher = null;
-        if ( expectedResult )
-        {
-            progressArgumentMatcher = replaceMockForGet( wagon, expectedSize );
-        }
-        else
-        {
-            replaceMockForSkippedGetIfNewer( wagon, expectedSize );
-        }
-        return progressArgumentMatcher;
-    }
 
     private void replaceMockForSkippedGetIfNewer( Wagon wagon, int expectedSize )
     {
@@ -960,6 +961,7 @@ public abstract class WagonTestCase
         verifyMock( progressArgumentMatcher, expectedSize );
     }
 
+
     protected void verifyMock( ProgressArgumentMatcher progressArgumentMatcher, int length )
     {
         mockTransferListenerControl.verify();
@@ -989,6 +991,16 @@ public abstract class WagonTestCase
         wagon.connect( testRepository, getAuthInfo() );
     }
 
+    /**
+     *
+     * some test (mock on transfertprogress call) relies on the fact that InputStream #read(byte[] b, int off, int len)
+     * read all bytes. But javadoc says: ""
+     */
+    protected boolean assertOnTransferProgress()
+    {
+        return true;
+    }
+
     protected ProgressArgumentMatcher replaceMockForGet( Wagon wagon, int expectedSize )
     {
         Resource resource = new Resource( this.resource );
@@ -1004,9 +1016,18 @@ public abstract class WagonTestCase
         mockTransferListener.transferProgress(
             new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_GET ),
             new byte[]{ }, 0 );
-        ProgressArgumentMatcher progressArgumentMatcher = new ProgressArgumentMatcher();
-        mockTransferListenerControl.setMatcher( progressArgumentMatcher );
 
+        ProgressArgumentMatcher progressArgumentMatcher = new ProgressArgumentMatcher();
+
+        if ( assertOnTransferProgress() )
+        {
+            mockTransferListenerControl.setMatcher( progressArgumentMatcher );
+        }
+        else
+        {
+            mockTransferListenerControl.setMatcher( progressArgumentMatcher );
+            mockTransferListenerControl.setVoidCallable( MockControl.ZERO_OR_MORE );
+        }
         mockTransferListener.debug( null );
         mockTransferListenerControl.setMatcher( MockControl.ALWAYS_MATCHER );
         mockTransferListenerControl.setVoidCallable( MockControl.ZERO_OR_MORE );
