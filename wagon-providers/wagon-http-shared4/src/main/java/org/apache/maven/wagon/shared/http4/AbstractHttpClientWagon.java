@@ -36,6 +36,7 @@ import java.util.Properties;
 import java.util.TimeZone;
 import java.util.zip.GZIPInputStream;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
@@ -63,7 +64,6 @@ import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.AbstractHttpEntity;
@@ -72,7 +72,6 @@ import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.BasicClientConnectionManager;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.http.impl.conn.SchemeRegistryFactory;
 import org.apache.http.impl.cookie.DateParseException;
 import org.apache.http.impl.cookie.DateUtils;
 import org.apache.http.message.BasicHeader;
@@ -242,7 +241,7 @@ public abstract class AbstractHttpClientWagon
      * @since 2.0
      */
     protected ClientConnectionManager clientConnectionManager = new BasicClientConnectionManager(
-            SchemeRegistryFactory.createDefault());
+            createSchemeRegistry());
 
     /**
      * use http(s) connection pool mechanism.
@@ -279,6 +278,36 @@ public abstract class AbstractHttpClientWagon
     protected static boolean IGNORE_SSL_VALIDITY_DATES =
         Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.ignore.validity.dates", "false" ) );
 
+    private static SchemeRegistry createSchemeRegistry()
+    {
+        SchemeRegistry schemeRegistry = new SchemeRegistry();
+        schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+        SSLSocketFactory sslSocketFactory;
+        if ( sslInsecure )
+        {
+            try
+            {
+                sslSocketFactory = new SSLSocketFactory(
+                    EasyX509TrustManager.createEasySSLContext(),
+                    sslAllowAll ? new EasyHostNameVerifier() : SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER );
+            }
+            catch ( IOException e )
+            {
+                throw new RuntimeException( "failed to init SSLSocket Factory " + e.getMessage(), e );
+            }
+        }
+        else
+        {
+            sslSocketFactory = new SSLSocketFactory(
+                HttpsURLConnection.getDefaultSSLSocketFactory(),
+                SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER );
+        }
+        Scheme httpsScheme = new Scheme( "https", 443,
+            new ConfigurableSSLSocketFactoryDecorator( sslSocketFactory ));
+        schemeRegistry.register(httpsScheme);
+        return schemeRegistry;
+    }
+
     static
     {
         if ( !useClientManagerPooled )
@@ -287,32 +316,8 @@ public abstract class AbstractHttpClientWagon
         }
         else
         {
-            SchemeRegistry schemeRegistry = new SchemeRegistry();
-            schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-            SSLSocketFactory sslSocketFactory;
-            if ( sslInsecure )
-            {
-                try
-                {
-                    sslSocketFactory = new SSLSocketFactory(
-                        EasyX509TrustManager.createEasySSLContext(),
-                        sslAllowAll ? new EasyHostNameVerifier() : new BrowserCompatHostnameVerifier() );
-                }
-                catch ( IOException e )
-                {
-                    throw new RuntimeException( "failed to init SSLSocket Factory " + e.getMessage(), e );
-                }
-            }
-            else
-            {
-                sslSocketFactory = SSLSocketFactory.getSocketFactory();
-            }
-            Scheme httpsScheme = new Scheme( "https", 443,
-                new ConfigurableSSLSocketFactoryDecorator( sslSocketFactory ));
-            schemeRegistry.register(httpsScheme);
-
             PoolingClientConnectionManager poolingClientConnectionManager = new PoolingClientConnectionManager(
-                schemeRegistry);
+                createSchemeRegistry());
             int maxPerRoute =
                 Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxPerRoute", "20" ) );
             poolingClientConnectionManager.setDefaultMaxPerRoute( maxPerRoute );
