@@ -46,11 +46,11 @@ Features
 
  * maven.wagon.httpconnectionManager.maxTotal = integer (default 40), maximum number of htp(s) connection.
 
- * maven.wagon.http.ssl.easy = true/false (default true), enable/disable use of easy ssl check for user generated certificates.
+ * maven.wagon.http.ssl.insecure = true/false (default false), enable/disable use of easy ssl check for user generated certificates.
 
- * maven.wagon.http.ssl.allowall = true/false (default true), enable/disable match of the server's X.509 certificate. If disable, a browser like check will be used.
+ * maven.wagon.http.ssl.allowall = true/false (default false), enable/disable match of the server's X.509 certificate. If disable, a browser like check will be used.
 
- * maven.wagon.http.ssl.ignore.validity.dates = true/false (default true), ignore issue with certifactes dates.
+ * maven.wagon.http.ssl.ignore.validity.dates = true/false (default false), ignore issue with certifactes dates.
 
  * maven.wagon.rto=time in ms (default 1800000) read time out.
 
