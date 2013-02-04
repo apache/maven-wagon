@@ -62,5 +62,15 @@ under the License.
     </menu>
     <menu ref="modules" />
     <menu ref="reports" />
+
+
+    <footer>
+      <div class="row span16"><div>Apache Maven, Apache, the Apache feather logo, and the Apache Maven project logos are trademarks of The Apache Software Foundation.
+        All other marks mentioned may be trademarks or registered trademarks of their respective owners.</div>
+        <a href="${project.url}/privacy-policy.html">Privacy Policy</a>
+      </div>
+    </footer>
+
   </body>
+
 </project>
