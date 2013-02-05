@@ -34,13 +34,20 @@ under the License.
 
   <name>Apache Maven Wagon</name>
   <description>Tools to manage artifacts and deployment</description>
-  <url>http://maven.apache.org/wagon</url>
+  <url>${siteUrl}</url>
   <inceptionYear>2003</inceptionYear>
 
   <properties>
+    <siteDeployUrl>scp://people.apache.org/www/maven.apache.org/wagon/</siteDeployUrl>
+    <siteUrl>http://maven.apache.org/wagon-archives/wagon-${project.version}</siteUrl>
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
     <slf4jVersion>1.7.2</slf4jVersion>
-    <maven.site.path>wagon-archives/wagon-LATEST</maven.site.path>
+
+    <maven.wagon.siteFilePath>${maven.site.cache}/maven-wagon-${project.version}</maven.wagon.siteFilePath>
+    <maven.wagon.siteUrlDeployment>file://${maven.wagon.siteFilePath}</maven.wagon.siteUrlDeployment>
+    <maven.wagon.scmPubCheckoutDirectory>${maven.site.cache}/maven-wagon-site-content-${project.version}</maven.wagon.scmPubCheckoutDirectory>
+    <maven.wagon.scmPubUrl>https://svn.apache.org/repos/infra/websites/production/maven/content/wagon-archives/wagon-${project.version}</maven.wagon.scmPubUrl>
+
   </properties>
 
   <contributors>
@@ -201,7 +208,7 @@ under the License.
   <distributionManagement>
     <site>
       <id>apache.website</id>
-      <url>scm:svn:https://svn.apache.org/repos/infra/websites/production/maven/content/${maven.site.path}</url>
+      <url>${maven.wagon.siteUrlDeployment}</url>
     </site>
   </distributionManagement>
 
@@ -360,7 +367,10 @@ under the License.
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-scm-publish-plugin</artifactId>
           <configuration>
-            <checkoutDirectory>${maven.site.cache}/${maven.site.path}</checkoutDirectory>
+            <checkoutDirectory>${maven.wagon.scmPubCheckoutDirectory}</checkoutDirectory>
+            <pubScmUrl>scm:svn:${maven.wagon.scmPubUrl}</pubScmUrl>
+            <checkinComment>Apache Maven Wagon site deployment</checkinComment>
+            <content>${maven.wagon.siteFilePath}</content>
             <tryUpdate>true</tryUpdate>
           </configuration>
         </plugin>
@@ -559,6 +569,14 @@ under the License.
         </plugins>
       </reporting>
     </profile>
+
+    <profile>
+      <id>site-release</id>
+      <properties>
+        <maven.site.path>${project.artifactId}</maven.site.path>
+      </properties>
+    </profile>
+
   </profiles>
   
 </project>
