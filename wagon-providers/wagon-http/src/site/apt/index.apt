@@ -37,20 +37,23 @@ Maven Wagon HTTP
 
 Features
 
- Prior to version 2.0, a pooled http connection manager is used.
- The pooled feature is enabled by default, you can configure it trough the following system properties :
+ Starting with version 2.0, a pooled http connection manager is used.
+ You can configure it through the following system properties:
 
- * maven.wagon.http.pool = true/false (default true), enable/disable the pooled mechanism.
+ * <<<maven.wagon.http.pool>>> = true/false (default true), enable/disable the pool mechanism.
 
- * maven.wagon.httpconnectionManager.maxPerRoute = integer (default : 20), maximum number of http(s) connection per destination.
+ * <<<maven.wagon.httpconnectionManager.maxPerRoute>>> = integer (default 20), maximum number of http(s) connection per destination.
 
- * maven.wagon.httpconnectionManager.maxTotal = integer (default 40), maximum number of htp(s) connection.
+ * <<<maven.wagon.httpconnectionManager.maxTotal>>> = integer (default 40), maximum number of htp(s) connection.
 
- * maven.wagon.http.ssl.insecure = true/false (default false), enable/disable use of easy ssl check for user generated certificates.
+ []
 
- * maven.wagon.http.ssl.allowall = true/false (default false), enable/disable match of the server's X.509 certificate. If disable, a browser like check will be used.
+ Other features can be configured through system properties:
 
- * maven.wagon.http.ssl.ignore.validity.dates = true/false (default false), ignore issue with certifactes dates.
+ * <<<maven.wagon.http.ssl.insecure>>> = true/false (default false), enable/disable use of relaxed ssl check for user generated certificates.
 
- * maven.wagon.rto=time in ms (default 1800000) read time out.
+ * <<<maven.wagon.http.ssl.allowall>>> = true/false (default false), enable/disable match of the server's X.509 certificate with hostname. If disabled, a browser like check will be used.
 
+ * <<<maven.wagon.http.ssl.ignore.validity.dates>>> = true/false (default false), ignore issue with certificate dates.
+
+ * <<<maven.wagon.rto>>> = time in ms (default 1800000), read time out.
