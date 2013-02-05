@@ -4,7 +4,7 @@
  Carlos Sanchez
  Olivier Lamy
  ------
- 2011-08-29
+ 2013-02-05
  ------
 
  ~~ Licensed to the Apache Software Foundation (ASF) under one
@@ -44,7 +44,7 @@ Features
 
  * <<<maven.wagon.httpconnectionManager.maxPerRoute>>> = integer (default 20), maximum number of http(s) connection per destination.
 
- * <<<maven.wagon.httpconnectionManager.maxTotal>>> = integer (default 40), maximum number of htp(s) connection.
+ * <<<maven.wagon.httpconnectionManager.maxTotal>>> = integer (default 40), maximum number of http(s) connection.
 
  []
 
@@ -54,6 +54,6 @@ Features
 
  * <<<maven.wagon.http.ssl.allowall>>> = true/false (default false), enable/disable match of the server's X.509 certificate with hostname. If disabled, a browser like check will be used.
 
- * <<<maven.wagon.http.ssl.ignore.validity.dates>>> = true/false (default false), ignore issue with certificate dates.
+ * <<<maven.wagon.http.ssl.ignore.validity.dates>>> = true/false (default false), ignore issues with certificate dates.
 
  * <<<maven.wagon.rto>>> = time in ms (default 1800000), read time out.
