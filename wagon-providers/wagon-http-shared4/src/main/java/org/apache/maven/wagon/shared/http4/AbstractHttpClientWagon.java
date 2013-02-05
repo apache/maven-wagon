@@ -152,7 +152,6 @@ public abstract class AbstractHttpClientWagon
             return length;
         }
 
-
         public InputStream getContent()
             throws IOException, IllegalStateException
         {
@@ -168,7 +167,6 @@ public abstract class AbstractHttpClientWagon
             return true;
         }
 
-
         public void writeTo( final OutputStream outstream )
             throws IOException
         {
@@ -179,7 +177,7 @@ public abstract class AbstractHttpClientWagon
             TransferEvent transferEvent =
                 new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT );
             transferEvent.setTimestamp( System.currentTimeMillis() );
-            InputStream instream = this.source != null
+            InputStream instream = ( this.source != null )
                 ? new FileInputStream( this.source )
                 : new ByteArrayInputStream( this.byteBuffer.array() );
             try
@@ -222,8 +220,6 @@ public abstract class AbstractHttpClientWagon
         {
             return true;
         }
-
-
     }
 
     protected static final int SC_NULL = -1;
@@ -240,8 +236,8 @@ public abstract class AbstractHttpClientWagon
     /**
      * @since 2.0
      */
-    protected ClientConnectionManager clientConnectionManager = new BasicClientConnectionManager(
-            createSchemeRegistry());
+    protected ClientConnectionManager clientConnectionManager =
+        new BasicClientConnectionManager( createSchemeRegistry() );
 
     /**
      * use http(s) connection pool mechanism.
@@ -261,16 +257,7 @@ public abstract class AbstractHttpClientWagon
     protected static boolean sslInsecure = Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.insecure", "false" ) );
 
     /**
-     * ssl hostname verifier is allow all by default. Disable this will use a browser compat hostname verifier
-     * <b>disabled by default</b>
-     *
-     * @since 2.0
-     */
-    protected static boolean sslAllowAll =
-        Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.allowall", "false" ) );
-
-    /**
-     * if using sslInsecure certificate date issues will be ignored
+     * if using sslInsecure, certificate date issues will be ignored
      * <b>disabled by default</b>
      *
      * @since 2.0
@@ -278,18 +265,28 @@ public abstract class AbstractHttpClientWagon
     protected static boolean IGNORE_SSL_VALIDITY_DATES =
         Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.ignore.validity.dates", "false" ) );
 
+    /**
+     * If enabled, ssl hostname verifier does not check hostname. Disable this will use a browser compat hostname verifier
+     * <b>disabled by default</b>
+     *
+     * @since 2.0
+     * @see BrowserCompatHostnameVerifier
+     */
+    protected static boolean sslAllowAll =
+        Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.allowall", "false" ) );
+
     private static SchemeRegistry createSchemeRegistry()
     {
         SchemeRegistry schemeRegistry = new SchemeRegistry();
-        schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+        schemeRegistry.register( new Scheme( "http", 80, PlainSocketFactory.getSocketFactory() ) );
         SSLSocketFactory sslSocketFactory;
         if ( sslInsecure )
         {
             try
             {
                 sslSocketFactory = new SSLSocketFactory(
-                    EasyX509TrustManager.createEasySSLContext(),
-                    sslAllowAll ? new EasyHostNameVerifier() : SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER );
+                    RelaxedX509TrustManager.createRelaxedSSLContext(),
+                    sslAllowAll ? new RelaxedHostNameVerifier() : SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER );
             }
             catch ( IOException e )
             {
@@ -302,9 +299,10 @@ public abstract class AbstractHttpClientWagon
                 HttpsURLConnection.getDefaultSSLSocketFactory(),
                 SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER );
         }
-        Scheme httpsScheme = new Scheme( "https", 443,
-            new ConfigurableSSLSocketFactoryDecorator( sslSocketFactory ));
-        schemeRegistry.register(httpsScheme);
+
+        Scheme httpsScheme = new Scheme( "https", 443, new ConfigurableSSLSocketFactoryDecorator( sslSocketFactory ) );
+        schemeRegistry.register( httpsScheme );
+
         return schemeRegistry;
     }
 
@@ -316,8 +314,8 @@ public abstract class AbstractHttpClientWagon
         }
         else
         {
-            PoolingClientConnectionManager poolingClientConnectionManager = new PoolingClientConnectionManager(
-                createSchemeRegistry());
+            PoolingClientConnectionManager poolingClientConnectionManager =
+                new PoolingClientConnectionManager( createSchemeRegistry() );
             int maxPerRoute =
                 Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxPerRoute", "20" ) );
             poolingClientConnectionManager.setDefaultMaxPerRoute( maxPerRoute );
@@ -334,7 +332,7 @@ public abstract class AbstractHttpClientWagon
      *
      * @since 2.0
      */
-    private static class EasyHostNameVerifier
+    private static class RelaxedHostNameVerifier
         implements X509HostnameVerifier
     {
         public void verify( String s, SSLSocket sslSocket )
@@ -546,13 +544,11 @@ public abstract class AbstractHttpClientWagon
 
         if ( authenticationInfo != null )
         {
-
             String username = authenticationInfo.getUserName();
             String password = authenticationInfo.getPassword();
             // preemptive for put
             if ( StringUtils.isNotEmpty( username ) && StringUtils.isNotEmpty( password ) )
             {
-
                 AuthCache authCache = new BasicAuthCache();
                 BasicScheme basicAuth = new BasicScheme();
                 HttpHost targetHost =
@@ -591,7 +587,7 @@ public abstract class AbstractHttpClientWagon
             }
 
             int statusCode = response.getStatusLine().getStatusCode();
-            String reasonPhrase = ", ReasonPhrase:" + response.getStatusLine().getReasonPhrase() + ".";
+            String reasonPhrase = ", ReasonPhrase: " + response.getStatusLine().getReasonPhrase() + ".";
             fireTransferDebug( url + " - Status code: " + statusCode + reasonPhrase );
 
             // Check that we didn't run out of retries.
@@ -680,7 +676,7 @@ public abstract class AbstractHttpClientWagon
         try
         {
             statusCode = response.getStatusLine().getStatusCode();
-            String reasonPhrase = ", ReasonPhrase:" + response.getStatusLine().getReasonPhrase() + ".";
+            String reasonPhrase = ", ReasonPhrase: " + response.getStatusLine().getReasonPhrase() + ".";
             switch ( statusCode )
             {
                 case HttpStatus.SC_OK:
@@ -696,10 +692,10 @@ public abstract class AbstractHttpClientWagon
                     throw new AuthorizationException( "Access denied to: " + url + reasonPhrase );
 
                 case HttpStatus.SC_UNAUTHORIZED:
-                    throw new AuthorizationException( "Not authorized" + reasonPhrase );
+                    throw new AuthorizationException( "Not authorized " + reasonPhrase );
 
                 case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
-                    throw new AuthorizationException( "Not authorized by proxy" + reasonPhrase );
+                    throw new AuthorizationException( "Not authorized by proxy " + reasonPhrase );
 
                 case HttpStatus.SC_NOT_FOUND:
                     return false;
@@ -922,32 +918,32 @@ public abstract class AbstractHttpClientWagon
             case SC_NULL:
             {
                 TransferFailedException e =
-                    new TransferFailedException( "Failed to transfer file: " + url + reasonPhrase );
+                    new TransferFailedException( "Failed to transfer file: " + url + " " + reasonPhrase );
                 fireTransferError( resource, e, TransferEvent.REQUEST_GET );
                 throw e;
             }
 
             case HttpStatus.SC_FORBIDDEN:
                 fireSessionConnectionRefused();
-                throw new AuthorizationException( "Access denied to: " + url + reasonPhrase );
+                throw new AuthorizationException( "Access denied to: " + url + " " + reasonPhrase );
 
             case HttpStatus.SC_UNAUTHORIZED:
                 fireSessionConnectionRefused();
-                throw new AuthorizationException( "Not authorized" + reasonPhrase );
+                throw new AuthorizationException( "Not authorized " + reasonPhrase );
 
             case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
                 fireSessionConnectionRefused();
-                throw new AuthorizationException( "Not authorized by proxy" + reasonPhrase );
+                throw new AuthorizationException( "Not authorized by proxy " + reasonPhrase );
 
             case HttpStatus.SC_NOT_FOUND:
-                throw new ResourceDoesNotExistException( "File: " + url + reasonPhrase );
+                throw new ResourceDoesNotExistException( "File: " + url + " " + reasonPhrase );
 
                 // add more entries here
             default:
             {
                 cleanupGetTransfer( resource );
                 TransferFailedException e = new TransferFailedException(
-                    "Failed to transfer file: " + url + ". Return code is: " + statusCode + reasonPhrase );
+                    "Failed to transfer file: " + url + ". Return code is: " + statusCode + " " + reasonPhrase );
                 fireTransferError( resource, e, TransferEvent.REQUEST_GET );
                 throw e;
             }
@@ -1009,7 +1005,7 @@ public abstract class AbstractHttpClientWagon
             fireTransferError( resource, e, TransferEvent.REQUEST_GET );
 
             String msg =
-                "Error occurred while retrieving from remote repository:" + getRepository() + ": " + e.getMessage();
+                "Error occurred while retrieving from remote repository " + getRepository() + ": " + e.getMessage();
 
             throw new TransferFailedException( msg, e );
         }

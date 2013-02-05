@@ -33,22 +33,24 @@ import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 
 /**
+ * Relaxed X509 certificate trust manager: can ignore invalid certificate date.
+ *
  * @author Olivier Lamy
  * @since 2.0
+ * @see AbstractHttpClientWagon.IGNORE_SSL_VALIDITY_DATES
  */
-public class EasyX509TrustManager
+public class RelaxedX509TrustManager
     implements X509TrustManager
 {
     private X509TrustManager standardTrustManager = null;
 
-
-    protected static SSLContext createEasySSLContext()
+    protected static SSLContext createRelaxedSSLContext()
         throws IOException
     {
         try
         {
             SSLContext context = SSLContext.getInstance( "SSL" );
-            context.init( null, new TrustManager[]{ new EasyX509TrustManager( null ) }, null );
+            context.init( null, new TrustManager[]{ new RelaxedX509TrustManager( null ) }, null );
             return context;
         }
         catch ( Exception e )
@@ -62,7 +64,7 @@ public class EasyX509TrustManager
     /**
      * Constructor for EasyX509TrustManager.
      */
-    public EasyX509TrustManager( KeyStore keystore )
+    public RelaxedX509TrustManager( KeyStore keystore )
         throws NoSuchAlgorithmException, KeyStoreException
     {
         super();
