@@ -28,7 +28,7 @@
 
 Maven Wagon SSH
 
- This project is an implementation of Wagon provider for SCP and SFTP access.
+ This component is an implementation of Wagon provider for SCP and SFTP access.
 
  It enables Maven to deploy artifacts and sites to SSH servers.
  It uses {{{http://www.jcraft.com/jsch/}JSch - Java Secure Channel}} as lower level layer.

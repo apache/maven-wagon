@@ -28,7 +28,7 @@
 
 Maven Wagon FTP
 
- This project is an implementation of Wagon provider for FTP access.
+ This component is an implementation of Wagon provider for FTP access.
  It uses {{{http://jakarta.apache.org/commons/net/}commons-net}} as lower level layer.
 
  It enables Maven to use remote repositories stored in FTP servers. It doesn't allow deployment of directories.

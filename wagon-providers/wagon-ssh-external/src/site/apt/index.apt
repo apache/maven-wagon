@@ -28,10 +28,10 @@
 
 Maven Wagon SSH External
 
- This project is an implementation of Wagon provider for SSH servers access.
+ This component is an implementation of Wagon provider for SSH servers access.
  
  It enables Maven to deploy artifacts and sites to SSH servers.
- it uses an external SSH program that has to be already installed in the system
+ it uses an external SSH program that has to be already installed in the system.
 
  Getting files from SSH servers is not fully tested.
 

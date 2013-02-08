@@ -28,7 +28,7 @@
 
 Maven Wagon API
 
- The Wagon API project defines {{{./apidocs/}a simple API}} for transferring resources
+ The Wagon API component defines {{{./apidocs/}a simple API}} for transferring resources
  (artifacts) to and from repositories. The word repository is used in this context as
  it is commonly used in
  {{{http://maven.apache.org/maven-1.x/reference/glossary.html}Maven}}

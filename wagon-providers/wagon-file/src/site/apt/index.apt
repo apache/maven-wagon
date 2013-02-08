@@ -28,7 +28,7 @@
 
 Maven Wagon File
 
- This project is an implementation of Wagon provider for File system access.
+ This component is an implementation of Wagon provider for File system access.
  
  It enables Maven to use remote repositories stored in local file system and to store Maven sites there also.
 

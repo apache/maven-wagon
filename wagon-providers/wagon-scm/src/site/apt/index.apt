@@ -28,7 +28,7 @@
 
 Maven Wagon SCM
 
- This project is an implementation of Wagon provider for SCM (Source Control Management) systems,
+ This component is an implementation of Wagon provider for SCM (Source Control Management) systems,
  using {{{http://maven.apache.org/scm}Maven SCM}}.
  
  It enables Maven to use remote repositories stored in SCM systems (Subversion, CVS, ...)

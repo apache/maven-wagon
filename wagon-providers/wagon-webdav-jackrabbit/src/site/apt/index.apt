@@ -28,7 +28,7 @@
 
 Maven Wagon WebDAV
 
- This project is an implementation of Wagon provider for WebDAV server access.
+ This component is an implementation of Wagon provider for WebDAV server access.
  You will need to use at least Java 1.6 if you want to use this Wagon provider.
  
  It enables Maven to deploy artifacts and files to WebDAV enabled servers.
