@@ -30,8 +30,7 @@ under the License.
   <artifactId>wagon-http-shared</artifactId>
   <name>Apache Maven Wagon :: Providers :: HTTP Shared Library</name>
   <description>
-    Shared Library for the wagon-http, and wagon-http-lightweight wagon
-    providers.
+    Shared Library for the wagon-webdav wagon provider based on httpclient-3.x.
   </description>
 
   <dependencies>
