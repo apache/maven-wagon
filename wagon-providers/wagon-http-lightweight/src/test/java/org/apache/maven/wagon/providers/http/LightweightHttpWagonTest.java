@@ -20,10 +20,7 @@ package org.apache.maven.wagon.providers.http;
  */
 
 import org.apache.maven.wagon.StreamingWagon;
-import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.http.HttpWagonTestCase;
-import org.apache.maven.wagon.proxy.ProxyInfo;
-import org.apache.maven.wagon.repository.Repository;
 
 import java.util.Properties;
 
@@ -44,7 +41,6 @@ public class LightweightHttpWagonTest
         return getProtocol() + "://localhost:" + getTestRepositoryPort() + "/";
     }
 
-
     protected void setHttpHeaders( StreamingWagon wagon, Properties properties )
     {
         ( (LightweightHttpWagon) wagon ).setHttpHeaders( properties );
@@ -55,7 +51,6 @@ public class LightweightHttpWagonTest
     {
         return false;
     }
-
 
     @Override
     protected boolean supportPreemptiveAuthenticationPut()
