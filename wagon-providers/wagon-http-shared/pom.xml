@@ -30,7 +30,7 @@ under the License.
   <artifactId>wagon-http-shared</artifactId>
   <name>Apache Maven Wagon :: Providers :: HTTP Shared Library</name>
   <description>
-    Shared Library for the wagon-webdav wagon provider based on httpclient-3.x.
+    Shared Library for wagon providers supporting HTTP.
   </description>
 
   <dependencies>
@@ -49,34 +49,6 @@ under the License.
           <artifactId>xercesImpl</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>commons-httpclient</groupId>
-      <artifactId>commons-httpclient</artifactId>
-      <version>3.1</version>
-      <!--
-        The version of commons-logging that comes transitively has class loader
-        problems. So we exclude it here and add a newer version below.
-      -->
-      <exclusions>
-        <exclusion>
-          <groupId>commons-logging</groupId>
-          <artifactId>commons-logging</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <!--
-      This dependency is here to upgrade to a version of commons-logging that is
-      newer than the one that comes transitively from commons-httpclient above.
-    -->
-    <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.1.1</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>

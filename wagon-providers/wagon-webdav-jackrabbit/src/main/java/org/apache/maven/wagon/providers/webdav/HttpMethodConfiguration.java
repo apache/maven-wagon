@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.shared.http;
+package org.apache.maven.wagon.providers.webdav;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one

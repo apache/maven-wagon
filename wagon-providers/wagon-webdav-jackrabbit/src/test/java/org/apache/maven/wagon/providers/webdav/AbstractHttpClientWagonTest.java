@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.shared.http;
+package org.apache.maven.wagon.providers.webdav;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -32,6 +32,9 @@ import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.providers.webdav.AbstractHttpClientWagon;
+import org.apache.maven.wagon.providers.webdav.HttpConfiguration;
+import org.apache.maven.wagon.providers.webdav.HttpMethodConfiguration;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 
