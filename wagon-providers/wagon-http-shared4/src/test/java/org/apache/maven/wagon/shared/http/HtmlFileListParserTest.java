@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.shared.http4;
+package org.apache.maven.wagon.shared.http;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -27,6 +27,7 @@ import java.util.List;
 import junit.framework.TestCase;
 import org.apache.log4j.Logger;
 import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.shared.http.HtmlFileListParser;
 
 /**
  * Unit Tests for the HtmlFileListParser

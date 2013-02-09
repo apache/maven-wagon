@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.shared.http4;
+package org.apache.maven.wagon.shared.http;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one

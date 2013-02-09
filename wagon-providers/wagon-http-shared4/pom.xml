@@ -27,8 +27,8 @@ under the License.
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>wagon-http-shared4</artifactId>
-  <name>Apache Maven Wagon :: Providers :: HTTP Shared Library 4</name>
+  <artifactId>wagon-http-shared</artifactId>
+  <name>Apache Maven Wagon :: Providers :: HTTP Shared Library</name>
   <description>
     Shared Library for wagon providers supporting HTTP.
   </description>

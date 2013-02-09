@@ -31,7 +31,7 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.resource.Resource;
-import org.apache.maven.wagon.shared.http4.HtmlFileListParser;
+import org.apache.maven.wagon.shared.http.HtmlFileListParser;
 import org.codehaus.plexus.util.Base64;
 
 import java.io.FileNotFoundException;
