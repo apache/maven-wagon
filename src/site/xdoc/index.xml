@@ -54,10 +54,9 @@
           <area shape="rect" coords="330,0,459,32"    alt="wagon-provider-test" href="./wagon-provider-test/" />
           <area shape="rect" coords="329,37,425,70"   alt="wagon-tck-http" href="./wagon-tcks/wagon-tck-http/" />
           <area shape="rect" coords="159,68,226,100"  alt="wagon-file" href="./wagon-providers/wagon-file/" />
-          <area shape="rect" coords="13,133,138,164"  alt="wagon-http-shared4" href="./wagon-providers/wagon-http-shared4/" />
+          <area shape="rect" coords="13,133,138,164"  alt="wagon-http-shared" href="./wagon-providers/wagon-http-shared/" />
           <area shape="rect" coords="159,110,304,141" alt="wagon-http-lightweight" href="./wagon-providers/wagon-http-lightweight/" />
           <area shape="rect" coords="159,151,226,183" alt="wagon-http" href="./wagon-providers/wagon-http/" />
-          <area shape="rect" coords="13,193,138,225"  alt="wagon-http-shared" href="./wagon-providers/wagon-http-shared/" />
           <area shape="rect" coords="159,193,257,225" alt="wagon-webdav-jackrabbit" href="./wagon-providers/wagon-webdav-jackrabbit/" />
           <area shape="rect" coords="159,234,226,266" alt="wagon-ftp" href="./wagon-providers/wagon-ftp/" />
           <area shape="rect" coords="12,298,134,330"  alt="wagon-ssh-common" href="./wagon-providers/wagon-ssh-common/" />
