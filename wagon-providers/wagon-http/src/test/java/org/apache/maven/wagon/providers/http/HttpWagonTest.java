@@ -24,8 +24,6 @@ import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.maven.wagon.StreamingWagon;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.http.HttpWagonTestCase;
-import org.apache.maven.wagon.shared.http4.HttpConfiguration;
-import org.apache.maven.wagon.shared.http4.HttpMethodConfiguration;
 
 import java.util.Properties;
 
