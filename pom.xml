@@ -360,6 +360,7 @@ under the License.
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-scm-publish-plugin</artifactId>
           <configuration>
+            <content>${project.build.directory}/staging/${maven.site.path}</content>
             <checkoutDirectory>${maven.site.cache}/${maven.site.path}</checkoutDirectory>
             <tryUpdate>true</tryUpdate>
           </configuration>
