@@ -830,7 +830,7 @@ public abstract class AbstractWagon
         this.interactive = interactive;
     }
 
-    public List getFileList( String destinationDirectory )
+    public List<String> getFileList( String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         throw new UnsupportedOperationException( "The wagon you are using has not implemented getFileList()" );

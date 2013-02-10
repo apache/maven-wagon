@@ -115,10 +115,10 @@ public class WagonMock
     	return timeout;
     }
 
-    public List getFileList( String destinationDirectory )
+    public List<String> getFileList( String destinationDirectory )
         throws TransferFailedException, AuthorizationException
     {
-        return Collections.EMPTY_LIST;
+        return Collections.<String>emptyList();
     }
 
     public boolean resourceExists( String resourceName )

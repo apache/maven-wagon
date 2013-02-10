@@ -210,7 +210,7 @@ public class WebDavWagon
                 MultiStatus multiStatus = method.getResponseBodyAsMultiStatus();
                 MultiStatusResponse response = multiStatus.getResponses()[0];
                 DavPropertySet propertySet = response.getProperties( HttpStatus.SC_OK );
-                DavProperty property = propertySet.get( DavConstants.PROPERTY_RESOURCETYPE );
+                DavProperty<?> property = propertySet.get( DavConstants.PROPERTY_RESOURCETYPE );
                 if ( property != null )
                 {
                     Node node = (Node) property.getValue();
