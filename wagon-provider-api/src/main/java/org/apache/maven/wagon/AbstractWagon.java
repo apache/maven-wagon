@@ -48,7 +48,6 @@ import java.util.List;
  * Implementation of common facilities for Wagon providers.
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- *
  */
 public abstract class AbstractWagon
     implements Wagon
@@ -340,11 +339,11 @@ public abstract class AbstractWagon
 
     @Deprecated
     protected void getTransfer( Resource resource, OutputStream output, InputStream input, boolean closeInput,
-            int maxSize )
+                                int maxSize )
         throws TransferFailedException
     {
-    	getTransfer(resource, output, input, closeInput, (long) maxSize);
-	}
+        getTransfer( resource, output, input, closeInput, (long) maxSize );
+    }
 
     protected void getTransfer( Resource resource, OutputStream output, InputStream input, boolean closeInput,
                                 long maxSize )
@@ -434,8 +433,10 @@ public abstract class AbstractWagon
     {
         try
         {
-        	transfer( resource, input, output, TransferEvent.REQUEST_PUT,
-            		resource.getContentLength() == WagonConstants.UNKNOWN_LENGTH ? Long.MAX_VALUE : resource.getContentLength());
+            transfer( resource, input, output, TransferEvent.REQUEST_PUT,
+                      resource.getContentLength() == WagonConstants.UNKNOWN_LENGTH
+                          ? Long.MAX_VALUE
+                          : resource.getContentLength() );
 
             finishPutTransfer( resource, input, output );
         }
@@ -483,7 +484,7 @@ public abstract class AbstractWagon
     {
         transfer( resource, input, output, requestType, Long.MAX_VALUE );
     }
-    
+
     /**
      * Write from {@link InputStream} to {@link OutputStream}.
      * Equivalent to {@link #transfer(Resource, InputStream, OutputStream, int, int)} with a maxSize equals to
@@ -499,9 +500,9 @@ public abstract class AbstractWagon
      */
     @Deprecated
     protected void transfer( Resource resource, InputStream input, OutputStream output, int requestType, int maxSize )
-            throws IOException
+        throws IOException
     {
-    	transfer(resource, input, output, requestType, (long) maxSize);
+        transfer( resource, input, output, requestType, (long) maxSize );
     }
 
     /**
@@ -527,8 +528,8 @@ public abstract class AbstractWagon
         long remaining = maxSize;
         while ( remaining > 0 )
         {
-        	// let's safely cast to int because the min value will be lower than the buffer size.
-            int n = input.read( buffer, 0, (int)Math.min( buffer.length, remaining ) ); 
+            // let's safely cast to int because the min value will be lower than the buffer size.
+            int n = input.read( buffer, 0, (int) Math.min( buffer.length, remaining ) );
 
             if ( n == -1 )
             {
