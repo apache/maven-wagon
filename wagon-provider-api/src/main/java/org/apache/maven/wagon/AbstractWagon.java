@@ -284,17 +284,25 @@ public abstract class AbstractWagon
     protected void getTransfer( Resource resource, File destination, InputStream input )
         throws TransferFailedException
     {
-        getTransfer( resource, destination, input, true, Integer.MAX_VALUE );
+        getTransfer( resource, destination, input, true, Long.MAX_VALUE );
     }
 
     protected void getTransfer( Resource resource, OutputStream output, InputStream input )
         throws TransferFailedException
     {
-        getTransfer( resource, output, input, true, Integer.MAX_VALUE );
+        getTransfer( resource, output, input, true, Long.MAX_VALUE );
+    }
+
+    @Deprecated
+    protected void getTransfer( Resource resource, File destination, InputStream input, boolean closeInput,
+                                int maxSize )
+        throws TransferFailedException
+    {
+        getTransfer( resource, destination, input, closeInput, (long) maxSize );
     }
 
     protected void getTransfer( Resource resource, File destination, InputStream input, boolean closeInput,
-                                int maxSize )
+                                long maxSize )
         throws TransferFailedException
     {
         // ensure that the destination is created only when we are ready to transfer
@@ -330,8 +338,16 @@ public abstract class AbstractWagon
         fireGetCompleted( resource, destination );
     }
 
+    @Deprecated
     protected void getTransfer( Resource resource, OutputStream output, InputStream input, boolean closeInput,
-                                int maxSize )
+            int maxSize )
+        throws TransferFailedException
+    {
+    	getTransfer(resource, output, input, closeInput, (long) maxSize);
+	}
+
+    protected void getTransfer( Resource resource, OutputStream output, InputStream input, boolean closeInput,
+                                long maxSize )
         throws TransferFailedException
     {
         try
@@ -418,7 +434,8 @@ public abstract class AbstractWagon
     {
         try
         {
-            transfer( resource, input, output, TransferEvent.REQUEST_PUT );
+        	transfer( resource, input, output, TransferEvent.REQUEST_PUT,
+            		resource.getContentLength() == WagonConstants.UNKNOWN_LENGTH ? Long.MAX_VALUE : resource.getContentLength());
 
             finishPutTransfer( resource, input, output );
         }
@@ -464,9 +481,9 @@ public abstract class AbstractWagon
     protected void transfer( Resource resource, InputStream input, OutputStream output, int requestType )
         throws IOException
     {
-        transfer( resource, input, output, requestType, Integer.MAX_VALUE );
+        transfer( resource, input, output, requestType, Long.MAX_VALUE );
     }
-
+    
     /**
      * Write from {@link InputStream} to {@link OutputStream}.
      * Equivalent to {@link #transfer(Resource, InputStream, OutputStream, int, int)} with a maxSize equals to
@@ -478,8 +495,28 @@ public abstract class AbstractWagon
      * @param requestType one of {@link TransferEvent#REQUEST_GET} or {@link TransferEvent#REQUEST_PUT}
      * @param maxSize     size of the buffer
      * @throws IOException
+     * @deprecated Please use the transfer using long as type of maxSize
      */
+    @Deprecated
     protected void transfer( Resource resource, InputStream input, OutputStream output, int requestType, int maxSize )
+            throws IOException
+    {
+    	transfer(resource, input, output, requestType, (long) maxSize);
+    }
+
+    /**
+     * Write from {@link InputStream} to {@link OutputStream}.
+     * Equivalent to {@link #transfer(Resource, InputStream, OutputStream, int, long)} with a maxSize equals to
+     * {@link Integer#MAX_VALUE}
+     *
+     * @param resource    resource to transfer
+     * @param input       input stream
+     * @param output      output stream
+     * @param requestType one of {@link TransferEvent#REQUEST_GET} or {@link TransferEvent#REQUEST_PUT}
+     * @param maxSize     size of the buffer
+     * @throws IOException
+     */
+    protected void transfer( Resource resource, InputStream input, OutputStream output, int requestType, long maxSize )
         throws IOException
     {
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
@@ -487,10 +524,11 @@ public abstract class AbstractWagon
         TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_PROGRESS, requestType );
         transferEvent.setTimestamp( System.currentTimeMillis() );
 
-        int remaining = maxSize;
+        long remaining = maxSize;
         while ( remaining > 0 )
         {
-            int n = input.read( buffer, 0, Math.min( buffer.length, remaining ) );
+        	// let's safely cast to int because the min value will be lower than the buffer size.
+            int n = input.read( buffer, 0, (int)Math.min( buffer.length, remaining ) ); 
 
             if ( n == -1 )
             {
