@@ -20,8 +20,8 @@ package org.apache.maven.wagon.shared.http;
  */
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.maven.wagon.TransferFailedException;
-import org.codehaus.plexus.util.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
