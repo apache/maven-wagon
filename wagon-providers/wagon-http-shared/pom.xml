@@ -35,20 +35,9 @@ under the License.
 
   <dependencies>
     <dependency>
-      <groupId>nekohtml</groupId>
-      <artifactId>xercesMinimal</artifactId>
-      <version>1.9.6.2</version>
-    </dependency>
-    <dependency>
-      <groupId>nekohtml</groupId>
-      <artifactId>nekohtml</artifactId>
-      <version>1.9.6.2</version>
-      <exclusions>
-        <exclusion>
-          <groupId>xerces</groupId>
-          <artifactId>xercesImpl</artifactId>
-        </exclusion>
-      </exclusions>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+      <version>1.7.1</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
