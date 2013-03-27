@@ -19,6 +19,7 @@ package org.apache.maven.wagon.providers.ftp;
  * under the License.
  */
 
+import org.apache.commons.io.FileUtils;
 import org.apache.ftpserver.FtpServer;
 import org.apache.ftpserver.FtpServerFactory;
 import org.apache.ftpserver.ftplet.Authority;
@@ -34,7 +35,7 @@ import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.FileUtils;
+
 
 import java.io.File;
 import java.util.ArrayList;
@@ -199,7 +200,7 @@ public class FtpWagonTest
         {
             // do the cleanup first
             File destDir = new File( getRepositoryDirectory(), "dirExists" );
-            FileUtils.deleteDirectory(destDir);
+            FileUtils.deleteDirectory( destDir );
             destDir.mkdirs();
             destDir = new File( destDir, "not_yet_existing/also_not" );
 

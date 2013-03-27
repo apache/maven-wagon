@@ -19,6 +19,7 @@ package org.apache.maven.wagon.providers.ftp;
  * under the License.
  */
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.ProtocolCommandEvent;
 import org.apache.commons.net.ProtocolCommandListener;
 import org.apache.commons.net.ftp.FTP;
@@ -38,7 +39,6 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.IOUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -664,7 +664,7 @@ public class FtpWagon
             }
             finally
             {
-                IOUtil.close( sourceFileStream );
+                IOUtils.close( sourceFileStream );
             }
 
         }
