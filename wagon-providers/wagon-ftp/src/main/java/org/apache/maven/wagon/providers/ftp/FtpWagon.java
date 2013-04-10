@@ -664,7 +664,7 @@ public class FtpWagon
             }
             finally
             {
-                IOUtils.close( sourceFileStream );
+                IOUtils.closeQuietly( sourceFileStream );
             }
 
         }
