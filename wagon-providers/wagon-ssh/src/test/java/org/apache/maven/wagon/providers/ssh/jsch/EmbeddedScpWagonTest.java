@@ -39,8 +39,6 @@ public class EmbeddedScpWagonTest
     extends AbstractEmbeddedScpWagonTest
 {
 
-    SshServerEmbedded sshServerEmbedded;
-
     @Override
     protected Wagon getWagon()
         throws Exception
