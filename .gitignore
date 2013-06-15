@@ -10,3 +10,5 @@ target
 .settings
 
 .DS_Store
+
+.java-version
