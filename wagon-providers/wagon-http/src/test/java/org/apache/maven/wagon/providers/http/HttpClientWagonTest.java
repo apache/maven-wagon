@@ -28,7 +28,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.TransferFailedException;
 
-public class AbstractHttpClientWagonTest
+public class HttpClientWagonTest
     extends TestCase
 {
 

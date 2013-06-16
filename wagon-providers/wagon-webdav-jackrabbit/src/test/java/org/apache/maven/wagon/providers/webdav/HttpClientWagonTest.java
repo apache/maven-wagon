@@ -38,7 +38,7 @@ import org.apache.maven.wagon.providers.webdav.HttpMethodConfiguration;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 
-public class AbstractHttpClientWagonTest
+public class HttpClientWagonTest
     extends TestCase
 {
 
