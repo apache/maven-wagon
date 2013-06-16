@@ -20,7 +20,6 @@ package org.apache.maven.wagon.providers.http;
  */
 
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.maven.wagon.StreamingWagon;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.http.HttpWagonTestCase;
@@ -29,7 +28,6 @@ import java.util.Properties;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- *
  */
 public class HttpWagonTest
     extends HttpWagonTestCase

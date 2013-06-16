@@ -25,7 +25,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 /**
- * This test will runn the TCK suite on wagon-http-lightweight
+ * This test will run the TCK suite on wagon-http-lightweight
  */
 @RunWith( Suite.class )
 @Suite.SuiteClasses( { GetWagonTests.class, HttpsGetWagonTests.class } )
