@@ -44,7 +44,6 @@ import java.io.OutputStream;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id: AbstractWagonTest.java 630808 2008-02-25 11:01:41Z brett $
  */
 public class AbstractWagonTest
     extends TestCase

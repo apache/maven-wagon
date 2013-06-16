@@ -70,7 +70,7 @@ import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * @version $Id: LightweightHttpWagonTest.java 680764 2008-07-29 16:45:51Z brett $
+ *
  */
 public abstract class HttpWagonTestCase
     extends StreamingWagonTestCase

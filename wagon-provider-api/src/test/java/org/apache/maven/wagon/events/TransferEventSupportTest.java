@@ -25,8 +25,6 @@ import org.easymock.MockControl;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @version $Id: TransferEventSupportTest.java,v 1.2 2003/11/16 12:41:02 michal
- *          Exp $
  */
 public class TransferEventSupportTest
     extends TestCase

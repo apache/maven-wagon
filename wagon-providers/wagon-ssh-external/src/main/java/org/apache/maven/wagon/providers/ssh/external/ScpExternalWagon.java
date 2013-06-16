@@ -50,7 +50,6 @@ import java.util.Locale;
  * ssh-agent type behavior, until we can construct a Java SSH Agent and interface for JSch.
  *
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
- * @version $Id:ScpExternalWagon.java 477260 2006-11-20 17:11:39Z brett $
  * @todo [BP] add compression flag
  * @plexus.component role="org.apache.maven.wagon.Wagon"
  * role-hint="scpexe"

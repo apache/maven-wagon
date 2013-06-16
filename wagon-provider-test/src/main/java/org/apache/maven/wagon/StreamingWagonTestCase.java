@@ -33,7 +33,6 @@ import java.text.SimpleDateFormat;
 
 /**
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
- * @version $Id: WagonTestCase.java 660462 2008-05-27 10:52:46Z brett $
  */
 public abstract class StreamingWagonTestCase
     extends WagonTestCase
