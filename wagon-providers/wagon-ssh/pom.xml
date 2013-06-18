@@ -98,7 +98,7 @@ under the License.
                 <exclude>**/Embedded*Test.*</exclude>
               </excludes>
               <systemPropertyVariables>
-                <java.io.tmpdir>${project.build.outputDirectory}</java.io.tmpdir>
+                <java.io.tmpdir>${project.build.directory}</java.io.tmpdir>
                 <test.user>olamy</test.user>
                 <sshd.stopImmediatly>${sshd.stopImmediatly}</sshd.stopImmediatly>
               </systemPropertyVariables>
@@ -128,7 +128,7 @@ under the License.
                 <exclude>**/Embedded*Test.*</exclude>
               </excludes>
               <systemPropertyVariables>
-                <java.io.tmpdir>${project.build.outputDirectory}</java.io.tmpdir>
+                <java.io.tmpdir>${project.build.directory}</java.io.tmpdir>
                 <test.user>olamy</test.user>
               </systemPropertyVariables>
             </configuration>
@@ -157,7 +157,7 @@ under the License.
                 <exclude>**/ScpWagon*Test.*</exclude>
               </excludes>
               <systemPropertyVariables>
-                <java.io.tmpdir>${project.build.outputDirectory}</java.io.tmpdir>
+                <java.io.tmpdir>${project.build.directory}</java.io.tmpdir>
                 <test.user>olamy</test.user>
                 <sshd.stopImmediatly>${sshd.stopImmediatly}</sshd.stopImmediatly>
               </systemPropertyVariables>

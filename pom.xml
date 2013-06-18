@@ -356,7 +356,7 @@ under the License.
           <configuration>
             <forkedProcessTimeoutInSeconds>400</forkedProcessTimeoutInSeconds>
             <systemPropertyVariables>
-              <java.io.tmpdir>${project.build.outputDirectory}</java.io.tmpdir>
+              <java.io.tmpdir>${project.build.directory}</java.io.tmpdir>
             </systemPropertyVariables>
           </configuration>
         </plugin>
