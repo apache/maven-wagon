@@ -369,6 +369,16 @@ under the License.
             <tryUpdate>true</tryUpdate>
           </configuration>
         </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>2.9.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>3.3</version>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
@@ -427,6 +437,16 @@ under the License.
     </plugins>
   </build>
 
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.7</version>
+      </plugin>
+    </plugins>
+  </reporting>
+
   <profiles>
 
     <profile>
@@ -436,6 +456,7 @@ under the License.
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
+            <version>2.9.1</version>
             <configuration>
               <linksource>true</linksource>
               <links>
@@ -455,19 +476,6 @@ under the License.
                 <link>http://maven.apache.org/ref/current/maven-reporting/maven-reporting-api/apidocs/</link>
                 <link>http://maven.apache.org/ref/current/maven-settings/apidocs/</link>
               </links>
-              <!--
-              <doclet>gr.spinellis.umlgraph.doclet.UmlGraph</doclet>
-              <docletArtifact>
-                <groupId>gr.spinellis</groupId>
-                <artifactId>UmlGraph</artifactId>
-                <version>4.4</version>
-              </docletArtifact>
-              <additionalparam>
-                -inferrel -inferdep -quiet -hide java.* -collpackages java.util.* -qualify
-                -postfixpackage -nodefontsize 9
-                -nodefontpackagesize 7
-              </additionalparam>
-              -->
               <groups>
                 <group>
                   <title>API + Test</title>
