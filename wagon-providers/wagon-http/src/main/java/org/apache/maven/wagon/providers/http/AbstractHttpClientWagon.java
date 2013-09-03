@@ -737,7 +737,7 @@ public abstract class AbstractHttpClientWagon
                     creds = new UsernamePasswordCredentials( proxyInfo.getUserName(), proxyInfo.getPassword() );
                 }
 
-                Header bs = new BasicScheme().authenticate( creds, httpMethod );
+                Header bs = new BasicScheme().authenticate( creds, httpMethod, localContext );
                 httpMethod.addHeader( "Proxy-Authorization", bs.getValue() );
             }
 
