@@ -270,7 +270,7 @@ public abstract class AbstractHttpClientWagon
      * <b>disabled by default</b>
      *
      * @since 2.0
-     * @see BrowserCompatHostnameVerifier
+     * @see RelaxedHostNameVerifier
      */
     protected static boolean sslAllowAll =
         Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.allowall", "false" ) );
