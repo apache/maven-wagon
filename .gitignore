@@ -1,3 +1,4 @@
+#maven
 target
 
 #idea
@@ -9,6 +10,7 @@ target
 .classpath
 .settings
 
+# OSX
 .DS_Store
 
 .java-version
