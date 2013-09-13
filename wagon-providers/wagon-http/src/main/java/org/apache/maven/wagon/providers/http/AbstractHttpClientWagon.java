@@ -101,6 +101,7 @@ import org.codehaus.plexus.util.StringUtils;
 public abstract class AbstractHttpClientWagon
     extends StreamWagon
 {
+    private static String defaultUserAgent;
 
     private BasicHttpContext localContext;
 
@@ -799,6 +800,7 @@ public abstract class AbstractHttpClientWagon
             method.addHeader( "Pragma", "no-cache" );
             method.addHeader( "Expires", "0" );
             method.addHeader( "Accept-Encoding", "gzip" );
+            method.addHeader( "User-Agent", getDefaultUserAgent() );
         }
 
         if ( httpHeaders != null )
@@ -817,6 +819,38 @@ public abstract class AbstractHttpClientWagon
                 method.addHeader( headers[i] );
             }
         }
+    }
+
+    private String getDefaultUserAgent()
+    {
+        if ( defaultUserAgent == null )
+        {
+            defaultUserAgent =
+                "Apache-Maven-Wagon/" + getWagonVersion() + " (Java " + System.getProperty( "java.version" ) + "; "
+                    + System.getProperty( "os.name" ) + " " + System.getProperty( "os.version" ) + ")";
+        }
+        return defaultUserAgent;
+    }
+
+    private String getWagonVersion()
+    {
+        Properties props = new Properties();
+
+        InputStream is = getClass().getResourceAsStream( "/META-INF/maven/org.apache.maven.wagon/wagon-http/pom.properties" );
+        if ( is != null )
+        {
+            try
+            {
+                props.load( is );
+            }
+            catch ( IOException e )
+            {
+                // ignore
+            }
+            IOUtil.close( is );
+        }
+
+        return props.getProperty( "version", "unknown-version" );
     }
 
     protected String getUserAgent( HttpUriRequest method )
