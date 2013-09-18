@@ -20,6 +20,7 @@ package org.apache.maven.wagon.providers.http;
  */
 
 import java.io.ByteArrayInputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -52,33 +53,34 @@ import org.apache.http.auth.Credentials;
 import org.apache.http.auth.NTCredentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.client.params.CookiePolicy;
-import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.params.ConnRoutePNames;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.HttpClientConnectionManager;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.BasicClientConnectionManager;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.cookie.DateParseException;
 import org.apache.http.impl.cookie.DateUtils;
 import org.apache.http.message.BasicHeader;
-import org.apache.http.params.CoreConnectionPNames;
-import org.apache.http.params.CoreProtocolPNames;
-import org.apache.http.params.HttpParams;
-import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.TextUtils;
 import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.PathUtils;
@@ -102,8 +104,6 @@ public abstract class AbstractHttpClientWagon
     extends StreamWagon
 {
     private static String defaultUserAgent;
-
-    private BasicHttpContext localContext;
 
     private final class RequestEntityImplementation
         extends AbstractHttpEntity
@@ -227,18 +227,22 @@ public abstract class AbstractHttpClientWagon
 
     protected static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone( "GMT" );
 
-    private DefaultHttpClient client;
+    private CloseableHttpClient client;
+
+    private HttpClientContext localContext;
+
+    private Closeable closeable;
 
     /**
      * @since 2.0
      */
-    protected static ClientConnectionManager connectionManagerPooled;
+    protected static HttpClientConnectionManager connectionManagerPooled;
 
     /**
      * @since 2.0
      */
-    protected ClientConnectionManager clientConnectionManager =
-        new BasicClientConnectionManager( createSchemeRegistry() );
+    protected HttpClientConnectionManager clientConnectionManager = new BasicHttpClientConnectionManager(
+            createSocketFactoryRegistry() );
 
     /**
      * use http(s) connection pool mechanism.
@@ -276,18 +280,27 @@ public abstract class AbstractHttpClientWagon
     protected static boolean sslAllowAll =
         Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.allowall", "false" ) );
 
-    private static SchemeRegistry createSchemeRegistry()
+    private static String[] split(final String s) {
+        if (TextUtils.isBlank(s)) {
+            return null;
+        }
+        return s.split(" *, *");
+    }
+
+    private static Registry<ConnectionSocketFactory> createSocketFactoryRegistry()
     {
-        SchemeRegistry schemeRegistry = new SchemeRegistry();
-        schemeRegistry.register( new Scheme( "http", 80, PlainSocketFactory.getSocketFactory() ) );
-        SSLSocketFactory sslSocketFactory;
+        String[] sslProtocols = split(System.getProperty("https.protocols"));
+        String[] cipherSuites = split(System.getProperty("https.cipherSuites"));
+        SSLConnectionSocketFactory sslSocketFactory;
         if ( sslInsecure )
         {
             try
             {
-                sslSocketFactory = new SSLSocketFactory(
-                    RelaxedX509TrustManager.createRelaxedSSLContext(),
-                    sslAllowAll ? new RelaxedHostNameVerifier() : SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER );
+                sslSocketFactory = new SSLConnectionSocketFactory(
+                        RelaxedX509TrustManager.createRelaxedSSLContext(),
+                        sslProtocols,
+                        cipherSuites,
+                        sslAllowAll ? new RelaxedHostNameVerifier() : SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER );
             }
             catch ( IOException e )
             {
@@ -296,15 +309,16 @@ public abstract class AbstractHttpClientWagon
         }
         else
         {
-            sslSocketFactory = new SSLSocketFactory(
-                HttpsURLConnection.getDefaultSSLSocketFactory(),
-                SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER );
+            sslSocketFactory = new SSLConnectionSocketFactory(
+                    HttpsURLConnection.getDefaultSSLSocketFactory(),
+                    sslProtocols,
+                    cipherSuites,
+                    SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER );
         }
-
-        Scheme httpsScheme = new Scheme( "https", 443, new ConfigurableSSLSocketFactoryDecorator( sslSocketFactory ) );
-        schemeRegistry.register( httpsScheme );
-
-        return schemeRegistry;
+        return RegistryBuilder.<ConnectionSocketFactory>create()
+                .register("http", PlainConnectionSocketFactory.INSTANCE)
+                .register("https", sslSocketFactory)
+                .build();
     }
 
     static
@@ -315,8 +329,8 @@ public abstract class AbstractHttpClientWagon
         }
         else
         {
-            PoolingClientConnectionManager poolingClientConnectionManager =
-                new PoolingClientConnectionManager( createSchemeRegistry() );
+            PoolingHttpClientConnectionManager poolingClientConnectionManager =
+                new PoolingHttpClientConnectionManager( createSocketFactoryRegistry() );
             int maxPerRoute =
                 Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxPerRoute", "20" ) );
             poolingClientConnectionManager.setDefaultMaxPerRoute( maxPerRoute );
@@ -360,7 +374,7 @@ public abstract class AbstractHttpClientWagon
         }
     }
 
-    public ClientConnectionManager getConnectionManager()
+    public HttpClientConnectionManager getConnectionManager()
     {
         if ( !useClientManagerPooled )
         {
@@ -369,7 +383,7 @@ public abstract class AbstractHttpClientWagon
         return connectionManagerPooled;
     }
 
-    public static void setConnectionManagerPooled( ClientConnectionManager clientConnectionManager )
+    public static void setConnectionManagerPooled( HttpClientConnectionManager clientConnectionManager )
     {
         connectionManagerPooled = clientConnectionManager;
     }
@@ -390,15 +404,11 @@ public abstract class AbstractHttpClientWagon
      */
     private HttpConfiguration httpConfiguration;
 
-    private HttpGet getMethod;
-
     public void openConnectionInternal()
     {
         repository.setUrl( getURL( repository ) );
-        client = new DefaultHttpClient( getConnectionManager() );
 
-        // WAGON-273: default the cookie-policy to browser compatible
-        client.getParams().setParameter( ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY );
+        CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 
         if ( authenticationInfo != null )
         {
@@ -413,7 +423,7 @@ public abstract class AbstractHttpClientWagon
                 String host = getRepository().getHost();
                 int port = getRepository().getPort() > -1 ? getRepository().getPort() : AuthScope.ANY_PORT;
 
-                client.getCredentialsProvider().setCredentials( new AuthScope( host, port ), creds );
+                credentialsProvider.setCredentials(new AuthScope(host, port), creds);
                 // preemptive off by default
                 /*
                 AuthCache authCache = new BasicAuthCache();
@@ -428,6 +438,7 @@ public abstract class AbstractHttpClientWagon
             }
         }
 
+        HttpHost proxy = null;
         ProxyInfo proxyInfo = getProxyInfo( getRepository().getProtocol(), getRepository().getHost() );
         if ( proxyInfo != null )
         {
@@ -439,7 +450,7 @@ public abstract class AbstractHttpClientWagon
             String proxyNtlmDomain = proxyInfo.getNtlmDomain();
             if ( proxyHost != null )
             {
-                HttpHost proxy = new HttpHost( proxyHost, proxyPort );
+                proxy = new HttpHost( proxyHost, proxyPort );
 
                 if ( proxyUsername != null && proxyPassword != null )
                 {
@@ -456,12 +467,20 @@ public abstract class AbstractHttpClientWagon
                     int port = proxyInfo.getPort() > -1 ? proxyInfo.getPort() : AuthScope.ANY_PORT;
 
                     AuthScope authScope = new AuthScope( proxyHost, port );
-                    client.getCredentialsProvider().setCredentials( authScope, creds );
+                    credentialsProvider.setCredentials(authScope, creds);
                 }
-
-                client.getParams().setParameter( ConnRoutePNames.DEFAULT_PROXY, proxy );
             }
         }
+
+        localContext = HttpClientContext.create();
+
+        client = HttpClientBuilder.create()
+                .useSystemProperties()
+                .disableConnectionState()
+                .setConnectionManager(getConnectionManager())
+                .setProxy(proxy)
+                .setDefaultCredentialsProvider(credentialsProvider)
+                .build();
     }
 
     public void closeConnection()
@@ -556,8 +575,7 @@ public abstract class AbstractHttpClientWagon
                     new HttpHost( repository.getHost(), repository.getPort(), repository.getProtocol() );
                 authCache.put( targetHost, basicAuth );
 
-                localContext = new BasicHttpContext();
-                localContext.setAttribute( ClientContext.AUTH_CACHE, authCache );
+                localContext.setAuthCache( authCache );
             }
         }
 
@@ -569,73 +587,71 @@ public abstract class AbstractHttpClientWagon
         {
             putMethod.setEntity( httpEntity );
 
-            HttpResponse response;
+            CloseableHttpResponse response = execute( putMethod );
             try
             {
-                response = execute( putMethod );
-            }
-            catch ( IOException e )
-            {
-                fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+                int statusCode = response.getStatusLine().getStatusCode();
+                String reasonPhrase = ", ReasonPhrase: " + response.getStatusLine().getReasonPhrase() + ".";
+                fireTransferDebug(url + " - Status code: " + statusCode + reasonPhrase);
 
-                throw new TransferFailedException( e.getMessage(), e );
-            }
-            catch ( HttpException e )
-            {
-                fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
-
-                throw new TransferFailedException( e.getMessage(), e );
-            }
-
-            int statusCode = response.getStatusLine().getStatusCode();
-            String reasonPhrase = ", ReasonPhrase: " + response.getStatusLine().getReasonPhrase() + ".";
-            fireTransferDebug( url + " - Status code: " + statusCode + reasonPhrase );
-
-            // Check that we didn't run out of retries.
-            switch ( statusCode )
-            {
-                // Success Codes
-                case HttpStatus.SC_OK: // 200
-                case HttpStatus.SC_CREATED: // 201
-                case HttpStatus.SC_ACCEPTED: // 202
-                case HttpStatus.SC_NO_CONTENT:  // 204
-                    break;
-                // handle all redirect even if http specs says " the user agent MUST NOT automatically redirect the request unless it can be confirmed by the user"
-                case HttpStatus.SC_MOVED_PERMANENTLY: // 301
-                case HttpStatus.SC_MOVED_TEMPORARILY: // 302
-                case HttpStatus.SC_SEE_OTHER: // 303
-                    put( resource, source, httpEntity, calculateRelocatedUrl( response ) );
-                    return;
-                case SC_NULL:
+                // Check that we didn't run out of retries.
+                switch ( statusCode )
                 {
-                    TransferFailedException e =
-                        new TransferFailedException( "Failed to transfer file: " + url + reasonPhrase );
-                    fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
-                    throw e;
+                    // Success Codes
+                    case HttpStatus.SC_OK: // 200
+                    case HttpStatus.SC_CREATED: // 201
+                    case HttpStatus.SC_ACCEPTED: // 202
+                    case HttpStatus.SC_NO_CONTENT:  // 204
+                        break;
+                    // handle all redirect even if http specs says " the user agent MUST NOT automatically redirect the request unless it can be confirmed by the user"
+                    case HttpStatus.SC_MOVED_PERMANENTLY: // 301
+                    case HttpStatus.SC_MOVED_TEMPORARILY: // 302
+                    case HttpStatus.SC_SEE_OTHER: // 303
+                        put( resource, source, httpEntity, calculateRelocatedUrl( response ) );
+                        return;
+                    case SC_NULL:
+                    {
+                        TransferFailedException e =
+                            new TransferFailedException( "Failed to transfer file: " + url + reasonPhrase );
+                        fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+                        throw e;
+                    }
+
+                    case HttpStatus.SC_FORBIDDEN:
+                        fireSessionConnectionRefused();
+                        throw new AuthorizationException( "Access denied to: " + url + reasonPhrase );
+
+                    case HttpStatus.SC_NOT_FOUND:
+                        throw new ResourceDoesNotExistException( "File: " + url + " does not exist" + reasonPhrase );
+
+                        //add more entries here
+                    default:
+                    {
+                        TransferFailedException e = new TransferFailedException(
+                            "Failed to transfer file: " + url + ". Return code is: " + statusCode + reasonPhrase );
+                        fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+                        throw e;
+                    }
                 }
 
-                case HttpStatus.SC_FORBIDDEN:
-                    fireSessionConnectionRefused();
-                    throw new AuthorizationException( "Access denied to: " + url + reasonPhrase );
-
-                case HttpStatus.SC_NOT_FOUND:
-                    throw new ResourceDoesNotExistException( "File: " + url + " does not exist" + reasonPhrase );
-
-                    //add more entries here
-                default:
-                {
-                    TransferFailedException e = new TransferFailedException(
-                        "Failed to transfer file: " + url + ". Return code is: " + statusCode + reasonPhrase );
-                    fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
-                    throw e;
-                }
+                firePutCompleted(resource, source);
             }
-
-            firePutCompleted( resource, source );
+            finally
+            {
+                response.close();
+            }
         }
-        finally
+        catch ( IOException e )
         {
-            putMethod.abort();
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+
+            throw new TransferFailedException( e.getMessage(), e );
+        }
+        catch ( HttpException e )
+        {
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+
+            throw new TransferFailedException( e.getMessage(), e );
         }
     }
 
@@ -659,11 +675,46 @@ public abstract class AbstractHttpClientWagon
         String repositoryUrl = getRepository().getUrl();
         String url = repositoryUrl + ( repositoryUrl.endsWith( "/" ) ? "" : "/" ) + resourceName;
         HttpHead headMethod = new HttpHead( url );
-        HttpResponse response = null;
-        int statusCode;
         try
         {
-            response = execute( headMethod );
+            CloseableHttpResponse response = execute( headMethod );
+            try {
+                int statusCode = response.getStatusLine().getStatusCode();
+                String reasonPhrase = ", ReasonPhrase: " + response.getStatusLine().getReasonPhrase() + ".";
+                switch ( statusCode )
+                {
+                    case HttpStatus.SC_OK:
+                        return true;
+
+                    case HttpStatus.SC_NOT_MODIFIED:
+                        return true;
+
+                    case SC_NULL:
+                        throw new TransferFailedException( "Failed to transfer file: " + url + reasonPhrase );
+
+                    case HttpStatus.SC_FORBIDDEN:
+                        throw new AuthorizationException( "Access denied to: " + url + reasonPhrase );
+
+                    case HttpStatus.SC_UNAUTHORIZED:
+                        throw new AuthorizationException( "Not authorized " + reasonPhrase );
+
+                    case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
+                        throw new AuthorizationException( "Not authorized by proxy " + reasonPhrase );
+
+                    case HttpStatus.SC_NOT_FOUND:
+                        return false;
+
+                    //add more entries here
+                    default:
+                        throw new TransferFailedException(
+                            "Failed to transfer file: " + url + ". Return code is: " + statusCode + reasonPhrase );
+                }
+
+            }
+            finally
+            {
+                response.close();
+            }
         }
         catch ( IOException e )
         {
@@ -673,52 +724,49 @@ public abstract class AbstractHttpClientWagon
         {
             throw new TransferFailedException( e.getMessage(), e );
         }
-
-        try
-        {
-            statusCode = response.getStatusLine().getStatusCode();
-            String reasonPhrase = ", ReasonPhrase: " + response.getStatusLine().getReasonPhrase() + ".";
-            switch ( statusCode )
-            {
-                case HttpStatus.SC_OK:
-                    return true;
-
-                case HttpStatus.SC_NOT_MODIFIED:
-                    return true;
-
-                case SC_NULL:
-                    throw new TransferFailedException( "Failed to transfer file: " + url + reasonPhrase );
-
-                case HttpStatus.SC_FORBIDDEN:
-                    throw new AuthorizationException( "Access denied to: " + url + reasonPhrase );
-
-                case HttpStatus.SC_UNAUTHORIZED:
-                    throw new AuthorizationException( "Not authorized " + reasonPhrase );
-
-                case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
-                    throw new AuthorizationException( "Not authorized by proxy " + reasonPhrase );
-
-                case HttpStatus.SC_NOT_FOUND:
-                    return false;
-
-                //add more entries here
-                default:
-                    throw new TransferFailedException(
-                        "Failed to transfer file: " + url + ". Return code is: " + statusCode + reasonPhrase );
-            }
-        }
-        finally
-        {
-            headMethod.abort();
-        }
     }
 
-    protected HttpResponse execute( HttpUriRequest httpMethod )
+    protected CloseableHttpResponse execute( HttpUriRequest httpMethod)
         throws HttpException, IOException
     {
-        setParameters( httpMethod );
         setHeaders( httpMethod );
-        client.getParams().setParameter( CoreProtocolPNames.USER_AGENT, getUserAgent( httpMethod ) );
+        String userAgent = getUserAgent( httpMethod );
+        if (userAgent != null) {
+            httpMethod.setHeader(HTTP.USER_AGENT, userAgent);
+        }
+
+        HttpMethodConfiguration config =
+            httpConfiguration == null ? null : httpConfiguration.getMethodConfiguration( httpMethod );
+        if ( config != null )
+        {
+            localContext.setRequestConfig( config.asRequestConfig() );
+
+            if ( config.isUsePreemptive() && authenticationInfo != null )
+            {
+                String username = authenticationInfo.getUserName();
+                String password = authenticationInfo.getPassword();
+
+                if ( StringUtils.isNotEmpty( username ) && StringUtils.isNotEmpty( password ) )
+                {
+
+                    AuthCache authCache = new BasicAuthCache();
+                    BasicScheme basicAuth = new BasicScheme();
+                    HttpHost targetHost =
+                        new HttpHost( repository.getHost(), repository.getPort(), repository.getProtocol() );
+                    authCache.put( targetHost, basicAuth );
+
+                    localContext.setAuthCache( authCache );
+                }
+
+            }
+        }
+        else
+        {
+            RequestConfig requestConfig = RequestConfig.custom()
+                    .setSocketTimeout( getReadTimeout() )
+                    .build();
+            localContext.setRequestConfig( requestConfig );
+        }
 
         ProxyInfo proxyInfo = getProxyInfo( getRepository().getProtocol(), getRepository().getHost() );
 
@@ -745,47 +793,6 @@ public abstract class AbstractHttpClientWagon
         }
 
         return client.execute( httpMethod, localContext );
-    }
-
-    protected void setParameters( HttpUriRequest method )
-    {
-        HttpMethodConfiguration config =
-            httpConfiguration == null ? null : httpConfiguration.getMethodConfiguration( method );
-        if ( config != null )
-        {
-            HttpParams params = config.asMethodParams( method.getParams() );
-
-            if ( config.isUsePreemptive() && authenticationInfo != null )
-            {
-                String username = authenticationInfo.getUserName();
-                String password = authenticationInfo.getPassword();
-
-                if ( StringUtils.isNotEmpty( username ) && StringUtils.isNotEmpty( password ) )
-                {
-
-                    AuthCache authCache = new BasicAuthCache();
-                    BasicScheme basicAuth = new BasicScheme();
-                    HttpHost targetHost =
-                        new HttpHost( repository.getHost(), repository.getPort(), repository.getProtocol() );
-                    authCache.put( targetHost, basicAuth );
-
-                    localContext = new BasicHttpContext();
-                    localContext.setAttribute( ClientContext.AUTH_CACHE, authCache );
-                }
-
-            }
-
-            if ( params != null )
-            {
-                method.setParams( params );
-            }
-        }
-
-        if ( config == null )
-        {
-            int readTimeout = getReadTimeout();
-            method.getParams().setParameter( CoreConnectionPNames.SO_TIMEOUT, readTimeout );
-        }
     }
 
     protected void setHeaders( HttpUriRequest method )
@@ -902,7 +909,7 @@ public abstract class AbstractHttpClientWagon
 
         String repositoryUrl = getRepository().getUrl();
         String url = repositoryUrl + ( repositoryUrl.endsWith( "/" ) ? "" : "/" ) + resource.getName();
-        getMethod = new HttpGet( url );
+        HttpGet getMethod = new HttpGet( url );
         long timestamp = resource.getLastModified();
         if ( timestamp > 0 )
         {
@@ -913,11 +920,123 @@ public abstract class AbstractHttpClientWagon
             getMethod.addHeader( hdr );
         }
 
-        HttpResponse response;
-        int statusCode;
         try
         {
-            response = execute( getMethod );
+            CloseableHttpResponse response = execute( getMethod );
+            closeable = response;
+            int statusCode = response.getStatusLine().getStatusCode();
+
+            String reasonPhrase = ", ReasonPhrase:" + response.getStatusLine().getReasonPhrase() + ".";
+
+            fireTransferDebug( url + " - Status code: " + statusCode + reasonPhrase );
+
+            // TODO [BP]: according to httpclient docs, really should swallow the output on error. verify if that is
+            // required
+            switch ( statusCode )
+            {
+                case HttpStatus.SC_OK:
+                    break;
+
+                case HttpStatus.SC_NOT_MODIFIED:
+                    // return, leaving last modified set to original value so getIfNewer should return unmodified
+                    return;
+
+                case SC_NULL:
+                {
+                    TransferFailedException e =
+                        new TransferFailedException( "Failed to transfer file: " + url + " " + reasonPhrase );
+                    fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+                    throw e;
+                }
+
+                case HttpStatus.SC_FORBIDDEN:
+                    fireSessionConnectionRefused();
+                    throw new AuthorizationException( "Access denied to: " + url + " " + reasonPhrase );
+
+                case HttpStatus.SC_UNAUTHORIZED:
+                    fireSessionConnectionRefused();
+                    throw new AuthorizationException( "Not authorized " + reasonPhrase );
+
+                case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
+                    fireSessionConnectionRefused();
+                    throw new AuthorizationException( "Not authorized by proxy " + reasonPhrase );
+
+                case HttpStatus.SC_NOT_FOUND:
+                    throw new ResourceDoesNotExistException( "File: " + url + " " + reasonPhrase );
+
+                    // add more entries here
+                default:
+                {
+                    cleanupGetTransfer( resource );
+                    TransferFailedException e = new TransferFailedException(
+                        "Failed to transfer file: " + url + ". Return code is: " + statusCode + " " + reasonPhrase );
+                    fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+                    throw e;
+                }
+            }
+
+            InputStream is;
+
+            Header contentLengthHeader = response.getFirstHeader( "Content-Length" );
+
+            if ( contentLengthHeader != null )
+            {
+                try
+                {
+                    long contentLength = Long.parseLong( contentLengthHeader.getValue() );
+
+                    resource.setContentLength( contentLength );
+                }
+                catch ( NumberFormatException e )
+                {
+                    fireTransferDebug(
+                        "error parsing content length header '" + contentLengthHeader.getValue() + "' " + e );
+                }
+            }
+
+            Header lastModifiedHeader = response.getFirstHeader( "Last-Modified" );
+
+            long lastModified = 0;
+
+            if ( lastModifiedHeader != null )
+            {
+                try
+                {
+                    lastModified = DateUtils.parseDate( lastModifiedHeader.getValue() ).getTime();
+
+                    resource.setLastModified( lastModified );
+                }
+                catch ( DateParseException e )
+                {
+                    fireTransferDebug( "Unable to parse last modified header" );
+                }
+
+                fireTransferDebug( "last-modified = " + lastModifiedHeader.getValue() + " (" + lastModified + ")" );
+            }
+
+            Header contentEncoding = response.getFirstHeader( "Content-Encoding" );
+            boolean isGZipped = contentEncoding == null ? false : "gzip".equalsIgnoreCase( contentEncoding.getValue() );
+
+            try
+            {
+                is = response.getEntity().getContent();
+
+                if ( isGZipped )
+                {
+                    is = new GZIPInputStream( is );
+                }
+            }
+            catch ( IOException e )
+            {
+                fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+
+                String msg =
+                    "Error occurred while retrieving from remote repository " + getRepository() + ": " + e.getMessage();
+
+                throw new TransferFailedException( msg, e );
+            }
+
+            inputData.setInputStream( is );
         }
         catch ( IOException e )
         {
@@ -931,127 +1050,20 @@ public abstract class AbstractHttpClientWagon
 
             throw new TransferFailedException( e.getMessage(), e );
         }
-
-        statusCode = response.getStatusLine().getStatusCode();
-
-        String reasonPhrase = ", ReasonPhrase:" + response.getStatusLine().getReasonPhrase() + ".";
-
-        fireTransferDebug( url + " - Status code: " + statusCode + reasonPhrase );
-
-        // TODO [BP]: according to httpclient docs, really should swallow the output on error. verify if that is
-        // required
-        switch ( statusCode )
-        {
-            case HttpStatus.SC_OK:
-                break;
-
-            case HttpStatus.SC_NOT_MODIFIED:
-                // return, leaving last modified set to original value so getIfNewer should return unmodified
-                return;
-
-            case SC_NULL:
-            {
-                TransferFailedException e =
-                    new TransferFailedException( "Failed to transfer file: " + url + " " + reasonPhrase );
-                fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-                throw e;
-            }
-
-            case HttpStatus.SC_FORBIDDEN:
-                fireSessionConnectionRefused();
-                throw new AuthorizationException( "Access denied to: " + url + " " + reasonPhrase );
-
-            case HttpStatus.SC_UNAUTHORIZED:
-                fireSessionConnectionRefused();
-                throw new AuthorizationException( "Not authorized " + reasonPhrase );
-
-            case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
-                fireSessionConnectionRefused();
-                throw new AuthorizationException( "Not authorized by proxy " + reasonPhrase );
-
-            case HttpStatus.SC_NOT_FOUND:
-                throw new ResourceDoesNotExistException( "File: " + url + " " + reasonPhrase );
-
-                // add more entries here
-            default:
-            {
-                cleanupGetTransfer( resource );
-                TransferFailedException e = new TransferFailedException(
-                    "Failed to transfer file: " + url + ". Return code is: " + statusCode + " " + reasonPhrase );
-                fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-                throw e;
-            }
-        }
-
-        InputStream is;
-
-        Header contentLengthHeader = response.getFirstHeader( "Content-Length" );
-
-        if ( contentLengthHeader != null )
-        {
-            try
-            {
-                long contentLength = Long.parseLong( contentLengthHeader.getValue() );
-
-                resource.setContentLength( contentLength );
-            }
-            catch ( NumberFormatException e )
-            {
-                fireTransferDebug(
-                    "error parsing content length header '" + contentLengthHeader.getValue() + "' " + e );
-            }
-        }
-
-        Header lastModifiedHeader = response.getFirstHeader( "Last-Modified" );
-
-        long lastModified = 0;
-
-        if ( lastModifiedHeader != null )
-        {
-            try
-            {
-                lastModified = DateUtils.parseDate( lastModifiedHeader.getValue() ).getTime();
-
-                resource.setLastModified( lastModified );
-            }
-            catch ( DateParseException e )
-            {
-                fireTransferDebug( "Unable to parse last modified header" );
-            }
-
-            fireTransferDebug( "last-modified = " + lastModifiedHeader.getValue() + " (" + lastModified + ")" );
-        }
-
-        Header contentEncoding = response.getFirstHeader( "Content-Encoding" );
-        boolean isGZipped = contentEncoding == null ? false : "gzip".equalsIgnoreCase( contentEncoding.getValue() );
-
-        try
-        {
-            is = response.getEntity().getContent();
-
-            if ( isGZipped )
-            {
-                is = new GZIPInputStream( is );
-            }
-        }
-        catch ( IOException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-
-            String msg =
-                "Error occurred while retrieving from remote repository " + getRepository() + ": " + e.getMessage();
-
-            throw new TransferFailedException( msg, e );
-        }
-
-        inputData.setInputStream( is );
     }
 
     protected void cleanupGetTransfer( Resource resource )
     {
-        if ( getMethod != null )
+        if ( closeable != null )
         {
-            getMethod.abort();
+            try
+            {
+                closeable.close();
+            }
+            catch (IOException ignore)
+            {
+            }
+
         }
     }
 

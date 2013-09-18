@@ -21,10 +21,10 @@ package org.apache.maven.wagon.providers.http;
 
 
 import junit.framework.TestCase;
+
 import org.apache.http.Header;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.params.HttpParams;
 import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.TransferFailedException;
 
@@ -32,43 +32,19 @@ public class HttpClientWagonTest
     extends TestCase
 {
 
-    public void testSetPreemptiveAuthParamViaConfig()
-    {
-        HttpMethodConfiguration methodConfig = new HttpMethodConfiguration();
-        //X TODO methodConfig.addParam( HttpClientParams.PREEMPTIVE_AUTHENTICATION, "%b,true" );
-
-        HttpConfiguration config = new HttpConfiguration();
-        config.setAll( methodConfig );
-
-        TestWagon wagon = new TestWagon();
-        wagon.setHttpConfiguration( config );
-
-        HttpHead method = new HttpHead();
-        wagon.setParameters( method );
-
-        HttpParams params = method.getParams();
-        assertNotNull( params );
-        //X TODO assertTrue( params.isParameterTrue( HttpClientParams.PREEMPTIVE_AUTHENTICATION ) );
-    }
-
     public void testSetMaxRedirectsParamViaConfig()
     {
         HttpMethodConfiguration methodConfig = new HttpMethodConfiguration();
         int maxRedirects = 2;
-        methodConfig.addParam( ClientPNames.MAX_REDIRECTS, "%i," + maxRedirects );
+        methodConfig.addParam("http.protocol.max-redirects", "%i," + maxRedirects);
 
         HttpConfiguration config = new HttpConfiguration();
-        config.setAll( methodConfig );
-
-        TestWagon wagon = new TestWagon();
-        wagon.setHttpConfiguration( config );
+        config.setAll(methodConfig);
 
         HttpHead method = new HttpHead();
-        wagon.setParameters( method );
+        RequestConfig requestConfig = config.getMethodConfiguration(method).asRequestConfig();
 
-        HttpParams params = method.getParams();
-        assertNotNull( params );
-        assertEquals( maxRedirects, params.getIntParameter( ClientPNames.MAX_REDIRECTS, -1 ) );
+        assertEquals(2, requestConfig.getMaxRedirects());
     }
 
     public void testDefaultHeadersUsedByDefault()

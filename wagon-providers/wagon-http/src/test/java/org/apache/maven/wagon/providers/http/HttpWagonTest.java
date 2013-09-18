@@ -19,12 +19,12 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import java.util.Properties;
+
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.maven.wagon.StreamingWagon;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.http.HttpWagonTestCase;
-
-import java.util.Properties;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -56,7 +56,7 @@ public class HttpWagonTest
         throws Exception
     {
         HttpWagon wagon = (HttpWagon) lookup( Wagon.class, "http" );
-        assertTrue( wagon.getConnectionManager() instanceof PoolingClientConnectionManager );
+        assertTrue( wagon.getConnectionManager() instanceof PoolingHttpClientConnectionManager );
 
     }
 
