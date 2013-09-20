@@ -35,7 +35,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
-import java.util.zip.GZIPInputStream;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLException;
@@ -61,6 +60,7 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.client.utils.DateUtils;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.HttpClientConnectionManager;
@@ -76,8 +76,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.impl.cookie.DateParseException;
-import org.apache.http.impl.cookie.DateUtils;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.TextUtils;
@@ -975,8 +973,6 @@ public abstract class AbstractHttpClientWagon
                 }
             }
 
-            InputStream is;
-
             Header contentLengthHeader = response.getFirstHeader( "Content-Length" );
 
             if ( contentLengthHeader != null )
@@ -995,48 +991,20 @@ public abstract class AbstractHttpClientWagon
             }
 
             Header lastModifiedHeader = response.getFirstHeader( "Last-Modified" );
-
-            long lastModified = 0;
-
             if ( lastModifiedHeader != null )
             {
-                try
-                {
-                    lastModified = DateUtils.parseDate( lastModifiedHeader.getValue() ).getTime();
-
-                    resource.setLastModified( lastModified );
-                }
-                catch ( DateParseException e )
-                {
-                    fireTransferDebug( "Unable to parse last modified header" );
-                }
-
-                fireTransferDebug( "last-modified = " + lastModifiedHeader.getValue() + " (" + lastModified + ")" );
-            }
-
-            Header contentEncoding = response.getFirstHeader( "Content-Encoding" );
-            boolean isGZipped = contentEncoding == null ? false : "gzip".equalsIgnoreCase( contentEncoding.getValue() );
-
-            try
-            {
-                is = response.getEntity().getContent();
-
-                if ( isGZipped )
-                {
-                    is = new GZIPInputStream( is );
+                Date lastModified = DateUtils.parseDate(lastModifiedHeader.getValue());
+                if ( lastModified != null ) {
+                    resource.setLastModified( lastModified.getTime() );
+                    fireTransferDebug( "last-modified = " + lastModifiedHeader.getValue() +
+                            " (" + lastModified.getTime() + ")" );
                 }
             }
-            catch ( IOException e )
-            {
-                fireTransferError( resource, e, TransferEvent.REQUEST_GET );
 
-                String msg =
-                    "Error occurred while retrieving from remote repository " + getRepository() + ": " + e.getMessage();
-
-                throw new TransferFailedException( msg, e );
+            HttpEntity entity = response.getEntity();
+            if ( entity != null ) {
+                inputData.setInputStream( entity.getContent() );
             }
-
-            inputData.setInputStream( is );
         }
         catch ( IOException e )
         {
