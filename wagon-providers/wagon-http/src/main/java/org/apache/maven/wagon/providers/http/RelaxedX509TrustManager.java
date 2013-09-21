@@ -19,6 +19,8 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
+import org.apache.http.conn.ssl.SSLInitializationException;
+
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
@@ -37,34 +39,32 @@ import java.security.cert.X509Certificate;
  *
  * @author Olivier Lamy
  * @since 2.0
- * @see AbstractHttpClientWagon.IGNORE_SSL_VALIDITY_DATES
  */
 public class RelaxedX509TrustManager
     implements X509TrustManager
 {
-    private X509TrustManager standardTrustManager = null;
+    private final X509TrustManager standardTrustManager;
+    private final boolean ignoreSSLValidityDates;
 
-    protected static SSLContext createRelaxedSSLContext()
-        throws IOException
+    public static SSLContext createRelaxedSSLContext( boolean ignoreSSLValidityDates )
     {
         try
         {
             SSLContext context = SSLContext.getInstance( "SSL" );
-            context.init( null, new TrustManager[]{ new RelaxedX509TrustManager( null ) }, null );
+            context.init( null, new TrustManager[]{
+                    new RelaxedX509TrustManager( null, ignoreSSLValidityDates ) }, null );
             return context;
         }
         catch ( Exception e )
         {
-            IOException ioe = new IOException( e.getMessage() );
-            ioe.initCause( e );
-            throw ioe;
+            throw new SSLInitializationException(e.getMessage(), e);
         }
     }
 
     /**
      * Constructor for EasyX509TrustManager.
      */
-    public RelaxedX509TrustManager( KeyStore keystore )
+    public RelaxedX509TrustManager( KeyStore keystore, boolean ignoreSSLValidityDates )
         throws NoSuchAlgorithmException, KeyStoreException
     {
         super();
@@ -76,6 +76,7 @@ public class RelaxedX509TrustManager
             throw new NoSuchAlgorithmException( "no trust manager found" );
         }
         this.standardTrustManager = (X509TrustManager) trustmanagers[0];
+        this.ignoreSSLValidityDates = ignoreSSLValidityDates;
     }
 
     /**
@@ -102,14 +103,14 @@ public class RelaxedX509TrustManager
             }
             catch ( CertificateExpiredException e )
             {
-                if ( !AbstractHttpClientWagon.IGNORE_SSL_VALIDITY_DATES )
+                if ( !ignoreSSLValidityDates )
                 {
                     throw e;
                 }
             }
             catch ( CertificateNotYetValidException e )
             {
-                if ( !AbstractHttpClientWagon.IGNORE_SSL_VALIDITY_DATES )
+                if ( !ignoreSSLValidityDates )
                 {
                     throw e;
                 }
