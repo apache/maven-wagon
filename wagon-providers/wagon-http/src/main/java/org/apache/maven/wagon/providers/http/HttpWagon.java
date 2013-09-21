@@ -59,14 +59,10 @@ public class HttpWagon
 
                 fireTransferDebug( url + " - Status code: " + statusCode );
 
-                // TODO [BP]: according to httpclient docs, really should swallow the output on error. verify if that is required
                 switch ( statusCode )
                 {
                     case HttpStatus.SC_OK:
                         break;
-
-                    case SC_NULL:
-                        throw new TransferFailedException( "Failed to transfer file: " );
 
                     case HttpStatus.SC_FORBIDDEN:
                         throw new AuthorizationException( "Access denied to: " + url );
