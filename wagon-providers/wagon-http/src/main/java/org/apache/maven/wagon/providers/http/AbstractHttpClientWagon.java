@@ -28,18 +28,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
-import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocket;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -63,22 +60,18 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.utils.DateUtils;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
-import org.apache.http.util.TextUtils;
 import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.PathUtils;
@@ -223,7 +216,7 @@ public abstract class AbstractHttpClientWagon
 
     protected static final int SC_NULL = -1;
 
-    protected static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone( "GMT" );
+    private static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone( "GMT" );
 
     private CloseableHttpClient client;
 
@@ -232,163 +225,92 @@ public abstract class AbstractHttpClientWagon
     private Closeable closeable;
 
     /**
-     * @since 2.0
-     */
-    protected static HttpClientConnectionManager connectionManagerPooled;
-
-    /**
-     * @since 2.0
-     */
-    protected HttpClientConnectionManager clientConnectionManager = new BasicHttpClientConnectionManager(
-            createSocketFactoryRegistry() );
-
-    /**
      * use http(s) connection pool mechanism.
      * <b>enabled by default</b>
-     *
-     * @since 2.0
      */
-    protected static boolean useClientManagerPooled =
-        Boolean.valueOf( System.getProperty( "maven.wagon.http.pool", "true" ) );
+    private final static boolean PERSISTENT_POOL =
+            Boolean.valueOf( System.getProperty( "maven.wagon.http.pool", "true" ) );
 
     /**
      * skip failure on certificate validity checks.
      * <b>disabled by default</b>
-     *
-     * @since 2.0
      */
-    protected static boolean sslInsecure = Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.insecure", "false" ) );
+    private final static boolean SSL_INSECURE =
+            Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.insecure", "false" ) );
 
     /**
      * if using sslInsecure, certificate date issues will be ignored
      * <b>disabled by default</b>
-     *
-     * @since 2.0
      */
-    protected static boolean IGNORE_SSL_VALIDITY_DATES =
-        Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.ignore.validity.dates", "false" ) );
+    private final static boolean IGNORE_SSL_VALIDITY_DATES =
+            Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.ignore.validity.dates", "false" ) );
 
     /**
      * If enabled, ssl hostname verifier does not check hostname. Disable this will use a browser compat hostname verifier
      * <b>disabled by default</b>
-     *
-     * @since 2.0
-     * @see RelaxedHostNameVerifier
      */
-    protected static boolean sslAllowAll =
-        Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.allowall", "false" ) );
+    private final static boolean SSL_ALLOW_ALL =
+            Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.allowall", "false" ) );
 
-    private static String[] split(final String s) {
-        if (TextUtils.isBlank(s)) {
-            return null;
-        }
-        return s.split(" *, *");
-    }
 
-    private static Registry<ConnectionSocketFactory> createSocketFactoryRegistry()
+    /**
+     * Maximum conncurrent connections per distinct route.
+     * <b>20 by default</b>
+     */
+    private final static int MAX_CONN_PER_ROUTE =
+            Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxPerRoute", "20" ) );
+
+    /**
+     * Maximum conncurrent connections in total.
+     * <b>40 by default</b>
+     */
+    private final static int MAX_CONN_TOTAL =
+            Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxTotal", "40" ) );
+
+    /**
+     * Internal connection manager
+     */
+    private static final PoolingHttpClientConnectionManager connManager = createConnManager();
+
+    private static PoolingHttpClientConnectionManager createConnManager()
     {
-        String[] sslProtocols = split(System.getProperty("https.protocols"));
-        String[] cipherSuites = split(System.getProperty("https.cipherSuites"));
-        SSLConnectionSocketFactory sslSocketFactory;
-        if ( sslInsecure )
+
+        String sslProtocolsStr = System.getProperty("https.protocols");
+        String cipherSuitesStr = System.getProperty("https.cipherSuites");
+        String[] sslProtocols = sslProtocolsStr != null ? sslProtocolsStr.split(" *, *") : null;
+        String[] cipherSuites = cipherSuitesStr != null ? cipherSuitesStr.split(" *, *") : null;
+
+        SSLConnectionSocketFactory sslConnectionSocketFactory;
+        if ( SSL_INSECURE )
         {
-            try
-            {
-                sslSocketFactory = new SSLConnectionSocketFactory(
-                        RelaxedX509TrustManager.createRelaxedSSLContext(),
-                        sslProtocols,
-                        cipherSuites,
-                        sslAllowAll ? new RelaxedHostNameVerifier() : SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER );
-            }
-            catch ( IOException e )
-            {
-                throw new RuntimeException( "failed to init SSLSocket Factory " + e.getMessage(), e );
-            }
+            sslConnectionSocketFactory = new SSLConnectionSocketFactory(
+                    RelaxedX509TrustManager.createRelaxedSSLContext(IGNORE_SSL_VALIDITY_DATES),
+                    sslProtocols,
+                    cipherSuites,
+                    SSL_ALLOW_ALL ? SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER : SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER );
         }
         else
         {
-            sslSocketFactory = new SSLConnectionSocketFactory(
+            sslConnectionSocketFactory = new SSLConnectionSocketFactory(
                     HttpsURLConnection.getDefaultSSLSocketFactory(),
                     sslProtocols,
                     cipherSuites,
                     SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER );
         }
-        return RegistryBuilder.<ConnectionSocketFactory>create()
+
+        Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
                 .register("http", PlainConnectionSocketFactory.INSTANCE)
-                .register("https", sslSocketFactory)
+                .register("https", sslConnectionSocketFactory)
                 .build();
-    }
 
-    static
-    {
-        if ( !useClientManagerPooled )
-        {
-            System.out.println( "http connection pool disabled in wagon http" );
+        PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager( registry );
+        if (PERSISTENT_POOL) {
+            connManager.setDefaultMaxPerRoute( MAX_CONN_PER_ROUTE );
+            connManager.setMaxTotal( MAX_CONN_TOTAL );
+        } else {
+            connManager.setMaxTotal( 1 );
         }
-        else
-        {
-            PoolingHttpClientConnectionManager poolingClientConnectionManager =
-                new PoolingHttpClientConnectionManager( createSocketFactoryRegistry() );
-            int maxPerRoute =
-                Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxPerRoute", "20" ) );
-            poolingClientConnectionManager.setDefaultMaxPerRoute( maxPerRoute );
-            int maxTotal = Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxTotal", "40" ) );
-            poolingClientConnectionManager.setDefaultMaxPerRoute( maxPerRoute );
-            poolingClientConnectionManager.setMaxTotal( maxTotal );
-
-            connectionManagerPooled = poolingClientConnectionManager;
-        }
-    }
-
-    /**
-     * disable all host name verification
-     *
-     * @since 2.0
-     */
-    private static class RelaxedHostNameVerifier
-        implements X509HostnameVerifier
-    {
-        public void verify( String s, SSLSocket sslSocket )
-            throws IOException
-        {
-            //no op
-        }
-
-        public void verify( String s, X509Certificate x509Certificate )
-            throws SSLException
-        {
-            //no op
-        }
-
-        public void verify( String s, String[] strings, String[] strings1 )
-            throws SSLException
-        {
-            //no op
-        }
-
-        public boolean verify( String s, SSLSession sslSession )
-        {
-            return true;
-        }
-    }
-
-    public HttpClientConnectionManager getConnectionManager()
-    {
-        if ( !useClientManagerPooled )
-        {
-            return clientConnectionManager;
-        }
-        return connectionManagerPooled;
-    }
-
-    public static void setConnectionManagerPooled( HttpClientConnectionManager clientConnectionManager )
-    {
-        connectionManagerPooled = clientConnectionManager;
-    }
-
-    public static void setUseClientManagerPooled( boolean pooledClientManager )
-    {
-        useClientManagerPooled = pooledClientManager;
+        return connManager;
     }
 
     /**
@@ -475,7 +397,7 @@ public abstract class AbstractHttpClientWagon
         client = HttpClientBuilder.create()
                 .useSystemProperties()
                 .disableConnectionState()
-                .setConnectionManager(getConnectionManager())
+                .setConnectionManager(connManager)
                 .setProxy(proxy)
                 .setDefaultCredentialsProvider(credentialsProvider)
                 .build();
@@ -483,9 +405,9 @@ public abstract class AbstractHttpClientWagon
 
     public void closeConnection()
     {
-        if ( !useClientManagerPooled )
+        if ( !PERSISTENT_POOL)
         {
-            getConnectionManager().shutdown();
+            connManager.closeIdleConnections(0, TimeUnit.MILLISECONDS);
         }
     }
 

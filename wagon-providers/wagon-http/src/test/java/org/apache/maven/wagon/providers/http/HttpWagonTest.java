@@ -52,14 +52,6 @@ public class HttpWagonTest
         ( (HttpWagon) wagon ).setHttpConfiguration( config );
     }
 
-    public void testDefaultPooledConnectionManager()
-        throws Exception
-    {
-        HttpWagon wagon = (HttpWagon) lookup( Wagon.class, "http" );
-        assertTrue( wagon.getConnectionManager() instanceof PoolingHttpClientConnectionManager );
-
-    }
-
     @Override
     protected boolean supportPreemptiveAuthenticationPut()
     {
