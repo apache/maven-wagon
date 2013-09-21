@@ -214,8 +214,6 @@ public abstract class AbstractHttpClientWagon
         }
     }
 
-    protected static final int SC_NULL = -1;
-
     private static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone( "GMT" );
 
     private CloseableHttpClient client;
@@ -529,14 +527,6 @@ public abstract class AbstractHttpClientWagon
                     case HttpStatus.SC_SEE_OTHER: // 303
                         put( resource, source, httpEntity, calculateRelocatedUrl( response ) );
                         return;
-                    case SC_NULL:
-                    {
-                        TransferFailedException e =
-                            new TransferFailedException( "Failed to transfer file: " + url + reasonPhrase );
-                        fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
-                        throw e;
-                    }
-
                     case HttpStatus.SC_FORBIDDEN:
                         fireSessionConnectionRefused();
                         throw new AuthorizationException( "Access denied to: " + url + reasonPhrase );
@@ -608,10 +598,6 @@ public abstract class AbstractHttpClientWagon
 
                     case HttpStatus.SC_NOT_MODIFIED:
                         return true;
-
-                    case SC_NULL:
-                        throw new TransferFailedException( "Failed to transfer file: " + url + reasonPhrase );
-
                     case HttpStatus.SC_FORBIDDEN:
                         throw new AuthorizationException( "Access denied to: " + url + reasonPhrase );
 
@@ -850,8 +836,6 @@ public abstract class AbstractHttpClientWagon
 
             fireTransferDebug( url + " - Status code: " + statusCode + reasonPhrase );
 
-            // TODO [BP]: according to httpclient docs, really should swallow the output on error. verify if that is
-            // required
             switch ( statusCode )
             {
                 case HttpStatus.SC_OK:
@@ -860,15 +844,6 @@ public abstract class AbstractHttpClientWagon
                 case HttpStatus.SC_NOT_MODIFIED:
                     // return, leaving last modified set to original value so getIfNewer should return unmodified
                     return;
-
-                case SC_NULL:
-                {
-                    TransferFailedException e =
-                        new TransferFailedException( "Failed to transfer file: " + url + " " + reasonPhrase );
-                    fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-                    throw e;
-                }
-
                 case HttpStatus.SC_FORBIDDEN:
                     fireSessionConnectionRefused();
                     throw new AuthorizationException( "Access denied to: " + url + " " + reasonPhrase );
