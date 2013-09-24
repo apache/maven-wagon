@@ -54,6 +54,7 @@ import org.apache.http.auth.NTCredentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -101,8 +102,6 @@ import org.codehaus.plexus.util.StringUtils;
 public abstract class AbstractHttpClientWagon
     extends StreamWagon
 {
-    private static String defaultUserAgent;
-
     private final class RequestEntityImplementation
         extends AbstractHttpEntity
     {
@@ -223,12 +222,6 @@ public abstract class AbstractHttpClientWagon
 
     private static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone( "GMT" );
 
-    private CloseableHttpClient client;
-
-    private HttpClientContext localContext;
-
-    private Closeable closeable;
-
     /**
      * use http(s) connection pool mechanism.
      * <b>enabled by default</b>
@@ -275,7 +268,7 @@ public abstract class AbstractHttpClientWagon
     /**
      * Internal connection manager
      */
-    private static final PoolingHttpClientConnectionManager connManager = createConnManager();
+    private static final PoolingHttpClientConnectionManager CONN_MAN = createConnManager();
 
     private static PoolingHttpClientConnectionManager createConnManager()
     {
@@ -328,6 +321,46 @@ public abstract class AbstractHttpClientWagon
         return connManager;
     }
 
+    private static CloseableHttpClient CLIENT = createClient();
+
+    private static CloseableHttpClient createClient() {
+        return HttpClientBuilder.create()
+                    .useSystemProperties()
+                    .disableConnectionState()
+                    .setConnectionManager(CONN_MAN)
+                    .build();
+    }
+
+    private static String DEFAULT_USER_AGENT = getDefaultUserAgent();
+
+    private static String getDefaultUserAgent()
+    {
+        Properties props = new Properties();
+
+        InputStream is = AbstractHttpClientWagon.class.getResourceAsStream("/META-INF/maven/org.apache.maven.wagon/wagon-http/pom.properties");
+        if ( is != null )
+        {
+            try
+            {
+                props.load( is );
+            }
+            catch ( IOException ignore )
+            {
+            }
+            finally
+            {
+                IOUtil.close( is );
+            }
+        }
+
+        String ver = props.getProperty( "version", "unknown-version" );
+        return "Apache-Maven-Wagon/" + ver + " (Java " + System.getProperty( "java.version" ) + "; ";
+    }
+
+    private HttpClientContext localContext;
+
+    private Closeable closeable;
+
     /**
      * @plexus.configuration
      * @deprecated Use httpConfiguration instead.
@@ -373,20 +406,16 @@ public abstract class AbstractHttpClientWagon
             }
         }
 
-        HttpHost proxy = null;
         ProxyInfo proxyInfo = getProxyInfo( getRepository().getProtocol(), getRepository().getHost() );
         if ( proxyInfo != null )
         {
             String proxyUsername = proxyInfo.getUserName();
             String proxyPassword = proxyInfo.getPassword();
             String proxyHost = proxyInfo.getHost();
-            int proxyPort = proxyInfo.getPort();
             String proxyNtlmHost = proxyInfo.getNtlmHost();
             String proxyNtlmDomain = proxyInfo.getNtlmDomain();
             if ( proxyHost != null )
             {
-                proxy = new HttpHost( proxyHost, proxyPort );
-
                 if ( proxyUsername != null && proxyPassword != null )
                 {
                     Credentials creds;
@@ -408,21 +437,14 @@ public abstract class AbstractHttpClientWagon
         }
 
         localContext = HttpClientContext.create();
-
-        client = HttpClientBuilder.create()
-                .useSystemProperties()
-                .disableConnectionState()
-                .setConnectionManager(connManager)
-                .setProxy(proxy)
-                .setDefaultCredentialsProvider(credentialsProvider)
-                .build();
+        localContext.setCredentialsProvider(credentialsProvider);
     }
 
     public void closeConnection()
     {
         if ( !PERSISTENT_POOL)
         {
-            connManager.closeIdleConnections(0, TimeUnit.MILLISECONDS);
+            CONN_MAN.closeIdleConnections(0, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -664,11 +686,23 @@ public abstract class AbstractHttpClientWagon
             httpMethod.setHeader(HTTP.USER_AGENT, userAgent);
         }
 
+        RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
+        // WAGON-273: default the cookie-policy to browser compatible
+        requestConfigBuilder.setCookieSpec(CookieSpecs.BROWSER_COMPATIBILITY);
+
+        ProxyInfo proxyInfo = getProxyInfo( getRepository().getProtocol(), getRepository().getHost() );
+        if ( proxyInfo != null )
+        {
+            HttpHost proxy = new HttpHost( proxyInfo.getHost(), proxyInfo.getPort() );
+            requestConfigBuilder.setProxy( proxy );
+        }
+
         HttpMethodConfiguration config =
-            httpConfiguration == null ? null : httpConfiguration.getMethodConfiguration( httpMethod );
+            httpConfiguration == null ? null : httpConfiguration.getMethodConfiguration(httpMethod);
+
         if ( config != null )
         {
-            localContext.setRequestConfig( config.asRequestConfig() );
+            config.applyConfig(requestConfigBuilder);
 
             if ( config.isUsePreemptive() && authenticationInfo != null )
             {
@@ -691,13 +725,10 @@ public abstract class AbstractHttpClientWagon
         }
         else
         {
-            RequestConfig requestConfig = RequestConfig.custom()
-                    .setSocketTimeout( getReadTimeout() )
-                    .build();
-            localContext.setRequestConfig( requestConfig );
+            requestConfigBuilder.setSocketTimeout( getReadTimeout() );
         }
 
-        ProxyInfo proxyInfo = getProxyInfo( getRepository().getProtocol(), getRepository().getHost() );
+        localContext.setRequestConfig( requestConfigBuilder.build() );
 
         if ( proxyInfo != null )
         {
@@ -721,7 +752,7 @@ public abstract class AbstractHttpClientWagon
 
         }
 
-        return client.execute( httpMethod, localContext );
+        return CLIENT.execute( httpMethod, localContext );
     }
 
     protected void setHeaders( HttpUriRequest method )
@@ -736,7 +767,7 @@ public abstract class AbstractHttpClientWagon
             method.addHeader( "Pragma", "no-cache" );
             method.addHeader( "Expires", "0" );
             method.addHeader( "Accept-Encoding", "gzip" );
-            method.addHeader( "User-Agent", getDefaultUserAgent() );
+            method.addHeader( "User-Agent", DEFAULT_USER_AGENT );
         }
 
         if ( httpHeaders != null )
@@ -755,38 +786,6 @@ public abstract class AbstractHttpClientWagon
                 method.addHeader( headers[i] );
             }
         }
-    }
-
-    private String getDefaultUserAgent()
-    {
-        if ( defaultUserAgent == null )
-        {
-            defaultUserAgent =
-                "Apache-Maven-Wagon/" + getWagonVersion() + " (Java " + System.getProperty( "java.version" ) + "; "
-                    + System.getProperty( "os.name" ) + " " + System.getProperty( "os.version" ) + ")";
-        }
-        return defaultUserAgent;
-    }
-
-    private String getWagonVersion()
-    {
-        Properties props = new Properties();
-
-        InputStream is = getClass().getResourceAsStream( "/META-INF/maven/org.apache.maven.wagon/wagon-http/pom.properties" );
-        if ( is != null )
-        {
-            try
-            {
-                props.load( is );
-            }
-            catch ( IOException e )
-            {
-                // ignore
-            }
-            IOUtil.close( is );
-        }
-
-        return props.getProperty( "version", "unknown-version" );
     }
 
     protected String getUserAgent( HttpUriRequest method )

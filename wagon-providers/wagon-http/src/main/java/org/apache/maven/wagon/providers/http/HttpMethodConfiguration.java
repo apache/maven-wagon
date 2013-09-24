@@ -146,15 +146,12 @@ public class HttpMethodConfiguration
 
     private static final String COERCE_PATTERN = "%(\\w+),(.+)";
 
-    public RequestConfig asRequestConfig()
+    public void applyConfig(RequestConfig.Builder builder)
     {
         if ( !hasParams() )
         {
-            return null;
+            return;
         }
-        RequestConfig.Builder builder = RequestConfig.custom();
-        // WAGON-273: default the cookie-policy to browser compatible
-        builder.setCookieSpec(CookieSpecs.BROWSER_COMPATIBILITY);
         if ( connectionTimeout > 0 )
         {
             builder.setConnectTimeout(connectionTimeout);
@@ -244,7 +241,6 @@ public class HttpMethodConfiguration
                 }
             }
         }
-        return builder.build();
     }
 
     private boolean hasParams()
