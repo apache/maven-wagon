@@ -21,8 +21,10 @@ package org.apache.maven.wagon.providers.http;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -81,10 +83,16 @@ public class HttpWagon
                         throw new TransferFailedException(
                             "Failed to transfer file: " + url + ". Return code is: " + statusCode );
                 }
+                HttpEntity entity = response.getEntity();
+                if ( entity != null )
+                {
+                    return HtmlFileListParser.parseFileList( url, entity.getContent() );
+                }
+                else
+                {
+                    return Collections.emptyList();
+                }
 
-                InputStream is = response.getEntity().getContent();
-
-                return HtmlFileListParser.parseFileList( url, is );
             } finally {
                 response.close();
             }

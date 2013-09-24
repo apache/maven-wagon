@@ -78,6 +78,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.PathUtils;
@@ -561,6 +562,8 @@ public abstract class AbstractHttpClientWagon
                 }
 
                 firePutCompleted(resource, source);
+
+                EntityUtils.consume(response.getEntity());
             }
             finally
             {
@@ -607,13 +610,15 @@ public abstract class AbstractHttpClientWagon
             try {
                 int statusCode = response.getStatusLine().getStatusCode();
                 String reasonPhrase = ", ReasonPhrase: " + response.getStatusLine().getReasonPhrase() + ".";
+                boolean result;
                 switch ( statusCode )
                 {
                     case HttpStatus.SC_OK:
-                        return true;
-
+                        result = true;
+                        break;
                     case HttpStatus.SC_NOT_MODIFIED:
-                        return true;
+                        result = true;
+                        break;
                     case HttpStatus.SC_FORBIDDEN:
                         throw new AuthorizationException( "Access denied to: " + url + reasonPhrase );
 
@@ -624,14 +629,16 @@ public abstract class AbstractHttpClientWagon
                         throw new AuthorizationException( "Not authorized by proxy " + reasonPhrase );
 
                     case HttpStatus.SC_NOT_FOUND:
-                        return false;
-
+                        result = false;
+                        break;
                     //add more entries here
                     default:
                         throw new TransferFailedException(
                             "Failed to transfer file: " + url + ". Return code is: " + statusCode + reasonPhrase );
                 }
 
+                EntityUtils.consume(response.getEntity());
+                return result;
             }
             finally
             {
