@@ -28,6 +28,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -37,6 +40,7 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -63,6 +67,8 @@ import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContextBuilder;
+import org.apache.http.conn.ssl.SSLInitializationException;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
@@ -281,11 +287,21 @@ public abstract class AbstractHttpClientWagon
         SSLConnectionSocketFactory sslConnectionSocketFactory;
         if ( SSL_INSECURE )
         {
-            sslConnectionSocketFactory = new SSLConnectionSocketFactory(
-                    RelaxedX509TrustManager.createRelaxedSSLContext(IGNORE_SSL_VALIDITY_DATES),
-                    sslProtocols,
-                    cipherSuites,
-                    SSL_ALLOW_ALL ? SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER : SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER );
+            try {
+                SSLContext sslContext = new SSLContextBuilder()
+                        .useSSL()
+                        .loadTrustMaterial(null, new RelaxedTrustStrategy(IGNORE_SSL_VALIDITY_DATES))
+                        .build();
+                sslConnectionSocketFactory = new SSLConnectionSocketFactory(
+                        sslContext,
+                        sslProtocols,
+                        cipherSuites,
+                        SSL_ALLOW_ALL ? SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER : SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER );
+            }
+            catch (Exception ex)
+            {
+                throw new SSLInitializationException(ex.getMessage(), ex);
+            }
         }
         else
         {
