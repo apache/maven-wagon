@@ -702,7 +702,7 @@ public abstract class AbstractHttpClientWagon
 
         if ( config != null )
         {
-            config.applyConfig(requestConfigBuilder);
+            ConfigurationUtils.copyConfig(config, requestConfigBuilder );
 
             if ( config.isUsePreemptive() && authenticationInfo != null )
             {

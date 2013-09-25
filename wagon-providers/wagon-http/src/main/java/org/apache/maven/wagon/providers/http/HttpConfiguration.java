@@ -87,15 +87,15 @@ public class HttpConfiguration
     {
         if ( method instanceof HttpGet )
         {
-            return HttpMethodConfiguration.merge( all, get );
+            return ConfigurationUtils.merge( all, get );
         }
         else if ( method instanceof HttpPut )
         {
-            return HttpMethodConfiguration.merge( DEFAULT_PUT, all, put );
+            return ConfigurationUtils.merge( DEFAULT_PUT, all, put );
         }
         else if ( method instanceof HttpHead )
         {
-            return HttpMethodConfiguration.merge( all, head );
+            return ConfigurationUtils.merge( all, head );
         }
 
         return all;

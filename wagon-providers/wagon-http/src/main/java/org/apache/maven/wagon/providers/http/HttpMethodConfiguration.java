@@ -19,25 +19,12 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.http.Header;
-import org.apache.http.HttpHost;
-import org.apache.http.client.config.CookieSpecs;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.message.BasicHeader;
-import org.apache.http.params.CoreConnectionPNames;
-import org.apache.http.params.HttpParams;
 import org.apache.maven.wagon.Wagon;
 
 public class HttpMethodConfiguration
@@ -128,131 +115,6 @@ public class HttpMethodConfiguration
         return this;
     }
 
-    private static final String SO_TIMEOUT                  = "http.socket.timeout";
-    private static final String STALE_CONNECTION_CHECK      = "http.connection.stalecheck";
-    private static final String CONNECTION_TIMEOUT          = "http.connection.timeout";
-    private static final String USE_EXPECT_CONTINUE         = "http.protocol.expect-continue";
-    private static final String DEFAULT_PROXY               = "http.route.default-proxy";
-    private static final String LOCAL_ADDRESS               = "http.route.local-address";
-    private static final String PROXY_AUTH_PREF             = "http.auth.proxy-scheme-pref";
-    private static final String TARGET_AUTH_PREF            = "http.auth.target-scheme-pref";
-    private static final String HANDLE_AUTHENTICATION       = "http.protocol.handle-authentication";
-    private static final String ALLOW_CIRCULAR_REDIRECTS    = "http.protocol.allow-circular-redirects";
-    private static final String CONN_MANAGER_TIMEOUT        = "http.conn-manager.timeout";
-    private static final String COOKIE_POLICY               = "http.protocol.cookie-policy";
-    private static final String MAX_REDIRECTS               = "http.protocol.max-redirects";
-    private static final String HANDLE_REDIRECTS            = "http.protocol.handle-redirects";
-    private static final String REJECT_RELATIVE_REDIRECT    = "http.protocol.reject-relative-redirect";
-
-    private static final String COERCE_PATTERN = "%(\\w+),(.+)";
-
-    public void applyConfig(RequestConfig.Builder builder)
-    {
-        if ( !hasParams() )
-        {
-            return;
-        }
-        if ( connectionTimeout > 0 )
-        {
-            builder.setConnectTimeout(connectionTimeout);
-        }
-        if ( readTimeout > 0 )
-        {
-            builder.setSocketTimeout(readTimeout);
-        }
-        if ( params != null )
-        {
-
-            Pattern coercePattern = Pattern.compile( COERCE_PATTERN );
-            for ( Iterator<?> it = params.entrySet().iterator(); it.hasNext(); )
-            {
-                Map.Entry<String, String> entry = (Map.Entry) it.next();
-                String key = entry.getKey();
-                String value = entry.getValue();
-                Matcher matcher = coercePattern.matcher(value);
-                if ( matcher.matches() )
-                {
-                    value = matcher.group( 2 );
-                }
-
-                if ( key.equals( SO_TIMEOUT ) )
-                {
-                    builder.setSocketTimeout( Integer.parseInt( value ) );
-                }
-                else if ( key.equals( STALE_CONNECTION_CHECK ) )
-                {
-                    builder.setStaleConnectionCheckEnabled( Boolean.valueOf( value ) );
-                }
-                else if ( key.equals( CONNECTION_TIMEOUT ) )
-                {
-                    builder.setConnectTimeout( Integer.parseInt( value ) );
-                }
-                else if ( key.equals( USE_EXPECT_CONTINUE ) )
-                {
-                    builder.setExpectContinueEnabled( Boolean.valueOf( value ) );
-                }
-                else if ( key.equals( DEFAULT_PROXY ) )
-                {
-                    builder.setProxy( new HttpHost( value ));
-                }
-                else if ( key.equals( LOCAL_ADDRESS ) )
-                {
-                    try {
-                        builder.setLocalAddress( InetAddress.getByName( value ) );
-                    }
-                    catch (UnknownHostException ignore) {
-                    }
-                }
-                else if ( key.equals( PROXY_AUTH_PREF ) )
-                {
-                    builder.setProxyPreferredAuthSchemes( Arrays.asList( value.split( "," ) ) );
-                }
-                else if ( key.equals( TARGET_AUTH_PREF ) )
-                {
-                    builder.setTargetPreferredAuthSchemes( Arrays.asList( value.split( "," ) ) );
-                }
-                else if ( key.equals( HANDLE_AUTHENTICATION ) )
-                {
-                    builder.setAuthenticationEnabled( Boolean.valueOf( value ) );
-                }
-                else if ( key.equals( ALLOW_CIRCULAR_REDIRECTS ) )
-                {
-                    builder.setCircularRedirectsAllowed( Boolean.valueOf( value ) );
-                }
-                else if ( key.equals( CONN_MANAGER_TIMEOUT ) )
-                {
-                    builder.setConnectionRequestTimeout( Integer.parseInt( value ) );
-                }
-                else if ( key.equals( COOKIE_POLICY ) )
-                {
-                    builder.setCookieSpec( value );
-                }
-                else if ( key.equals( MAX_REDIRECTS ) )
-                {
-                    builder.setMaxRedirects( Integer.parseInt( value ) );
-                }
-                else if ( key.equals( HANDLE_REDIRECTS ) )
-                {
-                    builder.setRedirectsEnabled( Boolean.valueOf( value ) );
-                }
-                else if ( key.equals( REJECT_RELATIVE_REDIRECT ) )
-                {
-                    builder.setRelativeRedirectsAllowed( !Boolean.valueOf( value ) );
-                }
-            }
-        }
-    }
-
-    private boolean hasParams()
-    {
-        if ( connectionTimeout < 1 && params == null && readTimeout < 1 )
-        {
-            return false;
-        }
-
-        return true;
-    }
-
     public boolean isUsePreemptive()
     {
         return usePreemptive;
@@ -288,7 +150,7 @@ public class HttpMethodConfiguration
         return result;
     }
 
-    private HttpMethodConfiguration copy()
+    HttpMethodConfiguration copy()
     {
         HttpMethodConfiguration copy = new HttpMethodConfiguration();
 
@@ -307,60 +169,6 @@ public class HttpMethodConfiguration
         copy.setUseDefaultHeaders( isUseDefaultHeaders() );
 
         return copy;
-    }
-
-    public static HttpMethodConfiguration merge( HttpMethodConfiguration defaults, HttpMethodConfiguration base,
-                                                 HttpMethodConfiguration local )
-    {
-        HttpMethodConfiguration result = merge( defaults, base );
-        return merge( result, local );
-    }
-
-    public static HttpMethodConfiguration merge( HttpMethodConfiguration base, HttpMethodConfiguration local )
-    {
-        if ( base == null && local == null )
-        {
-            return null;
-        }
-        else if ( base == null )
-        {
-            return local;
-        }
-        else if ( local == null )
-        {
-            return base;
-        }
-        else
-        {
-            HttpMethodConfiguration result = base.copy();
-
-            if ( local.getConnectionTimeout() != Wagon.DEFAULT_CONNECTION_TIMEOUT )
-            {
-                result.setConnectionTimeout( local.getConnectionTimeout() );
-            }
-
-            if ( local.getReadTimeout() != Wagon.DEFAULT_READ_TIMEOUT )
-            {
-                result.setReadTimeout( local.getReadTimeout() );
-            }
-
-            if ( local.getHeaders() != null )
-            {
-                result.getHeaders().putAll( local.getHeaders() );
-            }
-
-            if ( local.getParams() != null )
-            {
-                result.getParams().putAll( local.getParams() );
-            }
-
-            if ( local.getUseDefaultHeaders() != null )
-            {
-                result.setUseDefaultHeaders( local.isUseDefaultHeaders() );
-            }
-
-            return result;
-        }
     }
 
 }

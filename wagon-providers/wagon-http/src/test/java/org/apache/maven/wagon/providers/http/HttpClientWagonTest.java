@@ -43,7 +43,7 @@ public class HttpClientWagonTest
 
         HttpHead method = new HttpHead();
         RequestConfig.Builder builder = RequestConfig.custom();
-        config.getMethodConfiguration(method).applyConfig( builder );
+        ConfigurationUtils.copyConfig( config.getMethodConfiguration( method ), builder );
         RequestConfig requestConfig = builder.build();
 
         assertEquals(2, requestConfig.getMaxRedirects());
