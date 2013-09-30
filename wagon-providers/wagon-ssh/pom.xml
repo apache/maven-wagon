@@ -38,7 +38,17 @@ under the License.
     <dependency>
       <groupId>com.jcraft</groupId>
       <artifactId>jsch</artifactId>
-      <version>0.1.44-1</version>
+      <version>0.1.50</version>
+    </dependency>
+    <dependency>
+      <groupId>com.jcraft</groupId>
+      <artifactId>jsch.agentproxy.connector-factory</artifactId>
+      <version>0.0.6</version>
+    </dependency>
+    <dependency>
+      <groupId>com.jcraft</groupId>
+      <artifactId>jsch.agentproxy.jsch</artifactId>
+      <version>0.0.6</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>

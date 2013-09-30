@@ -55,9 +55,14 @@ import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringInputStream;
 
+import com.jcraft.jsch.agentproxy.AgentProxyException;
+import com.jcraft.jsch.agentproxy.Connector;
+import com.jcraft.jsch.agentproxy.ConnectorFactory;
+import com.jcraft.jsch.agentproxy.RemoteIdentityRepository;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.HostKey;
 import com.jcraft.jsch.HostKeyRepository;
+import com.jcraft.jsch.IdentityRepository;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Proxy;
@@ -123,6 +128,16 @@ public abstract class AbstractJschWagon
         catch ( FileNotFoundException e )
         {
             throw new AuthenticationException( e.getMessage() );
+        }
+
+        try {
+            Connector connector = ConnectorFactory.getDefault().createConnector();
+            if ( connector != null ) {
+                IdentityRepository repo = new RemoteIdentityRepository( connector );
+                sch.setIdentityRepository( repo );
+            }
+        } catch ( AgentProxyException e ) {
+            fireSessionDebug( "Unable to connect to agent: " + e.toString() );
         }
 
         if ( privateKey != null && privateKey.exists() )
