@@ -20,6 +20,7 @@ package org.apache.maven.wagon.providers.http;
  */
 
 import org.apache.http.conn.ssl.SSLInitializationException;
+import org.apache.http.conn.ssl.TrustStrategy;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -40,61 +41,19 @@ import java.security.cert.X509Certificate;
  * @author Olivier Lamy
  * @since 2.0
  */
-public class RelaxedX509TrustManager
-    implements X509TrustManager
+public class RelaxedTrustStrategy
+    implements TrustStrategy
 {
-    private final X509TrustManager standardTrustManager;
     private final boolean ignoreSSLValidityDates;
 
-    public static SSLContext createRelaxedSSLContext( boolean ignoreSSLValidityDates )
+    public RelaxedTrustStrategy(boolean ignoreSSLValidityDates)
     {
-        try
-        {
-            SSLContext context = SSLContext.getInstance( "SSL" );
-            context.init( null, new TrustManager[]{
-                    new RelaxedX509TrustManager( null, ignoreSSLValidityDates ) }, null );
-            return context;
-        }
-        catch ( Exception e )
-        {
-            throw new SSLInitializationException(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Constructor for EasyX509TrustManager.
-     */
-    public RelaxedX509TrustManager( KeyStore keystore, boolean ignoreSSLValidityDates )
-        throws NoSuchAlgorithmException, KeyStoreException
-    {
-        super();
-        TrustManagerFactory factory = TrustManagerFactory.getInstance( TrustManagerFactory.getDefaultAlgorithm() );
-        factory.init( keystore );
-        TrustManager[] trustmanagers = factory.getTrustManagers();
-        if ( trustmanagers.length == 0 )
-        {
-            throw new NoSuchAlgorithmException( "no trust manager found" );
-        }
-        this.standardTrustManager = (X509TrustManager) trustmanagers[0];
         this.ignoreSSLValidityDates = ignoreSSLValidityDates;
     }
 
-    /**
-     * @see javax.net.ssl.X509TrustManager#checkClientTrusted(X509Certificate[], String authType)
-     */
-    public void checkClientTrusted( X509Certificate[] certificates, String authType )
+    public boolean isTrusted(X509Certificate[] certificates, String authType)
         throws CertificateException
     {
-        standardTrustManager.checkClientTrusted( certificates, authType );
-    }
-
-    /**
-     * @see javax.net.ssl.X509TrustManager#checkServerTrusted(X509Certificate[], String authType)
-     */
-    public void checkServerTrusted( X509Certificate[] certificates, String authType )
-        throws CertificateException
-    {
-
         if ( ( certificates != null ) && ( certificates.length == 1 ) )
         {
             try
@@ -115,18 +74,12 @@ public class RelaxedX509TrustManager
                     throw e;
                 }
             }
+            return true;
         }
         else
         {
-            standardTrustManager.checkServerTrusted( certificates, authType );
+            return false;
         }
     }
 
-    /**
-     * @see javax.net.ssl.X509TrustManager#getAcceptedIssuers()
-     */
-    public X509Certificate[] getAcceptedIssuers()
-    {
-        return this.standardTrustManager.getAcceptedIssuers();
-    }
 }

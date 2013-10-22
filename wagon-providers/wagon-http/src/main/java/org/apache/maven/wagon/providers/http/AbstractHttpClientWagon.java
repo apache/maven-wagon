@@ -28,6 +28,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -37,6 +40,7 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -50,6 +54,7 @@ import org.apache.http.auth.NTCredentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -63,6 +68,8 @@ import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContextBuilder;
+import org.apache.http.conn.ssl.SSLInitializationException;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
@@ -72,6 +79,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.PathUtils;
@@ -94,8 +102,6 @@ import org.codehaus.plexus.util.StringUtils;
 public abstract class AbstractHttpClientWagon
     extends StreamWagon
 {
-    private static String defaultUserAgent;
-
     private final class RequestEntityImplementation
         extends AbstractHttpEntity
     {
@@ -216,39 +222,33 @@ public abstract class AbstractHttpClientWagon
 
     private static final TimeZone GMT_TIME_ZONE = TimeZone.getTimeZone( "GMT" );
 
-    private CloseableHttpClient client;
-
-    private HttpClientContext localContext;
-
-    private Closeable closeable;
-
     /**
      * use http(s) connection pool mechanism.
      * <b>enabled by default</b>
      */
     private final static boolean PERSISTENT_POOL =
-            Boolean.valueOf( System.getProperty( "maven.wagon.http.pool", "true" ) );
+        Boolean.valueOf( System.getProperty( "maven.wagon.http.pool", "true" ) );
 
     /**
      * skip failure on certificate validity checks.
      * <b>disabled by default</b>
      */
     private final static boolean SSL_INSECURE =
-            Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.insecure", "false" ) );
+        Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.insecure", "false" ) );
 
     /**
      * if using sslInsecure, certificate date issues will be ignored
      * <b>disabled by default</b>
      */
     private final static boolean IGNORE_SSL_VALIDITY_DATES =
-            Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.ignore.validity.dates", "false" ) );
+        Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.ignore.validity.dates", "false" ) );
 
     /**
      * If enabled, ssl hostname verifier does not check hostname. Disable this will use a browser compat hostname verifier
      * <b>disabled by default</b>
      */
     private final static boolean SSL_ALLOW_ALL =
-            Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.allowall", "false" ) );
+        Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.allowall", "false" ) );
 
 
     /**
@@ -256,60 +256,109 @@ public abstract class AbstractHttpClientWagon
      * <b>20 by default</b>
      */
     private final static int MAX_CONN_PER_ROUTE =
-            Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxPerRoute", "20" ) );
+        Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxPerRoute", "20" ) );
 
     /**
      * Maximum conncurrent connections in total.
      * <b>40 by default</b>
      */
     private final static int MAX_CONN_TOTAL =
-            Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxTotal", "40" ) );
+        Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxTotal", "40" ) );
 
     /**
      * Internal connection manager
      */
-    private static final PoolingHttpClientConnectionManager connManager = createConnManager();
+    private static final PoolingHttpClientConnectionManager CONN_MAN = createConnManager();
 
     private static PoolingHttpClientConnectionManager createConnManager()
     {
 
-        String sslProtocolsStr = System.getProperty("https.protocols");
-        String cipherSuitesStr = System.getProperty("https.cipherSuites");
-        String[] sslProtocols = sslProtocolsStr != null ? sslProtocolsStr.split(" *, *") : null;
-        String[] cipherSuites = cipherSuitesStr != null ? cipherSuitesStr.split(" *, *") : null;
+        String sslProtocolsStr = System.getProperty( "https.protocols" );
+        String cipherSuitesStr = System.getProperty( "https.cipherSuites" );
+        String[] sslProtocols = sslProtocolsStr != null ? sslProtocolsStr.split( " *, *" ) : null;
+        String[] cipherSuites = cipherSuitesStr != null ? cipherSuitesStr.split( " *, *" ) : null;
 
         SSLConnectionSocketFactory sslConnectionSocketFactory;
         if ( SSL_INSECURE )
         {
-            sslConnectionSocketFactory = new SSLConnectionSocketFactory(
-                    RelaxedX509TrustManager.createRelaxedSSLContext(IGNORE_SSL_VALIDITY_DATES),
-                    sslProtocols,
-                    cipherSuites,
-                    SSL_ALLOW_ALL ? SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER : SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER );
+            try
+            {
+                SSLContext sslContext = new SSLContextBuilder().useSSL().loadTrustMaterial( null,
+                                                                                            new RelaxedTrustStrategy(
+                                                                                                IGNORE_SSL_VALIDITY_DATES ) ).build();
+                sslConnectionSocketFactory = new SSLConnectionSocketFactory( sslContext, sslProtocols, cipherSuites,
+                                                                             SSL_ALLOW_ALL
+                                                                                 ? SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER
+                                                                                 : SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER );
+            }
+            catch ( Exception ex )
+            {
+                throw new SSLInitializationException( ex.getMessage(), ex );
+            }
         }
         else
         {
-            sslConnectionSocketFactory = new SSLConnectionSocketFactory(
-                    HttpsURLConnection.getDefaultSSLSocketFactory(),
-                    sslProtocols,
-                    cipherSuites,
-                    SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER );
+            sslConnectionSocketFactory =
+                new SSLConnectionSocketFactory( HttpsURLConnection.getDefaultSSLSocketFactory(), sslProtocols,
+                                                cipherSuites,
+                                                SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER );
         }
 
-        Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
-                .register("http", PlainConnectionSocketFactory.INSTANCE)
-                .register("https", sslConnectionSocketFactory)
-                .build();
+        Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create().register( "http",
+                                                                                                                 PlainConnectionSocketFactory.INSTANCE ).register(
+            "https", sslConnectionSocketFactory ).build();
 
         PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager( registry );
-        if (PERSISTENT_POOL) {
+        if ( PERSISTENT_POOL )
+        {
             connManager.setDefaultMaxPerRoute( MAX_CONN_PER_ROUTE );
             connManager.setMaxTotal( MAX_CONN_TOTAL );
-        } else {
+        }
+        else
+        {
             connManager.setMaxTotal( 1 );
         }
         return connManager;
     }
+
+    private static CloseableHttpClient CLIENT = createClient();
+
+    private static CloseableHttpClient createClient()
+    {
+        return HttpClientBuilder.create().useSystemProperties().disableConnectionState().setConnectionManager(
+            CONN_MAN ).build();
+    }
+
+    private static String DEFAULT_USER_AGENT = getDefaultUserAgent();
+
+    private static String getDefaultUserAgent()
+    {
+        Properties props = new Properties();
+
+        InputStream is = AbstractHttpClientWagon.class.getResourceAsStream(
+            "/META-INF/maven/org.apache.maven.wagon/wagon-http/pom.properties" );
+        if ( is != null )
+        {
+            try
+            {
+                props.load( is );
+            }
+            catch ( IOException ignore )
+            {
+            }
+            finally
+            {
+                IOUtil.close( is );
+            }
+        }
+
+        String ver = props.getProperty( "version", "unknown-version" );
+        return "Apache-Maven-Wagon/" + ver + " (Java " + System.getProperty( "java.version" ) + "; ";
+    }
+
+    private HttpClientContext localContext;
+
+    private Closeable closeable;
 
     /**
      * @plexus.configuration
@@ -341,7 +390,7 @@ public abstract class AbstractHttpClientWagon
                 String host = getRepository().getHost();
                 int port = getRepository().getPort() > -1 ? getRepository().getPort() : AuthScope.ANY_PORT;
 
-                credentialsProvider.setCredentials(new AuthScope(host, port), creds);
+                credentialsProvider.setCredentials( new AuthScope( host, port ), creds );
                 // preemptive off by default
                 /*
                 AuthCache authCache = new BasicAuthCache();
@@ -356,20 +405,16 @@ public abstract class AbstractHttpClientWagon
             }
         }
 
-        HttpHost proxy = null;
         ProxyInfo proxyInfo = getProxyInfo( getRepository().getProtocol(), getRepository().getHost() );
         if ( proxyInfo != null )
         {
             String proxyUsername = proxyInfo.getUserName();
             String proxyPassword = proxyInfo.getPassword();
             String proxyHost = proxyInfo.getHost();
-            int proxyPort = proxyInfo.getPort();
             String proxyNtlmHost = proxyInfo.getNtlmHost();
             String proxyNtlmDomain = proxyInfo.getNtlmDomain();
             if ( proxyHost != null )
             {
-                proxy = new HttpHost( proxyHost, proxyPort );
-
                 if ( proxyUsername != null && proxyPassword != null )
                 {
                     Credentials creds;
@@ -385,27 +430,20 @@ public abstract class AbstractHttpClientWagon
                     int port = proxyInfo.getPort() > -1 ? proxyInfo.getPort() : AuthScope.ANY_PORT;
 
                     AuthScope authScope = new AuthScope( proxyHost, port );
-                    credentialsProvider.setCredentials(authScope, creds);
+                    credentialsProvider.setCredentials( authScope, creds );
                 }
             }
         }
 
         localContext = HttpClientContext.create();
-
-        client = HttpClientBuilder.create()
-                .useSystemProperties()
-                .disableConnectionState()
-                .setConnectionManager(connManager)
-                .setProxy(proxy)
-                .setDefaultCredentialsProvider(credentialsProvider)
-                .build();
+        localContext.setCredentialsProvider( credentialsProvider );
     }
 
     public void closeConnection()
     {
-        if ( !PERSISTENT_POOL)
+        if ( !PERSISTENT_POOL )
         {
-            connManager.closeIdleConnections(0, TimeUnit.MILLISECONDS);
+            CONN_MAN.closeIdleConnections( 0, TimeUnit.MILLISECONDS );
         }
     }
 
@@ -510,7 +548,7 @@ public abstract class AbstractHttpClientWagon
             {
                 int statusCode = response.getStatusLine().getStatusCode();
                 String reasonPhrase = ", ReasonPhrase: " + response.getStatusLine().getReasonPhrase() + ".";
-                fireTransferDebug(url + " - Status code: " + statusCode + reasonPhrase);
+                fireTransferDebug( url + " - Status code: " + statusCode + reasonPhrase );
 
                 // Check that we didn't run out of retries.
                 switch ( statusCode )
@@ -544,7 +582,9 @@ public abstract class AbstractHttpClientWagon
                     }
                 }
 
-                firePutCompleted(resource, source);
+                firePutCompleted( resource, source );
+
+                EntityUtils.consume( response.getEntity() );
             }
             finally
             {
@@ -588,16 +628,19 @@ public abstract class AbstractHttpClientWagon
         try
         {
             CloseableHttpResponse response = execute( headMethod );
-            try {
+            try
+            {
                 int statusCode = response.getStatusLine().getStatusCode();
                 String reasonPhrase = ", ReasonPhrase: " + response.getStatusLine().getReasonPhrase() + ".";
+                boolean result;
                 switch ( statusCode )
                 {
                     case HttpStatus.SC_OK:
-                        return true;
-
+                        result = true;
+                        break;
                     case HttpStatus.SC_NOT_MODIFIED:
-                        return true;
+                        result = true;
+                        break;
                     case HttpStatus.SC_FORBIDDEN:
                         throw new AuthorizationException( "Access denied to: " + url + reasonPhrase );
 
@@ -608,14 +651,16 @@ public abstract class AbstractHttpClientWagon
                         throw new AuthorizationException( "Not authorized by proxy " + reasonPhrase );
 
                     case HttpStatus.SC_NOT_FOUND:
-                        return false;
-
+                        result = false;
+                        break;
                     //add more entries here
                     default:
                         throw new TransferFailedException(
                             "Failed to transfer file: " + url + ". Return code is: " + statusCode + reasonPhrase );
                 }
 
+                EntityUtils.consume( response.getEntity() );
+                return result;
             }
             finally
             {
@@ -632,20 +677,33 @@ public abstract class AbstractHttpClientWagon
         }
     }
 
-    protected CloseableHttpResponse execute( HttpUriRequest httpMethod)
+    protected CloseableHttpResponse execute( HttpUriRequest httpMethod )
         throws HttpException, IOException
     {
         setHeaders( httpMethod );
         String userAgent = getUserAgent( httpMethod );
-        if (userAgent != null) {
-            httpMethod.setHeader(HTTP.USER_AGENT, userAgent);
+        if ( userAgent != null )
+        {
+            httpMethod.setHeader( HTTP.USER_AGENT, userAgent );
+        }
+
+        RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
+        // WAGON-273: default the cookie-policy to browser compatible
+        requestConfigBuilder.setCookieSpec( CookieSpecs.BROWSER_COMPATIBILITY );
+
+        ProxyInfo proxyInfo = getProxyInfo( getRepository().getProtocol(), getRepository().getHost() );
+        if ( proxyInfo != null )
+        {
+            HttpHost proxy = new HttpHost( proxyInfo.getHost(), proxyInfo.getPort() );
+            requestConfigBuilder.setProxy( proxy );
         }
 
         HttpMethodConfiguration config =
             httpConfiguration == null ? null : httpConfiguration.getMethodConfiguration( httpMethod );
+
         if ( config != null )
         {
-            localContext.setRequestConfig( config.asRequestConfig() );
+            ConfigurationUtils.copyConfig( config, requestConfigBuilder );
 
             if ( config.isUsePreemptive() && authenticationInfo != null )
             {
@@ -668,13 +726,10 @@ public abstract class AbstractHttpClientWagon
         }
         else
         {
-            RequestConfig requestConfig = RequestConfig.custom()
-                    .setSocketTimeout( getReadTimeout() )
-                    .build();
-            localContext.setRequestConfig( requestConfig );
+            requestConfigBuilder.setSocketTimeout( getReadTimeout() );
         }
 
-        ProxyInfo proxyInfo = getProxyInfo( getRepository().getProtocol(), getRepository().getHost() );
+        localContext.setRequestConfig( requestConfigBuilder.build() );
 
         if ( proxyInfo != null )
         {
@@ -698,7 +753,7 @@ public abstract class AbstractHttpClientWagon
 
         }
 
-        return client.execute( httpMethod, localContext );
+        return CLIENT.execute( httpMethod, localContext );
     }
 
     protected void setHeaders( HttpUriRequest method )
@@ -713,7 +768,7 @@ public abstract class AbstractHttpClientWagon
             method.addHeader( "Pragma", "no-cache" );
             method.addHeader( "Expires", "0" );
             method.addHeader( "Accept-Encoding", "gzip" );
-            method.addHeader( "User-Agent", getDefaultUserAgent() );
+            method.addHeader( "User-Agent", DEFAULT_USER_AGENT );
         }
 
         if ( httpHeaders != null )
@@ -732,38 +787,6 @@ public abstract class AbstractHttpClientWagon
                 method.addHeader( headers[i] );
             }
         }
-    }
-
-    private String getDefaultUserAgent()
-    {
-        if ( defaultUserAgent == null )
-        {
-            defaultUserAgent =
-                "Apache-Maven-Wagon/" + getWagonVersion() + " (Java " + System.getProperty( "java.version" ) + "; "
-                    + System.getProperty( "os.name" ) + " " + System.getProperty( "os.version" ) + ")";
-        }
-        return defaultUserAgent;
-    }
-
-    private String getWagonVersion()
-    {
-        Properties props = new Properties();
-
-        InputStream is = getClass().getResourceAsStream( "/META-INF/maven/org.apache.maven.wagon/wagon-http/pom.properties" );
-        if ( is != null )
-        {
-            try
-            {
-                props.load( is );
-            }
-            catch ( IOException e )
-            {
-                // ignore
-            }
-            IOUtil.close( is );
-        }
-
-        return props.getProperty( "version", "unknown-version" );
     }
 
     protected String getUserAgent( HttpUriRequest method )
@@ -890,16 +913,18 @@ public abstract class AbstractHttpClientWagon
             Header lastModifiedHeader = response.getFirstHeader( "Last-Modified" );
             if ( lastModifiedHeader != null )
             {
-                Date lastModified = DateUtils.parseDate(lastModifiedHeader.getValue());
-                if ( lastModified != null ) {
+                Date lastModified = DateUtils.parseDate( lastModifiedHeader.getValue() );
+                if ( lastModified != null )
+                {
                     resource.setLastModified( lastModified.getTime() );
                     fireTransferDebug( "last-modified = " + lastModifiedHeader.getValue() +
-                            " (" + lastModified.getTime() + ")" );
+                                           " (" + lastModified.getTime() + ")" );
                 }
             }
 
             HttpEntity entity = response.getEntity();
-            if ( entity != null ) {
+            if ( entity != null )
+            {
                 inputData.setInputStream( entity.getContent() );
             }
         }
@@ -925,7 +950,7 @@ public abstract class AbstractHttpClientWagon
             {
                 closeable.close();
             }
-            catch (IOException ignore)
+            catch ( IOException ignore )
             {
             }
 
