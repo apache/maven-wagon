@@ -25,10 +25,7 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
-import org.apache.http.auth.NTCredentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.auth.*;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.CookieSpecs;
@@ -352,6 +349,11 @@ public abstract class AbstractHttpClientWagon
         return "Apache-Maven-Wagon/" + ver + " (Java " + System.getProperty( "java.version" ) + "; ";
     }
 
+
+    private CredentialsProvider credentialsProvider;
+
+    private AuthCache authCache;
+
     private HttpClientContext localContext;
 
     private Closeable closeable;
@@ -371,7 +373,11 @@ public abstract class AbstractHttpClientWagon
     {
         repository.setUrl( getURL( repository ) );
 
-        CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        localContext = HttpClientContext.create();
+        credentialsProvider = new BasicCredentialsProvider();
+        authCache = new BasicAuthCache();
+        localContext.setCredentialsProvider( credentialsProvider );
+        localContext.setAuthCache( authCache );
 
         if ( authenticationInfo != null )
         {
@@ -387,17 +393,6 @@ public abstract class AbstractHttpClientWagon
                 int port = getRepository().getPort() > -1 ? getRepository().getPort() : AuthScope.ANY_PORT;
 
                 credentialsProvider.setCredentials( new AuthScope( host, port ), creds );
-                // preemptive off by default
-                /*
-                AuthCache authCache = new BasicAuthCache();
-                BasicScheme basicAuth = new BasicScheme();
-                HttpHost targetHost =
-                    new HttpHost( repository.getHost(), repository.getPort(), repository.getProtocol() );
-                authCache.put( targetHost, basicAuth );
-
-                localContext = new BasicHttpContext();
-                localContext.setAttribute( ClientContext.AUTH_CACHE, authCache );
-                */
             }
         }
 
@@ -430,9 +425,6 @@ public abstract class AbstractHttpClientWagon
                 }
             }
         }
-
-        localContext = HttpClientContext.create();
-        localContext.setCredentialsProvider( credentialsProvider );
     }
 
     public void closeConnection()
@@ -514,20 +506,22 @@ public abstract class AbstractHttpClientWagon
             fireTransferError( resource, e, TransferEvent.REQUEST_GET );
         }
 
-        if ( authenticationInfo != null )
-        {
-            String username = authenticationInfo.getUserName();
-            String password = authenticationInfo.getPassword();
-            // preemptive for put
-            if ( StringUtils.isNotEmpty( username ) && StringUtils.isNotEmpty( password ) )
-            {
-                AuthCache authCache = new BasicAuthCache();
-                BasicScheme basicAuth = new BasicScheme();
-                HttpHost targetHost =
-                    new HttpHost( repository.getHost(), repository.getPort(), repository.getProtocol() );
-                authCache.put( targetHost, basicAuth );
+        // preemptive for put
+        // TODO: is it a good idea, though? 'Expect-continue' handshake would serve much better
 
-                localContext.setAuthCache( authCache );
+        Repository repo = getRepository();
+        HttpHost targetHost = new HttpHost( repo.getHost(), repo.getPort(), repo.getProtocol() );
+        AuthScope targetScope = new AuthScope( targetHost );
+
+        if ( credentialsProvider.getCredentials( targetScope ) != null )
+        {
+            BasicScheme targetAuth = new BasicScheme();
+            try {
+                targetAuth.processChallenge(new BasicHeader(AUTH.WWW_AUTH, "BASIC preemptive"));
+                authCache.put( targetHost, targetAuth  );
+            }
+            catch ( MalformedChallengeException ignore )
+            {
             }
         }
 
@@ -687,7 +681,8 @@ public abstract class AbstractHttpClientWagon
         // WAGON-273: default the cookie-policy to browser compatible
         requestConfigBuilder.setCookieSpec( CookieSpecs.BROWSER_COMPATIBILITY );
 
-        ProxyInfo proxyInfo = getProxyInfo( getRepository().getProtocol(), getRepository().getHost() );
+        Repository repo = getRepository();
+        ProxyInfo proxyInfo = getProxyInfo( repo.getProtocol(), repo.getHost() );
         if ( proxyInfo != null )
         {
             HttpHost proxy = new HttpHost( proxyInfo.getHost(), proxyInfo.getPort() );
@@ -700,25 +695,6 @@ public abstract class AbstractHttpClientWagon
         if ( config != null )
         {
             ConfigurationUtils.copyConfig( config, requestConfigBuilder );
-
-            if ( config.isUsePreemptive() && authenticationInfo != null )
-            {
-                String username = authenticationInfo.getUserName();
-                String password = authenticationInfo.getPassword();
-
-                if ( StringUtils.isNotEmpty( username ) && StringUtils.isNotEmpty( password ) )
-                {
-
-                    AuthCache authCache = new BasicAuthCache();
-                    BasicScheme basicAuth = new BasicScheme();
-                    HttpHost targetHost =
-                        new HttpHost( repository.getHost(), repository.getPort(), repository.getProtocol() );
-                    authCache.put( targetHost, basicAuth );
-
-                    localContext.setAuthCache( authCache );
-                }
-
-            }
         }
         else
         {
@@ -727,26 +703,49 @@ public abstract class AbstractHttpClientWagon
 
         localContext.setRequestConfig( requestConfigBuilder.build() );
 
+        if ( config != null && config.isUsePreemptive() )
+        {
+            HttpHost targetHost = new HttpHost( repo.getHost(), repo.getPort(), repo.getProtocol() );
+            AuthScope targetScope = new AuthScope( targetHost );
+
+            if ( credentialsProvider.getCredentials( targetScope ) != null )
+            {
+                BasicScheme targetAuth = new BasicScheme();
+                targetAuth.processChallenge( new BasicHeader(AUTH.WWW_AUTH, "BASIC preemptive" ) );
+                authCache.put( targetHost, targetAuth  );
+            }
+        }
+
         if ( proxyInfo != null )
         {
-            if ( proxyInfo.getUserName() != null && proxyInfo.getPassword() != null )
+            if ( proxyInfo.getHost() != null )
             {
-                Credentials creds;
-                if ( proxyInfo.getNtlmHost() != null || proxyInfo.getNtlmDomain() != null )
-                {
-                    creds =
-                        new NTCredentials( proxyInfo.getUserName(), proxyInfo.getPassword(), proxyInfo.getNtlmHost(),
-                                           proxyInfo.getNtlmDomain() );
-                }
-                else
-                {
-                    creds = new UsernamePasswordCredentials( proxyInfo.getUserName(), proxyInfo.getPassword() );
-                }
+                HttpHost proxyHost = new HttpHost( proxyInfo.getHost(), proxyInfo.getPort() );
+                AuthScope proxyScope = new AuthScope( proxyHost );
 
-                Header bs = new BasicScheme().authenticate( creds, httpMethod, localContext );
-                httpMethod.addHeader( "Proxy-Authorization", bs.getValue() );
+                String proxyUsername = proxyInfo.getUserName();
+                String proxyPassword = proxyInfo.getPassword();
+                String proxyNtlmHost = proxyInfo.getNtlmHost();
+                String proxyNtlmDomain = proxyInfo.getNtlmDomain();
+
+                if ( proxyUsername != null && proxyPassword != null )
+                {
+                    Credentials creds;
+                    if ( proxyNtlmHost != null || proxyNtlmDomain != null )
+                    {
+                        creds = new NTCredentials( proxyUsername, proxyPassword, proxyNtlmHost, proxyNtlmDomain );
+                    }
+                    else
+                    {
+                        creds = new UsernamePasswordCredentials( proxyUsername, proxyPassword );
+                    }
+
+                    credentialsProvider.setCredentials( proxyScope, creds );
+                    BasicScheme proxyAuth = new BasicScheme();
+                    proxyAuth.processChallenge( new BasicHeader(AUTH.PROXY_AUTH, "BASIC preemptive" ) );
+                    authCache.put( proxyHost, proxyAuth );
+                }
             }
-
         }
 
         return CLIENT.execute( httpMethod, localContext );
