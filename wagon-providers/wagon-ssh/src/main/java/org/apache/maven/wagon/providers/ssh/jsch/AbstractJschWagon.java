@@ -73,23 +73,21 @@ import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
 
 /**
- * AbstractJschWagon 
- *
- *
+ * AbstractJschWagon
  */
 public abstract class AbstractJschWagon
     extends StreamWagon
     implements SshWagon, CommandExecutor
 {
     protected ScpHelper sshTool = new ScpHelper( this );
-    
+
     protected Session session;
-    
+
     /**
      * @plexus.requirement role-hint="file"
      */
     private volatile KnownHostsProvider knownHostsProvider;
-    
+
     /**
      * @plexus.requirement
      */
@@ -130,13 +128,17 @@ public abstract class AbstractJschWagon
             throw new AuthenticationException( e.getMessage() );
         }
 
-        try {
+        try
+        {
             Connector connector = ConnectorFactory.getDefault().createConnector();
-            if ( connector != null ) {
+            if ( connector != null )
+            {
                 IdentityRepository repo = new RemoteIdentityRepository( connector );
                 sch.setIdentityRepository( repo );
             }
-        } catch ( AgentProxyException e ) {
+        }
+        catch ( AgentProxyException e )
+        {
             fireSessionDebug( "Unable to connect to agent: " + e.toString() );
         }
 
@@ -238,7 +240,7 @@ public abstract class AbstractJschWagon
         {
             config.setProperty( "PreferredAuthentications", "gssapi-with-mic,publickey,password,keyboard-interactive" );
         }
-        
+
         config.setProperty( "BatchMode", interactive ? "no" : "yes" );
 
         session.setConfig( config );
