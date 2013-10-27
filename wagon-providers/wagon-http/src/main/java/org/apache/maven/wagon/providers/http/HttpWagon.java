@@ -20,7 +20,6 @@ package org.apache.maven.wagon.providers.http;
  */
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 
@@ -93,7 +92,9 @@ public class HttpWagon
                     return Collections.emptyList();
                 }
 
-            } finally {
+            }
+            finally
+            {
                 response.close();
             }
         }
