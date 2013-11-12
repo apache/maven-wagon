@@ -140,7 +140,7 @@ public abstract class StreamingWagonTestCase
     {
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
-        ProgressArgumentMatcher progressArgumentMatcher = setupGetIfNewerTest( wagon, expectedResult, expectedSize );
+        ProgressAnswer progressAnswer = setupGetIfNewerTest( wagon, expectedResult, expectedSize );
 
         connectWagon( wagon );
 
@@ -158,7 +158,7 @@ public abstract class StreamingWagonTestCase
 
         disconnectWagon( wagon );
 
-        assertGetIfNewerTest( progressArgumentMatcher, expectedResult, expectedSize );
+        assertGetIfNewerTest( progressAnswer, expectedResult, expectedSize );
 
         tearDownWagonTestingFixtures();
     }
@@ -241,7 +241,7 @@ public abstract class StreamingWagonTestCase
 
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
-        ProgressArgumentMatcher progressArgumentMatcher = replayMockForPut( resource, content, wagon );
+        ProgressAnswer progressAnswer = replayMockForPut( resource, content, wagon );
 
         message( "Putting test artifact: " + resource + " into test repository " + testRepository );
 
@@ -265,7 +265,7 @@ public abstract class StreamingWagonTestCase
 
         disconnectWagon( wagon );
 
-        verifyMock( progressArgumentMatcher, content.length() );
+        verifyMock( progressAnswer, content.length() );
         return content.length();
     }
 
@@ -277,7 +277,7 @@ public abstract class StreamingWagonTestCase
 
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
-        ProgressArgumentMatcher progressArgumentMatcher = replaceMockForGet( wagon, expectedSize );
+        ProgressAnswer progressAnswer = replaceMockForGet( wagon, expectedSize );
 
         message( "Getting test artifact from test repository " + testRepository );
 
@@ -301,6 +301,6 @@ public abstract class StreamingWagonTestCase
 
         disconnectWagon( wagon );
 
-        verifyMock( progressArgumentMatcher, expectedSize );
+        verifyMock( progressAnswer, expectedSize );
     }
 }

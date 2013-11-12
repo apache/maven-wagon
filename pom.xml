@@ -319,9 +319,9 @@ under the License.
         <version>2.2</version>
       </dependency>
       <dependency>
-        <groupId>easymock</groupId>
+        <groupId>org.easymock</groupId>
         <artifactId>easymock</artifactId>
-        <version>1.2_Java1.5</version>
+        <version>3.2</version>
         <scope>test</scope>
       </dependency>
 
