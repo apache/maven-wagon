@@ -32,8 +32,9 @@ import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.util.FileUtils;
-import org.easymock.AbstractMatcher;
-import org.easymock.MockControl;
+import org.easymock.IAnswer;
+
+import static org.easymock.EasyMock.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,23 +53,15 @@ public abstract class WagonTestCase
     protected static Logger logger = Logger.getLogger( WagonTestCase.class );
 
 
-    static final class ProgressArgumentMatcher
-        extends AbstractMatcher
+    static final class ProgressAnswer implements IAnswer
     {
         private int size;
-
-        protected boolean argumentMatches( Object expected, Object actual )
+        
+        public Object answer() throws Throwable
         {
-            if ( actual instanceof byte[] )
-            {
-                return true;
-            }
-            if ( actual instanceof Integer )
-            {
-                size += ( (Integer) actual ).intValue();
-                return true;
-            }
-            return super.argumentMatches( expected, actual );
+            int length = (Integer) getCurrentArguments()[2];
+            size += length;
+            return null;
         }
 
         public int getSize()
@@ -99,8 +92,6 @@ public abstract class WagonTestCase
 
     protected TransferListener mockTransferListener;
 
-    protected MockControl mockTransferListenerControl;
-
     // ----------------------------------------------------------------------
     // Constructors
     // ----------------------------------------------------------------------
@@ -110,8 +101,7 @@ public abstract class WagonTestCase
     {
         checksumObserver = new ChecksumObserver();
 
-        mockTransferListenerControl = MockControl.createControl( TransferListener.class );
-        mockTransferListener = (TransferListener) mockTransferListenerControl.getMock();
+        mockTransferListener = createMock( TransferListener.class );
 
         super.setUp();
     }
@@ -299,7 +289,7 @@ public abstract class WagonTestCase
     {
         Wagon wagon = getWagon();
 
-        ProgressArgumentMatcher progressArgumentMatcher = setupGetIfNewerTest( wagon, expectedResult, expectedSize );
+        ProgressAnswer progressAnswer = setupGetIfNewerTest( wagon, expectedResult, expectedSize );
 
         connectWagon( wagon );
 
@@ -308,12 +298,12 @@ public abstract class WagonTestCase
 
         disconnectWagon( wagon );
 
-        assertGetIfNewerTest( progressArgumentMatcher, expectedResult, expectedSize );
+        assertGetIfNewerTest( progressAnswer, expectedResult, expectedSize );
 
         tearDownWagonTestingFixtures();
     }
 
-    protected ProgressArgumentMatcher setupGetIfNewerTest( Wagon wagon, boolean expectedResult, int expectedSize )
+    protected ProgressAnswer setupGetIfNewerTest( Wagon wagon, boolean expectedResult, int expectedSize )
         throws NoSuchAlgorithmException, IOException
     {
         checksumObserver = new ChecksumObserver();
@@ -323,25 +313,25 @@ public abstract class WagonTestCase
         assertFalse( destFile.exists() );
         destFile.deleteOnExit();
 
-        ProgressArgumentMatcher progressArgumentMatcher = null;
+        ProgressAnswer progressAnswer = null;
         if ( expectedResult )
         {
-            progressArgumentMatcher = replaceMockForGet( wagon, expectedSize );
+            progressAnswer = replaceMockForGet( wagon, expectedSize );
         }
         else
         {
             replaceMockForSkippedGetIfNewer( wagon, expectedSize );
         }
-        return progressArgumentMatcher;
+        return progressAnswer;
     }
 
-    protected void assertGetIfNewerTest( ProgressArgumentMatcher progressArgumentMatcher, boolean expectedResult,
+    protected void assertGetIfNewerTest( ProgressAnswer progressAnswer, boolean expectedResult,
                                          int expectedSize )
         throws IOException
     {
         if ( expectedResult )
         {
-            verifyMock( progressArgumentMatcher, expectedSize );
+            verifyMock( progressAnswer, expectedSize );
 
             assertNotNull( "check checksum is not null", checksumObserver.getActualChecksum() );
 
@@ -358,9 +348,9 @@ public abstract class WagonTestCase
         }
         else
         {
-            mockTransferListenerControl.verify();
+            verify( mockTransferListener );
 
-            mockTransferListenerControl.reset();
+            reset( mockTransferListener );
 
             assertNull( "check checksum is null", checksumObserver.getActualChecksum() );
 
@@ -382,11 +372,10 @@ public abstract class WagonTestCase
         // mockTransferListener.transferSkipped( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED,
         // TransferEvent.REQUEST_GET, destFile ) );
 
-        mockTransferListener.debug( null );
-        mockTransferListenerControl.setMatcher( MockControl.ALWAYS_MATCHER );
-        mockTransferListenerControl.setVoidCallable( MockControl.ZERO_OR_MORE );
-
-        mockTransferListenerControl.replay();
+        mockTransferListener.debug( anyString() );
+        expectLastCall().anyTimes();
+        
+        replay( mockTransferListener );
     }
 
     public void testWagonPutDirectory()
@@ -881,7 +870,7 @@ public abstract class WagonTestCase
 
         Wagon wagon = getWagon();
 
-        ProgressArgumentMatcher progressArgumentMatcher = replayMockForPut( resourceName, content, wagon );
+        ProgressAnswer progressAnswer = replayMockForPut( resourceName, content, wagon );
 
         message( "Putting test artifact: " + resourceName + " into test repository " + testRepository );
 
@@ -891,10 +880,10 @@ public abstract class WagonTestCase
 
         disconnectWagon( wagon );
 
-        verifyMock( progressArgumentMatcher, content.length() );
+        verifyMock( progressAnswer, content.length() );
     }
 
-    protected ProgressArgumentMatcher replayMockForPut( String resourceName, String content, Wagon wagon )
+    protected ProgressAnswer replayMockForPut( String resourceName, String content, Wagon wagon )
     {
         Resource resource = new Resource( resourceName );
         mockTransferListener.transferInitiated(
@@ -907,21 +896,20 @@ public abstract class WagonTestCase
             createTransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_PUT,
                                  sourceFile ) );
         mockTransferListener.transferProgress(
-            createTransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT,
-                                 sourceFile ), new byte[]{ }, 0 );
-        ProgressArgumentMatcher progressArgumentMatcher = new ProgressArgumentMatcher();
-        mockTransferListenerControl.setMatcher( progressArgumentMatcher );
+            eq( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT,
+                                 sourceFile ) ), anyObject( byte[].class ), anyInt() );
+        ProgressAnswer progressAnswer = new ProgressAnswer();
+        expectLastCall().andStubAnswer( progressAnswer );
 
-        mockTransferListener.debug( null );
-        mockTransferListenerControl.setMatcher( MockControl.ALWAYS_MATCHER );
-        mockTransferListenerControl.setVoidCallable( MockControl.ZERO_OR_MORE );
+        mockTransferListener.debug( anyString() );
+        expectLastCall().anyTimes();
 
         mockTransferListener.transferCompleted(
             createTransferEvent( wagon, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_PUT,
                                  sourceFile ) );
 
-        mockTransferListenerControl.replay();
-        return progressArgumentMatcher;
+        replay( mockTransferListener );
+        return progressAnswer;
     }
 
     protected TransferEvent createTransferEvent( Wagon wagon, Resource resource, int eventType, int requestType,
@@ -948,7 +936,7 @@ public abstract class WagonTestCase
 
         Wagon wagon = getWagon();
 
-        ProgressArgumentMatcher progressArgumentMatcher = replaceMockForGet( wagon, expectedSize );
+        ProgressAnswer progressAnswer = replaceMockForGet( wagon, expectedSize );
 
         message( "Getting test artifact from test repository " + testRepository );
 
@@ -958,17 +946,17 @@ public abstract class WagonTestCase
 
         disconnectWagon( wagon );
 
-        verifyMock( progressArgumentMatcher, expectedSize );
+        verifyMock( progressAnswer, expectedSize );
     }
 
 
-    protected void verifyMock( ProgressArgumentMatcher progressArgumentMatcher, int length )
+    protected void verifyMock( ProgressAnswer progressAnswer, int length )
     {
-        mockTransferListenerControl.verify();
+        verify( mockTransferListener );
 
-        assertEquals( length, progressArgumentMatcher.getSize() );
+        assertEquals( length, progressAnswer.getSize() );
 
-        mockTransferListenerControl.reset();
+        reset( mockTransferListener );
     }
 
     protected void disconnectWagon( Wagon wagon )
@@ -1001,7 +989,7 @@ public abstract class WagonTestCase
         return false;
     }
 
-    protected ProgressArgumentMatcher replaceMockForGet( Wagon wagon, int expectedSize )
+    protected ProgressAnswer replaceMockForGet( Wagon wagon, int expectedSize )
     {
         Resource resource = new Resource( this.resource );
         mockTransferListener.transferInitiated(
@@ -1014,30 +1002,29 @@ public abstract class WagonTestCase
             createTransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_GET, null );
         mockTransferListener.transferStarted( te );
         mockTransferListener.transferProgress(
-            new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_GET ),
-            new byte[]{ }, 0 );
+            eq( new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_GET ) ),
+            anyObject( byte[].class ), anyInt() );
 
-        ProgressArgumentMatcher progressArgumentMatcher = new ProgressArgumentMatcher();
+        ProgressAnswer progressAnswer = new ProgressAnswer();
 
         if ( assertOnTransferProgress() )
         {
-            mockTransferListenerControl.setMatcher( progressArgumentMatcher );
+            expectLastCall().andAnswer( progressAnswer );
         }
         else
         {
-            mockTransferListenerControl.setMatcher( progressArgumentMatcher );
-            mockTransferListenerControl.setVoidCallable( MockControl.ZERO_OR_MORE );
+            expectLastCall().andAnswer( progressAnswer );
+            expectLastCall().anyTimes();
         }
-        mockTransferListener.debug( null );
-        mockTransferListenerControl.setMatcher( MockControl.ALWAYS_MATCHER );
-        mockTransferListenerControl.setVoidCallable( MockControl.ZERO_OR_MORE );
+        mockTransferListener.debug( anyString() );
+        expectLastCall().anyTimes();
 
         mockTransferListener.transferCompleted(
             createTransferEvent( wagon, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_GET,
                                  destFile ) );
 
-        mockTransferListenerControl.replay();
-        return progressArgumentMatcher;
+        replay( mockTransferListener );
+        return progressAnswer;
     }
 
     protected int getExpectedContentLengthOnGet( int expectedSize )

@@ -46,7 +46,7 @@ under the License.
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>easymock</groupId>
+      <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
       <scope>compile</scope>
     </dependency>

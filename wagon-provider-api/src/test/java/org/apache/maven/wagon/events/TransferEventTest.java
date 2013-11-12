@@ -25,7 +25,7 @@ import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.easymock.MockControl;
+import org.easymock.EasyMock;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -41,7 +41,7 @@ public class TransferEventTest
     public void testTransferEventProperties()
         throws ConnectionException, AuthenticationException
     {
-        final Wagon wagon = (Wagon) MockControl.createControl( Wagon.class ).getMock();
+        final Wagon wagon = EasyMock.createMock( Wagon.class );
 
         final Repository repo = new Repository();
 

@@ -23,6 +23,7 @@ import junit.framework.TestCase;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.events.SessionEvent;
 import org.apache.maven.wagon.events.SessionListener;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferListener;
@@ -33,8 +34,9 @@ import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
-import org.easymock.AbstractMatcher;
-import org.easymock.MockControl;
+import org.easymock.IAnswer;
+
+import static org.easymock.EasyMock.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -92,10 +94,6 @@ public class AbstractWagonTest
 
     private TransferListener transferListener = null;
 
-    private MockControl transferListenerControl;
-
-    private MockControl sessionListenerControl;
-
     protected void setUp()
         throws Exception
     {
@@ -109,13 +107,11 @@ public class AbstractWagonTest
 
         wagon = new WagonMock();
 
-        sessionListenerControl = MockControl.createControl( SessionListener.class );
-        sessionListener = (SessionListener) sessionListenerControl.getMock();
+        sessionListener = createMock( SessionListener.class );
 
         wagon.addSessionListener( sessionListener );
 
-        transferListenerControl = MockControl.createControl( TransferListener.class );
-        transferListener = (TransferListener) transferListenerControl.getMock();
+        transferListener = createMock( TransferListener.class );
 
         wagon.addTransferListener( transferListener );
 
@@ -235,14 +231,13 @@ public class AbstractWagonTest
     {
         Repository repository = new Repository();
 
-        sessionListenerControl.setDefaultMatcher( MockControl.ALWAYS_MATCHER );
-        sessionListener.sessionOpening( null );
-        sessionListener.sessionOpened( null );
-        sessionListenerControl.replay();
+        sessionListener.sessionOpening( anyObject( SessionEvent.class ) );
+        sessionListener.sessionOpened( anyObject( SessionEvent.class ) );
+        replay( sessionListener );
 
         wagon.connect( repository );
 
-        sessionListenerControl.verify();
+        verify( sessionListener );
 
         assertEquals( repository, wagon.getRepository() );
     }
@@ -284,10 +279,9 @@ public class AbstractWagonTest
     {
         Repository repository = new Repository();
 
-        sessionListenerControl.setDefaultMatcher( MockControl.ALWAYS_MATCHER );
-        sessionListener.sessionOpening( null );
-        sessionListener.sessionConnectionRefused( null );
-        sessionListenerControl.replay();
+        sessionListener.sessionOpening( anyObject( SessionEvent.class ) );
+        sessionListener.sessionConnectionRefused( anyObject( SessionEvent.class ) );
+        replay( sessionListener );
 
         Wagon wagon = new TestWagon()
         {
@@ -313,7 +307,7 @@ public class AbstractWagonTest
         }
         finally
         {
-            sessionListenerControl.verify();
+            verify( sessionListener );
 
             assertEquals( repository, wagon.getRepository() );
         }
@@ -322,14 +316,13 @@ public class AbstractWagonTest
     public void testSessionCloseEvents()
         throws Exception
     {
-        sessionListenerControl.setDefaultMatcher( MockControl.ALWAYS_MATCHER );
-        sessionListener.sessionDisconnecting( null );
-        sessionListener.sessionDisconnected( null );
-        sessionListenerControl.replay();
+        sessionListener.sessionDisconnecting( anyObject( SessionEvent.class ) );
+        sessionListener.sessionDisconnected( anyObject( SessionEvent.class ) );
+        replay( sessionListener );
 
         wagon.disconnect();
 
-        sessionListenerControl.verify();
+        verify( sessionListener );
     }
 
     public void testSessionCloseRefusedEventConnectionException()
@@ -337,10 +330,9 @@ public class AbstractWagonTest
     {
         Repository repository = new Repository();
 
-        sessionListenerControl.setDefaultMatcher( MockControl.ALWAYS_MATCHER );
-        sessionListener.sessionDisconnecting( null );
-        sessionListener.sessionError( null );
-        sessionListenerControl.replay();
+        sessionListener.sessionDisconnecting( anyObject( SessionEvent.class ) );
+        sessionListener.sessionError( anyObject( SessionEvent.class ) );
+        replay( sessionListener );
 
         Wagon wagon = new TestWagon()
         {
@@ -363,7 +355,7 @@ public class AbstractWagonTest
         }
         finally
         {
-            sessionListenerControl.verify();
+            verify( sessionListener );
         }
     }
 
@@ -371,15 +363,14 @@ public class AbstractWagonTest
         throws Exception
     {
         transferListener.debug( "fetch debug message" );
-        transferListenerControl.setDefaultMatcher( MockControl.ALWAYS_MATCHER );
-        transferListener.transferInitiated( null );
-        transferListener.transferStarted( null );
-        transferListener.debug( null );
-        transferListenerControl.setVoidCallable( MockControl.ZERO_OR_MORE );
-        transferListener.transferProgress( null, null, 0 );
-        transferListenerControl.setVoidCallable( 5 );
-        transferListener.transferCompleted( null );
-        transferListenerControl.replay();
+        transferListener.transferInitiated( anyObject( TransferEvent.class ) );
+        transferListener.transferStarted( anyObject( TransferEvent.class ) );
+        transferListener.debug( anyString() );
+        expectLastCall().anyTimes();
+        transferListener.transferProgress( anyObject( TransferEvent.class ), anyObject( byte[].class ), anyInt() );
+        expectLastCall().times( 5 );
+        transferListener.transferCompleted( anyObject( TransferEvent.class ) );
+        replay( transferListener );
 
         wagon.fireTransferDebug( "fetch debug message" );
 
@@ -388,19 +379,18 @@ public class AbstractWagonTest
 
         wagon.get( artifact, destination );
 
-        transferListenerControl.verify();
+        verify( transferListener );
     }
 
     public void testGetError()
         throws Exception
     {
-        transferListenerControl.setDefaultMatcher( MockControl.ALWAYS_MATCHER );
-        transferListener.transferInitiated( null );
-        transferListener.transferStarted( null );
-        transferListener.debug( null );
-        transferListenerControl.setVoidCallable( MockControl.ZERO_OR_MORE );
-        transferListener.transferError( null );
-        transferListenerControl.replay();
+        transferListener.transferInitiated( anyObject( TransferEvent.class ) );
+        transferListener.transferStarted( anyObject( TransferEvent.class ) );
+        transferListener.debug( anyString() );
+        expectLastCall().anyTimes();
+        transferListener.transferError( anyObject( TransferEvent.class ) );
+        replay( transferListener );
 
         try
         {
@@ -421,7 +411,7 @@ public class AbstractWagonTest
             assertTrue( true );
         }
 
-        transferListenerControl.verify();
+        verify( transferListener );
     }
 
     public void testPutTransferEvents()
@@ -429,12 +419,11 @@ public class AbstractWagonTest
         AuthorizationException
     {
         transferListener.debug( "deploy debug message" );
-        transferListenerControl.setDefaultMatcher( MockControl.ALWAYS_MATCHER );
-        transferListener.transferInitiated( null );
-        transferListener.transferStarted( null );
-        transferListener.transferProgress( null, null, 0 );
-        transferListener.transferCompleted( null );
-        transferListenerControl.replay();
+        transferListener.transferInitiated( anyObject( TransferEvent.class ) );
+        transferListener.transferStarted( anyObject( TransferEvent.class ) );
+        transferListener.transferProgress( anyObject( TransferEvent.class ), anyObject( byte[].class ), anyInt() );
+        transferListener.transferCompleted( anyObject( TransferEvent.class ) );
+        replay( transferListener );
 
         wagon.fireTransferDebug( "deploy debug message" );
 
@@ -444,7 +433,7 @@ public class AbstractWagonTest
 
         wagon.put( source, artifact );
 
-        transferListenerControl.verify();
+        verify( transferListener );
     }
 
     public void testStreamShutdown()
@@ -541,52 +530,38 @@ public class AbstractWagonTest
 
         Resource resource = new Resource( "resource" );
 
-        transferListener.transferInitiated( null );
-        transferListenerControl.setMatcher( MockControl.ALWAYS_MATCHER );
-        transferListener.transferStarted( null );
-        transferListenerControl.setMatcher( MockControl.ALWAYS_MATCHER );
+        transferListener.transferInitiated( anyObject( TransferEvent.class ) );
+        transferListener.transferStarted( anyObject( TransferEvent.class ) );
         TransferEvent event =
             new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT );
         event.setLocalFile( tempFile );
-        transferListener.transferProgress( event, content.getBytes(), content.length() );
-        ProgressArgumentMatcher matcher = new ProgressArgumentMatcher();
-        transferListenerControl.setMatcher( matcher );
-        transferListener.transferCompleted( null );
-        transferListenerControl.setMatcher( MockControl.ALWAYS_MATCHER );
-        transferListenerControl.replay();
+        transferListener.transferProgress( eq( event ), anyObject( byte[].class ), eq( content.length() ) );
+        ProgressAnswer answer = new ProgressAnswer();
+        expectLastCall().andAnswer( answer );
+        transferListener.transferCompleted( anyObject( TransferEvent.class ) );
+        replay( transferListener );
 
         wagon.postProcessListeners( resource, tempFile, TransferEvent.REQUEST_PUT );
 
-        assertEquals( content.length(), matcher.getSize() );
-        assertEquals( new String( content.getBytes() ), new String( matcher.getBytes() ) );
+        assertEquals( content.length(), answer.getSize() );
+        assertEquals( new String( content.getBytes() ), new String( answer.getBytes() ) );
 
         tempFile.delete();
     }
 
-    static final class ProgressArgumentMatcher
-        extends AbstractMatcher
+    static final class ProgressAnswer implements IAnswer
     {
         private ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         private int size;
         
-        private byte[] lastArray;
-
-        protected boolean argumentMatches( Object expected, Object actual )
+        public Object answer() throws Throwable
         {
-            if ( actual instanceof byte[] )
-            {
-                lastArray = (byte[]) actual;
-                return true;
-            }
-            if ( actual instanceof Integer )
-            {
-                int length = ( (Integer) actual ).intValue();
-                baos.write( lastArray, 0, length );
-                size += length;
-                return true;
-            }
-            return super.argumentMatches( expected, actual );
+            byte[] buffer = (byte[]) getCurrentArguments()[1];
+            int length = (Integer) getCurrentArguments()[2];
+            baos.write( buffer, 0, length );
+            size += length;
+            return null;
         }
 
         public int getSize()

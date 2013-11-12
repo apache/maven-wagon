@@ -22,7 +22,7 @@ package org.apache.maven.wagon.events;
 import junit.framework.TestCase;
 
 import org.apache.maven.wagon.Wagon;
-import org.easymock.MockControl;
+import org.easymock.EasyMock;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -34,8 +34,6 @@ public class SessionEventSupportTest
 
     private SessionEventSupport eventSupport;
 
-    private MockControl wagonMockControl;
-    
     private Wagon wagon;
 
     /**
@@ -49,9 +47,7 @@ public class SessionEventSupportTest
         eventSupport = new SessionEventSupport();
         
         // TODO: actually test it gets called?
-        wagonMockControl = MockControl.createControl( Wagon.class );
-        
-        wagon = (Wagon) wagonMockControl.getMock();
+        wagon = EasyMock.createMock( Wagon.class );
     }
 
     public void testSessionListenerRegistration()

@@ -36,7 +36,8 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringInputStream;
 import org.codehaus.plexus.util.StringOutputStream;
-import org.easymock.MockControl;
+
+import static org.easymock.EasyMock.*;
 
 public class StreamWagonTest
     extends TestCase
@@ -78,15 +79,13 @@ public class StreamWagonTest
             }
         };
 
-        MockControl control = MockControl.createControl( TransferListener.class );
-        TransferListener listener = (TransferListener) control.getMock();
-        listener.transferInitiated( null );
-        control.setMatcher( MockControl.ALWAYS_MATCHER );
+        TransferListener listener = createMock( TransferListener.class );
+        listener.transferInitiated( anyObject( TransferEvent.class ) );
         TransferEvent transferEvent =
             new TransferEvent( wagon, new Resource( "resource" ), new TransferFailedException( "" ),
                                TransferEvent.REQUEST_GET );
         listener.transferError( transferEvent );
-        control.replay();
+        replay( listener );
 
         wagon.connect( repository );
         wagon.addTransferListener( listener );
@@ -104,7 +103,7 @@ public class StreamWagonTest
             wagon.disconnect();
         }
 
-        control.verify();
+        verify( listener );
     }
 
     public void testNullOutputStream()
@@ -118,15 +117,13 @@ public class StreamWagonTest
             }
         };
 
-        MockControl control = MockControl.createControl( TransferListener.class );
-        TransferListener listener = (TransferListener) control.getMock();
-        listener.transferInitiated( null );
-        control.setMatcher( MockControl.ALWAYS_MATCHER );
+        TransferListener listener = createMock( TransferListener.class );
+        listener.transferInitiated( anyObject( TransferEvent.class ) );
         TransferEvent transferEvent =
             new TransferEvent( wagon, new Resource( "resource" ), new TransferFailedException( "" ),
                                TransferEvent.REQUEST_PUT );
         listener.transferError( transferEvent );
-        control.replay();
+        replay( listener );
 
         wagon.connect( repository );
         wagon.addTransferListener( listener );
@@ -144,7 +141,7 @@ public class StreamWagonTest
             wagon.disconnect();
         }
 
-        control.verify();
+        verify( listener );
     }
 
     public void testTransferFailedExceptionOnInput()
@@ -173,15 +170,13 @@ public class StreamWagonTest
             }
         };
 
-        MockControl control = MockControl.createControl( TransferListener.class );
-        TransferListener listener = (TransferListener) control.getMock();
-        listener.transferInitiated( null );
-        control.setMatcher( MockControl.ALWAYS_MATCHER );
+        TransferListener listener = createMock( TransferListener.class );
+        listener.transferInitiated( anyObject( TransferEvent.class ) );
         TransferEvent transferEvent =
             new TransferEvent( wagon, new Resource( "resource" ), new TransferFailedException( "" ),
                                TransferEvent.REQUEST_PUT );
         listener.transferError( transferEvent );
-        control.replay();
+        replay( listener );
 
         wagon.connect( repository );
         wagon.addTransferListener( listener );
@@ -197,7 +192,7 @@ public class StreamWagonTest
         finally
         {
             wagon.disconnect();
-            control.verify();
+            verify( listener );
         }
     }
 
@@ -253,14 +248,12 @@ public class StreamWagonTest
             }
         };
 
-        MockControl control = MockControl.createControl( TransferListener.class );
-        TransferListener listener = (TransferListener) control.getMock();
-        listener.transferInitiated( null );
-        control.setMatcher( MockControl.ALWAYS_MATCHER );
+        TransferListener listener = createMock( TransferListener.class );
+        listener.transferInitiated( anyObject( TransferEvent.class ) );
         TransferEvent transferEvent =
             new TransferEvent( wagon, new Resource( "resource" ), exception, TransferEvent.REQUEST_GET );
         listener.transferError( transferEvent );
-        control.replay();
+        replay( listener );
 
         wagon.connect( repository );
         wagon.addTransferListener( listener );
@@ -272,7 +265,7 @@ public class StreamWagonTest
         finally
         {
             wagon.disconnect();
-            control.verify();
+            verify( listener );
         }
     }
 
