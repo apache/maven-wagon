@@ -53,7 +53,7 @@ public abstract class AbstractScmSvnWagonTest
 
         // TODO: this is a hack for windows
         // Note: why not use File.toURL() ?
-        if ( repository.indexOf( ":" ) >= 0 )
+        if ( repository.contains( ":" ) )
         {
             repository = "/" + repository;
         }
