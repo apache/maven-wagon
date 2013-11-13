@@ -58,7 +58,7 @@ public class ConsoleInteractiveUserInfo
         String ret;
         try
         {
-            ret = prompter.prompt( message, Arrays.asList( new String[]{"yes", "no"} ) );
+            ret = prompter.prompt( message, Arrays.asList( "yes", "no" ) );
         }
         catch ( PrompterException e )
         {

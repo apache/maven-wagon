@@ -128,7 +128,7 @@ public class GetWagonTests
 
                     if ( getWagon() instanceof StreamWagon )
                     {
-                        logger.info( "Connection timeout is: " + ( (StreamWagon) getWagon() ).getTimeout() );
+                        logger.info( "Connection timeout is: " + getWagon().getTimeout() );
                     }
 
                     File target = newTempFile();
@@ -510,7 +510,7 @@ public class GetWagonTests
 
         if ( getWagon() instanceof StreamWagon )
         {
-            logger.info( "Connection timeout is: " + ( (StreamWagon) getWagon() ).getTimeout() );
+            logger.info( "Connection timeout is: " + getWagon().getTimeout() );
         }
 
         File target = newTempFile();
