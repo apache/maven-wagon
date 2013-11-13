@@ -270,36 +270,36 @@ public class FtpWagon
 
             String[] dirs = PathUtils.dirnames( resource.getName() );
 
-            for ( int i = 0; i < dirs.length; i++ )
+            for ( String dir : dirs )
             {
-                boolean dirChanged = ftp.changeWorkingDirectory( dirs[i] );
+                boolean dirChanged = ftp.changeWorkingDirectory( dir );
 
                 if ( !dirChanged )
                 {
                     // first, try to create it
-                    boolean success = ftp.makeDirectory( dirs[i] );
+                    boolean success = ftp.makeDirectory( dir );
 
                     if ( success )
                     {
                         if ( permissions != null && permissions.getGroup() != null )
                         {
                             // ignore failures
-                            ftp.sendSiteCommand( "CHGRP " + permissions.getGroup() + " " + dirs[i] );
+                            ftp.sendSiteCommand( "CHGRP " + permissions.getGroup() + " " + dir );
                         }
 
                         if ( permissions != null && permissions.getDirectoryMode() != null )
                         {
                             // ignore failures
-                            ftp.sendSiteCommand( "CHMOD " + permissions.getDirectoryMode() + " " + dirs[i] );
+                            ftp.sendSiteCommand( "CHMOD " + permissions.getDirectoryMode() + " " + dir );
                         }
 
-                        dirChanged = ftp.changeWorkingDirectory( dirs[i] );
+                        dirChanged = ftp.changeWorkingDirectory( dir );
                     }
                 }
 
                 if ( !dirChanged )
                 {
-                    throw new TransferFailedException( "Unable to create directory " + dirs[i] );
+                    throw new TransferFailedException( "Unable to create directory " + dir );
                 }
             }
 
@@ -390,13 +390,13 @@ public class FtpWagon
 
         String[] dirs = PathUtils.dirnames( resource.getName() );
 
-        for ( int i = 0; i < dirs.length; i++ )
+        for ( String dir : dirs )
         {
-            boolean dirChanged = ftp.changeWorkingDirectory( dirs[i] );
+            boolean dirChanged = ftp.changeWorkingDirectory( dir );
 
             if ( !dirChanged )
             {
-                String msg = "Resource " + resource + " not found. Directory " + dirs[i] + " does not exist";
+                String msg = "Resource " + resource + " not found. Directory " + dir + " does not exist";
 
                 throw new ResourceDoesNotExistException( msg );
             }
@@ -448,11 +448,11 @@ public class FtpWagon
             }
 
             List<String> ret = new ArrayList<String>();
-            for ( int i = 0; i < ftpFiles.length; i++ )
+            for ( FTPFile file : ftpFiles )
             {
-                String name = ftpFiles[i].getName();
+                String name = file.getName();
 
-                if ( ftpFiles[i].isDirectory() && !name.endsWith( "/" ) )
+                if ( file.isDirectory() && !name.endsWith( "/" ) )
                 {
                     name += "/";
                 }
@@ -581,18 +581,18 @@ public class FtpWagon
                 fireTransferDebug( "listing children of = " + sourceFile.getAbsolutePath() + " found " + files.length );
 
                 // Directories first, then files. Let's go deep early.
-                for ( int i = 0; i < files.length; i++ )
+                for ( File file : files )
                 {
-                    if ( files[i].isDirectory() )
+                    if ( file.isDirectory() )
                     {
-                        ftpRecursivePut( files[i], files[i].getName() );
+                        ftpRecursivePut( file, file.getName() );
                     }
                 }
-                for ( int i = 0; i < files.length; i++ )
+                for ( File file : files )
                 {
-                    if ( !files[i].isDirectory() )
+                    if ( !file.isDirectory() )
                     {
-                        ftpRecursivePut( files[i], files[i].getName() );
+                        ftpRecursivePut( file, file.getName() );
                     }
                 }
             }

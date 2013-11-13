@@ -87,7 +87,7 @@ public class LatencyServlet
             logger.info( "Starting high-latency transfer. This should take about "
                 + ( ( f.length() / BUFFER_SIZE * latencyMs / 1000 ) + ( latencyMs / 1000 ) ) + " seconds." );
 
-            int read = -1;
+            int read;
             byte[] buf = new byte[BUFFER_SIZE];
             while ( ( read = in.read( buf ) ) > -1 )
             {

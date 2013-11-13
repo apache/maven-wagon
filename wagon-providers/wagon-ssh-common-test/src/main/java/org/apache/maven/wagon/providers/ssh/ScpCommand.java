@@ -479,7 +479,7 @@ public class ScpCommand
         {
             log.debug( "Reading file {}", path );
         }
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append( "C" );
         buf.append( "0644" ); // what about perms
         buf.append( " " );
@@ -520,7 +520,7 @@ public class ScpCommand
         {
             log.debug( "Reading directory {}", path );
         }
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append( "D" );
         buf.append( "0755" ); // what about perms
         buf.append( " " );

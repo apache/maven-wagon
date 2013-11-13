@@ -19,17 +19,8 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
-import org.apache.http.conn.ssl.SSLInitializationException;
 import org.apache.http.conn.ssl.TrustStrategy;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
-import java.io.IOException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;

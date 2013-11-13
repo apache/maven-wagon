@@ -178,7 +178,7 @@ public class ScpWagon
     protected String readLine( InputStream in )
         throws IOException
     {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         while ( true )
         {
@@ -258,7 +258,7 @@ public class ScpWagon
 
             if ( exitCode != COPY_START_CHAR )
             {
-                if ( exitCode == 1 && ( line.indexOf( "No such file or directory" ) != -1
+                if ( exitCode == 1 && ( line.contains( "No such file or directory" )
                     || line.indexOf( "no such file or directory" ) != 1 ) )
                 {
                     throw new ResourceDoesNotExistException( line );
@@ -402,7 +402,7 @@ public class ScpWagon
     private void handleIOException( Resource resource, IOException e )
         throws TransferFailedException
     {
-        if ( e.getMessage().indexOf( "set mode: Operation not permitted" ) >= 0 )
+        if ( e.getMessage().contains( "set mode: Operation not permitted" ) )
         {
             fireTransferDebug( e.getMessage() );
         }

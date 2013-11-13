@@ -21,7 +21,6 @@ package org.apache.maven.wagon.shared.http;
 
 import java.io.InputStream;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -37,38 +36,37 @@ public class HtmlFileListParserTest
 {
     private static Logger logger = Logger.getLogger( HtmlFileListParserTest.class );
 
-    private void assertContainsExpected( List/*<String>*/links, String[] expected )
+    private void assertContainsExpected( List<String> links, String[] expected )
     {
         if ( expected.length != links.size() )
         {
             Collections.sort( links );
-            for ( Iterator iterator = links.iterator(); iterator.hasNext(); )
+            for ( String link : links )
             {
-                String link = (String) iterator.next();
-                logger.info( "   \"" + link + "\", " );
+                logger.info("   \"" + link + "\", ");
             }
             assertEquals( "Links to Expected size", expected.length, links.size() );
         }
 
-        for ( int i = 0; i < expected.length; i++ )
+        for ( String exp : expected )
         {
-            assertTrue( "Should find [" + expected[i] + "] in link list", links.contains( expected[i] ) );
+            assertTrue( "Should find [" + exp + "] in link list", links.contains( exp ) );
         }
     }
 
-    private void assertNotContainingAvoided( List/*<String>*/links, String[] avoided )
+    private void assertNotContainingAvoided( List<String> links, String[] avoided )
     {
-        for ( int i = 0; i < avoided.length; i++ )
+        for ( String a : avoided )
         {
-            assertFalse( "Should not find [" + avoided[i] + "] in link list", links.contains( avoided[i] ) );
+            assertFalse( "Should not find [" + a + "] in link list", links.contains( a ) );
         }
     }
 
-    private List/*<String>*/parseLinks( String url, String filename )
+    private List<String> parseLinks( String url, String filename )
         throws TransferFailedException
     {
         InputStream is = this.getClass().getResourceAsStream( "/filelistings/" + filename );
-        List files = HtmlFileListParser.parseFileList( url, is );
+        List<String> files = HtmlFileListParser.parseFileList( url, is );
 
         assertNotNull( "file list should not be null.", files );
         assertFalse( "file list should not be empty.", files.isEmpty() );
@@ -76,10 +74,9 @@ public class HtmlFileListParserTest
         /* Debug */
         if ( false )
         {
-            Iterator it = files.iterator();
-            while ( it.hasNext() )
+            for ( String file : files )
             {
-                logger.info( "File: '" + it.next() + "'" );
+                logger.info( "File: '" + file + "'" );
             }
         }
 
@@ -94,7 +91,7 @@ public class HtmlFileListParserTest
     public void testParseCommonsLang()
         throws TransferFailedException
     {
-        List/*<String>*/links = parseLinks( "http://localhost/repository/commons-lang/commons-lang/2.3",
+        List<String> links = parseLinks( "http://localhost/repository/commons-lang/commons-lang/2.3",
                                              "commons-lang.html" );
 
         String[] expected = new String[] {
@@ -127,7 +124,7 @@ public class HtmlFileListParserTest
     public void testParseIbiblio()
         throws Exception
     {
-        List/*<String>*/links = parseLinks( "http://www.ibiblio.org/maven2/org/apache/maven/wagon/",
+        List<String> links = parseLinks( "http://www.ibiblio.org/maven2/org/apache/maven/wagon/",
                                              "ibiblio-wagon.html" );
 
         String[] expected = new String[] {
@@ -201,7 +198,7 @@ public class HtmlFileListParserTest
     public void testParseJetty()
         throws Exception
     {
-        List/*<String>*/links = parseLinks( "http://www.ibiblio.org/maven2/org/apache/maven/wagon/",
+        List<String> links = parseLinks( "http://www.ibiblio.org/maven2/org/apache/maven/wagon/",
                                              "jetty-wagon.html" );
 
         String[] expected = new String[] {
@@ -275,7 +272,7 @@ public class HtmlFileListParserTest
     public void testParseJettyWithNonNormalizedBaseURI()
         throws Exception
     {
-        List/*<String>*/links = parseLinks( "http://www.ibiblio.org/maven2/org/apache/maven/wagon//",
+        List<String> links = parseLinks( "http://www.ibiblio.org/maven2/org/apache/maven/wagon//",
                                              "jetty-wagon.html" );
 
         String[] expected = new String[] {
@@ -352,7 +349,7 @@ public class HtmlFileListParserTest
     public void testParseMevenIde()
         throws TransferFailedException
     {
-        List/*<String>*/links = parseLinks( "http://repository.codehaus.org/org/codehaus/mevenide/", "mevenide.html" );
+        List<String> links = parseLinks( "http://repository.codehaus.org/org/codehaus/mevenide/", "mevenide.html" );
 
         String[] expected = new String[] {
             "apisupport/",
@@ -397,7 +394,7 @@ public class HtmlFileListParserTest
     public void testParseMirror()
         throws Exception
     {
-        List/*<String>*/links = parseLinks( "http://www.ibiblio.org/maven2/org/apache/maven/wagon/",
+        List<String> links = parseLinks( "http://www.ibiblio.org/maven2/org/apache/maven/wagon/",
                                              "mirror-wagon.html" );
 
         String[] expected = new String[] {
@@ -478,7 +475,7 @@ public class HtmlFileListParserTest
     public void testParseNekoHtml()
         throws TransferFailedException
     {
-        List/*<String>*/links = parseLinks( "http://repo1.maven.org//maven2/nekohtml/nekohtml/1.9.6/", "nekohtml.html" );
+        List<String> links = parseLinks( "http://repo1.maven.org//maven2/nekohtml/nekohtml/1.9.6/", "nekohtml.html" );
 
         String[] expected = new String[] {
             "nekohtml-1.9.6-javadoc.jar",
@@ -509,7 +506,7 @@ public class HtmlFileListParserTest
     public void testParseNetSourceforge()
         throws TransferFailedException
     {
-        List/*<String>*/links = parseLinks( "http://repo1.maven.org/maven2/net/sf/", "net_sf.html" );
+        List<String> links = parseLinks( "http://repo1.maven.org/maven2/net/sf/", "net_sf.html" );
 
         String[] expected = new String[] {
             "a2j/",
@@ -588,7 +585,7 @@ public class HtmlFileListParserTest
     public void testParseOrgCodehaus()
         throws TransferFailedException
     {
-        List/*<String>*/links = parseLinks( "http://repository.codehaus.org/org/codehaus", "org.codehaus.html" );
+        List<String> links = parseLinks( "http://repository.codehaus.org/org/codehaus", "org.codehaus.html" );
 
         String[] expected = new String[] {
             "agilifier/",
@@ -679,7 +676,7 @@ public class HtmlFileListParserTest
     public void testParsePeopleApacheOrg()
         throws TransferFailedException
     {
-        List/*<String>*/links = parseLinks(
+        List<String> links = parseLinks(
                                              "http://people.apache.org/repo/m2-ibiblio-rsync-repository/org/apache/maven/archiva/archiva-plexus-runtime/1.0.1/",
                                              "org.apache.maven.html" );
 

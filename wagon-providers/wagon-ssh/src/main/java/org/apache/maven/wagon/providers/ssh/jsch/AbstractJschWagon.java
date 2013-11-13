@@ -272,7 +272,7 @@ public abstract class AbstractJschWagon
             {
                 throw new UnknownHostException( host, e );
             }
-            else if ( e.getMessage().indexOf( "HostKey has been changed" ) >= 0 )
+            else if ( e.getMessage().contains( "HostKey has been changed" ) )
             {
                 throw new KnownHostChangedException( host, e );
             }

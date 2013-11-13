@@ -504,7 +504,7 @@ public class ScmWagon
 
         while ( !stack.isEmpty() )
         {
-            String p = (String) stack.pop();
+            String p = stack.pop();
             relPath += p + "/";
 
             File newDir = new File( checkoutDirectory, relPath );
@@ -570,15 +570,13 @@ public class ScmWagon
 
         if ( scmFile.isDirectory() )
         {
-            File[] files = scmFile.listFiles();
-
-            for ( int i = 0; i < files.length; i++ )
+            for ( File file : scmFile.listFiles() )
             {
-                if ( reservedScmFile != null && !reservedScmFile.equals( files[i].getName() ) )
+                if ( reservedScmFile != null && !reservedScmFile.equals( file.getName() ) )
                 {
                     addedFiles += addFiles( scmProvider, scmRepository, basedir,
                                             ( scmFilePath.length() == 0 ? "" : scmFilePath + "/" )
-                                                + files[i].getName() );
+                                                + file.getName() );
                 }
             }
         }

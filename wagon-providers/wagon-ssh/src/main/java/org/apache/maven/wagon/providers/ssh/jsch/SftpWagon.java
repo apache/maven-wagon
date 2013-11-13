@@ -98,7 +98,7 @@ public class SftpWagon
         {
             String dir = ScpHelper.getResourceDirectory( resource.getName() );
             String[] dirs = PathUtils.dirnames( dir );
-            for ( int i = 0; i < dirs.length; i++ )
+            for ( String d : dirs )
             {
                 channel.cd( ".." );
             }
@@ -242,7 +242,7 @@ public class SftpWagon
             {
                 throw new ResourceDoesNotExistException( e.toString(), e );
             }
-            else if ( e.toString().trim().indexOf( "Can't change directory" ) != -1 )
+            else if ( e.toString().trim().contains( "Can't change directory" ) )
             {
                 throw new ResourceDoesNotExistException( e.toString(), e );
             }   

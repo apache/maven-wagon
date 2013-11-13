@@ -64,7 +64,7 @@ public class StreamKnownHostsProvider
         
         BufferedReader br = new BufferedReader( new StringReader( contents ) );
         
-        String line = null;
+        String line;
         
         do 
         {

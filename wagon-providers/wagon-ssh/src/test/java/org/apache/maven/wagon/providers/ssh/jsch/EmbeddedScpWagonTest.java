@@ -20,15 +20,9 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  */
 
 import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.providers.ssh.AbstractEmbeddedScpWagonTest;
-import org.apache.maven.wagon.providers.ssh.SshServerEmbedded;
-import org.apache.maven.wagon.providers.ssh.TestData;
 import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
-import org.apache.maven.wagon.repository.Repository;
-import org.apache.maven.wagon.resource.Resource;
 
-import java.io.File;
 import java.io.IOException;
 
 /**

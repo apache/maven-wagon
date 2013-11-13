@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -497,21 +498,21 @@ public abstract class WagonTestCase
 
             createDirectory( wagon, resourceToCreate, dirName );
 
-            for ( int i = 0; i < resources.length; i++ )
+            for ( String resource : resources )
             {
-                writeTestFile( resources[i] );
+                writeTestFile( resource );
             }
 
             wagon.connect( testRepository, getAuthInfo() );
 
             wagon.putDirectory( sourceFile, dirName );
 
-            List resourceNames = new ArrayList( resources.length + 1 );
+            List<String> resourceNames = new ArrayList<String>( resources.length + 1 );
 
             resourceNames.add( dirName + "/" + resourceToCreate );
-            for ( int i = 0; i < resources.length; i++ )
+            for ( String resource : resources )
             {
-                resourceNames.add( dirName + "/" + resources[i] );
+                resourceNames.add( dirName + "/" + resource );
             }
 
             assertResourcesAreInRemoteSide( wagon, resourceNames );
@@ -549,9 +550,9 @@ public abstract class WagonTestCase
 
             createDirectory( wagon, resourceToCreate, "." );
 
-            for ( int i = 0; i < resources.length; i++ )
+            for ( String resource : resources )
             {
-                writeTestFile( resources[i] );
+                writeTestFile( resource );
             }
 
             wagon.connect( testRepository, getAuthInfo() );
@@ -561,10 +562,7 @@ public abstract class WagonTestCase
             List<String> resourceNames = new ArrayList<String>( resources.length + 1 );
 
             resourceNames.add( resourceToCreate );
-            for ( int i = 0; i < resources.length; i++ )
-            {
-                resourceNames.add( resources[i] );
-            }
+            Collections.addAll( resourceNames, resources );
 
             assertResourcesAreInRemoteSide( wagon, resourceNames );
 
@@ -591,11 +589,8 @@ public abstract class WagonTestCase
     protected void assertResourcesAreInRemoteSide( Wagon wagon, List<String> resourceNames )
         throws IOException, TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        Iterator<String> iter = resourceNames.iterator();
-        while ( iter.hasNext() )
+        for ( String resourceName : resourceNames )
         {
-            String resourceName = iter.next();
-
             File destFile = FileTestUtils.createUniqueFile( getName(), resourceName );
 
             destFile.deleteOnExit();
@@ -733,9 +728,9 @@ public abstract class WagonTestCase
             new String[]{ "test-resource.txt", "test-resource.pom", "test-resource b.txt", "more-resources.dat",
                 ".index.txt" };
 
-        for ( int i = 0; i < filenames.length; i++ )
+        for ( String filename : filenames )
         {
-            putFile( dirName + "/" + filenames[i], dirName + "/" + filenames[i], filenames[i] + "\n" );
+            putFile( dirName + "/" + filename, dirName + "/" + filename, filename + "\n" );
         }
 
         Wagon wagon = getWagon();
@@ -747,9 +742,9 @@ public abstract class WagonTestCase
         assertTrue( "file list should contain more items (actually contains '" + list + "').",
                     list.size() >= filenames.length );
 
-        for ( int i = 0; i < filenames.length; i++ )
+        for ( String filename : filenames )
         {
-            assertTrue( "Filename '" + filenames[i] + "' should be in list.", list.contains( filenames[i] ) );
+            assertTrue( "Filename '" + filename + "' should be in list.", list.contains(filename) );
         }
 
         // WAGON-250

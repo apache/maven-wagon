@@ -47,7 +47,6 @@ import java.net.Proxy.Type;
 import java.net.SocketAddress;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.zip.GZIPInputStream;
@@ -189,10 +188,9 @@ public class LightweightHttpWagon
     {
         if ( httpHeaders != null )
         {
-            for ( Iterator<?> i = httpHeaders.keySet().iterator(); i.hasNext(); )
+            for ( Object header : httpHeaders.keySet() )
             {
-                String header = (String) i.next();
-                urlConnection.setRequestProperty( header, httpHeaders.getProperty( header ) );
+                urlConnection.setRequestProperty( (String) header, httpHeaders.getProperty( (String) header ) );
             }
         }
         setAuthorization( urlConnection );

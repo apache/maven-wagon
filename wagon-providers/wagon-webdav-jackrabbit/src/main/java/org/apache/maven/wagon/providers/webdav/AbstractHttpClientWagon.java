@@ -64,7 +64,6 @@ import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.TimeZone;
@@ -547,19 +546,18 @@ public abstract class AbstractHttpClientWagon
 
         if ( httpHeaders != null )
         {
-            for ( Iterator i = httpHeaders.keySet().iterator(); i.hasNext(); )
+            for ( Object header : httpHeaders.keySet() )
             {
-                String header = (String) i.next();
-                method.addRequestHeader( header, httpHeaders.getProperty( header ) );
+                method.addRequestHeader( (String) header, httpHeaders.getProperty( (String) header ) );
             }
         }
 
         Header[] headers = config == null ? null : config.asRequestHeaders();
         if ( headers != null )
         {
-            for ( int i = 0; i < headers.length; i++ )
+            for ( Header header : headers )
             {
-                method.addRequestHeader( headers[i] );
+                method.addRequestHeader( header );
             }
         }
     }

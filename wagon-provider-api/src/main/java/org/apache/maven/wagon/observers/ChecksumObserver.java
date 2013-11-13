@@ -119,9 +119,9 @@ public class ChecksumObserver
 
         StringBuilder retValue = new StringBuilder();
 
-        for ( int i = 0; i < binaryData.length; i++ )
+        for ( byte b : binaryData )
         {
-            String t = Integer.toHexString( binaryData[i] & 0xff );
+            String t = Integer.toHexString( b & 0xff );
 
             if ( t.length() == 1 )
             {

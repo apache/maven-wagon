@@ -1705,7 +1705,7 @@ public abstract class HttpWagonTestCase
         public void handle( String target, HttpServletRequest request, HttpServletResponse response, int dispatch )
             throws IOException, ServletException
         {
-            headers = new HashMap();
+            headers = new HashMap<String, String>();
             for ( Enumeration e = request.getHeaderNames(); e.hasMoreElements(); )
             {
                 String name = (String) e.nextElement();

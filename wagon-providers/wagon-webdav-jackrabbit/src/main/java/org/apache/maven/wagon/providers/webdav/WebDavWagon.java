@@ -176,22 +176,19 @@ public class WebDavWagon
     public void putDirectory( File sourceDirectory, String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        File[] listFiles = sourceDirectory.listFiles();
-
-        for ( int i = 0; i < listFiles.length; i++ )
+        for ( File file : sourceDirectory.listFiles() )
         {
-            if ( listFiles[i].isDirectory() )
+            if ( file.isDirectory() )
             {
-                putDirectory( listFiles[i], destinationDirectory + "/" + listFiles[i].getName() );
+                putDirectory( file, destinationDirectory + "/" + file.getName() );
             }
             else
             {
-                String target = destinationDirectory + "/" + listFiles[i].getName();
+                String target = destinationDirectory + "/" + file.getName();
 
-                put( listFiles[i], target );
+                put( file, target );
             }
         }
-
     }
 
     private boolean isDirectory( String url )
@@ -309,12 +306,12 @@ public class WebDavWagon
         String url = repository.getUrl();
 
         // Process mappings first.
-        for ( int i = 0; i < protocolMap.length; i++ )
+        for ( String[] entry : protocolMap )
         {
-            String protocol = protocolMap[i][0];
-            if ( url.startsWith( protocol ) )
+            String protocol = entry[0];
+            if ( url.startsWith(protocol) )
             {
-                return protocolMap[i][1] + url.substring( protocol.length() );
+                return entry[1] + url.substring( protocol.length() );
             }
         }
 

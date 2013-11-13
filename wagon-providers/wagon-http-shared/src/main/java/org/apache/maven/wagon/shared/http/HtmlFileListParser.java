@@ -78,9 +78,8 @@ public class HtmlFileListParser
             Document doc = Jsoup.parse( content, baseurl );
             Elements links = doc.select("a[href]");
             Set<String> results = new HashSet<String>();
-            for ( int lx = 0; lx < links.size(); lx++ )
+            for ( Element link : links )
             {
-                Element link = links.get( lx );
                 /*
                  * The abs:href loses directories, so we deal with absolute paths ourselves below in cleanLink
                  */
@@ -150,9 +149,9 @@ public class HtmlFileListParser
             return false;
         }
 
-        for ( int i = 0; i < SKIPS.length; i++ )
+        for ( Pattern pattern : SKIPS )
         {
-            if ( SKIPS[i].matcher( link ).find() )
+            if ( pattern.matcher( link ).find() )
             {
                 return false;
             }

@@ -51,20 +51,20 @@ public class PermissionModeUtilsTest
 
         };
 
-        for ( int i = 0; i < tests.length; i++ )
+        for ( String[] test : tests )
         {
             String umask = null;
 
             try
             {
-                umask = PermissionModeUtils.getUserMaskFor( tests[ i ][ 0 ] );
+                umask = PermissionModeUtils.getUserMaskFor( test[ 0 ] );
             }
             catch ( IllegalArgumentException e )
             {
                 // nothing to do
             }
 
-            assertEquals( tests[ i ][ 1 ], umask );
+            assertEquals( test[ 1 ], umask );
         }
     }
 }

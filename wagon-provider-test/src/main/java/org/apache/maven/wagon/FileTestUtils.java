@@ -33,7 +33,7 @@ import java.io.Writer;
 public class FileTestUtils
 {
 
-    public static final File createUniqueFile( final String dirname, final String name )
+    public static File createUniqueFile( final String dirname, final String name )
         throws IOException
     {
 
@@ -46,7 +46,7 @@ public class FileTestUtils
     }
 
 
-    public static final File createUniqueDir( final String name )
+    public static File createUniqueDir( final String name )
         throws IOException
     {
 
@@ -57,7 +57,7 @@ public class FileTestUtils
     }
 
 
-    public static final File createDir( final String name )
+    public static File createDir( final String name )
         throws IOException
     {
 
@@ -81,7 +81,7 @@ public class FileTestUtils
         return retValue;
     }
 
-    public static final File getTestOutputDir()
+    public static File getTestOutputDir()
     {
         final String tempDir = System.getProperty( "java.io.tmpdir" );
 

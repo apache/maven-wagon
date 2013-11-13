@@ -28,7 +28,6 @@ import org.apache.maven.wagon.Wagon;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -70,11 +69,10 @@ class ConfigurationUtils
         {
 
             Pattern coercePattern = Pattern.compile( COERCE_PATTERN );
-            for ( Iterator<?> it = params.entrySet().iterator(); it.hasNext(); )
+            for ( Map.Entry entry : params.entrySet() )
             {
-                Map.Entry<String, String> entry = (Map.Entry) it.next();
-                String key = entry.getKey();
-                String value = entry.getValue();
+                String key = (String) entry.getKey();
+                String value = (String) entry.getValue();
                 Matcher matcher = coercePattern.matcher(value);
                 if ( matcher.matches() )
                 {
@@ -160,12 +158,10 @@ class ConfigurationUtils
         Header[] result = new Header[headers.size()];
 
         int index = 0;
-        for ( Iterator<?> it = headers.entrySet().iterator(); it.hasNext(); )
+        for ( Map.Entry entry : headers.entrySet() )
         {
-            Map.Entry<String, String> entry = (Map.Entry) it.next();
-
-            String key = entry.getKey();
-            String value = entry.getValue();
+            String key = (String) entry.getKey();
+            String value = (String) entry.getValue();
 
             Header header = new BasicHeader( key, value );
             result[index++] = header;

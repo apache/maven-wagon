@@ -23,7 +23,6 @@ import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -148,10 +147,8 @@ public class HttpMethodConfiguration
         {
             Pattern coercePattern = Pattern.compile( COERCE_PATTERN );
 
-            for ( Iterator it = params.entrySet().iterator(); it.hasNext(); )
+            for ( Map.Entry<Object, Object> entry : params.entrySet() )
             {
-                Map.Entry entry = (Map.Entry) it.next();
-
                 String key = (String) entry.getKey();
                 String value = (String) entry.getValue();
 
@@ -186,10 +183,10 @@ public class HttpMethodConfiguration
                         case 'c':
                         {
                             String[] entries = value.split( "," );
-                            List collection = new ArrayList();
-                            for ( int i = 0; i < entries.length; i++ )
+                            List<String> collection = new ArrayList<String>();
+                            for (String e : entries)
                             {
-                                collection.add( entries[i].trim() );
+                                collection.add( e.trim() );
                             }
 
                             p.setParameter( key, collection );
@@ -199,17 +196,17 @@ public class HttpMethodConfiguration
                         {
                             String[] entries = value.split( "," );
 
-                            Map map = new LinkedHashMap();
-                            for ( int i = 0; i < entries.length; i++ )
+                            Map<String, String> map = new LinkedHashMap<String, String>();
+                            for ( String e : entries )
                             {
-                                int idx = entries[i].indexOf( "=>" );
+                                int idx = e.indexOf( "=>" );
                                 if ( idx < 1 )
                                 {
                                     break;
                                 }
 
-                                String mapKey = entries[i].substring( 0, idx );
-                                String mapVal = entries[i].substring( idx + 1, entries[i].length() );
+                                String mapKey = e.substring( 0, idx );
+                                String mapVal = e.substring( idx + 1, e.length() );
                                 map.put( mapKey.trim(), mapVal.trim() );
                             }
 
@@ -236,10 +233,8 @@ public class HttpMethodConfiguration
         Header[] result = new Header[headers.size()];
 
         int index = 0;
-        for ( Iterator it = headers.entrySet().iterator(); it.hasNext(); )
+        for ( Map.Entry<Object, Object> entry : headers.entrySet() )
         {
-            Map.Entry entry = (Map.Entry) it.next();
-
             String key = (String) entry.getKey();
             String value = (String) entry.getValue();
 
