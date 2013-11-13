@@ -42,7 +42,7 @@ public class PathNavigator
     public String getPath()
     {
         List<String> currentPathList = list.subList( 0, currentPosition );
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for ( int i = 0; i < currentPathList.size(); i++ )
         {
             sb.append( currentPathList.get( i ) );

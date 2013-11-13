@@ -178,7 +178,7 @@ public class ScpWagon
     protected String readLine( InputStream in )
         throws IOException
     {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         while ( true )
         {
