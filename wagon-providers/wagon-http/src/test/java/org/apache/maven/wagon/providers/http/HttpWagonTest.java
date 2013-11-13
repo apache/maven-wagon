@@ -21,9 +21,7 @@ package org.apache.maven.wagon.providers.http;
 
 import java.util.Properties;
 
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.maven.wagon.StreamingWagon;
-import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.http.HttpWagonTestCase;
 
 /**

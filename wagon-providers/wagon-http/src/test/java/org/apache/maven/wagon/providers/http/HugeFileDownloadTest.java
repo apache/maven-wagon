@@ -1,13 +1,10 @@
 package org.apache.maven.wagon.providers.http;
 
 import junit.framework.Assert;
-import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.observers.Debug;
 import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.plexus.PlexusTestCase;
-import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.util.StringOutputStream;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.DefaultServlet;
@@ -19,10 +16,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.math.BigInteger;
 
 /**
  * @author Olivier Lamy
