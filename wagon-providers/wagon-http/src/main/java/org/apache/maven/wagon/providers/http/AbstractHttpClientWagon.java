@@ -782,9 +782,9 @@ public abstract class AbstractHttpClientWagon
         Header[] headers = config == null ? null : config.asRequestHeaders();
         if ( headers != null )
         {
-            for ( int i = 0; i < headers.length; i++ )
+            for ( Header header : headers )
             {
-                method.addHeader( headers[i] );
+                method.addHeader( header );
             }
         }
     }

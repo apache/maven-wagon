@@ -43,10 +43,10 @@ public class PathNavigator
     {
         List<String> currentPathList = list.subList( 0, currentPosition );
         StringBuilder sb = new StringBuilder();
-        for ( int i = 0; i < currentPathList.size(); i++ )
+        for ( String path : currentPathList )
         {
-            sb.append( currentPathList.get( i ) );
-            sb.append( '/' );
+            sb.append(path);
+            sb.append('/');
         }
         return sb.toString();
     }

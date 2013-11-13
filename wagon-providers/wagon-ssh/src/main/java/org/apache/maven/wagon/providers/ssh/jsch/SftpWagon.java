@@ -98,7 +98,7 @@ public class SftpWagon
         {
             String dir = ScpHelper.getResourceDirectory( resource.getName() );
             String[] dirs = PathUtils.dirnames( dir );
-            for ( int i = 0; i < dirs.length; i++ )
+            for ( String d : dirs )
             {
                 channel.cd( ".." );
             }

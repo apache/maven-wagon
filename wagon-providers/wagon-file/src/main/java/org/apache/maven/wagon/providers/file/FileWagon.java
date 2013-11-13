@@ -242,10 +242,10 @@ public class FileWagon
         File[] files = path.listFiles();
 
         List<String> list = new ArrayList<String>( files.length );
-        for ( int i = 0; i < files.length; i++ )
+        for ( File file : files )
         {
-            String name = files[i].getName();
-            if ( files[i].isDirectory() && !name.endsWith( "/" ) )
+            String name = file.getName();
+            if ( file.isDirectory() && !name.endsWith( "/" ) )
             {
                 name += "/";
             }
