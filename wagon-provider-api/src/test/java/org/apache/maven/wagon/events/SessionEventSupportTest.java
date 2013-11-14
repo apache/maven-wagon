@@ -22,7 +22,8 @@ package org.apache.maven.wagon.events;
 import junit.framework.TestCase;
 
 import org.apache.maven.wagon.Wagon;
-import org.easymock.EasyMock;
+
+import static org.easymock.EasyMock.*;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -47,18 +48,18 @@ public class SessionEventSupportTest
         eventSupport = new SessionEventSupport();
         
         // TODO: actually test it gets called?
-        wagon = EasyMock.createMock( Wagon.class );
+        wagon = createNiceMock( Wagon.class );
     }
 
     public void testSessionListenerRegistration()
     {
-        final SessionListenerMock mock1 = new SessionListenerMock();
+        SessionListener mock1 = createMock( SessionListener.class );
 
         eventSupport.addSessionListener( mock1 );
 
         assertTrue( eventSupport.hasSessionListener( mock1 ) );
 
-        final SessionListenerMock mock2 = new SessionListenerMock();
+        SessionListener mock2 = createMock( SessionListener.class );
 
         assertFalse( eventSupport.hasSessionListener( mock2 ) );
 
@@ -81,192 +82,176 @@ public class SessionEventSupportTest
 
     public void testFireSessionDisconnected()
     {
-
-        final SessionListenerMock mock1 = new SessionListenerMock();
+        SessionListener mock1 = createMock( SessionListener.class );
 
         eventSupport.addSessionListener( mock1 );
 
-        final SessionListenerMock mock2 = new SessionListenerMock();
+        SessionListener mock2 = createMock( SessionListener.class );
 
         eventSupport.addSessionListener( mock2 );
 
         final SessionEvent event = new SessionEvent( wagon, 1 );
 
+        mock1.sessionDisconnected( event );
+        mock2.sessionDisconnected( event );
+
+        replay( mock1, mock2 );
+
         eventSupport.fireSessionDisconnected( event );
 
-        assertTrue( mock1.isSessionDisconnectedCalled() );
-
-        assertTrue( mock2.isSessionDisconnectedCalled() );
-
-        assertEquals( event, mock1.getSessionEvent() );
-
-        assertEquals( event, mock2.getSessionEvent() );
-
+        verify( mock1, mock2 );
     }
 
     public void testFireSessionDisconneting()
     {
-        final SessionListenerMock mock1 = new SessionListenerMock();
+        SessionListener mock1 = createMock( SessionListener.class );
 
         eventSupport.addSessionListener( mock1 );
 
-        final SessionListenerMock mock2 = new SessionListenerMock();
+        SessionListener mock2 = createMock( SessionListener.class );
 
         eventSupport.addSessionListener( mock2 );
 
         final SessionEvent event = new SessionEvent( wagon, 1 );
 
+        mock1.sessionDisconnecting( event );
+        mock2.sessionDisconnecting( event );
+
+        replay( mock1, mock2 );
+
         eventSupport.fireSessionDisconnecting( event );
 
-        assertTrue( mock1.isSessionDisconnectingCalled() );
-
-        assertTrue( mock2.isSessionDisconnectingCalled() );
-
-        assertEquals( event, mock1.getSessionEvent() );
-
-        assertEquals( event, mock2.getSessionEvent() );
+        verify( mock1, mock2 );
     }
 
     public void testFireSessionLoggedIn()
     {
-        final SessionListenerMock mock1 = new SessionListenerMock();
+        SessionListener mock1 = createMock( SessionListener.class );
 
         eventSupport.addSessionListener( mock1 );
 
-        final SessionListenerMock mock2 = new SessionListenerMock();
+        SessionListener mock2 = createMock( SessionListener.class );
 
         eventSupport.addSessionListener( mock2 );
 
         final SessionEvent event = new SessionEvent( wagon, 1 );
 
+        mock1.sessionLoggedIn( event );
+        mock2.sessionLoggedIn( event );
+
+        replay( mock1, mock2 );
+
         eventSupport.fireSessionLoggedIn( event );
 
-        assertTrue( mock1.isSessionLoggedInCalled() );
-
-        assertTrue( mock2.isSessionLoggedInCalled() );
-
-        assertEquals( event, mock1.getSessionEvent() );
-
-        assertEquals( event, mock2.getSessionEvent() );
-
+        verify( mock1, mock2 );
     }
 
     public void testFireSessionLoggedOff()
     {
-        final SessionListenerMock mock1 = new SessionListenerMock();
+        SessionListener mock1 = createMock( SessionListener.class );
 
         eventSupport.addSessionListener( mock1 );
 
-        final SessionListenerMock mock2 = new SessionListenerMock();
+        SessionListener mock2 = createMock( SessionListener.class );
 
         eventSupport.addSessionListener( mock2 );
 
         final SessionEvent event = new SessionEvent( wagon, 1 );
 
+        mock1.sessionLoggedOff( event );
+        mock2.sessionLoggedOff( event );
+
+        replay( mock1, mock2 );
+
         eventSupport.fireSessionLoggedOff( event );
 
-        assertTrue( mock1.isSessionLoggedOffCalled() );
-
-        assertTrue( mock2.isSessionLoggedOffCalled() );
-
-        assertEquals( event, mock1.getSessionEvent() );
-
-        assertEquals( event, mock2.getSessionEvent() );
+        verify( mock1, mock2 );
     }
 
     public void testFireSessionOpened()
     {
-
-        final SessionListenerMock mock1 = new SessionListenerMock();
+        SessionListener mock1 = createMock( SessionListener.class );
 
         eventSupport.addSessionListener( mock1 );
 
-        final SessionListenerMock mock2 = new SessionListenerMock();
+        SessionListener mock2 = createMock( SessionListener.class );
 
         eventSupport.addSessionListener( mock2 );
 
         final SessionEvent event = new SessionEvent( wagon, 1 );
 
+        mock1.sessionOpened( event );
+        mock2.sessionOpened( event );
+
+        replay( mock1, mock2 );
+
         eventSupport.fireSessionOpened( event );
 
-        assertTrue( mock1.isSessionOpenedCalled() );
-
-        assertTrue( mock2.isSessionOpenedCalled() );
-
-        assertEquals( event, mock1.getSessionEvent() );
-
-        assertEquals( event, mock2.getSessionEvent() );
-
+        verify( mock1, mock2 );
     }
 
     public void testFireSessionOpenning()
     {
-
-        final SessionListenerMock mock1 = new SessionListenerMock();
+        SessionListener mock1 = createMock( SessionListener.class );
 
         eventSupport.addSessionListener( mock1 );
 
-        final SessionListenerMock mock2 = new SessionListenerMock();
+        SessionListener mock2 = createMock( SessionListener.class );
 
         eventSupport.addSessionListener( mock2 );
 
         final SessionEvent event = new SessionEvent( wagon, 1 );
 
+        mock1.sessionOpening( event );
+        mock2.sessionOpening( event );
+
+        replay( mock1, mock2 );
+
         eventSupport.fireSessionOpening( event );
 
-        assertTrue( mock1.isSessionOpenningCalled() );
-
-        assertTrue( mock2.isSessionOpenningCalled() );
-
-        assertEquals( event, mock1.getSessionEvent() );
-
-        assertEquals( event, mock2.getSessionEvent() );
-
+        verify( mock1, mock2 );
     }
 
     public void testFireSessionRefused()
     {
-        final SessionListenerMock mock1 = new SessionListenerMock();
+        SessionListener mock1 = createMock( SessionListener.class );
 
         eventSupport.addSessionListener( mock1 );
 
-        final SessionListenerMock mock2 = new SessionListenerMock();
+        SessionListener mock2 = createMock( SessionListener.class );
 
         eventSupport.addSessionListener( mock2 );
 
         final SessionEvent event = new SessionEvent( wagon, 1 );
 
+        mock1.sessionConnectionRefused( event );
+        mock2.sessionConnectionRefused( event );
+
+        replay( mock1, mock2 );
+
         eventSupport.fireSessionConnectionRefused( event );
 
-        assertTrue( mock1.isSessionRefusedCalled() );
-
-        assertTrue( mock2.isSessionRefusedCalled() );
-
-        assertEquals( event, mock1.getSessionEvent() );
-
-        assertEquals( event, mock2.getSessionEvent() );
+        verify( mock1, mock2 );
     }
 
     public void testFireDebug()
     {
-        final SessionListenerMock mock1 = new SessionListenerMock();
+        SessionListener mock1 = createMock( SessionListener.class );
 
         eventSupport.addSessionListener( mock1 );
 
-        final SessionListenerMock mock2 = new SessionListenerMock();
+        SessionListener mock2 = createMock( SessionListener.class );
 
         eventSupport.addSessionListener( mock2 );
 
+        mock1.debug( "mm" );
+        mock2.debug( "mm" );
+
+        replay( mock1, mock2 );
+
         eventSupport.fireDebug( "mm" );
 
-        assertTrue( mock1.isDebugCalled() );
-
-        assertTrue( mock2.isDebugCalled() );
-
-        assertEquals( "mm", mock1.getDebugMessage() );
-
-        assertEquals( "mm", mock2.getDebugMessage() );
-
+        verify( mock1, mock2 );
     }
     
 }
