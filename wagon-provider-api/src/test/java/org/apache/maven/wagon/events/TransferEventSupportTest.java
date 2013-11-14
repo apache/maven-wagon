@@ -21,7 +21,10 @@ package org.apache.maven.wagon.events;
 
 import junit.framework.TestCase;
 import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.resource.Resource;
 import org.easymock.EasyMock;
+
+import static org.easymock.EasyMock.*;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -44,16 +47,16 @@ public class TransferEventSupportTest
         eventSupport = new TransferEventSupport();
         
         // TODO: actually test it gets called?
-        wagon = EasyMock.createMock( Wagon.class );
+        wagon = EasyMock.createNiceMock( Wagon.class );
     }
 
     public void testTransferListenerRegistration()
     {
-        final TransferListenerMock mock1 = new TransferListenerMock();
+        TransferListener mock1 = createMock( TransferListener.class );
         eventSupport.addTransferListener( mock1 );
 
         assertTrue( eventSupport.hasTransferListener( mock1 ) );
-        final TransferListenerMock mock2 = new TransferListenerMock();
+        TransferListener mock2 = createMock( TransferListener.class );
 
         assertFalse( eventSupport.hasTransferListener( mock2 ) );
 
@@ -73,122 +76,115 @@ public class TransferEventSupportTest
 
     public void testFireTransferStarted()
     {
-        final TransferListenerMock mock1 = new TransferListenerMock();
+        TransferListener mock1 = createMock( TransferListener.class );
         eventSupport.addTransferListener( mock1 );
 
-        final TransferListenerMock mock2 = new TransferListenerMock();
+        TransferListener mock2 = createMock( TransferListener.class );
         eventSupport.addTransferListener( mock2 );
 
         final TransferEvent event = getEvent( wagon );
 
+        mock1.transferStarted( event );
+        mock2.transferStarted( event );
+
+        replay( mock1, mock2 );
+
         eventSupport.fireTransferStarted( event );
 
-        assertTrue( mock1.isTransferStartedCalled() );
-        assertTrue( mock2.isTransferStartedCalled() );
-        assertEquals( event, mock1.getTransferEvent() );
-        assertEquals( event, mock2.getTransferEvent() );
-
+        verify( mock1, mock2 );
     }
 
     public void testFireTransferProgress()
     {
-        final TransferListenerMock mock1 = new TransferListenerMock();
+        TransferListener mock1 = createMock( TransferListener.class );
 
         eventSupport.addTransferListener( mock1 );
 
-        final TransferListenerMock mock2 = new TransferListenerMock();
+        TransferListener mock2 = createMock( TransferListener.class );
 
         eventSupport.addTransferListener( mock2 );
 
         final TransferEvent event = getEvent( wagon );
+        final byte[] buffer = "content".getBytes();
 
-        // TODO: should be testing the buffer
-        eventSupport.fireTransferProgress( event, null, 0 );
+        mock1.transferProgress( event, buffer, 0 );
+        mock2.transferProgress( event, buffer, 0 );
 
-        assertTrue( mock1.isTransferProgressCalled() );
+        replay( mock1, mock2 );
 
-        assertTrue( mock2.isTransferProgressCalled() );
+        eventSupport.fireTransferProgress( event, buffer , 0 );
 
-        assertEquals( event, mock1.getTransferEvent() );
-
-        assertEquals( event, mock2.getTransferEvent() );
+        verify( mock1, mock2 );
     }
 
     public void testFireTransferCompleted()
     {
-        final TransferListenerMock mock1 = new TransferListenerMock();
+        TransferListener mock1 = createMock( TransferListener.class );
 
         eventSupport.addTransferListener( mock1 );
 
-        final TransferListenerMock mock2 = new TransferListenerMock();
+        TransferListener mock2 = createMock( TransferListener.class );
 
         eventSupport.addTransferListener( mock2 );
 
         final TransferEvent event = getEvent( wagon );
 
+        mock1.transferCompleted( event );
+        mock2.transferCompleted( event );
+
+        replay( mock1, mock2 );
+
         eventSupport.fireTransferCompleted( event );
 
-        assertTrue( mock1.isTransferCompletedCalled() );
-
-        assertTrue( mock2.isTransferCompletedCalled() );
-
-        assertEquals( event, mock1.getTransferEvent() );
-
-        assertEquals( event, mock2.getTransferEvent() );
-
+        verify( mock1, mock2 );
     }
 
     public void testFireTransferError()
     {
-        final TransferListenerMock mock1 = new TransferListenerMock();
+        TransferListener mock1 = createMock( TransferListener.class );
 
         eventSupport.addTransferListener( mock1 );
 
-        final TransferListenerMock mock2 = new TransferListenerMock();
+        TransferListener mock2 = createMock( TransferListener.class );
 
         eventSupport.addTransferListener( mock2 );
 
         final TransferEvent event = getEvent( wagon );
+        
+        mock1.transferError( event );
+        mock2.transferError( event );
+
+        replay( mock1, mock2 );
 
         eventSupport.fireTransferError( event );
 
-        assertTrue( mock1.isTransferErrorCalled() );
-
-        assertTrue( mock2.isTransferErrorCalled() );
-
-        assertEquals( event, mock1.getTransferEvent() );
-
-        assertEquals( event, mock2.getTransferEvent() );
-
+        verify( mock1, mock2 );
     }
 
     public void testFireDebug()
     {
-        final TransferListenerMock mock1 = new TransferListenerMock();
+        TransferListener mock1 = createMock( TransferListener.class );
 
         eventSupport.addTransferListener( mock1 );
 
-        final TransferListenerMock mock2 = new TransferListenerMock();
+        TransferListener mock2 = createMock( TransferListener.class );
 
         eventSupport.addTransferListener( mock2 );
 
+        mock1.debug( "mm" );
+        mock2.debug( "mm" );
+
+        replay( mock1, mock2 );
+        
         eventSupport.fireDebug( "mm" );
 
-        assertTrue( mock1.isDebugCalled() );
-
-        assertTrue( mock2.isDebugCalled() );
-
-        assertEquals( "mm", mock1.getDebugMessage() );
-
-        assertEquals( "mm", mock2.getDebugMessage() );
-
+        verify( mock1, mock2 );
     }
 
     private TransferEvent getEvent( final Wagon wagon )
     {
-        final TransferEvent event = new TransferEvent( wagon, null, TransferEvent.TRANSFER_COMPLETED,
+        return new TransferEvent( wagon, new Resource(), TransferEvent.TRANSFER_COMPLETED,
                                                        TransferEvent.REQUEST_GET );
-        return event;
     }
 
 }
