@@ -32,6 +32,7 @@ under the License.
   <name>Apache Maven Wagon :: Providers</name>
 
   <modules>
+    <module>wagon-data</module>
     <module>wagon-file</module>
     <module>wagon-ftp</module>
     <module>wagon-http</module>

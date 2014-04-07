@@ -44,6 +44,7 @@
        <li><a href="./wagon-providers/wagon-ftp/">FTP</a></li>
        <li><a href="./wagon-providers/wagon-ssh/">SSH/SCP</a></li>
        <li><a href="./wagon-providers/wagon-webdav-jackrabbit/">WebDAV</a></li>
+       <li><a href="./wagon-providers/wagon-data/">Data URI (RFC 2397)</a></li>
        <li><a href="./wagon-providers/wagon-scm/">SCM</a> (in progress)</li>
       </ul>
 
