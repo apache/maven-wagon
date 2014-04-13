@@ -23,7 +23,7 @@ under the License.
   <parent>
     <artifactId>maven-parent</artifactId>
     <groupId>org.apache.maven</groupId>
-    <version>23</version>
+    <version>24</version>
     <relativePath>../pom/maven/pom.xml</relativePath>
   </parent>
 
@@ -189,7 +189,7 @@ under the License.
     <connection>scm:git:https://git-wip-us.apache.org/repos/asf/maven-wagon.git</connection>
     <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/maven-wagon.git</developerConnection>
     <url>https://github.com/apache/maven-wagon/tree/${project.scm.tag}</url>
-    <tag>HEAD</tag>
+    <tag>master</tag>
   </scm>
 
   <issueManagement>
@@ -338,20 +338,7 @@ under the License.
       <plugins>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.5.1</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-release-plugin</artifactId>
-          <configuration>
-            <autoVersionSubmodules>true</autoVersionSubmodules>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.15</version>
           <configuration>
             <forkedProcessTimeoutInSeconds>400</forkedProcessTimeoutInSeconds>
             <systemPropertyVariables>
@@ -359,24 +346,12 @@ under the License.
             </systemPropertyVariables>
           </configuration>
         </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-scm-publish-plugin</artifactId>
-          <configuration>
-            <content>${project.build.directory}/staging/${maven.site.path}</content>
-            <checkoutDirectory>${maven.site.cache}/${maven.site.path}</checkoutDirectory>
-            <tryUpdate>true</tryUpdate>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-javadoc-plugin</artifactId>
-          <version>2.9.1</version>
-        </plugin>
-        <plugin>
+        <plugin><!-- TODO remove when upgrading maven-parent to 25 -->
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.3</version>
+          <configuration>
+            <topSiteURL>scm:svn:https://svn.apache.org/repos/infra/websites/production/maven/content/${maven.site.path}</topSiteURL>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -436,16 +411,6 @@ under the License.
     </plugins>
   </build>
 
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>2.7</version>
-      </plugin>
-    </plugins>
-  </reporting>
-
   <profiles>
 
     <profile>
@@ -455,7 +420,6 @@ under the License.
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.9.1</version>
             <configuration>
               <linksource>true</linksource>
               <links>
@@ -463,7 +427,7 @@ under the License.
                 <link>http://commons.apache.org/collections/apidocs-COLLECTIONS_3_0/</link>
                 <link>http://commons.apache.org/logging/apidocs/</link>
                 <link>http://commons.apache.org/pool/apidocs/</link>
-                 <link>http://junit.sourceforge.net/javadoc/</link>
+                <link>http://junit.sourceforge.net/javadoc/</link>
                 <link>http://logging.apache.org/log4j/1.2/apidocs/</link>
                 <link>http://jakarta.apache.org/regexp/apidocs/</link>
                 <link>http://velocity.apache.org/engine/releases/velocity-1.5/apidocs/</link>
@@ -530,7 +494,6 @@ under the License.
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-jxr-plugin</artifactId>
-            <version>2.3</version>
             <reportSets>
               <reportSet>
                 <id>non-aggregate</id>
@@ -551,7 +514,6 @@ under the License.
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-checkstyle-plugin</artifactId>
-            <version>2.9.1</version>
             <reportSets>
               <reportSet>
                 <id>non-aggregate</id>
