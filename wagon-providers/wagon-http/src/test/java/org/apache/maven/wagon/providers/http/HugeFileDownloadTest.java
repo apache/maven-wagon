@@ -53,7 +53,7 @@ public class HugeFileDownloadTest
     public void testDownloadHugeFileWithContentLength()
         throws Exception
     {
-        File hugeFile = new File( getBasedir(), "/target/hugefile.txt" );
+        File hugeFile = new File( getBasedir(), "target/hugefile.txt" );
         if ( !hugeFile.exists() || hugeFile.length() < HUGE_FILE_SIZE )
         {
             makeHugeFile( hugeFile );
@@ -62,18 +62,19 @@ public class HugeFileDownloadTest
         server = new Server( 0 );
 
         Context root = new Context( server, "/", Context.SESSIONS );
-        root.setResourceBase( new File( getBasedir(), "/target" ).getAbsolutePath() );
+        root.setResourceBase( new File( getBasedir(), "target" ).getAbsolutePath() );
         ServletHolder servletHolder = new ServletHolder( new DefaultServlet() );
         root.addServlet( servletHolder, "/*" );
 
         server.start();
 
+        File dest = null;
         try
         {
             Wagon wagon = getWagon();
             wagon.connect( new Repository( "id", "http://localhost:" + server.getConnectors()[0].getLocalPort() ) );
 
-            File dest = File.createTempFile( "huge", "txt" );
+            dest = File.createTempFile( "huge", "txt" );
 
             wagon.get( "hugefile.txt", dest );
 
@@ -84,6 +85,8 @@ public class HugeFileDownloadTest
         finally
         {
             server.start();
+            dest.delete();
+            hugeFile.delete();
         }
 
 
@@ -92,7 +95,7 @@ public class HugeFileDownloadTest
     public void testDownloadHugeFileWithChunked()
         throws Exception
     {
-        final File hugeFile = new File( getBasedir(), "/target/hugefile.txt" );
+        final File hugeFile = new File( getBasedir(), "target/hugefile.txt" );
         if ( !hugeFile.exists() || hugeFile.length() < HUGE_FILE_SIZE )
         {
             makeHugeFile( hugeFile );
@@ -101,7 +104,7 @@ public class HugeFileDownloadTest
         server = new Server( 0 );
 
         Context root = new Context( server, "/", Context.SESSIONS );
-        root.setResourceBase( new File( getBasedir(), "/target" ).getAbsolutePath() );
+        root.setResourceBase( new File( getBasedir(), "target" ).getAbsolutePath() );
         ServletHolder servletHolder = new ServletHolder( new HttpServlet()
         {
             @Override
@@ -123,12 +126,13 @@ public class HugeFileDownloadTest
 
         server.start();
 
+        File dest = null;
         try
         {
             Wagon wagon = getWagon();
             wagon.connect( new Repository( "id", "http://localhost:" + server.getConnectors()[0].getLocalPort() ) );
 
-            File dest = File.createTempFile( "huge", "txt" );
+            dest = File.createTempFile( "huge", "txt" );
 
             wagon.get( "hugefile.txt", dest );
 
@@ -139,6 +143,8 @@ public class HugeFileDownloadTest
         finally
         {
             server.start();
+            dest.delete();
+            hugeFile.delete();
         }
 
 
