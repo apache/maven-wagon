@@ -32,7 +32,6 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.StringOutputStream;
 import org.codehaus.plexus.util.StringUtils;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
@@ -53,6 +52,8 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -162,7 +163,7 @@ public abstract class HttpWagonTestCase
         wagon.connect(
             new Repository( "id", getProtocol() + "://localhost:" + server.getConnectors()[0].getLocalPort() ) );
 
-        wagon.getToStream( "resource", new StringOutputStream() );
+        wagon.getToStream( "resource", new ByteArrayOutputStream() );
 
         wagon.disconnect();
 
@@ -194,7 +195,7 @@ public abstract class HttpWagonTestCase
         wagon.connect(
             new Repository( "id", getProtocol() + "://localhost:" + server.getConnectors()[0].getLocalPort() ) );
 
-        wagon.getToStream( "resource", new StringOutputStream() );
+        wagon.getToStream( "resource", new ByteArrayOutputStream() );
 
         wagon.disconnect();
 
@@ -273,7 +274,7 @@ public abstract class HttpWagonTestCase
 
         try
         {
-            wagon.getToStream( "resource", new StringOutputStream() );
+            wagon.getToStream( "resource", new ByteArrayOutputStream() );
             fail();
         }
         finally
@@ -958,10 +959,9 @@ public abstract class HttpWagonTestCase
 
             wagon.connect( testRepository, proxyInfo );
 
-            StringOutputStream out = new StringOutputStream();
             try
             {
-                wagon.getToStream( "test-proxied-resource", out );
+                wagon.getToStream( "test-proxied-resource", new ByteArrayOutputStream() );
 
                 assertTrue( handler.headers.containsKey( "Proxy-Connection" ) );
             }
@@ -1101,7 +1101,7 @@ public abstract class HttpWagonTestCase
 
             wagon.connect( testRepository, authInfo );
 
-            StringOutputStream out = new StringOutputStream();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
             try
             {
                 wagon.getToStream( "test-secured-resource", out );
@@ -1111,7 +1111,7 @@ public abstract class HttpWagonTestCase
                 wagon.disconnect();
             }
 
-            assertEquals( "top secret", out.toString() );
+            assertEquals( "top secret", out.toString( "US-ASCII" ) );
 
             TestSecurityHandler securityHandler = (TestSecurityHandler) ( (Context) server.getHandler() ).getHandler();
             testPreemptiveAuthenticationGet( securityHandler, supportPreemptiveAuthenticationGet() );
@@ -1706,9 +1706,9 @@ public abstract class HttpWagonTestCase
             throws IOException, ServletException
         {
             headers = new HashMap<String, String>();
-            for ( Enumeration e = request.getHeaderNames(); e.hasMoreElements(); )
+            for ( Enumeration<String> e = request.getHeaderNames(); e.hasMoreElements(); )
             {
-                String name = (String) e.nextElement();
+                String name = e.nextElement();
                 headers.put( name, request.getHeader( name ) );
             }
 
