@@ -420,14 +420,14 @@ public class WebDavWagonTest
     {
         if ( preemptive )
         {
-            assertEquals( "testPreemptiveAuthenticationGet not 1 security handler use " + sh.handlerRequestResponses, 1,
-                          sh.handlerRequestResponses.size() );
+            assertEquals( "testPreemptiveAuthenticationGet preemptive=true: expected 1 request, got "
+                + sh.handlerRequestResponses, 1, sh.handlerRequestResponses.size() );
             assertEquals( 200, sh.handlerRequestResponses.get( 0 ).responseCode );
         }
         else
         {
-            assertEquals( "testPreemptiveAuthenticationGet not 2 security handler use " + sh.handlerRequestResponses, 2,
-                          sh.handlerRequestResponses.size() );
+            assertEquals( "testPreemptiveAuthenticationGet preemptive=false: expected 2 requests (401,200), got "
+                + sh.handlerRequestResponses, 2, sh.handlerRequestResponses.size() );
             assertEquals( 401, sh.handlerRequestResponses.get( 0 ).responseCode );
             assertEquals( 200, sh.handlerRequestResponses.get( 1 ).responseCode );
         }
@@ -437,14 +437,14 @@ public class WebDavWagonTest
     {
         if ( preemptive )
         {
-            assertEquals( "testPreemptiveAuthenticationPut not 2 security handler use " + sh.handlerRequestResponses, 2,
-                          sh.handlerRequestResponses.size() );
+            assertEquals( "testPreemptiveAuthenticationPut preemptive=true: expected 2 requests (200,.), got "
+                + sh.handlerRequestResponses, 2, sh.handlerRequestResponses.size() );
             assertEquals( 200, sh.handlerRequestResponses.get( 0 ).responseCode );
         }
         else
         {
-            assertEquals( "testPreemptiveAuthenticationPut not 3 security handler use " + sh.handlerRequestResponses, 3,
-                          sh.handlerRequestResponses.size() );
+            assertEquals( "testPreemptiveAuthenticationPut preemptive=false: expected 3 requests (401,200,.), got "
+                + sh.handlerRequestResponses, 3, sh.handlerRequestResponses.size() );
             assertEquals( 401, sh.handlerRequestResponses.get( 0 ).responseCode );
             assertEquals( 200, sh.handlerRequestResponses.get( 1 ).responseCode );
         }
@@ -456,14 +456,14 @@ public class WebDavWagonTest
     {
         if ( preemptive )
         {
-            assertEquals( "testPreemptiveAuthentication not 2 security handler use " + sh.handlerRequestResponses, 2,
-                          sh.handlerRequestResponses.size() );
+            assertEquals( "testPreemptiveAuthentication preemptive=false: expected 2 requests (200,.), got "
+                + sh.handlerRequestResponses, 2, sh.handlerRequestResponses.size() );
             assertEquals( 200, sh.handlerRequestResponses.get( 0 ).responseCode );
         }
         else
         {
-            assertEquals( "testPreemptiveAuthentication not 3 security handler use " + sh.handlerRequestResponses, 3,
-                          sh.handlerRequestResponses.size() );
+            assertEquals( "testPreemptiveAuthentication preemptive=false: expected 3 requests (401,200,200), got "
+                + sh.handlerRequestResponses, 3, sh.handlerRequestResponses.size() );
             assertEquals( 401, sh.handlerRequestResponses.get( 0 ).responseCode );
             assertEquals( 200, sh.handlerRequestResponses.get( 1 ).responseCode );
             assertEquals( 200, sh.handlerRequestResponses.get( 2 ).responseCode );
