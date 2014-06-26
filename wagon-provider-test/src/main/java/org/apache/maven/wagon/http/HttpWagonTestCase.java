@@ -28,6 +28,7 @@ import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.proxy.ProxyInfo;
+import org.apache.maven.wagon.proxy.ProxyInfoProvider;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
@@ -428,6 +429,35 @@ public abstract class HttpWagonTestCase
         AuthorizingProxyHandler handler = new AuthorizingProxyHandler();
 
         runTestProxiedRequest( proxyInfo, handler );
+
+        assertTrue( handler.headers.containsKey( "Proxy-Authorization" ) );
+
+        if ( supportProxyPreemptiveAuthentication() )
+        {
+            assertEquals( 200, handler.handlerRequestResponses.get( 0 ).responseCode );
+        }
+        else
+        {
+            assertEquals( 407, handler.handlerRequestResponses.get( 0 ).responseCode );
+            assertEquals( 200, handler.handlerRequestResponses.get( 1 ).responseCode );
+        }
+
+    }
+
+    public void testProxiedRequestWithAuthenticationWithProvider()
+        throws Exception
+    {
+        final ProxyInfo proxyInfo = createProxyInfo();
+        proxyInfo.setUserName( "user" );
+        proxyInfo.setPassword( "secret" );
+        AuthorizingProxyHandler handler = new AuthorizingProxyHandler();
+
+        ProxyInfoProvider proxyInfoProvider = new ProxyInfoProvider() {
+            public ProxyInfo getProxyInfo(String protocol) {
+                return proxyInfo;
+            }
+        };
+        runTestProxiedRequestWithProvider( proxyInfoProvider, handler );
 
         assertTrue( handler.headers.containsKey( "Proxy-Authorization" ) );
 
@@ -958,6 +988,62 @@ public abstract class HttpWagonTestCase
             FileUtils.fileWrite( sourceFile.getAbsolutePath(), "content" );
 
             wagon.connect( testRepository, proxyInfo );
+
+            try
+            {
+                wagon.getToStream( "test-proxied-resource", new ByteArrayOutputStream() );
+
+                assertTrue( handler.headers.containsKey( "Proxy-Connection" ) );
+            }
+            finally
+            {
+                System.setProperty( "http.proxyHost", "" );
+                System.setProperty( "http.proxyPort", "" );
+                wagon.disconnect();
+            }
+        }
+        finally
+        {
+            proxyServer.stop();
+        }
+    }
+
+    private void runTestProxiedRequestWithProvider( ProxyInfoProvider proxyInfoProvider, TestHeaderHandler handler )
+        throws Exception
+    {
+        // what an UGLY hack!
+        // but apparently jetty needs some time to free up resources
+        // <5s: broken test :(
+        Thread.sleep( 5001L );
+
+        Server proxyServer = new Server( 0 );
+
+        proxyServer.setHandler( handler );
+
+        proxyServer.start();
+
+        proxyInfoProvider.getProxyInfo(null).setPort( proxyServer.getConnectors()[0].getLocalPort() );
+
+        System.out.println(
+            "start proxy on host/port " + proxyInfoProvider.getProxyInfo(null).getHost() + "/" + proxyInfoProvider.getProxyInfo(null).getPort() + " with non proxyHosts "
+                + proxyInfoProvider.getProxyInfo(null).getNonProxyHosts() );
+
+        while ( !proxyServer.isRunning() || !proxyServer.isStarted() )
+        {
+            Thread.sleep( 10 );
+        }
+
+        try
+        {
+            StreamingWagon wagon = (StreamingWagon) getWagon();
+
+            Repository testRepository = new Repository( "id", "http://www.example.com/" );
+
+            String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
+            File sourceFile = new File( localRepositoryPath, "test-proxied-resource" );
+            FileUtils.fileWrite( sourceFile.getAbsolutePath(), "content" );
+
+            wagon.connect( testRepository, proxyInfoProvider );
 
             try
             {

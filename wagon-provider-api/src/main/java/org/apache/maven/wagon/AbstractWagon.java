@@ -170,7 +170,6 @@ public abstract class AbstractWagon
                 }
             }
         } );
-        this.proxyInfo = proxyInfo;
     }
 
     public void connect( Repository repository, AuthenticationInfo authenticationInfo,
