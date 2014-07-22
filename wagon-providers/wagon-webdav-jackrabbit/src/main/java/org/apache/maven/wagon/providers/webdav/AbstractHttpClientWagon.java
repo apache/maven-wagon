@@ -19,6 +19,20 @@ package org.apache.maven.wagon.providers.webdav;
  * under the License.
  */
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.TimeZone;
+import java.util.zip.GZIPInputStream;
+
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
@@ -53,21 +67,7 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URLEncoder;
-import java.nio.ByteBuffer;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Properties;
-import java.util.TimeZone;
-import java.util.zip.GZIPInputStream;
+import org.apache.maven.wagon.shared.http.EncodingUtil;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -319,28 +319,28 @@ public abstract class AbstractHttpClientWagon
     private void put( final InputStream stream, Resource resource, File source )
         throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
-        StringBuilder url = new StringBuilder( getRepository().getUrl() );
-        String[] parts = StringUtils.split( resource.getName(), "/" );
-        for ( String part : parts )
-        {
-            // TODO: Fix encoding...
-            if ( !url.toString().endsWith( "/" ) )
-            {
-                url.append( '/' );
-            }
-            url.append( URLEncoder.encode( part ) );
-        }
         RequestEntityImplementation requestEntityImplementation =
             new RequestEntityImplementation( stream, resource, this, source );
-        put( resource, source, requestEntityImplementation, url.toString() );
+        
+		put( resource, source, requestEntityImplementation, buildUrl( resource ) );
 
+    }
+
+    /**
+     * Builds a complete URL string from the repository URL and the relative path of the resource passed.
+     *
+     * @param resource the resource to extract the relative path from.
+     * @return the complete URL
+     */
+    private String buildUrl( Resource resource )
+    {
+    	return EncodingUtil.encodeURLToString( getRepository().getUrl(), resource.getName() );
     }
 
     private void put( Resource resource, File source, RequestEntityImplementation requestEntityImplementation,
                       String url )
         throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
-
         // preemptive true for put
         client.getParams().setAuthenticationPreemptive( true );
 
