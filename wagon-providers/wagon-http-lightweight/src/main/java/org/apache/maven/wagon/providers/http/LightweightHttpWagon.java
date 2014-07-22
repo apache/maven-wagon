@@ -19,21 +19,6 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
-import org.apache.commons.io.IOUtils;
-import org.apache.maven.wagon.ConnectionException;
-import org.apache.maven.wagon.InputData;
-import org.apache.maven.wagon.OutputData;
-import org.apache.maven.wagon.ResourceDoesNotExistException;
-import org.apache.maven.wagon.StreamWagon;
-import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.authentication.AuthenticationException;
-import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.apache.maven.wagon.events.TransferEvent;
-import org.apache.maven.wagon.proxy.ProxyInfo;
-import org.apache.maven.wagon.resource.Resource;
-import org.apache.maven.wagon.shared.http.HtmlFileListParser;
-import org.codehaus.plexus.util.Base64;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,6 +35,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.zip.GZIPInputStream;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.maven.wagon.ConnectionException;
+import org.apache.maven.wagon.InputData;
+import org.apache.maven.wagon.OutputData;
+import org.apache.maven.wagon.ResourceDoesNotExistException;
+import org.apache.maven.wagon.StreamWagon;
+import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.authentication.AuthenticationException;
+import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.events.TransferEvent;
+import org.apache.maven.wagon.proxy.ProxyInfo;
+import org.apache.maven.wagon.resource.Resource;
+import org.apache.maven.wagon.shared.http.EncodingUtil;
+import org.apache.maven.wagon.shared.http.HtmlFileListParser;
+import org.codehaus.plexus.util.Base64;
 
 /**
  * LightweightHttpWagon, using JDK's HttpURLConnection.
@@ -88,23 +89,14 @@ public class LightweightHttpWagon
     private volatile LightweightHttpWagonAuthenticator authenticator;
 
     /**
-     * Builds a complete URL string from the repository URL and the relative path passed.
+     * Builds a complete URL string from the repository URL and the relative path of the resource passed.
      *
-     * @param path the relative path
+     * @param resource the resource to extract the relative path from.
      * @return the complete URL
      */
-    private String buildUrl( String path )
+    private String buildUrl( Resource resource )
     {
-        final String repoUrl = getRepository().getUrl();
-
-        path = path.replace( ' ', '+' );
-
-        if ( repoUrl.charAt( repoUrl.length() - 1 ) != '/' )
-        {
-            return repoUrl + '/' + path;
-        }
-
-        return repoUrl + path;
+    	return EncodingUtil.encodeURLToString( getRepository().getUrl(), resource.getName() );
     }
 
     public void fillInputData( InputData inputData )
@@ -112,7 +104,7 @@ public class LightweightHttpWagon
     {
         Resource resource = inputData.getResource();
 
-        String visitingUrl = buildUrl( resource.getName() );
+        String visitingUrl = buildUrl( resource );
         try
         {
             List<String> visitedUrls = new ArrayList<String>();
@@ -141,7 +133,7 @@ public class LightweightHttpWagon
                 if ( responseCode == HttpURLConnection.HTTP_FORBIDDEN
                     || responseCode == HttpURLConnection.HTTP_UNAUTHORIZED )
                 {
-                    throw new AuthorizationException( "Access denied to: " + buildUrl( resource.getName() ) );
+                    throw new AuthorizationException( "Access denied to: " + buildUrl( resource ) );
                 }
                 if ( responseCode == HttpURLConnection.HTTP_MOVED_PERM
                     || responseCode == HttpURLConnection.HTTP_MOVED_TEMP )
@@ -212,7 +204,7 @@ public class LightweightHttpWagon
         Resource resource = outputData.getResource();
         try
         {
-            URL url = new URL( buildUrl( resource.getName() ) );
+            URL url = new URL( buildUrl( resource ) );
             putConnection = (HttpURLConnection) url.openConnection( this.proxy );
 
             addHeaders( putConnection );
@@ -244,16 +236,16 @@ public class LightweightHttpWagon
                     break;
 
                 case HttpURLConnection.HTTP_FORBIDDEN:
-                    throw new AuthorizationException( "Access denied to: " + buildUrl( resource.getName() ) );
+                    throw new AuthorizationException( "Access denied to: " + buildUrl( resource ) );
 
                 case HttpURLConnection.HTTP_NOT_FOUND:
                     throw new ResourceDoesNotExistException(
-                        "File: " + buildUrl( resource.getName() ) + " does not exist" );
+                        "File: " + buildUrl( resource ) + " does not exist" );
 
                     // add more entries here
                 default:
                     throw new TransferFailedException(
-                        "Failed to transfer file: " + buildUrl( resource.getName() ) + ". Return code is: "
+                        "Failed to transfer file: " + buildUrl( resource ) + ". Return code is: "
                             + statusCode );
             }
         }
@@ -355,7 +347,7 @@ public class LightweightHttpWagon
             destinationDirectory += "/";
         }
 
-        String url = buildUrl( destinationDirectory );
+        String url = buildUrl( new Resource( destinationDirectory ) );
 
         Resource resource = new Resource( destinationDirectory );
 
@@ -389,7 +381,8 @@ public class LightweightHttpWagon
 
         try
         {
-            URL url = new URL( buildUrl( new Resource( resourceName ).getName() ) );
+            Resource resource = new Resource( resourceName );
+			URL url = new URL( buildUrl( resource ) );
             headConnection = (HttpURLConnection) url.openConnection( this.proxy );
 
             addHeaders( headConnection );
@@ -415,7 +408,7 @@ public class LightweightHttpWagon
 
                 default:
                     throw new TransferFailedException(
-                        "Failed to look for file: " + buildUrl( resourceName ) + ". Return code is: " + statusCode );
+                        "Failed to look for file: " + buildUrl( resource ) + ". Return code is: " + statusCode );
             }
         }
         catch ( IOException e )

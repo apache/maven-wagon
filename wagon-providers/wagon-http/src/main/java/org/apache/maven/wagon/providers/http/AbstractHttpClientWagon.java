@@ -19,6 +19,25 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
+import java.io.ByteArrayInputStream;
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
@@ -71,27 +90,9 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
+import org.apache.maven.wagon.shared.http.EncodingUtil;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import java.io.ByteArrayInputStream;
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URLEncoder;
-import java.nio.ByteBuffer;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -518,20 +519,18 @@ public abstract class AbstractHttpClientWagon
     private void put( Resource resource, File source, HttpEntity httpEntity )
         throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
-
-        StringBuilder url = new StringBuilder( getURL( getRepository() ) );
-        String[] parts = StringUtils.split( resource.getName(), "/" );
-        for ( String part : parts )
-        {
-            // TODO: Fix encoding...
-            // url += "/" + URLEncoder.encode( parts[i], System.getProperty("file.encoding") );
-            if ( !url.toString().endsWith( "/" ) )
-            {
-                url.append( '/' );
-            }
-            url.append( URLEncoder.encode( part ) );
-        }
-        put( resource, source, httpEntity, url.toString() );
+        put( resource, source, httpEntity, buildUrl( resource ) );
+    }
+    
+    /**
+     * Builds a complete URL string from the repository URL and the relative path of the resource passed.
+     *
+     * @param resource the resource to extract the relative path from.
+     * @return the complete URL
+     */
+    private String buildUrl( Resource resource )
+    {
+    	return EncodingUtil.encodeURLToString( getRepository().getUrl(), resource.getName() );
     }
 
 
