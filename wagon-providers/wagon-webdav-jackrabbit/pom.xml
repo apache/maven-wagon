@@ -46,6 +46,12 @@ under the License.
 
   <dependencies>
     <dependency>
+      <!-- Workaround for QDOX-148, see also MNG-3686 -->
+      <groupId>${project.groupId}</groupId>
+      <artifactId>wagon-http-shared</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.apache.jackrabbit</groupId>
       <artifactId>jackrabbit-webdav</artifactId>
       <version>2.5.2</version>
@@ -151,14 +157,6 @@ under the License.
             <phase>process-classes</phase>
           </execution>
         </executions>
-        <dependencies>
-          <dependency>
-            <!-- Workaround for QDOX-148, see also MNG-3686 -->
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wagon-http-shared</artifactId>
-            <version>${project.version}</version>
-          </dependency>
-        </dependencies>
       </plugin>
       <plugin><!-- Jackrabbit is compiled for JDK 6 -->
         <artifactId>maven-enforcer-plugin</artifactId>
