@@ -323,8 +323,11 @@ public abstract class AbstractHttpClientWagon
 
     private static CloseableHttpClient createClient()
     {
-        return HttpClientBuilder.create().useSystemProperties().disableConnectionState().setConnectionManager(
-            CONN_MAN ).build();
+        return HttpClientBuilder.create() //
+            .useSystemProperties() //
+            .disableConnectionState() //
+            .setConnectionManager( CONN_MAN ) //
+            .build();
     }
 
     private static String DEFAULT_USER_AGENT = getDefaultUserAgent();
@@ -521,9 +524,10 @@ public abstract class AbstractHttpClientWagon
         if ( credentialsProvider.getCredentials( targetScope ) != null )
         {
             BasicScheme targetAuth = new BasicScheme();
-            try {
-                targetAuth.processChallenge(new BasicHeader(AUTH.WWW_AUTH, "BASIC preemptive"));
-                authCache.put( targetHost, targetAuth  );
+            try
+            {
+                targetAuth.processChallenge( new BasicHeader( AUTH.WWW_AUTH, "BASIC preemptive" ) );
+                authCache.put( targetHost, targetAuth );
             }
             catch ( MalformedChallengeException ignore )
             {
@@ -716,8 +720,8 @@ public abstract class AbstractHttpClientWagon
             if ( credentialsProvider.getCredentials( targetScope ) != null )
             {
                 BasicScheme targetAuth = new BasicScheme();
-                targetAuth.processChallenge( new BasicHeader(AUTH.WWW_AUTH, "BASIC preemptive" ) );
-                authCache.put( targetHost, targetAuth  );
+                targetAuth.processChallenge( new BasicHeader( AUTH.WWW_AUTH, "BASIC preemptive" ) );
+                authCache.put( targetHost, targetAuth );
             }
         }
 
@@ -747,7 +751,7 @@ public abstract class AbstractHttpClientWagon
 
                     credentialsProvider.setCredentials( proxyScope, creds );
                     BasicScheme proxyAuth = new BasicScheme();
-                    proxyAuth.processChallenge( new BasicHeader(AUTH.PROXY_AUTH, "BASIC preemptive" ) );
+                    proxyAuth.processChallenge( new BasicHeader( AUTH.PROXY_AUTH, "BASIC preemptive" ) );
                     authCache.put( proxyHost, proxyAuth );
                 }
             }
