@@ -19,31 +19,35 @@ package org.apache.maven.wagon.shared.http;
  * under the License.
  */
 
+import junit.framework.TestCase;
+
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
-import junit.framework.TestCase;
+public class EncodingUtilTest
+    extends TestCase
+{
+    public void testEncodeURLWithSpaces()
+        throws URISyntaxException, MalformedURLException
+    {
+        String encodedURL = EncodingUtil.encodeURLToString( "file://host:1/path with spaces" );
 
-public class EncodingUtilTest extends TestCase
-{	
-	public void testEncodeURLWithSpaces() throws URISyntaxException, MalformedURLException
-	{
-		String encodedURL = EncodingUtil.encodeURLToString( "file://host:1/path with spaces" );
-		
-		assertEquals( "file://host:1/path%20with%20spaces", encodedURL );
-	}
-	
-	public void testEncodeURLWithSpacesInPath() throws URISyntaxException, MalformedURLException
-	{
-		String encodedURL = EncodingUtil.encodeURLToString( "file://host:1", "path with spaces" );
-		
-		assertEquals( "file://host:1/path%20with%20spaces", encodedURL );
-	}
-	
-	public void testEncodeURLWithSpacesInBothBaseAndPath() throws URISyntaxException, MalformedURLException
-	{
-		String encodedURL = EncodingUtil.encodeURLToString( "file://host:1/with a", "path with spaces" );
-		
-		assertEquals( "file://host:1/with%20a/path%20with%20spaces", encodedURL );
-	}
+        assertEquals( "file://host:1/path%20with%20spaces", encodedURL );
+    }
+
+    public void testEncodeURLWithSpacesInPath()
+        throws URISyntaxException, MalformedURLException
+    {
+        String encodedURL = EncodingUtil.encodeURLToString( "file://host:1", "path with spaces" );
+
+        assertEquals( "file://host:1/path%20with%20spaces", encodedURL );
+    }
+
+    public void testEncodeURLWithSpacesInBothBaseAndPath()
+        throws URISyntaxException, MalformedURLException
+    {
+        String encodedURL = EncodingUtil.encodeURLToString( "file://host:1/with a", "path with spaces" );
+
+        assertEquals( "file://host:1/with%20a/path%20with%20spaces", encodedURL );
+    }
 }
