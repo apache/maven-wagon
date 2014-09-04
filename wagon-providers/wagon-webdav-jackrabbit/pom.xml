@@ -92,6 +92,16 @@ under the License.
         </exclusion>
       </exclusions>
     </dependency>
+    
+    <!--
+    This dependency is here to upgrade to a version of commons-logging that is
+    newer than the one that comes transitively from commons-httpclient above.
+    -->
+    <dependency>
+       <groupId>commons-logging</groupId>
+       <artifactId>commons-logging</artifactId>
+       <version>1.1.1</version>
+    </dependency>
 
     <!-- Test dependencies -->
     <dependency>
