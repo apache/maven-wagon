@@ -19,6 +19,22 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
+import org.apache.commons.io.IOUtils;
+import org.apache.maven.wagon.ConnectionException;
+import org.apache.maven.wagon.InputData;
+import org.apache.maven.wagon.OutputData;
+import org.apache.maven.wagon.ResourceDoesNotExistException;
+import org.apache.maven.wagon.StreamWagon;
+import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.authentication.AuthenticationException;
+import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.events.TransferEvent;
+import org.apache.maven.wagon.proxy.ProxyInfo;
+import org.apache.maven.wagon.resource.Resource;
+import org.apache.maven.wagon.shared.http.EncodingUtil;
+import org.apache.maven.wagon.shared.http.HtmlFileListParser;
+import org.codehaus.plexus.util.Base64;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,27 +52,10 @@ import java.util.List;
 import java.util.Properties;
 import java.util.zip.GZIPInputStream;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.maven.wagon.ConnectionException;
-import org.apache.maven.wagon.InputData;
-import org.apache.maven.wagon.OutputData;
-import org.apache.maven.wagon.ResourceDoesNotExistException;
-import org.apache.maven.wagon.StreamWagon;
-import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.authentication.AuthenticationException;
-import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.apache.maven.wagon.events.TransferEvent;
-import org.apache.maven.wagon.proxy.ProxyInfo;
-import org.apache.maven.wagon.resource.Resource;
-import org.apache.maven.wagon.shared.http.EncodingUtil;
-import org.apache.maven.wagon.shared.http.HtmlFileListParser;
-import org.codehaus.plexus.util.Base64;
-
 /**
  * LightweightHttpWagon, using JDK's HttpURLConnection.
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- *
  * @plexus.component role="org.apache.maven.wagon.Wagon" role-hint="http" instantiation-strategy="per-lookup"
  * @see HttpURLConnection
  */
@@ -96,7 +95,7 @@ public class LightweightHttpWagon
      */
     private String buildUrl( Resource resource )
     {
-    	return EncodingUtil.encodeURLToString( getRepository().getUrl(), resource.getName() );
+        return EncodingUtil.encodeURLToString( getRepository().getUrl(), resource.getName() );
     }
 
     public void fillInputData( InputData inputData )
@@ -239,14 +238,12 @@ public class LightweightHttpWagon
                     throw new AuthorizationException( "Access denied to: " + buildUrl( resource ) );
 
                 case HttpURLConnection.HTTP_NOT_FOUND:
-                    throw new ResourceDoesNotExistException(
-                        "File: " + buildUrl( resource ) + " does not exist" );
+                    throw new ResourceDoesNotExistException( "File: " + buildUrl( resource ) + " does not exist" );
 
                     // add more entries here
                 default:
                     throw new TransferFailedException(
-                        "Failed to transfer file: " + buildUrl( resource ) + ". Return code is: "
-                            + statusCode );
+                        "Failed to transfer file: " + buildUrl( resource ) + ". Return code is: " + statusCode );
             }
         }
         catch ( IOException e )
@@ -382,7 +379,7 @@ public class LightweightHttpWagon
         try
         {
             Resource resource = new Resource( resourceName );
-			URL url = new URL( buildUrl( resource ) );
+            URL url = new URL( buildUrl( resource ) );
             headConnection = (HttpURLConnection) url.openConnection( this.proxy );
 
             addHeaders( headConnection );

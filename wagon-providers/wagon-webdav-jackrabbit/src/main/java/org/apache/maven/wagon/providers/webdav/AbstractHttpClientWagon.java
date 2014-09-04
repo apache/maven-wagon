@@ -19,20 +19,6 @@ package org.apache.maven.wagon.providers.webdav;
  * under the License.
  */
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Properties;
-import java.util.TimeZone;
-import java.util.zip.GZIPInputStream;
-
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
@@ -68,6 +54,20 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.apache.maven.wagon.shared.http.EncodingUtil;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.TimeZone;
+import java.util.zip.GZIPInputStream;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -197,8 +197,6 @@ public abstract class AbstractHttpClientWagon
         // WAGON-273: default the cookie-policy to browser compatible
         client.getParams().setCookiePolicy( CookiePolicy.BROWSER_COMPATIBILITY );
 
-
-
         String username = null;
         String password = null;
         String domain = null;
@@ -321,8 +319,8 @@ public abstract class AbstractHttpClientWagon
     {
         RequestEntityImplementation requestEntityImplementation =
             new RequestEntityImplementation( stream, resource, this, source );
-        
-		put( resource, source, requestEntityImplementation, buildUrl( resource ) );
+
+        put( resource, source, requestEntityImplementation, buildUrl( resource ) );
 
     }
 
@@ -334,7 +332,7 @@ public abstract class AbstractHttpClientWagon
      */
     private String buildUrl( Resource resource )
     {
-    	return EncodingUtil.encodeURLToString( getRepository().getUrl(), resource.getName() );
+        return EncodingUtil.encodeURLToString( getRepository().getUrl(), resource.getName() );
     }
 
     private void put( Resource resource, File source, RequestEntityImplementation requestEntityImplementation,
