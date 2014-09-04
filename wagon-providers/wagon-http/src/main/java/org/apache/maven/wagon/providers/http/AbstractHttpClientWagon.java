@@ -251,14 +251,14 @@ public abstract class AbstractHttpClientWagon
 
 
     /**
-     * Maximum conncurrent connections per distinct route.
+     * Maximum concurrent connections per distinct route.
      * <b>20 by default</b>
      */
     private final static int MAX_CONN_PER_ROUTE =
         Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxPerRoute", "20" ) );
 
     /**
-     * Maximum conncurrent connections in total.
+     * Maximum concurrent connections in total.
      * <b>40 by default</b>
      */
     private final static int MAX_CONN_TOTAL =
