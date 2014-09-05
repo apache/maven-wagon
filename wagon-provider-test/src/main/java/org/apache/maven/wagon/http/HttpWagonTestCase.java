@@ -52,7 +52,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -68,6 +67,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -244,6 +244,73 @@ public abstract class HttpWagonTestCase
         }
     }
 
+    public void testList429()
+        throws Exception
+    {
+        StreamingWagon wagon = (StreamingWagon) getWagon();
+        try
+        {
+
+            Server server = new Server( 0 );
+            final AtomicBoolean called = new AtomicBoolean();
+
+            AbstractHandler handler = new AbstractHandler()
+            {
+                public void handle( String s, HttpServletRequest request, HttpServletResponse response, int i )
+                    throws IOException, ServletException
+                {
+                    if ( called.get() )
+                    {
+                        response.setStatus( 200 );
+                        ( (Request) request ).setHandled( true );
+                    }
+                    else
+                    {
+                        called.set( true );
+                        response.setStatus( 429 );
+                        ( (Request) request ).setHandled( true );
+
+                    }
+                }
+            };
+
+            server.setHandler( handler );
+            addConnectors( server );
+            server.start();
+
+            wagon.connect( new Repository( "id", getRepositoryUrl( server ) ) );
+
+            try
+            {
+                wagon.getFileList( "resource" );
+            }
+            finally
+            {
+                wagon.disconnect();
+
+                server.stop();
+            }
+
+        }
+        catch ( ResourceDoesNotExistException e )
+        {
+            assertTrue( true );
+        }
+        catch ( TransferFailedException e )
+        {
+            if ( wagon.getClass().getName().contains( "Lightweight" ) )
+            {
+                //we don't care about lightweight
+                assertTrue( true );
+            }
+            else
+            {
+                fail();
+            }
+
+        }
+    }
+
     public void testGet500()
         throws Exception
     {
@@ -325,6 +392,60 @@ public abstract class HttpWagonTestCase
             assertTrue( true );
         }
     }
+
+    public void testResourceExists429()
+        throws Exception
+    {
+        try
+        {
+
+            final AtomicBoolean called = new AtomicBoolean();
+
+            AbstractHandler handler = new AbstractHandler()
+            {
+                public void handle( String s, HttpServletRequest request, HttpServletResponse response, int i )
+                    throws IOException, ServletException
+                {
+                    if ( called.get() )
+                    {
+                        response.setStatus( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                        ( (Request) request ).setHandled( true );
+                    }
+                    else
+                    {
+                        called.set( true );
+                        response.setStatus( 429 );
+                        ( (Request) request ).setHandled( true );
+                    }
+                }
+            };
+
+            StreamingWagon wagon = (StreamingWagon) getWagon();
+            Server server = new Server( 0 );
+            server.setHandler( handler );
+            addConnectors( server );
+            server.start();
+            wagon.connect( new Repository( "id", getRepositoryUrl( server ) ) );
+
+            try
+            {
+                wagon.resourceExists( "resource" );
+            }
+            finally
+            {
+                wagon.disconnect();
+
+                server.stop();
+            }
+
+            fail();
+        }
+        catch ( TransferFailedException e )
+        {
+            assertTrue( true );
+        }
+    }
+
 
     private boolean runTestResourceExists( int status )
         throws Exception
@@ -1293,6 +1414,68 @@ public abstract class HttpWagonTestCase
             assertTrue( true );
         }
     }
+
+    public void testPut429()
+        throws Exception
+    {
+
+        try
+        {
+
+            StreamingWagon wagon = (StreamingWagon) getWagon();
+            Server server = new Server( 0 );
+            final AtomicBoolean called = new AtomicBoolean();
+
+            AbstractHandler handler = new AbstractHandler()
+            {
+                public void handle( String s, HttpServletRequest request, HttpServletResponse response, int i )
+                    throws IOException, ServletException
+                {
+                    if ( called.get() )
+                    {
+                        response.setStatus( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                        ( (Request) request ).setHandled( true );
+                    }
+                    else
+                    {
+                        called.set( true );
+                        response.setStatus( 429 );
+                        ( (Request) request ).setHandled( true );
+                    }
+                }
+            };
+
+            server.setHandler( handler );
+            addConnectors( server );
+            server.start();
+
+            wagon.connect( new Repository( "id", getRepositoryUrl( server ) ) );
+
+            File tempFile = File.createTempFile( "wagon", "tmp" );
+            tempFile.deleteOnExit();
+            FileUtils.fileWrite( tempFile.getAbsolutePath(), "content" );
+
+            try
+            {
+                wagon.put( tempFile, "resource" );
+                fail();
+            }
+            finally
+            {
+                wagon.disconnect();
+
+                server.stop();
+
+                tempFile.delete();
+            }
+
+        }
+        catch ( TransferFailedException e )
+        {
+            assertTrue( true );
+        }
+    }
+
 
     private void runTestPut( int status )
         throws Exception

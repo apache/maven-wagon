@@ -94,6 +94,24 @@ import org.apache.maven.wagon.shared.http.EncodingUtil;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import java.io.ByteArrayInputStream;
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @author <a href="mailto:james@atlassian.com">James William Dumay</a>
@@ -268,6 +286,50 @@ public abstract class AbstractHttpClientWagon
      * Internal connection manager
      */
     private static final PoolingHttpClientConnectionManager CONN_MAN = createConnManager();
+
+
+    /**
+     * See RFC6585
+     */
+    protected static final int SC_TOO_MANY_REQUESTS = 429;
+
+    /**
+     * For exponential backoff.
+     */
+
+    /**
+     * Initial seconds to back off when a HTTP 429 received.
+     * Subsequent 429 responses result in exponental backoff.
+     * <b>5 by default</b>
+     *
+     * @since 2.7
+     */
+    private int initialBackoffSeconds =
+        Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.backoffSeconds", "5" ) );
+
+    /**
+     * The maximum amount of time we want to back off in the case of
+     * repeated HTTP 429 response codes.
+     *
+     * @since 2.7
+     */
+    private final static int maxBackoffWaitSeconds =
+        Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxBackoffSeconds", "180" ) );
+
+
+    protected int backoff( int wait, String url )
+        throws InterruptedException, TransferFailedException
+    {
+        TimeUnit.SECONDS.sleep( wait );
+        int nextWait = wait * 2;
+        if ( nextWait >= getMaxBackoffWaitSeconds() )
+        {
+            throw new TransferFailedException(
+                "Waited too long to access: " + url + ". Return code is: " + SC_TOO_MANY_REQUESTS );
+        }
+        return nextWait;
+    }
+
 
     private static PoolingHttpClientConnectionManager createConnManager()
     {
@@ -483,7 +545,7 @@ public abstract class AbstractHttpClientWagon
     {
         put( resource, source, httpEntity, buildUrl( resource ) );
     }
-    
+
     /**
      * Builds a complete URL string from the repository URL and the relative path of the resource passed.
      *
@@ -495,7 +557,15 @@ public abstract class AbstractHttpClientWagon
     	return EncodingUtil.encodeURLToString( getRepository().getUrl(), resource.getName() );
     }
 
+
     private void put( Resource resource, File source, HttpEntity httpEntity, String url )
+        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
+    {
+        put( getInitialBackoffSeconds(), resource, source, httpEntity, url );
+    }
+
+
+    private void put( int wait, Resource resource, File source, HttpEntity httpEntity, String url )
         throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
 
@@ -570,7 +640,10 @@ public abstract class AbstractHttpClientWagon
                     case HttpStatus.SC_NOT_FOUND:
                         throw new ResourceDoesNotExistException( "File: " + url + " does not exist" + reasonPhrase );
 
-                        //add more entries here
+                    case SC_TOO_MANY_REQUESTS:
+                        put( backoff( wait, url ), resource, source, httpEntity, url );
+                        break;
+                    //add more entries here
                     default:
                     {
                         TransferFailedException e = new TransferFailedException(
@@ -601,6 +674,13 @@ public abstract class AbstractHttpClientWagon
 
             throw new TransferFailedException( e.getMessage(), e );
         }
+        catch ( InterruptedException e )
+        {
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+
+            throw new TransferFailedException( e.getMessage(), e );
+        }
+
     }
 
     protected String calculateRelocatedUrl( HttpResponse response )
@@ -618,6 +698,13 @@ public abstract class AbstractHttpClientWagon
     }
 
     public boolean resourceExists( String resourceName )
+        throws TransferFailedException, AuthorizationException
+    {
+        return resourceExists( getInitialBackoffSeconds(), resourceName );
+    }
+
+
+    private boolean resourceExists( int wait, String resourceName )
         throws TransferFailedException, AuthorizationException
     {
         String repositoryUrl = getRepository().getUrl();
@@ -651,6 +738,10 @@ public abstract class AbstractHttpClientWagon
                     case HttpStatus.SC_NOT_FOUND:
                         result = false;
                         break;
+
+                    case SC_TOO_MANY_REQUESTS:
+                        return resourceExists( backoff( wait, resourceName ), resourceName );
+
                     //add more entries here
                     default:
                         throw new TransferFailedException(
@@ -673,6 +764,11 @@ public abstract class AbstractHttpClientWagon
         {
             throw new TransferFailedException( e.getMessage(), e );
         }
+        catch ( InterruptedException e )
+        {
+            throw new TransferFailedException( e.getMessage(), e );
+        }
+
     }
 
     protected CloseableHttpResponse execute( HttpUriRequest httpMethod )
@@ -837,6 +933,12 @@ public abstract class AbstractHttpClientWagon
     public void fillInputData( InputData inputData )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
+        fillInputData( getInitialBackoffSeconds(), inputData );
+    }
+
+    private void fillInputData( int wait, InputData inputData )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
         Resource resource = inputData.getResource();
 
         String repositoryUrl = getRepository().getUrl();
@@ -885,7 +987,11 @@ public abstract class AbstractHttpClientWagon
                 case HttpStatus.SC_NOT_FOUND:
                     throw new ResourceDoesNotExistException( "File: " + url + " " + reasonPhrase );
 
-                    // add more entries here
+                case SC_TOO_MANY_REQUESTS:
+                    fillInputData( backoff( wait, url ), inputData );
+                    break;
+
+                // add more entries here
                 default:
                 {
                     cleanupGetTransfer( resource );
@@ -943,6 +1049,13 @@ public abstract class AbstractHttpClientWagon
 
             throw new TransferFailedException( e.getMessage(), e );
         }
+        catch ( InterruptedException e )
+        {
+            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+
+            throw new TransferFailedException( e.getMessage(), e );
+        }
+
     }
 
     protected void cleanupGetTransfer( Resource resource )
@@ -991,5 +1104,20 @@ public abstract class AbstractHttpClientWagon
     {
         // no needed in this implementation but throw an Exception if used
         throw new IllegalStateException( "this wagon http client must not use fillOutputData" );
+    }
+
+    public int getInitialBackoffSeconds()
+    {
+        return initialBackoffSeconds;
+    }
+
+    public void setInitialBackoffSeconds( int initialBackoffSeconds )
+    {
+        this.initialBackoffSeconds = initialBackoffSeconds;
+    }
+
+    public static int getMaxBackoffWaitSeconds()
+    {
+        return maxBackoffWaitSeconds;
     }
 }
