@@ -282,17 +282,19 @@ public abstract class AbstractHttpClientWagon
      * Initial seconds to back off when a HTTP 429 received.
      * Subsequent 429 responses result in exponental backoff.
      * <b>5 by default</b>
+     *
      * @since 2.7
      */
-    protected final static int INITIAL_BACKOFF_SECONDS =
+    private int initialBackoffSeconds =
         Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.backoffSeconds", "5" ) );
 
     /**
      * The maximum amount of time we want to back off in the case of
      * repeated HTTP 429 response codes.
+     *
      * @since 2.7
      */
-    protected final static int MAX_WAIT_SECONDS =
+    private final static int maxBackoffWaitSeconds =
         Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxBackoffSeconds", "180" ) );
 
 
@@ -301,7 +303,7 @@ public abstract class AbstractHttpClientWagon
     {
         TimeUnit.SECONDS.sleep( wait );
         int nextWait = wait * 2;
-        if ( nextWait >= MAX_WAIT_SECONDS )
+        if ( nextWait >= getMaxBackoffWaitSeconds() )
         {
             throw new TransferFailedException(
                 "Waited too long to access: " + url + ". Return code is: " + SC_TOO_MANY_REQUESTS );
@@ -540,7 +542,7 @@ public abstract class AbstractHttpClientWagon
     private void put( Resource resource, File source, HttpEntity httpEntity, String url )
         throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
-        put( INITIAL_BACKOFF_SECONDS, resource, source, httpEntity, url );
+        put( getInitialBackoffSeconds(), resource, source, httpEntity, url );
     }
 
 
@@ -679,7 +681,7 @@ public abstract class AbstractHttpClientWagon
     public boolean resourceExists( String resourceName )
         throws TransferFailedException, AuthorizationException
     {
-        return resourceExists( INITIAL_BACKOFF_SECONDS, resourceName );
+        return resourceExists( getInitialBackoffSeconds(), resourceName );
     }
 
 
@@ -912,7 +914,7 @@ public abstract class AbstractHttpClientWagon
     public void fillInputData( InputData inputData )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        fillInputData( INITIAL_BACKOFF_SECONDS, inputData );
+        fillInputData( getInitialBackoffSeconds(), inputData );
     }
 
     private void fillInputData( int wait, InputData inputData )
@@ -1083,5 +1085,20 @@ public abstract class AbstractHttpClientWagon
     {
         // no needed in this implementation but throw an Exception if used
         throw new IllegalStateException( "this wagon http client must not use fillOutputData" );
+    }
+
+    public int getInitialBackoffSeconds()
+    {
+        return initialBackoffSeconds;
+    }
+
+    public void setInitialBackoffSeconds( int initialBackoffSeconds )
+    {
+        this.initialBackoffSeconds = initialBackoffSeconds;
+    }
+
+    public static int getMaxBackoffWaitSeconds()
+    {
+        return maxBackoffWaitSeconds;
     }
 }

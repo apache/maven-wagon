@@ -43,7 +43,7 @@ public class HttpWagon
     public List<String> getFileList( String destinationDirectory )
         throws AuthorizationException, ResourceDoesNotExistException, TransferFailedException
     {
-        return getFileList( INITIAL_BACKOFF_SECONDS, destinationDirectory );
+        return getFileList( getInitialBackoffSeconds(), destinationDirectory );
     }
 
     private List<String> getFileList( int wait, String destinationDirectory )
