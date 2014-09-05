@@ -19,11 +19,6 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpStatus;
@@ -34,21 +29,24 @@ import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.shared.http.HtmlFileListParser;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- *
  */
 public class HttpWagon
     extends AbstractHttpClientWagon
 {
 
-    public List<String> getFileList(String destinationDirectory )
-            throws AuthorizationException, ResourceDoesNotExistException, TransferFailedException
+    public List<String> getFileList( String destinationDirectory )
+        throws AuthorizationException, ResourceDoesNotExistException, TransferFailedException
     {
-        return getFileList(INITIAL_BACKOFF_SECONDS, destinationDirectory);
+        return getFileList( INITIAL_BACKOFF_SECONDS, destinationDirectory );
     }
-    
-    private List<String> getFileList(int wait,  String destinationDirectory )
+
+    private List<String> getFileList( int wait, String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         if ( destinationDirectory.length() > 0 && !destinationDirectory.endsWith( "/" ) )
@@ -63,7 +61,8 @@ public class HttpWagon
         try
         {
             CloseableHttpResponse response = execute( getMethod );
-            try {
+            try
+            {
                 int statusCode = response.getStatusLine().getStatusCode();
 
                 fireTransferDebug( url + " - Status code: " + statusCode );
@@ -86,9 +85,9 @@ public class HttpWagon
                         throw new ResourceDoesNotExistException( "File: " + url + " does not exist" );
 
                     case SC_TOO_MANY_REQUESTS:
-                        return getFileList(backoff(wait, url), destinationDirectory);
+                        return getFileList( backoff( wait, url ), destinationDirectory );
 
-                        //add more entries here
+                    //add more entries here
                     default:
                         throw new TransferFailedException(
                             "Failed to transfer file: " + url + ". Return code is: " + statusCode );

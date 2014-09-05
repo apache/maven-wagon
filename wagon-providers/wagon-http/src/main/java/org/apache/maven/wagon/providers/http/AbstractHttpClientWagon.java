@@ -19,25 +19,6 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
-import java.io.ByteArrayInputStream;
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
@@ -93,6 +74,24 @@ import org.apache.maven.wagon.resource.Resource;
 import org.apache.maven.wagon.shared.http.EncodingUtil;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import java.io.ByteArrayInputStream;
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -270,7 +269,6 @@ public abstract class AbstractHttpClientWagon
     private static final PoolingHttpClientConnectionManager CONN_MAN = createConnManager();
 
 
-
     /**
      * See RFC6585
      */
@@ -284,27 +282,29 @@ public abstract class AbstractHttpClientWagon
      * Initial seconds to back off when a HTTP 429 received.
      * Subsequent 429 responses result in exponental backoff.
      * <b>5 by default</b>
+     * @since 2.7
      */
     protected final static int INITIAL_BACKOFF_SECONDS =
-            Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.backoffSeconds", "5" ) );
+        Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.backoffSeconds", "5" ) );
 
     /**
      * The maximum amount of time we want to back off in the case of
      * repeated HTTP 429 response codes.
+     * @since 2.7
      */
     protected final static int MAX_WAIT_SECONDS =
-            Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxBackoffSeconds", "180" ) );
+        Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxBackoffSeconds", "180" ) );
 
 
-
-    protected int backoff(int wait, String url) throws InterruptedException, TransferFailedException
+    protected int backoff( int wait, String url )
+        throws InterruptedException, TransferFailedException
     {
-        TimeUnit.SECONDS.sleep(wait);
+        TimeUnit.SECONDS.sleep( wait );
         int nextWait = wait * 2;
-        if (nextWait >= MAX_WAIT_SECONDS)
+        if ( nextWait >= MAX_WAIT_SECONDS )
         {
             throw new TransferFailedException(
-                    "Waited too long to access: " + url + ". Return code is: " + SC_TOO_MANY_REQUESTS);
+                "Waited too long to access: " + url + ". Return code is: " + SC_TOO_MANY_REQUESTS );
         }
         return nextWait;
     }
@@ -524,7 +524,7 @@ public abstract class AbstractHttpClientWagon
     {
         put( resource, source, httpEntity, buildUrl( resource ) );
     }
-    
+
     /**
      * Builds a complete URL string from the repository URL and the relative path of the resource passed.
      *
@@ -533,19 +533,19 @@ public abstract class AbstractHttpClientWagon
      */
     private String buildUrl( Resource resource )
     {
-    	return EncodingUtil.encodeURLToString( getRepository().getUrl(), resource.getName() );
+        return EncodingUtil.encodeURLToString( getRepository().getUrl(), resource.getName() );
     }
 
 
-    private void put(Resource resource, File source, HttpEntity httpEntity, String url )
-            throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
+    private void put( Resource resource, File source, HttpEntity httpEntity, String url )
+        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
-        put(INITIAL_BACKOFF_SECONDS, resource, source, httpEntity, url);
+        put( INITIAL_BACKOFF_SECONDS, resource, source, httpEntity, url );
     }
 
 
-    private void put(int wait, Resource resource, File source, HttpEntity httpEntity, String url )
-    throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
+    private void put( int wait, Resource resource, File source, HttpEntity httpEntity, String url )
+        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
 
         //Parent directories need to be created before posting
@@ -620,9 +620,9 @@ public abstract class AbstractHttpClientWagon
                         throw new ResourceDoesNotExistException( "File: " + url + " does not exist" + reasonPhrase );
 
                     case SC_TOO_MANY_REQUESTS:
-                        put(backoff(wait, url), resource, source, httpEntity, url);
+                        put( backoff( wait, url ), resource, source, httpEntity, url );
                         break;
-                        //add more entries here
+                    //add more entries here
                     default:
                     {
                         TransferFailedException e = new TransferFailedException(
@@ -677,12 +677,13 @@ public abstract class AbstractHttpClientWagon
     }
 
     public boolean resourceExists( String resourceName )
-            throws TransferFailedException, AuthorizationException {
-        return resourceExists( INITIAL_BACKOFF_SECONDS, resourceName);
+        throws TransferFailedException, AuthorizationException
+    {
+        return resourceExists( INITIAL_BACKOFF_SECONDS, resourceName );
     }
 
 
-    private boolean resourceExists(int wait,  String resourceName )
+    private boolean resourceExists( int wait, String resourceName )
         throws TransferFailedException, AuthorizationException
     {
         String repositoryUrl = getRepository().getUrl();
@@ -718,7 +719,7 @@ public abstract class AbstractHttpClientWagon
                         break;
 
                     case SC_TOO_MANY_REQUESTS:
-                        return resourceExists(backoff(wait, resourceName), resourceName);
+                        return resourceExists( backoff( wait, resourceName ), resourceName );
 
                     //add more entries here
                     default:
@@ -909,11 +910,12 @@ public abstract class AbstractHttpClientWagon
     }
 
     public void fillInputData( InputData inputData )
-            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
-        fillInputData(INITIAL_BACKOFF_SECONDS, inputData);
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
+        fillInputData( INITIAL_BACKOFF_SECONDS, inputData );
     }
 
-    private void fillInputData(int wait, InputData inputData )
+    private void fillInputData( int wait, InputData inputData )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         Resource resource = inputData.getResource();
@@ -965,10 +967,10 @@ public abstract class AbstractHttpClientWagon
                     throw new ResourceDoesNotExistException( "File: " + url + " " + reasonPhrase );
 
                 case SC_TOO_MANY_REQUESTS:
-                    fillInputData(backoff(wait, url), inputData);
+                    fillInputData( backoff( wait, url ), inputData );
                     break;
 
-                    // add more entries here
+                // add more entries here
                 default:
                 {
                     cleanupGetTransfer( resource );

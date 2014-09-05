@@ -52,7 +52,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -246,7 +245,7 @@ public abstract class HttpWagonTestCase
     }
 
     public void testList429()
-            throws Exception
+        throws Exception
     {
         StreamingWagon wagon = (StreamingWagon) getWagon();
         try
@@ -255,17 +254,19 @@ public abstract class HttpWagonTestCase
             Server server = new Server( 0 );
             final AtomicBoolean called = new AtomicBoolean();
 
-            AbstractHandler handler = new AbstractHandler() {
-                public void handle(String s, HttpServletRequest request, HttpServletResponse response, int i) throws IOException, ServletException
+            AbstractHandler handler = new AbstractHandler()
+            {
+                public void handle( String s, HttpServletRequest request, HttpServletResponse response, int i )
+                    throws IOException, ServletException
                 {
-                    if (called.get())
+                    if ( called.get() )
                     {
                         response.setStatus( 200 );
                         ( (Request) request ).setHandled( true );
                     }
                     else
                     {
-                        called.set(true);
+                        called.set( true );
                         response.setStatus( 429 );
                         ( (Request) request ).setHandled( true );
 
@@ -281,7 +282,7 @@ public abstract class HttpWagonTestCase
 
             try
             {
-                wagon.getFileList("resource");
+                wagon.getFileList( "resource" );
             }
             finally
             {
@@ -295,11 +296,15 @@ public abstract class HttpWagonTestCase
         {
             assertTrue( true );
         }
-        catch ( TransferFailedException e ) {
-            if (wagon.getClass().getName().contains("Lightweight")) {
+        catch ( TransferFailedException e )
+        {
+            if ( wagon.getClass().getName().contains( "Lightweight" ) )
+            {
                 //we don't care about lightweight
                 assertTrue( true );
-            } else {
+            }
+            else
+            {
                 fail();
             }
 
@@ -316,7 +321,7 @@ public abstract class HttpWagonTestCase
         }
         catch ( TransferFailedException e )
         {
-            assertTrue(true);
+            assertTrue( true );
         }
     }
 
@@ -336,7 +341,7 @@ public abstract class HttpWagonTestCase
 
         try
         {
-            wagon.getToStream("resource", new ByteArrayOutputStream());
+            wagon.getToStream( "resource", new ByteArrayOutputStream() );
             fail();
         }
         finally
@@ -389,26 +394,28 @@ public abstract class HttpWagonTestCase
     }
 
     public void testResourceExists429()
-            throws Exception
+        throws Exception
     {
         try
         {
 
             final AtomicBoolean called = new AtomicBoolean();
 
-            AbstractHandler handler = new AbstractHandler() {
-                public void handle(String s, HttpServletRequest request, HttpServletResponse response, int i)
-                        throws IOException, ServletException
+            AbstractHandler handler = new AbstractHandler()
+            {
+                public void handle( String s, HttpServletRequest request, HttpServletResponse response, int i )
+                    throws IOException, ServletException
                 {
-                    if (called.get())
+                    if ( called.get() )
                     {
-                        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                        ((Request) request).setHandled(true);
-                    } else
+                        response.setStatus( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                        ( (Request) request ).setHandled( true );
+                    }
+                    else
                     {
-                        called.set(true);
-                        response.setStatus(429);
-                        ((Request) request).setHandled(true);
+                        called.set( true );
+                        response.setStatus( 429 );
+                        ( (Request) request ).setHandled( true );
                     }
                 }
             };
@@ -430,7 +437,6 @@ public abstract class HttpWagonTestCase
 
                 server.stop();
             }
-
 
             fail();
         }
@@ -1410,48 +1416,51 @@ public abstract class HttpWagonTestCase
     }
 
     public void testPut429()
-            throws Exception
+        throws Exception
     {
 
-        try {
-
+        try
+        {
 
             StreamingWagon wagon = (StreamingWagon) getWagon();
-            Server server = new Server(0);
+            Server server = new Server( 0 );
             final AtomicBoolean called = new AtomicBoolean();
 
-            AbstractHandler handler = new AbstractHandler() {
-                public void handle(String s, HttpServletRequest request, HttpServletResponse response, int i)
-                        throws IOException, ServletException
+            AbstractHandler handler = new AbstractHandler()
+            {
+                public void handle( String s, HttpServletRequest request, HttpServletResponse response, int i )
+                    throws IOException, ServletException
                 {
-                    if (called.get())
+                    if ( called.get() )
                     {
-                        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                        ((Request) request).setHandled(true);
-                    } else
+                        response.setStatus( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                        ( (Request) request ).setHandled( true );
+                    }
+                    else
                     {
-                        called.set(true);
-                        response.setStatus(429);
-                        ((Request) request).setHandled(true);
+                        called.set( true );
+                        response.setStatus( 429 );
+                        ( (Request) request ).setHandled( true );
                     }
                 }
             };
 
-            server.setHandler(handler);
-            addConnectors(server);
+            server.setHandler( handler );
+            addConnectors( server );
             server.start();
 
-            wagon.connect(new Repository("id", getRepositoryUrl(server)));
+            wagon.connect( new Repository( "id", getRepositoryUrl( server ) ) );
 
-            File tempFile = File.createTempFile("wagon", "tmp");
+            File tempFile = File.createTempFile( "wagon", "tmp" );
             tempFile.deleteOnExit();
-            FileUtils.fileWrite(tempFile.getAbsolutePath(), "content");
+            FileUtils.fileWrite( tempFile.getAbsolutePath(), "content" );
 
             try
             {
-                wagon.put(tempFile, "resource");
+                wagon.put( tempFile, "resource" );
                 fail();
-            } finally
+            }
+            finally
             {
                 wagon.disconnect();
 
@@ -1460,11 +1469,12 @@ public abstract class HttpWagonTestCase
                 tempFile.delete();
             }
 
-        } catch ( TransferFailedException e )
+        }
+        catch ( TransferFailedException e )
         {
             assertTrue( true );
         }
-      }
+    }
 
 
     private void runTestPut( int status )
