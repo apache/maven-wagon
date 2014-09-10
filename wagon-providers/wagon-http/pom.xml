@@ -99,6 +99,18 @@ under the License.
                   <shadedPattern>org.apache.maven.wagon.providers.http.commons.codec</shadedPattern>
                 </relocation>
                 <relocation>
+                  <pattern>org.apache.commons.lang</pattern>
+                  <shadedPattern>org.apache.maven.wagon.providers.http.commons.lang</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.apache.commons.io</pattern>
+                  <shadedPattern>org.apache.maven.wagon.providers.http.commons.io</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.jsoup</pattern>
+                  <shadedPattern>org.apache.maven.wagon.providers.http.org.jsoup</shadedPattern>
+                </relocation>
+                <relocation>
                   <pattern>org.apache.commons.logging</pattern>
                   <shadedPattern>org.apache.maven.wagon.providers.http.commons.logging</shadedPattern>
                 </relocation>
