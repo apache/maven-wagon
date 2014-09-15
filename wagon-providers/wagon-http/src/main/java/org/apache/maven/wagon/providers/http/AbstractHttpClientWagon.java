@@ -464,6 +464,9 @@ public abstract class AbstractHttpClientWagon
                 int port = getRepository().getPort() > -1 ? getRepository().getPort() : AuthScope.ANY_PORT;
 
                 credentialsProvider.setCredentials( new AuthScope( host, port ), creds );
+
+                // This is needed In order to use the preemptive basic authentication
+                enablePreemptiveConfiguration();
             }
         }
 
@@ -496,6 +499,14 @@ public abstract class AbstractHttpClientWagon
                 }
             }
         }
+    }
+
+    private void enablePreemptiveConfiguration() {
+        HttpMethodConfiguration httpMethodConfiguration = new HttpMethodConfiguration();
+        httpMethodConfiguration.setUsePreemptive( true );
+        HttpConfiguration config = new HttpConfiguration();
+        config.setAll( httpMethodConfiguration );
+        setHttpConfiguration( config );
     }
 
     public void closeConnection()
