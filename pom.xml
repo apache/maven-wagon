@@ -29,7 +29,7 @@ under the License.
 
   <groupId>org.apache.maven.wagon</groupId>
   <artifactId>wagon</artifactId>
-  <version>2.7-SNAPSHOT</version>
+  <version>2.7</version>
   <packaging>pom</packaging>
 
   <name>Apache Maven Wagon</name>
@@ -192,7 +192,7 @@ under the License.
     <connection>scm:git:https://git-wip-us.apache.org/repos/asf/maven-wagon.git</connection>
     <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/maven-wagon.git</developerConnection>
     <url>https://github.com/apache/maven-wagon/tree/${project.scm.tag}</url>
-    <tag>master</tag>
+    <tag>wagon-2.7</tag>
   </scm>
 
   <issueManagement>
