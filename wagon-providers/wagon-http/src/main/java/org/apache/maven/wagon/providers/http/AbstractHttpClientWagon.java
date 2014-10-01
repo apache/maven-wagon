@@ -440,6 +440,16 @@ public abstract class AbstractHttpClientWagon
      */
     private HttpConfiguration httpConfiguration;
 
+    /**
+     * Basic auth scope overrides
+     */
+    private BasicAuthScope basicAuth;
+
+    /**
+     * Proxy basic auth scope overrides
+     */
+    private BasicAuthScope proxyAuth;
+
     public void openConnectionInternal()
     {
         repository.setUrl( getURL( repository ) );
@@ -461,10 +471,11 @@ public abstract class AbstractHttpClientWagon
                 Credentials creds = new UsernamePasswordCredentials( username, password );
 
                 String host = getRepository().getHost();
-                int port = getRepository().getPort() > -1 ? getRepository().getPort() : AuthScope.ANY_PORT;
+		int port = getRepository().getPort();
 
-                credentialsProvider.setCredentials( new AuthScope( host, port ), creds );
-            }
+		credentialsProvider.setCredentials(getBasicAuthScope()
+			.getScope(host, port), creds);
+	    }
         }
 
         ProxyInfo proxyInfo = getProxyInfo( getRepository().getProtocol(), getRepository().getHost() );
@@ -489,10 +500,11 @@ public abstract class AbstractHttpClientWagon
                         creds = new UsernamePasswordCredentials( proxyUsername, proxyPassword );
                     }
 
-                    int port = proxyInfo.getPort() > -1 ? proxyInfo.getPort() : AuthScope.ANY_PORT;
+		    int port = proxyInfo.getPort();
 
-                    AuthScope authScope = new AuthScope( proxyHost, port );
-                    credentialsProvider.setCredentials( authScope, creds );
+		    AuthScope authScope = getProxyBasicAuthScope().getScope(
+			    proxyHost, port);
+		    credentialsProvider.setCredentials(authScope, creds);
                 }
             }
         }
@@ -588,7 +600,7 @@ public abstract class AbstractHttpClientWagon
 
         Repository repo = getRepository();
         HttpHost targetHost = new HttpHost( repo.getHost(), repo.getPort(), repo.getProtocol() );
-        AuthScope targetScope = new AuthScope( targetHost );
+	AuthScope targetScope = getBasicAuthScope().getScope(targetHost);
 
         if ( credentialsProvider.getCredentials( targetScope ) != null )
         {
@@ -810,7 +822,7 @@ public abstract class AbstractHttpClientWagon
         if ( config != null && config.isUsePreemptive() )
         {
             HttpHost targetHost = new HttpHost( repo.getHost(), repo.getPort(), repo.getProtocol() );
-            AuthScope targetScope = new AuthScope( targetHost );
+	    AuthScope targetScope = getBasicAuthScope().getScope(targetHost);
 
             if ( credentialsProvider.getCredentials( targetScope ) != null )
             {
@@ -825,7 +837,8 @@ public abstract class AbstractHttpClientWagon
             if ( proxyInfo.getHost() != null )
             {
                 HttpHost proxyHost = new HttpHost( proxyInfo.getHost(), proxyInfo.getPort() );
-                AuthScope proxyScope = new AuthScope( proxyHost );
+		AuthScope proxyScope = getProxyBasicAuthScope().getScope(
+			proxyHost);
 
                 String proxyUsername = proxyInfo.getUserName();
                 String proxyPassword = proxyInfo.getPassword();
@@ -928,6 +941,48 @@ public abstract class AbstractHttpClientWagon
     public void setHttpConfiguration( HttpConfiguration httpConfiguration )
     {
         this.httpConfiguration = httpConfiguration;
+    }
+
+    /**
+     * Get the override values for standard HttpClient AuthScope
+     * 
+     * @return the basicAuth
+     */
+    public BasicAuthScope getBasicAuthScope() {
+	if (basicAuth == null)
+	    basicAuth = new BasicAuthScope();
+	return basicAuth;
+    }
+
+    /**
+     * Set the override values for standard HttpClient AuthScope
+     * 
+     * @param basicAuth
+     *            the AuthScope to set
+     */
+    public void setBasicAuthScope(BasicAuthScope basicAuth) {
+	this.basicAuth = basicAuth;
+    }
+
+    /**
+     * Get the override values for proxy HttpClient AuthScope
+     * 
+     * @return the proxyAuth
+     */
+    public BasicAuthScope getProxyBasicAuthScope() {
+	if (proxyAuth == null)
+	    proxyAuth = new BasicAuthScope();
+	return proxyAuth;
+    }
+
+    /**
+     * Set the override values for proxy HttpClient AuthScope
+     * 
+     * @param proxyAuth
+     *            the AuthScope to set
+     */
+    public void setProxyBasicAuthScope(BasicAuthScope proxyAuth) {
+	this.proxyAuth = proxyAuth;
     }
 
     public void fillInputData( InputData inputData )
