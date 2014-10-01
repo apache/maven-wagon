@@ -19,25 +19,6 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
-import java.io.ByteArrayInputStream;
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
@@ -442,11 +423,13 @@ public abstract class AbstractHttpClientWagon
 
     /**
      * Basic auth scope overrides
+     * @since 2.8
      */
     private BasicAuthScope basicAuth;
 
     /**
      * Proxy basic auth scope overrides
+     * @since 2.8
      */
     private BasicAuthScope proxyAuth;
 
@@ -471,11 +454,10 @@ public abstract class AbstractHttpClientWagon
                 Credentials creds = new UsernamePasswordCredentials( username, password );
 
                 String host = getRepository().getHost();
-		int port = getRepository().getPort();
+                int port = getRepository().getPort();
 
-		credentialsProvider.setCredentials(getBasicAuthScope()
-			.getScope(host, port), creds);
-	    }
+                credentialsProvider.setCredentials( getBasicAuthScope().getScope( host, port ), creds );
+            }
         }
 
         ProxyInfo proxyInfo = getProxyInfo( getRepository().getProtocol(), getRepository().getHost() );
@@ -500,11 +482,10 @@ public abstract class AbstractHttpClientWagon
                         creds = new UsernamePasswordCredentials( proxyUsername, proxyPassword );
                     }
 
-		    int port = proxyInfo.getPort();
+                    int port = proxyInfo.getPort();
 
-		    AuthScope authScope = getProxyBasicAuthScope().getScope(
-			    proxyHost, port);
-		    credentialsProvider.setCredentials(authScope, creds);
+                    AuthScope authScope = getProxyBasicAuthScope().getScope( proxyHost, port );
+                    credentialsProvider.setCredentials( authScope, creds );
                 }
             }
         }
@@ -566,7 +547,7 @@ public abstract class AbstractHttpClientWagon
      */
     private String buildUrl( Resource resource )
     {
-    	return EncodingUtil.encodeURLToString( getRepository().getUrl(), resource.getName() );
+        return EncodingUtil.encodeURLToString( getRepository().getUrl(), resource.getName() );
     }
 
 
@@ -600,7 +581,7 @@ public abstract class AbstractHttpClientWagon
 
         Repository repo = getRepository();
         HttpHost targetHost = new HttpHost( repo.getHost(), repo.getPort(), repo.getProtocol() );
-	AuthScope targetScope = getBasicAuthScope().getScope(targetHost);
+        AuthScope targetScope = getBasicAuthScope().getScope( targetHost );
 
         if ( credentialsProvider.getCredentials( targetScope ) != null )
         {
@@ -822,7 +803,7 @@ public abstract class AbstractHttpClientWagon
         if ( config != null && config.isUsePreemptive() )
         {
             HttpHost targetHost = new HttpHost( repo.getHost(), repo.getPort(), repo.getProtocol() );
-	    AuthScope targetScope = getBasicAuthScope().getScope(targetHost);
+            AuthScope targetScope = getBasicAuthScope().getScope( targetHost );
 
             if ( credentialsProvider.getCredentials( targetScope ) != null )
             {
@@ -837,8 +818,7 @@ public abstract class AbstractHttpClientWagon
             if ( proxyInfo.getHost() != null )
             {
                 HttpHost proxyHost = new HttpHost( proxyInfo.getHost(), proxyInfo.getPort() );
-		AuthScope proxyScope = getProxyBasicAuthScope().getScope(
-			proxyHost);
+                AuthScope proxyScope = getProxyBasicAuthScope().getScope( proxyHost );
 
                 String proxyUsername = proxyInfo.getUserName();
                 String proxyPassword = proxyInfo.getPassword();
@@ -945,44 +925,50 @@ public abstract class AbstractHttpClientWagon
 
     /**
      * Get the override values for standard HttpClient AuthScope
-     * 
+     *
      * @return the basicAuth
      */
-    public BasicAuthScope getBasicAuthScope() {
-	if (basicAuth == null)
-	    basicAuth = new BasicAuthScope();
-	return basicAuth;
+    public BasicAuthScope getBasicAuthScope()
+    {
+        if ( basicAuth == null )
+        {
+            basicAuth = new BasicAuthScope();
+        }
+        return basicAuth;
     }
 
     /**
      * Set the override values for standard HttpClient AuthScope
-     * 
-     * @param basicAuth
-     *            the AuthScope to set
+     *
+     * @param basicAuth the AuthScope to set
      */
-    public void setBasicAuthScope(BasicAuthScope basicAuth) {
-	this.basicAuth = basicAuth;
+    public void setBasicAuthScope( BasicAuthScope basicAuth )
+    {
+        this.basicAuth = basicAuth;
     }
 
     /**
      * Get the override values for proxy HttpClient AuthScope
-     * 
+     *
      * @return the proxyAuth
      */
-    public BasicAuthScope getProxyBasicAuthScope() {
-	if (proxyAuth == null)
-	    proxyAuth = new BasicAuthScope();
-	return proxyAuth;
+    public BasicAuthScope getProxyBasicAuthScope()
+    {
+        if ( proxyAuth == null )
+        {
+            proxyAuth = new BasicAuthScope();
+        }
+        return proxyAuth;
     }
 
     /**
      * Set the override values for proxy HttpClient AuthScope
-     * 
-     * @param proxyAuth
-     *            the AuthScope to set
+     *
+     * @param proxyAuth the AuthScope to set
      */
-    public void setProxyBasicAuthScope(BasicAuthScope proxyAuth) {
-	this.proxyAuth = proxyAuth;
+    public void setProxyBasicAuthScope( BasicAuthScope proxyAuth )
+    {
+        this.proxyAuth = proxyAuth;
     }
 
     public void fillInputData( InputData inputData )
