@@ -261,6 +261,7 @@ public class LightweightHttpWagon
         if ( proxyInfo != null )
         {
             this.proxy = getProxy( proxyInfo );
+            this.proxyInfo = proxyInfo;
         }
         authenticator.setWagon( this );
 
