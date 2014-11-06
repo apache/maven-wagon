@@ -573,8 +573,10 @@ public abstract class HttpWagonTestCase
         proxyInfo.setPassword( "secret" );
         AuthorizingProxyHandler handler = new AuthorizingProxyHandler();
 
-        ProxyInfoProvider proxyInfoProvider = new ProxyInfoProvider() {
-            public ProxyInfo getProxyInfo(String protocol) {
+        ProxyInfoProvider proxyInfoProvider = new ProxyInfoProvider()
+        {
+            public ProxyInfo getProxyInfo( String protocol )
+            {
                 return proxyInfo;
             }
         };
@@ -1143,11 +1145,11 @@ public abstract class HttpWagonTestCase
 
         proxyServer.start();
 
-        proxyInfoProvider.getProxyInfo(null).setPort( proxyServer.getConnectors()[0].getLocalPort() );
+        proxyInfoProvider.getProxyInfo( null ).setPort( proxyServer.getConnectors()[0].getLocalPort() );
 
-        System.out.println(
-            "start proxy on host/port " + proxyInfoProvider.getProxyInfo(null).getHost() + "/" + proxyInfoProvider.getProxyInfo(null).getPort() + " with non proxyHosts "
-                + proxyInfoProvider.getProxyInfo(null).getNonProxyHosts() );
+        System.out.println( "start proxy on host/port " + proxyInfoProvider.getProxyInfo( null ).getHost() + "/"
+                                + proxyInfoProvider.getProxyInfo( null ).getPort() + " with non proxyHosts "
+                                + proxyInfoProvider.getProxyInfo( null ).getNonProxyHosts() );
 
         while ( !proxyServer.isRunning() || !proxyServer.isStarted() )
         {
