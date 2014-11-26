@@ -66,5 +66,8 @@ public abstract class AbstractKnownHostsProvider
     {
     }
     
-    
+    public void addKnownHost( KnownHostEntry knownHost )
+        throws IOException
+    {
+    }
 }
