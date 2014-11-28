@@ -647,10 +647,8 @@ public abstract class HttpWagonTestCase
             String found = FileUtils.fileRead( tmpResult );
             assertEquals( "found:'" + found + "'", "Hello, World!", found );
 
-            assertEquals( 1, handler.handlerRequestResponses.size() );
-            assertEquals( 200, handler.handlerRequestResponses.get( 0 ).responseCode );
-            assertEquals( 1, redirectHandler.handlerRequestResponses.size() );
-            assertEquals( 302, redirectHandler.handlerRequestResponses.get( 0 ).responseCode );
+            checkHandlerResult( handler.handlerRequestResponses, 200 );
+            checkHandlerResult( redirectHandler.handlerRequestResponses, 302 );
         }
         finally
         {
@@ -709,10 +707,8 @@ public abstract class HttpWagonTestCase
             String found = FileUtils.fileRead( tmpResult );
             assertEquals( "found:'" + found + "'", "Hello, World!", found );
 
-            assertEquals( 1, handler.handlerRequestResponses.size() );
-            assertEquals( 200, handler.handlerRequestResponses.get( 0 ).responseCode );
-            assertEquals( 1, redirectHandler.handlerRequestResponses.size() );
-            assertEquals( 302, redirectHandler.handlerRequestResponses.get( 0 ).responseCode );
+            checkHandlerResult( handler.handlerRequestResponses, 200 );
+            checkHandlerResult( redirectHandler.handlerRequestResponses, 302 );
         }
         finally
         {
@@ -808,13 +804,8 @@ public abstract class HttpWagonTestCase
     protected void checkRequestResponseForRedirectPutFromStreamWithFullUrl( PutHandler putHandler,
                                                                             RedirectHandler redirectHandler )
     {
-        assertEquals( "found:" + putHandler.handlerRequestResponses, 1, putHandler.handlerRequestResponses.size() );
-        assertEquals( "found:" + putHandler.handlerRequestResponses, 201,
-                      putHandler.handlerRequestResponses.get( 0 ).responseCode );
-        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 1,
-                      redirectHandler.handlerRequestResponses.size() );
-        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 302,
-                      redirectHandler.handlerRequestResponses.get( 0 ).responseCode );
+        checkHandlerResult( putHandler.handlerRequestResponses, 201 );
+        checkHandlerResult( redirectHandler.handlerRequestResponses, 302 );
     }
 
     public void testRedirectPutFromStreamRelativeUrl()
@@ -885,15 +876,26 @@ public abstract class HttpWagonTestCase
     protected void checkRequestResponseForRedirectPutFromStreamWithRelativeUrl( PutHandler putHandler,
                                                                                 RedirectHandler redirectHandler )
     {
-        assertEquals( "found:" + putHandler.handlerRequestResponses, 0, putHandler.handlerRequestResponses.size() );
+        checkHandlerResult( putHandler.handlerRequestResponses );
+        checkHandlerResult( redirectHandler.handlerRequestResponses, 302, 201 );
+    }
 
-        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 2,
-                      redirectHandler.handlerRequestResponses.size() );
-        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 302,
-                      redirectHandler.handlerRequestResponses.get( 0 ).responseCode );
-        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 201,
-                      redirectHandler.handlerRequestResponses.get( 1 ).responseCode );
+    protected void checkHandlerResult( List<HandlerRequestResponse> handlerRequestResponses,
+                                       int... expectedResponseCodes )
+    {
+        boolean success = true;
+        if ( handlerRequestResponses.size() == expectedResponseCodes.length )
+        {
+            for ( int i = 0; i < expectedResponseCodes.length; i++ )
+            {
+                success &= ( expectedResponseCodes[i] == handlerRequestResponses.get( i ).responseCode );
+            }
+        }
 
+        if ( !success )
+        {
+            fail( "expected " + expectedResponseCodes + ", got " + handlerRequestResponses );
+        }
     }
 
     public void testRedirectPutFileWithFullUrl()
