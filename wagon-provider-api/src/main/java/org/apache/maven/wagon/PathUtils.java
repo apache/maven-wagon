@@ -188,7 +188,7 @@ public final class PathUtils
     }
 
     private static int endOfHostPosition(String host, int pos) {
-        //GENADI: if this is IPv6 then it will be in IPv6 Literal Addresses in URL's format, see: http://www.ietf.org/rfc/rfc2732.txt
+        //if this is IPv6 then it will be in IPv6 Literal Addresses in URL's format, see: http://www.ietf.org/rfc/rfc2732.txt
         int endOfIPv6Pos = host.indexOf( ']', pos);
         return endOfIPv6Pos > 0 ? endOfIPv6Pos + 1 : host.indexOf(":", pos);
     }

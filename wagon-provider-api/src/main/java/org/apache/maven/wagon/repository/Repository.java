@@ -182,7 +182,7 @@ public class Repository
 
         sb.append( "://" );
 
-        if(host.contains(":")) {
+        if(isIPv6Address()) {
             //If this is IPv6 then we have to sarround it with brackets '[' and ']'
             sb.append("[").append( host ).append("]");
         } else {
@@ -199,6 +199,10 @@ public class Repository
         sb.append( basedir );
 
         return sb.toString();
+    }
+
+    private boolean isIPv6Address() {
+        return host.contains(":");
     }
 
     public String getHost()
