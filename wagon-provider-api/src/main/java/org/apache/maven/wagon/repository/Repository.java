@@ -182,7 +182,12 @@ public class Repository
 
         sb.append( "://" );
 
-        sb.append( host );
+        if(host.contains(":")) {
+            //If this is IPv6 then we have to sarround it with brackets '[' and ']'
+            sb.append("[").append( host ).append("]");
+        } else {
+            sb.append( host );
+        }
 
         if ( port != WagonConstants.UNKNOWN_PORT )
         {
