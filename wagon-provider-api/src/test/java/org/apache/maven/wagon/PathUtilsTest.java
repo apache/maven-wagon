@@ -253,6 +253,41 @@ public class PathUtilsTest
         assertEquals( "/", PathUtils.basedir( "http://localhost/" ) );
     }
 
+    public void testIpV4()
+    {
+        assertUrl( "http://127.0.0.1",
+                   "http", null, null, "127.0.0.1", -1, "/" );
+        assertUrl( "http://127.0.0.1:8080",
+                   "http", null, null, "127.0.0.1", 8080, "/" );
+        assertUrl( "http://127.0.0.1/oo/rest/users",
+                   "http", null, null, "127.0.0.1", -1, "/oo/rest/users" );
+        assertUrl( "http://127.0.0.1:8080/oo/rest/users",
+                   "http", null, null, "127.0.0.1", 8080, "/oo/rest/users" );
+
+        assertUrl( "http://user:password@127.0.0.1",
+                   "http", "user", "password", "127.0.0.1", -1, "/" );
+        assertUrl( "http://user:password@127.0.0.1:8080",
+                   "http", "user", "password", "127.0.0.1", 8080, "/" );
+        assertUrl( "http://user:password@127.0.0.1/oo/rest/users",
+                   "http", "user", "password", "127.0.0.1", -1, "/oo/rest/users" );
+        assertUrl( "http://user:password@127.0.0.1:8080/oo/rest/users",
+                   "http", "user", "password", "127.0.0.1", 8080, "/oo/rest/users" );
+
+        assertUrl( "scm:svn:http://user:password@127.0.0.1:8080/oo/rest/users",
+                   "scm", "user", "password", "127.0.0.1", 8080, "/oo/rest/users" );
+    }
+
+    private void assertUrl( String url, String protocol, String user, String password, String host, int port,
+                            String basedir )
+    {
+        assertEquals( protocol, PathUtils.protocol( url ) );
+        assertEquals( user, PathUtils.user( url ) );
+        assertEquals( password, PathUtils.password( url ) );
+        assertEquals( host, PathUtils.host( url ) );
+        assertEquals( port, PathUtils.port( url ) );
+        assertEquals( basedir, PathUtils.basedir( url ) );
+    }
+
     public void testToRelative()
     {
         assertEquals( "dir", PathUtils.toRelative( new File( "/home/user" ).getAbsoluteFile(),
