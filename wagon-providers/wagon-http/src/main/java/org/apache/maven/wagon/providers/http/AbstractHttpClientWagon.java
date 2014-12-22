@@ -40,6 +40,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.utils.DateUtils;
 import org.apache.http.config.Registry;
@@ -86,9 +87,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
+import java.net.URI;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Stack;
 import java.util.Properties;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
@@ -562,20 +565,6 @@ public abstract class AbstractHttpClientWagon
         throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
 
-        //Parent directories need to be created before posting
-        try
-        {
-            mkdirs( PathUtils.dirname( resource.getName() ) );
-        }
-        catch ( HttpException he )
-        {
-            fireTransferError( resource, he, TransferEvent.REQUEST_GET );
-        }
-        catch ( IOException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-        }
-
         // preemptive for put
         // TODO: is it a good idea, though? 'Expect-continue' handshake would serve much better
 
@@ -594,6 +583,16 @@ public abstract class AbstractHttpClientWagon
             catch ( MalformedChallengeException ignore )
             {
             }
+        }
+
+        //Parent directories need to be created before posting
+        try
+        {
+            mkdirs( PathUtils.dirname( resource.getName() ) );
+        }
+        catch ( HttpException he )
+        {
+            fireTransferError( resource, he, TransferEvent.REQUEST_GET );
         }
 
         HttpPut putMethod = new HttpPut( url );
@@ -684,12 +683,93 @@ public abstract class AbstractHttpClientWagon
         return locationField.startsWith( "http" ) ? locationField : getURL( getRepository() ) + '/' + locationField;
     }
 
-    protected void mkdirs( String dirname )
-        throws HttpException, IOException
+    /**
+     * Recursively create a path, working down from the leaf to the root.
+     * <p>
+     * Borrowed from Apache Sling
+     * 
+     * @param path a directory path to create
+     * @throws HttpException
+     * @throws TransferFailedException
+     * @throws AuthorizationException
+     */
+    protected void mkdirs( String path )
+        throws HttpException, TransferFailedException, AuthorizationException
     {
-        // nothing to do
+	// Call mkdir on all parent paths, starting at the topmost one
+        final Stack<String> parents = new Stack<String>();
+        while(path.length() > 0 && !resourceExists(path)) {
+            parents.push(path);
+            path = getParentPath(path);
+        }
+        
+        while(!parents.isEmpty()) {
+        	mkdir(parents.pop());
+        }
     }
-
+    
+    /** Create a specific path using MKCOL 
+     * <p>
+     * Borrowed from Apache Sling
+     * */
+    protected void mkdir(String path) throws HttpException, TransferFailedException, AuthorizationException
+    {
+        if(!resourceExists(path)) {
+            String repositoryUrl = getRepository().getUrl();
+            String url = repositoryUrl + ( repositoryUrl.endsWith( "/" ) ? "" : "/" ) + path;
+            HttpAnyMethod method = new HttpAnyMethod("MKCOL", url);
+	    try {
+                CloseableHttpResponse response = execute( method );
+    
+                try
+                {
+                    int statusCode = response.getStatusLine().getStatusCode();
+                    String reasonPhrase = ", ReasonPhrase: " + response.getStatusLine().getReasonPhrase() + ".";
+                    switch ( statusCode )
+                    {
+                        case HttpStatus.SC_CREATED:
+                            break;
+                        case HttpStatus.SC_FORBIDDEN:
+                            throw new AuthorizationException( "Access denied to: " + url + reasonPhrase );
+    
+                        case HttpStatus.SC_UNAUTHORIZED:
+                            throw new AuthorizationException( "Not authorized " + reasonPhrase );
+    
+                        case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
+                            throw new AuthorizationException( "Not authorized by proxy " + reasonPhrase );
+    
+                        //add more entries here
+                        default:
+                            throw new TransferFailedException(
+                                "Failed to transfer file: " + url + ". Return code is: " + statusCode + reasonPhrase );
+                    }
+    
+                    EntityUtils.consume( response.getEntity() );
+                }
+                finally
+                {
+                    response.close();
+                }
+    	    }
+            catch ( IOException e )
+            {
+                throw new TransferFailedException( e.getMessage(), e );
+            }
+	}
+    }
+    
+    /** Return parent path: whatever comes before the last / in path, empty
+     *  string if no / in path.
+     */
+    protected String getParentPath(String path) {
+        final int pos = path.lastIndexOf('/');
+        if(pos > 0) {
+            return path.substring(0, pos);
+        } else {
+            return "";
+        }
+    }
+    
     public boolean resourceExists( String resourceName )
         throws TransferFailedException, AuthorizationException
     {
@@ -1161,4 +1241,30 @@ public abstract class AbstractHttpClientWagon
     {
         return maxBackoffWaitSeconds;
     }
+
+    /**
+     * A Http Client request for arbitrary HTTP methods.
+     * <p>
+     * Borrowed from Apache Sling
+     */
+    private static class HttpAnyMethod extends HttpRequestBase {
+        private final URI uri;
+        private final String method;
+        
+        HttpAnyMethod(String method, String uriString) {
+            this.uri = URI.create(uriString);
+            this.method = method;
+        }
+
+        @Override
+        public String getMethod() {
+            return method;
+        }
+        
+        @Override
+        public URI getURI() {
+            return uri;
+        }
+    };
+
 }
