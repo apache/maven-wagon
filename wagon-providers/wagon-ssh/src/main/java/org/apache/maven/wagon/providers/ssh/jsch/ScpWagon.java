@@ -168,11 +168,19 @@ public class ScpWagon
         }
     }
 
+    @Deprecated
     protected void getTransfer( Resource resource, OutputStream output, InputStream input, boolean closeInput,
                                 int maxSize )
         throws TransferFailedException
     {
         super.getTransfer( resource, output, input, closeInput, (int) resource.getContentLength() );
+    }
+
+    protected void getTransfer( Resource resource, OutputStream output, InputStream input, boolean closeInput,
+                                long maxSize )
+        throws TransferFailedException
+    {
+        super.getTransfer( resource, output, input, closeInput, resource.getContentLength() );
     }
 
     protected String readLine( InputStream in )
