@@ -47,7 +47,7 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * Scp helper for general algorithms on ssh server.
- * See {@link #putDirectory(Wagon, File, String) putDirectory(...)} for more info on bulk directory upload. 
+ * See {@link #putDirectory(Wagon, File, String) putDirectory(...)} for more info on bulk directory upload.
  */
 public class ScpHelper
 {
@@ -293,12 +293,7 @@ public class ScpHelper
             //Streams streams = executor.executeCommand( "ls -FlA " + path, false );
             Streams streams = executor.executeCommand( "ls -FlA \"" + path + "\"", false );
 
-            List<String> ret = new LSParser().parseFiles( streams.getOut() );
-            if ( ret == null || ret.isEmpty() )
-            {
-                throw new ResourceDoesNotExistException( "No such file or directory" );
-            }
-            return ret;
+            return new LSParser().parseFiles( streams.getOut() );
         }
         catch ( CommandExecutionException e )
         {
