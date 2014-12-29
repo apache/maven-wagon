@@ -25,7 +25,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 /**
- * CommandExecutorStreamProcessor 
+ * CommandExecutorStreamProcessor
  *
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
  *
@@ -41,25 +41,6 @@ public class CommandExecutorStreamProcessor
         throws IOException
     {
         Streams streams = new Streams();
-
-        while ( true )
-        {
-            String line = stderrReader.readLine();
-
-            if ( line == null )
-            {
-                break;
-            }
-
-            // TODO: I think we need to deal with exit codes instead, but IIRC there are some cases of errors that
-            // don't have exit codes ignore this error. TODO: output a warning
-            if ( !line.startsWith( "Could not chdir to home directory" )
-                 && !line.endsWith( "ttyname: Operation not supported" ) )
-            {
-                streams.setErr( streams.getErr() + line + "\n" );
-            }
-        }
-
         while ( true )
         {
             String line = stdoutReader.readLine();
@@ -82,6 +63,26 @@ public class CommandExecutorStreamProcessor
 //            {
 //                in.read( trashcan, 0, avail );
 //            }
+
+        // drain stderr next, if stream size is more than the allowed buffer size
+        // ( ie jsch has a hardcoded 32K size), the remote shell may be blocked. See WAGON-431
+        while ( true )
+        {
+            String line = stderrReader.readLine();
+
+            if ( line == null )
+            {
+                break;
+            }
+
+            // TODO: I think we need to deal with exit codes instead, but IIRC there are some cases of errors that
+            // don't have exit codes ignore this error. TODO: output a warning
+            if ( !line.startsWith( "Could not chdir to home directory" )
+                 && !line.endsWith( "ttyname: Operation not supported" ) )
+            {
+                streams.setErr( streams.getErr() + line + "\n" );
+            }
+        }
 
         return streams;
     }
