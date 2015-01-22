@@ -44,6 +44,7 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.utils.DateUtils;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -224,7 +225,7 @@ public abstract class AbstractHttpClientWagon
      * use http(s) connection pool mechanism.
      * <b>enabled by default</b>
      */
-    private final static boolean PERSISTENT_POOL =
+    private static boolean persistentPool =
         Boolean.valueOf( System.getProperty( "maven.wagon.http.pool", "true" ) );
 
     /**
@@ -266,7 +267,7 @@ public abstract class AbstractHttpClientWagon
     /**
      * Internal connection manager
      */
-    private static final PoolingHttpClientConnectionManager CONN_MAN = createConnManager();
+    private static HttpClientConnectionManager httpClientConnectionManager = createConnManager();
 
 
     /**
@@ -351,7 +352,7 @@ public abstract class AbstractHttpClientWagon
             "https", sslConnectionSocketFactory ).build();
 
         PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager( registry );
-        if ( PERSISTENT_POOL )
+        if ( persistentPool )
         {
             connManager.setDefaultMaxPerRoute( MAX_CONN_PER_ROUTE );
             connManager.setMaxTotal( MAX_CONN_TOTAL );
@@ -370,7 +371,7 @@ public abstract class AbstractHttpClientWagon
         return HttpClientBuilder.create() //
             .useSystemProperties() //
             .disableConnectionState() //
-            .setConnectionManager( CONN_MAN ) //
+            .setConnectionManager( httpClientConnectionManager ) //
             .build();
     }
 
@@ -493,10 +494,21 @@ public abstract class AbstractHttpClientWagon
 
     public void closeConnection()
     {
-        if ( !PERSISTENT_POOL )
+        if ( !persistentPool )
         {
-            CONN_MAN.closeIdleConnections( 0, TimeUnit.MILLISECONDS );
+            httpClientConnectionManager.closeIdleConnections( 0, TimeUnit.MILLISECONDS );
         }
+    }
+
+    public static void setPersistentPool( boolean persistentPool )
+    {
+        persistentPool = persistentPool;
+    }
+
+    public static void setPoolingHttpClientConnectionManager(
+        PoolingHttpClientConnectionManager poolingHttpClientConnectionManager )
+    {
+        httpClientConnectionManager = poolingHttpClientConnectionManager;
     }
 
     public void put( File source, String resourceName )
