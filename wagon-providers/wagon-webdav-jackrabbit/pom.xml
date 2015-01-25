@@ -67,6 +67,10 @@ under the License.
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
+    <dependency> <!-- required for commons-httpclient:commons-httpclient -->
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>commons-lang</groupId>
@@ -84,6 +88,7 @@ under the License.
       <!--
         The version of commons-logging that comes transitively has class loader
         problems. So we exclude it here and add a newer version below.
+        Is replaced by org.slf4j:jcl-over-slf4j
       -->
       <exclusions>
         <exclusion>
@@ -91,16 +96,6 @@ under the License.
           <artifactId>commons-logging</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-    
-    <!--
-    This dependency is here to upgrade to a version of commons-logging that is
-    newer than the one that comes transitively from commons-httpclient above.
-    -->
-    <dependency>
-       <groupId>commons-logging</groupId>
-       <artifactId>commons-logging</artifactId>
-       <version>1.1.1</version>
     </dependency>
 
     <!-- Test dependencies -->
@@ -122,13 +117,7 @@ under the License.
       <artifactId>slf4j-log4j12</artifactId>
       <scope>test</scope>
     </dependency>
-
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>jcl-over-slf4j</artifactId>
-      <scope>test</scope>
-    </dependency>
-
+ 
     <dependency>
       <groupId>biz.aQute</groupId>
       <artifactId>bnd</artifactId>
