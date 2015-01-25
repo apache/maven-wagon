@@ -548,7 +548,14 @@ public abstract class AbstractHttpClientWagon
         {
             for ( Object header : httpHeaders.keySet() )
             {
-                method.addRequestHeader( (String) header, httpHeaders.getProperty( (String) header ) );
+                if ( "User-Agent".equals( header ) )
+                {
+                    method.setRequestHeader( (String) header, httpHeaders.getProperty( (String) header ) );
+                }
+                else
+                {
+                    method.addRequestHeader( (String) header, httpHeaders.getProperty( (String) header ) );
+                }
             }
         }
 
