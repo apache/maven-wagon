@@ -569,7 +569,7 @@ public abstract class AbstractHttpClientWagon
         Properties props = new Properties();
 
         InputStream is = AbstractHttpClientWagon.class.getResourceAsStream(
-            "/META-INF/maven/org.apache.maven.wagon/wagon-http/pom.properties" );
+            "/META-INF/maven/org.apache.maven.wagon/wagon-webdav-jackrabbit/pom.properties" );
         if ( is != null )
         {
             try
