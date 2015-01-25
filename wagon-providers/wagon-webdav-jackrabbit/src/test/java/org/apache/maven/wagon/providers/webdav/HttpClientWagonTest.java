@@ -115,6 +115,11 @@ public class HttpClientWagonTest
         header = method.getRequestHeader( "Accept-Encoding" );
         assertNotNull( header );
         assertEquals( "gzip", header.getValue() );
+
+        header = method.getRequestHeader( "User-Agent" );
+        assertNotNull( header );
+        // during test-phase /META-INF/maven/org.apache.maven.wagon/*/pom.properties hasn't been created yet
+        assertTrue( header.getValue().startsWith( "Apache-Maven-Wagon/unknown-version (Java " ) );
     }
 
     public void testTurnOffDefaultHeaders()

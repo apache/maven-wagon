@@ -54,6 +54,7 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.apache.maven.wagon.shared.http.EncodingUtil;
+import org.codehaus.plexus.util.IOUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -540,6 +541,7 @@ public abstract class AbstractHttpClientWagon
             method.addRequestHeader( "Pragma", "no-cache" );
             method.addRequestHeader( "Expires", "0" );
             method.addRequestHeader( "Accept-Encoding", "gzip" );
+            method.addRequestHeader( "User-Agent", DEFAULT_USER_AGENT );
         }
 
         if ( httpHeaders != null )
@@ -558,6 +560,33 @@ public abstract class AbstractHttpClientWagon
                 method.addRequestHeader( header );
             }
         }
+    }
+    
+    private static String DEFAULT_USER_AGENT = getDefaultUserAgent();
+
+    private static String getDefaultUserAgent()
+    {
+        Properties props = new Properties();
+
+        InputStream is = AbstractHttpClientWagon.class.getResourceAsStream(
+            "/META-INF/maven/org.apache.maven.wagon/wagon-http/pom.properties" );
+        if ( is != null )
+        {
+            try
+            {
+                props.load( is );
+            }
+            catch ( IOException ignore )
+            {
+            }
+            finally
+            {
+                IOUtil.close( is );
+            }
+        }
+
+        String ver = props.getProperty( "version", "unknown-version" );
+        return "Apache-Maven-Wagon/" + ver + " (Java " + System.getProperty( "java.version" ) + "; ";
     }
 
     /**
