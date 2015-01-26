@@ -33,7 +33,7 @@ public final class PathUtils
     private PathUtils()
     {
     }
-    
+
     /**
      * Returns the directory path portion of a file specification string.
      * Matches the equally named unix command.
@@ -135,14 +135,14 @@ public final class PathUtils
     {
         String authorization = authorization( url );
         int index = authorization.indexOf( '@' );
-        if ( index >= 0 )
-        {
-            return authorization.substring( index + 1 );
-        }
-        else
-        {
-            return authorization;
-        }
+        String host = index >= 0 ?
+                authorization.substring( index + 1 ) :
+                authorization;
+        //In case we have IPv6 in the host portion of url
+        // we have to remove brackets '[' and ']'
+        return host.charAt( 0 ) == '[' && host.charAt( host.length() - 1 ) == ']' ?
+                host.substring( 1, host.length() - 1 ) :
+                host;
     }
 
     /**
@@ -185,20 +185,22 @@ public final class PathUtils
 
         pos = host.indexOf( '@' );
 
-        if ( pos > 0 )
-        {
-            pos = host.indexOf( ':', pos );
-        }
-        else
-        {
-            pos = host.indexOf( ":" );
-        }
-
+        pos = pos > 0 ?
+                endOfHostPosition( host, pos ) :
+                endOfHostPosition( host, 0 );
         if ( pos > 0 )
         {
             host = host.substring( 0, pos );
         }
         return host;
+    }
+
+    private static int endOfHostPosition(String host, int pos)
+    {
+        //if this is IPv6 then it will be in IPv6 Literal Addresses in URL's format
+        // see: http://www.ietf.org/rfc/rfc2732.txt
+        int endOfIPv6Pos = host.indexOf( ']', pos );
+        return endOfIPv6Pos > 0 ? endOfIPv6Pos + 1 : host.indexOf( ":", pos );
     }
 
     /**

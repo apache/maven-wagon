@@ -154,7 +154,7 @@ public class PathUtilsTest
     public void testFileBasedir()
     {
         // see http://www.mozilla.org/quality/networking/testing/filetests.html
-        
+
         // strict forms
         assertEquals( "c:/temp", PathUtils.basedir( "file:///c|/temp" ) );
         assertEquals( "localhost", PathUtils.host( "file:///c|/temp" ) );
@@ -306,4 +306,34 @@ public class PathUtilsTest
                                                  new File( "C:/home/user" ).getAbsolutePath() ) );
     }
 
+    public void testIPv6Related()
+    {
+        assertUrl( "http://user:password@[fff:::1]:7891/oo/rest/users", "user", "password", "fff:::1", 7891 );
+        assertUrl( "http://[fff:::1]:7891/oo/rest/users", null, null, "fff:::1", 7891 );
+        assertUrl( "http://user:password@[fff:::1]/oo/rest/users", "user", "password", "fff:::1", -1 );
+        assertUrl( "http://user:password@[fff:::1]:7891", "user", "password", "fff:::1", 7891 );
+
+        assertUrl( "http://user:password@[fff:000::222:1111]:7891/oo/rest/users", "user", "password", "fff:000::222:1111", 7891 );
+        assertUrl( "http://[fff:000::222:1111]:7891/oo/rest/users", null, null, "fff:000::222:1111", 7891 );
+        assertUrl( "http://user:password@[fff:000::222:1111]/oo/rest/users", "user", "password", "fff:000::222:1111", -1 );
+        assertUrl( "http://user:password@[fff:000::222:1111]:7891", "user", "password", "fff:000::222:1111", 7891 );
+
+        assertUrl( "http://user:password@16.60.56.58:7891/oo/rest/users", "user", "password", "16.60.56.58", 7891 );
+        assertUrl( "http://16.60.56.58:7891/oo/rest/users", null, null, "16.60.56.58", 7891 );
+        assertUrl( "http://user:password@16.60.56.58/oo/rest/users", "user", "password", "16.60.56.58", -1 );
+        assertUrl( "http://user:password@16.60.56.58:7891", "user", "password", "16.60.56.58", 7891 );
+
+        assertUrl( "http://user:password@16.60.56.58:7891/oo/rest/users", "user", "password", "16.60.56.58", 7891 );
+        assertUrl( "http://16.60.56.58:7891/oo/rest/users", null, null, "16.60.56.58", 7891 );
+        assertUrl( "http://user:password@16.60.56.58/oo/rest/users", "user", "password", "16.60.56.58", -1 );
+        assertUrl( "http://user:password@16.60.56.58:7891", "user", "password", "16.60.56.58", 7891 );
+    }
+
+    private void assertUrl( String url, String user, String password, String host, int port )
+    {
+        assertEquals( user, PathUtils.user( url ) );
+        assertEquals( password, PathUtils.password( url ) );
+        assertEquals( host, PathUtils.host( url ) );
+        assertEquals( port, PathUtils.port( url ) );
+    }
 }

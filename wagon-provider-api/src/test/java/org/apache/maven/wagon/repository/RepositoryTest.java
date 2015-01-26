@@ -105,4 +105,72 @@ public class RepositoryTest
         assertEquals( "http://www.ibiblio.org", repository.getUrl() );
 
     }
+
+    public void testIPv6Related()
+    {
+        assertRepository( "http://user:password@[fff:::1]:7891/oo/rest/users",
+                "http://[fff:::1]:7891/oo/rest/users", "/oo/rest/users",
+                "user", "password", "fff:::1", 7891 );
+        assertRepository( "http://[fff:::1]:7891/oo/rest/users",
+                "http://[fff:::1]:7891/oo/rest/users", "/oo/rest/users",
+                null, null, "fff:::1", 7891 );
+        assertRepository( "http://user:password@[fff:::1]/oo/rest/users",
+                "http://[fff:::1]/oo/rest/users", "/oo/rest/users",
+                "user", "password", "fff:::1", -1 );
+        assertRepository( "http://user:password@[fff:::1]:7891",
+                "http://[fff:::1]:7891", "/",
+                "user", "password", "fff:::1", 7891 );
+
+        assertRepository( "http://user:password@[fff:000::222:1111]:7891/oo/rest/users",
+                "http://[fff:000::222:1111]:7891/oo/rest/users", "/oo/rest/users",
+                "user", "password", "fff:000::222:1111", 7891 );
+        assertRepository( "http://[fff:000::222:1111]:7891/oo/rest/users",
+                "http://[fff:000::222:1111]:7891/oo/rest/users", "/oo/rest/users",
+                null, null, "fff:000::222:1111", 7891 );
+        assertRepository( "http://user:password@[fff:000::222:1111]/oo/rest/users",
+                "http://[fff:000::222:1111]/oo/rest/users", "/oo/rest/users",
+                "user", "password", "fff:000::222:1111", -1 );
+        assertRepository( "http://user:password@[fff:000::222:1111]:7891",
+                "http://[fff:000::222:1111]:7891", "/",
+                "user", "password", "fff:000::222:1111", 7891 );
+
+        assertRepository( "http://user:password@16.60.56.58:7891/oo/rest/users",
+                "http://16.60.56.58:7891/oo/rest/users", "/oo/rest/users",
+                "user", "password", "16.60.56.58", 7891 );
+        assertRepository( "http://16.60.56.58:7891/oo/rest/users",
+                "http://16.60.56.58:7891/oo/rest/users", "/oo/rest/users",
+                null, null, "16.60.56.58", 7891 );
+        assertRepository( "http://user:password@16.60.56.58/oo/rest/users",
+                "http://16.60.56.58/oo/rest/users", "/oo/rest/users",
+                "user", "password", "16.60.56.58", -1 );
+        assertRepository( "http://user:password@16.60.56.58:7891",
+                "http://16.60.56.58:7891", "/",
+                "user", "password", "16.60.56.58", 7891 );
+
+        assertRepository( "http://user:password@16.60.56.58:7891/oo/rest/users",
+                "http://16.60.56.58:7891/oo/rest/users", "/oo/rest/users",
+                "user", "password", "16.60.56.58", 7891 );
+        assertRepository( "http://16.60.56.58:7891/oo/rest/users",
+                "http://16.60.56.58:7891/oo/rest/users", "/oo/rest/users",
+                null, null, "16.60.56.58", 7891 );
+        assertRepository( "http://user:password@16.60.56.58/oo/rest/users",
+                "http://16.60.56.58/oo/rest/users", "/oo/rest/users",
+                "user", "password", "16.60.56.58", -1 );
+        assertRepository( "http://user:password@16.60.56.58:7891",
+                "http://16.60.56.58:7891", "/",
+                "user", "password", "16.60.56.58", 7891 );
+    }
+
+    private void assertRepository(  String url, String repoUrl, String baseDir,
+                                    String user, String password,
+                                    String host, int port )
+    {
+        Repository repo = new Repository( String.valueOf( System.currentTimeMillis() ), url );
+        assertEquals( repoUrl, repo.getUrl() );
+        assertEquals( baseDir, repo.getBasedir() );
+        assertEquals( host, repo.getHost() );
+        assertEquals( user, repo.getUsername() );
+        assertEquals( password, repo.getPassword() );
+        assertEquals( port, repo.getPort() );
+    }
 }
