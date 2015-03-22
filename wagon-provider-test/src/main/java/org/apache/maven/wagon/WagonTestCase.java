@@ -34,7 +34,9 @@ import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.util.FileUtils;
 import org.easymock.IAnswer;
 
+// CHECKSTYLE_OFF: AvoidStarImport
 import static org.easymock.EasyMock.*;
+//CHECKSTYLE_ON: AvoidStarImport
 
 import java.io.File;
 import java.io.IOException;
@@ -70,7 +72,7 @@ public abstract class WagonTestCase
         }
     }
 
-    protected static String POM = "pom.xml";
+    protected static final String POM = "pom.xml";
 
     protected Repository localRepository;
 
@@ -249,8 +251,10 @@ public abstract class WagonTestCase
             setupRepositories();
             setupWagonTestingFixtures();
             int expectedSize = putFile();
+            // CHECKSTYLE_OFF: MagicNumber
             getIfNewer( getExpectedLastModifiedOnGet( testRepository, new Resource( resource ) ) + 30000, false,
                         expectedSize );
+            // CHECKSTYLE_ON: MagicNumber
         }
     }
 
@@ -743,7 +747,7 @@ public abstract class WagonTestCase
 
         for ( String filename : filenames )
         {
-            assertTrue( "Filename '" + filename + "' should be in list.", list.contains(filename) );
+            assertTrue( "Filename '" + filename + "' should be in list.", list.contains( filename ) );
         }
 
         // WAGON-250

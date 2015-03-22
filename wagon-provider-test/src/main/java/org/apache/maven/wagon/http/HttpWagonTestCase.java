@@ -77,6 +77,8 @@ import java.util.zip.GZIPOutputStream;
 public abstract class HttpWagonTestCase
     extends StreamingWagonTestCase
 {
+    public static final int SC_TOO_MANY_REQUESTS = 429;
+
     private Server server;
 
     protected void setupWagonTestingFixtures()
@@ -262,13 +264,13 @@ public abstract class HttpWagonTestCase
                 {
                     if ( called.get() )
                     {
-                        response.setStatus( 200 );
+                        response.setStatus( HttpServletResponse.SC_OK );
                         ( (Request) request ).setHandled( true );
                     }
                     else
                     {
                         called.set( true );
-                        response.setStatus( 429 );
+                        response.setStatus( SC_TOO_MANY_REQUESTS );
                         ( (Request) request ).setHandled( true );
 
                     }
@@ -415,7 +417,7 @@ public abstract class HttpWagonTestCase
                     else
                     {
                         called.set( true );
-                        response.setStatus( 429 );
+                        response.setStatus( SC_TOO_MANY_REQUESTS );
                         ( (Request) request ).setHandled( true );
                     }
                 }
@@ -555,12 +557,13 @@ public abstract class HttpWagonTestCase
 
         if ( supportProxyPreemptiveAuthentication() )
         {
-            assertEquals( 200, handler.handlerRequestResponses.get( 0 ).responseCode );
+            assertEquals( HttpServletResponse.SC_OK, handler.handlerRequestResponses.get( 0 ).responseCode );
         }
         else
         {
-            assertEquals( 407, handler.handlerRequestResponses.get( 0 ).responseCode );
-            assertEquals( 200, handler.handlerRequestResponses.get( 1 ).responseCode );
+            assertEquals( HttpServletResponse.SC_PROXY_AUTHENTICATION_REQUIRED,
+                          handler.handlerRequestResponses.get( 0 ).responseCode );
+            assertEquals( HttpServletResponse.SC_OK, handler.handlerRequestResponses.get( 1 ).responseCode );
         }
 
     }
@@ -586,12 +589,13 @@ public abstract class HttpWagonTestCase
 
         if ( supportProxyPreemptiveAuthentication() )
         {
-            assertEquals( 200, handler.handlerRequestResponses.get( 0 ).responseCode );
+            assertEquals( HttpServletResponse.SC_OK, handler.handlerRequestResponses.get( 0 ).responseCode );
         }
         else
         {
-            assertEquals( 407, handler.handlerRequestResponses.get( 0 ).responseCode );
-            assertEquals( 200, handler.handlerRequestResponses.get( 1 ).responseCode );
+            assertEquals( HttpServletResponse.SC_PROXY_AUTHENTICATION_REQUIRED,
+                          handler.handlerRequestResponses.get( 0 ).responseCode );
+            assertEquals( HttpServletResponse.SC_OK, handler.handlerRequestResponses.get( 1 ).responseCode );
         }
 
     }
@@ -627,7 +631,8 @@ public abstract class HttpWagonTestCase
 
         String redirectUrl = protocol + "://localhost:" + server.getConnectors()[0].getLocalPort();
 
-        RedirectHandler redirectHandler = new RedirectHandler( "Found", 303, redirectUrl, null );
+        RedirectHandler redirectHandler =
+            new RedirectHandler( "Found", HttpServletResponse.SC_SEE_OTHER, redirectUrl, null );
 
         redirectServer.setHandler( redirectHandler );
 
@@ -647,8 +652,8 @@ public abstract class HttpWagonTestCase
             String found = FileUtils.fileRead( tmpResult );
             assertEquals( "found:'" + found + "'", "Hello, World!", found );
 
-            checkHandlerResult( handler.handlerRequestResponses, 200 );
-            checkHandlerResult( redirectHandler.handlerRequestResponses, 302 );
+            checkHandlerResult( handler.handlerRequestResponses, HttpServletResponse.SC_OK );
+            checkHandlerResult( redirectHandler.handlerRequestResponses, HttpServletResponse.SC_FOUND );
         }
         finally
         {
@@ -691,7 +696,8 @@ public abstract class HttpWagonTestCase
 
         String redirectUrl = protocol + "://localhost:" + server.getConnectors()[0].getLocalPort();
 
-        RedirectHandler redirectHandler = new RedirectHandler( "Found", 303, redirectUrl, null );
+        RedirectHandler redirectHandler =
+            new RedirectHandler( "Found", HttpServletResponse.SC_SEE_OTHER, redirectUrl, null );
 
         redirectServer.setHandler( redirectHandler );
 
@@ -707,8 +713,8 @@ public abstract class HttpWagonTestCase
             String found = FileUtils.fileRead( tmpResult );
             assertEquals( "found:'" + found + "'", "Hello, World!", found );
 
-            checkHandlerResult( handler.handlerRequestResponses, 200 );
-            checkHandlerResult( redirectHandler.handlerRequestResponses, 302 );
+            checkHandlerResult( handler.handlerRequestResponses, HttpServletResponse.SC_OK );
+            checkHandlerResult( redirectHandler.handlerRequestResponses, HttpServletResponse.SC_FOUND );
         }
         finally
         {
@@ -757,7 +763,8 @@ public abstract class HttpWagonTestCase
 
         String redirectUrl = protocol + "://localhost:" + realServer.getConnectors()[0].getLocalPort();
 
-        RedirectHandler redirectHandler = new RedirectHandler( "Found", 303, redirectUrl, repositoryDirectory );
+        RedirectHandler redirectHandler =
+            new RedirectHandler( "Found", HttpServletResponse.SC_SEE_OTHER, redirectUrl, repositoryDirectory );
 
         redirectServer.setHandler( redirectHandler );
 
@@ -804,8 +811,8 @@ public abstract class HttpWagonTestCase
     protected void checkRequestResponseForRedirectPutFromStreamWithFullUrl( PutHandler putHandler,
                                                                             RedirectHandler redirectHandler )
     {
-        checkHandlerResult( putHandler.handlerRequestResponses, 201 );
-        checkHandlerResult( redirectHandler.handlerRequestResponses, 302 );
+        checkHandlerResult( putHandler.handlerRequestResponses, HttpServletResponse.SC_CREATED );
+        checkHandlerResult( redirectHandler.handlerRequestResponses, HttpServletResponse.SC_FOUND );
     }
 
     public void testRedirectPutFromStreamRelativeUrl()
@@ -828,7 +835,8 @@ public abstract class HttpWagonTestCase
         addConnectors( redirectServer );
 
         RedirectHandler redirectHandler =
-            new RedirectHandler( "Found", 303, "/redirectRequest/foo", repositoryDirectory );
+            new RedirectHandler( "Found", HttpServletResponse.SC_SEE_OTHER, "/redirectRequest/foo",
+                                 repositoryDirectory );
 
         redirectServer.setHandler( redirectHandler );
 
@@ -877,7 +885,8 @@ public abstract class HttpWagonTestCase
                                                                                 RedirectHandler redirectHandler )
     {
         checkHandlerResult( putHandler.handlerRequestResponses );
-        checkHandlerResult( redirectHandler.handlerRequestResponses, 302, 201 );
+        checkHandlerResult( redirectHandler.handlerRequestResponses, HttpServletResponse.SC_FOUND,
+                            HttpServletResponse.SC_CREATED );
     }
 
     protected void checkHandlerResult( List<HandlerRequestResponse> handlerRequestResponses,
@@ -934,7 +943,8 @@ public abstract class HttpWagonTestCase
 
         String redirectUrl = protocol + "://localhost:" + realServer.getConnectors()[0].getLocalPort();
 
-        RedirectHandler redirectHandler = new RedirectHandler( "Found", 303, redirectUrl, repositoryDirectory );
+        RedirectHandler redirectHandler =
+            new RedirectHandler( "Found", HttpServletResponse.SC_SEE_OTHER, redirectUrl, repositoryDirectory );
 
         redirectServer.setHandler( redirectHandler );
 
@@ -995,7 +1005,8 @@ public abstract class HttpWagonTestCase
         addConnectors( redirectServer );
 
         RedirectHandler redirectHandler =
-            new RedirectHandler( "Found", 303, "/redirectRequest/foo", repositoryDirectory );
+            new RedirectHandler( "Found", HttpServletResponse.SC_SEE_OTHER, "/redirectRequest/foo",
+                                 repositoryDirectory );
 
         redirectServer.setHandler( redirectHandler );
 
@@ -1036,6 +1047,10 @@ public abstract class HttpWagonTestCase
     }
 
 
+    /**
+     * 
+     */
+    @SuppressWarnings( "checkstyle:visibilitymodifier" )
     public static class RedirectHandler
         extends AbstractHandler
     {
@@ -1083,7 +1098,9 @@ public abstract class HttpWagonTestCase
         // what an UGLY hack!
         // but apparently jetty needs some time to free up resources
         // <5s: broken test :(
+        // CHECKSTYLE_OFF: MagicNumber
         Thread.sleep( 5001L );
+        // CHECKSTYLE_ON: MagicNumber
 
         Server proxyServer = new Server( 0 );
 
@@ -1139,7 +1156,9 @@ public abstract class HttpWagonTestCase
         // what an UGLY hack!
         // but apparently jetty needs some time to free up resources
         // <5s: broken test :(
+        // CHECKSTYLE_OFF: MagicNumber
         Thread.sleep( 5001L );
+        // CHECKSTYLE_ON: MagicNumber
 
         Server proxyServer = new Server( 0 );
 
@@ -1529,7 +1548,7 @@ public abstract class HttpWagonTestCase
                     else
                     {
                         called.set( true );
-                        response.setStatus( 429 );
+                        response.setStatus( SC_TOO_MANY_REQUESTS );
                         ( (Request) request ).setHandled( true );
                     }
                 }
@@ -1817,14 +1836,14 @@ public abstract class HttpWagonTestCase
         {
             assertEquals( "not 1 security handler use " + sh.handlerRequestResponses, 1,
                           sh.handlerRequestResponses.size() );
-            assertEquals( 200, sh.handlerRequestResponses.get( 0 ).responseCode );
+            assertEquals( HttpServletResponse.SC_OK, sh.handlerRequestResponses.get( 0 ).responseCode );
         }
         else
         {
             assertEquals( "not 2 security handler use " + sh.handlerRequestResponses, 2,
                           sh.handlerRequestResponses.size() );
-            assertEquals( 401, sh.handlerRequestResponses.get( 0 ).responseCode );
-            assertEquals( 200, sh.handlerRequestResponses.get( 1 ).responseCode );
+            assertEquals( HttpServletResponse.SC_UNAUTHORIZED, sh.handlerRequestResponses.get( 0 ).responseCode );
+            assertEquals( HttpServletResponse.SC_OK, sh.handlerRequestResponses.get( 1 ).responseCode );
 
         }
     }
@@ -1879,6 +1898,10 @@ public abstract class HttpWagonTestCase
         }
     }
 
+    /**
+     * 
+     */
+    @SuppressWarnings( "checkstyle:visibilitymodifier" )
     public static class PutHandler
         extends AbstractHandler
     {
@@ -1898,15 +1921,15 @@ public abstract class HttpWagonTestCase
         public void handle( String target, HttpServletRequest request, HttpServletResponse response, int dispatch )
             throws IOException, ServletException
         {
-            Request base_request =
+            Request baseRequest =
                 request instanceof Request ? (Request) request : HttpConnection.getCurrentConnection().getRequest();
 
-            if ( base_request.isHandled() || !"PUT".equals( base_request.getMethod() ) )
+            if ( baseRequest.isHandled() || !"PUT".equals( baseRequest.getMethod() ) )
             {
                 return;
             }
 
-            base_request.setHandled( true );
+            baseRequest.setHandled( true );
 
             File file = new File( resourceBase, URLDecoder.decode( request.getPathInfo() ) );
             file.getParentFile().mkdirs();
@@ -1951,19 +1974,25 @@ public abstract class HttpWagonTestCase
             if ( request.getHeader( "Proxy-Authorization" ) == null )
             {
                 handlerRequestResponses.add(
-                    new HandlerRequestResponse( request.getMethod(), 407, request.getRequestURI() ) );
-                response.setStatus( 407 );
+                    new HandlerRequestResponse( request.getMethod(),
+                                                HttpServletResponse.SC_PROXY_AUTHENTICATION_REQUIRED,
+                                                request.getRequestURI() ) );
+                response.setStatus( HttpServletResponse.SC_PROXY_AUTHENTICATION_REQUIRED );
                 response.addHeader( "Proxy-Authenticate", "Basic realm=\"Squid proxy-caching web server\"" );
 
                 ( (Request) request ).setHandled( true );
                 return;
             }
             handlerRequestResponses.add(
-                new HandlerRequestResponse( request.getMethod(), 200, request.getRequestURI() ) );
+                new HandlerRequestResponse( request.getMethod(), HttpServletResponse.SC_OK, request.getRequestURI() ) );
             super.handle( target, request, response, dispatch );
         }
     }
 
+    /**
+     * 
+     */
+    @SuppressWarnings( "checkstyle:visibilitymodifier" )
     private static class TestHeaderHandler
         extends AbstractHandler
     {
@@ -2018,6 +2047,10 @@ public abstract class HttpWagonTestCase
         return sh;
     }
 
+    /**
+     * 
+     */
+    @SuppressWarnings( "checkstyle:visibilitymodifier" )
     public static class TestSecurityHandler
         extends SecurityHandler
     {
@@ -2037,6 +2070,10 @@ public abstract class HttpWagonTestCase
 
     }
 
+    /**
+     * 
+     */
+    @SuppressWarnings( "checkstyle:visibilitymodifier" )
     public static class HandlerRequestResponse
     {
         public String method;

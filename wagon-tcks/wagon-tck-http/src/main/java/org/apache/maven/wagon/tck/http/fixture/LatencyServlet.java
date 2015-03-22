@@ -32,6 +32,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.codehaus.plexus.util.IOUtil;
 
+/**
+ * 
+ */
 public class LatencyServlet
     extends HttpServlet
 {
@@ -63,6 +66,7 @@ public class LatencyServlet
                 }
                 catch ( InterruptedException e )
                 {
+                    // ignore
                 }
             }
 

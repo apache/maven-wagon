@@ -24,6 +24,9 @@ import java.io.OutputStream;
 
 import org.apache.maven.wagon.authorization.AuthorizationException;
 
+/**
+ * 
+ */
 public interface StreamingWagon
     extends Wagon
 {
@@ -58,8 +61,8 @@ public interface StreamingWagon
         throws ResourceDoesNotExistException, TransferFailedException, AuthorizationException;
 
     /**
-     * @deprecated due to unknown contentLength various http(s) implementation will use a chuncked transfer encoding mode
-     *             you must take care you http target server supports that (ngnix don't !).
+     * @deprecated due to unknown contentLength various http(s) implementation will use a chuncked transfer encoding
+     *             mode you must take care you http target server supports that (ngnix don't !).
      *             <b>So in case of http(s) transport layer avoid using this. Will be remove in 3.0</b>
      * Copy from a local input stream to remote.
      * 

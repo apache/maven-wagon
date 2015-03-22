@@ -19,7 +19,6 @@ package org.apache.maven.wagon.providers.webdav;
  * under the License.
  */
 
-import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
@@ -75,7 +74,7 @@ public class WebDavWagon
      * <p/>
      * NOTE: The order of the mapping becomes the search order.
      */
-    private static final String[][] protocolMap =
+    private static final String[][] PROTOCOL_MAP =
         new String[][]{ { "dav:http://", "http://" },    /* maven 2.0.x url string format. (violates URI spec) */
             { "dav:https://", "https://" },  /* maven 2.0.x url string format. (violates URI spec) */
             { "dav+http://", "http://" },    /* URI spec compliant (protocol+transport) */
@@ -99,7 +98,6 @@ public class WebDavWagon
      *
      * @param dir path to be created in server from repository basedir
      * @throws IOException
-     * @throws HttpException
      * @throws TransferFailedException
      */
     protected void mkdirs( String dir )
@@ -257,9 +255,9 @@ public class WebDavWagon
                         {
                             if ( i == 0 )
                             {
-                                //by design jackrabbit webdav sticks parent directory as the first entry
+                                // by design jackrabbit webdav sticks parent directory as the first entry
                                 // so we need to ignore this entry
-                                // http://www.nabble.com/Extra-entry-in-get-file-list-with-jackrabbit-webdav-td21262786.html
+                           // http://www.nabble.com/Extra-entry-in-get-file-list-with-jackrabbit-webdav-td21262786.html
                                 // http://www.webdav.org/specs/rfc4918.html#rfc.section.9.1
                                 continue;
                             }
@@ -306,10 +304,10 @@ public class WebDavWagon
         String url = repository.getUrl();
 
         // Process mappings first.
-        for ( String[] entry : protocolMap )
+        for ( String[] entry : PROTOCOL_MAP )
         {
             String protocol = entry[0];
-            if ( url.startsWith(protocol) )
+            if ( url.startsWith( protocol ) )
             {
                 return entry[1] + url.substring( protocol.length() );
             }

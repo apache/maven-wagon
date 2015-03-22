@@ -46,6 +46,9 @@ import java.net.URISyntaxException;
 
 import static org.apache.maven.wagon.tck.http.util.TestUtil.getResource;
 
+/**
+ * 
+ */
 public class ServerFixture
 {
     private static Logger logger = Logger.getLogger( ServerFixture.class );
@@ -189,7 +192,7 @@ public class ServerFixture
         server.start();
 
         int total = 0;
-        while ( total < 3000 && !server.isStarted() )
+        while ( total < 3 * 1000 && !server.isStarted() )
         {
             server.wait( 10 );
             total += 10;

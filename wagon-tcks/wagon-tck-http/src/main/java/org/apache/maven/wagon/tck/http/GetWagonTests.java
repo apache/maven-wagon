@@ -47,9 +47,14 @@ import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 import static org.apache.maven.wagon.tck.http.Assertions.assertFileContentsFromResource;
 
+/**
+ * 
+ */
 public class GetWagonTests
     extends HttpWagonTests
 {
+    private static final int TWO_SECONDS = 2000;
+    private static final int ONE_MINUTE = 60000;
 
     @Test
     public void basic()
@@ -85,7 +90,7 @@ public class GetWagonTests
         throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
         TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        getServerFixture().addServlet( "/slow/*", new LatencyServlet( 2000 ) );
+        getServerFixture().addServlet( "/slow/*", new LatencyServlet( TWO_SECONDS ) );
         testSuccessfulGet( "slow/large.txt", "large.txt" );
     }
 
@@ -94,7 +99,7 @@ public class GetWagonTests
         throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
         TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
-        Servlet servlet = new LatencyServlet( 2000 );
+        Servlet servlet = new LatencyServlet( TWO_SECONDS );
         getServerFixture().addServlet( "/slow/*", servlet );
         testSuccessfulGet( "slow/large.txt", "large.txt" );
     }
@@ -128,7 +133,7 @@ public class GetWagonTests
 
                     if ( getWagon() instanceof StreamWagon )
                     {
-                        logger.info( "Connection timeout is: " + getWagon().getTimeout() );
+                        LOGGER.info( "Connection timeout is: " + getWagon().getTimeout() );
                     }
 
                     File target = newTempFile();
@@ -173,15 +178,15 @@ public class GetWagonTests
 
         try
         {
-            logger.info( "Waiting 60 seconds for wagon timeout." );
-            t.join( 30000 );
+            LOGGER.info( "Waiting 60 seconds for wagon timeout." );
+            t.join( ONE_MINUTE );
         }
         catch ( InterruptedException e )
         {
             e.printStackTrace();
         }
 
-        logger.info( "Interrupting thread." );
+        LOGGER.info( "Interrupting thread." );
         t.interrupt();
 
         assertTrue( "TransferFailedException should have been thrown.", holder.getValue() );
@@ -218,7 +223,8 @@ public class GetWagonTests
         TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         getServerFixture().addServlet( "/moved.txt",
-                                       new RedirectionServlet( HttpServletResponse.SC_MOVED_PERMANENTLY, "/base.txt" ) );
+                                       new RedirectionServlet( HttpServletResponse.SC_MOVED_PERMANENTLY,
+                                                               "/base.txt" ) );
 
         testSuccessfulGet( "moved.txt" );
     }
@@ -229,7 +235,8 @@ public class GetWagonTests
         TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
         getServerFixture().addServlet( "/moved.txt",
-                                       new RedirectionServlet( HttpServletResponse.SC_MOVED_TEMPORARILY, "/base.txt" ) );
+                                       new RedirectionServlet( HttpServletResponse.SC_MOVED_TEMPORARILY,
+                                                               "/base.txt" ) );
 
         testSuccessfulGet( "moved.txt" );
     }
@@ -317,6 +324,7 @@ public class GetWagonTests
      * case of the Sun HTTP implementation, this is the default limit.
      */
     @Test
+    @SuppressWarnings( "checkstyle:methodname" )
     public void permanentMove_TooManyRedirects_limit20()
         throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
         TransferFailedException, ResourceDoesNotExistException, AuthorizationException
@@ -345,6 +353,7 @@ public class GetWagonTests
      * case of the Sun HTTP implementation, this is the default limit.
      */
     @Test
+    @SuppressWarnings( "checkstyle:methodname" )
     public void temporaryMove_TooManyRedirects_limit20()
         throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
         ResourceDoesNotExistException, AuthorizationException
@@ -510,7 +519,7 @@ public class GetWagonTests
 
         if ( getWagon() instanceof StreamWagon )
         {
-            logger.info( "Connection timeout is: " + getWagon().getTimeout() );
+            LOGGER.info( "Connection timeout is: " + getWagon().getTimeout() );
         }
 
         File target = newTempFile();

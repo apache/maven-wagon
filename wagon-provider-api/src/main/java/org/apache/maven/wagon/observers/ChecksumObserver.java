@@ -109,8 +109,10 @@ public class ChecksumObserver
      * @param binaryData Array containing the digest
      * @return Encoded hex string, or null if encoding failed
      */
+    @SuppressWarnings( "checkstyle:magicnumber" )
     protected String encode( byte[] binaryData )
     {
+        
         if ( binaryData.length != 16 && binaryData.length != 20 )
         {
             int bitLength = binaryData.length * 8;

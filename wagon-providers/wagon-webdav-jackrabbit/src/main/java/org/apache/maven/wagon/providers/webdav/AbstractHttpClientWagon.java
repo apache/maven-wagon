@@ -377,6 +377,7 @@ public abstract class AbstractHttpClientWagon
             fireTransferDebug( url + " - Status code: " + statusCode );
 
             // Check that we didn't run out of retries.
+            // CHECKSTYLE_OFF: AvoidNestedBlocks
             switch ( statusCode )
             {
                 // Success Codes
@@ -386,7 +387,8 @@ public abstract class AbstractHttpClientWagon
                 case HttpStatus.SC_NO_CONTENT:  // 204
                     break;
 
-                // handle all redirect even if http specs says " the user agent MUST NOT automatically redirect the request unless it can be confirmed by the user"
+                // handle all redirect even if http specs says
+                // " the user agent MUST NOT automatically redirect the request unless it can be confirmed by the user"
                 case HttpStatus.SC_MOVED_PERMANENTLY: // 301
                 case HttpStatus.SC_MOVED_TEMPORARILY: // 302
                 case HttpStatus.SC_SEE_OTHER: // 303
@@ -418,6 +420,7 @@ public abstract class AbstractHttpClientWagon
                     throw e;
                 }
             }
+            // CHECKSTYLE_ON: AvoidNestedBlocks
 
             firePutCompleted( resource, source );
         }
@@ -569,7 +572,7 @@ public abstract class AbstractHttpClientWagon
         }
     }
     
-    private static String DEFAULT_USER_AGENT = getDefaultUserAgent();
+    private static final String DEFAULT_USER_AGENT = getDefaultUserAgent();
 
     private static String getDefaultUserAgent()
     {
@@ -585,6 +588,7 @@ public abstract class AbstractHttpClientWagon
             }
             catch ( IOException ignore )
             {
+                // ignore
             }
             finally
             {
@@ -678,6 +682,7 @@ public abstract class AbstractHttpClientWagon
 
         // TODO [BP]: according to httpclient docs, really should swallow the output on error. verify if that is
         // required
+        // CHECKSTYLE_OFF: AvoidNestedBlocks
         switch ( statusCode )
         {
             case HttpStatus.SC_OK:
@@ -719,6 +724,7 @@ public abstract class AbstractHttpClientWagon
                 throw e;
             }
         }
+        // CHECKSTYLE_ON: AvoidNestedBlocks
 
         InputStream is = null;
 

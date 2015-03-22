@@ -19,6 +19,9 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
  * under the License.
  */
 
+/**
+ * 
+ */
 public class KnownHostEntry
 {
 

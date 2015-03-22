@@ -25,6 +25,9 @@ import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.params.HttpClientParams;
 
+/**
+ * 
+ */
 public class HttpConfiguration
 {
     

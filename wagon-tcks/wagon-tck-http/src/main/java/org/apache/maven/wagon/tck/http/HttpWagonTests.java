@@ -43,6 +43,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import static org.apache.maven.wagon.tck.http.util.TestUtil.getResource;
 
+/**
+ * 
+ */
 public abstract class HttpWagonTests
 {
 
@@ -56,13 +59,13 @@ public abstract class HttpWagonTests
 
     private String baseUrl;
 
-    private static final Set<File> tmpFiles = new HashSet<File>();
+    private static final Set<File> TMP_FILES = new HashSet<File>();
 
     private Repository repo;
 
     private final Set<Object> notificationTargets = new HashSet<Object>();
 
-    protected static Logger logger = Logger.getLogger( HttpWagonTests.class );
+    protected static final Logger LOGGER = Logger.getLogger( HttpWagonTests.class );
 
     @Before
     public void beforeEach()
@@ -136,7 +139,7 @@ public abstract class HttpWagonTests
     @AfterClass
     public static void afterAll()
     {
-        for ( File f : tmpFiles )
+        for ( File f : TMP_FILES )
         {
             if ( f.exists() )
             {
@@ -215,7 +218,7 @@ public abstract class HttpWagonTests
 
         if ( testCaseId == null || !configurator.isSupported( testCaseId ) )
         {
-            logger.error( "Cannot run test: " + testCaseId
+            LOGGER.error( "Cannot run test: " + testCaseId
                           + ". Wagon under test does not support this test case." );
             return false;
         }
@@ -250,7 +253,7 @@ public abstract class HttpWagonTests
 
         if ( testCaseId == null || !configurator.configureWagonForTest( wagon, testCaseId ) )
         {
-            logger.error( "Cannot run test: " + testCaseId
+            LOGGER.error( "Cannot run test: " + testCaseId
                           + ". Wagon under test does not support this test case." );
 
             return false;
@@ -319,7 +322,7 @@ public abstract class HttpWagonTests
 
     protected static Set<File> getTmpfiles()
     {
-        return tmpFiles;
+        return TMP_FILES;
     }
 
     protected Repository getRepo()

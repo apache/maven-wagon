@@ -33,6 +33,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 
+/**
+ * 
+ */
 public class ProxyConnectionVerifierFilter
     implements Filter
 {

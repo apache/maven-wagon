@@ -48,7 +48,9 @@ public final class PermissionModeUtils
 
             mode = mode % 8 + ( ( mode / 8 ) % 8 ) * 8 + ( ( mode / 64 ) % 8 ) * 64;
 
+            // CHECKSTYLE_OFF: MagicNumber
             ret = Integer.toOctalString( 0777 - mode );
+            // CHECKSTYLE_ON: MagicNumber
         }
         catch ( final NumberFormatException e )
         {

@@ -35,7 +35,7 @@ public abstract class AbstractEmbeddedScpWagonTest
     extends StreamingWagonTestCase
 {
 
-    SshServerEmbedded sshServerEmbedded;
+    SshServerEmbedded sshServer;
 
     @Override
     protected void setUp()
@@ -45,23 +45,24 @@ public abstract class AbstractEmbeddedScpWagonTest
 
         String sshKeyResource = "ssh-keys/id_rsa";
 
-        sshServerEmbedded = new SshServerEmbedded( getProtocol(), Arrays.asList( sshKeyResource ), false );
+        sshServer = new SshServerEmbedded( getProtocol(), Arrays.asList( sshKeyResource ), false );
 
-        sshServerEmbedded.start();
-        System.out.println( "sshd on port " + sshServerEmbedded.getPort() );
+        sshServer.start();
+        System.out.println( "sshd on port " + sshServer.getPort() );
     }
 
     @Override
+    @SuppressWarnings( "checkstyle:linelength" )
     protected void tearDownWagonTestingFixtures()
         throws Exception
     {
 
-        for ( TestPasswordAuthenticator.PasswordAuthenticatorRequest passwordAuthenticatorRequest : sshServerEmbedded.passwordAuthenticator.passwordAuthenticatorRequests )
+        for ( TestPasswordAuthenticator.PasswordAuthenticatorRequest request : sshServer.passwordAuthenticator.requests )
         {
-            assertEquals( TestData.getUserName(), passwordAuthenticatorRequest.username );
-            assertEquals( TestData.getUserPassword(), passwordAuthenticatorRequest.password );
+            assertEquals( TestData.getUserName(), request.getUsername() );
+            assertEquals( TestData.getUserPassword(), request.getPassword() );
         }
-        sshServerEmbedded.stop();
+        sshServer.stop();
     }
 
     protected abstract String getProtocol();
@@ -69,13 +70,13 @@ public abstract class AbstractEmbeddedScpWagonTest
     @Override
     protected int getTestRepositoryPort()
     {
-        return sshServerEmbedded.getPort();
+        return sshServer.getPort();
     }
 
 
     public String getTestRepositoryUrl()
     {
-        return TestData.getTestRepositoryUrl( sshServerEmbedded.getPort() );
+        return TestData.getTestRepositoryUrl( sshServer.getPort() );
     }
 
     protected AuthenticationInfo getAuthInfo()

@@ -26,6 +26,9 @@ import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
 import org.apache.maven.wagon.Wagon;
 
+/**
+ * 
+ */
 public class HttpMethodConfiguration
 {
 

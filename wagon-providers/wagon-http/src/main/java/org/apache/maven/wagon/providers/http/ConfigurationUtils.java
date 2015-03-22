@@ -73,7 +73,7 @@ class ConfigurationUtils
             {
                 String key = (String) entry.getKey();
                 String value = (String) entry.getValue();
-                Matcher matcher = coercePattern.matcher(value);
+                Matcher matcher = coercePattern.matcher( value );
                 if ( matcher.matches() )
                 {
                     value = matcher.group( 2 );
@@ -97,14 +97,17 @@ class ConfigurationUtils
                 }
                 else if ( key.equals( DEFAULT_PROXY ) )
                 {
-                    builder.setProxy( new HttpHost( value ));
+                    builder.setProxy( new HttpHost( value ) );
                 }
                 else if ( key.equals( LOCAL_ADDRESS ) )
                 {
-                    try {
+                    try
+                    {
                         builder.setLocalAddress( InetAddress.getByName( value ) );
                     }
-                    catch (UnknownHostException ignore) {
+                    catch ( UnknownHostException ignore )
+                    {
+                        // ignore
                     }
                 }
                 else if ( key.equals( PROXY_AUTH_PREF ) )

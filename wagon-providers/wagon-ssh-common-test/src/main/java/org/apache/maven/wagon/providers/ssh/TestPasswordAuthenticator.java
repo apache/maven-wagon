@@ -1,4 +1,5 @@
 package org.apache.maven.wagon.providers.ssh;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -31,21 +32,24 @@ import java.util.List;
 public class TestPasswordAuthenticator
     implements PasswordAuthenticator
 {
-    public List<PasswordAuthenticatorRequest> passwordAuthenticatorRequests =
+    List<PasswordAuthenticatorRequest> requests =
         new ArrayList<PasswordAuthenticatorRequest>();
 
     public boolean authenticate( String username, String password, ServerSession session )
     {
-        passwordAuthenticatorRequests.add( new PasswordAuthenticatorRequest( username, password ) );
-        return StringUtils.equals( username, TestData.getUserName() ) && StringUtils.equals( password,
-                                                                                             TestData.getUserPassword() );
+        requests.add( new PasswordAuthenticatorRequest( username, password ) );
+        return StringUtils.equals( username, TestData.getUserName() )
+            && StringUtils.equals( password, TestData.getUserPassword() );
     }
 
+    /**
+     * 
+     */
     public static class PasswordAuthenticatorRequest
     {
-        public String username;
+        private String username;
 
-        public String password;
+        private String password;
 
         public PasswordAuthenticatorRequest( String username, String password )
         {
@@ -62,6 +66,16 @@ public class TestPasswordAuthenticator
             sb.append( ", password='" ).append( password ).append( '\'' );
             sb.append( '}' );
             return sb.toString();
+        }
+
+        public String getUsername()
+        {
+            return username;
+        }
+
+        public String getPassword()
+        {
+            return password;
         }
     }
 }

@@ -292,8 +292,8 @@ public class SftpWagon
 
         if ( sourceFile.isDirectory() )
         {
-        	//ScpHelper.getResourceFilename( destinationDirectory ) - could return empty string
-            if ( !fileName.equals( "." ) && !fileName.equals("") )
+            // ScpHelper.getResourceFilename( destinationDirectory ) - could return empty string
+            if ( !fileName.equals( "." ) && !fileName.equals( "" ) )
             {
                 prefix = getFileName( prefix, fileName );
                 mkdir( fileName, directoryMode );

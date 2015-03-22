@@ -32,6 +32,9 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 
+/**
+ * 
+ */
 public class AuthSnoopFilter
     implements Filter
 {

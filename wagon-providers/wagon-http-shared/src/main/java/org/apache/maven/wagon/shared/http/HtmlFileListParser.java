@@ -76,7 +76,7 @@ public class HtmlFileListParser
             // assumption.
             String content = IOUtils.toString( stream, "utf-8" );
             Document doc = Jsoup.parse( content, baseurl );
-            Elements links = doc.select("a[href]");
+            Elements links = doc.select( "a[href]" );
             Set<String> results = new HashSet<String>();
             for ( Element link : links )
             {
@@ -134,9 +134,11 @@ public class HtmlFileListParser
         }
         catch ( URISyntaxException e )
         {
+            // ignore
         }
         catch ( UnsupportedEncodingException e )
         {
+            // ignore
         }
 
         return ret;

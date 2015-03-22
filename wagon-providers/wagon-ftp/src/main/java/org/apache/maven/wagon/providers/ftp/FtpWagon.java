@@ -403,6 +403,9 @@ public class FtpWagon
         }
     }
 
+    /**
+     * 
+     */
     public class PrintCommandListener
         implements ProtocolCommandListener
     {
@@ -634,6 +637,7 @@ public class FtpWagon
                             }
                             catch ( IOException e )
                             {
+                                // ignore
                             }
                         }
                         String mode = permissions.getFileMode();
@@ -645,6 +649,7 @@ public class FtpWagon
                             }
                             catch ( IOException e )
                             {
+                                // ignore
                             }
                         }
                     }
@@ -695,6 +700,7 @@ public class FtpWagon
                 }
                 catch ( IOException e )
                 {
+                    // ignore
                 }
             }
             String mode = permissions.getDirectoryMode();
@@ -706,6 +712,7 @@ public class FtpWagon
                 }
                 catch ( IOException e )
                 {
+                    // ignore
                 }
             }
         }

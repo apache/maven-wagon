@@ -48,7 +48,7 @@ public class ScpCommand
     implements Command, Runnable, FileSystemAware
 {
 
-    protected static final Logger log = LoggerFactory.getLogger( ScpCommand.class );
+    protected static final Logger LOG = LoggerFactory.getLogger( ScpCommand.class );
 
     protected static final int OK = 0;
 
@@ -87,9 +87,9 @@ public class ScpCommand
     public ScpCommand( String[] args )
     {
         name = Arrays.asList( args ).toString();
-        if ( log.isDebugEnabled() )
+        if ( LOG.isDebugEnabled() )
         {
-            log.debug( "Executing command {}", name );
+            LOG.debug( "Executing command {}", name );
         }
         path = ".";
         for ( int i = 1; i < args.length; i++ )
@@ -118,7 +118,7 @@ public class ScpCommand
                         case 'd':
                             optD = true;
                             break;
-//                          default:
+                        default:
 //                            error = new IOException("Unsupported option: " + args[i].charAt(j));
 //                            return;
                     }
@@ -307,7 +307,7 @@ public class ScpCommand
             {
                 // Ignore
             }
-            log.info( "Error in scp command", e );
+            LOG.info( "Error in scp command", e );
         }
         finally
         {
@@ -321,9 +321,9 @@ public class ScpCommand
     protected void writeDir( String header, SshFile path )
         throws IOException
     {
-        if ( log.isDebugEnabled() )
+        if ( LOG.isDebugEnabled() )
         {
-            log.debug( "Writing dir {}", path );
+            LOG.debug( "Writing dir {}", path );
         }
         if ( !header.startsWith( "D" ) )
         {
@@ -385,9 +385,9 @@ public class ScpCommand
     protected void writeFile( String header, SshFile path )
         throws IOException
     {
-        if ( log.isDebugEnabled() )
+        if ( LOG.isDebugEnabled() )
         {
-            log.debug( "Writing file {}", path );
+            LOG.debug( "Writing file {}", path );
         }
         if ( !header.startsWith( "C" ) )
         {
@@ -428,7 +428,7 @@ public class ScpCommand
         {
             ack();
 
-            byte[] buffer = new byte[8192];
+            byte[] buffer = new byte[8 * 1024];
             while ( length > 0 )
             {
                 int len = (int) Math.min( length, buffer.length );
@@ -475,9 +475,9 @@ public class ScpCommand
     protected void readFile( SshFile path )
         throws IOException
     {
-        if ( log.isDebugEnabled() )
+        if ( LOG.isDebugEnabled() )
         {
-            log.debug( "Reading file {}", path );
+            LOG.debug( "Reading file {}", path );
         }
         StringBuilder buf = new StringBuilder();
         buf.append( "C" );
@@ -494,7 +494,7 @@ public class ScpCommand
         InputStream is = path.createInputStream( 0 );
         try
         {
-            byte[] buffer = new byte[8192];
+            byte[] buffer = new byte[8 * 1024];
             for (; ; )
             {
                 int len = is.read( buffer, 0, buffer.length );
@@ -516,9 +516,9 @@ public class ScpCommand
     protected void readDir( SshFile path )
         throws IOException
     {
-        if ( log.isDebugEnabled() )
+        if ( LOG.isDebugEnabled() )
         {
-            log.debug( "Reading directory {}", path );
+            LOG.debug( "Reading directory {}", path );
         }
         StringBuilder buf = new StringBuilder();
         buf.append( "D" );
@@ -571,7 +571,7 @@ public class ScpCommand
             case OK:
                 break;
             case WARNING:
-                log.warn( "Received warning: " + readLine() );
+                LOG.warn( "Received warning: " + readLine() );
                 break;
             case ERROR:
                 throw new IOException( "Received nack: " + readLine() );

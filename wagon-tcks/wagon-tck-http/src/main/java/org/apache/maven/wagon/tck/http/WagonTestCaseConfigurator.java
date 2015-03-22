@@ -32,6 +32,9 @@ import org.codehaus.plexus.context.Context;
 import org.codehaus.plexus.context.ContextException;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable;
 
+/**
+ * 
+ */
 public class WagonTestCaseConfigurator
     implements Contextualizable
 {

@@ -216,7 +216,7 @@ public final class SessionEventSupport
      */
     public void fireSessionError( final SessionEvent sessionEvent )
     {
-        for ( SessionListener listener : listeners)
+        for ( SessionListener listener : listeners )
         {
             listener.sessionError( sessionEvent );
         }

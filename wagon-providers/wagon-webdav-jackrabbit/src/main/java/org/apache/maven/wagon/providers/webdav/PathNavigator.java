@@ -45,8 +45,8 @@ public class PathNavigator
         StringBuilder sb = new StringBuilder();
         for ( String path : currentPathList )
         {
-            sb.append(path);
-            sb.append('/');
+            sb.append( path );
+            sb.append( '/' );
         }
         return sb.toString();
     }

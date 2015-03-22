@@ -19,6 +19,9 @@ package org.apache.maven.wagon;
  * under the License.
  */
 
+/**
+ * 
+ */
 public class Streams
 {
     private String out = "";

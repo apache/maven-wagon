@@ -1,12 +1,5 @@
 package org.apache.maven.wagon.shared.http;
 
-import org.apache.commons.lang.StringUtils;
-
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -25,6 +18,13 @@ import java.net.URL;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import org.apache.commons.lang.StringUtils;
+
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 /**
  * Encoding utility.

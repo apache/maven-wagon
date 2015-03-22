@@ -19,7 +19,9 @@ package org.apache.maven.wagon.tck.http;
  * under the License.
  */
 
-
+/**
+ * 
+ */
 public class HttpsGetWagonTests
     extends GetWagonTests
 {

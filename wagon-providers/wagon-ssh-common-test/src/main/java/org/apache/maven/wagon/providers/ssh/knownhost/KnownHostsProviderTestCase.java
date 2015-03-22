@@ -25,6 +25,9 @@ import org.apache.maven.wagon.providers.ssh.TestData;
 import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.plexus.PlexusTestCase;
 
+/**
+ * 
+ */
 public class KnownHostsProviderTestCase
     extends PlexusTestCase
 {

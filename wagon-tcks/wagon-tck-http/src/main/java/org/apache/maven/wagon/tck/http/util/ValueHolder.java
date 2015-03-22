@@ -19,6 +19,10 @@ package org.apache.maven.wagon.tck.http.util;
  * under the License.
  */
 
+/**
+ * 
+ * @param <T> 
+ */
 public class ValueHolder<T>
 {
     private T value;

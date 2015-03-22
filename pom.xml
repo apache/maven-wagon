@@ -23,7 +23,7 @@ under the License.
   <parent>
     <artifactId>maven-parent</artifactId>
     <groupId>org.apache.maven</groupId>
-    <version>24</version>
+    <version>26</version>
     <relativePath>../pom/maven/pom.xml</relativePath>
   </parent>
 
@@ -354,6 +354,19 @@ under the License.
           <artifactId>maven-site-plugin</artifactId>
           <configuration>
             <topSiteURL>scm:svn:https://svn.apache.org/repos/infra/websites/production/maven/content/${maven.site.path}</topSiteURL>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.rat</groupId>
+          <artifactId>apache-rat-plugin</artifactId>
+          <configuration>
+            <excludes combine.children="append">
+              <exclude>**/*.odg</exclude>
+              <exclude>src/test/resources/**</exclude>
+              <exclude>src/main/resources/default-server-root/**</exclude>
+              <exclude>src/main/resources/ssh-keys/**</exclude>
+              <exclude>src/test/ssh-keys/**</exclude>
+            </excludes>
           </configuration>
         </plugin>
       </plugins>

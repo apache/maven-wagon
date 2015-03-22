@@ -77,7 +77,8 @@ public class ScpWagon
         if ( permissions != null && permissions.getGroup() != null )
         {
             //executeCommand( "chgrp -f " + permissions.getGroup() + " " + getPath( basedir, resource.getName() ) );
-            executeCommand( "chgrp -f " + permissions.getGroup() + " \"" + getPath( basedir, resource.getName() ) + "\"" );
+            executeCommand( "chgrp -f " + permissions.getGroup() + " \"" + getPath( basedir, resource.getName() )
+                + "\"" );
         }
     }
 

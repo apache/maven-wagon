@@ -104,8 +104,10 @@ public abstract class StreamingWagonTestCase
             setupRepositories();
             setupWagonTestingFixtures();
             int expectedSize = putFile();
+            // CHECKSTYLE_OFF: MagicNumber
             getIfNewerToStream( getExpectedLastModifiedOnGet( testRepository, new Resource( resource ) ) + 30000, false,
                                 expectedSize );
+            // CHECKSTYLE_ON: MagicNumber
         }
     }
 

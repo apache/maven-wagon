@@ -1,4 +1,5 @@
 package org.apache.maven.wagon.providers.ssh;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -26,6 +27,7 @@ import org.apache.sshd.server.Command;
 import org.apache.sshd.server.CommandFactory;
 import org.apache.sshd.server.FileSystemFactory;
 import org.apache.sshd.server.FileSystemView;
+import org.apache.sshd.server.PasswordAuthenticator;
 import org.apache.sshd.server.SshFile;
 import org.apache.sshd.server.auth.UserAuthPassword;
 import org.apache.sshd.server.auth.UserAuthPublicKey;
@@ -54,9 +56,9 @@ public class SshServerEmbedded
 
     private List<String> sshKeysResources = new ArrayList<String>();
 
-    public TestPublickeyAuthenticator publickeyAuthenticator;
+    private TestPublickeyAuthenticator publickeyAuthenticator;
 
-    public TestPasswordAuthenticator passwordAuthenticator = new TestPasswordAuthenticator();
+    TestPasswordAuthenticator passwordAuthenticator = new TestPasswordAuthenticator();
 
     private boolean keyAuthz;
 
@@ -186,6 +188,13 @@ public class SshServerEmbedded
         return port;
     }
 
+    public PasswordAuthenticator getPasswordAuthenticator()
+    {
+        return passwordAuthenticator;
+    }
+    /**
+     * 
+     */
     public static class TestSshFile
         extends NativeSshFile
     {

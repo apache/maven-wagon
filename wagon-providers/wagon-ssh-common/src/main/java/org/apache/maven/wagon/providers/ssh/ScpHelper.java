@@ -260,7 +260,8 @@ public class ScpHelper
         {
             //executor.executeCommand(
             //    "cd " + path + "; unzip -q -o " + zipFile.getName() + "; rm -f " + zipFile.getName() );
-            executor.executeCommand( "cd \"" + path + "\"; unzip -q -o \"" + zipFile.getName() + "\"; rm -f \"" + zipFile.getName() + "\"" );
+            executor.executeCommand( "cd \"" + path + "\"; unzip -q -o \"" + zipFile.getName() + "\"; rm -f \""
+                + zipFile.getName() + "\"" );
 
             zipFile.delete();
 

@@ -35,11 +35,14 @@ import java.util.jar.JarFile;
 import org.apache.log4j.Logger;
 import org.codehaus.plexus.util.IOUtil;
 
+/**
+ * 
+ */
 public final class TestUtil
 {
-    private static Logger logger = Logger.getLogger( TestUtil.class );
+    private static final Logger LOGGER = Logger.getLogger( TestUtil.class );
 
-    private static final Map<String, File> bases = new HashMap<String, File>();
+    private static final Map<String, File> BASES = new HashMap<String, File>();
 
     private TestUtil()
     {
@@ -64,7 +67,7 @@ public final class TestUtil
             int endIdx = url.indexOf( "!" );
             url = url.substring( startIdx, endIdx );
 
-            File base = bases.get( url );
+            File base = BASES.get( url );
             if ( base == null )
             {
                 File urlFile = new File( url );
@@ -72,7 +75,7 @@ public final class TestUtil
                 base = new File( "target/tck-resources/" + urlFile.getName() );
                 base.getParentFile().mkdirs();
 
-                logger.info( "unpacking test resources in jar: " + url );
+                LOGGER.info( "unpacking test resources in jar: " + url );
                 JarFile jf = null;
                 try
                 {
@@ -108,7 +111,7 @@ public final class TestUtil
                         }
                     }
 
-                    bases.put( url, base );
+                    BASES.put( url, base );
                 }
                 finally
                 {
@@ -120,6 +123,7 @@ public final class TestUtil
                         }
                         catch ( Exception e )
                         {
+                            // ignore
                         }
                     }
                 }

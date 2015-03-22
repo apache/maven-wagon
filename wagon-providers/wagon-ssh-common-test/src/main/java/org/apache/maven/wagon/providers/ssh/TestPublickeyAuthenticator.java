@@ -1,4 +1,5 @@
 package org.apache.maven.wagon.providers.ssh;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -41,10 +42,10 @@ import java.util.List;
 public class TestPublickeyAuthenticator
     implements PublickeyAuthenticator
 {
-    public List<PublickeyAuthenticatorRequest> publickeyAuthenticatorRequests =
+    private List<PublickeyAuthenticatorRequest> publickeyAuthenticatorRequests =
         new ArrayList<PublickeyAuthenticatorRequest>();
 
-    public boolean keyAuthz;
+    private boolean keyAuthz;
 
     public TestPublickeyAuthenticator( boolean keyAuthz )
     {
@@ -82,11 +83,14 @@ public class TestPublickeyAuthenticator
         return dectyptedText;
     }
 
+    /**
+     * 
+     */
     public static class PublickeyAuthenticatorRequest
     {
-        public String username;
+        private String username;
 
-        public PublicKey publicKey;
+        private PublicKey publicKey;
 
         public PublickeyAuthenticatorRequest( String username, PublicKey publicKey )
         {
@@ -162,8 +166,10 @@ public class TestPublickeyAuthenticator
 
     private int decodeInt()
     {
+        // CHECKSTYLE_OFF: MagicNumber
         return ( ( bytes[pos++] & 0xFF ) << 24 ) | ( ( bytes[pos++] & 0xFF ) << 16 ) | ( ( bytes[pos++] & 0xFF ) << 8 )
             | ( bytes[pos++] & 0xFF );
+        // CHECKSTYLE_ON: MagicNumber
     }
 
     private BigInteger decodeBigInt()

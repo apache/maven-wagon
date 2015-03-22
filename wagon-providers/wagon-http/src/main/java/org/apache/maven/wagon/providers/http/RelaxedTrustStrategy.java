@@ -37,12 +37,12 @@ public class RelaxedTrustStrategy
 {
     private final boolean ignoreSSLValidityDates;
 
-    public RelaxedTrustStrategy(boolean ignoreSSLValidityDates)
+    public RelaxedTrustStrategy( boolean ignoreSSLValidityDates )
     {
         this.ignoreSSLValidityDates = ignoreSSLValidityDates;
     }
 
-    public boolean isTrusted(X509Certificate[] certificates, String authType)
+    public boolean isTrusted( X509Certificate[] certificates, String authType )
         throws CertificateException
     {
         if ( ( certificates != null ) && ( certificates.length == 1 ) )

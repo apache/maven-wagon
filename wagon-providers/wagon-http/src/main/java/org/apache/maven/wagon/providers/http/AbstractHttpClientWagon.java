@@ -105,7 +105,7 @@ public abstract class AbstractHttpClientWagon
         extends AbstractHttpEntity
     {
 
-        private final static int BUFFER_SIZE = 2048;
+        private static final int BUFFER_SIZE = 2048;
 
         private final Resource resource;
 
@@ -232,21 +232,21 @@ public abstract class AbstractHttpClientWagon
      * skip failure on certificate validity checks.
      * <b>disabled by default</b>
      */
-    private final static boolean SSL_INSECURE =
+    private static final boolean SSL_INSECURE =
         Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.insecure", "false" ) );
 
     /**
      * if using sslInsecure, certificate date issues will be ignored
      * <b>disabled by default</b>
      */
-    private final static boolean IGNORE_SSL_VALIDITY_DATES =
+    private static final boolean IGNORE_SSL_VALIDITY_DATES =
         Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.ignore.validity.dates", "false" ) );
 
     /**
-     * If enabled, ssl hostname verifier does not check hostname. Disable this will use a browser compat hostname verifier
-     * <b>disabled by default</b>
+     * If enabled, ssl hostname verifier does not check hostname. Disable this will use a browser compat hostname
+     * verifier <b>disabled by default</b>
      */
-    private final static boolean SSL_ALLOW_ALL =
+    private static final boolean SSL_ALLOW_ALL =
         Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.allowall", "false" ) );
 
 
@@ -254,14 +254,14 @@ public abstract class AbstractHttpClientWagon
      * Maximum concurrent connections per distinct route.
      * <b>20 by default</b>
      */
-    private final static int MAX_CONN_PER_ROUTE =
+    private static final int MAX_CONN_PER_ROUTE =
         Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxPerRoute", "20" ) );
 
     /**
      * Maximum concurrent connections in total.
      * <b>40 by default</b>
      */
-    private final static int MAX_CONN_TOTAL =
+    private static final int MAX_CONN_TOTAL =
         Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxTotal", "40" ) );
 
     /**
@@ -295,7 +295,7 @@ public abstract class AbstractHttpClientWagon
      *
      * @since 2.7
      */
-    private final static int maxBackoffWaitSeconds =
+    private static final int MAX_BACKOFF_WAIT_SECONDS =
         Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxBackoffSeconds", "180" ) );
 
 
@@ -312,7 +312,7 @@ public abstract class AbstractHttpClientWagon
         return nextWait;
     }
 
-
+    @SuppressWarnings( "checkstyle:linelength" )
     private static PoolingHttpClientConnectionManager createConnManager()
     {
 
@@ -364,7 +364,7 @@ public abstract class AbstractHttpClientWagon
         return connManager;
     }
 
-    private static CloseableHttpClient CLIENT = createClient();
+    private static final CloseableHttpClient CLIENT = createClient();
 
     private static CloseableHttpClient createClient()
     {
@@ -375,7 +375,7 @@ public abstract class AbstractHttpClientWagon
             .build();
     }
 
-    private static String DEFAULT_USER_AGENT = getDefaultUserAgent();
+    private static final String DEFAULT_USER_AGENT = getDefaultUserAgent();
 
     private static String getDefaultUserAgent()
     {
@@ -391,6 +391,7 @@ public abstract class AbstractHttpClientWagon
             }
             catch ( IOException ignore )
             {
+                // ignore
             }
             finally
             {
@@ -605,6 +606,7 @@ public abstract class AbstractHttpClientWagon
             }
             catch ( MalformedChallengeException ignore )
             {
+                // ignore
             }
         }
 
@@ -632,7 +634,8 @@ public abstract class AbstractHttpClientWagon
                     case HttpStatus.SC_ACCEPTED: // 202
                     case HttpStatus.SC_NO_CONTENT:  // 204
                         break;
-                    // handle all redirect even if http specs says " the user agent MUST NOT automatically redirect the request unless it can be confirmed by the user"
+                    // handle all redirect even if http specs says " the user agent MUST NOT automatically redirect
+                    // the request unless it can be confirmed by the user"
                     case HttpStatus.SC_MOVED_PERMANENTLY: // 301
                     case HttpStatus.SC_MOVED_TEMPORARILY: // 302
                     case HttpStatus.SC_SEE_OTHER: // 303
@@ -650,12 +653,10 @@ public abstract class AbstractHttpClientWagon
                         break;
                     //add more entries here
                     default:
-                    {
                         TransferFailedException e = new TransferFailedException(
                             "Failed to transfer file: " + url + ". Return code is: " + statusCode + reasonPhrase );
                         fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
                         throw e;
-                    }
                 }
 
                 firePutCompleted( resource, source );
@@ -1046,13 +1047,11 @@ public abstract class AbstractHttpClientWagon
 
                 // add more entries here
                 default:
-                {
                     cleanupGetTransfer( resource );
                     TransferFailedException e = new TransferFailedException(
                         "Failed to transfer file: " + url + ". Return code is: " + statusCode + " " + reasonPhrase );
                     fireTransferError( resource, e, TransferEvent.REQUEST_GET );
                     throw e;
-                }
             }
 
             Header contentLengthHeader = response.getFirstHeader( "Content-Length" );
@@ -1079,8 +1078,8 @@ public abstract class AbstractHttpClientWagon
                 if ( lastModified != null )
                 {
                     resource.setLastModified( lastModified.getTime() );
-                    fireTransferDebug( "last-modified = " + lastModifiedHeader.getValue() +
-                                           " (" + lastModified.getTime() + ")" );
+                    fireTransferDebug( "last-modified = " + lastModifiedHeader.getValue() + " ("
+                        + lastModified.getTime() + ")" );
                 }
             }
 
@@ -1121,6 +1120,7 @@ public abstract class AbstractHttpClientWagon
             }
             catch ( IOException ignore )
             {
+                // ignore
             }
 
         }
@@ -1171,6 +1171,6 @@ public abstract class AbstractHttpClientWagon
 
     public static int getMaxBackoffWaitSeconds()
     {
-        return maxBackoffWaitSeconds;
+        return MAX_BACKOFF_WAIT_SECONDS;
     }
 }

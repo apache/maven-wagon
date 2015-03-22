@@ -30,6 +30,9 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * 
+ */
 public class HttpMethodConfiguration
 {
 
@@ -158,33 +161,30 @@ public class HttpMethodConfiguration
                     char type = matcher.group( 1 ).charAt( 0 );
                     value = matcher.group( 2 );
 
+                    // CHECKSTYLE_OFF: AvoidNestedBlocks
                     switch ( type )
                     {
                         case 'i':
-                        {
                             p.setIntParameter( key, Integer.parseInt( value ) );
                             break;
-                        }
+
                         case 'd':
-                        {
                             p.setDoubleParameter( key, Double.parseDouble( value ) );
                             break;
-                        }
+
                         case 'l':
-                        {
                             p.setLongParameter( key, Long.parseLong( value ) );
                             break;
-                        }
+
                         case 'b':
-                        {
                             p.setBooleanParameter( key, Boolean.valueOf( value ).booleanValue() );
                             break;
-                        }
+
                         case 'c':
                         {
                             String[] entries = value.split( "," );
                             List<String> collection = new ArrayList<String>();
-                            for (String e : entries)
+                            for ( String e : entries )
                             {
                                 collection.add( e.trim() );
                             }
@@ -213,7 +213,9 @@ public class HttpMethodConfiguration
                             p.setParameter( key, map );
                             break;
                         }
+                        default:
                     }
+                    // CHECKSTYLE_ON: AvoidNestedBlocks
                 }
                 else
                 {
