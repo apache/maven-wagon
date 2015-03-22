@@ -154,7 +154,7 @@ public class PathUtilsTest
     public void testFileBasedir()
     {
         // see http://www.mozilla.org/quality/networking/testing/filetests.html
-        
+
         // strict forms
         assertEquals( "c:/temp", PathUtils.basedir( "file:///c|/temp" ) );
         assertEquals( "localhost", PathUtils.host( "file:///c|/temp" ) );
@@ -255,26 +255,53 @@ public class PathUtilsTest
 
     public void testIpV4()
     {
-        assertUrl( "http://127.0.0.1",
-                   "http", null, null, "127.0.0.1", -1, "/" );
-        assertUrl( "http://127.0.0.1:8080",
-                   "http", null, null, "127.0.0.1", 8080, "/" );
-        assertUrl( "http://127.0.0.1/oo/rest/users",
-                   "http", null, null, "127.0.0.1", -1, "/oo/rest/users" );
-        assertUrl( "http://127.0.0.1:8080/oo/rest/users",
-                   "http", null, null, "127.0.0.1", 8080, "/oo/rest/users" );
+        assertUrl( "http://127.0.0.1", "http", null, null, "127.0.0.1", -1, "/" );
+        assertUrl( "http://127.0.0.1:8080", "http", null, null, "127.0.0.1", 8080, "/" );
+        assertUrl( "http://127.0.0.1/oo/rest/users", "http", null, null, "127.0.0.1", -1, "/oo/rest/users" );
+        assertUrl( "http://127.0.0.1:8080/oo/rest/users", "http", null, null, "127.0.0.1", 8080, "/oo/rest/users" );
 
-        assertUrl( "http://user:password@127.0.0.1",
-                   "http", "user", "password", "127.0.0.1", -1, "/" );
-        assertUrl( "http://user:password@127.0.0.1:8080",
-                   "http", "user", "password", "127.0.0.1", 8080, "/" );
-        assertUrl( "http://user:password@127.0.0.1/oo/rest/users",
-                   "http", "user", "password", "127.0.0.1", -1, "/oo/rest/users" );
-        assertUrl( "http://user:password@127.0.0.1:8080/oo/rest/users",
-                   "http", "user", "password", "127.0.0.1", 8080, "/oo/rest/users" );
+        assertUrl( "http://user:password@127.0.0.1", "http", "user", "password", "127.0.0.1", -1, "/" );
+        assertUrl( "http://user:password@127.0.0.1:8080", "http", "user", "password", "127.0.0.1", 8080, "/" );
+        assertUrl( "http://user:password@127.0.0.1/oo/rest/users", "http", "user", "password", "127.0.0.1", -1,
+                   "/oo/rest/users" );
+        assertUrl( "http://user:password@127.0.0.1:8080/oo/rest/users", "http", "user", "password", "127.0.0.1", 8080,
+                   "/oo/rest/users" );
 
-        assertUrl( "scm:svn:http://user:password@127.0.0.1:8080/oo/rest/users",
-                   "scm", "user", "password", "127.0.0.1", 8080, "/oo/rest/users" );
+        assertUrl( "scm:svn:http://user:password@127.0.0.1:8080/oo/rest/users", "scm", "user", "password", "127.0.0.1",
+                   8080, "/oo/rest/users" );
+    }
+
+    public void testIPv6()
+    {
+        assertUrl( "http://user:password@[fff:::1]:7891/oo/rest/users", "http", "user", "password", "fff:::1", 7891,
+                   "/oo/rest/users" );
+        assertUrl( "http://[fff:::1]:7891/oo/rest/users", "http", null, null, "fff:::1", 7891, "/oo/rest/users" );
+        assertUrl( "http://user:password@[fff:::1]/oo/rest/users", "http", "user", "password", "fff:::1", -1,
+                   "/oo/rest/users" );
+        assertUrl( "http://user:password@[fff:::1]:7891", "http", "user", "password", "fff:::1", 7891, "/" );
+
+        assertUrl( "http://user:password@[fff:000::222:1111]:7891/oo/rest/users", "http", "user", "password",
+                   "fff:000::222:1111", 7891, "/oo/rest/users" );
+        assertUrl( "http://[fff:000::222:1111]:7891/oo/rest/users", "http", null, null, "fff:000::222:1111", 7891,
+                   "/oo/rest/users" );
+        assertUrl( "http://user:password@[fff:000::222:1111]/oo/rest/users", "http", "user", "password",
+                   "fff:000::222:1111", -1, "/oo/rest/users" );
+        assertUrl( "http://user:password@[fff:000::222:1111]:7891", "http", "user", "password", "fff:000::222:1111",
+                   7891, "/" );
+
+        assertUrl( "http://user:password@16.60.56.58:7891/oo/rest/users", "http", "user", "password", "16.60.56.58",
+                   7891, "/oo/rest/users" );
+        assertUrl( "http://16.60.56.58:7891/oo/rest/users", "http", null, null, "16.60.56.58", 7891, "/oo/rest/users" );
+        assertUrl( "http://user:password@16.60.56.58/oo/rest/users", "http", "user", "password", "16.60.56.58", -1,
+                   "/oo/rest/users" );
+        assertUrl( "http://user:password@16.60.56.58:7891", "http", "user", "password", "16.60.56.58", 7891, "/" );
+
+        assertUrl( "http://user:password@16.60.56.58:7891/oo/rest/users", "http", "user", "password", "16.60.56.58",
+                   7891, "/oo/rest/users" );
+        assertUrl( "http://16.60.56.58:7891/oo/rest/users", "http", null, null, "16.60.56.58", 7891, "/oo/rest/users" );
+        assertUrl( "http://user:password@16.60.56.58/oo/rest/users", "http", "user", "password", "16.60.56.58", -1,
+                   "/oo/rest/users" );
+        assertUrl( "http://user:password@16.60.56.58:7891", "http", "user", "password", "16.60.56.58", 7891, "/" );
     }
 
     private void assertUrl( String url, String protocol, String user, String password, String host, int port,

@@ -182,7 +182,16 @@ public class Repository
 
         sb.append( "://" );
 
-        sb.append( host );
+        if ( isIPv6Address() )
+        {
+            // If this is IPv6 then we have to surround it
+            // with brackets '[' and ']'
+            sb.append( "[" ).append( getHost() ).append( "]" );
+        }
+        else
+        {
+            sb.append( getHost() );
+        }
 
         if ( port != WagonConstants.UNKNOWN_PORT )
         {
@@ -194,6 +203,16 @@ public class Repository
         sb.append( basedir );
 
         return sb.toString();
+    }
+
+    /**
+     * Checks whtther provided url contains IPv6 format in host portion
+     * 
+     * @return true if provide host part is of IPv6 format
+     */
+    private boolean isIPv6Address()
+    {
+        return getHost().contains( ":" );
     }
 
     public String getHost()
