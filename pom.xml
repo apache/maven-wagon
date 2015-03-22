@@ -366,6 +366,7 @@ under the License.
               <exclude>src/main/resources/default-server-root/**</exclude>
               <exclude>src/main/resources/ssh-keys/**</exclude>
               <exclude>src/test/ssh-keys/**</exclude>
+              <exclude>.repository/**</exclude><!-- for CI -->
             </excludes>
           </configuration>
         </plugin>
