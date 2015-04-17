@@ -375,35 +375,6 @@ public abstract class AbstractHttpClientWagon
             .build();
     }
 
-    private static final String DEFAULT_USER_AGENT = getDefaultUserAgent();
-
-    private static String getDefaultUserAgent()
-    {
-        Properties props = new Properties();
-
-        InputStream is = AbstractHttpClientWagon.class.getResourceAsStream(
-            "/META-INF/maven/org.apache.maven.wagon/wagon-http/pom.properties" );
-        if ( is != null )
-        {
-            try
-            {
-                props.load( is );
-            }
-            catch ( IOException ignore )
-            {
-                // ignore
-            }
-            finally
-            {
-                IOUtil.close( is );
-            }
-        }
-
-        String ver = props.getProperty( "version", "unknown-version" );
-        return "Apache-Maven-Wagon/" + ver + " (Java " + System.getProperty( "java.version" ) + "; ";
-    }
-
-
     private CredentialsProvider credentialsProvider;
 
     private AuthCache authCache;
@@ -873,14 +844,13 @@ public abstract class AbstractHttpClientWagon
             method.addHeader( "Pragma", "no-cache" );
             method.addHeader( "Expires", "0" );
             method.addHeader( "Accept-Encoding", "gzip" );
-            method.addHeader( "User-Agent", DEFAULT_USER_AGENT );
         }
 
         if ( httpHeaders != null )
         {
             for ( Map.Entry<Object, Object> entry : httpHeaders.entrySet() )
             {
-                method.addHeader( (String) entry.getKey(), (String) entry.getValue() );
+                method.setHeader( (String) entry.getKey(), (String) entry.getValue() );
             }
         }
 
@@ -889,7 +859,7 @@ public abstract class AbstractHttpClientWagon
         {
             for ( Header header : headers )
             {
-                method.addHeader( header );
+                method.setHeader( header );
             }
         }
     }
