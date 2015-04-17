@@ -207,6 +207,56 @@ public abstract class HttpWagonTestCase
         assertEquals( "Maven-Wagon/1.0", handler.headers.get( "User-Agent" ) );
     }
 
+    public void testUserAgentHeaderIsPresentByDefault()
+        throws Exception
+    {
+        StreamingWagon wagon = (StreamingWagon) getWagon();
+        Server server = new Server( 0 );
+        TestHeaderHandler handler = new TestHeaderHandler();
+        server.setHandler( handler );
+        addConnectors( server );
+        server.start();
+        wagon.connect( new Repository( "id", getProtocol() + "://localhost:" 
+          + server.getConnectors()[0].getLocalPort() ) );
+        wagon.getToStream( "resource", new ByteArrayOutputStream() );
+        wagon.disconnect();
+        server.stop();
+
+        assertNotNull( "default User-Agent header of wagon provider should be present",
+                       handler.headers.get( "User-Agent" ) );
+    }
+
+    public void testUserAgentHeaderIsPresentOnlyOnceIfSetMultipleTimes()
+        throws Exception
+    {
+        StreamingWagon wagon = (StreamingWagon) getWagon();
+
+        // 1. set User-Agent header via HttpConfiguration
+        Properties headers1 = new Properties();
+        headers1.setProperty( "User-Agent", "test-user-agent" );
+        setHttpHeaders( wagon, headers1 );
+
+        // 2. redundantly set User-Agent header via setHttpHeaders()
+        Properties headers2 = new Properties();
+        headers2.setProperty( "User-Agent", "test-user-agent" );
+        Method setHttpHeaders = wagon.getClass().getMethod( "setHttpHeaders", Properties.class );
+        setHttpHeaders.invoke( wagon, headers2 );
+
+        Server server = new Server( 0 );
+        TestHeaderHandler handler = new TestHeaderHandler();
+        server.setHandler( handler );
+        addConnectors( server );
+        server.start();
+        wagon.connect( new Repository( "id", getProtocol() + "://localhost:"
+          + server.getConnectors()[0].getLocalPort() ) );
+        wagon.getToStream( "resource", new ByteArrayOutputStream() );
+        wagon.disconnect();
+        server.stop();
+
+        assertEquals( "test-user-agent", handler.headers.get( "User-Agent" ) );
+
+    }
+
     protected abstract void setHttpHeaders( StreamingWagon wagon, Properties properties );
 
     protected void addConnectors( Server server )
@@ -2011,7 +2061,20 @@ public abstract class HttpWagonTestCase
             for ( Enumeration<String> e = request.getHeaderNames(); e.hasMoreElements(); )
             {
                 String name = e.nextElement();
-                headers.put( name, request.getHeader( name ) );
+                Enumeration headerValues = request.getHeaders( name );
+                // as per HTTP spec http://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html
+                // multiple values for the same header key are concatenated separated by comma
+                // otherwise we wouldn't notice headers with same key added multiple times
+                StringBuffer combinedHeaderValue = new StringBuffer();
+                for ( int i = 0; headerValues.hasMoreElements(); i++ )
+                {
+                    if ( i > 0 )
+                    {
+                        combinedHeaderValue.append( "," );
+                    }
+                    combinedHeaderValue.append( headerValues.nextElement() );
+                }
+                headers.put( name, combinedHeaderValue.toString() );
             }
 
             response.setContentType( "text/plain" );
