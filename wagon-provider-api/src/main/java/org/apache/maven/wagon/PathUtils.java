@@ -133,6 +133,10 @@ public final class PathUtils
      */
     public static String host( final String url )
     {
+        if ( url == null || url.length() == 0 )
+        {
+            return "localhost";
+        }
         String authorization = authorization( url );
         int index = authorization.indexOf( '@' );
         String host = ( index >= 0 ) ? authorization.substring( index + 1 ) : authorization;
