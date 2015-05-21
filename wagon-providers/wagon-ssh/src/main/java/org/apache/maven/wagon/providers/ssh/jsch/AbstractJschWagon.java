@@ -415,4 +415,9 @@ public abstract class AbstractJschWagon
     {
         this.knownHostsProvider = knownHostsProvider;
     }
+
+    public void setUIKeyboardInteractive( UIKeyboardInteractive uIKeyboardInteractive )
+    {
+        this.uIKeyboardInteractive = uIKeyboardInteractive;
+    }
 }
