@@ -128,20 +128,7 @@ public abstract class AbstractJschWagon
             throw new AuthenticationException( e.getMessage() );
         }
 
-        try
-        {
-            Connector connector = ConnectorFactory.getDefault().createConnector();
-            if ( connector != null )
-            {
-                IdentityRepository repo = new RemoteIdentityRepository( connector );
-                sch.setIdentityRepository( repo );
-            }
-        }
-        catch ( AgentProxyException e )
-        {
-            fireSessionDebug( "Unable to connect to agent: " + e.toString() );
-        }
-
+        //can only pick one method of authentication
         if ( privateKey != null && privateKey.exists() )
         {
             fireSessionDebug( "Using private key: " + privateKey );
@@ -153,6 +140,23 @@ public abstract class AbstractJschWagon
             {
                 throw new AuthenticationException( "Cannot connect. Reason: " + e.getMessage(), e );
             }
+        }
+        else
+        {
+            try
+            {
+                Connector connector = ConnectorFactory.getDefault().createConnector();
+                if ( connector != null )
+                {
+                    IdentityRepository repo = new RemoteIdentityRepository( connector );
+                    sch.setIdentityRepository( repo );
+                }
+            }
+            catch ( AgentProxyException e )
+            {
+                fireSessionDebug( "Unable to connect to agent: " + e.toString() );
+            }
+
         }
 
         String host = getRepository().getHost();
