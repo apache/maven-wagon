@@ -22,6 +22,7 @@ package org.apache.maven.wagon.providers.ssh.jsch;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.providers.ssh.AbstractEmbeddedScpWagonWithKeyTest;
+import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostEntry;
 import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
 
 import java.io.File;
@@ -48,6 +49,11 @@ public class EmbeddedScpWagonWithKeyTest
                 throws IOException
             {
 
+            }
+
+            public void addKnownHost( KnownHostEntry knownHost )
+                throws IOException
+            {
             }
 
             public void setHostKeyChecking( String hostKeyChecking )
