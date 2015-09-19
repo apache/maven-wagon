@@ -81,6 +81,16 @@ public class FileKnownHostsProvider
         }
     }
     
+    public void addKnownHost( KnownHostEntry knownHostEntry )
+        throws IOException
+    {
+        if( !this.knownHosts.contains( knownHostEntry ) )
+        {
+            String knownHost = knownHostEntry.getHostName()+" "+knownHostEntry.getKeyType()+" "+knownHostEntry.getKeyValue()+"\n";
+            FileUtils.fileAppend( file.getAbsolutePath(), knownHost );
+        }
+    }
+    
     public File getFile()
     {
         return file;
