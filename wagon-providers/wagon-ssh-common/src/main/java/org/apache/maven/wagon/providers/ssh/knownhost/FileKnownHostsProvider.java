@@ -33,7 +33,7 @@ import org.codehaus.plexus.util.FileUtils;
  *
  * @author Juan F. Codagnone
  * @since Sep 12, 2005
- * 
+ *
  * @plexus.component role="org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider"
  *    role-hint="file"
  *    instantiation-strategy="per-lookup"
@@ -72,7 +72,7 @@ public class FileKnownHostsProvider
         throws IOException
     {
         Set<KnownHostEntry> hosts = this.loadKnownHosts( contents );
-        
+
         if ( ! this.knownHosts.equals( hosts ) )
         {
             file.getParentFile().mkdirs();
@@ -80,7 +80,18 @@ public class FileKnownHostsProvider
             this.knownHosts = hosts;
         }
     }
-    
+
+    public void addKnownHost( KnownHostEntry knownHostEntry )
+        throws IOException
+    {
+        if ( !this.knownHosts.contains( knownHostEntry ) )
+        {
+            String knownHost = knownHostEntry.getHostName() + " " + knownHostEntry.getKeyType() + " "
+                + knownHostEntry.getKeyValue() + "\n";
+            FileUtils.fileAppend( file.getAbsolutePath(), knownHost );
+        }
+    }
+
     public File getFile()
     {
         return file;

@@ -34,6 +34,9 @@ public interface KnownHostsProvider
     void storeKnownHosts( String contents )
         throws IOException;
 
+    void addKnownHost( KnownHostEntry knownHost )
+        throws IOException;
+
     void setHostKeyChecking( String hostKeyChecking );
 
     String getHostKeyChecking();
