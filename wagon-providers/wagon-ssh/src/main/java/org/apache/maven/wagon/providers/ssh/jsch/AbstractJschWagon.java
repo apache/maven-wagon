@@ -25,6 +25,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.Properties;
 
@@ -46,7 +48,6 @@ import org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo;
 import org.apache.maven.wagon.providers.ssh.interactive.NullInteractiveUserInfo;
 import org.apache.maven.wagon.providers.ssh.jsch.interactive.UserInfoUIKeyboardInteractiveProxy;
 import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostChangedException;
-import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostEntry;
 import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
 import org.apache.maven.wagon.providers.ssh.knownhost.UnknownHostException;
 import org.apache.maven.wagon.proxy.ProxyInfo;
@@ -54,6 +55,10 @@ import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringInputStream;
 
+import com.jcraft.jsch.agentproxy.AgentProxyException;
+import com.jcraft.jsch.agentproxy.Connector;
+import com.jcraft.jsch.agentproxy.ConnectorFactory;
+import com.jcraft.jsch.agentproxy.RemoteIdentityRepository;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.HostKey;
 import com.jcraft.jsch.HostKeyRepository;
@@ -66,10 +71,6 @@ import com.jcraft.jsch.ProxySOCKS5;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
-import com.jcraft.jsch.agentproxy.AgentProxyException;
-import com.jcraft.jsch.agentproxy.Connector;
-import com.jcraft.jsch.agentproxy.ConnectorFactory;
-import com.jcraft.jsch.agentproxy.RemoteIdentityRepository;
 
 /**
  * AbstractJschWagon
@@ -250,9 +251,24 @@ public abstract class AbstractJschWagon
 
         session.setUserInfo( ui );
 
+        StringWriter stringWriter = new StringWriter();
         try
         {
             session.connect();
+
+            if ( getKnownHostsProvider() != null )
+            {
+                PrintWriter w = new PrintWriter( stringWriter );
+
+                HostKeyRepository hkr = sch.getHostKeyRepository();
+                HostKey[] keys = hkr.getHostKey();
+
+                for ( int i = 0; keys != null && i < keys.length; i++ )
+                {
+                    HostKey key = keys[i];
+                    w.println( key.getHost() + " " + key.getType() + " " + key.getKey() );
+                }
+            }
         }
         catch ( JSchException e )
         {
@@ -270,27 +286,16 @@ public abstract class AbstractJschWagon
             }
         }
 
-        if ( getKnownHostsProvider() != null )
+        try
         {
-            HostKeyRepository hkr = sch.getHostKeyRepository();
+            getKnownHostsProvider().storeKnownHosts( stringWriter.toString() );
+        }
+        catch ( IOException e )
+        {
+            closeConnection();
 
-            HostKey[] hk = hkr.getHostKey( host, null );
-            try
-            {
-                for ( HostKey hostKey : hk )
-                {
-                    KnownHostEntry knownHostEntry = new KnownHostEntry( hostKey.getHost(), hostKey.getType(),
-                            hostKey.getKey() );
-                    getKnownHostsProvider().addKnownHost( knownHostEntry );
-                }
-            }
-            catch ( IOException e )
-            {
-                closeConnection();
-
-                throw new AuthenticationException(
-                    "Connection aborted - failed to write to known_hosts. Reason: " + e.getMessage(), e );
-            }
+            throw new AuthenticationException(
+                "Connection aborted - failed to write to known_hosts. Reason: " + e.getMessage(), e );
         }
     }
 

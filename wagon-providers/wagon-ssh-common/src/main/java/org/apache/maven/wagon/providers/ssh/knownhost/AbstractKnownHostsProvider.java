@@ -34,7 +34,7 @@ public abstract class AbstractKnownHostsProvider
 {
     /**
      * Valid values are ask, yes, no.
-     *
+     * 
      * @plexus.configuration default-value="ask"
      */
     private String hostKeyChecking = "ask";
@@ -43,7 +43,7 @@ public abstract class AbstractKnownHostsProvider
      * the known hosts, in the openssh format
      */
     protected String contents;
-
+    
     protected Set<KnownHostEntry> knownHosts = new HashSet<KnownHostEntry>();
 
     public void setHostKeyChecking( String hostKeyChecking )
@@ -60,16 +60,11 @@ public abstract class AbstractKnownHostsProvider
     {
         return contents;
     }
-
+    
     public void storeKnownHosts( String contents )
         throws IOException
     {
     }
-
-    public void addKnownHost( KnownHostEntry knownHost )
-        throws IOException
-    {
-    }
-
-
+    
+    
 }
