@@ -206,7 +206,6 @@ public abstract class AbstractWagon
             }
         }
 
-        // TODO: Do these needs to be fields, or are they only used in openConnection()?
         this.authenticationInfo = authenticationInfo;
 
         this.proxyInfoProvider = proxyInfoProvider;

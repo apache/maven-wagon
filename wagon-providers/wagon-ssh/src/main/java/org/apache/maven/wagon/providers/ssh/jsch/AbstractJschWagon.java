@@ -20,6 +20,7 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  */
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -52,7 +53,6 @@ import org.apache.maven.wagon.providers.ssh.knownhost.UnknownHostException;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.StringInputStream;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.HostKey;
@@ -229,7 +229,7 @@ public abstract class AbstractJschWagon
                 String contents = getKnownHostsProvider().getContents();
                 if ( contents != null )
                 {
-                    sch.setKnownHosts( new StringInputStream( contents ) );
+                    sch.setKnownHosts( new ByteArrayInputStream( contents.getBytes() ) );
                 }
             }
             catch ( JSchException e )
