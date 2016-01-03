@@ -30,7 +30,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.LazyFileOutputStream;
@@ -44,7 +43,7 @@ import org.codehaus.plexus.util.FileUtils;
 
 /**
  * Wagon Provider for Local File System
- * 
+ *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  * @plexus.component role="org.apache.maven.wagon.Wagon" role-hint="file" instantiation-strategy="per-lookup"
@@ -203,7 +202,7 @@ public class FileWagon
     {
         String basedir = getRepository().getBasedir();
 
-        destinationPath = StringUtils.replace( destinationPath, "\\", "/" );
+        destinationPath = destinationPath.replace( '\\', '/' );
 
         File path;
 
@@ -268,7 +267,7 @@ public class FileWagon
         {
             return file.isDirectory();
         }
-        
+
         return file.exists();
     }
 }
