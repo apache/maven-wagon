@@ -364,7 +364,7 @@ public abstract class AbstractHttpClientWagon
         return connManager;
     }
 
-    private static final CloseableHttpClient CLIENT = createClient();
+    private static CloseableHttpClient httpClient = createClient();
 
     private static CloseableHttpClient createClient()
     {
@@ -481,6 +481,7 @@ public abstract class AbstractHttpClientWagon
         PoolingHttpClientConnectionManager poolingHttpClientConnectionManager )
     {
         httpClientConnectionManager = poolingHttpClientConnectionManager;
+        httpClient = createClient();
     }
 
     public void put( File source, String resourceName )
@@ -829,7 +830,7 @@ public abstract class AbstractHttpClientWagon
             }
         }
 
-        return CLIENT.execute( httpMethod, localContext );
+        return httpClient.execute( httpMethod, localContext );
     }
 
     protected void setHeaders( HttpUriRequest method )
