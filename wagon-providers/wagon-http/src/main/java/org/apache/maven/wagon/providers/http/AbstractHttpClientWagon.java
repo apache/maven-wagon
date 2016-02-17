@@ -698,10 +698,9 @@ public abstract class AbstractHttpClientWagon
                 boolean result;
                 switch ( statusCode )
                 {
-                    case HttpStatus.SC_OK:
-                        result = true;
-                        break;
-                    case HttpStatus.SC_NOT_MODIFIED:
+                    case HttpStatus.SC_OK: // 200
+                    case HttpStatus.SC_NO_CONTENT: // 204
+                    case HttpStatus.SC_NOT_MODIFIED: // 304
                         result = true;
                         break;
                     case HttpStatus.SC_FORBIDDEN:

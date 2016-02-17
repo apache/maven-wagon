@@ -392,7 +392,9 @@ public class LightweightHttpWagon
 
             switch ( statusCode )
             {
-                case HttpURLConnection.HTTP_OK:
+                case HttpURLConnection.HTTP_OK: // 200
+                case HttpURLConnection.HTTP_NO_CONTENT: // 204
+                case HttpURLConnection.HTTP_NOT_MODIFIED: // 304
                     return true;
 
                 case HttpURLConnection.HTTP_FORBIDDEN:
