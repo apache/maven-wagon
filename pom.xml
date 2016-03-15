@@ -39,7 +39,7 @@ under the License.
 
   <properties>
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
-    <slf4jVersion>1.7.7</slf4jVersion>
+    <slf4jVersion>1.7.19</slf4jVersion>
     <maven.site.path>wagon-archives/wagon-LATEST</maven.site.path>
   </properties>
 
@@ -417,7 +417,7 @@ under the License.
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>animal-sniffer-maven-plugin</artifactId>
-        <version>1.9</version>
+        <version>1.15</version>
         <configuration>
           <signature>
             <groupId>org.codehaus.mojo.signature</groupId>
