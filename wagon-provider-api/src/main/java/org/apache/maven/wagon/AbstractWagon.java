@@ -306,13 +306,33 @@ public abstract class AbstractWagon
         fireTransferDebug( "attempting to create parent directories for destination: " + destination.getName() );
         createParentDirectories( destination );
 
-        OutputStream output = new LazyFileOutputStream( destination );
-
         fireGetStarted( resource, destination );
 
+        OutputStream output = null;
         try
         {
+            output = new LazyFileOutputStream( destination );
             getTransfer( resource, output, input, closeInput, maxSize );
+            output.close();
+            output = null;
+        }
+        catch ( final IOException e )
+        {
+            if ( destination.exists() )
+            {
+                boolean deleted = destination.delete();
+
+                if ( !deleted )
+                {
+                    destination.deleteOnExit();
+                }
+            }
+
+            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+
+            String msg = "GET request of: " + resource.getName() + " from " + repository.getName() + " failed";
+
+            throw new TransferFailedException( msg, e );
         }
         catch ( TransferFailedException e )
         {
@@ -350,6 +370,12 @@ public abstract class AbstractWagon
         try
         {
             transfer( resource, input, output, TransferEvent.REQUEST_GET, maxSize );
+
+            if ( closeInput )
+            {
+                input.close();
+                input = null;
+            }
 
             finishGetTransfer( resource, input, output );
         }
@@ -413,12 +439,21 @@ public abstract class AbstractWagon
             input = new FileInputStream( source );
 
             putTransfer( resource, input, output, closeOutput );
+
+            input.close();
+            input = null;
         }
         catch ( FileNotFoundException e )
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
 
             throw new TransferFailedException( "Specified source file does not exist: " + source, e );
+        }
+        catch ( final IOException e )
+        {
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+
+            throw new TransferFailedException( "Failure transferring " + source, e );
         }
         finally
         {
@@ -435,6 +470,12 @@ public abstract class AbstractWagon
                       resource.getContentLength() == WagonConstants.UNKNOWN_LENGTH
                           ? Long.MAX_VALUE
                           : resource.getContentLength() );
+
+            if ( closeOutput )
+            {
+                output.close();
+                output = null;
+            }
 
             finishPutTransfer( resource, input, output );
         }
@@ -821,6 +862,9 @@ public abstract class AbstractWagon
 
                 fireTransferProgress( transferEvent, buffer, n );
             }
+
+            input.close();
+            input = null;
         }
         catch ( IOException e )
         {

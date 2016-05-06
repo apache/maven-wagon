@@ -58,11 +58,14 @@ public class TestPublickeyAuthenticator
         {
             return false;
         }
+        InputStream in = null;
         try
         {
-            InputStream is =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream( "ssh-keys/id_rsa.pub" );
-            PublicKey publicKey = decodePublicKey( IOUtil.toString( is ) );
+            in = Thread.currentThread().getContextClassLoader().getResourceAsStream( "ssh-keys/id_rsa.pub" );
+            PublicKey publicKey = decodePublicKey( IOUtil.toString( in ) );
+            in.close();
+            in = null;
+
             publickeyAuthenticatorRequests.add( new PublickeyAuthenticatorRequest( username, key ) );
 
             return ( (RSAPublicKey) publicKey ).getModulus().equals( ( (RSAPublicKey) publicKey ).getModulus() );
@@ -70,6 +73,10 @@ public class TestPublickeyAuthenticator
         catch ( Exception e )
         {
             throw new RuntimeException( e.getMessage(), e );
+        }
+        finally
+        {
+            IOUtil.close( in );
         }
     }
 

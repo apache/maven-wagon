@@ -147,16 +147,20 @@ public class ScpHelper
     public static void createZip( List<String> files, File zipName, File basedir )
         throws IOException
     {
-        ZipOutputStream zos = new ZipOutputStream( new FileOutputStream( zipName ) );
-
+        ZipOutputStream zos = null;
         try
         {
+            zos = new ZipOutputStream( new FileOutputStream( zipName ) );
+
             for ( String file : files )
             {
                 file = file.replace( '\\', '/' );
 
                 writeZipEntry( zos, new File( basedir, file ), file );
             }
+
+            zos.close();
+            zos = null;
         }
         finally
         {

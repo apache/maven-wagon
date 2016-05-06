@@ -20,13 +20,13 @@ package org.apache.maven.wagon;
  */
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.IOUtil;
 
 /**
  * Base class for wagon which provide stream based API.
@@ -98,7 +98,17 @@ public abstract class StreamWagon
         }
         else
         {
-            IOUtil.close( is );
+            try
+            {
+                if ( is != null )
+                {
+                    is.close();
+                }
+            }
+            catch ( final IOException e )
+            {
+                throw new TransferFailedException( "Failure transferring " + resourceName, e );
+            }
         }
 
         return retValue;
@@ -230,7 +240,17 @@ public abstract class StreamWagon
         }
         else
         {
-            IOUtil.close( is );
+            try
+            {
+                if ( is != null )
+                {
+                    is.close();
+                }
+            }
+            catch ( final IOException e )
+            {
+                throw new TransferFailedException( "Failure transferring " + resourceName, e );
+            }
         }
         
         return retValue;

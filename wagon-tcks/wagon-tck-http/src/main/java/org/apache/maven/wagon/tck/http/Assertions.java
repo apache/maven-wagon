@@ -62,7 +62,9 @@ public final class Assertions
             return null;
         }
 
-        return IOUtil.toString( stream );
+        final String resource = IOUtil.toString( stream );
+        stream.close();
+        return resource;
     }
 
 }

@@ -24,7 +24,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Properties;
@@ -318,15 +317,18 @@ public abstract class AbstractJschWagon
 
             channel.setCommand( command + "\n" );
 
-            InputStream stdout = channel.getInputStream();
-            InputStream stderr = channel.getErrStream();
+            stdoutReader = new BufferedReader( new InputStreamReader( channel.getInputStream() ) );
+            stderrReader = new BufferedReader( new InputStreamReader( channel.getErrStream() ) );
 
             channel.connect();
 
-            stdoutReader = new BufferedReader( new InputStreamReader( stdout ) );
-            stderrReader = new BufferedReader( new InputStreamReader( stderr ) );
-
             Streams streams = CommandExecutorStreamProcessor.processStreams( stderrReader, stdoutReader );
+
+            stdoutReader.close();
+            stdoutReader = null;
+
+            stderrReader.close();
+            stderrReader = null;
 
             if ( streams.getErr().length() > 0 && !ignoreFailures )
             {

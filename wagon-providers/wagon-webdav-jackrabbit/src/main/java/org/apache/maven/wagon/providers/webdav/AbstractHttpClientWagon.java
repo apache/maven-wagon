@@ -103,10 +103,15 @@ public abstract class AbstractHttpClientWagon
                     byte[] bytes = IOUtils.toByteArray( stream );
                     this.byteBuffer = ByteBuffer.allocate( bytes.length );
                     this.byteBuffer.put( bytes );
+                    stream.close();
                 }
                 catch ( IOException e )
                 {
                     throw new TransferFailedException( e.getMessage(), e );
+                }
+                finally
+                {
+                    IOUtils.closeQuietly( stream );
                 }
             }
 
@@ -160,6 +165,9 @@ public abstract class AbstractHttpClientWagon
 
                     remaining -= n;
                 }
+
+                fin.close();
+                fin = null;
             }
             finally
             {
@@ -585,6 +593,8 @@ public abstract class AbstractHttpClientWagon
             try
             {
                 props.load( is );
+                is.close();
+                is = null;
             }
             catch ( IOException ignore )
             {

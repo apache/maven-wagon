@@ -50,7 +50,6 @@ import org.mortbay.jetty.servlet.DefaultServlet;
 import org.mortbay.jetty.servlet.ServletHolder;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
@@ -58,6 +57,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
@@ -1983,16 +1983,22 @@ public abstract class HttpWagonTestCase
 
             File file = new File( resourceBase, URLDecoder.decode( request.getPathInfo() ) );
             file.getParentFile().mkdirs();
-            FileOutputStream out = new FileOutputStream( file );
-            ServletInputStream in = request.getInputStream();
+            OutputStream out = null;
+            InputStream in = null;
             try
             {
+                in = request.getInputStream();
+                out = new FileOutputStream( file );
                 IOUtil.copy( in, out );
+                out.close();
+                out = null;
+                in.close();
+                in = null;
             }
             finally
             {
-                in.close();
-                out.close();
+                IOUtil.close( in );
+                IOUtil.close( out );
             }
             putCallNumber++;
             DeployedResource deployedResource = new DeployedResource();

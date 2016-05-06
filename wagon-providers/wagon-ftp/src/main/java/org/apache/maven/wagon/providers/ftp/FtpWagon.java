@@ -661,6 +661,9 @@ public class FtpWagon
                             + ftp.getReplyString();
                     throw new TransferFailedException( msg );
                 }
+
+                sourceFileStream.close();
+                sourceFileStream = null;
             }
             catch ( IOException e )
             {

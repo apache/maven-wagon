@@ -132,10 +132,15 @@ public abstract class AbstractHttpClientWagon
                     byte[] bytes = IOUtil.toByteArray( stream );
                     byteBuffer = ByteBuffer.allocate( bytes.length );
                     byteBuffer.put( bytes );
+                    stream.close();
                 }
                 catch ( IOException e )
                 {
                     throw new TransferFailedException( e.getMessage(), e );
+                }
+                finally
+                {
+                    IOUtil.close( stream );
                 }
             }
             this.resource = resource;

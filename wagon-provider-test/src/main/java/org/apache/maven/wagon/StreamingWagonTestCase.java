@@ -78,6 +78,8 @@ public abstract class StreamingWagonTestCase
             stream = new FileOutputStream( destFile );
             wagon.getToStream( "fubar.txt", stream );
             fail( "File was found when it shouldn't have been" );
+            stream.close();
+            stream = null;
         }
         catch ( ResourceDoesNotExistException e )
         {
@@ -155,7 +157,7 @@ public abstract class StreamingWagonTestCase
         }
         finally
         {
-            IOUtil.close( stream );
+            stream.close();
         }
 
         disconnectWagon( wagon );
@@ -184,6 +186,8 @@ public abstract class StreamingWagonTestCase
                 stream = new FileOutputStream( destFile );
                 wagon.getIfNewerToStream( "fubar.txt", stream, 0 );
                 fail( "File was found when it shouldn't have been" );
+                stream.close();
+                stream = null;
             }
             catch ( ResourceDoesNotExistException e )
             {
@@ -255,6 +259,8 @@ public abstract class StreamingWagonTestCase
         {
             stream = new FileInputStream( sourceFile );
             wagon.putFromStream( stream, resource, sourceFile.length(), sourceFile.lastModified() );
+            stream.close();
+            stream = null;
         }
         catch ( Exception e )
         {
@@ -291,6 +297,8 @@ public abstract class StreamingWagonTestCase
         {
             stream = new FileOutputStream( destFile );
             wagon.getToStream( this.resource, stream );
+            stream.close();
+            stream = null;
         }
         catch ( Exception e )
         {

@@ -102,6 +102,12 @@ public final class TestUtil
                                 out = new FileOutputStream( target );
 
                                 IOUtil.copy( in, out );
+
+                                out.close();
+                                out = null;
+
+                                in.close();
+                                in = null;
                             }
                             finally
                             {

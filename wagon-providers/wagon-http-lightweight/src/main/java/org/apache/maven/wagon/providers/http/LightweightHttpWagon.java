@@ -364,7 +364,14 @@ public class LightweightHttpWagon
                     url + " - Could not open input stream for resource: '" + resource + "'" );
             }
 
-            return HtmlFileListParser.parseFileList( url, is );
+            final List<String> htmlFileList = HtmlFileListParser.parseFileList( url, is );
+            is.close();
+            is = null;
+            return htmlFileList;
+        }
+        catch ( final IOException e )
+        {
+            throw new TransferFailedException( "Failure transferring " + resource.getName(), e );
         }
         finally
         {

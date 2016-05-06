@@ -111,6 +111,9 @@ public class LatencyServlet
 
                 total += read;
             }
+
+            in.close();
+            in = null;
         }
         finally
         {

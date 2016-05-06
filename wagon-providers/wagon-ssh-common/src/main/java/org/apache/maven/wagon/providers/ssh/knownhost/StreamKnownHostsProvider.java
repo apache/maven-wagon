@@ -47,6 +47,10 @@ public class StreamKnownHostsProvider
         {
             StringOutputStream stringOutputStream = new StringOutputStream();
             IOUtil.copy( stream, stringOutputStream );
+
+            stream.close();
+            stream = null;
+
             this.contents = stringOutputStream.toString();
             
             this.knownHosts = this.loadKnownHosts( this.contents );
