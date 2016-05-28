@@ -20,7 +20,6 @@ package org.apache.maven.wagon.shared.http;
  */
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.maven.wagon.TransferFailedException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -109,7 +108,7 @@ public class HtmlFileListParser
 
     private static String cleanLink( URI baseURI, String link )
     {
-        if ( StringUtils.isEmpty( link ) )
+        if ( link == null || link.length() == 0 )
         {
             return "";
         }
@@ -146,7 +145,7 @@ public class HtmlFileListParser
 
     private static boolean isAcceptableLink( String link )
     {
-        if ( StringUtils.isEmpty( link ) )
+        if ( link == null || link.length() == 0 )
         {
             return false;
         }

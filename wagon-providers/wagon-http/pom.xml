@@ -86,7 +86,6 @@ under the License.
                   <include>org.apache.httpcomponents:httpcore</include>
                   <include>commons-logging:commons-logging</include>
                   <include>commons-codec:commons-codec</include>
-                  <include>commons-lang:commons-lang</include>
                   <include>commons-io:commons-io</include>
                   <include>org.jsoup:jsoup</include>
                   <include>org.apache.maven.wagon:wagon-http-shared</include>
@@ -98,10 +97,6 @@ under the License.
                 <relocation>
                   <pattern>org.apache.commons.codec</pattern>
                   <shadedPattern>org.apache.maven.wagon.providers.http.commons.codec</shadedPattern>
-                </relocation>
-                <relocation>
-                  <pattern>org.apache.commons.lang</pattern>
-                  <shadedPattern>org.apache.maven.wagon.providers.http.commons.lang</shadedPattern>
                 </relocation>
                 <relocation>
                   <pattern>org.apache.commons.io</pattern>

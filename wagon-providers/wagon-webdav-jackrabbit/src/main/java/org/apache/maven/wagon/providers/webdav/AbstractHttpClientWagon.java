@@ -40,7 +40,6 @@ import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.util.DateParseException;
 import org.apache.commons.httpclient.util.DateUtil;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.PathUtils;
@@ -214,7 +213,7 @@ public abstract class AbstractHttpClientWagon
         {
             username = authenticationInfo.getUserName();
 
-            if ( StringUtils.contains( username, "\\" ) )
+            if ( username != null && username.contains( "\\" ) )
             {
                 String[] domainAndUsername = username.split( "\\\\" );
                 domain = domainAndUsername[0];
@@ -228,7 +227,8 @@ public abstract class AbstractHttpClientWagon
 
         String host = getRepository().getHost();
 
-        if ( StringUtils.isNotEmpty( username ) && StringUtils.isNotEmpty( password ) )
+        if ( !( username == null || username.length() == 0 )
+            && !( password == null || password.length() == 0 ) )
         {
             Credentials creds;
             if ( domain != null )
@@ -579,7 +579,7 @@ public abstract class AbstractHttpClientWagon
             }
         }
     }
-    
+
     private static final String DEFAULT_USER_AGENT = getDefaultUserAgent();
 
     private static String getDefaultUserAgent()

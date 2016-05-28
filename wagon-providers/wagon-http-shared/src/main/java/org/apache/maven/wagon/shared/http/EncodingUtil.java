@@ -19,8 +19,6 @@ package org.apache.maven.wagon.shared.http;
  * under the License.
  */
 
-import org.apache.commons.lang.StringUtils;
-
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -90,7 +88,7 @@ public class EncodingUtil
 
         String[] parts = paths == null ? //
             new String[0] : //
-            paths.length == 1 ? StringUtils.split( paths[0], "/" ) : paths;
+            paths.length == 1 ? paths[0].split( "/" ) : paths;
 
         for ( String part : parts )
         {
