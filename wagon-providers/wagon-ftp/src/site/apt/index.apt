@@ -39,3 +39,64 @@ Features
  * Get files from FTP Server
 
  * Deploy files to FTP server
+
+
+Configuration
+
+
+* Configuration options
+
+
+ Configuration options in <<<settings.xml>>> are used to create <<<FTPClient>>> or <<<FTPSClient>>>:
+
+ * <<<passiveMode>>> (default: <<true>>)
+
+ * <<<controlEncoding>>> (default: <<"ISO-8859-1">>,
+ set from <<<org.apache.commons.net.ftp.FTP.DEFAULT_CONTROL_ENCODING>>>)
+
+ * <<<secure>>> (default: <<false>>)
+
+ * <<<securityProtocol>>> (default: <<TLS>>) FTPS security protocol
+
+ * <<<implicitMode>>> (default: <<false>>)
+
+
+* Sample configuration
+
+
+ Wagon-ftp may be used for deploying a site to remote location:
+
+** pom.xml
+
+---------------------------------------------
+<project>
+    ...
+    <distributionManagement>
+        ...
+        <site>
+            <id>ftp.server.id</id>
+            <url>ftp://ftp.example.com</url>
+        </site>
+    </distributionManagement>
+    ...
+</project>
+---------------------------------------------
+
+** settings.xml
+
+---------------------------------------------
+<settings>
+    ...
+    <servers>
+        ...
+        <server>
+            <id>ftp.server.id</id>
+            <username>username</username>
+            <password>password</password>
+            <configuration>
+                <secure>true</secure>
+            </configuration>
+        </server>
+    </servers>
+<settings>
+---------------------------------------------
