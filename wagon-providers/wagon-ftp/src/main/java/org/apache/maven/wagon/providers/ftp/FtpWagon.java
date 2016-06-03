@@ -72,6 +72,21 @@ public class FtpWagon
      */
     private String controlEncoding = FTP.DEFAULT_CONTROL_ENCODING;
 
+    /**
+     * @plexus.configuration default-value=false
+     */
+    private boolean secure = false;
+
+    /**
+     * Security protocol for secure FTP (TLS or SSL) default-value="TLS"
+     */
+    private String securityProtocol = "TLS";
+
+    /**
+     * @plexus.configuration default-value=false
+     */
+    private boolean implicitMode = false;
+
     public boolean isPassiveMode()
     {
         return passiveMode;
@@ -112,7 +127,7 @@ public class FtpWagon
 
         String host = getRepository().getHost();
 
-        ftp = new FTPClient();
+        ftp = FtpClientFactory.get( secure, securityProtocol, implicitMode );
         ftp.setDefaultTimeout( getTimeout() );
         ftp.setDataTimeout( getTimeout() );
         ftp.setControlEncoding( getControlEncoding() );
