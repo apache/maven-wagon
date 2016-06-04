@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 #
 # Licensed to the Apache Software Foundation (ASF) under one
@@ -18,12 +19,4 @@
 # under the License.
 #
 
-language: java
-sudo: false
-jdk:
-  - oraclejdk8
-  - oraclejdk7
-  - openjdk7
-  - openjdk6
-
-script: ./travis-script.sh
+mvn --fail-at-end -Dsurefire.rerunFailingTestsCount=5 test -B
