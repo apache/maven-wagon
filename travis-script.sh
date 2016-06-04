@@ -19,4 +19,4 @@
 # under the License.
 #
 
-mvn --fail-at-end -Dsurefire.rerunFailingTestsCount=5 test -B
+mvn --fail-at-end -Dsurefire.rerunFailingTestsCount=5 -Dsurefire.timeout=800 test -B
