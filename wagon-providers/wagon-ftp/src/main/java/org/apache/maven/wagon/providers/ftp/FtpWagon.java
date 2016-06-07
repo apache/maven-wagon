@@ -127,7 +127,7 @@ public class FtpWagon
 
         String host = getRepository().getHost();
 
-        ftp = FtpClientFactory.get( secure, securityProtocol, implicitMode );
+        ftp = createFTPClient( secure, securityProtocol, implicitMode );
         ftp.setDefaultTimeout( getTimeout() );
         ftp.setDataTimeout( getTimeout() );
         ftp.setControlEncoding( getControlEncoding() );
@@ -200,6 +200,12 @@ public class FtpWagon
         {
             throw new ConnectionException( "Cannot login to remote system", e );
         }
+    }
+
+    protected FTPClient createFTPClient( boolean isSecure, String protocol, boolean isImplicit )
+    {
+        FtpClientProvider ftpClientProvider = new FtpClientProvider( isSecure, protocol, isImplicit );
+        return ftpClientProvider.get();
     }
 
     protected void firePutCompleted( Resource resource, File file )

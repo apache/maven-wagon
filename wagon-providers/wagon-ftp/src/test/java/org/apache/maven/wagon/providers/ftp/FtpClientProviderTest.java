@@ -26,18 +26,18 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPSClient;
 import org.junit.Test;
 
-public class FtpClientFactoryTest
+public class FtpClientProviderTest
 {
-
     @Test
     public void shouldCreateSimpleFTPClient() throws Exception
     {
         //given
+        boolean isSecure = false;
         String irrelevantSecurityProtocol = "SSL";
         boolean irrelevantImplicitMode = false;
         // when
         FTPClient actual =
-            FtpClientFactory.get( false, irrelevantSecurityProtocol, irrelevantImplicitMode );
+            new FtpClientProvider( isSecure, irrelevantSecurityProtocol, irrelevantImplicitMode ).get();
         // then
         assertThat( actual.getClass().getName(), is( FTPClient.class.getName() ) );
     }
@@ -46,7 +46,7 @@ public class FtpClientFactoryTest
     public void shouldCreateDefaultFTPSClient() throws Exception
     {
         // when
-        FTPClient actual = FtpClientFactory.get( true, null, false );
+        FTPClient actual = new FtpClientProvider( true, null, false ).get();
         // then
         assertThat( actual.getClass().getName(), is( FTPSClient.class.getName() ) );
     }
@@ -55,7 +55,7 @@ public class FtpClientFactoryTest
     public void shouldCreateImplicitSSLClient() throws Exception
     {
         // when
-        FTPClient actual = FtpClientFactory.get( true, "SSL", true );
+        FTPClient actual = new FtpClientProvider( true, "SSL", true ).get();
         // then
         assertThat( actual.getClass().getName(), is( FTPSClient.class.getName() ) );
     }
@@ -64,7 +64,7 @@ public class FtpClientFactoryTest
     public void shouldCreateExplicitTLSClient() throws Exception
     {
         // when
-        FTPClient actual = FtpClientFactory.get( true, "TLS", false );
+        FTPClient actual = new FtpClientProvider( true, "TLS", false ).get();
         // then
         assertThat( actual.getClass().getName(), is( FTPSClient.class.getName() ) );
     }

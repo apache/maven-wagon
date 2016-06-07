@@ -24,15 +24,27 @@ import org.apache.commons.net.ftp.FTPSClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class FtpClientFactory
+class FtpClientProvider
 {
+    private static final Logger LOG = LoggerFactory.getLogger( FtpClientProvider.class );
 
-    private static final Logger LOG = LoggerFactory.getLogger( FtpClientFactory.class );
+    private final boolean isSecure;
 
-    static FTPClient get( boolean secure, String securityProtocol, boolean isImplicit )
+    private final String securityProtocol;
+
+    private final boolean isImplicit;
+
+    FtpClientProvider( boolean isSecure, String securityProtocol, boolean isImplicit )
+    {
+        this.isSecure = isSecure;
+        this.securityProtocol = securityProtocol;
+        this.isImplicit = isImplicit;
+    }
+
+    FTPClient get()
     {
         FTPClient client;
-        if ( secure )
+        if ( isSecure )
         {
             client = new FTPSClient( securityProtocol, isImplicit );
             LOG.debug( "created FTP client for '{}', implicit: '{}'", securityProtocol, isImplicit );
