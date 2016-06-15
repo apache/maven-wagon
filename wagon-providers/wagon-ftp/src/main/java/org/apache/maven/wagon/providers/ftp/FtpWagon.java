@@ -78,7 +78,7 @@ public class FtpWagon
     private boolean secure = false;
 
     /**
-     * Security protocol for secure FTP (TLS or SSL) default-value="TLS"
+     * @plexus.configuration default-value="TLS"
      */
     private String securityProtocol = "TLS";
 

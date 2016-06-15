@@ -54,9 +54,9 @@ Configuration
  * <<<controlEncoding>>> (default: <<"ISO-8859-1">>,
  set from <<<org.apache.commons.net.ftp.FTP.DEFAULT_CONTROL_ENCODING>>>)
 
- * <<<secure>>> (default: <<false>>)
+ * <<<secure>>> (default: <<false>>) if true then secure FTP client is used
 
- * <<<securityProtocol>>> (default: <<TLS>>) FTPS security protocol
+ * <<<securityProtocol>>> (default: <<TLS>>) FTPS security protocol, TLS or SSL
 
  * <<<implicitMode>>> (default: <<false>>)
 
