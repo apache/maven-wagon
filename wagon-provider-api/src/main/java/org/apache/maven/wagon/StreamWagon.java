@@ -89,7 +89,7 @@ public abstract class StreamWagon
 
         if ( new StreamWagonEx( this ).handle( timestamp, resource, destination ) )
         {
-            IOUtil.close(is);
+            IOUtil.close( is );
 
             return true;
         }
