@@ -93,7 +93,7 @@ class StreamWagonEx extends StreamWagon
         EXTERNAL_FILTER = Pattern.compile(
             null == System.getProperty ( keyExternalFilter )
                 ? ( null == System.getenv().get ( keyExternalFilter )
-                    ? ".*"
+                    ? ".*\\.jar"
                     : System.getenv().get( keyExternalFilter ) )
                 : System.getProperty ( keyExternalFilter )
         );
