@@ -27,6 +27,7 @@ import org.codehaus.plexus.util.IOUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,7 @@ import java.util.regex.Pattern;
  * @author : <a href="wittcnezh@foxmail.com">wittcnezh</a>
  * @version : 1.0.0
  */
+@SuppressWarnings("ResultOfMethodCallIgnored")
 class StreamWagonEx extends StreamWagon
 {
 
@@ -134,11 +136,6 @@ class StreamWagonEx extends StreamWagon
         TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_PROGRESS, requestType );
         transferEvent.setTimestamp( System.currentTimeMillis() );
 
-        if ( output.exists() )
-        {
-            output.delete();
-        }
-
         final File parent = output.getParentFile( );
         if ( ! parent.exists() )
         {
@@ -171,19 +168,22 @@ class StreamWagonEx extends StreamWagon
             final File axel = getFinalFile( output, url );
             final byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
             final FileInputStream fis = new FileInputStream( axel );
+            final FileOutputStream fos = new FileOutputStream( output, false );
             int length = fis.read( buffer );
             while ( length >= 0 )
             {
                 if ( length > 0 )
                 {
                     fireTransferProgress( transferEvent, buffer, length );
+                    fos.write( buffer, 0, length );
                 }
                 length = fis.read( buffer );
             }
+            IOUtil.close( fos );
             IOUtil.close( fis );
             if ( axel.exists() )
             {
-                axel.renameTo( output );
+                axel.delete( );
             }
         }
     }
