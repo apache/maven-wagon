@@ -84,15 +84,13 @@ public abstract class StreamWagon
         fireGetInitiated( resource, destination );
 
         resource.setLastModified( timestamp );
-        
-        InputStream is = getInputStream( resource );
 
         if ( new StreamWagonEx( this ).handle( timestamp, resource, destination ) )
         {
-            IOUtil.close( is );
-
             return true;
         }
+
+        InputStream is = getInputStream( resource );
 
         // always get if timestamp is 0 (ie, target doesn't exist), otherwise only if older than the remote file
         if ( timestamp == 0 || timestamp < resource.getLastModified() )
