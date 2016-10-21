@@ -31,6 +31,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.regex.Pattern;
 
 /**
@@ -131,8 +132,7 @@ class StreamWagonEx extends StreamWagon
      * @param requestType one of {@link TransferEvent#REQUEST_GET} or {@link TransferEvent#REQUEST_PUT}
      */
     protected void transfer( Resource resource, String url, File output, int requestType )
-        throws IOException
-    {
+        throws IOException, TransferFailedException {
         TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_PROGRESS, requestType );
         transferEvent.setTimestamp( System.currentTimeMillis() );
 
@@ -161,7 +161,9 @@ class StreamWagonEx extends StreamWagon
 
         if ( 0 != exitCode )
         {
-            fireTransferError( resource, new Exception( "(" + exitCode + ")" ), TransferEvent.REQUEST_GET );
+            final TransferFailedException re = new TransferFailedException( "(" + exitCode + ")" );
+            fireTransferError( resource, re, TransferEvent.REQUEST_GET );
+            throw re;
         }
         else
         {
