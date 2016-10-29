@@ -305,7 +305,7 @@ public abstract class AbstractJschWagon
         }
     }
 
-    public Streams executeCommand( String command, boolean ignoreFailures )
+    public Streams executeCommand( String command, boolean ignoreStdErr, boolean ignoreNoneZeroExitCode )
         throws CommandExecutionException
     {
         ChannelExec channel = null;
@@ -330,9 +330,14 @@ public abstract class AbstractJschWagon
             stderrReader.close();
             stderrReader = null;
 
-            if ( streams.getErr().length() > 0 && !ignoreFailures )
+            int exitCode = channel.getExitStatus();
+            if ( streams.getErr().length() > 0 && !ignoreStdErr )
             {
-                int exitCode = channel.getExitStatus();
+                throw new CommandExecutionException( "Exit code: " + exitCode + " - " + streams.getErr() );
+            }
+
+            if ( exitCode != 0 && !ignoreNoneZeroExitCode )
+            {
                 throw new CommandExecutionException( "Exit code: " + exitCode + " - " + streams.getErr() );
             }
 
@@ -397,8 +402,21 @@ public abstract class AbstractJschWagon
     {
         fireTransferDebug( "Executing command: " + command );
 
-        executeCommand( command, false );
+        //backward compatible with wagon 2.10
+        executeCommand( command, false, true );
     }
+
+
+    public Streams executeCommand( String command, boolean ignoreError )
+        throws CommandExecutionException
+    {
+        fireTransferDebug( "Executing command: " + command );
+
+        //backward compatible with wagon 2.10
+        return executeCommand( command, ignoreError, ignoreError );
+    }
+
+
 
     public InteractiveUserInfo getInteractiveUserInfo()
     {
