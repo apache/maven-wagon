@@ -371,13 +371,14 @@ public abstract class AbstractWagon
         {
             transfer( resource, input, output, TransferEvent.REQUEST_GET, maxSize );
 
+            finishGetTransfer( resource, input, output );
+
             if ( closeInput )
             {
                 input.close();
                 input = null;
             }
 
-            finishGetTransfer( resource, input, output );
         }
         catch ( IOException e )
         {
@@ -471,13 +472,13 @@ public abstract class AbstractWagon
                           ? Long.MAX_VALUE
                           : resource.getContentLength() );
 
+            finishPutTransfer( resource, input, output );
+
             if ( closeOutput )
             {
                 output.close();
                 output = null;
             }
-
-            finishPutTransfer( resource, input, output );
         }
         catch ( IOException e )
         {

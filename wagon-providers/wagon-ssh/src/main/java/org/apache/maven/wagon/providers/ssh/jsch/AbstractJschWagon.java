@@ -305,16 +305,18 @@ public abstract class AbstractJschWagon
         }
     }
 
-    public Streams executeCommand( String command, boolean ignoreFailures )
+    public Streams executeCommand( String command, boolean ignoreStdErr, boolean ignoreNoneZeroExitCode )
         throws CommandExecutionException
     {
         ChannelExec channel = null;
         BufferedReader stdoutReader = null;
         BufferedReader stderrReader = null;
+        Streams streams = null;
         try
         {
             channel = (ChannelExec) session.openChannel( EXEC_CHANNEL );
 
+            fireSessionDebug( "Executing: " + command );
             channel.setCommand( command + "\n" );
 
             stdoutReader = new BufferedReader( new InputStreamReader( channel.getInputStream() ) );
@@ -322,7 +324,7 @@ public abstract class AbstractJschWagon
 
             channel.connect();
 
-            Streams streams = CommandExecutorStreamProcessor.processStreams( stderrReader, stdoutReader );
+            streams = CommandExecutorStreamProcessor.processStreams( stderrReader, stdoutReader );
 
             stdoutReader.close();
             stdoutReader = null;
@@ -330,9 +332,15 @@ public abstract class AbstractJschWagon
             stderrReader.close();
             stderrReader = null;
 
-            if ( streams.getErr().length() > 0 && !ignoreFailures )
+            int exitCode = channel.getExitStatus();
+
+            if ( streams.getErr().length() > 0 && !ignoreStdErr )
             {
-                int exitCode = channel.getExitStatus();
+                throw new CommandExecutionException( "Exit code: " + exitCode + " - " + streams.getErr() );
+            }
+
+            if ( exitCode != 0 && !ignoreNoneZeroExitCode )
+            {
                 throw new CommandExecutionException( "Exit code: " + exitCode + " - " + streams.getErr() );
             }
 
@@ -348,6 +356,12 @@ public abstract class AbstractJschWagon
         }
         finally
         {
+            if ( streams != null )
+            {
+                fireSessionDebug( "Stdout results:" + streams.getOut() );
+                fireSessionDebug( "Stderr results:" + streams.getErr() );
+            }
+
             IOUtil.close( stdoutReader );
             IOUtil.close( stderrReader );
             if ( channel != null )
@@ -398,6 +412,15 @@ public abstract class AbstractJschWagon
         fireTransferDebug( "Executing command: " + command );
 
         executeCommand( command, false );
+    }
+
+    public Streams executeCommand( String command, boolean ignoreFailures )
+            throws CommandExecutionException
+    {
+        fireTransferDebug( "Executing command: " + command );
+
+        //backward compatible with wagon 2.10
+        return executeCommand( command, ignoreFailures, ignoreFailures );
     }
 
     public InteractiveUserInfo getInteractiveUserInfo()
