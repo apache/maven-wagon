@@ -72,6 +72,21 @@ public class FtpWagon
      */
     private String controlEncoding = FTP.DEFAULT_CONTROL_ENCODING;
 
+    /**
+     * @plexus.configuration default-value=false
+     */
+    private boolean secure = false;
+
+    /**
+     * @plexus.configuration default-value="TLS"
+     */
+    private String securityProtocol = "TLS";
+
+    /**
+     * @plexus.configuration default-value=false
+     */
+    private boolean implicitMode = false;
+
     public boolean isPassiveMode()
     {
         return passiveMode;
@@ -112,7 +127,7 @@ public class FtpWagon
 
         String host = getRepository().getHost();
 
-        ftp = new FTPClient();
+        ftp = createFTPClient( secure, securityProtocol, implicitMode );
         ftp.setDefaultTimeout( getTimeout() );
         ftp.setDataTimeout( getTimeout() );
         ftp.setControlEncoding( getControlEncoding() );
@@ -185,6 +200,12 @@ public class FtpWagon
         {
             throw new ConnectionException( "Cannot login to remote system", e );
         }
+    }
+
+    protected FTPClient createFTPClient( boolean isSecure, String protocol, boolean isImplicit )
+    {
+        FtpClientProvider ftpClientProvider = new FtpClientProvider( isSecure, protocol, isImplicit );
+        return ftpClientProvider.get();
     }
 
     protected void firePutCompleted( Resource resource, File file )
