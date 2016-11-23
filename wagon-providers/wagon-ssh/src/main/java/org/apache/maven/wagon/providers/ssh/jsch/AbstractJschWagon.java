@@ -81,6 +81,8 @@ public abstract class AbstractJschWagon
 
     protected Session session;
 
+    private String strictHostKeyChecking;
+
     /**
      * @plexus.requirement role-hint="file"
      */
@@ -90,6 +92,11 @@ public abstract class AbstractJschWagon
      * @plexus.requirement
      */
     private volatile InteractiveUserInfo interactiveUserInfo;
+
+    /**
+     * @plexus.configuration default-value="gssapi-with-mic,publickey,password,keyboard-interactive"
+     */
+    private volatile String preferredAuthentications;
 
     /**
      * @plexus.requirement
@@ -235,12 +242,16 @@ public abstract class AbstractJschWagon
             {
                 // continue without known_hosts
             }
-            config.setProperty( "StrictHostKeyChecking", getKnownHostsProvider().getHostKeyChecking() );
+            if ( strictHostKeyChecking == null )
+            {
+                strictHostKeyChecking = getKnownHostsProvider().getHostKeyChecking();
+            }
+            config.setProperty( "StrictHostKeyChecking", strictHostKeyChecking );
         }
 
         if ( authenticationInfo.getPassword() != null )
         {
-            config.setProperty( "PreferredAuthentications", "gssapi-with-mic,publickey,password,keyboard-interactive" );
+            config.setProperty( "PreferredAuthentications", preferredAuthentications );
         }
 
         config.setProperty( "BatchMode", interactive ? "no" : "yes" );
@@ -446,5 +457,25 @@ public abstract class AbstractJschWagon
     public void setUIKeyboardInteractive( UIKeyboardInteractive uIKeyboardInteractive )
     {
         this.uIKeyboardInteractive = uIKeyboardInteractive;
+    }
+
+    public String getPreferredAuthentications()
+    {
+        return preferredAuthentications;
+    }
+
+    public void setPreferredAuthentications( String preferredAuthentications )
+    {
+        this.preferredAuthentications = preferredAuthentications;
+    }
+
+    public String getStrictHostKeyChecking()
+    {
+        return strictHostKeyChecking;
+    }
+
+    public void setStrictHostKeyChecking( String strictHostKeyChecking )
+    {
+        this.strictHostKeyChecking = strictHostKeyChecking;
     }
 }
