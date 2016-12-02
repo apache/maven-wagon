@@ -112,7 +112,7 @@ public class FtpWagon
 
         String host = getRepository().getHost();
 
-        ftp = new FTPClient();
+        ftp = createClient();
         ftp.setDefaultTimeout( getTimeout() );
         ftp.setDataTimeout( getTimeout() );
         ftp.setControlEncoding( getControlEncoding() );
@@ -185,6 +185,11 @@ public class FtpWagon
         {
             throw new ConnectionException( "Cannot login to remote system", e );
         }
+    }
+
+    protected FTPClient createClient()
+    {
+        return new FTPClient();
     }
 
     protected void firePutCompleted( Resource resource, File file )
