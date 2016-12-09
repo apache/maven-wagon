@@ -23,7 +23,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.protocol.HTTP;
 
 /**
  * 
@@ -32,7 +31,7 @@ public class HttpConfiguration
 {
     
     private static final HttpMethodConfiguration DEFAULT_PUT =
-        new HttpMethodConfiguration().addParam( HTTP.EXPECT_CONTINUE, "%b,true" );
+        new HttpMethodConfiguration().addParam( "http.protocol.expect-continue", "%b,true" );
 
     private HttpMethodConfiguration all;
 
