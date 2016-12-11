@@ -146,12 +146,12 @@ Deploying your Maven site to SCM
       <extension>
         <groupId>org.apache.maven.scm</groupId>
         <artifactId>maven-scm-manager-plexus</artifactId>
-        <version>${project.version}</version>
+        <version>${mavenScmVersion}</version>
       </extension>
       <extension>
         <groupId>org.apache.maven.scm</groupId>
         <artifactId>maven-scm-provider-gitexe</artifactId>
-        <version>${project.version}</version>
+        <version>${mavenScmVersion}</version>
       </extension>
     </extensions>
   </build>

@@ -34,7 +34,7 @@ under the License.
   </description>
 
   <properties>
-    <mavenScmVersion>1.5</mavenScmVersion>
+    <mavenScmVersion>1.9.5</mavenScmVersion>
   </properties>
 
   <dependencies>
