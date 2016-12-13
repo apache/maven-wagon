@@ -282,7 +282,6 @@ under the License.
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-container-default</artifactId>
         <version>1.5.5</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
@@ -323,7 +322,6 @@ under the License.
         <groupId>org.easymock</groupId>
         <artifactId>easymock</artifactId>
         <version>3.2</version>
-        <scope>test</scope>
       </dependency>
 
       <dependency>

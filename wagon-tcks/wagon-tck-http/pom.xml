@@ -35,7 +35,6 @@ under the License.
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-container-default</artifactId>
-      <!-- override test scope from parents -->
       <scope>compile</scope>
     </dependency>
     <dependency>
