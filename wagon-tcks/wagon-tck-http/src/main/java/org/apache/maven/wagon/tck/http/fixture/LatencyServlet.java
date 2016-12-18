@@ -29,8 +29,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
 import org.codehaus.plexus.util.IOUtil;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -38,7 +40,7 @@ import org.codehaus.plexus.util.IOUtil;
 public class LatencyServlet
     extends HttpServlet
 {
-    private static Logger logger = Logger.getLogger( LatencyServlet.class );
+    private static Logger logger = LoggerFactory.getLogger( LatencyServlet.class );
 
     private static final long serialVersionUID = 1L;
 

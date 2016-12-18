@@ -19,7 +19,6 @@ package org.apache.maven.wagon;
  * under the License.
  */
 
-import org.apache.log4j.Logger;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
@@ -38,6 +37,9 @@ import org.easymock.IAnswer;
 import static org.easymock.EasyMock.*;
 //CHECKSTYLE_ON: AvoidStarImport
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -52,7 +54,7 @@ import java.util.List;
 public abstract class WagonTestCase
     extends PlexusTestCase
 {
-    protected static Logger logger = Logger.getLogger( WagonTestCase.class );
+    protected static Logger logger = LoggerFactory.getLogger( WagonTestCase.class );
 
 
     static final class ProgressAnswer implements IAnswer

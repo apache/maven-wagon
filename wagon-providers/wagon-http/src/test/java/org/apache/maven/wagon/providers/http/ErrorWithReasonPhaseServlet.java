@@ -19,13 +19,14 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
-import org.apache.log4j.Logger;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * User: jdumay
@@ -37,7 +38,7 @@ public class ErrorWithReasonPhaseServlet
 {
     public static final String REASON = "it sucks!";
 
-    private Logger logger = Logger.getLogger( ErrorWithReasonPhaseServlet.class );
+    private Logger logger = LoggerFactory.getLogger( ErrorWithReasonPhaseServlet.class );
 
     public void service( HttpServletRequest request, HttpServletResponse response )
         throws ServletException, IOException

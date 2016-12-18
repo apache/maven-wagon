@@ -19,7 +19,6 @@ package org.apache.maven.wagon.tck.http.fixture;
  * under the License.
  */
 
-import org.apache.log4j.Logger;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
@@ -46,12 +45,15 @@ import java.net.URISyntaxException;
 
 import static org.apache.maven.wagon.tck.http.util.TestUtil.getResource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * 
  */
 public class ServerFixture
 {
-    private static Logger logger = Logger.getLogger( ServerFixture.class );
+    private static Logger logger = LoggerFactory.getLogger( ServerFixture.class );
 
     public static final String SERVER_ROOT_RESOURCE_PATH = "default-server-root";
 
@@ -84,7 +86,7 @@ public class ServerFixture
             SslSocketConnector connector = new SslSocketConnector();
             String keystore = getResource( SERVER_SSL_KEYSTORE_RESOURCE_PATH ).getAbsolutePath();
 
-            Logger.getLogger( ServerFixture.class ).info( "TCK Keystore path: " + keystore );
+            LoggerFactory.getLogger( ServerFixture.class ).info( "TCK Keystore path: " + keystore );
             System.setProperty( "javax.net.ssl.keyStore", keystore );
             System.setProperty( "javax.net.ssl.trustStore", keystore );
 

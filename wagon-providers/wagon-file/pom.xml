@@ -32,4 +32,11 @@ under the License.
   <description>
     Wagon provider that gets and puts artifacts using file system protocol
   </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-utils</artifactId>
+    </dependency>
+  </dependencies>
 </project>

@@ -52,24 +52,9 @@ under the License.
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.sshd</groupId>
-      <artifactId>sshd-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
       <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <scope>test</scope>
+      <artifactId>slf4j-simple</artifactId>
     </dependency>
-
-    <dependency>
-      <groupId>bouncycastle</groupId>
-      <artifactId>bcprov-jdk15</artifactId>
-      <version>140</version>
-      <scope>test</scope>
-    </dependency>
-
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>

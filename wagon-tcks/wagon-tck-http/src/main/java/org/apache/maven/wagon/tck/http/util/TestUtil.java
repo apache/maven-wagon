@@ -32,15 +32,19 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import org.apache.log4j.Logger;
 import org.codehaus.plexus.util.IOUtil;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
  */
 public final class TestUtil
 {
-    private static final Logger LOGGER = Logger.getLogger( TestUtil.class );
+    // CHECKSTYLE_OFF: ConstantName
+    private static final Logger logger = LoggerFactory.getLogger( TestUtil.class );
+    // CHECKSTYLE_ON: ConstantName
 
     private static final Map<String, File> BASES = new HashMap<String, File>();
 
@@ -75,7 +79,7 @@ public final class TestUtil
                 base = new File( "target/tck-resources/" + urlFile.getName() );
                 base.getParentFile().mkdirs();
 
-                LOGGER.info( "unpacking test resources in jar: " + url );
+                logger.info( "unpacking test resources in jar: " + url );
                 JarFile jf = null;
                 try
                 {

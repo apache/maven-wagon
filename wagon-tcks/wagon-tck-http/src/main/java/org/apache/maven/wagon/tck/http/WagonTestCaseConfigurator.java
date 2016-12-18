@@ -19,7 +19,6 @@ package org.apache.maven.wagon.tck.http;
  * under the License.
  */
 
-import org.apache.log4j.Logger;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusContainer;
@@ -31,6 +30,9 @@ import org.codehaus.plexus.configuration.PlexusConfiguration;
 import org.codehaus.plexus.context.Context;
 import org.codehaus.plexus.context.ContextException;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -48,7 +50,7 @@ public class WagonTestCaseConfigurator
 
     private String wagonHint;
 
-    private static Logger logger = Logger.getLogger( WagonTestCaseConfigurator.class );
+    private static Logger logger = LoggerFactory.getLogger( WagonTestCaseConfigurator.class );
 
     public boolean isSupported( final String useCaseId )
     {

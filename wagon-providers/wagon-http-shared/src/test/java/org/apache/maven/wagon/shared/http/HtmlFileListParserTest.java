@@ -25,8 +25,10 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.apache.log4j.Logger;
 import org.apache.maven.wagon.TransferFailedException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Unit Tests for the HtmlFileListParser
@@ -34,7 +36,7 @@ import org.apache.maven.wagon.TransferFailedException;
 public class HtmlFileListParserTest
     extends TestCase
 {
-    private static Logger logger = Logger.getLogger( HtmlFileListParserTest.class );
+    private static Logger logger = LoggerFactory.getLogger( HtmlFileListParserTest.class );
 
     private void assertContainsExpected( List<String> links, String[] expected )
     {

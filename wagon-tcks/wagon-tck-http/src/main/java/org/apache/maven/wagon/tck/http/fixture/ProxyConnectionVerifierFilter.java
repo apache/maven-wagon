@@ -31,7 +31,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -39,7 +40,7 @@ import org.apache.log4j.Logger;
 public class ProxyConnectionVerifierFilter
     implements Filter
 {
-    private static Logger logger = Logger.getLogger( ProxyConnectionVerifierFilter.class );
+    private static Logger logger = LoggerFactory.getLogger( ProxyConnectionVerifierFilter.class );
 
     public void destroy()
     {

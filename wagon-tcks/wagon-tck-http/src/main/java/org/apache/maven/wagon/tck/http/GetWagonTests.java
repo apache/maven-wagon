@@ -133,7 +133,7 @@ public class GetWagonTests
 
                     if ( getWagon() instanceof StreamWagon )
                     {
-                        LOGGER.info( "Connection timeout is: " + getWagon().getTimeout() );
+                        logger.info( "Connection timeout is: " + getWagon().getTimeout() );
                     }
 
                     File target = newTempFile();
@@ -178,7 +178,7 @@ public class GetWagonTests
 
         try
         {
-            LOGGER.info( "Waiting 60 seconds for wagon timeout." );
+            logger.info( "Waiting 60 seconds for wagon timeout." );
             t.join( ONE_MINUTE );
         }
         catch ( InterruptedException e )
@@ -186,7 +186,7 @@ public class GetWagonTests
             e.printStackTrace();
         }
 
-        LOGGER.info( "Interrupting thread." );
+        logger.info( "Interrupting thread." );
         t.interrupt();
 
         assertTrue( "TransferFailedException should have been thrown.", holder.getValue() );
@@ -519,7 +519,7 @@ public class GetWagonTests
 
         if ( getWagon() instanceof StreamWagon )
         {
-            LOGGER.info( "Connection timeout is: " + getWagon().getTimeout() );
+            logger.info( "Connection timeout is: " + getWagon().getTimeout() );
         }
 
         File target = newTempFile();

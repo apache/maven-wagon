@@ -55,6 +55,10 @@ under the License.
       <artifactId>plexus-utils</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-interactivity-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.apache.maven.wagon</groupId>
       <artifactId>wagon-ssh-common</artifactId>
     </dependency>
@@ -63,27 +67,25 @@ under the License.
       <artifactId>wagon-ssh-common-test</artifactId>
       <scope>test</scope>
     </dependency>
-
-
     <dependency>
-      <groupId>org.apache.sshd</groupId>
-      <artifactId>sshd-core</artifactId>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty</artifactId>
       <scope>test</scope>
     </dependency>
-
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>servlet-api</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <scope>test</scope>
+      <artifactId>slf4j-simple</artifactId>
     </dependency>
-
     <dependency>
-      <groupId>bouncycastle</groupId>
-      <artifactId>bcprov-jdk15</artifactId>
-      <version>140</version>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-container-default</artifactId>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
 
   <profiles>
