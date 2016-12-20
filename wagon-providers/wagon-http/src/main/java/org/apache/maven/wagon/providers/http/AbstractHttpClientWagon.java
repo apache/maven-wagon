@@ -174,7 +174,7 @@ public abstract class AbstractHttpClientWagon
         {
             if ( outputStream == null )
             {
-                throw new NullPointerException("outputStream cannot be null");
+                throw new NullPointerException( "outputStream cannot be null" );
             }
             TransferEvent transferEvent =
                 new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT );

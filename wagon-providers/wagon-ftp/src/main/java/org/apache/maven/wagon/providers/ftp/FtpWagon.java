@@ -89,7 +89,7 @@ public class FtpWagon
 
         if ( authInfo == null )
         {
-            throw new NullPointerException("authenticationInfo cannot be null");
+            throw new NullPointerException( "authenticationInfo cannot be null" );
         }
 
         if ( authInfo.getUserName() == null )
