@@ -78,14 +78,14 @@ public class Repository
     {
         if ( id == null )
         {
-            throw new NullPointerException( "id can not be null for Repository with url=" + url );
+            throw new NullPointerException( "id cannot be null" );
         }
 
         setId( id );
 
         if ( url == null )
         {
-            throw new NullPointerException( "url can not be null for Repository with id=" + id );
+            throw new NullPointerException( "url cannot be null" );
         }
 
         setUrl( url );
@@ -207,7 +207,7 @@ public class Repository
 
     /**
      * Checks whtther provided url contains IPv6 format in host portion
-     * 
+     *
      * @return true if provide host part is of IPv6 format
      */
     private boolean isIPv6Address()

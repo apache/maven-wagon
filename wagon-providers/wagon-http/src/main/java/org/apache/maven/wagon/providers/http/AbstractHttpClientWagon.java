@@ -169,12 +169,12 @@ public abstract class AbstractHttpClientWagon
             return true;
         }
 
-        public void writeTo( final OutputStream outstream )
+        public void writeTo( final OutputStream outputStream )
             throws IOException
         {
-            if ( outstream == null )
+            if ( outputStream == null )
             {
-                throw new IllegalArgumentException( "Output stream may not be null" );
+                throw new NullPointerException("outputStream cannot be null");
             }
             TransferEvent transferEvent =
                 new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT );
@@ -192,7 +192,7 @@ public abstract class AbstractHttpClientWagon
                     while ( ( l = instream.read( buffer ) ) != -1 )
                     {
                         fireTransferProgress( transferEvent, buffer, -1 );
-                        outstream.write( buffer, 0, l );
+                        outputStream.write( buffer, 0, l );
                     }
                 }
                 else
@@ -207,7 +207,7 @@ public abstract class AbstractHttpClientWagon
                             break;
                         }
                         fireTransferProgress( transferEvent, buffer, (int) Math.min( BUFFER_SIZE, remaining ) );
-                        outstream.write( buffer, 0, l );
+                        outputStream.write( buffer, 0, l );
                         remaining -= l;
                     }
                 }

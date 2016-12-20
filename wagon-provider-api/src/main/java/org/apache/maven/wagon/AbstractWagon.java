@@ -178,7 +178,7 @@ public abstract class AbstractWagon
     {
         if ( repository == null )
         {
-            throw new IllegalStateException( "The repository specified cannot be null." );
+            throw new NullPointerException( "repository cannot be null" );
         }
 
         if ( permissionsOverride != null )

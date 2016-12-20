@@ -89,7 +89,7 @@ public class FtpWagon
 
         if ( authInfo == null )
         {
-            throw new IllegalArgumentException( "Authentication Credentials cannot be null for FTP protocol" );
+            throw new NullPointerException("authenticationInfo cannot be null");
         }
 
         if ( authInfo.getUserName() == null )
@@ -409,7 +409,7 @@ public class FtpWagon
     }
 
     /**
-     * 
+     *
      */
     public class PrintCommandListener
         implements ProtocolCommandListener
