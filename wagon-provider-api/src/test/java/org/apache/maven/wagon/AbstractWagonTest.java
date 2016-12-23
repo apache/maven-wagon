@@ -514,7 +514,7 @@ public class AbstractWagonTest
             wagon.connect( null );
             fail();
         }
-        catch ( IllegalStateException e )
+        catch ( NullPointerException e )
         {
             assertTrue( true );
         }
