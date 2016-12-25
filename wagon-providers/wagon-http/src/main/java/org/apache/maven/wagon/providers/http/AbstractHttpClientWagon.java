@@ -792,6 +792,11 @@ public abstract class AbstractHttpClientWagon
             }
         }
 
+        if ( httpMethod instanceof HttpPut )
+        {
+            requestConfigBuilder.setRedirectsEnabled( false );
+        }
+
         localContext.setRequestConfig( requestConfigBuilder.build() );
 
         if ( config != null && config.isUsePreemptive() )
