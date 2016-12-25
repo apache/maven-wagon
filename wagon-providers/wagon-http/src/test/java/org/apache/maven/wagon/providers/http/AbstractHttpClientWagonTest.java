@@ -47,5 +47,7 @@ public class AbstractHttpClientWagonTest
         inputData.setResource( resource );
 
         wagon.fillInputData( inputData );
+
+        wagon.disconnect();
     }
 }

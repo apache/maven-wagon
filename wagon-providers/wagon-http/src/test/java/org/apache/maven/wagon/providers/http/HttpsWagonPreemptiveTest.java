@@ -20,9 +20,9 @@ package org.apache.maven.wagon.providers.http;
  */
 
 import org.apache.maven.wagon.Wagon;
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.security.SslSocketConnector;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ssl.SslSocketConnector;
 
 public class HttpsWagonPreemptiveTest
     extends HttpWagonTest

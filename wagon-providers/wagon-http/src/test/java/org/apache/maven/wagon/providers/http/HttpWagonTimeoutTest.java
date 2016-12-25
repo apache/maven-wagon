@@ -23,7 +23,7 @@ import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.repository.Repository;
-import org.mortbay.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.servlet.ServletHolder;
 
 import java.io.File;
 import java.util.Random;
@@ -197,6 +197,8 @@ public class HttpWagonTimeoutTest
             long start = System.currentTimeMillis();
             wagon.getFileList( "/foobar" );
             long end = System.currentTimeMillis();
+
+            wagon.disconnect();
 
             // validate we have a default time out 60000
             assertTrue( (end - start) >= 500 && (end - start) < 1000 );

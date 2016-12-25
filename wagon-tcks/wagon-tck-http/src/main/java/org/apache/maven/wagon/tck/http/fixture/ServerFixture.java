@@ -19,23 +19,24 @@ package org.apache.maven.wagon.tck.http.fixture;
  * under the License.
  */
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.DefaultHandler;
-import org.mortbay.jetty.handler.HandlerCollection;
-import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.security.Constraint;
-import org.mortbay.jetty.security.ConstraintMapping;
-import org.mortbay.jetty.security.HashUserRealm;
-import org.mortbay.jetty.security.SecurityHandler;
-import org.mortbay.jetty.security.SslSocketConnector;
-import org.mortbay.jetty.servlet.AbstractSessionManager;
-import org.mortbay.jetty.servlet.FilterHolder;
-import org.mortbay.jetty.servlet.FilterMapping;
-import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.servlet.SessionHandler;
-import org.mortbay.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.DefaultHandler;
+import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.server.session.AbstractSessionManager;
+import org.eclipse.jetty.server.session.SessionHandler;
+import org.eclipse.jetty.security.ConstraintMapping;
+import org.eclipse.jetty.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.security.HashLoginService;
+import org.eclipse.jetty.server.ssl.SslSocketConnector;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.FilterMapping;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.security.Constraint;
+import org.eclipse.jetty.util.security.Password;
+import org.eclipse.jetty.webapp.WebAppContext;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
@@ -49,7 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ *
  */
 public class ServerFixture
 {
@@ -69,9 +70,9 @@ public class ServerFixture
 
     private final WebAppContext webappContext;
 
-    private final HashUserRealm securityRealm;
+    private final HashLoginService loginService;
 
-    private final SecurityHandler securityHandler;
+    private final ConstraintSecurityHandler securityHandler;
 
     private int filterCount = 0;
 
@@ -116,11 +117,11 @@ public class ServerFixture
         cm.setConstraint( constraint );
         cm.setPathSpec( "/protected/*" );
 
-        securityHandler = new SecurityHandler();
+        securityHandler = new ConstraintSecurityHandler();
 
-        securityRealm = new HashUserRealm( "Test Server" );
+        loginService = new HashLoginService( "Test Server" );
 
-        securityHandler.setUserRealm( securityRealm );
+        securityHandler.setLoginService( loginService );
         securityHandler.setConstraintMappings( new ConstraintMapping[]{ cm } );
 
         webappContext = new WebAppContext();
@@ -129,7 +130,7 @@ public class ServerFixture
         File base = getResource( SERVER_ROOT_RESOURCE_PATH );
         logger.info( "docroot: " + base );
         webappContext.setWar( base.getAbsolutePath() );
-        webappContext.addHandler( securityHandler );
+        webappContext.setHandler( securityHandler );
 
         SessionHandler sessionHandler = webappContext.getSessionHandler();
         ( (AbstractSessionManager) sessionHandler.getSessionManager() ).setUsingCookies( false );
@@ -161,8 +162,7 @@ public class ServerFixture
 
     public void addUser( final String user, final String password )
     {
-        securityRealm.put( user, password );
-        securityRealm.addUserToRole( user, "allowed" );
+        loginService.putUser( user, new Password( password ), new String[] { "allowed" } );
     }
 
     public Server getServer()

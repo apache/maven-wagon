@@ -59,7 +59,7 @@ public class FileWagonTest
     /**
      * This test is introduced to allow for null file wagons.
      * Which is used heavily in the maven component ITs.
-     * 
+     *
      * @throws ConnectionException
      * @throws AuthenticationException
      */
@@ -70,28 +70,29 @@ public class FileWagonTest
         resource.setContentLength( 100000 );
         Repository repository = new Repository();
         wagon.connect( repository );
+        wagon.disconnect();
     }
 
     protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
     {
         return new File( repository.getBasedir(), resource.getName() ).lastModified();
     }
-    
+
     public void testResourceExists()
         throws Exception
     {
         String url = "file://" + getBasedir();
-        
+
         Wagon wagon = new FileWagon();
         Repository repository = new Repository( "someID", url );
         wagon.connect( repository );
-        
+
         assertTrue( wagon.resourceExists( "target" ) );
         assertTrue( wagon.resourceExists( "target/" ) );
         assertTrue( wagon.resourceExists( "pom.xml" ) );
-        
+
         assertFalse( wagon.resourceExists( "pom.xml/" ) );
-        
+
         wagon.disconnect();
     }
 }

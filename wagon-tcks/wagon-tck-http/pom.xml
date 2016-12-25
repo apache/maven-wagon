@@ -19,7 +19,7 @@ under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  
+
   <parent>
     <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon-tcks</artifactId>
@@ -28,7 +28,7 @@ under the License.
   </parent>
 
   <artifactId>wagon-tck-http</artifactId>
-  
+
   <name>Apache Maven Wagon :: HTTP Test Compatibility Kit</name>
 
   <dependencies>
@@ -43,12 +43,12 @@ under the License.
       <version>2.2.2</version>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty</artifactId>
+      <groupId>org.eclipse.jetty.aggregate</groupId>
+      <artifactId>jetty-all</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>servlet-api</artifactId>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>

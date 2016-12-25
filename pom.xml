@@ -312,14 +312,14 @@ under the License.
       </dependency>
 
       <dependency>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>jetty</artifactId>
-        <version>6.1.26</version>
+        <groupId>org.eclipse.jetty.aggregate</groupId>
+        <artifactId>jetty-all</artifactId>
+        <version>8.1.22.v20160922</version>
       </dependency>
       <dependency>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>servlet-api</artifactId>
-        <version>2.5-20081211</version>
+        <groupId>javax.servlet</groupId>
+        <artifactId>javax.servlet-api</artifactId>
+        <version>3.0.1</version>
     </dependency>
     </dependencies>
   </dependencyManagement>
@@ -331,7 +331,7 @@ under the License.
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <configuration>
-            <forkedProcessTimeoutInSeconds>400</forkedProcessTimeoutInSeconds>
+            <forkedProcessTimeoutInSeconds>800</forkedProcessTimeoutInSeconds>
             <systemPropertyVariables>
               <java.io.tmpdir>${project.build.directory}</java.io.tmpdir>
             </systemPropertyVariables>
@@ -564,5 +564,5 @@ under the License.
       </reporting>
     </profile>
   </profiles>
-  
+
 </project>

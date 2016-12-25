@@ -24,10 +24,12 @@ import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.observers.Debug;
 import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.plexus.PlexusTestCase;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.DefaultServlet;
-import org.mortbay.jetty.servlet.ServletHolder;
+import org.codehaus.plexus.util.IOUtil;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -45,6 +47,8 @@ public class HugeFileDownloadTest
     extends PlexusTestCase
 {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger( HugeFileDownloadTest.class );
+
     private static long HUGE_FILE_SIZE =
         Integer.valueOf( Integer.MAX_VALUE ).longValue() + Integer.valueOf( Integer.MAX_VALUE ).longValue();
 
@@ -53,7 +57,7 @@ public class HugeFileDownloadTest
     public void testDownloadHugeFileWithContentLength()
         throws Exception
     {
-        File hugeFile = new File( getBasedir(), "target/hugefile.txt" );
+        final File hugeFile = new File( getBasedir(), "target/hugefile.txt" );
         if ( !hugeFile.exists() || hugeFile.length() < HUGE_FILE_SIZE )
         {
             makeHugeFile( hugeFile );
@@ -61,10 +65,23 @@ public class HugeFileDownloadTest
 
         server = new Server( 0 );
 
-        Context root = new Context( server, "/", Context.SESSIONS );
+        ServletContextHandler root = new ServletContextHandler( ServletContextHandler.SESSIONS );
         root.setResourceBase( new File( getBasedir(), "target" ).getAbsolutePath() );
-        ServletHolder servletHolder = new ServletHolder( new DefaultServlet() );
+        ServletHolder servletHolder = new ServletHolder( new HttpServlet()
+        {
+            @Override
+            protected void doGet( HttpServletRequest req, HttpServletResponse resp )
+                throws ServletException, IOException
+            {
+                FileInputStream fis = new FileInputStream( hugeFile );
+
+                resp.addHeader( "Content-Length", String.valueOf( hugeFile.length() ) );
+                IOUtil.copy( fis, resp.getOutputStream() );
+                fis.close();
+            }
+        } );
         root.addServlet( servletHolder, "/*" );
+        server.setHandler( root );
 
         server.start();
 
@@ -76,19 +93,20 @@ public class HugeFileDownloadTest
 
             dest = File.createTempFile( "huge", "txt" );
 
+            LOGGER.info( "Fetching 'hugefile.txt' with content length" );
             wagon.get( "hugefile.txt", dest );
 
             Assert.assertTrue( dest.length() >= HUGE_FILE_SIZE );
+            LOGGER.info( "The file was successfully fetched" );
 
             wagon.disconnect();
         }
         finally
         {
-            server.start();
+            server.stop();
             dest.delete();
             hugeFile.delete();
         }
-
 
     }
 
@@ -103,7 +121,7 @@ public class HugeFileDownloadTest
 
         server = new Server( 0 );
 
-        Context root = new Context( server, "/", Context.SESSIONS );
+        ServletContextHandler root = new ServletContextHandler( ServletContextHandler.SESSIONS );
         root.setResourceBase( new File( getBasedir(), "target" ).getAbsolutePath() );
         ServletHolder servletHolder = new ServletHolder( new HttpServlet()
         {
@@ -113,16 +131,12 @@ public class HugeFileDownloadTest
             {
                 FileInputStream fis = new FileInputStream( hugeFile );
 
-                byte[] buffer = new byte[8192];
-                int len = 0;
-                while ( ( len = fis.read( buffer ) ) != -1 )
-                {
-                    resp.getOutputStream().write( buffer, 0, len );
-                }
+                IOUtil.copy( fis, resp.getOutputStream() );
                 fis.close();
             }
         } );
         root.addServlet( servletHolder, "/*" );
+        server.setHandler( root );
 
         server.start();
 
@@ -134,22 +148,22 @@ public class HugeFileDownloadTest
 
             dest = File.createTempFile( "huge", "txt" );
 
+            LOGGER.info( "Fetching 'hugefile.txt' in chunks" );
             wagon.get( "hugefile.txt", dest );
 
             Assert.assertTrue( dest.length() >= HUGE_FILE_SIZE );
+            LOGGER.info( "The file was successfully fetched" );
 
             wagon.disconnect();
         }
         finally
         {
-            server.start();
+            server.stop();
             dest.delete();
             hugeFile.delete();
         }
 
-
     }
-
 
     protected Wagon getWagon()
         throws Exception
@@ -166,11 +180,13 @@ public class HugeFileDownloadTest
     private void makeHugeFile( File hugeFile )
         throws Exception
     {
+        LOGGER.info( "Creating test file" );
         RandomAccessFile ra = new RandomAccessFile( hugeFile.getPath(), "rw" );
-        ra.setLength( HUGE_FILE_SIZE + 1 );
+        ra.setLength( HUGE_FILE_SIZE + 1L );
         ra.seek( HUGE_FILE_SIZE );
         ra.write( 1 );
-
+        ra.close();
+        LOGGER.info( "Test file created" );
     }
 
 }

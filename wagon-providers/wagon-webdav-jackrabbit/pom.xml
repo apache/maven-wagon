@@ -106,8 +106,8 @@ under the License.
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty</artifactId>
+      <groupId>org.eclipse.jetty.aggregate</groupId>
+      <artifactId>jetty-all</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -121,7 +121,7 @@ under the License.
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
     </dependency>
- 
+
     <dependency>
       <groupId>biz.aQute</groupId>
       <artifactId>bnd</artifactId>
@@ -165,5 +165,5 @@ under the License.
         </executions>
       </plugin>
     </plugins>
-  </build>  
+  </build>
 </project>

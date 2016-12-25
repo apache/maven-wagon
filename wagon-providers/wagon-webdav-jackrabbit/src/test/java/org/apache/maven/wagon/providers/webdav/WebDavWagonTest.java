@@ -6,9 +6,9 @@ package org.apache.maven.wagon.providers.webdav;
  * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance with the License. You may obtain a
  * copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -25,9 +25,9 @@ import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.http.HttpWagonTestCase;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,11 +35,13 @@ import java.net.SocketTimeoutException;
 import java.util.List;
 import java.util.Properties;
 
+import javax.servlet.http.HttpServletResponse;
+
 /*
  * WebDAV Wagon Test
- * 
+ *
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
- * 
+ *
  * @author <a href="mailto:carlos@apache.org">Carlos Sanchez</a>
  */
 public class WebDavWagonTest
@@ -56,20 +58,21 @@ public class WebDavWagonTest
         return "dav";
     }
 
-    protected void createContext( Server server, File repositoryDirectory )
+    protected ServletContextHandler createContext( Server server, File repositoryDirectory )
         throws IOException
     {
-        Context dav = new Context( server, "/", Context.SESSIONS );
+        ServletContextHandler dav = new ServletContextHandler( ServletContextHandler.SESSIONS );
         ServletHolder davServletHolder = new ServletHolder( new DAVServlet() );
         davServletHolder.setInitParameter( "rootPath", repositoryDirectory.getAbsolutePath() );
         davServletHolder.setInitParameter( "xmlOnly", "false" );
         dav.addServlet( davServletHolder, "/*" );
+        return dav;
     }
 
     protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
     {
         File file = new File( getDavRepository(), resource.getName() );
-        return ( file.lastModified() / 1000 ) * 1000;
+        return ( file.lastModified() / 1000L ) * 1000L;
     }
 
 
@@ -422,14 +425,14 @@ public class WebDavWagonTest
         {
             assertEquals( "testPreemptiveAuthenticationGet preemptive=true: expected 1 request, got "
                 + sh.handlerRequestResponses, 1, sh.handlerRequestResponses.size() );
-            assertEquals( 200, sh.handlerRequestResponses.get( 0 ).responseCode );
+            assertEquals( HttpServletResponse.SC_OK, sh.handlerRequestResponses.get( 0 ).responseCode );
         }
         else
         {
             assertEquals( "testPreemptiveAuthenticationGet preemptive=false: expected 2 requests (401,200), got "
                 + sh.handlerRequestResponses, 2, sh.handlerRequestResponses.size() );
-            assertEquals( 401, sh.handlerRequestResponses.get( 0 ).responseCode );
-            assertEquals( 200, sh.handlerRequestResponses.get( 1 ).responseCode );
+            assertEquals( HttpServletResponse.SC_UNAUTHORIZED, sh.handlerRequestResponses.get( 0 ).responseCode );
+            assertEquals( HttpServletResponse.SC_OK, sh.handlerRequestResponses.get( 1 ).responseCode );
         }
     }
 
@@ -437,64 +440,70 @@ public class WebDavWagonTest
     {
         if ( preemptive )
         {
-            assertEquals( "testPreemptiveAuthenticationPut preemptive=true: expected 2 requests (200,.), got "
+            assertEquals( "testPreemptiveAuthenticationPut preemptive=true: expected 2 requests (200,201), got "
                 + sh.handlerRequestResponses, 2, sh.handlerRequestResponses.size() );
-            assertEquals( 200, sh.handlerRequestResponses.get( 0 ).responseCode );
+            assertEquals( HttpServletResponse.SC_OK, sh.handlerRequestResponses.get( 0 ).responseCode );
+            assertEquals( HttpServletResponse.SC_CREATED, sh.handlerRequestResponses.get( 1 ).responseCode );
         }
         else
         {
-            assertEquals( "testPreemptiveAuthenticationPut preemptive=false: expected 3 requests (401,200,.), got "
+            assertEquals( "testPreemptiveAuthenticationPut preemptive=false: expected 3 requests (401,200,201), got "
                 + sh.handlerRequestResponses, 3, sh.handlerRequestResponses.size() );
-            assertEquals( 401, sh.handlerRequestResponses.get( 0 ).responseCode );
-            assertEquals( 200, sh.handlerRequestResponses.get( 1 ).responseCode );
+            assertEquals( HttpServletResponse.SC_UNAUTHORIZED, sh.handlerRequestResponses.get( 0 ).responseCode );
+            assertEquals( HttpServletResponse.SC_OK, sh.handlerRequestResponses.get( 1 ).responseCode );
+            assertEquals( HttpServletResponse.SC_CREATED, sh.handlerRequestResponses.get( 2 ).responseCode );
         }
     }
 
 
-    @Override
+    /* This method cannot be reasonable used to represend GET and PUT for WebDAV, it would contain too much
+     * duplicate code. Leave as-is, but don't use it.
+     */
     protected void testPreemptiveAuthentication( TestSecurityHandler sh, boolean preemptive )
     {
         if ( preemptive )
         {
             assertEquals( "testPreemptiveAuthentication preemptive=false: expected 2 requests (200,.), got "
                 + sh.handlerRequestResponses, 2, sh.handlerRequestResponses.size() );
-            assertEquals( 200, sh.handlerRequestResponses.get( 0 ).responseCode );
+            assertEquals( HttpServletResponse.SC_OK, sh.handlerRequestResponses.get( 0 ).responseCode );
         }
         else
         {
             assertEquals( "testPreemptiveAuthentication preemptive=false: expected 3 requests (401,200,200), got "
                 + sh.handlerRequestResponses, 3, sh.handlerRequestResponses.size() );
-            assertEquals( 401, sh.handlerRequestResponses.get( 0 ).responseCode );
-            assertEquals( 200, sh.handlerRequestResponses.get( 1 ).responseCode );
-            assertEquals( 200, sh.handlerRequestResponses.get( 2 ).responseCode );
+            assertEquals( HttpServletResponse.SC_UNAUTHORIZED, sh.handlerRequestResponses.get( 0 ).responseCode );
+            assertEquals( HttpServletResponse.SC_OK, sh.handlerRequestResponses.get( 1 ).responseCode );
+            assertEquals( HttpServletResponse.SC_OK, sh.handlerRequestResponses.get( 2 ).responseCode );
 
         }
     }
 
-    protected void checkRequestResponseForRedirectPutFromStreamWithFullUrl( PutHandler putHandler,
-                                                                            RedirectHandler redirectHandler )
+    @Override
+    protected void checkRequestResponseForRedirectPutWithFullUrl( RedirectHandler redirectHandler,
+                                                                  PutHandler putHandler )
     {
         assertEquals( "found:" + putHandler.handlerRequestResponses, 1, putHandler.handlerRequestResponses.size() );
-        assertEquals( "found:" + putHandler.handlerRequestResponses, 201,
+        assertEquals( "found:" + putHandler.handlerRequestResponses, HttpServletResponse.SC_CREATED,
                       putHandler.handlerRequestResponses.get( 0 ).responseCode );
         assertEquals( "found:" + redirectHandler.handlerRequestResponses, 3,
                       redirectHandler.handlerRequestResponses.size() );
-        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 302,
+        assertEquals( "found:" + redirectHandler.handlerRequestResponses, HttpServletResponse.SC_SEE_OTHER,
                       redirectHandler.handlerRequestResponses.get( 0 ).responseCode );
     }
 
-    protected void checkRequestResponseForRedirectPutFromStreamWithRelativeUrl( PutHandler putHandler,
-                                                                                RedirectHandler redirectHandler )
+    @Override
+    protected void checkRequestResponseForRedirectPutWithRelativeUrl( RedirectHandler redirectHandler,
+                                                                      PutHandler putHandler )
     {
         assertEquals( "found:" + putHandler.handlerRequestResponses, 0, putHandler.handlerRequestResponses.size() );
 
         assertEquals( "found:" + redirectHandler.handlerRequestResponses, 4,
                       redirectHandler.handlerRequestResponses.size() );
-        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 302,
+        assertEquals( "found:" + redirectHandler.handlerRequestResponses, HttpServletResponse.SC_SEE_OTHER,
                       redirectHandler.handlerRequestResponses.get( 0 ).responseCode );
-        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 302,
+        assertEquals( "found:" + redirectHandler.handlerRequestResponses, HttpServletResponse.SC_SEE_OTHER,
                       redirectHandler.handlerRequestResponses.get( 1 ).responseCode );
-        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 201,
+        assertEquals( "found:" + redirectHandler.handlerRequestResponses, HttpServletResponse.SC_CREATED,
                       redirectHandler.handlerRequestResponses.get( 3 ).responseCode );
 
     }

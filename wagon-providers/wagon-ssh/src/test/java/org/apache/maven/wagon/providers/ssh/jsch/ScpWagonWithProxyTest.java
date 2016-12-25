@@ -34,10 +34,10 @@ import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.plexus.PlexusTestCase;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.AbstractHandler;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.AbstractHandler;
 
 public class ScpWagonWithProxyTest
     extends PlexusTestCase
@@ -50,13 +50,13 @@ public class ScpWagonWithProxyTest
         handled = false;
         Handler handler = new AbstractHandler()
         {
-            public void handle( String target, HttpServletRequest request, HttpServletResponse response, int dispatch )
-                throws IOException, ServletException
+            public void handle( String target, Request baseRequest, HttpServletRequest request,
+                HttpServletResponse response ) throws IOException, ServletException
             {
                 assertEquals( "CONNECT", request.getMethod() );
 
                 handled = true;
-                ( (Request) request ).setHandled( true );
+                baseRequest.setHandled( true );
             }
         };
 
@@ -83,10 +83,8 @@ public class ScpWagonWithProxyTest
         }
         finally
         {
-            if ( server != null )
-            {
-                server.stop();
-            }
+            wagon.disconnect();
+            server.stop();
         }
     }
 
@@ -120,6 +118,7 @@ public class ScpWagonWithProxyTest
         }
         finally
         {
+            wagon.disconnect();
             t.interrupt();
         }
     }
@@ -165,7 +164,7 @@ public class ScpWagonWithProxyTest
                         {
                             continue;
                         }
-                        
+
                         handled = true;
                     }
                     catch ( IOException e )

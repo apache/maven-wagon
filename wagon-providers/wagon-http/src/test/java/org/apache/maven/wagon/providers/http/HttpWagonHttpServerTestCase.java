@@ -21,9 +21,9 @@ package org.apache.maven.wagon.providers.http;
 
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.plexus.PlexusTestCase;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.ResourceHandler;
-import org.mortbay.jetty.servlet.Context;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 
 /**
  * User: jdumay Date: 24/01/2008 Time: 18:15:53
@@ -37,7 +37,7 @@ public abstract class HttpWagonHttpServerTestCase
 
     protected ResourceHandler resourceHandler;
 
-    protected Context context;
+    protected ServletContextHandler context;
 
     protected void setUp()
         throws Exception
@@ -45,10 +45,10 @@ public abstract class HttpWagonHttpServerTestCase
         super.setUp();
         server = new Server( httpServerPort );
 
-        context = new Context( server, "/", Context.SESSIONS );
-
+        context = new ServletContextHandler( ServletContextHandler.SESSIONS );
         resourceHandler = new ResourceHandler();
-        server.addHandler( resourceHandler );
+        context.setHandler( resourceHandler );
+        server.setHandler( context );
     }
 
     protected Wagon getWagon()

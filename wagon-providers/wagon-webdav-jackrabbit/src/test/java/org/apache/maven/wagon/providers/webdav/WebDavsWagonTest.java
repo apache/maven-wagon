@@ -1,8 +1,8 @@
 package org.apache.maven.wagon.providers.webdav;
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.security.SslSocketConnector;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ssl.SslSocketConnector;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
