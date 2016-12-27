@@ -25,10 +25,9 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.auth.AUTH;
 import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.ChallengeState;
 import org.apache.http.auth.Credentials;
-import org.apache.http.auth.MalformedChallengeException;
 import org.apache.http.auth.NTCredentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
@@ -460,9 +459,9 @@ public abstract class AbstractHttpClientWagon
                         creds = new UsernamePasswordCredentials( proxyUsername, proxyPassword );
                     }
 
-                    int port = proxyInfo.getPort();
+                    int proxyPort = proxyInfo.getPort();
 
-                    AuthScope authScope = getProxyBasicAuthScope().getScope( proxyHost, port );
+                    AuthScope authScope = getProxyBasicAuthScope().getScope( proxyHost, proxyPort );
                     credentialsProvider.setCredentials( authScope, creds );
                 }
             }
@@ -576,15 +575,7 @@ public abstract class AbstractHttpClientWagon
         if ( credentialsProvider.getCredentials( targetScope ) != null )
         {
             BasicScheme targetAuth = new BasicScheme();
-            try
-            {
-                targetAuth.processChallenge( new BasicHeader( AUTH.WWW_AUTH, "BASIC preemptive" ) );
-                authCache.put( targetHost, targetAuth );
-            }
-            catch ( MalformedChallengeException ignore )
-            {
-                // ignore
-            }
+            authCache.put( targetHost, targetAuth );
         }
 
         HttpPut putMethod = new HttpPut( url );
@@ -807,7 +798,6 @@ public abstract class AbstractHttpClientWagon
             if ( credentialsProvider.getCredentials( targetScope ) != null )
             {
                 BasicScheme targetAuth = new BasicScheme();
-                targetAuth.processChallenge( new BasicHeader( AUTH.WWW_AUTH, "BASIC preemptive" ) );
                 authCache.put( targetHost, targetAuth );
             }
         }
@@ -819,26 +809,13 @@ public abstract class AbstractHttpClientWagon
                 HttpHost proxyHost = new HttpHost( proxyInfo.getHost(), proxyInfo.getPort() );
                 AuthScope proxyScope = getProxyBasicAuthScope().getScope( proxyHost );
 
-                String proxyUsername = proxyInfo.getUserName();
-                String proxyPassword = proxyInfo.getPassword();
-                String proxyNtlmHost = proxyInfo.getNtlmHost();
-                String proxyNtlmDomain = proxyInfo.getNtlmDomain();
-
-                if ( proxyUsername != null && proxyPassword != null )
+                if ( credentialsProvider.getCredentials( proxyScope ) != null )
                 {
-                    Credentials creds;
-                    if ( proxyNtlmHost != null || proxyNtlmDomain != null )
-                    {
-                        creds = new NTCredentials( proxyUsername, proxyPassword, proxyNtlmHost, proxyNtlmDomain );
-                    }
-                    else
-                    {
-                        creds = new UsernamePasswordCredentials( proxyUsername, proxyPassword );
-                    }
-
-                    credentialsProvider.setCredentials( proxyScope, creds );
-                    BasicScheme proxyAuth = new BasicScheme();
-                    proxyAuth.processChallenge( new BasicHeader( AUTH.PROXY_AUTH, "BASIC preemptive" ) );
+                    /* This is extremely ugly because we need to set challengeState to PROXY, but
+                     * the constructor is deprecated. Alternatively, we could subclass BasicScheme
+                     * to ProxyBasicScheme and set the state internally in the constructor.
+                     */
+                    BasicScheme proxyAuth = new BasicScheme( ChallengeState.PROXY );
                     authCache.put( proxyHost, proxyAuth );
                 }
             }
