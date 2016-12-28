@@ -383,8 +383,6 @@ public abstract class AbstractHttpClientWagon
 
     private AuthCache authCache;
 
-    private HttpClientContext localContext;
-
     private Closeable closeable;
 
     /**
@@ -414,11 +412,8 @@ public abstract class AbstractHttpClientWagon
     {
         repository.setUrl( getURL( repository ) );
 
-        localContext = HttpClientContext.create();
         credentialsProvider = new BasicCredentialsProvider();
         authCache = new BasicAuthCache();
-        localContext.setCredentialsProvider( credentialsProvider );
-        localContext.setAuthCache( authCache );
 
         if ( authenticationInfo != null )
         {
@@ -788,6 +783,9 @@ public abstract class AbstractHttpClientWagon
             requestConfigBuilder.setRedirectsEnabled( false );
         }
 
+        HttpClientContext localContext = HttpClientContext.create();
+        localContext.setCredentialsProvider( credentialsProvider );
+        localContext.setAuthCache( authCache );
         localContext.setRequestConfig( requestConfigBuilder.build() );
 
         if ( config != null && config.isUsePreemptive() )
