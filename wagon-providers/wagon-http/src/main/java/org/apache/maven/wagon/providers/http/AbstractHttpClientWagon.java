@@ -469,6 +469,18 @@ public abstract class AbstractHttpClientWagon
         {
             httpClientConnectionManager.closeIdleConnections( 0, TimeUnit.MILLISECONDS );
         }
+
+        if ( authCache != null )
+        {
+            authCache.clear();
+            authCache = null;
+        }
+
+        if ( credentialsProvider != null )
+        {
+            credentialsProvider.clear();
+            credentialsProvider = null;
+        }
     }
 
     public static void setPersistentPool( boolean persistentPool )
