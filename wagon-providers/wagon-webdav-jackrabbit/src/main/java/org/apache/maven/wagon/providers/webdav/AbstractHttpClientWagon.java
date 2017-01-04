@@ -358,7 +358,7 @@ public abstract class AbstractHttpClientWagon
         }
         catch ( IOException e )
         {
-            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
         }
 
         PutMethod putMethod = new PutMethod( url );

@@ -409,13 +409,13 @@ public class ScmWagon
         }
         catch ( ScmException e )
         {
-            fireTransferError( target, e, TransferEvent.REQUEST_GET );
+            fireTransferError( target, e, TransferEvent.REQUEST_PUT );
 
             throw new TransferFailedException( "Error interacting with SCM: " + e.getMessage(), e );
         }
         catch ( IOException e )
         {
-            fireTransferError( target, e, TransferEvent.REQUEST_GET );
+            fireTransferError( target, e, TransferEvent.REQUEST_PUT );
 
             throw new TransferFailedException( "Error interacting with SCM: " + e.getMessage(), e );
         }
@@ -465,7 +465,7 @@ public class ScmWagon
         }
         catch ( ScmException e )
         {
-            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
 
             throw new TransferFailedException( "Error listing repository: " + e.getMessage(), e );
         }
@@ -493,7 +493,7 @@ public class ScmWagon
         }
         catch ( ScmException e )
         {
-            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
 
             throw new TransferFailedException( "Error checking out: " + e.getMessage(), e );
         }
