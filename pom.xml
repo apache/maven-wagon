@@ -495,7 +495,7 @@ under the License.
                   <packages>org.apache.maven.wagon.providers.ssh*</packages>
                 </group>
                 <group>
-                  <title>Webdav Provider</title>
+                  <title>WebDAV Provider</title>
                   <packages>org.apache.maven.wagon.providers.webdav*:org.apache.jackrabbit.webdav*</packages>
                 </group>
                 <group>

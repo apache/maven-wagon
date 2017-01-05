@@ -26,7 +26,7 @@ under the License.
       <instantiation-strategy>per-lookup</instantiation-strategy>
       <description>&lt;p&gt;WebDavWagon&lt;/p&gt;
 &lt;p/&gt;
-&lt;p&gt;Allows using a webdav remote repository for downloads and deployments&lt;/p&gt;</description>
+&lt;p&gt;Allows using a WebDAV remote repository for downloads and deployments&lt;/p&gt;</description>
       <isolated-realm>false</isolated-realm>
     </component>
     <component>
@@ -36,7 +36,7 @@ under the License.
       <instantiation-strategy>per-lookup</instantiation-strategy>
       <description>&lt;p&gt;WebDavWagon&lt;/p&gt;
 &lt;p/&gt;
-&lt;p&gt;Allows using a webdav remote repository for downloads and deployments&lt;/p&gt;</description>
+&lt;p&gt;Allows using a WebDAV remote repository for downloads and deployments&lt;/p&gt;</description>
       <isolated-realm>false</isolated-realm>
     </component>
     <component>
@@ -46,7 +46,7 @@ under the License.
       <instantiation-strategy>per-lookup</instantiation-strategy>
       <description>&lt;p&gt;WebDavWagon&lt;/p&gt;
 &lt;p/&gt;
-&lt;p&gt;Allows using a webdav remote repository for downloads and deployments&lt;/p&gt;</description>
+&lt;p&gt;Allows using a WebDAV remote repository for downloads and deployments&lt;/p&gt;</description>
       <isolated-realm>false</isolated-realm>
     </component>
     <component>

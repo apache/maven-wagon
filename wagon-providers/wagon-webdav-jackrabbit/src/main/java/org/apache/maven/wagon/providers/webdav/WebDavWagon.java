@@ -49,7 +49,7 @@ import java.util.List;
 /**
  * <p>WebDavWagon</p>
  * <p/>
- * <p>Allows using a webdav remote repository for downloads and deployments</p>
+ * <p>Allows using a WebDAV remote repository for downloads and deployments</p>
  *
  * @author <a href="mailto:hisidro@exist.com">Henry Isidro</a>
  * @author <a href="mailto:joakime@apache.org">Joakim Erdfelt</a>
@@ -69,7 +69,7 @@ public class WebDavWagon
     /**
      * Defines the protocol mapping to use.
      * <p/>
-     * First string is the user definition way to define a webdav url,
+     * First string is the user definition way to define a WebDAV url,
      * the second string is the internal representation of that url.
      * <p/>
      * NOTE: The order of the mapping becomes the search order.
@@ -163,7 +163,7 @@ public class WebDavWagon
     }
 
     /**
-     * Copy a directory from local system to remote webdav server
+     * Copy a directory from local system to remote WebDAV server
      *
      * @param sourceDirectory      the local directory
      * @param destinationDirectory the remote destination
@@ -255,7 +255,7 @@ public class WebDavWagon
                         {
                             if ( i == 0 )
                             {
-                                // by design jackrabbit webdav sticks parent directory as the first entry
+                                // by design jackrabbit WebDAV sticks parent directory as the first entry
                                 // so we need to ignore this entry
                            // http://www.nabble.com/Extra-entry-in-get-file-list-with-jackrabbit-webdav-td21262786.html
                                 // http://www.webdav.org/specs/rfc4918.html#rfc.section.9.1

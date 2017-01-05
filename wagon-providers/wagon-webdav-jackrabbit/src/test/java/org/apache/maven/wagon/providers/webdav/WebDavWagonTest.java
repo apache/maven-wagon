@@ -233,7 +233,7 @@ public class WebDavWagonTest
     }
 
     /**
-     * Make sure wagon webdav can detect remote directory
+     * Make sure Wagon WebDAV can detect remote directory
      *
      * @throws Exception
      */
