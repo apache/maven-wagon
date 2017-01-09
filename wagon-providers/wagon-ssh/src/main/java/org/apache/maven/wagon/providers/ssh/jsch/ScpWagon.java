@@ -297,7 +297,7 @@ public class ScpWagon
                 throw new IOException( "Invalid transfer header: " + line );
             }
 
-            int filesize = Integer.valueOf( line.substring( 5, index ) ).intValue();
+            long filesize = Long.parseLong( line.substring( 5, index ) );
             fireTransferDebug( "Remote file size: " + filesize );
 
             resource.setContentLength( filesize );
