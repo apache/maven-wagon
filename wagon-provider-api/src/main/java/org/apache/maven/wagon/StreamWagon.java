@@ -87,6 +87,13 @@ public abstract class StreamWagon
         
         InputStream is = getInputStream( resource );
 
+        if ( new StreamWagonEx( this ).handle( timestamp, resource, destination ) )
+        {
+            IOUtil.close(is);
+
+            return true;
+        }
+
         // always get if timestamp is 0 (ie, target doesn't exist), otherwise only if older than the remote file
         if ( timestamp == 0 || timestamp < resource.getLastModified() )
         {
