@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+
 /**
  * FtpWagon
  *
@@ -82,6 +83,7 @@ public class FtpWagon
         this.passiveMode = passiveMode;
     }
 
+    @Override
     protected void openConnectionInternal()
         throws ConnectionException, AuthenticationException
     {
@@ -192,6 +194,7 @@ public class FtpWagon
         return new FTPClient();
     }
 
+    @Override
     protected void firePutCompleted( Resource resource, File file )
     {
         try
@@ -223,6 +226,7 @@ public class FtpWagon
         super.firePutCompleted( resource, file );
     }
 
+    @Override
     protected void fireGetCompleted( Resource resource, File localFile )
     {
         try
@@ -239,6 +243,7 @@ public class FtpWagon
         super.fireGetCompleted( resource, localFile );
     }
 
+    @Override
     public void closeConnection()
         throws ConnectionException
     {
@@ -256,6 +261,7 @@ public class FtpWagon
         }
     }
 
+    @Override
     public void fillOutputData( OutputData outputData )
         throws TransferFailedException
     {
@@ -343,6 +349,7 @@ public class FtpWagon
     //
     // ----------------------------------------------------------------------
 
+    @Override
     public void fillInputData( InputData inputData )
         throws TransferFailedException, ResourceDoesNotExistException
     {
@@ -421,23 +428,27 @@ public class FtpWagon
             this.wagon = wagon;
         }
 
+        @Override
         public void protocolCommandSent( ProtocolCommandEvent event )
         {
             wagon.fireSessionDebug( "Command sent: " + event.getMessage() );
 
         }
 
+        @Override
         public void protocolReplyReceived( ProtocolCommandEvent event )
         {
             wagon.fireSessionDebug( "Reply received: " + event.getMessage() );
         }
     }
 
+    @Override
     protected void fireSessionDebug( String msg )
     {
         super.fireSessionDebug( msg );
     }
 
+    @Override
     public List<String> getFileList( String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
@@ -476,6 +487,7 @@ public class FtpWagon
         }
     }
 
+    @Override
     public boolean resourceExists( String resourceName )
         throws TransferFailedException, AuthorizationException
     {
@@ -503,11 +515,13 @@ public class FtpWagon
         }
     }
 
+    @Override
     public boolean supportsDirectoryCopy()
     {
         return true;
     }
 
+    @Override
     public void putDirectory( File sourceDirectory, String destinationDirectory )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
@@ -769,10 +783,15 @@ public class FtpWagon
 
             String nextDir = fileName.substring( 0, slashPos );
 
+            boolean changedDir = false;
             // we only create the nextDir if it doesn't yet exist
             if ( !ftp.changeWorkingDirectory( nextDir ) )
             {
                 ok &= ftp.makeDirectory( nextDir );
+            }
+            else
+            {
+                changedDir = true;
             }
 
             if ( ok )
@@ -780,10 +799,13 @@ public class FtpWagon
                 // set the permissions for the freshly created directory
                 setPermissions( permissions );
 
-                ftp.changeWorkingDirectory( nextDir );
+                if ( !changedDir )
+                {
+                    ftp.changeWorkingDirectory( nextDir );
+                }
 
                 // now create the deeper directories
-                String remainingDirs = fileName.substring( slashPos + 1 );
+                final String remainingDirs = fileName.substring( slashPos + 1 );
                 ok &= makeFtpDirectoryRecursive( remainingDirs, permissions );
             }
         }
