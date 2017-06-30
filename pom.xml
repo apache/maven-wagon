@@ -41,6 +41,8 @@ under the License.
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
     <slf4jVersion>1.7.22</slf4jVersion>
     <maven.site.path>wagon-archives/wagon-LATEST</maven.site.path>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
   </properties>
 
   <contributors>
@@ -406,13 +408,13 @@ under the License.
         <configuration>
           <signature>
             <groupId>org.codehaus.mojo.signature</groupId>
-            <artifactId>java15</artifactId>
+            <artifactId>java17</artifactId>
             <version>1.0</version>
           </signature>
         </configuration>
         <executions>
           <execution>
-            <id>check-java-1.5-compat</id>
+            <id>check-java-1.7-compat</id>
             <phase>process-classes</phase>
             <goals>
               <goal>check</goal>
@@ -431,7 +433,7 @@ under the License.
             <configuration>
               <rules>
                 <requireJavaVersion>
-                  <version>1.6.0</version>
+                  <version>1.7.0</version>
                 </requireJavaVersion>
               </rules>
             </configuration>

@@ -45,11 +45,11 @@ public class WebDavsWagonTest
 
         SslSocketConnector connector = new SslSocketConnector();
         connector.setPort( server.getConnectors()[0].getPort() );
-        connector.setKeystore( getTestPath( "src/test/resources/ssl/keystore" ) );
-        connector.setPassword( "wagonhttp" );
-        connector.setKeyPassword( "wagonhttp" );
-        connector.setTruststore( getTestPath( "src/test/resources/ssl/keystore" ) );
-        connector.setTrustPassword( "wagonhttp" );
+        connector.getSslContextFactory().setKeyStorePath( getTestPath( "src/test/resources/ssl/keystore" ) );
+        connector.getSslContextFactory().setKeyStorePassword( "wagonhttp" );
+        connector.getSslContextFactory().setKeyManagerPassword( "wagonhttp" );
+        connector.getSslContextFactory().setTrustStore( getTestPath( "src/test/resources/ssl/keystore" ) );
+        connector.getSslContextFactory().setTrustStorePassword( "wagonhttp" );
         server.setConnectors( new Connector[] { connector } );
     }
 

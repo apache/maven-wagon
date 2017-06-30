@@ -23,10 +23,16 @@ package org.apache.maven.wagon.providers.http;
 import junit.framework.TestCase;
 
 import org.apache.http.Header;
+
+
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;
+import org.apache.maven.wagon.shared.http.ConfigurationUtils;
+import org.apache.maven.wagon.shared.http.HttpConfiguration;
+import org.apache.maven.wagon.shared.http.HttpMethodConfiguration;
 
 public class HttpClientWagonTest
     extends TestCase

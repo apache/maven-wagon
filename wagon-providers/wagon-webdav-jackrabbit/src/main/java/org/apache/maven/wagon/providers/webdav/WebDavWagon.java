@@ -19,13 +19,15 @@ package org.apache.maven.wagon.providers.webdav;
  * under the License.
  */
 
-import org.apache.commons.httpclient.HttpStatus;
+import org.apache.http.HttpException;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.MultiStatus;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
-import org.apache.jackrabbit.webdav.client.methods.MkColMethod;
-import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
+import org.apache.jackrabbit.webdav.client.methods.HttpMkcol;
+import org.apache.jackrabbit.webdav.client.methods.HttpPropfind;
 import org.apache.jackrabbit.webdav.property.DavProperty;
 import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
@@ -36,6 +38,7 @@ import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.w3c.dom.Node;
@@ -119,7 +122,7 @@ public class WebDavWagon
 
         // traverse backwards until we hit a directory that already exists (OK/NOT_ALLOWED), or that we were able to
         // create (CREATED), or until we get to the top of the path
-        int status = SC_NULL;
+        int status = -1;
         do
         {
             String url = baseUrl + "/" + navigator.getPath();
@@ -147,17 +150,27 @@ public class WebDavWagon
     private int doMkCol( String url )
         throws IOException
     {
-        MkColMethod method = null;
+        HttpMkcol method = null;
+        CloseableHttpResponse closeableHttpResponse = null;
         try
         {
-            method = new MkColMethod( url );
-            return execute( method );
+            method = new HttpMkcol( url );
+            closeableHttpResponse = execute( method );
+            return closeableHttpResponse.getStatusLine().getStatusCode();
+        }
+        catch ( HttpException e )
+        {
+            throw new IOException( e.getMessage(), e );
         }
         finally
         {
             if ( method != null )
             {
                 method.releaseConnection();
+            }
+            if ( closeableHttpResponse != null )
+            {
+                closeableHttpResponse.close();
             }
         }
     }
@@ -188,21 +201,22 @@ public class WebDavWagon
             }
         }
     }
-
     private boolean isDirectory( String url )
         throws IOException, DavException
     {
         DavPropertyNameSet nameSet = new DavPropertyNameSet();
         nameSet.add( DavPropertyName.create( DavConstants.PROPERTY_RESOURCETYPE ) );
 
-        PropFindMethod method = null;
+        CloseableHttpResponse closeableHttpResponse = null;
+        HttpPropfind method = null;
         try
         {
-            method = new PropFindMethod( url, nameSet, DavConstants.DEPTH_0 );
-            execute( method );
-            if ( method.succeeded() )
+            method = new HttpPropfind( url, nameSet, DavConstants.DEPTH_0 );
+            closeableHttpResponse = execute( method );
+
+            if ( method.succeeded( closeableHttpResponse ) )
             {
-                MultiStatus multiStatus = method.getResponseBodyAsMultiStatus();
+                MultiStatus multiStatus = method.getResponseBodyAsMultiStatus(closeableHttpResponse);
                 MultiStatusResponse response = multiStatus.getResponses()[0];
                 DavPropertySet propertySet = response.getProperties( HttpStatus.SC_OK );
                 DavProperty<?> property = propertySet.get( DavConstants.PROPERTY_RESOURCETYPE );
@@ -214,11 +228,20 @@ public class WebDavWagon
             }
             return false;
         }
+        catch ( HttpException e )
+        {
+            throw new IOException( e.getMessage(), e );
+        }
         finally
         {
+            //TODO olamy: not sure we still need this!!
             if ( method != null )
             {
                 method.releaseConnection();
+            }
+            if ( closeableHttpResponse != null )
+            {
+                closeableHttpResponse.close();
             }
         }
     }
@@ -229,7 +252,8 @@ public class WebDavWagon
         String repositoryUrl = repository.getUrl();
         String url = repositoryUrl + ( repositoryUrl.endsWith( "/" ) ? "" : "/" ) + destinationDirectory;
 
-        PropFindMethod method = null;
+        HttpPropfind method = null;
+        CloseableHttpResponse closeableHttpResponse = null;
         try
         {
             if ( isDirectory( url ) )
@@ -237,18 +261,15 @@ public class WebDavWagon
                 DavPropertyNameSet nameSet = new DavPropertyNameSet();
                 nameSet.add( DavPropertyName.create( DavConstants.PROPERTY_DISPLAYNAME ) );
 
-                method = new PropFindMethod( url, nameSet, DavConstants.DEPTH_1 );
-                int status = execute( method );
-                if ( method.succeeded() )
+                method = new HttpPropfind( url, nameSet, DavConstants.DEPTH_1 );
+                closeableHttpResponse = execute( method );
+                if ( method.succeeded(closeableHttpResponse) )
                 {
                     ArrayList<String> dirs = new ArrayList<String>();
-                    MultiStatus multiStatus = method.getResponseBodyAsMultiStatus();
-
+                    MultiStatus multiStatus = method.getResponseBodyAsMultiStatus(closeableHttpResponse);
                     for ( int i = 0; i < multiStatus.getResponses().length; i++ )
                     {
-
                         MultiStatusResponse response = multiStatus.getResponses()[i];
-
                         String entryUrl = response.getHref();
                         String fileName = PathUtils.filename( URLDecoder.decode( entryUrl ) );
                         if ( entryUrl.endsWith( "/" ) )
@@ -257,7 +278,7 @@ public class WebDavWagon
                             {
                                 // by design jackrabbit WebDAV sticks parent directory as the first entry
                                 // so we need to ignore this entry
-                           // http://www.nabble.com/Extra-entry-in-get-file-list-with-jackrabbit-webdav-td21262786.html
+                                // http://www.nabble.com/Extra-entry-in-get-file-list-with-jackrabbit-webdav-td21262786.html
                                 // http://www.webdav.org/specs/rfc4918.html#rfc.section.9.1
                                 continue;
                             }
@@ -274,11 +295,15 @@ public class WebDavWagon
                     return dirs;
                 }
 
-                if ( status == HttpStatus.SC_NOT_FOUND )
+                if ( closeableHttpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND )
                 {
                     throw new ResourceDoesNotExistException( "Destination directory does not exist: " + url );
                 }
             }
+        }
+        catch ( HttpException e )
+        {
+            throw new TransferFailedException( e.getMessage(), e );
         }
         catch ( DavException e )
         {
@@ -290,9 +315,21 @@ public class WebDavWagon
         }
         finally
         {
+            //TODO olamy: not sure we still need this!!
             if ( method != null )
             {
                 method.releaseConnection();
+            }
+            if ( closeableHttpResponse != null )
+            {
+                try
+                {
+                    closeableHttpResponse.close();
+                }
+                catch ( IOException e )
+                {
+                    // ignore
+                }
             }
         }
         throw new ResourceDoesNotExistException(

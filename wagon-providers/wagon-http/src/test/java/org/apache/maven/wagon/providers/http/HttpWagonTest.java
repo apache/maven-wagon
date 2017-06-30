@@ -23,6 +23,8 @@ import java.util.Properties;
 
 import org.apache.maven.wagon.StreamingWagon;
 import org.apache.maven.wagon.http.HttpWagonTestCase;
+import org.apache.maven.wagon.shared.http.HttpConfiguration;
+import org.apache.maven.wagon.shared.http.HttpMethodConfiguration;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>

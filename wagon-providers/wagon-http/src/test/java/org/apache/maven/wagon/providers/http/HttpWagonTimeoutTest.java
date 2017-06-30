@@ -23,6 +23,8 @@ import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.repository.Repository;
+import org.apache.maven.wagon.shared.http.HttpConfiguration;
+import org.apache.maven.wagon.shared.http.HttpMethodConfiguration;
 import org.eclipse.jetty.servlet.ServletHolder;
 
 import java.io.File;

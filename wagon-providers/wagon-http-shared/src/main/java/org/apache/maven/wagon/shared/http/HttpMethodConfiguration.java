@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.http;
+package org.apache.maven.wagon.shared.http;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -19,12 +19,12 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
-import java.util.Map;
-import java.util.Properties;
-
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
 import org.apache.maven.wagon.Wagon;
+
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * 

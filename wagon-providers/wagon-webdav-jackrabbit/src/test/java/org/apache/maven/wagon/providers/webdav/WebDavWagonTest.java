@@ -16,8 +16,8 @@ package org.apache.maven.wagon.providers.webdav;
  */
 
 import it.could.webdav.DAVServlet;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.HttpMethod;
+import org.apache.http.HttpException;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.StreamingWagon;
 import org.apache.maven.wagon.TransferFailedException;
@@ -356,16 +356,16 @@ public class WebDavWagonTest
     {
         private static final String TIMEOUT_TRIGGER = "timeout";
 
-        protected int execute( HttpMethod httpMethod )
+        protected int execute( HttpRequestBase httpRequestBase )
             throws HttpException, IOException
         {
-            if ( httpMethod.getPath().contains( TIMEOUT_TRIGGER ) )
+            if ( httpRequestBase.getURI().getPath().contains( TIMEOUT_TRIGGER ) )
             {
-                throw new SocketTimeoutException( "Timeout triggered by request for '" + httpMethod.getPath() + "'" );
+                throw new SocketTimeoutException( "Timeout triggered by request for '" + httpRequestBase.getURI().getPath() + "'" );
             }
             else
             {
-                return super.execute( httpMethod );
+                return super.execute( httpRequestBase ).getStatusLine().getStatusCode();
             }
         }
     }

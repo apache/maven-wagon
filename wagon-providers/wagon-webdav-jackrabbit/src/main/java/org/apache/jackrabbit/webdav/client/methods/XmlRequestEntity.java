@@ -19,10 +19,12 @@ package org.apache.jackrabbit.webdav.client.methods;
  * under the License.
  */
 
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.commons.httpclient.methods.RequestEntity;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.w3c.dom.Document;
 
 import java.io.OutputStream;
@@ -38,14 +40,15 @@ import javax.xml.transform.stream.StreamResult;
 
 /**
  * <code>XmlRequestEntity</code>...
+ * @deprecated is it really use???
  */
 public class XmlRequestEntity
-    implements RequestEntity
+    extends HttpEntityEnclosingRequestBase
 {
 
     private static Logger log = LoggerFactory.getLogger( XmlRequestEntity.class );
 
-    private final RequestEntity delegatee;
+    private final StringEntity delegatee;
 
     public XmlRequestEntity( Document xmlDocument )
         throws IOException
@@ -70,7 +73,7 @@ public class XmlRequestEntity
             throw exception;
         }
 
-        delegatee = new StringRequestEntity( out.toString(), "text/xml", "UTF-8" );
+        delegatee = new StringEntity( out.toString(), "text/xml", "UTF-8" );
     }
 
     public boolean isRepeatable()
@@ -80,16 +83,22 @@ public class XmlRequestEntity
 
     public String getContentType()
     {
-        return delegatee.getContentType();
+        return delegatee.getContentType().getValue();
     }
 
     public void writeRequest( OutputStream out ) throws IOException
     {
-        delegatee.writeRequest( out );
+        delegatee.writeTo( out );
     }
 
     public long getContentLength()
     {
         return delegatee.getContentLength();
+    }
+
+    @Override
+    public String getMethod()
+    {
+        return HttpPost.METHOD_NAME;
     }
 }

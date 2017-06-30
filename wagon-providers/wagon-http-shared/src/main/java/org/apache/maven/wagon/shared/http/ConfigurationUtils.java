@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.http;
+package org.apache.maven.wagon.shared.http;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -33,7 +33,10 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class ConfigurationUtils
+/**
+ * Configuration helper class
+ */
+public class ConfigurationUtils
 {
 
     private static final String SO_TIMEOUT                  = "http.socket.timeout";

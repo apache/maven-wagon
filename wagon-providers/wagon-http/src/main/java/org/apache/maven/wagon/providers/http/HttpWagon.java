@@ -27,6 +27,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;
 import org.apache.maven.wagon.shared.http.HtmlFileListParser;
 
 import java.io.IOException;

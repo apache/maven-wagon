@@ -22,6 +22,7 @@ package org.apache.maven.wagon.providers.http;
 import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
+import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;
 import org.junit.Test;
 
 public class AbstractHttpClientWagonTest

@@ -1,4 +1,4 @@
-package org.apache.maven.wagon.providers.http;
+package org.apache.maven.wagon.shared.http;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -71,7 +71,6 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.apache.maven.wagon.shared.http.EncodingUtil;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 
@@ -483,6 +482,11 @@ public abstract class AbstractHttpClientWagon
         }
     }
 
+    public static CloseableHttpClient getHttpClient()
+    {
+        return httpClient;
+    }
+
     public static void setPersistentPool( boolean persistentPool )
     {
         persistentPool = persistentPool;
@@ -834,7 +838,7 @@ public abstract class AbstractHttpClientWagon
         return httpClient.execute( httpMethod, localContext );
     }
 
-    protected void setHeaders( HttpUriRequest method )
+    public void setHeaders( HttpUriRequest method )
     {
         HttpMethodConfiguration config =
             httpConfiguration == null ? null : httpConfiguration.getMethodConfiguration( method );
