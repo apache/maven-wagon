@@ -387,14 +387,6 @@ under the License.
             </lifecycleMappingMetadata>
           </configuration>
         </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-checkstyle-plugin</artifactId>
-          <configuration>
-            <failsOnError>false</failsOnError>
-            <failOnViolation>false</failOnViolation>
-          </configuration>
-        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>

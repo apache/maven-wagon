@@ -87,10 +87,10 @@ public abstract class HttpWagonTestCase
     private Server server;
     private ServerConnector connector;
 
-    protected int getLocalPort( Server server)
+    protected int getLocalPort( Server server )
     {
         Connector connector = server.getConnectors()[0];
-        return ((ServerConnector)connector).getLocalPort();
+        return ( ( ServerConnector ) connector ).getLocalPort();
     }
 
     protected void setupWagonTestingFixtures()
@@ -207,10 +207,6 @@ public abstract class HttpWagonTestCase
         setHttpHeaders.invoke( wagon, properties );
 
         Server server = new Server( );
-        /*
-        ServerConnector serverConnector = new ServerConnector( server, new HttpConnectionFactory( new HttpConfiguration() ) );
-        server.addConnector( serverConnector );
-        */
         ServerConnector serverConnector = addConnector( server );
         TestHeaderHandler handler = new TestHeaderHandler();
         server.setHandler( handler );
@@ -238,8 +234,7 @@ public abstract class HttpWagonTestCase
         server.setHandler( handler );
         addConnector( server );
         server.start();
-        wagon.connect( new Repository( "id", getProtocol() + "://localhost:"
-          + getLocalPort( server )));
+        wagon.connect( new Repository( "id", getProtocol() + "://localhost:" + getLocalPort( server ) ) );
         wagon.getToStream( "resource", new ByteArrayOutputStream() );
         wagon.disconnect();
         server.stop();
@@ -269,8 +264,7 @@ public abstract class HttpWagonTestCase
         server.setHandler( handler );
         addConnector( server );
         server.start();
-        wagon.connect( new Repository( "id", getProtocol() + "://localhost:"
-          + getLocalPort( server ) ));
+        wagon.connect( new Repository( "id", getProtocol() + "://localhost:" + getLocalPort( server ) ) );
         wagon.getToStream( "resource", new ByteArrayOutputStream() );
         wagon.disconnect();
         server.stop();
@@ -283,7 +277,8 @@ public abstract class HttpWagonTestCase
 
     protected ServerConnector addConnector( Server server )
     {
-        ServerConnector serverConnector = new ServerConnector( server, new HttpConnectionFactory( new HttpConfiguration() ) );
+        ServerConnector serverConnector =
+            new ServerConnector( server, new HttpConnectionFactory( new HttpConfiguration() ) );
         server.addConnector( serverConnector );
         return serverConnector;
     }
@@ -931,7 +926,7 @@ public abstract class HttpWagonTestCase
             String content = "put top secret";
             FileUtils.fileWrite( tempFile.getAbsolutePath(), content );
 
-            try (FileInputStream fileInputStream = new FileInputStream( tempFile ))
+            try ( FileInputStream fileInputStream = new FileInputStream( tempFile ) )
             {
                 wagon.putFromStream( fileInputStream, "test-secured-put-resource", content.length(), -1 );
                 assertEquals( content, FileUtils.fileRead( sourceFile.getAbsolutePath() ) );
@@ -1183,7 +1178,8 @@ public abstract class HttpWagonTestCase
         // CHECKSTYLE_ON: MagicNumber
 
         Server proxyServer = new Server( );
-        ServerConnector serverConnector = new ServerConnector( proxyServer, new HttpConnectionFactory( new HttpConfiguration() ) );
+        ServerConnector serverConnector =
+            new ServerConnector( proxyServer, new HttpConnectionFactory( new HttpConfiguration() ) );
         proxyServer.addConnector( serverConnector );
         proxyServer.setHandler( handler );
 
@@ -1242,7 +1238,8 @@ public abstract class HttpWagonTestCase
         // CHECKSTYLE_ON: MagicNumber
 
         Server proxyServer = new Server( );
-        ServerConnector serverConnector = new ServerConnector( proxyServer, new HttpConnectionFactory( new HttpConfiguration() ) );
+        ServerConnector serverConnector =
+            new ServerConnector( proxyServer, new HttpConnectionFactory( new HttpConfiguration() ) );
         proxyServer.addConnector( serverConnector );
 
         proxyServer.setHandler( handler );
@@ -1882,14 +1879,13 @@ public abstract class HttpWagonTestCase
                 String content = "put top secret";
                 FileUtils.fileWrite( tempFile.getAbsolutePath(), content );
 
-                try(FileInputStream fileInputStream = new FileInputStream( tempFile ))
+                try ( FileInputStream fileInputStream = new FileInputStream( tempFile ) )
                 {
                     wagon.putFromStream( fileInputStream, "test-secured-put-resource", content.length(), -1 );
                 }
                 finally
                 {
                     tempFile.delete();
-
                 }
 
                 assertEquals( content, FileUtils.fileRead( sourceFile.getAbsolutePath() ) );
