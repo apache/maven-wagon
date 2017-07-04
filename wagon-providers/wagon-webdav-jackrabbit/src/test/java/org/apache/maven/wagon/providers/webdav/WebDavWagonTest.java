@@ -17,7 +17,9 @@ package org.apache.maven.wagon.providers.webdav;
 
 import it.could.webdav.DAVServlet;
 import org.apache.http.HttpException;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.StreamingWagon;
 import org.apache.maven.wagon.TransferFailedException;
@@ -25,6 +27,8 @@ import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.http.HttpWagonTestCase;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
+import org.apache.maven.wagon.shared.http.HttpConfiguration;
+import org.apache.maven.wagon.shared.http.HttpMethodConfiguration;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -47,6 +51,18 @@ import javax.servlet.http.HttpServletResponse;
 public class WebDavWagonTest
     extends HttpWagonTestCase
 {
+
+    @Override
+    protected Wagon getWagon()
+        throws Exception
+    {
+        WebDavWagon wagon = (WebDavWagon) super.getWagon();
+        wagon.setHttpConfiguration(
+            new HttpConfiguration() //
+                .setPut( new HttpMethodConfiguration().setUsePreemptive( true ) ));
+        return wagon;
+    }
+
     protected String getTestRepositoryUrl()
         throws IOException
     {
@@ -356,7 +372,7 @@ public class WebDavWagonTest
     {
         private static final String TIMEOUT_TRIGGER = "timeout";
 
-        protected int execute( HttpRequestBase httpRequestBase )
+        protected CloseableHttpResponse execute( HttpUriRequest httpRequestBase )
             throws HttpException, IOException
         {
             if ( httpRequestBase.getURI().getPath().contains( TIMEOUT_TRIGGER ) )
@@ -365,7 +381,7 @@ public class WebDavWagonTest
             }
             else
             {
-                return super.execute( httpRequestBase ).getStatusLine().getStatusCode();
+                return super.execute( httpRequestBase );
             }
         }
     }
@@ -416,7 +432,7 @@ public class WebDavWagonTest
     @Override
     protected boolean supportProxyPreemptiveAuthentication()
     {
-        return false;
+        return true;
     }
 
     protected void testPreemptiveAuthenticationGet( TestSecurityHandler sh, boolean preemptive )
@@ -497,14 +513,14 @@ public class WebDavWagonTest
     {
         assertEquals( "found:" + putHandler.handlerRequestResponses, 0, putHandler.handlerRequestResponses.size() );
 
-        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 4,
+        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 6,
                       redirectHandler.handlerRequestResponses.size() );
         assertEquals( "found:" + redirectHandler.handlerRequestResponses, HttpServletResponse.SC_SEE_OTHER,
                       redirectHandler.handlerRequestResponses.get( 0 ).responseCode );
-        assertEquals( "found:" + redirectHandler.handlerRequestResponses, HttpServletResponse.SC_SEE_OTHER,
+        assertEquals( "found:" + redirectHandler.handlerRequestResponses, HttpServletResponse.SC_OK,
                       redirectHandler.handlerRequestResponses.get( 1 ).responseCode );
-        assertEquals( "found:" + redirectHandler.handlerRequestResponses, HttpServletResponse.SC_CREATED,
-                      redirectHandler.handlerRequestResponses.get( 3 ).responseCode );
+        assertEquals( "found:" + redirectHandler.handlerRequestResponses, HttpServletResponse.SC_SEE_OTHER,
+                      redirectHandler.handlerRequestResponses.get( 2 ).responseCode );
 
     }
 

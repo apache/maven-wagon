@@ -20,9 +20,12 @@ package org.apache.maven.wagon.providers.webdav;
  */
 
 import org.apache.http.HttpException;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
+import org.apache.http.auth.AuthScope;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.auth.BasicScheme;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.MultiStatus;
@@ -104,8 +107,8 @@ public class WebDavWagon
     {
         Properties props = new Properties();
 
-        try (InputStream is = AbstractHttpClientWagon.class.getResourceAsStream(
-            "/META-INF/maven/org.apache.maven.wagon/wagon-webdav-jackrabbit/pom.properties" );)
+        try ( InputStream is = AbstractHttpClientWagon.class.getResourceAsStream(
+            "/META-INF/maven/org.apache.maven.wagon/wagon-webdav-jackrabbit/pom.properties" ) )
         {
             props.load( is );
             is.close();
@@ -185,10 +188,18 @@ public class WebDavWagon
     private int doMkCol( String url )
         throws IOException
     {
-        HttpMkcol method = new HttpMkcol( url );
-        try (CloseableHttpResponse closeableHttpResponse = execute( method ))
-        {
+        Repository repo = getRepository();
+        HttpHost targetHost = new HttpHost( repo.getHost(), repo.getPort(), repo.getProtocol() );
+        AuthScope targetScope = getBasicAuthScope().getScope( targetHost );
 
+        if ( getCredentialsProvider().getCredentials( targetScope ) != null )
+        {
+            BasicScheme targetAuth = new BasicScheme();
+            getAuthCache().put( targetHost, targetAuth );
+        }
+        HttpMkcol method = new HttpMkcol( url );
+        try ( CloseableHttpResponse closeableHttpResponse = execute( method ) )
+        {
             return closeableHttpResponse.getStatusLine().getStatusCode();
         }
         catch ( HttpException e )

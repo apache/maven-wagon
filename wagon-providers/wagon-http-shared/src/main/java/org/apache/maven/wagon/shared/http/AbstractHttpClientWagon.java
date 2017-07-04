@@ -1145,6 +1145,16 @@ public abstract class AbstractHttpClientWagon
         throw new IllegalStateException( "this wagon http client must not use fillOutputData" );
     }
 
+    protected CredentialsProvider getCredentialsProvider()
+    {
+        return credentialsProvider;
+    }
+
+    protected AuthCache getAuthCache()
+    {
+        return authCache;
+    }
+
     public int getInitialBackoffSeconds()
     {
         return initialBackoffSeconds;

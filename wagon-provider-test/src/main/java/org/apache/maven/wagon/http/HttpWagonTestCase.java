@@ -44,11 +44,11 @@ import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.util.security.Constraint;
-import org.eclipse.jetty.util.security.Password;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.security.Constraint;
+import org.eclipse.jetty.util.security.Password;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -698,9 +698,7 @@ public abstract class HttpWagonTestCase
 
         File tmpResult = File.createTempFile( "foo", "get" );
 
-        FileOutputStream fileOutputStream = new FileOutputStream( tmpResult );
-
-        try
+        try ( FileOutputStream fileOutputStream = new FileOutputStream( tmpResult ) )
         {
             wagon.getToStream( "resource", fileOutputStream );
             fileOutputStream.flush();
@@ -843,8 +841,7 @@ public abstract class HttpWagonTestCase
             String content = "put top secret";
             FileUtils.fileWrite( tempFile.getAbsolutePath(), content );
 
-            FileInputStream fileInputStream = new FileInputStream( tempFile );
-            try
+            try ( FileInputStream fileInputStream = new FileInputStream( tempFile ) )
             {
                 wagon.putFromStream( fileInputStream, "test-secured-put-resource", content.length(), -1 );
                 assertEquals( content, FileUtils.fileRead( sourceFile.getAbsolutePath() ) );
@@ -854,7 +851,6 @@ public abstract class HttpWagonTestCase
             finally
             {
                 wagon.disconnect();
-                fileInputStream.close();
                 tempFile.delete();
             }
 
@@ -915,8 +911,7 @@ public abstract class HttpWagonTestCase
             String content = "put top secret";
             FileUtils.fileWrite( tempFile.getAbsolutePath(), content );
 
-            FileInputStream fileInputStream = new FileInputStream( tempFile );
-            try
+            try (FileInputStream fileInputStream = new FileInputStream( tempFile ))
             {
                 wagon.putFromStream( fileInputStream, "test-secured-put-resource", content.length(), -1 );
                 assertEquals( content, FileUtils.fileRead( sourceFile.getAbsolutePath() ) );
@@ -926,7 +921,6 @@ public abstract class HttpWagonTestCase
             finally
             {
                 wagon.disconnect();
-                fileInputStream.close();
                 tempFile.delete();
             }
 
@@ -1141,7 +1135,7 @@ public abstract class HttpWagonTestCase
                 PutHandler putHandler = new PutHandler( this.repositoryDirectory );
                 putHandler.handle( target, baseRequest, request, response );
                 handlerRequestResponses.add(
-                    new HandlerRequestResponse( request.getMethod(), ( (Response) response ).getStatus(),
+                    new HandlerRequestResponse( request.getMethod(), response.getStatus(),
                                                 request.getRequestURI() ) );
                 return;
             }
@@ -1150,7 +1144,7 @@ public abstract class HttpWagonTestCase
             baseRequest.setHandled( true );
 
             handlerRequestResponses.add(
-                new HandlerRequestResponse( request.getMethod(), ( (Response) response ).getStatus(),
+                new HandlerRequestResponse( request.getMethod(), response.getStatus(),
                                             request.getRequestURI() ) );
         }
 
@@ -1865,14 +1859,12 @@ public abstract class HttpWagonTestCase
                 String content = "put top secret";
                 FileUtils.fileWrite( tempFile.getAbsolutePath(), content );
 
-                FileInputStream fileInputStream = new FileInputStream( tempFile );
-                try
+                try(FileInputStream fileInputStream = new FileInputStream( tempFile ))
                 {
                     wagon.putFromStream( fileInputStream, "test-secured-put-resource", content.length(), -1 );
                 }
                 finally
                 {
-                    fileInputStream.close();
                     tempFile.delete();
 
                 }
