@@ -19,9 +19,9 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
-import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ssl.SslSocketConnector;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 public class HttpsWagonTest
     extends HttpWagonTest
@@ -36,18 +36,19 @@ public class HttpsWagonTest
         return false;
     }
 
-    protected void addConnectors( Server server )
+    protected ServerConnector addConnector( Server server )
     {
         System.setProperty( "javax.net.ssl.trustStore",
                             getTestFile( "src/test/resources/ssl/keystore" ).getAbsolutePath() );
 
-        SslSocketConnector connector = new SslSocketConnector();
-        connector.setPort( server.getConnectors()[0].getPort() );
-        connector.getSslContextFactory().setKeyStorePath( "src/test/resources/ssl/keystore" );
-        connector.getSslContextFactory().setKeyStorePassword( "wagonhttp" );
-        connector.getSslContextFactory().setKeyManagerPassword( "wagonhttp" );
-        connector.getSslContextFactory().setTrustStore( getTestPath( "src/test/resources/ssl/keystore" ) );
-        connector.getSslContextFactory().setTrustStorePassword( "wagonhttp" );
-        server.setConnectors( new Connector[]{ connector } );
+        SslContextFactory sslContextFactory = new SslContextFactory();
+        sslContextFactory.setKeyStorePath( getTestPath( "src/test/resources/ssl/keystore" ) );
+        sslContextFactory.setKeyStorePassword( "wagonhttp" );
+        sslContextFactory.setKeyManagerPassword( "wagonhttp" );
+        sslContextFactory.setTrustStorePath( getTestPath( "src/test/resources/ssl/keystore" ) );
+        sslContextFactory.setTrustStorePassword( "wagonhttp" );
+        ServerConnector serverConnector = new ServerConnector( server, sslContextFactory );
+        server.addConnector( serverConnector );
+        return serverConnector;
     }
 }

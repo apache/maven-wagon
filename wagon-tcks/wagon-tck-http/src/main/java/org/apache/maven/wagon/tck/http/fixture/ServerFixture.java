@@ -19,24 +19,25 @@ package org.apache.maven.wagon.tck.http.fixture;
  * under the License.
  */
 
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.DefaultHandler;
-import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
-import org.eclipse.jetty.server.session.AbstractSessionManager;
-import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.HashLoginService;
-import org.eclipse.jetty.server.ssl.SslSocketConnector;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.DefaultHandler;
+import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.session.AbstractSessionManager;
+import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.FilterMapping;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.security.Password;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
@@ -45,9 +46,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import static org.apache.maven.wagon.tck.http.util.TestUtil.getResource;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -67,6 +65,7 @@ public class ServerFixture
     public static final String SERVER_HOST = "localhost";
 
     private final Server server;
+    private ServerConnector serverConnector;
 
     private final WebAppContext webappContext;
 
@@ -84,27 +83,25 @@ public class ServerFixture
         server = new Server();
         if ( ssl )
         {
-            SslSocketConnector connector = new SslSocketConnector();
             String keystore = getResource( SERVER_SSL_KEYSTORE_RESOURCE_PATH ).getAbsolutePath();
 
             LoggerFactory.getLogger( ServerFixture.class ).info( "TCK Keystore path: " + keystore );
             System.setProperty( "javax.net.ssl.keyStore", keystore );
             System.setProperty( "javax.net.ssl.trustStore", keystore );
 
-            // connector.setHost( SERVER_HOST );
-            //connector.setPort( port );
-            connector.setKeystore( keystore );
-            connector.setPassword( SERVER_SSL_KEYSTORE_PASSWORD );
-            connector.setKeyPassword( SERVER_SSL_KEYSTORE_PASSWORD );
-
-            server.addConnector( connector );
+            SslContextFactory sslContextFactory = new SslContextFactory();
+            sslContextFactory.setKeyStorePath( keystore );
+            sslContextFactory.setKeyStorePassword( SERVER_SSL_KEYSTORE_PASSWORD );
+            sslContextFactory.setKeyManagerPassword( SERVER_SSL_KEYSTORE_PASSWORD );
+            serverConnector = new ServerConnector( server, sslContextFactory );
+            server.addConnector( serverConnector );
         }
         else
         {
-            Connector connector = new SelectChannelConnector();
-            connector.setHost( "localhost" );
+            serverConnector = new ServerConnector( server );
+            serverConnector.setHost( "localhost" );
             //connector.setPort( port );
-            server.addConnector( connector );
+            server.addConnector( serverConnector );
         }
 
         Constraint constraint = new Constraint();
@@ -204,7 +201,7 @@ public class ServerFixture
         {
             throw new IllegalStateException( "Server didn't start in: " + total + "ms." );
         }
-        this.httpPort = server.getConnectors()[0].getLocalPort();
+        this.httpPort = serverConnector.getLocalPort();
     }
 
     public int getHttpPort()

@@ -35,8 +35,11 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.plexus.PlexusTestCase;
 import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
 public class ScpWagonWithProxyTest
@@ -60,11 +63,13 @@ public class ScpWagonWithProxyTest
             }
         };
 
-        Server server = new Server( 0 );
+        Server server = new Server(  );
+        ServerConnector connector = new ServerConnector( server, new HttpConnectionFactory( new HttpConfiguration() ) );
+        server.addConnector( connector );
         server.setHandler( handler );
         server.start();
 
-        int port = server.getConnectors()[0].getLocalPort();
+        int port = connector.getLocalPort();
         ProxyInfo proxyInfo = new ProxyInfo();
         proxyInfo.setHost( "localhost" );
         proxyInfo.setPort( port );

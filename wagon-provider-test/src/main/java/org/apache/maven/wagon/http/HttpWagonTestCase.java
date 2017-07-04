@@ -39,9 +39,13 @@ import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.security.authentication.BasicAuthenticator;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.servlet.DefaultServlet;
@@ -81,6 +85,13 @@ public abstract class HttpWagonTestCase
     public static final int SC_TOO_MANY_REQUESTS = 429;
 
     private Server server;
+    private ServerConnector connector;
+
+    protected int getLocalPort( Server server)
+    {
+        Connector connector = server.getConnectors()[0];
+        return ((ServerConnector)connector).getLocalPort();
+    }
 
     protected void setupWagonTestingFixtures()
         throws Exception
@@ -97,7 +108,10 @@ public abstract class HttpWagonTestCase
         FileUtils.deleteDirectory( repositoryDirectory );
         repositoryDirectory.mkdirs();
 
-        server = new Server( 0 );
+        server = new Server( );
+        //connector = new ServerConnector( server, new HttpConnectionFactory( new HttpConfiguration() ) );
+        //server.addConnector( connector );
+        connector = addConnector( server );
 
         PutHandler putHandler = new PutHandler( repositoryDirectory );
 
@@ -106,8 +120,6 @@ public abstract class HttpWagonTestCase
         handlers.addHandler( putHandler );
         handlers.addHandler( context );
         server.setHandler( handlers );
-
-        addConnectors( server );
 
         server.start();
 
@@ -121,7 +133,7 @@ public abstract class HttpWagonTestCase
         {
             return 0;
         }
-        return server.getConnectors()[0].getLocalPort();
+        return connector.getLocalPort();
     }
 
     protected ServletContextHandler createContext( Server server, File repositoryDirectory )
@@ -162,14 +174,14 @@ public abstract class HttpWagonTestCase
 
         setHttpHeaders( wagon, properties );
 
-        Server server = new Server( 0 );
+        Server server = new Server(  );
         TestHeaderHandler handler = new TestHeaderHandler();
         server.setHandler( handler );
-        addConnectors( server );
+        ServerConnector serverConnector = addConnector( server );
         server.start();
 
         wagon.connect(
-            new Repository( "id", getProtocol() + "://localhost:" + server.getConnectors()[0].getLocalPort() ) );
+            new Repository( "id", getProtocol() + "://localhost:" + serverConnector.getLocalPort() ) );
 
         wagon.getToStream( "resource", new ByteArrayOutputStream() );
 
@@ -194,14 +206,19 @@ public abstract class HttpWagonTestCase
         Method setHttpHeaders = wagon.getClass().getMethod( "setHttpHeaders", Properties.class );
         setHttpHeaders.invoke( wagon, properties );
 
-        Server server = new Server( 0 );
+        Server server = new Server( );
+        /*
+        ServerConnector serverConnector = new ServerConnector( server, new HttpConnectionFactory( new HttpConfiguration() ) );
+        server.addConnector( serverConnector );
+        */
+        ServerConnector serverConnector = addConnector( server );
         TestHeaderHandler handler = new TestHeaderHandler();
         server.setHandler( handler );
-        addConnectors( server );
+        addConnector( server );
         server.start();
 
         wagon.connect(
-            new Repository( "id", getProtocol() + "://localhost:" + server.getConnectors()[0].getLocalPort() ) );
+            new Repository( "id", getProtocol() + "://localhost:" + serverConnector.getLocalPort() ) );
 
         wagon.getToStream( "resource", new ByteArrayOutputStream() );
 
@@ -216,13 +233,13 @@ public abstract class HttpWagonTestCase
         throws Exception
     {
         StreamingWagon wagon = (StreamingWagon) getWagon();
-        Server server = new Server( 0 );
+        Server server = new Server(  );
         TestHeaderHandler handler = new TestHeaderHandler();
         server.setHandler( handler );
-        addConnectors( server );
+        addConnector( server );
         server.start();
         wagon.connect( new Repository( "id", getProtocol() + "://localhost:"
-          + server.getConnectors()[0].getLocalPort() ) );
+          + getLocalPort( server )));
         wagon.getToStream( "resource", new ByteArrayOutputStream() );
         wagon.disconnect();
         server.stop();
@@ -247,13 +264,13 @@ public abstract class HttpWagonTestCase
         Method setHttpHeaders = wagon.getClass().getMethod( "setHttpHeaders", Properties.class );
         setHttpHeaders.invoke( wagon, headers2 );
 
-        Server server = new Server( 0 );
+        Server server = new Server(  );
         TestHeaderHandler handler = new TestHeaderHandler();
         server.setHandler( handler );
-        addConnectors( server );
+        addConnector( server );
         server.start();
         wagon.connect( new Repository( "id", getProtocol() + "://localhost:"
-          + server.getConnectors()[0].getLocalPort() ) );
+          + getLocalPort( server ) ));
         wagon.getToStream( "resource", new ByteArrayOutputStream() );
         wagon.disconnect();
         server.stop();
@@ -264,13 +281,16 @@ public abstract class HttpWagonTestCase
 
     protected abstract void setHttpHeaders( StreamingWagon wagon, Properties properties );
 
-    protected void addConnectors( Server server )
+    protected ServerConnector addConnector( Server server )
     {
+        ServerConnector serverConnector = new ServerConnector( server, new HttpConnectionFactory( new HttpConfiguration() ) );
+        server.addConnector( serverConnector );
+        return serverConnector;
     }
 
     protected String getRepositoryUrl( Server server )
     {
-        int localPort = server.getConnectors()[0].getLocalPort();
+        int localPort = getLocalPort( server );
         return getProtocol() + "://localhost:" + localPort;
     }
 
@@ -309,7 +329,7 @@ public abstract class HttpWagonTestCase
         try
         {
 
-            Server server = new Server( 0 );
+            Server server = new Server(  );
             final AtomicBoolean called = new AtomicBoolean();
 
             AbstractHandler handler = new AbstractHandler()
@@ -333,7 +353,7 @@ public abstract class HttpWagonTestCase
             };
 
             server.setHandler( handler );
-            addConnectors( server );
+            ServerConnector serverConnector = addConnector( server );
             server.start();
 
             wagon.connect( new Repository( "id", getRepositoryUrl( server ) ) );
@@ -388,11 +408,11 @@ public abstract class HttpWagonTestCase
     {
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
-        Server server = new Server( 0 );
+        Server server = new Server(  );
         StatusHandler handler = new StatusHandler();
         handler.setStatusToReturn( status );
         server.setHandler( handler );
-        addConnectors( server );
+        addConnector( server );
         server.start();
 
         wagon.connect( new Repository( "id", getRepositoryUrl( server ) ) );
@@ -479,9 +499,9 @@ public abstract class HttpWagonTestCase
             };
 
             StreamingWagon wagon = (StreamingWagon) getWagon();
-            Server server = new Server( 0 );
+            Server server = new Server(  );
             server.setHandler( handler );
-            addConnectors( server );
+            addConnector( server );
             server.start();
             wagon.connect( new Repository( "id", getRepositoryUrl( server ) ) );
 
@@ -510,11 +530,11 @@ public abstract class HttpWagonTestCase
     {
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
-        Server server = new Server( 0 );
+        Server server = new Server( );
         StatusHandler handler = new StatusHandler();
         handler.setStatusToReturn( status );
         server.setHandler( handler );
-        addConnectors( server );
+        addConnector( server );
         server.start();
 
         wagon.connect( new Repository( "id", getRepositoryUrl( server ) ) );
@@ -545,7 +565,7 @@ public abstract class HttpWagonTestCase
     public void testGzipGet()
         throws Exception
     {
-        Server server = new Server( getTestRepositoryPort() );
+        Server server = new Server( );
 
         String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
         ServletContextHandler root = new ServletContextHandler( ServletContextHandler.SESSIONS );
@@ -553,7 +573,7 @@ public abstract class HttpWagonTestCase
         ServletHolder servletHolder = new ServletHolder( new DefaultServlet() );
         servletHolder.setInitParameter( "gzip", "true" );
         root.addServlet( servletHolder, "/*" );
-        addConnectors( server );
+        addConnector( server );
         server.setHandler( root );
         server.start();
 
@@ -661,16 +681,16 @@ public abstract class HttpWagonTestCase
     {
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
-        Server realServer = new Server( 0 );
+        Server realServer = new Server(  );
         TestHeaderHandler handler = new TestHeaderHandler();
 
         realServer.setHandler( handler );
-        addConnectors( realServer );
+        addConnector( realServer );
         realServer.start();
 
-        Server redirectServer = new Server( 0 );
+        Server redirectServer = new Server(  );
 
-        addConnectors( redirectServer );
+        addConnector( redirectServer );
 
         String protocol = getProtocol();
 
@@ -685,7 +705,7 @@ public abstract class HttpWagonTestCase
             protocol = "https";
         }
 
-        String redirectUrl = protocol + "://localhost:" + realServer.getConnectors()[0].getLocalPort();
+        String redirectUrl = protocol + "://localhost:" + getLocalPort( realServer );
 
         RedirectHandler redirectHandler =
             new RedirectHandler( "See Other", HttpServletResponse.SC_SEE_OTHER, redirectUrl, null );
@@ -725,16 +745,16 @@ public abstract class HttpWagonTestCase
     {
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
-        Server realServer = new Server( 0 );
+        Server realServer = new Server( );
         TestHeaderHandler handler = new TestHeaderHandler();
 
         realServer.setHandler( handler );
-        addConnectors( realServer );
+        addConnector( realServer );
         realServer.start();
 
-        Server redirectServer = new Server( 0 );
+        Server redirectServer = new Server( );
 
-        addConnectors( redirectServer );
+        addConnector( redirectServer );
 
         String protocol = getProtocol();
 
@@ -749,7 +769,7 @@ public abstract class HttpWagonTestCase
             protocol = "https";
         }
 
-        String redirectUrl = protocol + "://localhost:" + realServer.getConnectors()[0].getLocalPort();
+        String redirectUrl = protocol + "://localhost:" + getLocalPort( realServer );
 
         RedirectHandler redirectHandler =
             new RedirectHandler( "See Other", HttpServletResponse.SC_SEE_OTHER, redirectUrl, null );
@@ -786,9 +806,9 @@ public abstract class HttpWagonTestCase
     public void testRedirectPutFromStreamWithFullUrl()
         throws Exception
     {
-        Server realServer = new Server( 0 );
+        Server realServer = new Server( );
 
-        addConnectors( realServer );
+        addConnector( realServer );
 
         File repositoryDirectory = getRepositoryDirectory();
         FileUtils.deleteDirectory( repositoryDirectory );
@@ -800,9 +820,9 @@ public abstract class HttpWagonTestCase
 
         realServer.start();
 
-        Server redirectServer = new Server( 0 );
+        Server redirectServer = new Server( );
 
-        addConnectors( redirectServer );
+        addConnector( redirectServer );
 
         String protocol = getProtocol();
 
@@ -817,7 +837,7 @@ public abstract class HttpWagonTestCase
             protocol = "https";
         }
 
-        String redirectUrl = protocol + "://localhost:" + realServer.getConnectors()[0].getLocalPort();
+        String redirectUrl = protocol + "://localhost:" + getLocalPort( realServer );
 
         RedirectHandler redirectHandler =
             new RedirectHandler( "See Other", HttpServletResponse.SC_SEE_OTHER, redirectUrl, repositoryDirectory );
@@ -872,8 +892,8 @@ public abstract class HttpWagonTestCase
     public void testRedirectPutFromStreamRelativeUrl()
         throws Exception
     {
-        Server realServer = new Server( 0 );
-        addConnectors( realServer );
+        Server realServer = new Server( );
+        addConnector( realServer );
         File repositoryDirectory = getRepositoryDirectory();
         FileUtils.deleteDirectory( repositoryDirectory );
         repositoryDirectory.mkdirs();
@@ -884,9 +904,9 @@ public abstract class HttpWagonTestCase
 
         realServer.start();
 
-        Server redirectServer = new Server( 0 );
+        Server redirectServer = new Server( );
 
-        addConnectors( redirectServer );
+        addConnector( redirectServer );
 
         RedirectHandler redirectHandler =
             new RedirectHandler( "See Other", HttpServletResponse.SC_SEE_OTHER, "/redirectRequest/foo",
@@ -961,9 +981,9 @@ public abstract class HttpWagonTestCase
     public void testRedirectPutFileWithFullUrl()
         throws Exception
     {
-        Server realServer = new Server( 0 );
+        Server realServer = new Server( );
 
-        addConnectors( realServer );
+        addConnector( realServer );
 
         File repositoryDirectory = getRepositoryDirectory();
         FileUtils.deleteDirectory( repositoryDirectory );
@@ -975,9 +995,9 @@ public abstract class HttpWagonTestCase
 
         realServer.start();
 
-        Server redirectServer = new Server( 0 );
+        Server redirectServer = new Server( );
 
-        addConnectors( redirectServer );
+        addConnector( redirectServer );
 
         String protocol = getProtocol();
 
@@ -992,7 +1012,7 @@ public abstract class HttpWagonTestCase
             protocol = "https";
         }
 
-        String redirectUrl = protocol + "://localhost:" + realServer.getConnectors()[0].getLocalPort();
+        String redirectUrl = protocol + "://localhost:" + getLocalPort( realServer );
 
         RedirectHandler redirectHandler =
             new RedirectHandler( "See Other", HttpServletResponse.SC_SEE_OTHER, redirectUrl, repositoryDirectory );
@@ -1041,8 +1061,8 @@ public abstract class HttpWagonTestCase
     public void testRedirectPutFileRelativeUrl()
         throws Exception
     {
-        Server realServer = new Server( 0 );
-        addConnectors( realServer );
+        Server realServer = new Server( );
+        addConnector( realServer );
         File repositoryDirectory = getRepositoryDirectory();
         FileUtils.deleteDirectory( repositoryDirectory );
         repositoryDirectory.mkdirs();
@@ -1053,9 +1073,9 @@ public abstract class HttpWagonTestCase
 
         realServer.start();
 
-        Server redirectServer = new Server( 0 );
+        Server redirectServer = new Server( );
 
-        addConnectors( redirectServer );
+        addConnector( redirectServer );
 
         RedirectHandler redirectHandler =
             new RedirectHandler( "See Other", HttpServletResponse.SC_SEE_OTHER, "/redirectRequest/foo",
@@ -1162,13 +1182,14 @@ public abstract class HttpWagonTestCase
         Thread.sleep( 5001L );
         // CHECKSTYLE_ON: MagicNumber
 
-        Server proxyServer = new Server( 0 );
-
+        Server proxyServer = new Server( );
+        ServerConnector serverConnector = new ServerConnector( proxyServer, new HttpConnectionFactory( new HttpConfiguration() ) );
+        proxyServer.addConnector( serverConnector );
         proxyServer.setHandler( handler );
 
         proxyServer.start();
 
-        proxyInfo.setPort( proxyServer.getConnectors()[0].getLocalPort() );
+        proxyInfo.setPort( getLocalPort( proxyServer ) );
 
         System.out.println(
             "start proxy on host/port " + proxyInfo.getHost() + "/" + proxyInfo.getPort() + " with non proxyHosts "
@@ -1220,13 +1241,15 @@ public abstract class HttpWagonTestCase
         Thread.sleep( 5001L );
         // CHECKSTYLE_ON: MagicNumber
 
-        Server proxyServer = new Server( 0 );
+        Server proxyServer = new Server( );
+        ServerConnector serverConnector = new ServerConnector( proxyServer, new HttpConnectionFactory( new HttpConfiguration() ) );
+        proxyServer.addConnector( serverConnector );
 
         proxyServer.setHandler( handler );
 
         proxyServer.start();
 
-        proxyInfoProvider.getProxyInfo( null ).setPort( proxyServer.getConnectors()[0].getLocalPort() );
+        proxyInfoProvider.getProxyInfo( null ).setPort( getLocalPort( proxyServer ) );
 
         System.out.println( "start proxy on host/port " + proxyInfoProvider.getProxyInfo( null ).getHost() + "/"
                                 + proxyInfoProvider.getProxyInfo( null ).getPort() + " with non proxyHosts "
@@ -1509,7 +1532,7 @@ public abstract class HttpWagonTestCase
 
     private Server createSecurityServer( String localRepositoryPath )
     {
-        Server server = new Server( 0 );
+        Server server = new Server( );
 
         SecurityHandler sh = createSecurityHandler();
 
@@ -1521,7 +1544,7 @@ public abstract class HttpWagonTestCase
         root.addServlet( servletHolder, "/*" );
 
         server.setHandler( root );
-        addConnectors( server );
+        addConnector( server );
         return server;
     }
 
@@ -1612,7 +1635,7 @@ public abstract class HttpWagonTestCase
         {
 
             StreamingWagon wagon = (StreamingWagon) getWagon();
-            Server server = new Server( 0 );
+            Server server = new Server( );
             final AtomicBoolean called = new AtomicBoolean();
 
             AbstractHandler handler = new AbstractHandler()
@@ -1635,7 +1658,7 @@ public abstract class HttpWagonTestCase
             };
 
             server.setHandler( handler );
-            addConnectors( server );
+            addConnector( server );
             server.start();
 
             wagon.connect( new Repository( "id", getRepositoryUrl( server ) ) );
@@ -1671,11 +1694,11 @@ public abstract class HttpWagonTestCase
     {
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
-        Server server = new Server( 0 );
+        Server server = new Server( );
         StatusHandler handler = new StatusHandler();
         handler.setStatusToReturn( status );
         server.setHandler( handler );
-        addConnectors( server );
+        addConnector( server );
         server.start();
 
         wagon.connect( new Repository( "id", getRepositoryUrl( server ) ) );
@@ -1749,7 +1772,7 @@ public abstract class HttpWagonTestCase
         throws Exception
     {
         String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
-        Server server = new Server( 0 );
+        Server server = new Server( );
 
         TestSecurityHandler sh = createSecurityHandler();
 
@@ -1757,7 +1780,7 @@ public abstract class HttpWagonTestCase
 
         sh.setHandler( putHandler );
         server.setHandler( sh );
-        addConnectors( server );
+        addConnector( server );
         server.start();
 
         StreamingWagon wagon = (StreamingWagon) getWagon();
@@ -1818,7 +1841,7 @@ public abstract class HttpWagonTestCase
         throws Exception
     {
         String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
-        Server server = new Server( 0 );
+        Server server = new Server( );
 
         TestSecurityHandler sh = createSecurityHandler();
 
@@ -1833,7 +1856,7 @@ public abstract class HttpWagonTestCase
         {
             server.setHandler( putHandler );
         }
-        addConnectors( server );
+        addConnector( server );
         server.start();
 
         StreamingWagon wagon = (StreamingWagon) getWagon();

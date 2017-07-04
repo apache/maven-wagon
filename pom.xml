@@ -316,12 +316,12 @@ under the License.
       <dependency>
         <groupId>org.eclipse.jetty.aggregate</groupId>
         <artifactId>jetty-all</artifactId>
-        <version>8.1.22.v20160922</version>
+        <version>9.2.9.v20150224</version>
       </dependency>
       <dependency>
         <groupId>javax.servlet</groupId>
         <artifactId>javax.servlet-api</artifactId>
-        <version>3.0.1</version>
+        <version>3.1.0</version>
     </dependency>
     </dependencies>
   </dependencyManagement>

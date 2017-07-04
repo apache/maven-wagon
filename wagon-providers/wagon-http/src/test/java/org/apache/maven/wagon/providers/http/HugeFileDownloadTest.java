@@ -25,7 +25,10 @@ import org.apache.maven.wagon.observers.Debug;
 import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.util.IOUtil;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
@@ -53,6 +56,7 @@ public class HugeFileDownloadTest
         Integer.valueOf( Integer.MAX_VALUE ).longValue() + Integer.valueOf( Integer.MAX_VALUE ).longValue();
 
     private Server server;
+    private ServerConnector connector;
 
     public void testDownloadHugeFileWithContentLength()
         throws Exception
@@ -63,7 +67,9 @@ public class HugeFileDownloadTest
             makeHugeFile( hugeFile );
         }
 
-        server = new Server( 0 );
+        server = new Server(  );
+        connector = new ServerConnector( server, new HttpConnectionFactory( new HttpConfiguration() ) );
+        server.addConnector( connector );
 
         ServletContextHandler root = new ServletContextHandler( ServletContextHandler.SESSIONS );
         root.setResourceBase( new File( getBasedir(), "target" ).getAbsolutePath() );
@@ -89,7 +95,7 @@ public class HugeFileDownloadTest
         try
         {
             Wagon wagon = getWagon();
-            wagon.connect( new Repository( "id", "http://localhost:" + server.getConnectors()[0].getLocalPort() ) );
+            wagon.connect( new Repository( "id", "http://localhost:" + connector.getLocalPort() ) );
 
             dest = File.createTempFile( "huge", "txt" );
 
@@ -119,7 +125,9 @@ public class HugeFileDownloadTest
             makeHugeFile( hugeFile );
         }
 
-        server = new Server( 0 );
+        server = new Server(  );
+        connector = new ServerConnector( server, new HttpConnectionFactory( new HttpConfiguration() ) );
+        server.addConnector( connector );
 
         ServletContextHandler root = new ServletContextHandler( ServletContextHandler.SESSIONS );
         root.setResourceBase( new File( getBasedir(), "target" ).getAbsolutePath() );
@@ -144,7 +152,7 @@ public class HugeFileDownloadTest
         try
         {
             Wagon wagon = getWagon();
-            wagon.connect( new Repository( "id", "http://localhost:" + server.getConnectors()[0].getLocalPort() ) );
+            wagon.connect( new Repository( "id", "http://localhost:" + connector.getLocalPort() ) );
 
             dest = File.createTempFile( "huge", "txt" );
 
