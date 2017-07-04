@@ -110,7 +110,7 @@ public class WebDavWagon
             props.load( is );
             is.close();
         }
-        catch ( IOException ignore )
+        catch ( Exception ignore )
         {
             // ignore
         }
@@ -123,10 +123,11 @@ public class WebDavWagon
     protected String getUserAgent( HttpUriRequest method )
     {
         String userAgent = super.getUserAgent( method );
-        if (userAgent == null)
+        if ( userAgent == null )
         {
             return DEFAULT_USER_AGENT;
         }
+        return userAgent;
     }
 
     /**
