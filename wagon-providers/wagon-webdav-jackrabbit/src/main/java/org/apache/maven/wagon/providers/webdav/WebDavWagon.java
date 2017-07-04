@@ -216,7 +216,7 @@ public class WebDavWagon
 
             if ( method.succeeded( closeableHttpResponse ) )
             {
-                MultiStatus multiStatus = method.getResponseBodyAsMultiStatus(closeableHttpResponse);
+                MultiStatus multiStatus = method.getResponseBodyAsMultiStatus( closeableHttpResponse );
                 MultiStatusResponse response = multiStatus.getResponses()[0];
                 DavPropertySet propertySet = response.getProperties( HttpStatus.SC_OK );
                 DavProperty<?> property = propertySet.get( DavConstants.PROPERTY_RESOURCETYPE );
@@ -263,10 +263,10 @@ public class WebDavWagon
 
                 method = new HttpPropfind( url, nameSet, DavConstants.DEPTH_1 );
                 closeableHttpResponse = execute( method );
-                if ( method.succeeded(closeableHttpResponse) )
+                if ( method.succeeded( closeableHttpResponse ) )
                 {
-                    ArrayList<String> dirs = new ArrayList<String>();
-                    MultiStatus multiStatus = method.getResponseBodyAsMultiStatus(closeableHttpResponse);
+                    ArrayList<String> dirs = new ArrayList<>();
+                    MultiStatus multiStatus = method.getResponseBodyAsMultiStatus( closeableHttpResponse );
                     for ( int i = 0; i < multiStatus.getResponses().length; i++ )
                     {
                         MultiStatusResponse response = multiStatus.getResponses()[i];
@@ -278,7 +278,6 @@ public class WebDavWagon
                             {
                                 // by design jackrabbit WebDAV sticks parent directory as the first entry
                                 // so we need to ignore this entry
-                                // http://www.nabble.com/Extra-entry-in-get-file-list-with-jackrabbit-webdav-td21262786.html
                                 // http://www.webdav.org/specs/rfc4918.html#rfc.section.9.1
                                 continue;
                             }

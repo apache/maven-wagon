@@ -75,7 +75,7 @@ under the License.
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
-    <dependency> <!-- required for commons-httpclient:commons-httpclient -->
+    <dependency> <!-- required for org.apache.httpcomponents:httpclient -->
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
       <scope>runtime</scope>

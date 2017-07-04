@@ -19,7 +19,6 @@ package org.apache.jackrabbit.webdav.client.methods;
  * under the License.
  */
 
-import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
