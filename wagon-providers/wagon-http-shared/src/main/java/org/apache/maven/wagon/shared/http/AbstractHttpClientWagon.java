@@ -845,7 +845,7 @@ public abstract class AbstractHttpClientWagon
         if ( config == null || config.isUseDefaultHeaders() )
         {
             // TODO: merge with the other headers and have some better defaults, unify with lightweight headers
-            method.addHeader( "Cache-control", "no-cache" );
+            method.addHeader(  "Cache-control", "no-cache" );
             method.addHeader( "Cache-store", "no-store" );
             method.addHeader( "Pragma", "no-cache" );
             method.addHeader( "Expires", "0" );
@@ -866,6 +866,16 @@ public abstract class AbstractHttpClientWagon
             for ( Header header : headers )
             {
                 method.setHeader( header );
+            }
+        }
+
+        Header userAgentHeader = method.getFirstHeader( HTTP.USER_AGENT );
+        if ( userAgentHeader == null )
+        {
+            String userAgent = getUserAgent( method );
+            if ( userAgent != null )
+            {
+                method.setHeader( HTTP.USER_AGENT, userAgent );
             }
         }
     }

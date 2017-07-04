@@ -235,7 +235,7 @@ public class HttpClientWagonTest
     }
 
     private static final class TestWagon
-        extends AbstractHttpClientWagon
+        extends WebDavWagon
     {
         @Override
         public void fillOutputData( OutputData outputData )

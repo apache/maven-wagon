@@ -22,6 +22,7 @@ package org.apache.maven.wagon.providers.webdav;
 import org.apache.http.HttpException;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.MultiStatus;
@@ -45,9 +46,11 @@ import org.w3c.dom.Node;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * <p>WebDavWagon</p>
@@ -93,6 +96,37 @@ public class WebDavWagon
     public boolean supportsDirectoryCopy()
     {
         return true;
+    }
+
+    private static final String DEFAULT_USER_AGENT = getDefaultUserAgent();
+
+    private static String getDefaultUserAgent()
+    {
+        Properties props = new Properties();
+
+        try (InputStream is = AbstractHttpClientWagon.class.getResourceAsStream(
+            "/META-INF/maven/org.apache.maven.wagon/wagon-webdav-jackrabbit/pom.properties" );)
+        {
+            props.load( is );
+            is.close();
+        }
+        catch ( IOException ignore )
+        {
+            // ignore
+        }
+
+        String ver = props.getProperty( "version", "unknown-version" );
+        return "Apache-Maven-Wagon/" + ver + " (Java " + System.getProperty( "java.version" ) + "; ";
+    }
+
+    @Override
+    protected String getUserAgent( HttpUriRequest method )
+    {
+        String userAgent = super.getUserAgent( method );
+        if (userAgent == null)
+        {
+            return DEFAULT_USER_AGENT;
+        }
     }
 
     /**
@@ -150,12 +184,10 @@ public class WebDavWagon
     private int doMkCol( String url )
         throws IOException
     {
-        HttpMkcol method = null;
-        CloseableHttpResponse closeableHttpResponse = null;
-        try
+        HttpMkcol method = new HttpMkcol( url );
+        try (CloseableHttpResponse closeableHttpResponse = execute( method ))
         {
-            method = new HttpMkcol( url );
-            closeableHttpResponse = execute( method );
+
             return closeableHttpResponse.getStatusLine().getStatusCode();
         }
         catch ( HttpException e )
@@ -167,10 +199,6 @@ public class WebDavWagon
             if ( method != null )
             {
                 method.releaseConnection();
-            }
-            if ( closeableHttpResponse != null )
-            {
-                closeableHttpResponse.close();
             }
         }
     }
