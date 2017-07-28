@@ -32,7 +32,7 @@ public interface SessionListener
      * This method will be called when Wagon is about to open
      * connection to the repository.
      * The type of the event should
-     * be set to {@link SessionEvent.SESSION_OPENING}
+     * be set to {@link SessionEvent#SESSION_OPENING}
      *
      * @param sessionEvent the session event
      */
@@ -42,7 +42,7 @@ public interface SessionListener
      * This method will be called when Wagon has successfully connected to
      * to the repository.
      * The type of the event should
-     * be set to {@link SessionEvent.SESSION_OPENED}
+     * be set to {@link SessionEvent#SESSION_OPENED}
      *
      * @param sessionEvent the session event
      */
@@ -52,7 +52,7 @@ public interface SessionListener
      * This method will be called when Wagon has closed connection to
      * to the repository.
      * The type of the event should
-     * be set to {@link SessionEvent.SESSION_DISCONNECTING}
+     * be set to {@link SessionEvent#SESSION_DISCONNECTING}
      *
      * @param sessionEvent the session event
      */
@@ -62,7 +62,7 @@ public interface SessionListener
      * This method will be called when Wagon has closed connection to
      * the repository.
      * The type of the event should
-     * be set to {@link SessionEvent.SESSION_DISCONNECTED}
+     * be set to {@link SessionEvent#SESSION_DISCONNECTED}
      *
      * @param sessionEvent the session event
      */
@@ -73,7 +73,7 @@ public interface SessionListener
      * the repository was refused.
      * <p/>
      * The type of the event should
-     * be set to {@link SessionEvent.SESSION_CONNECTION_REFUSED}
+     * be set to {@link SessionEvent#SESSION_CONNECTION_REFUSED}
      *
      * @param sessionEvent the session event
      */
@@ -92,7 +92,7 @@ public interface SessionListener
      * from the repository.
      * <p/>
      * The type of the event should
-     * be set to {@link SessionEvent.SESSION_LOGGED_OFF}
+     * be set to {@link SessionEvent#SESSION_LOGGED_OFF}
      *
      * @param sessionEvent the session event
      */
@@ -102,7 +102,7 @@ public interface SessionListener
      * This method will be called by Wagon when an error occurred.
      * <p/>
      * The type of the event should
-     * be set to {@link SessionEvent.SESSION_ERROR_OCCURRED}
+     * be set to {@link SessionEvent#SESSION_ERROR_OCCURRED}
      *
      * @param sessionEvent the session event
      */
