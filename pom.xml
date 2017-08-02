@@ -348,6 +348,13 @@ under the License.
           </configuration>
         </plugin>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <configuration>
+            <failOnError>false</failOnError>
+          </configuration>
+        </plugin>
+        <plugin>
           <groupId>org.apache.rat</groupId>
           <artifactId>apache-rat-plugin</artifactId>
           <configuration>
@@ -455,6 +462,7 @@ under the License.
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
             <configuration>
+              <failOnError>false</failOnError>
               <linksource>true</linksource>
               <links>
                 <link>http://java.sun.com/j2ee/1.4/docs/api</link>
@@ -563,6 +571,11 @@ under the License.
                 </reports>
               </reportSet>
             </reportSets>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>findbugs-maven-plugin</artifactId>
+            <version>3.0.4</version>
           </plugin>
         </plugins>
       </reporting>
