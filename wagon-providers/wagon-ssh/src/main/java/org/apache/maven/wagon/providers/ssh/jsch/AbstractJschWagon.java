@@ -19,15 +19,22 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  * under the License.
  */
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.List;
-import java.util.Properties;
-
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.HostKey;
+import com.jcraft.jsch.HostKeyRepository;
+import com.jcraft.jsch.IdentityRepository;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Proxy;
+import com.jcraft.jsch.ProxyHTTP;
+import com.jcraft.jsch.ProxySOCKS5;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.UIKeyboardInteractive;
+import com.jcraft.jsch.UserInfo;
+import com.jcraft.jsch.agentproxy.AgentProxyException;
+import com.jcraft.jsch.agentproxy.Connector;
+import com.jcraft.jsch.agentproxy.ConnectorFactory;
+import com.jcraft.jsch.agentproxy.RemoteIdentityRepository;
 import org.apache.maven.wagon.CommandExecutionException;
 import org.apache.maven.wagon.CommandExecutor;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
@@ -53,22 +60,15 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
 
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.HostKey;
-import com.jcraft.jsch.HostKeyRepository;
-import com.jcraft.jsch.IdentityRepository;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Proxy;
-import com.jcraft.jsch.ProxyHTTP;
-import com.jcraft.jsch.ProxySOCKS5;
-import com.jcraft.jsch.Session;
-import com.jcraft.jsch.UIKeyboardInteractive;
-import com.jcraft.jsch.UserInfo;
-import com.jcraft.jsch.agentproxy.AgentProxyException;
-import com.jcraft.jsch.agentproxy.Connector;
-import com.jcraft.jsch.agentproxy.ConnectorFactory;
-import com.jcraft.jsch.agentproxy.RemoteIdentityRepository;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * AbstractJschWagon
@@ -316,6 +316,34 @@ public abstract class AbstractJschWagon
         }
     }
 
+    public void executeCommand( String command, boolean ignoreStdErr, boolean ignoreNoneZeroExitCode,
+                               OutputStream errStream, OutputStream outStream )
+            throws CommandExecutionException
+    {
+        ChannelExec channel = null;
+        BufferedReader stdoutReader = null;
+        BufferedReader stderrReader = null;
+        try
+        {
+            channel = (ChannelExec) session.openChannel( EXEC_CHANNEL );
+            fireSessionDebug( "Executing: " + command );
+            channel.setCommand( command + "\n" );
+            stdoutReader = new BufferedReader( new InputStreamReader( channel.getInputStream() ) );
+            stderrReader = new BufferedReader( new InputStreamReader( channel.getErrStream() ) );
+            channel.setPty( true );
+            channel.connect();
+            CommandExecutorStreamProcessor.processStreams( stderrReader, stdoutReader, errStream, outStream );
+        }
+        catch ( IOException e )
+        {
+            throw new CommandExecutionException( "Cannot execute remote command: " + command, e );
+        }
+        catch ( JSchException e )
+        {
+            throw new CommandExecutionException( "Cannot execute remote command: " + command, e );
+        }
+    }
+
     public Streams executeCommand( String command, boolean ignoreStdErr, boolean ignoreNoneZeroExitCode )
         throws CommandExecutionException
     {
@@ -415,6 +443,23 @@ public abstract class AbstractJschWagon
     public boolean supportsDirectoryCopy()
     {
         return true;
+    }
+
+    public void executeCommand( String command, OutputStream errStream, OutputStream outStream )
+            throws CommandExecutionException
+    {
+        fireTransferDebug( "Executing command: " + command );
+
+        executeCommand( command, false, errStream, outStream );
+    }
+
+    public void executeCommand( String command, boolean ignoreFailures, OutputStream errStream, OutputStream outStream )
+            throws CommandExecutionException
+    {
+        fireTransferDebug( "Executing command: " + command );
+
+        //backward compatible with wagon 2.10
+        executeCommand( command, ignoreFailures, ignoreFailures, errStream, outStream );
     }
 
     public void executeCommand( String command )

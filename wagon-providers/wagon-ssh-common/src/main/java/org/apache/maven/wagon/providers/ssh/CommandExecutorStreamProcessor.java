@@ -20,9 +20,11 @@ package org.apache.maven.wagon.providers.ssh;
  */
 
 import org.apache.maven.wagon.Streams;
+import org.codehaus.plexus.util.IOUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * CommandExecutorStreamProcessor
@@ -85,5 +87,81 @@ public class CommandExecutorStreamProcessor
         }
 
         return streams;
+    }
+
+    public static void processStreams( final BufferedReader stderrReader, final BufferedReader stdoutReader,
+                                       final OutputStream errStream, final OutputStream outStream )
+    {
+        new Thread( new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                try
+                {
+                    while ( true )
+                    {
+                        String line = stdoutReader.readLine();
+                        if ( line == null )
+                        {
+                            break;
+                        }
+                        if ( outStream == null )
+                        {
+                            continue;
+                        }
+                        outStream.write( ( line + "\n" ).getBytes() );
+                    }
+                }
+                catch ( Exception e )
+                {
+                    e.printStackTrace();
+                }
+                finally
+                {
+                    IOUtil.close( stdoutReader );
+                    IOUtil.close( outStream );
+                }
+            }
+        } ).start();
+
+        new Thread ( new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                try
+                {
+                    while ( true )
+                    {
+                        String line = stderrReader.readLine();
+                        if ( line == null )
+                        {
+                            break;
+                        }
+                        // TODO: I think we need to deal with exit codes instead, but IIRC there are some cases of errors that
+                        // don't have exit codes ignore this error. TODO: output a warning
+                        if ( !line.startsWith( "Could not chdir to home directory" )
+                                && !line.endsWith( "ttyname: Operation not supported" ) )
+                        {
+                            if ( errStream == null )
+                            {
+                                continue;
+                            }
+                            errStream.write( ( line + "\n" ).getBytes() );
+                        }
+                    }
+                }
+                catch ( Exception e )
+                {
+                    e.printStackTrace();
+                }
+                finally
+                {
+                    IOUtil.close( stderrReader );
+                    IOUtil.close( errStream );
+                }
+            }
+        } ).start();
     }
 }
