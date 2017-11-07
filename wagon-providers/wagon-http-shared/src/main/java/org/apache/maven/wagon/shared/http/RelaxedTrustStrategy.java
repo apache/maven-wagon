@@ -45,24 +45,27 @@ public class RelaxedTrustStrategy
     public boolean isTrusted( X509Certificate[] certificates, String authType )
         throws CertificateException
     {
-        if ( ( certificates != null ) && ( certificates.length == 1 ) )
+        if ( ( certificates != null ) && ( certificates.length > 0 ) )
         {
-            try
+            for ( X509Certificate currentCertificate : certificates )
             {
-                certificates[0].checkValidity();
-            }
-            catch ( CertificateExpiredException e )
-            {
-                if ( !ignoreSSLValidityDates )
+                try
                 {
-                    throw e;
+                    currentCertificate.checkValidity();
                 }
-            }
-            catch ( CertificateNotYetValidException e )
-            {
-                if ( !ignoreSSLValidityDates )
+                catch ( CertificateExpiredException e )
                 {
-                    throw e;
+                    if ( !ignoreSSLValidityDates )
+                    {
+                        throw e;
+                    }
+                }
+                catch ( CertificateNotYetValidException e )
+                {
+                    if ( !ignoreSSLValidityDates )
+                    {
+                        throw e;
+                    }
                 }
             }
             return true;
