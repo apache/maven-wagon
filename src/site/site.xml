@@ -54,12 +54,12 @@ under the License.
 
   <body>
     <breadcrumbs>
-      <item name="Wagon" href="http://maven.apache.org/wagon/index.html" />
+      <item name="Wagon" href="./index.html" />
     </breadcrumbs>
     <menu name="Overview">
       <item name="Introduction" href="index.html"/>
       <item name="JavaDocs" href="apidocs/index.html"/>
-      <!-- According to http://jira.codehaus.org/browse/MNGSITE-152 -->
+      <!-- According to https://issues.apache.org/jira/browse/MNGSITE-152 -->
       <item name="License" href="http://www.apache.org/licenses/"/>
       <item name="Download" href="download.html"/>
     </menu>

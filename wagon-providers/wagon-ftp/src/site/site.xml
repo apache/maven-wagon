@@ -24,7 +24,7 @@ under the License.
   xsi:schemaLocation="http://maven.apache.org/DECORATION/1.3.0 http://maven.apache.org/xsd/decoration-1.3.0.xsd">
   <body>
     <breadcrumbs>
-      <item name="FTP" href="http://maven.apache.org/wagon/wagon-providers/wagon-ftp/index.html" />
+      <item name="FTP" href="./index.html" />
     </breadcrumbs>
 
     <menu ref="parent"/>

@@ -24,7 +24,7 @@ under the License.
   xsi:schemaLocation="http://maven.apache.org/DECORATION/1.3.0 http://maven.apache.org/xsd/decoration-1.3.0.xsd">
   <body>
     <breadcrumbs>
-      <item name="WebDAV Jackrabbit" href="http://maven.apache.org/wagon/wagon-providers/wagon-webdav-jackrabbit/index.html" />
+      <item name="WebDAV Jackrabbit" href="./index.html" />
     </breadcrumbs>
 
     <menu ref="parent"/>

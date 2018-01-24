@@ -49,6 +49,6 @@ Known issues
 
    * CVS: when keywords are expanded
 
- * Generated site may have inconsistent newlines (see {{{http://jira.codehaus.org/browse/MSITE-121}MSITE-121}}),
+ * Generated site may have inconsistent newlines (see {{{https://issues.apache.org/jira/browse/MSITE-121}MSITE-121}}),
  preventing SCM check-in: <<prefer {{{/plugins/maven-scm-publish-plugin/}maven-scm-publish-plugin}} to
  publish your site to SCM>>
