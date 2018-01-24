@@ -32,13 +32,13 @@ Maven Wagon SCM Usage
 
  * <<<wagon-scm>>>,
 
- * {{{http://maven.apache.org/scm/maven-scm-managers/maven-scm-manager-plexus/index.html}<<<maven-scm-manager-plexus>>>}}
+ * {{{/scm/maven-scm-managers/maven-scm-manager-plexus/index.html}<<<maven-scm-manager-plexus>>>}}
 
- * and the {{{http://maven.apache.org/scm/maven-scm-providers/index.html}Maven SCM Provider}} for your SCM system,
+ * and the {{{/scm/maven-scm-providers/index.html}Maven SCM Provider}} for your SCM system,
 
  []
 
- and use URLs in the {{{http://maven.apache.org/scm/scm-url-format.html}SCM format}}.
+ and use URLs in the {{{/scm/scm-url-format.html}SCM format}}.
  
  For non-subversion SCM, you can include the elements <<<scmVersionType>>> and <<<scmVersion>>> in your <<<settings.xml>>> file to
  specify a branch or tag to use. The value of <<<scmVersionType>>> must be one of <<<branch>>> or <<<tag>>>.
@@ -48,21 +48,23 @@ Maven Wagon SCM Usage
 
 Deploying your Maven site to SCM
 
- There are some shortcomings to simply using Wagon SCM provider with site plugin:
+ There are some <<shortcomings>> to simply using Wagon SCM provider with site plugin:
 
- * generated site may have inconsistent newlines (see {{{http://jira.codehaus.org/browse/MSITE-121}MSITE-121}}),
+ * generated site may have inconsistent newlines (see {{{https://issues.apache.org/jira/browse/MSITE-121}MSITE-121}}),
  preventing SCM check-in,
 
  * deploying site to SCM will require obsolete pages deletion, which is not done,
 
  * site plugin way make one commit per file.
 
- Prefer {{{http://maven.apache.org/plugins/maven-scm-publish-plugin/}maven-scm-publish-plugin}} to
- publish your site to SCM
+ []
+
+ <<Prefer {{{http://maven.apache.org/plugins/maven-scm-publish-plugin/}maven-scm-publish-plugin}} to
+ publish your site to SCM>>
 
  <<Note for Maven 3 users:>> The site plugin behaves differently, require these
  be added as dependencies instead of extensions. See
- {{{http://maven.apache.org/plugins/maven-site-plugin/examples/adding-deploy-protocol.html}
+ {{{/plugins/maven-site-plugin/examples/adding-deploy-protocol.html}
  Adding a Protocol to Deploy the Site}}.
 
 * Deploying your Maven site to Subversion
