@@ -14,3 +14,4 @@ target
 .DS_Store
 
 .java-version
+.someignoredfile
