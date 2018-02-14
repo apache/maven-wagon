@@ -422,7 +422,8 @@ public abstract class AbstractJschWagon
     {
         fireTransferDebug( "Executing command: " + command );
 
-        executeCommand( command, false );
+        //backward compatible with wagon 2.10
+        executeCommand( command, false, true );
     }
 
     public Streams executeCommand( String command, boolean ignoreFailures )
@@ -431,7 +432,7 @@ public abstract class AbstractJschWagon
         fireTransferDebug( "Executing command: " + command );
 
         //backward compatible with wagon 2.10
-        return executeCommand( command, ignoreFailures, ignoreFailures );
+        return executeCommand( command, ignoreFailures, true );
     }
 
     public InteractiveUserInfo getInteractiveUserInfo()
