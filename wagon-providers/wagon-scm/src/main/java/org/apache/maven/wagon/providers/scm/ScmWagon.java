@@ -475,6 +475,7 @@ public class ScmWagon
         // and the configuration is incorrect. We will not try repo.getParent since most scm's don't
         // implement that.
 
+        target = target.replace( '\\', '/' );
         try
         {
             String repoUrl = getRepository().getUrl();
@@ -482,7 +483,7 @@ public class ScmWagon
             {
                 // Subversion is the only SCM that adds path structure to represent tags and branches.
                 // The rest use scmVersion and scmVersionType.
-                repoUrl += "/" + target.replace( '\\', '/' );
+                repoUrl += "/" + target;
             }
             scmRepository = getScmRepository( repoUrl );
             CheckOutScmResult ret =
@@ -500,7 +501,7 @@ public class ScmWagon
 
         // now create the subdirs in target, if it's a parent of targetName
 
-        String relPath = "";
+        String relPath = target.concat(target.length() > 0 ? "/" : "");
 
         while ( !stack.isEmpty() )
         {
