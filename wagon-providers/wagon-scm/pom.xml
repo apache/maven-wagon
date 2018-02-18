@@ -82,6 +82,24 @@ under the License.
           </excludes>
         </configuration>
       </plugin>
+
+				<plugin>
+					<groupId>org.apache.rat</groupId>
+					<artifactId>apache-rat-plugin</artifactId>
+					<version>0.13-SNAPSHOT</version>
+					<configuration>
+						<parseSCMIgnoresAsExcludes>true</parseSCMIgnoresAsExcludes>
+					</configuration>
+				</plugin>
+
     </plugins>
   </build>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>apache-snapshots</id>
+			<url>https://repository.apache.org/content/repositories/snapshots</url>
+		</pluginRepository>
+	</pluginRepositories>
+
 </project>
