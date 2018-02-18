@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -73,6 +74,10 @@ public abstract class WagonTestCase
             return size;
         }
     }
+
+    protected static final String TEST_CONTENT = "test-resource.txt\n";
+
+    protected static final String TEST_CKSUM = cksum( TEST_CONTENT );
 
     protected static final String POM = "pom.xml";
 
@@ -233,16 +238,13 @@ public abstract class WagonTestCase
     public void testWagon()
         throws Exception
     {
-        if ( supportsGetIfNewer() )
-        {
-            setupRepositories();
+        setupRepositories();
 
-            setupWagonTestingFixtures();
+        setupWagonTestingFixtures();
 
-            fileRoundTripTesting();
+        fileRoundTripTesting();
 
-            tearDownWagonTestingFixtures();
-        }
+        tearDownWagonTestingFixtures();
     }
 
     public void testWagonGetIfNewerIsNewer()
@@ -341,7 +343,7 @@ public abstract class WagonTestCase
 
             assertNotNull( "check checksum is not null", checksumObserver.getActualChecksum() );
 
-            assertEquals( "compare checksums", "6b144b7285ffd6b0bc8300da162120b9",
+            assertEquals( "compare checksums", TEST_CKSUM,
                           checksumObserver.getActualChecksum() );
 
             // Now compare the contents of the artifact that was placed in
@@ -923,7 +925,7 @@ public abstract class WagonTestCase
     protected int putFile()
         throws Exception
     {
-        String content = "test-resource.txt\n";
+        String content = TEST_CONTENT;
         putFile( resource, "test-resource", content );
         return content.length();
     }
@@ -1049,7 +1051,7 @@ public abstract class WagonTestCase
 
         assertNotNull( "check checksum is not null", checksumObserver.getActualChecksum() );
 
-        assertEquals( "compare checksums", "6b144b7285ffd6b0bc8300da162120b9", checksumObserver.getActualChecksum() );
+        assertEquals( "compare checksums", TEST_CKSUM, checksumObserver.getActualChecksum() );
 
         checksumObserver = new ChecksumObserver();
 
@@ -1057,7 +1059,7 @@ public abstract class WagonTestCase
 
         assertNotNull( "check checksum is not null", checksumObserver.getActualChecksum() );
 
-        assertEquals( "compare checksums", "6b144b7285ffd6b0bc8300da162120b9", checksumObserver.getActualChecksum() );
+        assertEquals( "compare checksums", TEST_CKSUM, checksumObserver.getActualChecksum() );
 
         // Now compare the conents of the artifact that was placed in
         // the repository with the contents of the artifact that was
@@ -1085,6 +1087,24 @@ public abstract class WagonTestCase
         repository.setUrl( url );
 
         return repository;
+    }
+
+    protected static String cksum( String content )
+    {
+        String checkSum;
+        try
+        {
+            ChecksumObserver obs = new ChecksumObserver();
+            byte[] buf = content.getBytes( StandardCharsets.ISO_8859_1 );
+            obs.transferProgress( null, buf, buf.length );
+            obs.transferCompleted( null );
+            checkSum = obs.getActualChecksum();
+        }
+        catch ( Exception e )
+        {
+            checkSum = null;
+        }
+        return checkSum;
     }
 
 }
