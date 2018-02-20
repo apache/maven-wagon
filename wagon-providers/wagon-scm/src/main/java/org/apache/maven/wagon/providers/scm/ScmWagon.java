@@ -508,7 +508,8 @@ public class ScmWagon
             relPath += p + "/";
 
             File newDir = new File( checkoutDirectory, relPath );
-            if ( !newDir.mkdirs() )
+            newDir.mkdir();
+            if ( !newDir.isDirectory() )
             {
                 throw new TransferFailedException(
                     "Failed to create directory " + newDir.getAbsolutePath() + "; parent should exist: "
