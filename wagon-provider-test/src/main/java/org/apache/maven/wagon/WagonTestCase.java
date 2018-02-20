@@ -93,6 +93,8 @@ public abstract class WagonTestCase
 
     protected String resource;
 
+    protected boolean testSkipped;
+
     protected File artifactSourceFile;
 
     protected File artifactDestFile;
@@ -226,6 +228,24 @@ public abstract class WagonTestCase
         return wagon;
     }
 
+    /**
+     * @param cmd the executable to run, not null.
+     * @return <code>true</code>
+     */
+    public static boolean isSystemCmd( String cmd )
+    {
+        try
+        {
+            Runtime.getRuntime().exec( cmd );
+
+            return true;
+        }
+        catch ( IOException e )
+        {
+            return false;
+        }
+    }
+
     protected void message( String message )
     {
         logger.info( message );
@@ -259,6 +279,16 @@ public abstract class WagonTestCase
             getIfNewer( getExpectedLastModifiedOnGet( testRepository, new Resource( resource ) ) + 30000, false,
                         expectedSize );
             // CHECKSTYLE_ON: MagicNumber
+        }
+    }
+    
+    @Override
+    protected void runTest()
+        throws Throwable
+    {
+        if ( !testSkipped )
+        {
+            super.runTest();
         }
     }
 

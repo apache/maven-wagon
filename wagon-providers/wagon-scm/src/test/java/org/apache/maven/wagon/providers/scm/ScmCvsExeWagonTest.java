@@ -31,34 +31,60 @@ import org.apache.maven.scm.provider.cvslib.cvsexe.CvsExeScmProvider;
 public class ScmCvsExeWagonTest
     extends AbstractScmCvsWagonTest
 {
+    
+    @Override
+    protected void setUp()
+        throws Exception
+    {
+        assumeHaveCvsBinary();
+        if ( !testSkipped )
+        {
+            super.setUp();
+        }
+    }
 
     protected ScmProvider getScmProvider()
     {
         return new CvsExeScmProvider();
     }
 
-    public void testFailedGet()
+    @Override
+    public void testWagonGetFileList()
         throws Exception
     {
-        // Not ready yet
+        // cvs rls is rare
     }
 
-    public void testWagon()
+    @Override
+    public void testWagonResourceExists()
         throws Exception
     {
-        // Not ready yet
+        // cvs rls is rare
     }
 
-    public void testWagonPutDirectory()
+    @Override
+    public void testWagonResourceNotExists()
         throws Exception
     {
-        // Not ready yet
+        // cvs rls is rare
     }
 
-    public void testWagonPutDirectoryWhenDirectoryAlreadyExists()
-        throws Exception
+    @Override
+    protected boolean supportsGetIfNewer()
     {
-        // Not ready yet
+        return false;
     }
 
+    /** Optionally set the testSkipped flag */
+    protected void assumeHaveCvsBinary()
+    {
+        if ( !isSystemCmd( CVS_COMMAND_LINE ) )
+        {
+            testSkipped = true;
+            System.err.println( "'" + CVS_COMMAND_LINE + "' is not a system command. Ignored " + getName() + "." );
+        }
+    }
+
+    /** 'cvs' command line */
+    public static final String CVS_COMMAND_LINE = "cvs";
 }
