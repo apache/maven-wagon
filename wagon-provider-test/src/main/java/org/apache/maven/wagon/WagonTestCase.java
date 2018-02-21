@@ -61,7 +61,7 @@ public abstract class WagonTestCase
     static final class ProgressAnswer implements IAnswer
     {
         private int size;
-        
+
         public Object answer() throws Throwable
         {
             int length = (Integer) getCurrentArguments()[2];
@@ -92,6 +92,8 @@ public abstract class WagonTestCase
     protected File destFile;
 
     protected String resource;
+
+    protected boolean testSkipped;
 
     protected File artifactSourceFile;
 
@@ -226,6 +228,24 @@ public abstract class WagonTestCase
         return wagon;
     }
 
+    /**
+     * @param cmd the executable to run, not null.
+     * @return <code>true</code>
+     */
+    public static boolean isSystemCmd( String cmd )
+    {
+        try
+        {
+            Runtime.getRuntime().exec( cmd );
+
+            return true;
+        }
+        catch ( IOException e )
+        {
+            return false;
+        }
+    }
+
     protected void message( String message )
     {
         logger.info( message );
@@ -259,6 +279,16 @@ public abstract class WagonTestCase
             getIfNewer( getExpectedLastModifiedOnGet( testRepository, new Resource( resource ) ) + 30000, false,
                         expectedSize );
             // CHECKSTYLE_ON: MagicNumber
+        }
+    }
+
+    @Override
+    protected void runTest()
+        throws Throwable
+    {
+        if ( !testSkipped )
+        {
+            super.runTest();
         }
     }
 
@@ -382,7 +412,7 @@ public abstract class WagonTestCase
 
         mockTransferListener.debug( anyString() );
         expectLastCall().anyTimes();
-        
+
         replay( mockTransferListener );
     }
 
