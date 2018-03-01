@@ -46,6 +46,16 @@ public abstract class AbstractScmWagonTest
     extends WagonTestCase
 {
 
+    @Override
+    public void testWagonPutDirectory() throws Exception
+    {
+        super.testWagonPutDirectory();
+        // repeat the test on a non-empty repo
+        // ScmWagon should checkout all involved subdirs before calling
+        // FileUtils.copyDirectoryStructure()
+        super.testWagonPutDirectory();
+    }
+
     private ScmWagon wagon;
 
     private String providerClassName;
