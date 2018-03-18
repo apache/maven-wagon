@@ -359,6 +359,7 @@ under the License.
           <artifactId>apache-rat-plugin</artifactId>
           <configuration>
             <excludes combine.children="append">
+              <exclude>.checkstyle</exclude>
               <exclude>**/*.odg</exclude>
               <exclude>src/test/resources/**</exclude>
               <exclude>src/main/resources/default-server-root/**</exclude>
