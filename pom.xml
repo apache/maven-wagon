@@ -209,7 +209,7 @@ under the License.
   </issueManagement>
   <ciManagement>
     <system>Jenkins</system>
-    <url>https://builds.apache.org/job/maven-wagon/</url>
+    <url>https://builds.apache.org/job/maven-box/job/maven-wagon/</url>
   </ciManagement>
 
   <distributionManagement>
