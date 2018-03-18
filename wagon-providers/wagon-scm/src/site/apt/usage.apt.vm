@@ -163,6 +163,34 @@ Deploying your Maven site to SCM
       <url>scm:git:ssh://git@github.com/myuser/myproject.git</url>
     </site>
   </distributionManagement>
+  <!-- if the extension mecanism do not work, use plugin dependency instead -->
+  <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>${maven-site-plugin.version}</version>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.maven.doxia</groupId>
+                <artifactId>doxia-module-markdown</artifactId>
+                <version>${mavenScmVersion}</version>
+               </dependency>
+            <dependency>
+                <groupId>org.apache.maven.scm</groupId>
+                <artifactId>maven-scm-provider-gitexe</artifactId>
+                <version>${mavenScmVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-scm</artifactId>
+                <version>${mavenScmVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven.scm</groupId>
+                <artifactId>maven-scm-manager-plexus</artifactId>
+                <version>${mavenScmVersion}</version>
+            </dependency>
+        </dependencies>
+  </plugin>
 ------
 
  And in your settings.xml file:
@@ -171,8 +199,10 @@ Deploying your Maven site to SCM
   <server>
     <id>my.git.server</id>
     <username>git</username>
-    <scmVersionType>branch</scmVersionType>
-    <scmVersion>gh-pages</scmVersion>
+    <configuration>
+        <scmVersionType>branch</scmVersionType>
+        <scmVersion>gh-pages</scmVersion>
+    </configuration>
   </server>
 ------
 
