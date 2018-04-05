@@ -1979,7 +1979,7 @@ public abstract class HttpWagonTestCase
 
         String transferEncoding;
 
-        public DeployedResource()
+        DeployedResource()
         {
             // no op
         }
@@ -2103,7 +2103,7 @@ public abstract class HttpWagonTestCase
 
         public List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<HandlerRequestResponse>();
 
-        public TestHeaderHandler()
+        TestHeaderHandler()
         {
         }
 

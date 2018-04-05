@@ -21,9 +21,9 @@ under the License.
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>maven-parent</artifactId>
     <groupId>org.apache.maven</groupId>
-    <version>27</version>
+    <artifactId>maven-parent</artifactId>
+    <version>31</version>
     <relativePath>../pom/maven/pom.xml</relativePath>
   </parent>
 
@@ -338,13 +338,6 @@ under the License.
             <systemPropertyVariables>
               <java.io.tmpdir>${project.build.directory}</java.io.tmpdir>
             </systemPropertyVariables>
-          </configuration>
-        </plugin>
-        <plugin><!-- TODO remove when upgrading maven-parent to 25 -->
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-site-plugin</artifactId>
-          <configuration>
-            <topSiteURL>scm:svn:https://svn.apache.org/repos/infra/websites/production/maven/components/${maven.site.path}</topSiteURL>
           </configuration>
         </plugin>
         <plugin>
