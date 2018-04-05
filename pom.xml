@@ -310,7 +310,7 @@ under the License.
       <dependency>
         <groupId>org.easymock</groupId>
         <artifactId>easymock</artifactId>
-        <version>3.2</version>
+        <version>3.5.1</version>
       </dependency>
 
       <dependency>
