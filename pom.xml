@@ -316,7 +316,7 @@ under the License.
       <dependency>
         <groupId>org.eclipse.jetty.aggregate</groupId>
         <artifactId>jetty-all</artifactId>
-        <version>9.2.9.v20150224</version>
+        <version>9.2.24.v20180105</version>
       </dependency>
       <dependency>
         <groupId>javax.servlet</groupId>
