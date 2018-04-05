@@ -41,7 +41,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.channels.SeekableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.StandardOpenOption;
 
 /**
  * @author Olivier Lamy
@@ -189,11 +193,17 @@ public class HugeFileDownloadTest
         throws Exception
     {
         LOGGER.info( "Creating test file" );
-        RandomAccessFile ra = new RandomAccessFile( hugeFile.getPath(), "rw" );
-        ra.setLength( HUGE_FILE_SIZE + 1L );
-        ra.seek( HUGE_FILE_SIZE );
-        ra.write( 1 );
-        ra.close();
+        final ByteBuffer buf = ByteBuffer.allocate( 4 ).putInt( 2 );
+        buf.rewind();
+
+        final OpenOption[] options = { StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW,
+                                       StandardOpenOption.SPARSE };
+
+        try ( final SeekableByteChannel channel = Files.newByteChannel( hugeFile.toPath(), options ) )
+        {
+            channel.position( HUGE_FILE_SIZE );
+            channel.write( buf );
+        }
         LOGGER.info( "Test file created" );
     }
 
