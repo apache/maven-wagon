@@ -71,19 +71,16 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -109,11 +106,13 @@ public abstract class AbstractHttpClientWagon
 
         private final Wagon wagon;
 
-        private ByteBuffer byteBuffer;
+        private InputStream stream;
 
         private File source;
 
         private long length = -1;
+
+        private boolean repeatable;
 
         private RequestEntityImplementation( final InputStream stream, final Resource resource, final Wagon wagon,
                                              final File source )
@@ -122,24 +121,12 @@ public abstract class AbstractHttpClientWagon
             if ( source != null )
             {
                 this.source = source;
+                this.repeatable = true;
             }
             else
             {
-                try
-                {
-                    byte[] bytes = IOUtil.toByteArray( stream );
-                    byteBuffer = ByteBuffer.allocate( bytes.length );
-                    byteBuffer.put( bytes );
-                    stream.close();
-                }
-                catch ( IOException e )
-                {
-                    throw new TransferFailedException( e.getMessage(), e );
-                }
-                finally
-                {
-                    IOUtil.close( stream );
-                }
+                this.stream = stream;
+                this.repeatable = false;
             }
             this.resource = resource;
             this.length = resource == null ? -1 : resource.getContentLength();
@@ -159,12 +146,12 @@ public abstract class AbstractHttpClientWagon
             {
                 return new FileInputStream( this.source );
             }
-            return new ByteArrayInputStream( this.byteBuffer.array() );
+            return stream;
         }
 
         public boolean isRepeatable()
         {
-            return true;
+            return repeatable;
         }
 
         public void writeTo( final OutputStream outputStream )
@@ -179,7 +166,7 @@ public abstract class AbstractHttpClientWagon
             transferEvent.setTimestamp( System.currentTimeMillis() );
             InputStream instream = ( this.source != null )
                 ? new FileInputStream( this.source )
-                : new ByteArrayInputStream( this.byteBuffer.array() );
+                : stream;
             try
             {
                 byte[] buffer = new byte[BUFFER_SIZE];
