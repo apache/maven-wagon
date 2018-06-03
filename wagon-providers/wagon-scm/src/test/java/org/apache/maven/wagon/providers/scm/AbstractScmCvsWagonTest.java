@@ -41,6 +41,6 @@ public abstract class AbstractScmCvsWagonTest
     {
         String repository = getTestFile( "target/test-classes/test-repo-cvs" ).getAbsolutePath();
 
-        return "scm:cvs|local|" + repository + "|repository/newfolder";
+        return "scm:cvs|local|" + repository + "|repository";
     }
 }
