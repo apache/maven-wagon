@@ -19,6 +19,15 @@ package org.apache.maven.wagon.providers.scm;
  * under the License.
  */
 
+import java.io.File;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import org.apache.maven.scm.CommandParameter;
+import org.apache.maven.scm.CommandParameters;
 import org.apache.maven.scm.ScmBranch;
 import org.apache.maven.scm.ScmException;
 import org.apache.maven.scm.ScmFile;
@@ -30,6 +39,7 @@ import org.apache.maven.scm.ScmVersion;
 import org.apache.maven.scm.command.add.AddScmResult;
 import org.apache.maven.scm.command.checkout.CheckOutScmResult;
 import org.apache.maven.scm.command.list.ListScmResult;
+import org.apache.maven.scm.command.update.UpdateScmResult;
 import org.apache.maven.scm.manager.NoSuchScmProviderException;
 import org.apache.maven.scm.manager.ScmManager;
 import org.apache.maven.scm.provider.ScmProvider;
@@ -46,14 +56,6 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
-
-import java.io.File;
-import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Stack;
 
 /**
  * Wagon provider to get and put files from and to SCM systems, using Maven-SCM as underlying transport.
@@ -92,6 +94,11 @@ public class ScmWagon
      * @parameter
      */
     private String scmVersionType;
+
+    /**
+     * Empty string or subdir ending with slash.
+     */
+    private String partCOSubdir = "";
 
     private File checkoutDirectory;
 
@@ -369,18 +376,19 @@ public class ScmWagon
 
             ScmProvider scmProvider = getScmProvider( scmRepository.getProvider() );
 
-            String checkoutTargetName = source.isDirectory() ? targetName : getDirname( targetName );
-            String relPath = checkOut( scmProvider, scmRepository, checkoutTargetName, target );
+            boolean isDirectory = source.isDirectory();
+            String checkoutTargetName = isDirectory ? targetName : getDirname( targetName );
+            String relPath = ensureDirs( scmProvider, scmRepository, checkoutTargetName, target );
 
             File newCheckoutDirectory = new File( checkoutDirectory, relPath );
 
-            File scmFile = new File( newCheckoutDirectory, source.isDirectory() ? "" : getFilename( targetName ) );
+            File scmFile = new File( newCheckoutDirectory, isDirectory ? "" : FileUtils.removePath( targetName, '/' ) );
 
             boolean fileAlreadyInScm = scmFile.exists();
 
             if ( !scmFile.equals( source ) )
             {
-                if ( source.isDirectory() )
+                if ( isDirectory )
                 {
                     FileUtils.copyDirectoryStructure( source, scmFile );
                 }
@@ -393,7 +401,7 @@ public class ScmWagon
             if ( !fileAlreadyInScm || scmFile.isDirectory() )
             {
                 int addedFiles = addFiles( scmProvider, scmRepository, newCheckoutDirectory,
-                                           source.isDirectory() ? "" : scmFile.getName() );
+                                           isDirectory ? "" : scmFile.getName() );
 
                 if ( !fileAlreadyInScm && addedFiles == 0 )
                 {
@@ -437,14 +445,16 @@ public class ScmWagon
      * @param targetName
      * @return
      * @throws TransferFailedException
+     * @throws IOException
      */
-    private String checkOut( ScmProvider scmProvider, ScmRepository scmRepository, String targetName,
+    private String ensureDirs( ScmProvider scmProvider, ScmRepository scmRepository, String targetName,
                              Resource resource )
-        throws TransferFailedException
+        throws TransferFailedException, IOException
     {
-        checkoutDirectory = createCheckoutDirectory();
-
-        Stack<String> stack = new Stack<String>();
+        if ( checkoutDirectory == null )
+        {
+            checkoutDirectory = createCheckoutDirectory();
+        }
 
         String target = targetName;
 
@@ -453,81 +463,82 @@ public class ScmWagon
         // Check whether targetName, which is a relative path into the scm, exists.
         // If it doesn't, check the parent, etc.
 
-        try
+        for ( ;; )
         {
-            while ( target.length() > 0 && !scmProvider.list( scmRepository,
-                                                              new ScmFileSet( new File( "." ), new File( target ) ),
-                                                              false, makeScmVersion() ).isSuccess() )
+            try
             {
-                stack.push( getFilename( target ) );
+                ScmResult res = tryPartialCheckout( target );
+                if ( !res.isSuccess() )
+                {
+                    throw new ScmException( "command failed: " + res.getCommandOutput().trim() );
+                }
+                break;
+            }
+            catch ( ScmException e )
+            {
+                if ( partCOSubdir.length() == 0 )
+                {
+                    fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+
+                    throw new TransferFailedException( "Error checking out: " + e.getMessage(), e );
+                }
                 target = getDirname( target );
             }
-        }
-        catch ( ScmException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-
-            throw new TransferFailedException( "Error listing repository: " + e.getMessage(), e );
-        }
-
-        // ok, we've established that target exists, or is empty.
-        // Check the resource out; if it doesn't exist, that means we're in the svn repo url root,
-        // and the configuration is incorrect. We will not try repo.getParent since most scm's don't
-        // implement that.
-
-        try
-        {
-            String repoUrl = getRepository().getUrl();
-            if ( "svn".equals( scmProvider.getScmType() ) )
-            {
-                // Subversion is the only SCM that adds path structure to represent tags and branches.
-                // The rest use scmVersion and scmVersionType.
-                repoUrl += "/" + target.replace( '\\', '/' );
-            }
-            scmRepository = getScmRepository( repoUrl );
-            CheckOutScmResult ret =
-                scmProvider.checkOut( scmRepository, new ScmFileSet( new File( checkoutDirectory, "" ) ),
-                                      makeScmVersion(), false );
-
-            checkScmResult( ret );
-        }
-        catch ( ScmException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-
-            throw new TransferFailedException( "Error checking out: " + e.getMessage(), e );
         }
 
         // now create the subdirs in target, if it's a parent of targetName
 
-        String relPath = "";
+        String res =
+            partCOSubdir.length() >= targetName.length() ? "" : targetName.substring( partCOSubdir.length() ) + '/';
 
-        while ( !stack.isEmpty() )
+        ArrayList<File> createdDirs = new ArrayList<File>();
+        File deepDir = new File( checkoutDirectory, res );
+
+        boolean added = false;
+        try
         {
-            String p = stack.pop();
-            relPath += p + "/";
-
-            File newDir = new File( checkoutDirectory, relPath );
-            if ( !newDir.mkdirs() )
+            mkdirsThrow( deepDir, createdDirs );
+            if ( createdDirs.size() != 0 )
             {
-                throw new TransferFailedException(
-                    "Failed to create directory " + newDir.getAbsolutePath() + "; parent should exist: "
-                        + checkoutDirectory );
+                File topNewDir = createdDirs.get( 0 );
+                String relTopNewDir =
+                    topNewDir.getPath().substring( checkoutDirectory.getPath().length() + 1 ).replace( '\\', '/' );
+
+                addFiles( scmProvider, scmRepository, checkoutDirectory, relTopNewDir );
+                added = true;
             }
+        }
+        catch ( ScmException e )
+        {
+            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
 
-            try
+            throw new TransferFailedException( "Failed to add directory " + createdDirs.get( 0 ) + " to working copy",
+                                               e );
+        }
+        finally
+        {
+            if ( !added && createdDirs.size() != 0 )
             {
-                addFiles( scmProvider, scmRepository, checkoutDirectory, relPath );
-            }
-            catch ( ScmException e )
-            {
-                fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
-
-                throw new TransferFailedException( "Failed to add directory " + newDir + " to working copy", e );
+                FileUtils.deleteDirectory( createdDirs.get( 0 ) );
             }
         }
 
-        return relPath;
+        return res;
+    }
+
+    private static void mkdirsThrow( File f, List<File> createdDirs )
+        throws IOException
+    {
+        if ( !f.isDirectory() )
+        {
+            File parent = f.getParentFile();
+            mkdirsThrow( parent, createdDirs );
+            if ( !f.mkdir() )
+            {
+                throw new IOException( "Failed to create directory " + f.getAbsolutePath() );
+            }
+            createdDirs.add( f );
+        }
     }
 
     /**
@@ -551,7 +562,8 @@ public class ScmWagon
 
         if ( scmFilePath.length() != 0 )
         {
-            AddScmResult result = scmProvider.add( scmRepository, new ScmFileSet( basedir, new File( scmFilePath ) ) );
+            AddScmResult result =
+                scmProvider.add( scmRepository, new ScmFileSet( basedir, new File( scmFilePath ) ), mkBinaryFlag() );
 
             /*
              * TODO dirty fix to work around files with property svn:eol-style=native if a file has that property, first
@@ -560,7 +572,9 @@ public class ScmWagon
              */
             if ( !result.isSuccess() )
             {
-                result = scmProvider.add( scmRepository, new ScmFileSet( basedir, new File( scmFilePath ) ) );
+                result =
+                    scmProvider.add( scmRepository, new ScmFileSet( basedir, new File( scmFilePath ) ),
+                                     mkBinaryFlag() );
             }
 
             addedFiles = result.getAddedFiles().size();
@@ -584,12 +598,38 @@ public class ScmWagon
         return addedFiles;
     }
 
+    private CheckOutScmResult checkOut( ScmProvider scmProvider, ScmRepository scmRepository, ScmFileSet fileSet )
+        throws ScmException
+    {
+        ScmVersion ver = makeScmVersion();
+        CommandParameters parameters = mkBinaryFlag();
+        // TODO: AbstractScmProvider 6f7dd0c ignores checkOut() parameter "version"
+        parameters.setScmVersion( CommandParameter.SCM_VERSION, ver );
+        parameters.setString( CommandParameter.RECURSIVE, Boolean.toString( false ) );
+        parameters.setString( CommandParameter.SHALLOW, Boolean.toString( true ) );
+
+        return scmProvider.checkOut( scmRepository, fileSet, ver, parameters );
+    }
+
+    private CommandParameters mkBinaryFlag() throws ScmException
+    {
+        CommandParameters parameters = new CommandParameters();
+        parameters.setString( CommandParameter.BINARY, Boolean.toString( true ) );
+        return parameters;
+    }
+
     /**
      * @return true
      */
     public boolean supportsDirectoryCopy()
     {
         return true;
+    }
+
+    private boolean supportsPartialCheckout( ScmProvider scmProvider )
+    {
+        String scmType = scmProvider.getScmType();
+        return ( "svn".equals( scmType ) || "cvs".equals( scmType ) );
     }
 
     public void putDirectory( File sourceDirectory, String destinationDirectory )
@@ -646,16 +686,19 @@ public class ScmWagon
 
         fireGetInitiated( resource, destination );
 
-        String url = getRepository().getUrl() + "/" + resourceName;
-
-        // remove the file
-        url = url.substring( 0, url.lastIndexOf( '/' ) );
+        fireGetStarted( resource, destination );
 
         try
         {
-            ScmRepository scmRepository = getScmRepository( url );
-
-            fireGetStarted( resource, destination );
+            String subdir = getDirname( resourceName );
+            ScmResult res = tryPartialCheckout( subdir );
+            if ( !res.isSuccess() && ( partCOSubdir.length() == 0 || res instanceof UpdateScmResult ) )
+            {
+                // inability to checkout SVN or CVS subdir is not fatal. We just assume it doesn't exist
+                // inability to update existing subdir or checkout root is fatal
+                throw new ScmException( "command failed: " + res.getCommandOutput().trim() );
+            }
+            resourceName = resourceName.substring( partCOSubdir.length() );
 
             // TODO: limitations:
             // - destination filename must match that in the repository - should allow the "-d" CVS equiv to be passed
@@ -665,24 +708,6 @@ public class ScmWagon
             // - exists() check doesn't test if it is in SCM already
 
             File scmFile = new File( checkoutDirectory, resourceName );
-
-            File basedir = scmFile.getParentFile();
-
-            ScmProvider scmProvider = getScmProvider( scmRepository.getProvider() );
-
-            String reservedScmFile = scmProvider.getScmSpecificFilename();
-
-            if ( reservedScmFile != null && new File( basedir, reservedScmFile ).exists() )
-            {
-                scmProvider.update( scmRepository, new ScmFileSet( basedir ), makeScmVersion() );
-            }
-            else
-            {
-                // TODO: this should be checking out a full hierarchy (requires the -d equiv)
-                basedir.mkdirs();
-
-                scmProvider.checkOut( scmRepository, new ScmFileSet( basedir ), makeScmVersion() );
-            }
 
             if ( !scmFile.exists() )
             {
@@ -710,6 +735,49 @@ public class ScmWagon
         postProcessListeners( resource, destination, TransferEvent.REQUEST_GET );
 
         fireGetCompleted( resource, destination );
+    }
+
+    private ScmResult tryPartialCheckout( String subdir )
+        throws ScmException, IOException
+    {
+        String url = getRepository().getUrl();
+
+        String desiredPartCOSubdir = "";
+
+        ScmRepository scmRepository = getScmRepository( url );
+        ScmProvider scmProvider = getScmProvider( scmRepository.getProvider() );
+        if ( subdir.length() != 0 && supportsPartialCheckout( scmProvider ) )
+        {
+            url += ( url.endsWith( "/" ) ? "" : "/" ) + subdir;
+
+            desiredPartCOSubdir = subdir + "/";
+
+            scmRepository = getScmRepository( url );
+        }
+
+        if ( !desiredPartCOSubdir.equals( partCOSubdir ) )
+        {
+            FileUtils.deleteDirectory( checkoutDirectory );
+            partCOSubdir = desiredPartCOSubdir;
+        }
+
+        ScmResult res;
+        if ( checkoutDirExists( scmProvider ) )
+        {
+            res = scmProvider.update( scmRepository, new ScmFileSet( checkoutDirectory ), makeScmVersion() );
+        }
+        else
+        {
+            res = checkOut( scmProvider, scmRepository, new ScmFileSet( checkoutDirectory ) );
+        }
+        return res;
+    }
+
+    private boolean checkoutDirExists( ScmProvider scmProvider )
+    {
+        String reservedScmFile = scmProvider.getScmSpecificFilename();
+        File pathToCheck = reservedScmFile == null ? checkoutDirectory : new File( checkoutDirectory, reservedScmFile );
+        return pathToCheck.exists();
     }
 
     /**
@@ -764,15 +832,8 @@ public class ScmWagon
         }
     }
 
-    private String getFilename( String filename )
+    private String getDirname( String resourceName )
     {
-        String fname = StringUtils.replace( filename, "/", File.separator );
-        return FileUtils.filename( fname );
-    }
-
-    private String getDirname( String filename )
-    {
-        String fname = StringUtils.replace( filename, "/", File.separator );
-        return FileUtils.dirname( fname );
+        return FileUtils.getPath( resourceName, '/' );
     }
 }
