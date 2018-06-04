@@ -100,6 +100,8 @@ public class ScmWagon
      */
     private String partCOSubdir = "";
 
+    private boolean haveRecursiveCO;
+
     private File checkoutDirectory;
 
     /**
@@ -246,7 +248,7 @@ public class ScmWagon
 
         try
         {
-            FileUtils.deleteDirectory( checkoutDirectory );
+            deleteCheckoutDirectory();
         }
         catch ( IOException e )
         {
@@ -378,7 +380,20 @@ public class ScmWagon
 
             boolean isDirectory = source.isDirectory();
             String checkoutTargetName = isDirectory ? targetName : getDirname( targetName );
-            String relPath = ensureDirs( scmProvider, scmRepository, checkoutTargetName, target );
+            boolean recursive = false;
+            if ( isDirectory )
+            {
+                for ( File f : source.listFiles() )
+                {
+                    if ( f.isDirectory() )
+                    {
+                        recursive = true;
+                        break;
+                    }
+                }
+            }
+
+            String relPath = ensureDirs( scmProvider, scmRepository, checkoutTargetName, target, recursive );
 
             File newCheckoutDirectory = new File( checkoutDirectory, relPath );
 
@@ -448,7 +463,7 @@ public class ScmWagon
      * @throws IOException
      */
     private String ensureDirs( ScmProvider scmProvider, ScmRepository scmRepository, String targetName,
-                             Resource resource )
+                               Resource resource, boolean recursiveArg )
         throws TransferFailedException, IOException
     {
         if ( checkoutDirectory == null )
@@ -463,11 +478,13 @@ public class ScmWagon
         // Check whether targetName, which is a relative path into the scm, exists.
         // If it doesn't, check the parent, etc.
 
+        boolean recursive = recursiveArg;
+
         for ( ;; )
         {
             try
             {
-                ScmResult res = tryPartialCheckout( target );
+                ScmResult res = tryPartialCheckout( target, recursive );
                 if ( !res.isSuccess() )
                 {
                     throw new ScmException( "command failed: " + res.getCommandOutput().trim() );
@@ -476,6 +493,7 @@ public class ScmWagon
             }
             catch ( ScmException e )
             {
+                recursive = false;
                 if ( partCOSubdir.length() == 0 )
                 {
                     fireTransferError( resource, e, TransferEvent.REQUEST_GET );
@@ -598,14 +616,15 @@ public class ScmWagon
         return addedFiles;
     }
 
-    private CheckOutScmResult checkOut( ScmProvider scmProvider, ScmRepository scmRepository, ScmFileSet fileSet )
+    private CheckOutScmResult checkOut( ScmProvider scmProvider, ScmRepository scmRepository, ScmFileSet fileSet,
+                                        boolean recursive )
         throws ScmException
     {
         ScmVersion ver = makeScmVersion();
         CommandParameters parameters = mkBinaryFlag();
         // TODO: AbstractScmProvider 6f7dd0c ignores checkOut() parameter "version"
         parameters.setScmVersion( CommandParameter.SCM_VERSION, ver );
-        parameters.setString( CommandParameter.RECURSIVE, Boolean.toString( false ) );
+        parameters.setString( CommandParameter.RECURSIVE, Boolean.toString( recursive ) );
         parameters.setString( CommandParameter.SHALLOW, Boolean.toString( true ) );
 
         return scmProvider.checkOut( scmRepository, fileSet, ver, parameters );
@@ -630,6 +649,12 @@ public class ScmWagon
     {
         String scmType = scmProvider.getScmType();
         return ( "svn".equals( scmType ) || "cvs".equals( scmType ) );
+    }
+
+    private boolean isAlwaysRecursive( ScmProvider scmProvider )
+    {
+        String scmType = scmProvider.getScmType();
+        return ( "git".equals( scmType ) || "cvs".equals( scmType ) );
     }
 
     public void putDirectory( File sourceDirectory, String destinationDirectory )
@@ -691,7 +716,7 @@ public class ScmWagon
         try
         {
             String subdir = getDirname( resourceName );
-            ScmResult res = tryPartialCheckout( subdir );
+            ScmResult res = tryPartialCheckout( subdir, false );
             if ( !res.isSuccess() && ( partCOSubdir.length() == 0 || res instanceof UpdateScmResult ) )
             {
                 // inability to checkout SVN or CVS subdir is not fatal. We just assume it doesn't exist
@@ -737,7 +762,7 @@ public class ScmWagon
         fireGetCompleted( resource, destination );
     }
 
-    private ScmResult tryPartialCheckout( String subdir )
+    private ScmResult tryPartialCheckout( String subdir, boolean recursiveArg )
         throws ScmException, IOException
     {
         String url = getRepository().getUrl();
@@ -755,10 +780,17 @@ public class ScmWagon
             scmRepository = getScmRepository( url );
         }
 
+        boolean recursive = recursiveArg | isAlwaysRecursive( scmProvider );
+
         if ( !desiredPartCOSubdir.equals( partCOSubdir ) )
         {
-            FileUtils.deleteDirectory( checkoutDirectory );
+            deleteCheckoutDirectory();
             partCOSubdir = desiredPartCOSubdir;
+        }
+
+        if ( recursive && !haveRecursiveCO )
+        {
+            deleteCheckoutDirectory();
         }
 
         ScmResult res;
@@ -768,9 +800,17 @@ public class ScmWagon
         }
         else
         {
-            res = checkOut( scmProvider, scmRepository, new ScmFileSet( checkoutDirectory ) );
+            res = checkOut( scmProvider, scmRepository, new ScmFileSet( checkoutDirectory ), recursive );
+            haveRecursiveCO = recursive && res.isSuccess();
         }
         return res;
+    }
+
+    private void deleteCheckoutDirectory()
+        throws IOException
+    {
+        haveRecursiveCO = false;
+        FileUtils.deleteDirectory( checkoutDirectory );
     }
 
     private boolean checkoutDirExists( ScmProvider scmProvider )
