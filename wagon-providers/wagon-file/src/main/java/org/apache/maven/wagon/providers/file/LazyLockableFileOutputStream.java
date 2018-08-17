@@ -1,4 +1,4 @@
-package org.apache.maven.wagon;
+package org.apache.maven.wagon.providers.file;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -19,52 +19,44 @@ package org.apache.maven.wagon;
  * under the License.
  */
 
+import org.apache.commons.io.output.WriterOutputStream;
+import org.apache.maven.wagon.LazyOutputStream;
+
 import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
+import java.util.concurrent.TimeUnit;
 
 
 /**
- * Variant of FileOutputStream which creates the file only when first portion
- * of data is written.
+ * Lazy Lockable OutputStream that initializes lazily and places a file lock.
  *
- * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a>
+ * @author <a href="mailto:erikhakan@gmail.com">Erik Håkansson</a>
  *
  */
-public class LazyFileOutputStream
-    extends LazyOutputStream<FileOutputStream>
+public class LazyLockableFileOutputStream
+    extends LazyOutputStream<WriterOutputStream>
 {
+
     private File file;
+    private long timeout;
+    private TimeUnit timeoutUnit;
 
-    public LazyFileOutputStream( String filename )
-    {
-        this.file = new File( filename );
-    }
-
-    public LazyFileOutputStream( File file )
+    public LazyLockableFileOutputStream( File file, long timeout, TimeUnit timeoutUnit )
     {
         this.file = file;
-    }
-
-    public FileChannel getChannel()
-    {
-        return getDelegee().getChannel();
-    }
-
-    public FileDescriptor getFD()
-        throws IOException
-    {
-        return getDelegee().getFD();
+        this.timeout = timeout;
+        this.timeoutUnit = timeoutUnit;
     }
 
     /**
-     * 
+     *
      */
     protected void initialize()
         throws IOException
     {
-        setDelegee( new FileOutputStream( file ) );
+        boolean wait = timeout > 0;
+        setDelegee( new WriterOutputStream( new WaitingLockableFileWriter( file, Charset.defaultCharset(), false,
+            file.getParent(), timeout, timeoutUnit, wait ), Charset.defaultCharset() ) );
     }
 }

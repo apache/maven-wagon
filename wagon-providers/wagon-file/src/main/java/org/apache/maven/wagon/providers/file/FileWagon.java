@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.InputData;
@@ -51,6 +52,17 @@ import org.codehaus.plexus.util.FileUtils;
 public class FileWagon
     extends StreamWagon
 {
+
+    /**
+     * use file locking when writing files.
+     * <b>disabled by default</b>
+     */
+    private static boolean useFileLock =
+        Boolean.valueOf( System.getProperty( "maven.wagon.file.fileLock", "false" ) );
+
+    private static Long fileLockTimeout =
+            Long.valueOf( System.getProperty( "maven.wagon.file.fileLock.timeout", "300" ) );
+
     public void fillInputData( InputData inputData )
         throws TransferFailedException, ResourceDoesNotExistException
     {
@@ -98,7 +110,9 @@ public class FileWagon
 
         createParentDirectories( file );
 
-        OutputStream outputStream = new BufferedOutputStream( new LazyFileOutputStream( file ) );
+        OutputStream outputStream = useFileLock
+                ? new LazyLockableFileOutputStream( file, fileLockTimeout, TimeUnit.SECONDS )
+                : new BufferedOutputStream( new LazyFileOutputStream( file ) );
 
         outputData.setOutputStream( outputStream );
     }
