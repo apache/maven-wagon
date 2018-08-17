@@ -217,7 +217,8 @@ public class ScpExternalWagon
 
     protected boolean isPuTTY()
     {
-        return sshExecutable.toLowerCase( Locale.ENGLISH ).contains( "plink" );
+        String exe = sshExecutable.toLowerCase( Locale.ENGLISH );
+        return exe.contains( "plink" ) || exe.contains( "klink" );
     }
 
     private Commandline createBaseCommandLine( boolean putty, String executable, File privateKey )
@@ -336,7 +337,8 @@ public class ScpExternalWagon
 
     boolean isPuTTYSCP()
     {
-        return scpExecutable.toLowerCase( Locale.ENGLISH ).contains( "pscp" );
+        String exe = scpExecutable.toLowerCase( Locale.ENGLISH );
+        return exe.contains( "pscp" ) || exe.contains( "kscp" );
     }
 
     private String normalizeResource( Resource resource )
