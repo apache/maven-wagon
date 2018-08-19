@@ -83,8 +83,6 @@ under the License.
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <excludes>
-            <!-- disable testing the CVS SCM as CVS is broken -->
-            <exclude>**/*Cvs*.java</exclude>
           </excludes>
         </configuration>
       </plugin>

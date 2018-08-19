@@ -19,7 +19,10 @@ package org.apache.maven.wagon.providers.scm;
  * under the License.
  */
 
+import java.io.File;
 import java.io.IOException;
+
+import org.codehaus.plexus.util.FileUtils;
 
 /**
  * Test for ScmWagon using CVS as underlying SCM
@@ -30,6 +33,25 @@ import java.io.IOException;
 public abstract class AbstractScmCvsWagonTest
     extends AbstractScmWagonTest
 {
+    private String repository;
+
+    @Override
+    protected void setUp()
+        throws Exception
+    {
+        super.setUp();
+
+        File origRepo = getTestFile( "target/test-classes/test-repo-cvs" );
+
+        File testRepo = getTestFile( "target/test-classes/test-repo-cvs-test" );
+
+        FileUtils.deleteDirectory( testRepo );
+
+        FileUtils.copyDirectoryStructure( origRepo, testRepo );
+
+        repository = "scm:cvs|local|" + testRepo.getAbsolutePath() + "|repository";
+
+    }
 
     protected String getScmId()
     {
@@ -39,8 +61,6 @@ public abstract class AbstractScmCvsWagonTest
     protected String getTestRepositoryUrl()
         throws IOException
     {
-        String repository = getTestFile( "target/test-classes/test-repo-cvs" ).getAbsolutePath();
-
-        return "scm:cvs|local|" + repository + "|repository";
+        return repository;
     }
 }
