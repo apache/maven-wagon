@@ -57,3 +57,22 @@ Features
  * <<<maven.wagon.http.ssl.ignore.validity.dates>>> = true/false (default false), ignore issues with certificate dates.
 
  * <<<maven.wagon.rto>>> = time in ms (default 1800000), read time out.
+
+ []
+
+ Since version 3.0.1, the retry handler can be configured as well with system properties:
+
+ * <<<maven.wagon.http.retryhandler.class>>> supports this set of values:
+ 
+    * which implementation to use. `auto` will use `DefaultHttpRequestRetryHandler.INSTANCE`.
+    * `default` will use a new instance of `DefaultHttpRequestRetryHandler` respecting `requestSentEnabled`, `count` and `nonRetryableClasses`.
+    * `standard` will use an instance of `StandardHttpRequestRetryHandler` (see https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/impl/client/StandardHttpRequestRetryHandler.html).
+    * Any fully qualified name of a `HttpRequestRetryHandler` implementation will be instantiated with its default constructor.
+
+ * <<<maven.wagon.http.retryhandler.requestSentEnabled>>> = `requestSentEnabled` for `default` or `standard` implementations.
+
+ * <<<maven.wagon.http.retryhandler.count>>> = number of retries for `default` or `standard` implementations.
+
+ * <<<maven.wagon.http.retryhandler.nonRetryableClasses>>> = the comma separated list of classes bypassing the retries (only the `default` implementation).
+ Default being `java.io.InterruptedIOException,java.io.UnknownHostException,java.io.ConnectException,java.io.SSLException`
+

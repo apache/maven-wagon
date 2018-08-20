@@ -32,6 +32,7 @@ import org.apache.http.auth.NTCredentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -54,7 +55,9 @@ import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.StandardHttpRequestRetryHandler;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
@@ -75,14 +78,21 @@ import org.codehaus.plexus.util.StringUtils;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.io.OutputStream;
+import java.net.ConnectException;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -354,6 +364,97 @@ public abstract class AbstractHttpClientWagon
         return connManager;
     }
 
+    /**
+     * The type of the retry handler, default to DefaultHttpRequestRetryHandler.
+     * Values can be default, standard (StandardHttpRequestRetryHandler), or a fully qualified name class.
+     *
+     * @since 3.2
+     */
+    private static final String RETRY_HANDLER_CLASS =
+            System.getProperty( "maven.wagon.http.retryhandler.class", "standard" );
+
+    /**
+     * true if it's OK to retry non-idempotent requests that have been sent.
+     * Note: only used for default and standard retry handlers.
+     *
+     * @since 3.2
+     */
+    private static final boolean RETRY_HANDLER_REQUEST_SENT_ENABLED =
+            Boolean.getBoolean( "maven.wagon.http.retryhandler.requestSentEnabled" );
+
+    /**
+     * Number of retries for the retry handler.
+     * Note: only used for default and standard retry handlers.
+     *
+     * @since 3.2
+     */
+    private static final int RETRY_HANDLER_COUNT =
+            Integer.getInteger( "maven.wagon.http.retryhandler.count", 3 );
+
+    private static final String DEFAULT_NON_RETRYABLE_CLASSES =
+            InterruptedIOException.class.getName() + ","
+            + UnknownHostException.class.getName() + ","
+            + ConnectException.class.getName() + ","
+            + SSLException.class.getName();
+    /**
+     * Comma separated list of non retryable classes.
+     * Note: only used for default retry handler.
+     *
+     * @since 3.0.1
+     */
+    private static final String RETRY_HANDLER_EXCEPTIONS =
+            System.getProperty( "maven.wagon.http.retryhandler.nonRetryableClasses", DEFAULT_NON_RETRYABLE_CLASSES );
+
+    private static HttpRequestRetryHandler createRetryHandler()
+    {
+        switch ( RETRY_HANDLER_CLASS )
+        {
+            case "default":
+                if ( DEFAULT_NON_RETRYABLE_CLASSES.equals( RETRY_HANDLER_EXCEPTIONS ) ) // default value test
+                {
+                    return new DefaultHttpRequestRetryHandler(
+                            RETRY_HANDLER_COUNT, RETRY_HANDLER_REQUEST_SENT_ENABLED );
+                }
+                return new DefaultHttpRequestRetryHandler(
+                        RETRY_HANDLER_COUNT, RETRY_HANDLER_REQUEST_SENT_ENABLED, getNonRetryableExceptions() )
+                {
+                };
+            case "standard":
+                return new StandardHttpRequestRetryHandler( RETRY_HANDLER_COUNT, RETRY_HANDLER_REQUEST_SENT_ENABLED );
+            case "auto":
+                return DefaultHttpRequestRetryHandler.INSTANCE;
+            default:
+                try
+                {
+                    final ClassLoader classLoader = AbstractHttpClientWagon.class.getClassLoader();
+                    return HttpRequestRetryHandler.class.cast( classLoader.loadClass( RETRY_HANDLER_CLASS )
+                                                                          .getConstructor().newInstance() );
+                }
+                catch ( final Exception e )
+                {
+                    throw new IllegalArgumentException( e );
+                }
+        }
+    }
+
+    private static Collection<Class<? extends IOException>> getNonRetryableExceptions()
+    {
+        final List<Class<? extends IOException>> exceptions = new ArrayList<>();
+        final ClassLoader loader = AbstractHttpClientWagon.class.getClassLoader();
+        for ( final String ex : RETRY_HANDLER_EXCEPTIONS.split( "," ) )
+        {
+            try
+            {
+                exceptions.add( ( Class<? extends IOException> ) loader.loadClass( ex ) );
+            }
+            catch ( final ClassNotFoundException e )
+            {
+                throw new IllegalArgumentException( e );
+            }
+        }
+        return exceptions;
+    }
+
     private static CloseableHttpClient httpClient = createClient();
 
     private static CloseableHttpClient createClient()
@@ -362,6 +463,7 @@ public abstract class AbstractHttpClientWagon
             .useSystemProperties() //
             .disableConnectionState() //
             .setConnectionManager( httpClientConnectionManager ) //
+            .setRetryHandler( createRetryHandler() )
             .build();
     }
 
