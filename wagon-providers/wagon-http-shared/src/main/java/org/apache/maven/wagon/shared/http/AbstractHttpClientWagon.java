@@ -78,16 +78,12 @@ import org.codehaus.plexus.util.StringUtils;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLException;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InterruptedIOException;
 import java.io.OutputStream;
-import java.net.ConnectException;
-import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -391,11 +387,6 @@ public abstract class AbstractHttpClientWagon
     private static final int RETRY_HANDLER_COUNT =
             Integer.getInteger( "maven.wagon.http.retryhandler.count", 3 );
 
-    private static final String DEFAULT_NON_RETRYABLE_CLASSES =
-            InterruptedIOException.class.getName() + ","
-            + UnknownHostException.class.getName() + ","
-            + ConnectException.class.getName() + ","
-            + SSLException.class.getName();
     /**
      * Comma separated list of non retryable classes.
      * Note: only used for default retry handler.
@@ -403,14 +394,14 @@ public abstract class AbstractHttpClientWagon
      * @since 3.0.1
      */
     private static final String RETRY_HANDLER_EXCEPTIONS =
-            System.getProperty( "maven.wagon.http.retryhandler.nonRetryableClasses", DEFAULT_NON_RETRYABLE_CLASSES );
+            System.getProperty( "maven.wagon.http.retryhandler.nonRetryableClasses" );
 
     private static HttpRequestRetryHandler createRetryHandler()
     {
         switch ( RETRY_HANDLER_CLASS )
         {
             case "default":
-                if ( DEFAULT_NON_RETRYABLE_CLASSES.equals( RETRY_HANDLER_EXCEPTIONS ) ) // default value test
+                if ( RETRY_HANDLER_EXCEPTIONS == null )
                 {
                     return new DefaultHttpRequestRetryHandler(
                             RETRY_HANDLER_COUNT, RETRY_HANDLER_REQUEST_SENT_ENABLED );
