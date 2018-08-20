@@ -74,5 +74,5 @@ Features
  * <<<maven.wagon.http.retryhandler.count>>> = number of retries for `default` or `standard` implementations.
 
  * <<<maven.wagon.http.retryhandler.nonRetryableClasses>>> = the comma separated list of classes bypassing the retries (only the `default` implementation).
- Default being `java.io.InterruptedIOException,java.io.UnknownHostException,java.io.ConnectException,java.io.SSLException`
+ If not set, the default value from http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/impl/client/DefaultHttpRequestRetryHandler.html#DefaultHttpRequestRetryHandler(int, boolean) will be used.
 
