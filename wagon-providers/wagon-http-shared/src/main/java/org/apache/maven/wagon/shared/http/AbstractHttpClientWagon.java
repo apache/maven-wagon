@@ -362,7 +362,8 @@ public abstract class AbstractHttpClientWagon
 
     /**
      * The type of the retry handler, default to DefaultHttpRequestRetryHandler.
-     * Values can be default, standard (StandardHttpRequestRetryHandler), or a fully qualified name class.
+     * Values can be default (DefaultHttpRequestRetryHandler), standard (StandardHttpRequestRetryHandler),
+     * or a fully qualified name class with a no-arg.
      *
      * @since 3.2
      */
@@ -370,7 +371,7 @@ public abstract class AbstractHttpClientWagon
             System.getProperty( "maven.wagon.http.retryhandler.class", "standard" );
 
     /**
-     * true if it's OK to retry non-idempotent requests that have been sent.
+     * Whether or not methods that have successfully sent their request will be retried.
      * Note: only used for default and standard retry handlers.
      *
      * @since 3.2
@@ -391,7 +392,7 @@ public abstract class AbstractHttpClientWagon
      * Comma separated list of non retryable classes.
      * Note: only used for default retry handler.
      *
-     * @since 3.0.1
+     * @since 3.2
      */
     private static final String RETRY_HANDLER_EXCEPTIONS =
             System.getProperty( "maven.wagon.http.retryhandler.nonRetryableClasses" );
@@ -401,8 +402,12 @@ public abstract class AbstractHttpClientWagon
         switch ( RETRY_HANDLER_CLASS )
         {
             case "default":
-                if ( RETRY_HANDLER_EXCEPTIONS == null )
+                if ( StringUtils.isEmpty( RETRY_HANDLER_EXCEPTIONS ) )
                 {
+                    if ( RETRY_HANDLER_COUNT == 3 && !RETRY_HANDLER_REQUEST_SENT_ENABLED )
+                    {
+                        return DefaultHttpRequestRetryHandler.INSTANCE;
+                    }
                     return new DefaultHttpRequestRetryHandler(
                             RETRY_HANDLER_COUNT, RETRY_HANDLER_REQUEST_SENT_ENABLED );
                 }
@@ -412,8 +417,6 @@ public abstract class AbstractHttpClientWagon
                 };
             case "standard":
                 return new StandardHttpRequestRetryHandler( RETRY_HANDLER_COUNT, RETRY_HANDLER_REQUEST_SENT_ENABLED );
-            case "auto":
-                return DefaultHttpRequestRetryHandler.INSTANCE;
             default:
                 try
                 {

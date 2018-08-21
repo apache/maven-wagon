@@ -64,15 +64,14 @@ Features
 
  * <<<maven.wagon.http.retryhandler.class>>> supports this set of values:
  
-    * which implementation to use. `auto` will use `DefaultHttpRequestRetryHandler.INSTANCE`.
-    * `default` will use a new instance of `DefaultHttpRequestRetryHandler` respecting `requestSentEnabled`, `count` and `nonRetryableClasses`.
-    * `standard` will use an instance of `StandardHttpRequestRetryHandler` (see https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/impl/client/StandardHttpRequestRetryHandler.html).
-    * Any fully qualified name of a `HttpRequestRetryHandler` implementation will be instantiated with its default constructor.
+    * `default` will use a new instance of {{{http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/impl/client/DefaultHttpRequestRetryHandler.html}DefaultHttpRequestRetryHandler}} respecting `requestSentEnabled`, `count` and `nonRetryableClasses`.
+    * `standard` will use an instance of {{{http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/impl/client/StandardHttpRequestRetryHandler.html}StandardHttpRequestRetryHandler}} (see https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/impl/client/StandardHttpRequestRetryHandler.html).
+    * Any fully qualified name of a {{{https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/client/HttpRequestRetryHandler.html}HttpRequestRetryHandler}} implementation will be instantiated with its default constructor.
 
  * <<<maven.wagon.http.retryhandler.requestSentEnabled>>> = `requestSentEnabled` for `default` or `standard` implementations.
 
  * <<<maven.wagon.http.retryhandler.count>>> = number of retries for `default` or `standard` implementations.
 
  * <<<maven.wagon.http.retryhandler.nonRetryableClasses>>> = the comma separated list of classes bypassing the retries (only the `default` implementation).
- If not set, the default value from http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/impl/client/DefaultHttpRequestRetryHandler.html#DefaultHttpRequestRetryHandler(int, boolean) will be used.
+ If not set, the default value from {{{http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/impl/client/DefaultHttpRequestRetryHandler.html}DefaultHttpRequestRetryHandler}} will be used.
 
