@@ -31,7 +31,6 @@ import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
-import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;
 import org.apache.maven.wagon.shared.http.HttpConfiguration;
 import org.apache.maven.wagon.shared.http.HttpMethodConfiguration;
 import org.junit.Ignore;
@@ -97,7 +96,7 @@ public class HttpClientWagonTest
         // method.addRequestHeader( "Cache-store", "no-store" );
         // method.addRequestHeader( "Pragma", "no-cache" );
         // method.addRequestHeader( "Expires", "0" );
-        // method.addRequestHeader( "Accept-Encoding", "gzip" );
+        // "Accept-Encoding" is automatically set by HttpClient at runtime
 
         Header header = method.getFirstHeader( "Cache-control" );
         assertNotNull( header );
@@ -114,10 +113,6 @@ public class HttpClientWagonTest
         header = method.getFirstHeader( "Expires" );
         assertNotNull( header );
         assertEquals( "0", header.getValue() );
-
-        header = method.getFirstHeader( "Accept-Encoding" );
-        assertNotNull( header );
-        assertEquals( "gzip", header.getValue() );
     }
 
     public void testTurnOffDefaultHeaders()
@@ -136,7 +131,6 @@ public class HttpClientWagonTest
         // method.addRequestHeader( "Cache-store", "no-store" );
         // method.addRequestHeader( "Pragma", "no-cache" );
         // method.addRequestHeader( "Expires", "0" );
-        // method.addRequestHeader( "Accept-Encoding", "gzip" );
 
         Header header = method.getFirstHeader( "Cache-control" );
         assertNull( header );
@@ -148,9 +142,6 @@ public class HttpClientWagonTest
         assertNull( header );
 
         header = method.getFirstHeader( "Expires" );
-        assertNull( header );
-
-        header = method.getFirstHeader( "Accept-Encoding" );
         assertNull( header );
     }
 

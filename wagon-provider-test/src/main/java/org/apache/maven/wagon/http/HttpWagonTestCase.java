@@ -74,6 +74,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -583,7 +584,7 @@ public abstract class HttpWagonTestCase
             sourceFile.deleteOnExit();
 
             String resName = "gzip-res.txt";
-            String sourceContent = writeTestFileGzip( sourceFile, resName );
+            String sourceContent = writeTestFile( sourceFile, resName, "gzip" );
 
             wagon.connect( testRepository );
 
@@ -604,6 +605,56 @@ public abstract class HttpWagonTestCase
             server.stop();
         }
     }
+
+    /* This test cannot be enabled because we cannot tell GzipFilter to compress with deflate only
+    public void testDeflateGet()
+            throws Exception
+        {
+            Server server = new Server( );
+
+            String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
+            ServletContextHandler root = new ServletContextHandler( ServletContextHandler.SESSIONS );
+            root.setResourceBase( localRepositoryPath );
+            ServletHolder servletHolder = new ServletHolder( new DefaultServlet() );
+            root.addServlet( servletHolder, "/*" );
+            FilterHolder filterHolder = new FilterHolder( new GzipFilter() );
+            root.addFilter( filterHolder, "/deflate/*", EnumSet.of( DispatcherType.REQUEST ) );
+            addConnector( server );
+            server.setHandler( root );
+            server.start();
+
+            try
+            {
+                Wagon wagon = getWagon();
+
+                Repository testRepository = new Repository( "id", getRepositoryUrl( server ) );
+
+                File sourceFile = new File( localRepositoryPath + "/deflate" );
+
+                sourceFile.deleteOnExit();
+
+                String resName = "deflate-res.txt";
+                String sourceContent = writeTestFile( sourceFile, resName, null );
+
+                wagon.connect( testRepository );
+
+                File destFile = FileTestUtils.createUniqueFile( getName(), getName() );
+
+                destFile.deleteOnExit();
+
+                wagon.get( "deflate/" + resName, destFile );
+
+                wagon.disconnect();
+
+                String destContent = FileUtils.fileRead( destFile );
+
+                assertEquals( sourceContent, destContent );
+            }
+            finally
+            {
+                server.stop();
+            }
+        }*/
 
     public void testProxiedRequest()
         throws Exception
@@ -1546,7 +1597,7 @@ public abstract class HttpWagonTestCase
     }
 
 
-    private String writeTestFileGzip( File parent, String child )
+    private String writeTestFile( File parent, String child, String compressionType )
         throws IOException
     {
         File file = new File( parent, child );
@@ -1562,15 +1613,32 @@ public abstract class HttpWagonTestCase
             out.close();
         }
 
-        file = new File( parent, child + ".gz" );
+        String ext = "";
+        if ( "gzip".equals( compressionType ) )
+        {
+            ext = ".gz";
+        }
+        if ( "deflate".equals( compressionType ) )
+        {
+            ext = ".deflate";
+        }
+
+        file = new File( parent, child + ext );
         file.deleteOnExit();
         String content;
         out = new FileOutputStream( file );
-        out = new GZIPOutputStream( out );
+        if ( "gzip".equals( compressionType ) )
+        {
+            out = new GZIPOutputStream( out );
+        }
+        if ( "deflate".equals( compressionType ) )
+        {
+            out = new DeflaterOutputStream( out );
+        }
         try
         {
-            // write out different data than non-gz file, so we can
-            // assert the gz version was returned
+            // write out different data than non-compressed file, so we can
+            // assert the compressed version was returned
             content = file.getAbsolutePath();
             out.write( content.getBytes() );
         }

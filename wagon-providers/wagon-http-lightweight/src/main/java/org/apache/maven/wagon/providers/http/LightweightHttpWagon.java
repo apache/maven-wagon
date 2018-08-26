@@ -50,6 +50,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.zip.DeflaterInputStream;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -119,7 +120,7 @@ public class LightweightHttpWagon
                 URL url = new URL( visitingUrl );
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection( this.proxy );
 
-                urlConnection.setRequestProperty( "Accept-Encoding", "gzip" );
+                urlConnection.setRequestProperty( "Accept-Encoding", "gzip,deflate" );
                 if ( !useCache )
                 {
                     urlConnection.setRequestProperty( "Pragma", "no-cache" );
@@ -147,6 +148,11 @@ public class LightweightHttpWagon
                 if ( isGZipped )
                 {
                     is = new GZIPInputStream( is );
+                }
+                boolean isDeflated = contentEncoding != null && "deflate".equalsIgnoreCase( contentEncoding );
+                if ( isDeflated )
+                {
+                    is = new DeflaterInputStream( is );
                 }
                 inputData.setInputStream( is );
                 resource.setLastModified( urlConnection.getLastModified() );

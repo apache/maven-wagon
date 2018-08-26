@@ -930,7 +930,6 @@ public abstract class AbstractHttpClientWagon
             method.addHeader( "Cache-store", "no-store" );
             method.addHeader( "Pragma", "no-cache" );
             method.addHeader( "Expires", "0" );
-            method.addHeader( "Accept-Encoding", "gzip" );
         }
 
         if ( httpHeaders != null )
