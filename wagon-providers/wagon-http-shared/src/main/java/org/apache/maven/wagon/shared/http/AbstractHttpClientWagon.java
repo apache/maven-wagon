@@ -965,7 +965,7 @@ public abstract class AbstractHttpClientWagon
     {
         if ( httpHeaders != null )
         {
-            String value = (String) httpHeaders.get( "User-Agent" );
+            String value = (String) httpHeaders.get( HTTP.USER_AGENT );
             if ( value != null )
             {
                 return value;
@@ -976,7 +976,7 @@ public abstract class AbstractHttpClientWagon
 
         if ( config != null )
         {
-            return (String) config.getHeaders().get( "User-Agent" );
+            return (String) config.getHeaders().get( HTTP.USER_AGENT );
         }
         return null;
     }
