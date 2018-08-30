@@ -130,8 +130,7 @@ public class WebDavWagon
         {
             String url = baseUrl + "/" + navigator.getPath();
             status = doMkCol( url );
-            if ( status == HttpStatus.SC_OK || status == HttpStatus.SC_CREATED
-                || status == HttpStatus.SC_METHOD_NOT_ALLOWED )
+            if ( status == HttpStatus.SC_CREATED || status == HttpStatus.SC_METHOD_NOT_ALLOWED )
             {
                 break;
             }
@@ -143,7 +142,7 @@ public class WebDavWagon
         {
             String url = baseUrl + "/" + navigator.getPath();
             status = doMkCol( url );
-            if ( status != HttpStatus.SC_OK && status != HttpStatus.SC_CREATED )
+            if ( status != HttpStatus.SC_CREATED )
             {
                 throw new IOException( "Unable to create collection: " + url + "; status code = " + status );
             }
