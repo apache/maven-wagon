@@ -25,39 +25,36 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * User: jdumay
  * Date: 24/01/2008
  * Time: 17:25:27
  */
-public class ErrorWithReasonPhaseServlet
+public class ErrorWithMessageServlet
     extends HttpServlet
 {
-    public static final String REASON = "it sucks!";
+    private static final long serialVersionUID = -1419714266724471393L;
 
-    private Logger logger = LoggerFactory.getLogger( ErrorWithReasonPhaseServlet.class );
+    public static final String MESSAGE = "it sucks!";
 
     public void service( HttpServletRequest request, HttpServletResponse response )
         throws ServletException, IOException
     {
         if ( request.getRequestURL().toString().contains( "401" ) )
         {
-            response.sendError( 401, REASON );
+            response.sendError( 401, MESSAGE );
         }
         else if ( request.getRequestURL().toString().contains( "403" ) )
         {
-            response.sendError( 403, REASON );
+            response.sendError( 403, MESSAGE );
         }
         else if ( request.getRequestURL().toString().contains( "407" ) )
         {
-            response.sendError( 407, REASON );
+            response.sendError( 407, MESSAGE );
         }
         else if ( request.getRequestURL().toString().contains( "500" ) )
         {
-            response.sendError( 500, REASON );
+            response.sendError( 500, MESSAGE );
         }
 
     }

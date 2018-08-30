@@ -31,14 +31,14 @@ import java.io.File;
 /**
  * User: jdumay Date: 24/01/2008 Time: 17:17:34
  */
-public class HttpWagonReasonPhraseTest
+public class HttpWagonErrorTest
     extends HttpWagonHttpServerTestCase
 {
     protected void setUp()
         throws Exception
     {
         super.setUp();
-        ServletHolder servlets = new ServletHolder( new ErrorWithReasonPhaseServlet() );
+        ServletHolder servlets = new ServletHolder( new ErrorWithMessageServlet() );
         context.addServlet( servlets, "/*" );
         startServer();
     }
@@ -75,7 +75,6 @@ public class HttpWagonReasonPhraseTest
 
         assertNotNull( thrown );
         assertEquals( AuthorizationException.class, thrown.getClass() );
-        assertTrue( thrown.getMessage().contains( ErrorWithReasonPhaseServlet.REASON ) );
     }
 
     public void testGetReasonPhase403()
@@ -110,7 +109,6 @@ public class HttpWagonReasonPhraseTest
 
         assertNotNull( thrown );
         assertEquals( AuthorizationException.class, thrown.getClass() );
-        assertTrue( thrown.getMessage().contains( ErrorWithReasonPhaseServlet.REASON ) );
     }
 
 
@@ -146,7 +144,6 @@ public class HttpWagonReasonPhraseTest
 
         assertNotNull( thrown );
         assertEquals( AuthorizationException.class, thrown.getClass() );
-        assertTrue( thrown.getMessage().contains( ErrorWithReasonPhaseServlet.REASON ) );
     }
 
     public void testGetReasonPhase500()
@@ -181,6 +178,5 @@ public class HttpWagonReasonPhraseTest
 
         assertNotNull( thrown );
         assertEquals( TransferFailedException.class, thrown.getClass() );
-        assertTrue( thrown.getMessage().contains( ErrorWithReasonPhaseServlet.REASON ) );
     }
 }
