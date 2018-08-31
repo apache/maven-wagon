@@ -936,7 +936,6 @@ public abstract class AbstractHttpClientWagon
             method.addHeader(  "Cache-control", "no-cache" );
             method.addHeader( "Cache-store", "no-store" );
             method.addHeader( "Pragma", "no-cache" );
-            method.addHeader( "Expires", "0" );
         }
 
         if ( httpHeaders != null )
