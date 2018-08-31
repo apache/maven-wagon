@@ -18,7 +18,6 @@ package org.apache.maven.wagon.providers.webdav;
 import it.could.webdav.DAVServlet;
 import org.apache.http.HttpException;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.StreamingWagon;

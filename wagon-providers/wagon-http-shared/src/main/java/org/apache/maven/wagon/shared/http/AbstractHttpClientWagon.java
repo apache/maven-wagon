@@ -294,6 +294,15 @@ public abstract class AbstractHttpClientWagon
     private static final int MAX_BACKOFF_WAIT_SECONDS =
         Integer.parseInt( System.getProperty( "maven.wagon.httpconnectionManager.maxBackoffSeconds", "180" ) );
 
+    /**
+     * Time to live in seconds for an HTTP connection. After that time, the connection will be dropped.
+     * Intermediates tend to drop connections after some idle period. Set to -1 to maintain connections
+     * indefinitely. This value defaults to 300 seconds.
+     *
+     * @since 3.2
+     */
+    private static final long CONN_TTL =
+        Long.getLong( "maven.wagon.httpconnectionManager.ttlSeconds", 300L );
 
     protected int backoff( int wait, String url )
         throws InterruptedException, TransferFailedException
@@ -347,7 +356,8 @@ public abstract class AbstractHttpClientWagon
                                                                                                                  PlainConnectionSocketFactory.INSTANCE ).register(
             "https", sslConnectionSocketFactory ).build();
 
-        PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager( registry );
+        PoolingHttpClientConnectionManager connManager =
+            new PoolingHttpClientConnectionManager( registry, null, null, null, CONN_TTL, TimeUnit.SECONDS );
         if ( persistentPool )
         {
             connManager.setDefaultMaxPerRoute( MAX_CONN_PER_ROUTE );
