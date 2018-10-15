@@ -44,6 +44,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 /**
  * Implementation of common facilities for Wagon providers.
  *
@@ -53,6 +56,7 @@ public abstract class AbstractWagon
     implements Wagon
 {
     protected static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
+    protected static final int MAXIMUM_BUFFER_SIZE = 1024 * 512;
 
     protected Repository repository;
 
@@ -560,7 +564,7 @@ public abstract class AbstractWagon
     protected void transfer( Resource resource, InputStream input, OutputStream output, int requestType, long maxSize )
         throws IOException
     {
-        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+        byte[] buffer = bufferForTransferring( resource );
 
         TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_PROGRESS, requestType );
         transferEvent.setTimestamp( System.currentTimeMillis() );
@@ -568,21 +572,68 @@ public abstract class AbstractWagon
         long remaining = maxSize;
         while ( remaining > 0 )
         {
-            // let's safely cast to int because the min value will be lower than the buffer size.
-            int n = input.read( buffer, 0, (int) Math.min( buffer.length, remaining ) );
+            // Read from the stream, block if necessary until either EOF or buffer is filled.
+            // Filling the buffer has priority since downstream processors will significantly degrade i/o
+            // performance if called to frequently (large data streams) as they perform expensive tasks such as
+            // console output or data integrity checks.
+            int nextByte = input.read();
 
-            if ( n == -1 )
+            if ( nextByte == -1 )
             {
                 break;
             }
 
-            fireTransferProgress( transferEvent, buffer, n );
+            buffer[0] = ( byte ) nextByte;
 
-            output.write( buffer, 0, n );
+            // let's safely cast to int because the min value will be lower than the buffer size.
+            int length = (int) min( buffer.length, remaining ),
+                read = 1;
 
-            remaining -= n;
+            for ( ; read < length ; ++read )
+            {
+                nextByte = input.read();
+                if ( nextByte == -1 )
+                {
+                    break;
+                }
+                buffer[read] = ( byte ) nextByte;
+            }
+
+            fireTransferProgress( transferEvent, buffer, read );
+
+            output.write( buffer, 0, read );
+
+            remaining -= read;
         }
         output.flush();
+    }
+
+    /**
+     * Provide a buffer suitably sized for efficiently
+     * {@link #transfer(Resource, InputStream, OutputStream, int, long) transferring}
+     * the given {@link Resource}. For larger files, larger buffers are provided such that downstream
+     * {@link #fireTransferProgress(TransferEvent, byte[], int) listeners} are not notified overly frequently.
+     * For instance, transferring gigabyte-sized resources would result in millions of notifications when using
+     * only a few kilobytes of buffer, drastically slowing transfer since transfer progress listeners and
+     * notifications are synchronous and may block, e.g. when writing download progress status to console.
+     *
+     * @param resource must not be null.
+     * @return a byte buffer suitable for the {@link Resource#getContentLength() content length} of the resource.
+     */
+    protected byte[] bufferForTransferring( Resource resource )
+    {
+        long contentLength = resource.getContentLength();
+
+        if ( contentLength <= 0 )
+        {
+            return new byte[DEFAULT_BUFFER_SIZE];
+        }
+
+        int numberOf4KbSegmentsFor100Chunks = ( ( int ) ( contentLength / ( 4 * 1024 * 100 ) ) );
+        int bufferSizeFor100Chunks = numberOf4KbSegmentsFor100Chunks * 4 * 1024;
+        int effectiveBufferSize = min( MAXIMUM_BUFFER_SIZE, max( DEFAULT_BUFFER_SIZE, bufferSizeFor100Chunks ) );
+
+        return new byte[effectiveBufferSize];
     }
 
     // ----------------------------------------------------------------------
