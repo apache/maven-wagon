@@ -58,6 +58,23 @@ public abstract class AbstractWagon
     protected static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
     protected static final int MAXIMUM_BUFFER_SIZE = 1024 * 512;
 
+    /**
+     * To efficiently buffer data, use a multiple of 4k
+     * as this is likely to match the hardware buffer size of certain
+     * storage devices.
+     */
+    protected static final int BUFFER_SEGMENT_SIZE = 4 * 1024;
+
+    /**
+     * The desired minimum amount of chunks in which a {@link Resource} shall be
+     * {@link #transfer(Resource, InputStream, OutputStream, int, long) transferred}.
+     * This corresponds to the minimum times {@link #fireTransferProgress(TransferEvent, byte[], int)}.
+     * 100 notifications is a conservative value that will lead to small chunks for
+     * any artifact less that {@link #BUFFER_SEGMENT_SIZE} * {@link #MINIMUM_AMOUNT_OF_TRANSFER_CHUNKS}
+     * in size.
+     */
+    protected static final int MINIMUM_AMOUNT_OF_TRANSFER_CHUNKS = 100;
+
     protected Repository repository;
 
     protected SessionEventSupport sessionEventSupport = new SessionEventSupport();
@@ -622,16 +639,18 @@ public abstract class AbstractWagon
      */
     protected byte[] bufferForTransferring( Resource resource )
     {
-        long contentLength = resource.getContentLength();
+        final long contentLength = resource.getContentLength();
 
         if ( contentLength <= 0 )
         {
             return new byte[DEFAULT_BUFFER_SIZE];
         }
 
-        int numberOf4KbSegmentsFor100Chunks = ( ( int ) ( contentLength / ( 4 * 1024 * 100 ) ) );
-        int bufferSizeFor100Chunks = numberOf4KbSegmentsFor100Chunks * 4 * 1024;
-        int effectiveBufferSize = min( MAXIMUM_BUFFER_SIZE, max( DEFAULT_BUFFER_SIZE, bufferSizeFor100Chunks ) );
+        final int numberOfBufferSegments = ( ( int ) (
+            contentLength / ( BUFFER_SEGMENT_SIZE * MINIMUM_AMOUNT_OF_TRANSFER_CHUNKS ) )
+        );
+        final int potentialBufferSize = numberOfBufferSegments * BUFFER_SEGMENT_SIZE;
+        final int effectiveBufferSize = min( MAXIMUM_BUFFER_SIZE, max( DEFAULT_BUFFER_SIZE, potentialBufferSize ) );
 
         return new byte[effectiveBufferSize];
     }
