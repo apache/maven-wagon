@@ -42,7 +42,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.util.List;
+
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 /**
  * Implementation of common facilities for Wagon providers.
@@ -52,7 +58,24 @@ import java.util.List;
 public abstract class AbstractWagon
     implements Wagon
 {
-    protected static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
+    protected static final int DEFAULT_BUFFER_SIZE = 4 * 1024;
+    protected static final int MAXIMUM_BUFFER_SIZE = 512 * 1024;
+
+    /**
+     * To efficiently buffer data, use a multiple of 4 KiB as this is likely to match the hardware
+     * buffer size of certain storage devices.
+     */
+    protected static final int BUFFER_SEGMENT_SIZE = 4 * 1024;
+
+    /**
+     * The desired minimum amount of chunks in which a {@link Resource} shall be
+     * {@link #transfer(Resource, InputStream, OutputStream, int, long) transferred}.
+     * This corresponds to the minimum times {@link #fireTransferProgress(TransferEvent, byte[], int)}
+     * is executed. 100 notifications is a conservative value that will lead to small chunks for
+     * any artifact less that {@link #BUFFER_SEGMENT_SIZE} * {@link #MINIMUM_AMOUNT_OF_TRANSFER_CHUNKS}
+     * in size.
+     */
+    protected static final int MINIMUM_AMOUNT_OF_TRANSFER_CHUNKS = 100;
 
     protected Repository repository;
 
@@ -560,29 +583,71 @@ public abstract class AbstractWagon
     protected void transfer( Resource resource, InputStream input, OutputStream output, int requestType, long maxSize )
         throws IOException
     {
-        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+
+        ByteBuffer buffer = ByteBuffer.allocate( getBufferCapacityForTransfer( resource.getContentLength() ) );
+        int halfBufferCapacity = buffer.capacity() / 2;
 
         TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_PROGRESS, requestType );
         transferEvent.setTimestamp( System.currentTimeMillis() );
 
-        long remaining = maxSize;
-        while ( remaining > 0 )
-        {
-            // let's safely cast to int because the min value will be lower than the buffer size.
-            int n = input.read( buffer, 0, (int) Math.min( buffer.length, remaining ) );
+        ReadableByteChannel in = Channels.newChannel( input );
 
-            if ( n == -1 )
+        long remaining = maxSize;
+        while ( remaining > 0L )
+        {
+            int read = in.read( buffer );
+
+            if ( read == -1 )
             {
+                // EOF, but some data has not been written yet.
+                if ( buffer.position() != 0 )
+                {
+                    buffer.flip();
+                    fireTransferProgress( transferEvent, buffer.array(), buffer.limit() );
+                    output.write( buffer.array(), 0, buffer.limit() );
+                }
+
                 break;
             }
 
-            fireTransferProgress( transferEvent, buffer, n );
+            // Prevent minichunking / fragmentation: when less than half the buffer is utilized,
+            // read some more bytes before writing and firing progress.
+            if ( buffer.position() < halfBufferCapacity )
+            {
+                continue;
+            }
 
-            output.write( buffer, 0, n );
-
-            remaining -= n;
+            buffer.flip();
+            fireTransferProgress( transferEvent, buffer.array(), buffer.limit() );
+            output.write( buffer.array(), 0, buffer.limit() );
+            remaining -= buffer.limit();
+            buffer.clear();
         }
         output.flush();
+    }
+
+    /**
+     * Provides a buffer size for efficiently transferring the given amount of bytes such that
+     * it is not fragmented into too many chunks. For larger files larger buffers are provided such that downstream
+     * {@link #fireTransferProgress(TransferEvent, byte[], int) listeners} are not notified too frequently.
+     * For instance, transferring gigabyte-sized resources would result in millions of notifications when using
+     * only a few kibibytes of buffer, drastically slowing down transfer since transfer progress listeners and
+     * notifications are synchronous and may block, e.g., when writing download progress status to console.
+     *
+     * @param numberOfBytes can be 0 or less, in which case a default buffer size is used.
+     * @return a byte buffer suitable for transferring the given amount of bytes without too many chunks.
+     */
+    protected int getBufferCapacityForTransfer( long numberOfBytes )
+    {
+        if ( numberOfBytes <= 0L )
+        {
+            return DEFAULT_BUFFER_SIZE;
+        }
+
+        final int numberOfBufferSegments = (int)
+            numberOfBytes / ( BUFFER_SEGMENT_SIZE * MINIMUM_AMOUNT_OF_TRANSFER_CHUNKS );
+        final int potentialBufferSize = numberOfBufferSegments * BUFFER_SEGMENT_SIZE;
+        return min( MAXIMUM_BUFFER_SIZE, max( DEFAULT_BUFFER_SIZE, potentialBufferSize ) );
     }
 
     // ----------------------------------------------------------------------
