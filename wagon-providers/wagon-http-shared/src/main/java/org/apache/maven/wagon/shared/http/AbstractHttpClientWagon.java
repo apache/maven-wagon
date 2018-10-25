@@ -84,6 +84,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -105,9 +109,6 @@ public abstract class AbstractHttpClientWagon
     private final class RequestEntityImplementation
         extends AbstractHttpEntity
     {
-
-        private static final int BUFFER_SIZE = 2048;
-
         private final Resource resource;
 
         private final Wagon wagon;
@@ -170,42 +171,47 @@ public abstract class AbstractHttpClientWagon
             TransferEvent transferEvent =
                 new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT );
             transferEvent.setTimestamp( System.currentTimeMillis() );
-            InputStream instream = ( this.source != null )
-                ? new FileInputStream( this.source )
-                : stream;
-            try
+
+            try ( ReadableByteChannel input = ( this.source != null )
+                    ? new RandomAccessFile( this.source, "r" ).getChannel()
+                    : Channels.newChannel( stream ) )
             {
-                byte[] buffer = new byte[BUFFER_SIZE];
-                int l;
-                if ( this.length < 0 )
+                ByteBuffer buffer = ByteBuffer.allocate( getBufferCapacityForTransferring( this.length ) );
+                int halfBufferCapacity = buffer.capacity() / 2;
+
+                long remaining = this.length < 0 ? Long.MAX_VALUE : this.length;
+                while ( remaining > 0 )
                 {
-                    // until EOF
-                    while ( ( l = instream.read( buffer ) ) != -1 )
+                    int read = input.read( buffer );
+                    if ( read == -1 )
                     {
-                        fireTransferProgress( transferEvent, buffer, -1 );
-                        outputStream.write( buffer, 0, l );
-                    }
-                }
-                else
-                {
-                    // no need to consume more than length
-                    long remaining = this.length;
-                    while ( remaining > 0 )
-                    {
-                        l = instream.read( buffer, 0, (int) Math.min( BUFFER_SIZE, remaining ) );
-                        if ( l == -1 )
+                        // EOF, but some data has not been written yet.
+                        if ( buffer.position() != 0 )
                         {
-                            break;
+                            buffer.flip();
+                            fireTransferProgress( transferEvent, buffer.array(), buffer.limit() );
+                            outputStream.write( buffer.array(), 0, buffer.limit() );
+                            buffer.clear();
                         }
-                        fireTransferProgress( transferEvent, buffer, (int) Math.min( BUFFER_SIZE, remaining ) );
-                        outputStream.write( buffer, 0, l );
-                        remaining -= l;
+
+                        break;
                     }
+
+                    // Prevent minichunking / fragmentation: when less than half the buffer is utilized,
+                    // read some more bytes before writing and firing progress.
+                    if ( buffer.position() < halfBufferCapacity )
+                    {
+                        continue;
+                    }
+
+                    buffer.flip();
+                    fireTransferProgress( transferEvent, buffer.array(), buffer.limit() );
+                    outputStream.write( buffer.array(), 0, buffer.limit() );
+                    remaining -= buffer.limit();
+                    buffer.clear();
+
                 }
-            }
-            finally
-            {
-                instream.close();
+                outputStream.flush();
             }
         }
 
