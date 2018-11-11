@@ -19,12 +19,14 @@ package org.apache.maven.wagon.shared.http;
  * under the License.
  */
 
+import org.apache.http.Consts;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.auth.AuthSchemeProvider;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.ChallengeState;
 import org.apache.http.auth.Credentials;
@@ -33,6 +35,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpRequestRetryHandler;
+import org.apache.http.client.config.AuthSchemes;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -52,6 +55,7 @@ import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.SSLInitializationException;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.auth.BasicSchemeFactory;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -439,6 +443,13 @@ public abstract class AbstractHttpClientWagon
         }
     }
 
+    private static Registry<AuthSchemeProvider> createAuthSchemeRegistry()
+    {
+        return RegistryBuilder.<AuthSchemeProvider>create()
+                .register( AuthSchemes.BASIC, new BasicSchemeFactory( Consts.UTF_8 ) )
+                .build();
+    }
+
     private static Collection<Class<? extends IOException>> getNonRetryableExceptions()
     {
         final List<Class<? extends IOException>> exceptions = new ArrayList<>();
@@ -466,6 +477,7 @@ public abstract class AbstractHttpClientWagon
             .disableConnectionState() //
             .setConnectionManager( httpClientConnectionManager ) //
             .setRetryHandler( createRetryHandler() )
+            .setDefaultAuthSchemeRegistry( createAuthSchemeRegistry() )
             .build();
     }
 
