@@ -93,6 +93,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -453,8 +454,8 @@ public abstract class AbstractHttpClientWagon
     private static Registry<AuthSchemeProvider> createAuthSchemeRegistry()
     {
         return RegistryBuilder.<AuthSchemeProvider>create()
-            .register( AuthSchemes.BASIC, new BasicSchemeFactory() )
-            .register( AuthSchemes.DIGEST, new DigestSchemeFactory() )
+            .register( AuthSchemes.BASIC, new BasicSchemeFactory( StandardCharsets.UTF_8 ) )
+            .register( AuthSchemes.DIGEST, new DigestSchemeFactory( StandardCharsets.UTF_8 ) )
             .register( AuthSchemes.NTLM, new NTLMSchemeFactory() )
             .build();
     }
