@@ -24,7 +24,9 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Properties;
 
@@ -478,5 +480,36 @@ public abstract class AbstractJschWagon
     public void setStrictHostKeyChecking( String strictHostKeyChecking )
     {
         this.strictHostKeyChecking = strictHostKeyChecking;
+    }
+
+    /** {@inheritDoc} */
+    // This method will be removed as soon as JSch issue #122 is resolved
+    @Override
+    protected void transfer( Resource resource, InputStream input, OutputStream output, int requestType, long maxSize )
+        throws IOException
+    {
+        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+
+        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_PROGRESS, requestType );
+        transferEvent.setTimestamp( System.currentTimeMillis() );
+
+        long remaining = maxSize;
+        while ( remaining > 0L )
+        {
+            // let's safely cast to int because the min value will be lower than the buffer size.
+            int n = input.read( buffer, 0, (int) Math.min( buffer.length, remaining ) );
+
+            if ( n == -1 )
+            {
+                break;
+            }
+
+            fireTransferProgress( transferEvent, buffer, n );
+
+            output.write( buffer, 0, n );
+
+            remaining -= n;
+        }
+        output.flush();
     }
 }

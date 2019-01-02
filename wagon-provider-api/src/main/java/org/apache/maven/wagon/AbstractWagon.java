@@ -583,7 +583,6 @@ public abstract class AbstractWagon
     protected void transfer( Resource resource, InputStream input, OutputStream output, int requestType, long maxSize )
         throws IOException
     {
-
         ByteBuffer buffer = ByteBuffer.allocate( getBufferCapacityForTransfer( resource.getContentLength() ) );
         int halfBufferCapacity = buffer.capacity() / 2;
 
