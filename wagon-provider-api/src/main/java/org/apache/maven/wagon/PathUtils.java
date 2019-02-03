@@ -157,7 +157,7 @@ public final class PathUtils
             return "localhost";
         }
 
-        final String protocol = PathUtils.protocol( url );
+        String protocol = PathUtils.protocol( url );
 
         if ( protocol == null || protocol.equalsIgnoreCase( "file" ) )
         {
@@ -169,6 +169,13 @@ public final class PathUtils
         {
             // skip over type
             host = host.substring( host.indexOf( ":", 4 ) + 1 ).trim();
+        }
+
+        protocol = PathUtils.protocol( host );
+
+        if ( protocol.equalsIgnoreCase( "file" ) )
+        {
+            return "localhost";
         }
 
         // skip over protocol
@@ -292,7 +299,7 @@ public final class PathUtils
 
     /**
      * Derive the path portion of the given URL.
-     * 
+     *
      * @param url the repository URL
      * @return the basedir of the repository
      * @todo need to URL decode for spaces?
@@ -408,7 +415,7 @@ public final class PathUtils
     /**
      * Decodes the specified (portion of a) URL. <strong>Note:</strong> This decoder assumes that ISO-8859-1 is used to
      * convert URL-encoded octets to characters.
-     * 
+     *
      * @param url The URL to decode, may be <code>null</code>.
      * @return The decoded URL or <code>null</code> if the input was <code>null</code>.
      */
