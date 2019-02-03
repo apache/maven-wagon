@@ -19,9 +19,8 @@ package org.apache.maven.wagon.tck.http.fixture;
  * under the License.
  */
 
-import org.apache.commons.codec.binary.Base64;
-
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -32,8 +31,10 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.codehaus.plexus.util.Base64;
+
 /**
- * 
+ *
  */
 public class ProxyAuthenticationFilter
     implements Filter
@@ -69,7 +70,7 @@ public class ProxyAuthenticationFilter
         else
         {
             String data = header.substring( "BASIC ".length() );
-            data = new String( Base64.decodeBase64( data ) );
+            data = new String( Base64.decodeBase64( data.getBytes( StandardCharsets.US_ASCII ) ) );
             String[] creds = data.split( ":" );
 
             if ( !creds[0].equals( username ) || !creds[1].equals( password ) )

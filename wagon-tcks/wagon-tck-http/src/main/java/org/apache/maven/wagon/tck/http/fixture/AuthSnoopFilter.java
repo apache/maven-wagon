@@ -20,6 +20,7 @@ package org.apache.maven.wagon.tck.http.fixture;
  */
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -29,13 +30,12 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.codec.binary.Base64;
-
+import org.codehaus.plexus.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ *
  */
 public class AuthSnoopFilter
     implements Filter
@@ -56,7 +56,7 @@ public class AuthSnoopFilter
         {
             logger.info( "Authorization: " + authHeader );
             String data = authHeader.substring( "BASIC ".length() );
-            String decoded = new String( Base64.decodeBase64( data ) );
+            String decoded = new String( Base64.decodeBase64( data.getBytes( StandardCharsets.US_ASCII ) ) );
             logger.info( decoded );
             String[] creds = decoded.split( ":" );
 
