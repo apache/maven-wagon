@@ -47,7 +47,7 @@ public class FileWagonTest
     {
         File file = FileTestUtils.createUniqueDir( getName() + ".file-repository." );
 
-        return "file://" + file.getPath();
+        return file.toPath().toUri().toASCIIString();
     }
 
     @Override
@@ -81,7 +81,7 @@ public class FileWagonTest
     public void testResourceExists()
         throws Exception
     {
-        String url = "file://" + getBasedir();
+        String url = new File( getBasedir() ).toPath().toUri().toASCIIString();
 
         Wagon wagon = new FileWagon();
         Repository repository = new Repository( "someID", url );

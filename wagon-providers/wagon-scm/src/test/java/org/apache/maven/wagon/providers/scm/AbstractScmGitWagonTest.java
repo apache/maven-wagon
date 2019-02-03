@@ -46,7 +46,7 @@ public abstract class AbstractScmGitWagonTest
 
         FileUtils.copyDirectoryStructure( origRepo, testRepo );
 
-        repository = "scm:git:" + testRepo.toPath().toUri();
+        repository = "scm:git:" + testRepo.getAbsoluteFile().toPath().toUri().toASCIIString();
     }
 
     protected String getScmId()

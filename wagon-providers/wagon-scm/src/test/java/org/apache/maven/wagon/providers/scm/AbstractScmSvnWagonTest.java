@@ -49,17 +49,7 @@ public abstract class AbstractScmSvnWagonTest
 
         FileUtils.copyDirectoryStructure( origRepo, testRepo );
 
-        repository = testRepo.getAbsolutePath();
-
-        // TODO: this is a hack for windows
-        // Note: why not use File.toURL() ?
-        if ( repository.contains( ":" ) )
-        {
-            repository = "/" + repository;
-        }
-        repository = repository.replace( '\\', '/' );
-
-        repository = "scm:svn:file://" + repository;
+        repository = "scm:svn:" + testRepo.getAbsoluteFile().toPath().toUri().toASCIIString();
     }
 
     protected String getScmId()

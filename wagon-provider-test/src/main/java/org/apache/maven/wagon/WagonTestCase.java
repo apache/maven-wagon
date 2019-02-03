@@ -170,9 +170,10 @@ public abstract class WagonTestCase
         // Create a test local repository.
         // ----------------------------------------------------------------------
 
-        localRepositoryPath = FileTestUtils.createDir( "local-repository" ).getPath();
+        File file = FileTestUtils.createDir( "local-repository" );
+        localRepositoryPath = file.getPath();
 
-        localRepository = createFileRepository( "file://" + localRepositoryPath );
+        localRepository = createFileRepository( file.toPath().toUri().toASCIIString() );
 
         message( "Local repository: " + localRepository );
 
