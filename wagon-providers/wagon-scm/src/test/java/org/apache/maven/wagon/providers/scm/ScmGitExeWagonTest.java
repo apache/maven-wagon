@@ -20,7 +20,6 @@ package org.apache.maven.wagon.providers.scm;
  */
 
 import org.apache.maven.scm.provider.ScmProvider;
-import org.apache.maven.scm.provider.git.gitexe.GitExeScmProvider;
 
 /**
  * Test for ScmWagon using Git Exe as underlying SCM
@@ -31,7 +30,7 @@ public class ScmGitExeWagonTest
 
     protected ScmProvider getScmProvider()
     {
-        return new GitExeScmProvider();
+        return new UserSafeGitExeScmProvider();
     }
 
     @Override
