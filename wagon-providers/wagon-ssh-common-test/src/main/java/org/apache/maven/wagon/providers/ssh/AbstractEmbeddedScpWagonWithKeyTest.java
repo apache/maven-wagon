@@ -65,12 +65,10 @@ public abstract class AbstractEmbeddedScpWagonWithKeyTest
 
     protected abstract String getProtocol();
 
-    @Override
     protected int getTestRepositoryPort()
     {
         return sshServerEmbedded.getPort();
     }
-
 
     public String getTestRepositoryUrl()
     {

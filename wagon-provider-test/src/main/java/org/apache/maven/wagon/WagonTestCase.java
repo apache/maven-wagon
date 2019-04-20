@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
@@ -135,12 +136,22 @@ public abstract class WagonTestCase
      */
     protected abstract String getProtocol();
 
-    /**
-     * The number of the port which should get used to start the test server
-     *
-     * @return the port number for the test server
-     */
-    protected abstract int getTestRepositoryPort();
+    public static ServerSocket newServerSocket( int... ports )
+    {
+        for ( int port : ports )
+        {
+            try
+            {
+                return new ServerSocket( port );
+            }
+            catch ( IOException ex )
+            {
+                continue;
+            }
+        }
+
+        throw new RuntimeException( "no port available" );
+    }
 
     // ----------------------------------------------------------------------
     // 1. Create a local file repository which mimic a users local file

@@ -50,12 +50,6 @@ public class FileWagonTest
         return file.toPath().toUri().toASCIIString();
     }
 
-    @Override
-    protected int getTestRepositoryPort() {
-        // file transfer dont needs a port
-        return 0;
-    }
-
     /**
      * This test is introduced to allow for null file wagons.
      * Which is used heavily in the maven component ITs.

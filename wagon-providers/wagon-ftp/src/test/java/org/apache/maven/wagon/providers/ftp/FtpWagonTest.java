@@ -19,6 +19,12 @@ package org.apache.maven.wagon.providers.ftp;
  * under the License.
  */
 
+import java.io.File;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.ftpserver.FtpServer;
 import org.apache.ftpserver.FtpServerFactory;
@@ -36,11 +42,6 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
@@ -49,15 +50,31 @@ public class FtpWagonTest
     extends StreamingWagonTestCase
 {
     static private FtpServer server;
-
+    
+//    private static final int testRepositoryPort = 10023 + new Random().nextInt( 16 );
+    
+    private static int testRepositoryPort;
+    
     protected String getProtocol()
     {
         return "ftp";
     }
+    
+    static
+    {
+        // claim number, release it again so it can be reclaimed by ftp server
+        try (ServerSocket socket = newServerSocket( 10023, 10024, 10025, 10026 ))
+        {
+            testRepositoryPort = socket.getLocalPort();
+        }
+        catch ( IOException e )
+        {
+            e.printStackTrace();
+        }
+    }
 
-    @Override
     protected int getTestRepositoryPort() {
-        return 10023;
+        return testRepositoryPort;
     }
 
     protected void setupWagonTestingFixtures()
@@ -77,7 +94,7 @@ public class FtpWagonTest
 
             // set the port of the listener
             factory.setPort(getTestRepositoryPort());
-
+            
             // replace the default listener
             serverFactory.addListener("default", factory.createListener());
 

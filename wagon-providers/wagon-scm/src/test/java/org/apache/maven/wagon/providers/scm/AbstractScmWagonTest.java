@@ -100,12 +100,6 @@ public abstract class AbstractScmWagonTest
         return null;
     }
 
-    @Override
-    protected int getTestRepositoryPort()
-    {
-        return 0; // not used
-    }
-
     protected Wagon getWagon()
         throws Exception
     {

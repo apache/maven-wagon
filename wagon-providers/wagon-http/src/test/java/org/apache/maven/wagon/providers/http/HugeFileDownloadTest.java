@@ -19,7 +19,6 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
-import junit.framework.Assert;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.observers.Debug;
 import org.apache.maven.wagon.repository.Repository;
@@ -106,7 +105,7 @@ public class HugeFileDownloadTest
             LOGGER.info( "Fetching 'hugefile.txt' with content length" );
             wagon.get( "hugefile.txt", dest );
 
-            Assert.assertTrue( dest.length() >= HUGE_FILE_SIZE );
+            assertTrue( dest.length() >= HUGE_FILE_SIZE );
             LOGGER.info( "The file was successfully fetched" );
 
             wagon.disconnect();
@@ -163,7 +162,7 @@ public class HugeFileDownloadTest
             LOGGER.info( "Fetching 'hugefile.txt' in chunks" );
             wagon.get( "hugefile.txt", dest );
 
-            Assert.assertTrue( dest.length() >= HUGE_FILE_SIZE );
+            assertTrue( dest.length() >= HUGE_FILE_SIZE );
             LOGGER.info( "The file was successfully fetched" );
 
             wagon.disconnect();

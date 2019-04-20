@@ -127,7 +127,6 @@ public abstract class HttpWagonTestCase
         testRepository.setUrl( getTestRepositoryUrl() );
     }
 
-    @Override
     protected final int getTestRepositoryPort()
     {
         if ( server == null )

@@ -40,15 +40,9 @@ public class ScpWagonTest
         return "scp";
     }
 
-    @Override
-    protected int getTestRepositoryPort()
-    {
-        return 0;  // not used
-    }
-
     public String getTestRepositoryUrl()
     {
-        return TestData.getTestRepositoryUrl( getTestRepositoryPort() );
+        return TestData.getTestRepositoryUrl();
     }
 
     protected AuthenticationInfo getAuthInfo()

@@ -39,11 +39,6 @@ public class SftpWagonTest
         return "sftp";
     }
 
-    @Override
-    protected int getTestRepositoryPort() {
-        return 0;  // not used
-    }
-
     public String getTestRepositoryUrl()
     {
         return TestData.getTestRepositoryUrl(0);

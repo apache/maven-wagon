@@ -108,8 +108,8 @@ public class WebDavWagonTest
      */
     public void testGetURLDavHttp()
     {
-        assertURL( "dav:http://localhost:" + getTestRepositoryPort() + "/dav/",
-                   "http://localhost:" + getTestRepositoryPort() + "/dav/" );
+        assertURL( "dav:http://localhost:9080/dav/",
+                   "http://localhost:9080/dav/" );
     }
 
     /**
@@ -117,8 +117,8 @@ public class WebDavWagonTest
      */
     public void testGetURLDavHttps()
     {
-        assertURL( "dav:https://localhost:" + getTestRepositoryPort() + "/dav/",
-                   "https://localhost:" + getTestRepositoryPort() + "/dav/" );
+        assertURL( "dav:https://localhost:9443/dav/",
+                   "https://localhost:9443/dav/" );
     }
 
     /**
@@ -126,8 +126,8 @@ public class WebDavWagonTest
      */
     public void testGetURLDavUri()
     {
-        assertURL( "dav://localhost:" + getTestRepositoryPort() + "/dav/",
-                   "http://localhost:" + getTestRepositoryPort() + "/dav/" );
+        assertURL( "dav://localhost:9080/dav/",
+                   "http://localhost:9080/dav/" );
     }
 
     /**
@@ -135,8 +135,8 @@ public class WebDavWagonTest
      */
     public void testGetURLDavUriWithSsl()
     {
-        assertURL( "davs://localhost:" + getTestRepositoryPort() + "/dav/",
-                   "https://localhost:" + getTestRepositoryPort() + "/dav/" );
+        assertURL( "davs://localhost:9443/dav/",
+                   "https://localhost:9443/dav/" );
     }
 
     /**
@@ -153,8 +153,8 @@ public class WebDavWagonTest
      */
     public void testGetURLDavPlusHttps()
     {
-        assertURL( "dav+https://localhost:" + getTestRepositoryPort() + "/dav/",
-                   "https://localhost:" + getTestRepositoryPort() + "/dav/" );
+        assertURL( "dav+https://localhost:9443/dav/",
+                   "https://localhost:9443/dav/" );
     }
 
     public void testMkdirs()
