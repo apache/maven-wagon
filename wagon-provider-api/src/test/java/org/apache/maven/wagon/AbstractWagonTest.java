@@ -117,6 +117,23 @@ public class AbstractWagonTest
 
     }
 
+    public void testCalculationOfTransferBufferSize() {
+        // 1 KiB -> Default buffer size (4 KiB)
+        assertEquals( 4096, wagon.getBufferCapacityForTransfer(1024L ) );
+
+        // 1 MiB -> Twice the default buffer size (8 KiB)
+        assertEquals( 4096 * 2, wagon.getBufferCapacityForTransfer(1024L * 1024 ) );
+
+        // 100 MiB -> Maximum buffer size (512 KiB)
+        assertEquals( 4096 * 128, wagon.getBufferCapacityForTransfer(1024L * 1024  * 100 ) );
+
+        // 1 GiB -> Maximum buffer size (512 KiB)
+        assertEquals( 4096 * 128, wagon.getBufferCapacityForTransfer(1024L * 1024  * 1024 ) );
+
+        // 100 GiB -> Maximum buffer size (512 KiB)
+        assertEquals( 4096 * 128, wagon.getBufferCapacityForTransfer(1024L * 1024  * 1024 * 100 ) );
+    }
+
     public void testSessionListenerRegistration()
     {
         assertTrue( wagon.hasSessionListener( sessionListener ) );
