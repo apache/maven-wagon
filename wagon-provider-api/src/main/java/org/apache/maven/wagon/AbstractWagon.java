@@ -643,10 +643,14 @@ public abstract class AbstractWagon
             return DEFAULT_BUFFER_SIZE;
         }
 
-        final int numberOfBufferSegments = (int)
-            numberOfBytes / ( BUFFER_SEGMENT_SIZE * MINIMUM_AMOUNT_OF_TRANSFER_CHUNKS );
-        final int potentialBufferSize = numberOfBufferSegments * BUFFER_SEGMENT_SIZE;
-        return min( MAXIMUM_BUFFER_SIZE, max( DEFAULT_BUFFER_SIZE, potentialBufferSize ) );
+        final long numberOfBufferSegments =  numberOfBytes
+                / ( BUFFER_SEGMENT_SIZE * MINIMUM_AMOUNT_OF_TRANSFER_CHUNKS );
+        final long potentialBufferSize = numberOfBufferSegments * BUFFER_SEGMENT_SIZE;
+        if ( potentialBufferSize > Integer.MAX_VALUE )
+        {
+            return MAXIMUM_BUFFER_SIZE;
+        }
+        return min( MAXIMUM_BUFFER_SIZE, max( DEFAULT_BUFFER_SIZE, (int) potentialBufferSize ) );
     }
 
     // ----------------------------------------------------------------------
