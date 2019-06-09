@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Properties;
 
@@ -142,6 +143,19 @@ public abstract class AbstractJschWagon
             try
             {
                 sch.addIdentity( privateKey.getAbsolutePath(), authenticationInfo.getPassphrase() );
+            }
+            catch ( JSchException e )
+            {
+                throw new AuthenticationException( "Cannot connect. Reason: " + e.getMessage(), e );
+            }
+        }
+        else if ( authenticationInfo.getPrivateKeyContent() != null )
+        {
+            fireSessionDebug( "Using private key content" );
+            try
+            {
+                sch.addIdentity( null, authenticationInfo.getPrivateKeyContent(), null,
+                                 authenticationInfo.getPassphrase().getBytes( StandardCharsets.UTF_8 ) );
             }
             catch ( JSchException e )
             {

@@ -43,7 +43,7 @@ public class AuthenticationInfo
     private String password;
 
     /**
-     * Passphrase of the user's private key file
+     * Passphrase of the user's private key
      */
     private String passphrase;
 
@@ -53,11 +53,16 @@ public class AuthenticationInfo
     private String privateKey;
 
     /**
-     * Get the passphrase of the private key file. The passphrase is used only
+     * The private key file content (if key is in a package like JAR, WAR, ...)
+     */
+    private byte[] privateKeyContent;
+
+    /**
+     * Get the passphrase of the private key. The passphrase is used only
      * when host/protocol supports authentication via exchange of
      * private/public keys and private key was used for authentication.
      *
-     * @return passphrase of the private key file
+     * @return passphrase of the private key
      */
     public String getPassphrase()
     {
@@ -65,9 +70,9 @@ public class AuthenticationInfo
     }
 
     /**
-     * Set the passphrase of the private key file.
+     * Set the passphrase of the private key.
      *
-     * @param passphrase passphrase of the private key file
+     * @param passphrase passphrase of the private key
      */
     public void setPassphrase( final String passphrase )
     {
@@ -92,6 +97,26 @@ public class AuthenticationInfo
     public void setPrivateKey( final String privateKey )
     {
         this.privateKey = privateKey;
+    }
+
+    /**
+     * Get the private key content.
+     *
+     * @return private key content
+     */
+    public byte[] getPrivateKeyContent()
+    {
+        return privateKeyContent;
+    }
+
+    /**
+     * Set private key content.
+     *
+     * @param privateKeyContent private key content
+     */
+    public void setPrivateKeyContent( final byte[] privateKeyContent )
+    {
+        this.privateKeyContent = privateKeyContent;
     }
 
     /**
