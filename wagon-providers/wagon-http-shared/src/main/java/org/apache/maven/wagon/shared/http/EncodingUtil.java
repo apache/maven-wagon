@@ -39,19 +39,20 @@ public class EncodingUtil
      * @throws MalformedURLException
      * @throws URISyntaxException
      */
-    public static URI encodeURL( String url )
+    public static URI encodeURL( final String url )
         throws MalformedURLException, URISyntaxException
     {
-        URL urlObject = new URL( url );
+        final URL urlObject = new URL( url );
 
-        URI uriEncoded =
+        final URI uriEncoded =
             new URI( urlObject.getProtocol(), //
                      urlObject.getAuthority(), //
                      urlObject.getPath(), //
                      urlObject.getQuery(), //
                      urlObject.getRef() );
 
-        return uriEncoded;
+        // WAGON-566
+        return uriEncoded.normalize();
     }
 
     /**
@@ -62,13 +63,13 @@ public class EncodingUtil
      * @return Parsed/encoded URI (as string) that represents the
      * @throws IllegalArgumentException in case the URL string is invalid.
      */
-    public static String encodeURLToString( String url )
+    public static String encodeURLToString( final String url )
     {
         try
         {
             return encodeURL( url ).toString();
         }
-        catch ( Exception e )
+        catch ( final Exception e )
         {
             throw new IllegalArgumentException( String.format( "Error parsing url: %s", url ), e );
         }
@@ -82,15 +83,15 @@ public class EncodingUtil
      * @return Composed URL (base + paths) already encoded, separating the individual path components by "/".
      * @since TODO
      */
-    public static String encodeURLToString( String baseUrl, String... paths )
+    public static String encodeURLToString( final String baseUrl, final String... paths )
     {
-        StringBuilder url = new StringBuilder( baseUrl );
+        final StringBuilder url = new StringBuilder( baseUrl );
 
-        String[] parts = paths == null ? //
+        final String[] parts = paths == null ? //
             new String[0] : //
             paths.length == 1 ? paths[0].split( "/" ) : paths;
 
-        for ( String part : parts )
+        for ( final String part : parts )
         {
             if ( !url.toString().endsWith( "/" ) )
             {
