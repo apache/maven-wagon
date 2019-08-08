@@ -39,12 +39,12 @@ public class EncodingUtil
      * @throws MalformedURLException
      * @throws URISyntaxException
      */
-    public static URI encodeURL( final String url )
+    public static URI encodeURL( String url )
         throws MalformedURLException, URISyntaxException
     {
-        final URL urlObject = new URL( url );
+        URL urlObject = new URL( url );
 
-        final URI uriEncoded =
+        URI uriEncoded =
             new URI( urlObject.getProtocol(), //
                      urlObject.getAuthority(), //
                      urlObject.getPath(), //
@@ -63,13 +63,13 @@ public class EncodingUtil
      * @return Parsed/encoded URI (as string) that represents the
      * @throws IllegalArgumentException in case the URL string is invalid.
      */
-    public static String encodeURLToString( final String url )
+    public static String encodeURLToString( String url )
     {
         try
         {
             return encodeURL( url ).toString();
         }
-        catch ( final Exception e )
+        catch ( Exception e )
         {
             throw new IllegalArgumentException( String.format( "Error parsing url: %s", url ), e );
         }
@@ -83,15 +83,15 @@ public class EncodingUtil
      * @return Composed URL (base + paths) already encoded, separating the individual path components by "/".
      * @since TODO
      */
-    public static String encodeURLToString( final String baseUrl, final String... paths )
+    public static String encodeURLToString( String baseUrl, String... paths )
     {
-        final StringBuilder url = new StringBuilder( baseUrl );
+        StringBuilder url = new StringBuilder( baseUrl );
 
-        final String[] parts = paths == null ? //
+        String[] parts = paths == null ? //
             new String[0] : //
             paths.length == 1 ? paths[0].split( "/" ) : paths;
 
-        for ( final String part : parts )
+        for ( String part : parts )
         {
             if ( !url.toString().endsWith( "/" ) )
             {
