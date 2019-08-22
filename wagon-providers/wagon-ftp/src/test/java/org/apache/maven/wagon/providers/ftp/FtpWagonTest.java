@@ -20,8 +20,6 @@ package org.apache.maven.wagon.providers.ftp;
  */
 
 import java.io.File;
-import java.io.IOException;
-import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +28,7 @@ import org.apache.ftpserver.FtpServer;
 import org.apache.ftpserver.FtpServerFactory;
 import org.apache.ftpserver.ftplet.Authority;
 import org.apache.ftpserver.ftplet.UserManager;
+import org.apache.ftpserver.listener.Listener;
 import org.apache.ftpserver.listener.ListenerFactory;
 import org.apache.ftpserver.usermanager.PropertiesUserManagerFactory;
 import org.apache.ftpserver.usermanager.impl.BaseUser;
@@ -49,30 +48,15 @@ import org.apache.maven.wagon.resource.Resource;
 public class FtpWagonTest
     extends StreamingWagonTestCase
 {
-    static private FtpServer server;
+    private FtpServer server;
     
-//    private static final int testRepositoryPort = 10023 + new Random().nextInt( 16 );
-    
-    private static int testRepositoryPort;
+    private int testRepositoryPort;
     
     protected String getProtocol()
     {
         return "ftp";
     }
     
-    static
-    {
-        // claim number, release it again so it can be reclaimed by ftp server
-        try (ServerSocket socket = newServerSocket( 10023, 10024, 10025, 10026 ))
-        {
-            testRepositoryPort = socket.getLocalPort();
-        }
-        catch ( IOException e )
-        {
-            e.printStackTrace();
-        }
-    }
-
     protected int getTestRepositoryPort() {
         return testRepositoryPort;
     }
@@ -86,17 +70,18 @@ public class FtpWagonTest
             ftpHomeDir.mkdirs();
         }
 
-        if (server == null)
+        if ( server == null )
         {
             FtpServerFactory serverFactory = new FtpServerFactory();
 
             ListenerFactory factory = new ListenerFactory();
 
             // set the port of the listener
-            factory.setPort(getTestRepositoryPort());
+            factory.setPort( 0 );
             
             // replace the default listener
-            serverFactory.addListener("default", factory.createListener());
+            Listener defaultListener = factory.createListener();
+            serverFactory.addListener("default", defaultListener );
 
             PropertiesUserManagerFactory userManagerFactory = new PropertiesUserManagerFactory();
             UserManager um = userManagerFactory.createUserManager();
@@ -122,6 +107,7 @@ public class FtpWagonTest
             // start the server
             server.start();
 
+            testRepositoryPort = defaultListener.getPort();
         }
     }
 
@@ -207,9 +193,9 @@ public class FtpWagonTest
     public void testPutDirectoryCreation()
         throws Exception
     {
-        setupRepositories();
-
         setupWagonTestingFixtures();
+
+        setupRepositories();
 
         Wagon wagon = getWagon();
 
