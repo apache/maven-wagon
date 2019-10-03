@@ -45,7 +45,9 @@ import java.io.IOException;
 
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
+import static org.apache.maven.wagon.tck.http.Assertions.NO_RESPONSE_STATUS_CODE;
 import static org.apache.maven.wagon.tck.http.Assertions.assertFileContentsFromResource;
+import static org.apache.maven.wagon.tck.http.Assertions.assertWagonExceptionMessage;
 
 /**
  * 
@@ -114,7 +116,7 @@ public class GetWagonTests
             return;
         }
 
-        final ValueHolder<Boolean> holder = new ValueHolder<Boolean>( false );
+        final ValueHolder<TransferFailedException> holder = new ValueHolder<>( null );
 
         Runnable r = new Runnable()
         {
@@ -141,34 +143,15 @@ public class GetWagonTests
 
                     fail( "Should have failed to transfer due to transaction timeout." );
                 }
-                catch ( ConnectionException e )
-                {
-                    throw new IllegalStateException( e );
-                }
-                catch ( AuthenticationException e )
+                catch ( ConnectionException | AuthenticationException | ResourceDoesNotExistException
+                        | AuthorizationException | ComponentConfigurationException | IOException e )
                 {
                     throw new IllegalStateException( e );
                 }
                 catch ( TransferFailedException e )
                 {
                     // expected
-                    holder.setValue( true );
-                }
-                catch ( ResourceDoesNotExistException e )
-                {
-                    throw new IllegalStateException( e );
-                }
-                catch ( AuthorizationException e )
-                {
-                    throw new IllegalStateException( e );
-                }
-                catch ( ComponentConfigurationException e )
-                {
-                    throw new IllegalStateException( e );
-                }
-                catch ( IOException e )
-                {
-                    throw new IllegalStateException( e );
+                    holder.setValue( e );
                 }
             }
         };
@@ -189,7 +172,9 @@ public class GetWagonTests
         logger.info( "Interrupting thread." );
         t.interrupt();
 
-        assertTrue( "TransferFailedException should have been thrown.", holder.getValue() );
+        assertTrue( "TransferFailedException should have been thrown.", holder.getValue() != null );
+        assertWagonExceptionMessage( holder.getValue(), NO_RESPONSE_STATUS_CODE, getBaseUrl() + "infinite/",
+                "", null );
     }
 
     @Test
@@ -214,6 +199,8 @@ public class GetWagonTests
         catch ( TransferFailedException e )
         {
             // expected
+            assertWagonExceptionMessage( e, NO_RESPONSE_STATUS_CODE,  "http://localhost:65520/base.txt",
+                    null, null );
         }
     }
 

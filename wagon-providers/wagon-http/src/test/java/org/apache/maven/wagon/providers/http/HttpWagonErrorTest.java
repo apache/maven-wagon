@@ -20,6 +20,7 @@ package org.apache.maven.wagon.providers.http;
  */
 
 import org.apache.maven.wagon.FileTestUtils;
+import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authorization.AuthorizationException;
@@ -34,6 +35,8 @@ import java.io.File;
 public class HttpWagonErrorTest
     extends HttpWagonHttpServerTestCase
 {
+    private int serverPort;
+
     protected void setUp()
         throws Exception
     {
@@ -41,9 +44,10 @@ public class HttpWagonErrorTest
         ServletHolder servlets = new ServletHolder( new ErrorWithMessageServlet() );
         context.addServlet( servlets, "/*" );
         startServer();
+        serverPort = getPort();
     }
 
-    public void testGetReasonPhase401()
+    public void testGet401()
         throws Exception
     {
         Exception thrown = null;
@@ -53,14 +57,14 @@ public class HttpWagonErrorTest
             Wagon wagon = getWagon();
 
             Repository testRepository = new Repository();
-            testRepository.setUrl( "http://localhost:" + getPort() );
+            testRepository.setUrl( "http://localhost:" + serverPort );
 
             wagon.connect( testRepository );
 
             File destFile = FileTestUtils.createUniqueFile( getName(), getName() );
             destFile.deleteOnExit();
 
-            wagon.get( "/401", destFile );
+            wagon.get( "401", destFile );
 
             wagon.disconnect();
         }
@@ -75,9 +79,11 @@ public class HttpWagonErrorTest
 
         assertNotNull( thrown );
         assertEquals( AuthorizationException.class, thrown.getClass() );
+        assertEquals("Authentication failed for http://localhost:" + serverPort
+                + "/401 401 " + ErrorWithMessageServlet.MESSAGE, thrown.getMessage());
     }
 
-    public void testGetReasonPhase403()
+    public void testGet403()
         throws Exception
     {
         Exception thrown = null;
@@ -87,14 +93,14 @@ public class HttpWagonErrorTest
             Wagon wagon = getWagon();
 
             Repository testRepository = new Repository();
-            testRepository.setUrl( "http://localhost:" + getPort() );
+            testRepository.setUrl( "http://localhost:" + serverPort );
 
             wagon.connect( testRepository );
 
             File destFile = FileTestUtils.createUniqueFile( getName(), getName() );
             destFile.deleteOnExit();
 
-            wagon.get( "/403", destFile );
+            wagon.get( "403", destFile );
 
             wagon.disconnect();
         }
@@ -109,10 +115,47 @@ public class HttpWagonErrorTest
 
         assertNotNull( thrown );
         assertEquals( AuthorizationException.class, thrown.getClass() );
+        assertEquals("Authorization failed for http://localhost:" + serverPort
+                + "/403 403 " + ErrorWithMessageServlet.MESSAGE, thrown.getMessage());
     }
 
+    public void testGet404()
+            throws Exception
+    {
+        Exception thrown = null;
 
-    public void testGetReasonPhase407()
+        try
+        {
+            Wagon wagon = getWagon();
+
+            Repository testRepository = new Repository();
+            testRepository.setUrl( "http://localhost:" + serverPort );
+
+            wagon.connect( testRepository );
+
+            File destFile = FileTestUtils.createUniqueFile( getName(), getName() );
+            destFile.deleteOnExit();
+
+            wagon.get( "404", destFile );
+
+            wagon.disconnect();
+        }
+        catch ( Exception e )
+        {
+            thrown = e;
+        }
+        finally
+        {
+            stopServer();
+        }
+
+        assertNotNull( thrown );
+        assertEquals( ResourceDoesNotExistException.class, thrown.getClass() );
+        assertEquals("Resource missing at http://localhost:" + serverPort + "/404 404 "
+                + ErrorWithMessageServlet.MESSAGE, thrown.getMessage());
+    }
+
+    public void testGet407()
         throws Exception
     {
         Exception thrown = null;
@@ -129,7 +172,7 @@ public class HttpWagonErrorTest
             File destFile = FileTestUtils.createUniqueFile( getName(), getName() );
             destFile.deleteOnExit();
 
-            wagon.get( "/407", destFile );
+            wagon.get( "407", destFile );
 
             wagon.disconnect();
         }
@@ -144,9 +187,11 @@ public class HttpWagonErrorTest
 
         assertNotNull( thrown );
         assertEquals( AuthorizationException.class, thrown.getClass() );
+        assertEquals("HTTP proxy server authentication failed for http://localhost:" + serverPort
+                + "/407 407 " + ErrorWithMessageServlet.MESSAGE, thrown.getMessage());
     }
 
-    public void testGetReasonPhase500()
+    public void testGet500()
         throws Exception
     {
         Exception thrown = null;
@@ -156,14 +201,14 @@ public class HttpWagonErrorTest
             Wagon wagon = getWagon();
 
             Repository testRepository = new Repository();
-            testRepository.setUrl( "http://localhost:" + getPort() );
+            testRepository.setUrl( "http://localhost:" + serverPort );
 
             wagon.connect( testRepository );
 
             File destFile = FileTestUtils.createUniqueFile( getName(), getName() );
             destFile.deleteOnExit();
 
-            wagon.get( "/500", destFile );
+            wagon.get( "500", destFile );
 
             wagon.disconnect();
         }
@@ -178,5 +223,7 @@ public class HttpWagonErrorTest
 
         assertNotNull( thrown );
         assertEquals( TransferFailedException.class, thrown.getClass() );
+        assertEquals("Transfer failed for http://localhost:" + serverPort + "/500 500 "
+                + ErrorWithMessageServlet.MESSAGE, thrown.getMessage());
     }
 }

@@ -48,6 +48,10 @@ public class ErrorWithMessageServlet
         {
             response.sendError( 403, MESSAGE );
         }
+        else if ( request.getRequestURL().toString().contains( "404" ) )
+        {
+            response.sendError( 404, MESSAGE );
+        }
         else if ( request.getRequestURL().toString().contains( "407" ) )
         {
             response.sendError( 407, MESSAGE );

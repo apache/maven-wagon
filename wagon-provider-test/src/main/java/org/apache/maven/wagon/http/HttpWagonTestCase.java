@@ -25,6 +25,7 @@ import org.apache.maven.wagon.StreamingWagon;
 import org.apache.maven.wagon.StreamingWagonTestCase;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.WagonException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.proxy.ProxyInfo;
@@ -34,6 +35,7 @@ import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
+import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.HashLoginService;
@@ -401,19 +403,24 @@ public abstract class HttpWagonTestCase
     {
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
-        Server server = new Server(  );
-        StatusHandler handler = new StatusHandler();
-        handler.setStatusToReturn( status );
-        server.setHandler( handler );
-        addConnector( server );
+        Server server = createStatusServer( status );
         server.start();
 
-        wagon.connect( new Repository( "id", getRepositoryUrl( server ) ) );
+        String baseUrl = getRepositoryUrl( server );
+        String resourceName = "resource";
+        String serverReasonPhrase = HttpStatus.getCode( status ).getMessage();
+
+        wagon.connect( new Repository( "id", baseUrl ) );
 
         try
         {
             wagon.getToStream( "resource", new ByteArrayOutputStream() );
             fail();
+        }
+        catch ( Exception e )
+        {
+            verifyWagonExceptionMessage( e, status, baseUrl + "/" + resourceName, serverReasonPhrase );
+            throw e;
         }
         finally
         {
@@ -523,11 +530,7 @@ public abstract class HttpWagonTestCase
     {
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
-        Server server = new Server( );
-        StatusHandler handler = new StatusHandler();
-        handler.setStatusToReturn( status );
-        server.setHandler( handler );
-        addConnector( server );
+        Server server = createStatusServer( status );
         server.start();
 
         wagon.connect( new Repository( "id", getRepositoryUrl( server ) ) );
@@ -1593,6 +1596,16 @@ public abstract class HttpWagonTestCase
         return server;
     }
 
+    private Server createStatusServer( int status )
+    {
+        Server server = new Server( );
+        StatusHandler handler = new StatusHandler();
+        handler.setStatusToReturn( status );
+        server.setHandler( handler );
+        addConnector( server );
+        return server;
+    }
+
 
     private String writeTestFile( File parent, String child, String compressionType )
         throws IOException
@@ -1756,11 +1769,7 @@ public abstract class HttpWagonTestCase
     {
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
-        Server server = new Server( );
-        StatusHandler handler = new StatusHandler();
-        handler.setStatusToReturn( status );
-        server.setHandler( handler );
-        addConnector( server );
+        Server server = createStatusServer( status );
         server.start();
 
         wagon.connect( new Repository( "id", getRepositoryUrl( server ) ) );
@@ -1769,10 +1778,19 @@ public abstract class HttpWagonTestCase
         tempFile.deleteOnExit();
         FileUtils.fileWrite( tempFile.getAbsolutePath(), "content" );
 
+        String baseUrl = getRepositoryUrl( server );
+        String resourceName = "resource";
+        String serverReasonPhrase = HttpStatus.getCode( status ).getMessage();
+
         try
         {
-            wagon.put( tempFile, "resource" );
+            wagon.put( tempFile, resourceName );
             fail();
+        }
+        catch ( Exception e )
+        {
+            verifyWagonExceptionMessage( e, status, baseUrl + "/" + resourceName, serverReasonPhrase );
+            throw e;
         }
         finally
         {
@@ -2281,4 +2299,85 @@ public abstract class HttpWagonTestCase
             return sb.toString();
         }
     }
+
+    /**
+     * Verify a WagonException message contains required format and context based on the status code we expected to
+     * trigger it in the first place.
+     * <p>
+     * This implementation represents the most desired assertions, but HttpWagonTestCase sub-classes could override
+     * this method if a specific wagon representation makes it impossible to meet these assertions.
+     *
+     * @param e               an instance of {@link WagonException}
+     * @param forStatusCode   the response status code that triggered the exception
+     * @param forUrl          the url that triggered the exception
+     * @param forReasonPhrase the optional status line reason phrase the server returned
+     */
+    protected void verifyWagonExceptionMessage( Exception e, int forStatusCode, String forUrl, String forReasonPhrase )
+    {
+        // TODO: handle AuthenticationException for Wagon.connect() calls
+        assertNotNull( e );
+        try
+        {
+            assertTrue( "only verify instances of WagonException", e instanceof WagonException );
+
+            String reasonPhrase;
+            String assertMessageForBadMessage = "exception message not described properly";
+            switch ( forStatusCode )
+            {
+                case HttpServletResponse.SC_NOT_FOUND:
+                    // TODO: add test for 410: Gone?
+                    assertTrue( "404 not found response should throw ResourceDoesNotExistException",
+                            e instanceof ResourceDoesNotExistException );
+                    reasonPhrase = StringUtils.isEmpty( forReasonPhrase ) ? " Not Found" : ( " " + forReasonPhrase );
+                    assertEquals( assertMessageForBadMessage, "Resource missing at " + forUrl + " 404"
+                            + reasonPhrase, e.getMessage() );
+                    break;
+
+                case HttpServletResponse.SC_UNAUTHORIZED:
+                    // FIXME assumes Wagon.get()/put() returning 401 instead of Wagon.connect()
+                    assertTrue( "401 Unauthorized should throw AuthorizationException since "
+                                    + " AuthenticationException is not explicitly declared as thrown from wagon "
+                                    + "methods",
+                            e instanceof AuthorizationException );
+                    reasonPhrase = StringUtils.isEmpty( forReasonPhrase ) ? " Unauthorized" : ( " " + forReasonPhrase );
+                    assertEquals( assertMessageForBadMessage, "Authentication failed for " + forUrl + " 401"
+                            + reasonPhrase, e.getMessage() );
+                    break;
+
+                case HttpServletResponse.SC_PROXY_AUTHENTICATION_REQUIRED:
+                    assertTrue( "407 Proxy authentication required should throw AuthorizationException",
+                            e instanceof AuthorizationException );
+                    reasonPhrase = StringUtils.isEmpty( forReasonPhrase ) ? " Proxy Authentication Required"
+                            : ( " " + forReasonPhrase );
+                    assertEquals( assertMessageForBadMessage, "HTTP proxy server authentication failed for "
+                            + forUrl + " 407" + reasonPhrase, e.getMessage() );
+                    break;
+
+                case HttpServletResponse.SC_FORBIDDEN:
+                    assertTrue( "403 Forbidden should throw AuthorizationException",
+                            e instanceof AuthorizationException );
+                    reasonPhrase = StringUtils.isEmpty( forReasonPhrase ) ? " Forbidden" : ( " " + forReasonPhrase );
+                    assertEquals( assertMessageForBadMessage, "Authorization failed for " + forUrl + " 403"
+                            + reasonPhrase, e.getMessage() );
+                    break;
+
+                default:
+                    assertTrue( "transfer failures should at least be wrapped in a TransferFailedException", e
+                                    instanceof TransferFailedException );
+                    assertTrue( "expected status code for transfer failures should be >= 400",
+                            forStatusCode >= HttpServletResponse.SC_BAD_REQUEST );
+                    reasonPhrase = forReasonPhrase == null ? "" : " " + forReasonPhrase;
+                    assertEquals( assertMessageForBadMessage, "Transfer failed for " + forUrl + " "
+                            + forStatusCode + reasonPhrase, e.getMessage() );
+                    break;
+            }
+        }
+        catch ( AssertionError assertionError )
+        {
+            logger.error( "Exception which failed assertions: ", e );
+            throw assertionError;
+        }
+
+    }
+
 }

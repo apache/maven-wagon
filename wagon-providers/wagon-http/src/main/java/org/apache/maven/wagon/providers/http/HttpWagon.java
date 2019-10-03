@@ -29,10 +29,15 @@ import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;
 import org.apache.maven.wagon.shared.http.HtmlFileListParser;
+import org.apache.maven.wagon.shared.http.HttpMessageUtils;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+
+import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatResourceDoesNotExistMessage;
+import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatTransferDebugMessage;
+import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatTransferFailedMessage;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -64,9 +69,10 @@ public class HttpWagon
             CloseableHttpResponse response = execute( getMethod );
             try
             {
+                String reasonPhrase = response.getStatusLine().getReasonPhrase();
                 int statusCode = response.getStatusLine().getStatusCode();
 
-                fireTransferDebug( url + " - Status code: " + statusCode );
+                fireTransferDebug( formatTransferDebugMessage( url, statusCode, reasonPhrase, getProxyInfo() ) );
 
                 switch ( statusCode )
                 {
@@ -74,24 +80,22 @@ public class HttpWagon
                         break;
 
                     case HttpStatus.SC_FORBIDDEN:
-                        throw new AuthorizationException( "Access denied to: " + url );
-
                     case HttpStatus.SC_UNAUTHORIZED:
-                        throw new AuthorizationException( "Not authorized." );
-
                     case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
-                        throw new AuthorizationException( "Not authorized by proxy." );
+                        throw new AuthorizationException( HttpMessageUtils.formatAuthorizationMessage( url, statusCode,
+                                reasonPhrase, getProxyInfo() ) );
 
                     case HttpStatus.SC_NOT_FOUND:
-                        throw new ResourceDoesNotExistException( "File: " + url + " does not exist" );
+                        throw new ResourceDoesNotExistException( formatResourceDoesNotExistMessage( url, statusCode,
+                                reasonPhrase, getProxyInfo() ) );
 
                     case SC_TOO_MANY_REQUESTS:
                         return getFileList( backoff( wait, url ), destinationDirectory );
 
                     //add more entries here
                     default:
-                        throw new TransferFailedException(
-                            "Failed to transfer file: " + url + ". Return code is: " + statusCode );
+                        throw new TransferFailedException( formatTransferFailedMessage( url, statusCode, reasonPhrase,
+                                getProxyInfo() ) );
                 }
                 HttpEntity entity = response.getEntity();
                 if ( entity != null )

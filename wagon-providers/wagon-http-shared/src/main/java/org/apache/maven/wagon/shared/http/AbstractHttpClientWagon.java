@@ -105,6 +105,11 @@ import java.util.Properties;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatAuthorizationMessage;
+import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatResourceDoesNotExistMessage;
+import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatTransferDebugMessage;
+import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatTransferFailedMessage;
+
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  * @author <a href="mailto:james@atlassian.com">James William Dumay</a>
@@ -713,17 +718,9 @@ public abstract class AbstractHttpClientWagon
             CloseableHttpResponse response = execute( putMethod );
             try
             {
+                fireTransferDebug( formatTransferDebugMessage( url, response.getStatusLine().getStatusCode(),
+                        response.getStatusLine().getReasonPhrase(), getProxyInfo() ) );
                 int statusCode = response.getStatusLine().getStatusCode();
-                String reasonPhrase = response.getStatusLine().getReasonPhrase();
-                StringBuilder debugMessage = new StringBuilder();
-                debugMessage.append( url );
-                debugMessage.append( " -- " );
-                debugMessage.append( "status code: " ).append( statusCode );
-                if ( StringUtils.isNotEmpty( reasonPhrase ) )
-                {
-                    debugMessage.append( ", reason phrase: " ).append( reasonPhrase );
-                }
-                fireTransferDebug( debugMessage.toString() );
 
                 // Check that we didn't run out of retries.
                 switch ( statusCode )
@@ -741,20 +738,26 @@ public abstract class AbstractHttpClientWagon
                     case HttpStatus.SC_SEE_OTHER: // 303
                         put( resource, source, httpEntity, calculateRelocatedUrl( response ) );
                         return;
+                    //case HttpStatus.SC_UNAUTHORIZED:
                     case HttpStatus.SC_FORBIDDEN:
                         fireSessionConnectionRefused();
-                        throw new AuthorizationException( "Access denied to: " + url );
+                        throw new AuthorizationException( formatAuthorizationMessage( url,
+                                response.getStatusLine().getStatusCode(),
+                                response.getStatusLine().getReasonPhrase(), getProxyInfo() ) );
 
                     case HttpStatus.SC_NOT_FOUND:
-                        throw new ResourceDoesNotExistException( "File " + url + " does not exist" );
+                        throw new ResourceDoesNotExistException( formatResourceDoesNotExistMessage( url,
+                                response.getStatusLine().getStatusCode(),
+                                response.getStatusLine().getReasonPhrase(), getProxyInfo() ) );
 
                     case SC_TOO_MANY_REQUESTS:
                         put( backoff( wait, url ), resource, source, httpEntity, url );
                         break;
                     //add more entries here
                     default:
-                        TransferFailedException e = new TransferFailedException(
-                            "Failed to transfer file " + url + " with status code " + statusCode );
+                        TransferFailedException e = new TransferFailedException( formatTransferFailedMessage( url,
+                                response.getStatusLine().getStatusCode(),
+                                response.getStatusLine().getReasonPhrase(), getProxyInfo() ) );
                         fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
                         throw e;
                 }
@@ -768,23 +771,11 @@ public abstract class AbstractHttpClientWagon
                 response.close();
             }
         }
-        catch ( IOException e )
+        catch ( IOException | HttpException | InterruptedException e )
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
 
-            throw new TransferFailedException( e.getMessage(), e );
-        }
-        catch ( HttpException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
-
-            throw new TransferFailedException( e.getMessage(), e );
-        }
-        catch ( InterruptedException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
-
-            throw new TransferFailedException( e.getMessage(), e );
+            throw new TransferFailedException( formatTransferFailedMessage( url, getProxyInfo() ), e );
         }
 
     }
@@ -831,14 +822,13 @@ public abstract class AbstractHttpClientWagon
                     case HttpStatus.SC_NOT_MODIFIED:
                         result = true;
                         break;
+
                     case HttpStatus.SC_FORBIDDEN:
-                        throw new AuthorizationException( "Access denied to: " + url );
-
                     case HttpStatus.SC_UNAUTHORIZED:
-                        throw new AuthorizationException( "Not authorized" );
-
                     case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
-                        throw new AuthorizationException( "Not authorized by proxy" );
+                        throw new AuthorizationException( formatAuthorizationMessage( url,
+                                response.getStatusLine().getStatusCode(),
+                                response.getStatusLine().getReasonPhrase(), getProxyInfo() ) );
 
                     case HttpStatus.SC_NOT_FOUND:
                         result = false;
@@ -849,8 +839,9 @@ public abstract class AbstractHttpClientWagon
 
                     //add more entries here
                     default:
-                        throw new TransferFailedException(
-                            "Failed to transfer file " + url + " with status code " + statusCode );
+                        throw new TransferFailedException( formatTransferFailedMessage( url,
+                                response.getStatusLine().getStatusCode(),
+                                response.getStatusLine().getReasonPhrase(), getProxyInfo() ) );
                 }
 
                 EntityUtils.consume( response.getEntity() );
@@ -861,17 +852,9 @@ public abstract class AbstractHttpClientWagon
                 response.close();
             }
         }
-        catch ( IOException e )
+        catch ( IOException | HttpException | InterruptedException e )
         {
-            throw new TransferFailedException( e.getMessage(), e );
-        }
-        catch ( HttpException e )
-        {
-            throw new TransferFailedException( e.getMessage(), e );
-        }
-        catch ( InterruptedException e )
-        {
-            throw new TransferFailedException( e.getMessage(), e );
+            throw new TransferFailedException( formatTransferFailedMessage( url, getProxyInfo() ), e );
         }
 
     }
@@ -1116,17 +1099,10 @@ public abstract class AbstractHttpClientWagon
         {
             CloseableHttpResponse response = execute( getMethod );
             closeable = response;
+
+            fireTransferDebug( formatTransferDebugMessage( url, response.getStatusLine().getStatusCode(),
+                    response.getStatusLine().getReasonPhrase(), getProxyInfo() ) );
             int statusCode = response.getStatusLine().getStatusCode();
-            String reasonPhrase = response.getStatusLine().getReasonPhrase();
-            StringBuilder debugMessage = new StringBuilder();
-            debugMessage.append( url );
-            debugMessage.append( " -- " );
-            debugMessage.append( "status code: " ).append( statusCode );
-            if ( StringUtils.isNotEmpty( reasonPhrase ) )
-            {
-                debugMessage.append( ", reason phrase: " ).append( reasonPhrase );
-            }
-            fireTransferDebug( debugMessage.toString() );
 
             switch ( statusCode )
             {
@@ -1136,20 +1112,19 @@ public abstract class AbstractHttpClientWagon
                 case HttpStatus.SC_NOT_MODIFIED:
                     // return, leaving last modified set to original value so getIfNewer should return unmodified
                     return;
+
                 case HttpStatus.SC_FORBIDDEN:
-                    fireSessionConnectionRefused();
-                    throw new AuthorizationException( "Access denied to: " + url );
-
                 case HttpStatus.SC_UNAUTHORIZED:
-                    fireSessionConnectionRefused();
-                    throw new AuthorizationException( "Not authorized" );
-
                 case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
                     fireSessionConnectionRefused();
-                    throw new AuthorizationException( "Not authorized by proxy" );
+                    throw new AuthorizationException( formatAuthorizationMessage( url,
+                            response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase(),
+                            getProxyInfo() ) );
 
                 case HttpStatus.SC_NOT_FOUND:
-                    throw new ResourceDoesNotExistException( "File " + url + " does not exist" );
+                    throw new ResourceDoesNotExistException( formatResourceDoesNotExistMessage( url,
+                            response.getStatusLine().getStatusCode(),
+                            response.getStatusLine().getReasonPhrase(), getProxyInfo() ) );
 
                 case SC_TOO_MANY_REQUESTS:
                     fillInputData( backoff( wait, url ), inputData );
@@ -1158,8 +1133,9 @@ public abstract class AbstractHttpClientWagon
                 // add more entries here
                 default:
                     cleanupGetTransfer( resource );
-                    TransferFailedException e = new TransferFailedException(
-                        "Failed to transfer file " + url + " with status code " + statusCode );
+                    TransferFailedException e = new TransferFailedException( formatTransferFailedMessage( url,
+                            response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase(),
+                            getProxyInfo() ) );
                     fireTransferError( resource, e, TransferEvent.REQUEST_GET );
                     throw e;
             }
@@ -1199,23 +1175,11 @@ public abstract class AbstractHttpClientWagon
                 inputData.setInputStream( entity.getContent() );
             }
         }
-        catch ( IOException e )
+        catch ( IOException | HttpException | InterruptedException e )
         {
             fireTransferError( resource, e, TransferEvent.REQUEST_GET );
 
-            throw new TransferFailedException( e.getMessage(), e );
-        }
-        catch ( HttpException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-
-            throw new TransferFailedException( e.getMessage(), e );
-        }
-        catch ( InterruptedException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
-
-            throw new TransferFailedException( e.getMessage(), e );
+            throw new TransferFailedException( formatTransferFailedMessage( url, getProxyInfo() ), e );
         }
 
     }

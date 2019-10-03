@@ -523,4 +523,11 @@ public class WebDavWagonTest
 
     }
 
+    @Override
+    protected void verifyWagonExceptionMessage( Exception e, int forStatusCode, String forUrl, String forReasonPhrase )
+    {
+        Repository repo = new Repository( "test-geturl", forUrl );
+        String expectedMessageUrl = ( new WebDavWagon() ).getURL( repo );
+        super.verifyWagonExceptionMessage( e, forStatusCode, expectedMessageUrl, forReasonPhrase );
+    }
 }

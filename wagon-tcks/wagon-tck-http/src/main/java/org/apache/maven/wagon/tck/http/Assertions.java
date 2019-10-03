@@ -19,20 +19,35 @@ package org.apache.maven.wagon.tck.http;
  * under the License.
  */
 
-import static junit.framework.Assert.assertEquals;
-import static org.codehaus.plexus.util.FileUtils.fileRead;
-
+import org.apache.maven.wagon.ResourceDoesNotExistException;
+import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.WagonException;
+import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.codehaus.plexus.util.IOUtil;
+import org.codehaus.plexus.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+
+import static org.codehaus.plexus.util.FileUtils.fileRead;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * 
  */
 public final class Assertions
 {
+
+    public static final int NO_RESPONSE_STATUS_CODE = -1;
+
+    protected static final Logger LOGGER = LoggerFactory.getLogger( Assertions.class );
 
     public static void assertFileContentsFromResource( final String resourceBase, final String resourceName,
                                                        final File output, final String whyWouldItFail )
@@ -65,6 +80,122 @@ public final class Assertions
         final String resource = IOUtil.toString( stream );
         stream.close();
         return resource;
+    }
+
+    /**
+     * Assert a WagonException message contains required format and context based on the status code we expected to
+     * trigger it in the first place.
+     * <p>
+     * This implementation represents the most desired assertions, but HttpWagonTestCase sub-classes could override
+     * this method if a specific wagon representation makes it impossible to meet these assertions.
+     *
+     * @param e               an instance of {@link WagonException}
+     * @param forStatusCode   the response status code that triggered the exception
+     * @param forUrl          the url that triggered the exception
+     * @param forReasonPhrase the optional status line reason phrase the server returned
+     */
+    public static void assertWagonExceptionMessage( Exception e, int forStatusCode, String forUrl,
+                                                    String forReasonPhrase, ProxyInfo proxyInfo )
+    {
+        // TODO: handle AuthenticationException for Wagon.connect() calls
+        assertNotNull( e );
+        try
+        {
+            assertTrue( "only verify instances of WagonException", e instanceof WagonException );
+
+            String reasonPhrase;
+            String assertMessageForBadMessage = "exception message not described properly";
+
+            if ( proxyInfo != null )
+            {
+                assertTrue( "message should end with proxy information if proxy was used",
+                        e.getMessage().endsWith( proxyInfo.toString() ) );
+            }
+
+            switch ( forStatusCode )
+            {
+                case HttpServletResponse.SC_NOT_FOUND:
+                    // TODO: add test for 410: Gone?
+                    assertTrue( "404 not found response should throw ResourceDoesNotExistException",
+                            e instanceof ResourceDoesNotExistException );
+                    reasonPhrase = StringUtils.isEmpty( forReasonPhrase ) ? " Not Found" : ( " " + forReasonPhrase );
+                    assertEquals( assertMessageForBadMessage, "Resource missing at " + forUrl + " 404"
+                            + reasonPhrase, e.getMessage() );
+                    break;
+
+                case HttpServletResponse.SC_UNAUTHORIZED:
+                    // FIXME assumes Wagon.get()/put() returning 401 instead of Wagon.connect()
+                    assertTrue( "401 Unauthorized should throw AuthorizationException since "
+                                    + " AuthenticationException is not explicitly declared as thrown from wagon "
+                                    + "methods",
+                            e instanceof AuthorizationException );
+                    reasonPhrase = StringUtils.isEmpty( forReasonPhrase ) ? " Unauthorized" : ( " " + forReasonPhrase );
+                    assertEquals( assertMessageForBadMessage, "Authentication failed for " + forUrl + " 401"
+                            + reasonPhrase, e.getMessage() );
+                    break;
+
+                case HttpServletResponse.SC_PROXY_AUTHENTICATION_REQUIRED:
+                    assertTrue( "407 Proxy authentication required should throw AuthorizationException",
+                            e instanceof AuthorizationException );
+                    reasonPhrase = StringUtils.isEmpty( forReasonPhrase ) ? " Proxy Authentication Required"
+                            : ( " " + forReasonPhrase );
+                    assertEquals( assertMessageForBadMessage, "HTTP proxy server authentication failed for "
+                            + forUrl + " 407" + reasonPhrase, e.getMessage() );
+                    break;
+
+                case HttpServletResponse.SC_FORBIDDEN:
+                    assertTrue( "403 Forbidden should throw AuthorizationException",
+                            e instanceof AuthorizationException );
+                    reasonPhrase = StringUtils.isEmpty( forReasonPhrase ) ? " Forbidden" : ( " " + forReasonPhrase );
+                    assertEquals( assertMessageForBadMessage, "Authorization failed for " + forUrl + " 403"
+                            + reasonPhrase, e.getMessage() );
+                    break;
+
+                default:
+                    assertTrue( "transfer failures should at least be wrapped in a TransferFailedException", e
+                            instanceof TransferFailedException );
+
+                    // the status code and reason phrase cannot always be learned due to implementation limitations
+                    // so the message may not include them, but the implementation should use a consistent format
+                    assertTrue( "message should always include url tried: " + e.getMessage(),
+                            e.getMessage().startsWith( "Transfer failed for " + forUrl ) );
+
+                    String statusCodeStr = forStatusCode == NO_RESPONSE_STATUS_CODE ? ""
+                            : String.valueOf( forStatusCode );
+                    if ( forStatusCode != NO_RESPONSE_STATUS_CODE )
+                    {
+
+                        assertTrue( "if there was a response status line, the status code should be >= 400",
+                                forStatusCode >= HttpServletResponse.SC_BAD_REQUEST );
+
+                        if ( e.getMessage().length() > ( "Transfer failed for " + forUrl ).length() )
+                        {
+                            assertTrue( "message should include url and status code: " + e.getMessage(),
+                                    e.getMessage().startsWith( "Transfer failed for " + forUrl + statusCodeStr ) );
+                        }
+
+                        reasonPhrase = forReasonPhrase == null ? "" : " " + forReasonPhrase;
+
+                        if ( reasonPhrase.length() > 0 && e.getMessage().length() > ( "Transfer failed for " + forUrl
+                                + statusCodeStr ).length() )
+                        {
+                            assertTrue( "message should include url and status code and reason phrase: "
+                                    + e.getMessage(), e.getMessage().startsWith( "Transfer failed for "
+                                            + forUrl + statusCodeStr
+                                            + reasonPhrase ) );
+                        }
+
+                    }
+
+                    break;
+            }
+        }
+        catch ( AssertionError assertionError )
+        {
+            LOGGER.error( "Exception which failed assertions: ", e );
+            throw assertionError;
+        }
+
     }
 
 }
