@@ -46,7 +46,7 @@ public class EncodingUtilTest
     public void testEncodeURLWithSpacesInBothBaseAndPath()
         throws URISyntaxException, MalformedURLException
     {
-        String encodedURL = EncodingUtil.encodeURLToString( "file://host:1/with a", "path with spaces" );
+        String encodedURL = EncodingUtil.encodeURLToString( "file://host:1/with%20a", "path with spaces" );
 
         assertEquals( "file://host:1/with%20a/path%20with%20spaces", encodedURL );
     }

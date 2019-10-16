@@ -24,6 +24,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.codehaus.plexus.util.StringUtils;
+
 /**
  * Encoding utility.
  *
@@ -86,20 +89,17 @@ public class EncodingUtil
     {
         StringBuilder url = new StringBuilder( baseUrl );
 
-        String[] parts = paths == null ? //
+        String[] segments = paths == null ? //
             new String[0] : //
             paths.length == 1 ? paths[0].split( "/" ) : paths;
 
-        for ( String part : parts )
-        {
-            if ( !url.toString().endsWith( "/" ) )
-            {
-                url.append( '/' );
-            }
+        String path = URLEncodedUtils.formatSegments(segments);
 
-            url.append( part );
-        }
+        if (url.toString().endsWith("/") && StringUtils.isNotEmpty(path))
+            url.deleteCharAt(url.length() - 1);
 
-        return encodeURLToString( url.toString() );
+        url.append(path);
+
+        return url.toString();
     }
 }
