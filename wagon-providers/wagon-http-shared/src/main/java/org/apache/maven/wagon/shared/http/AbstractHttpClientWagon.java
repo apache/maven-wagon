@@ -665,9 +665,19 @@ public abstract class AbstractHttpClientWagon
      */
     private String buildUrl( Resource resource )
     {
-        return EncodingUtil.encodeURLToString( getRepository().getUrl(), resource.getName() );
+        return buildUrl( resource.getName() );
     }
 
+    /**
+     * Builds a complete URL string from the repository URL and the relative path of the resource passed.
+     *
+     * @param resourceName the resourcerelative path
+     * @return the complete URL
+     */
+    private String buildUrl( String resourceName )
+    {
+        return EncodingUtil.encodeURLToString( getRepository().getUrl(), resourceName );
+    }
 
     private void put( Resource resource, File source, HttpEntity httpEntity, String url )
         throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
@@ -804,8 +814,7 @@ public abstract class AbstractHttpClientWagon
     private boolean resourceExists( int wait, String resourceName )
         throws TransferFailedException, AuthorizationException
     {
-        String repositoryUrl = getRepository().getUrl();
-        String url = repositoryUrl + ( repositoryUrl.endsWith( "/" ) ? "" : "/" ) + resourceName;
+        String url = buildUrl( resourceName );
         HttpHead headMethod = new HttpHead( url );
         try
         {
@@ -1082,8 +1091,7 @@ public abstract class AbstractHttpClientWagon
     {
         Resource resource = inputData.getResource();
 
-        String repositoryUrl = getRepository().getUrl();
-        String url = repositoryUrl + ( repositoryUrl.endsWith( "/" ) ? "" : "/" ) + resource.getName();
+        String url = buildUrl( resource );
         HttpGet getMethod = new HttpGet( url );
         long timestamp = resource.getLastModified();
         if ( timestamp > 0 )

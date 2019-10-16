@@ -24,6 +24,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import org.apache.http.client.utils.URLEncodedUtils;
+
 /**
  * Encoding utility.
  *
@@ -38,7 +40,9 @@ public class EncodingUtil
      * @return Parsed/encoded {@link URI} that represents the string form URL passed in.
      * @throws MalformedURLException
      * @throws URISyntaxException
+     * @deprecated to be removed with 4.0.0
      */
+    @Deprecated
     public static URI encodeURL( String url )
         throws MalformedURLException, URISyntaxException
     {
@@ -61,7 +65,9 @@ public class EncodingUtil
      * @param url Raw/decoded string form of a URL to parse/encode.
      * @return Parsed/encoded URI (as string) that represents the
      * @throws IllegalArgumentException in case the URL string is invalid.
+     * @deprecated To be remvoed with 4.0.0
      */
+    @Deprecated
     public static String encodeURLToString( String url )
     {
         try
@@ -75,31 +81,43 @@ public class EncodingUtil
     }
 
     /**
-     * Parses and returns an encoded version of the given URL string alongside the given paths.
+     * Parses and returns an encoded version of the given URL string alongside the given path.
      *
-     * @param baseUrl Base URL to use when constructing the final URL, ie: scheme://authority/initial.path.
-     * @param paths   Additional path(s) to append at the end of the base path.
-     * @return Composed URL (base + paths) already encoded, separating the individual path components by "/".
+     * @param baseUrl Base URL to use when constructing the final URL. This has to be a valid URL already.
+     * @param path Additional unencoded path to append at the end of the base path.
+     * @return Composed URL (base + path) already encoded, separating the individual path segments by "/".
      * @since TODO
      */
-    public static String encodeURLToString( String baseUrl, String... paths )
+    public static String encodeURLToString( String baseUrl, String path )
+    {
+        String[] pathSegments = path == null ? new String[0] : path.split( "/" );
+
+        return encodeURLToString( baseUrl, pathSegments );
+    }
+
+    /**
+     * Parses and returns an encoded version of the given URL string alongside the given path segments.
+     *
+     * @param baseUrl Base URL to use when constructing the final URL. This has to be a valid URL already.
+     * @param pathSegments Additional unencoded path segments to append at the end of the base path.
+     * @return Composed URL (base + path) already encoded, separating the individual path segments by "/".
+     * @since TODO
+     */
+    public static String encodeURLToString( String baseUrl, String... pathSegments )
     {
         StringBuilder url = new StringBuilder( baseUrl );
 
-        String[] parts = paths == null ? //
-            new String[0] : //
-            paths.length == 1 ? paths[0].split( "/" ) : paths;
+        String[] segments = pathSegments == null ? new String[0] : pathSegments;
 
-        for ( String part : parts )
+        String path = URLEncodedUtils.formatSegments( segments );
+
+        if ( url.toString().endsWith( "/" ) && !path.isEmpty() )
         {
-            if ( !url.toString().endsWith( "/" ) )
-            {
-                url.append( '/' );
-            }
-
-            url.append( part );
+            url.deleteCharAt( url.length() - 1 );
         }
 
-        return encodeURLToString( url.toString() );
+        url.append( path );
+
+        return url.toString();
     }
 }
