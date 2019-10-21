@@ -129,17 +129,15 @@ public class HttpMessageUtils
         switch ( statusCode )
         {
             case SC_UNAUTHORIZED: // no credentials or auth was not valid
-                return "Authentication failed for " + url + " " + statusCode
-                        + ( StringUtils.isEmpty( reasonPhrase ) ? " Unauthorized" : " " + reasonPhrase );
+                return formatMessage( "Authentication failed for ", url, statusCode, reasonPhrase, null );
 
             case SC_FORBIDDEN: // forbidden based on permissions usually
-                return "Authorization failed for " + url + " " + statusCode
-                        + ( StringUtils.isEmpty( reasonPhrase ) ? " Forbidden" : " " + reasonPhrase );
+                return formatMessage( "Authorization failed for ", url, statusCode, reasonPhrase, null );
 
             case SC_PROXY_AUTH_REQUIRED:
-                return "HTTP proxy server authentication failed for " + url + " " + statusCode
-                        + ( StringUtils.isEmpty( reasonPhrase ) ? " Proxy Authentication Required"
-                        : " " + reasonPhrase );
+                return formatMessage( "HTTP proxy server authentication failed for ", url, statusCode,
+                        reasonPhrase, null );
+
             default:
                 break;
         }
@@ -179,13 +177,30 @@ public class HttpMessageUtils
             }
             else
             {
-                if ( statusCode == SC_NOT_FOUND )
+                switch ( statusCode )
                 {
-                    msg += " Not Found";
-                }
-                else if ( statusCode == SC_GONE )
-                {
-                    msg += " Gone";
+                    case SC_UNAUTHORIZED:
+                        msg += " Unauthorized";
+                        break;
+
+                    case SC_FORBIDDEN:
+                        msg += " Forbidden";
+                        break;
+
+                    case SC_NOT_FOUND:
+                        msg += " Not Found";
+                        break;
+
+                    case SC_PROXY_AUTH_REQUIRED:
+                        msg += " Proxy Authentication Required";
+                        break;
+
+                    case SC_GONE:
+                        msg += " Gone";
+                        break;
+
+                    default:
+                        break;
                 }
             }
         }
