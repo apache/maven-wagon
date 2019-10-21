@@ -73,7 +73,7 @@ public class LightweightHttpWagonTest
     }
 
     @Override
-    protected void verifyWagonExceptionMessage(Exception e, int forStatusCode, String forUrl, String forReasonPhrase)
+    protected void verifyWagonExceptionMessage( Exception e, int forStatusCode, String forUrl, String forReasonPhrase )
     {
 
         // HttpUrlConnection prevents direct API access to the response code or reasonPhrase for any
@@ -135,9 +135,10 @@ public class LightweightHttpWagonTest
                                     + " the already handled codes",
                             forStatusCode >= HttpServletResponse.SC_BAD_REQUEST );
 
-                    if( e.getCause() != null ){
-                        assertTrue("TransferFailedException should have the original cause for diagnosis",
-                                e.getCause() instanceof IOException );
+                    if ( e.getCause() != null )
+                    {
+                        assertTrue( "TransferFailedException should have the original cause for diagnosis",
+                                    e.getCause() instanceof IOException );
                     }
 
                     // the status code and reason phrase cannot always be learned due to implementation limitations
@@ -145,13 +146,13 @@ public class LightweightHttpWagonTest
                     assertTrue( "message should always include url",
                             e.getMessage().startsWith( "Transfer failed for " + forUrl ) );
 
-                    if( e.getMessage().length() > ("Transfer failed for " + forUrl).length() )
+                    if ( e.getMessage().length() > ( "Transfer failed for " + forUrl ).length() )
                     {
                         assertTrue( "message should include url and status code",
                                 e.getMessage().startsWith( "Transfer failed for " + forUrl + " " + forStatusCode ) );
                     }
 
-                    if( e.getMessage().length() > ("Transfer failed for " + forUrl + " " + forStatusCode).length() )
+                    if ( e.getMessage().length() > ( "Transfer failed for " + forUrl + " " + forStatusCode ).length() )
                     {
                         assertEquals( "message should include url and status code and reason phrase",
                                 "Transfer failed for " + forUrl + " " + forStatusCode + " " + forReasonPhrase,

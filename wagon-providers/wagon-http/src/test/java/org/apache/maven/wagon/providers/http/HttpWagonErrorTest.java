@@ -79,8 +79,8 @@ public class HttpWagonErrorTest
 
         assertNotNull( thrown );
         assertEquals( AuthorizationException.class, thrown.getClass() );
-        assertEquals("Authentication failed for http://localhost:" + serverPort
-                + "/401 401 " + ErrorWithMessageServlet.MESSAGE, thrown.getMessage());
+        assertEquals( "Authentication failed for http://localhost:" + serverPort + "/401 401 "
+            + ErrorWithMessageServlet.MESSAGE, thrown.getMessage() );
     }
 
     public void testGet403()
@@ -115,8 +115,8 @@ public class HttpWagonErrorTest
 
         assertNotNull( thrown );
         assertEquals( AuthorizationException.class, thrown.getClass() );
-        assertEquals("Authorization failed for http://localhost:" + serverPort
-                + "/403 403 " + ErrorWithMessageServlet.MESSAGE, thrown.getMessage());
+        assertEquals( "Authorization failed for http://localhost:" + serverPort + "/403 403 "
+            + ErrorWithMessageServlet.MESSAGE, thrown.getMessage() );
     }
 
     public void testGet404()
@@ -151,8 +151,8 @@ public class HttpWagonErrorTest
 
         assertNotNull( thrown );
         assertEquals( ResourceDoesNotExistException.class, thrown.getClass() );
-        assertEquals("Resource missing at http://localhost:" + serverPort + "/404 404 "
-                + ErrorWithMessageServlet.MESSAGE, thrown.getMessage());
+        assertEquals( "Resource missing at http://localhost:" + serverPort + "/404 404 "
+            + ErrorWithMessageServlet.MESSAGE, thrown.getMessage() );
     }
 
     public void testGet407()
@@ -187,8 +187,8 @@ public class HttpWagonErrorTest
 
         assertNotNull( thrown );
         assertEquals( AuthorizationException.class, thrown.getClass() );
-        assertEquals("HTTP proxy server authentication failed for http://localhost:" + serverPort
-                + "/407 407 " + ErrorWithMessageServlet.MESSAGE, thrown.getMessage());
+        assertEquals( "HTTP proxy server authentication failed for http://localhost:" + serverPort + "/407 407 "
+            + ErrorWithMessageServlet.MESSAGE, thrown.getMessage() );
     }
 
     public void testGet500()
@@ -223,7 +223,7 @@ public class HttpWagonErrorTest
 
         assertNotNull( thrown );
         assertEquals( TransferFailedException.class, thrown.getClass() );
-        assertEquals("Transfer failed for http://localhost:" + serverPort + "/500 500 "
-                + ErrorWithMessageServlet.MESSAGE, thrown.getMessage());
+        assertEquals( "Transfer failed for http://localhost:" + serverPort + "/500 500 "
+            + ErrorWithMessageServlet.MESSAGE, thrown.getMessage() );
     }
 }
