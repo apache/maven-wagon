@@ -108,22 +108,7 @@ public class HttpMessageUtils
     public static String formatTransferFailedMessage( String url, int statusCode, String reasonPhrase,
                                                       ProxyInfo proxyInfo )
     {
-        String msg = "Transfer failed for " + url;
-        if ( statusCode != UNKNOWN_STATUS_CODE )
-        {
-            msg += " " + statusCode;
-            // deliberately a null check instead of empty check so that we avoid having to handle
-            // all conceivable default status code messages
-            if ( reasonPhrase != null )
-            {
-                msg += " " + reasonPhrase;
-            }
-        }
-        if ( proxyInfo != null )
-        {
-            msg += " " + proxyInfo.toString();
-        }
-        return msg;
+        return formatMessage( "Transfer failed for ", url, statusCode, reasonPhrase, proxyInfo );
     }
 
     /**
@@ -158,21 +143,8 @@ public class HttpMessageUtils
             default:
                 break;
         }
-        String msg = "Authorization failed for " + url;
-        if ( statusCode != UNKNOWN_STATUS_CODE )
-        {
-            msg += " " + statusCode;
-            if ( StringUtils.isNotEmpty( reasonPhrase ) )
-            {
-                msg += " " + reasonPhrase;
-            }
-        }
-        if ( proxyInfo != null )
-        {
-            msg += " " + proxyInfo.toString();
-        }
-        return msg;
 
+        return formatMessage( "Authorization failed for ", url, statusCode, reasonPhrase, proxyInfo );
     }
 
     /**
@@ -190,8 +162,13 @@ public class HttpMessageUtils
     public static String formatResourceDoesNotExistMessage( String url, int statusCode, String reasonPhrase,
                                                             ProxyInfo proxyInfo )
     {
-        String msg = "Resource missing at " + url;
+        return formatMessage( "Resource missing at ", url, statusCode, reasonPhrase, proxyInfo );
+    }
 
+    private static String formatMessage( String message, String url, int statusCode, String reasonPhrase,
+                                         ProxyInfo proxyInfo )
+    {
+        String msg = message + url;
         if ( statusCode != UNKNOWN_STATUS_CODE )
         {
             msg += " " + statusCode;
@@ -218,5 +195,4 @@ public class HttpMessageUtils
         }
         return msg;
     }
-
 }
