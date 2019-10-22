@@ -123,8 +123,6 @@ public abstract class HttpWagonTestCase
         server.setHandler( handlers );
 
         server.start();
-
-        testRepository.setUrl( getTestRepositoryUrl() );
     }
 
     protected final int getTestRepositoryPort()

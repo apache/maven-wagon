@@ -42,9 +42,9 @@ public abstract class StreamingWagonTestCase
     {
         if ( supportsGetIfNewer() )
         {
-            setupRepositories();
-
             setupWagonTestingFixtures();
+
+            setupRepositories();
 
             streamRoundTripTesting();
 
@@ -55,9 +55,9 @@ public abstract class StreamingWagonTestCase
     public void testFailedGetToStream()
         throws Exception
     {
-        setupRepositories();
-
         setupWagonTestingFixtures();
+
+        setupRepositories();
 
         message( "Getting test artifact from test repository " + testRepository );
 
@@ -103,8 +103,9 @@ public abstract class StreamingWagonTestCase
     {
         if ( supportsGetIfNewer() )
         {
-            setupRepositories();
             setupWagonTestingFixtures();
+            setupRepositories();
+
             int expectedSize = putFile();
             // CHECKSTYLE_OFF: MagicNumber
             getIfNewerToStream( getExpectedLastModifiedOnGet( testRepository, new Resource( resource ) ) + 30000, false,
@@ -118,8 +119,8 @@ public abstract class StreamingWagonTestCase
     {
         if ( supportsGetIfNewer() )
         {
-            setupRepositories();
             setupWagonTestingFixtures();
+            setupRepositories();
             int expectedSize = putFile();
             getIfNewerToStream( new SimpleDateFormat( "yyyy-MM-dd" ).parse( "2006-01-01" ).getTime(), true,
                                 expectedSize );
@@ -131,8 +132,8 @@ public abstract class StreamingWagonTestCase
     {
         if ( supportsGetIfNewer() )
         {
-            setupRepositories();
             setupWagonTestingFixtures();
+            setupRepositories();
             int expectedSize = putFile();
             getIfNewerToStream( getExpectedLastModifiedOnGet( testRepository, new Resource( resource ) ), false,
                                 expectedSize );
@@ -172,8 +173,8 @@ public abstract class StreamingWagonTestCase
     {
         if ( supportsGetIfNewer() )
         {
-            setupRepositories();
             setupWagonTestingFixtures();
+            setupRepositories();
             message( "Getting test artifact from test repository " + testRepository );
             StreamingWagon wagon = (StreamingWagon) getWagon();
             wagon.addTransferListener( checksumObserver );

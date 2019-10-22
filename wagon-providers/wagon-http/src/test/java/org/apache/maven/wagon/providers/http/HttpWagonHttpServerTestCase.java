@@ -1,8 +1,5 @@
 package org.apache.maven.wagon.providers.http;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -23,9 +20,9 @@ import java.net.ServerSocket;
  */
 
 import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.WagonTestCase;
 import org.codehaus.plexus.PlexusTestCase;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
@@ -35,32 +32,17 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 public abstract class HttpWagonHttpServerTestCase
     extends PlexusTestCase
 {
-    protected static int httpServerPort;
-
     private Server server;
 
     protected ResourceHandler resourceHandler;
 
     protected ServletContextHandler context;
 
-    static
-    {
-        // claim number, release it again so it can be reclaimed by ftp server
-        try ( ServerSocket socket = WagonTestCase.newServerSocket( 10008, 10009, 10010, 10011 ) )
-        {
-            httpServerPort = socket.getLocalPort();
-        }
-        catch ( IOException e )
-        {
-            e.printStackTrace();
-        }
-    }
-    
     protected void setUp()
         throws Exception
     {
         super.setUp();
-        server = new Server( httpServerPort );
+        server = new Server( 0 );
 
         context = new ServletContextHandler( ServletContextHandler.SESSIONS );
         resourceHandler = new ResourceHandler();
@@ -85,4 +67,10 @@ public abstract class HttpWagonHttpServerTestCase
     {
         server.stop();
     }
+    
+    protected final int getPort()
+    {
+        return ((ServerConnector) server.getConnectors()[0]).getLocalPort();
+    }
+    
 }

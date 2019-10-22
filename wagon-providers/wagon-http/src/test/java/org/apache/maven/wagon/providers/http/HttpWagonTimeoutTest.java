@@ -56,7 +56,7 @@ public class HttpWagonTimeoutTest
             wagon.setReadTimeout( 1000 );
 
             Repository testRepository = new Repository();
-            testRepository.setUrl( "http://localhost:" + httpServerPort );
+            testRepository.setUrl( "http://localhost:" + getPort() );
 
             wagon.connect( testRepository );
 
@@ -91,7 +91,7 @@ public class HttpWagonTimeoutTest
             wagon.setReadTimeout( 1000 );
 
             Repository testRepository = new Repository();
-            testRepository.setUrl( "http://localhost:" + httpServerPort );
+            testRepository.setUrl( "http://localhost:" + getPort() );
 
             wagon.connect( testRepository );
 
@@ -123,7 +123,7 @@ public class HttpWagonTimeoutTest
             wagon.setReadTimeout( 1000 );
 
             Repository testRepository = new Repository();
-            testRepository.setUrl( "http://localhost:" + httpServerPort );
+            testRepository.setUrl( "http://localhost:" + getPort() );
 
             wagon.connect( testRepository );
 
@@ -155,7 +155,7 @@ public class HttpWagonTimeoutTest
             wagon.setReadTimeout( 1000 );
 
             Repository testRepository = new Repository();
-            testRepository.setUrl( "http://localhost:" + httpServerPort );
+            testRepository.setUrl( "http://localhost:" + getPort() );
 
             wagon.connect( testRepository );
 

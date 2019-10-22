@@ -53,7 +53,7 @@ public class HttpWagonErrorTest
             Wagon wagon = getWagon();
 
             Repository testRepository = new Repository();
-            testRepository.setUrl( "http://localhost:" + httpServerPort );
+            testRepository.setUrl( "http://localhost:" + getPort() );
 
             wagon.connect( testRepository );
 
@@ -87,7 +87,7 @@ public class HttpWagonErrorTest
             Wagon wagon = getWagon();
 
             Repository testRepository = new Repository();
-            testRepository.setUrl( "http://localhost:" + httpServerPort );
+            testRepository.setUrl( "http://localhost:" + getPort() );
 
             wagon.connect( testRepository );
 
@@ -122,7 +122,7 @@ public class HttpWagonErrorTest
             Wagon wagon = getWagon();
 
             Repository testRepository = new Repository();
-            testRepository.setUrl( "http://localhost:" + httpServerPort );
+            testRepository.setUrl( "http://localhost:" + getPort() );
 
             wagon.connect( testRepository );
 
@@ -156,7 +156,7 @@ public class HttpWagonErrorTest
             Wagon wagon = getWagon();
 
             Repository testRepository = new Repository();
-            testRepository.setUrl( "http://localhost:" + httpServerPort );
+            testRepository.setUrl( "http://localhost:" + getPort() );
 
             wagon.connect( testRepository );
 

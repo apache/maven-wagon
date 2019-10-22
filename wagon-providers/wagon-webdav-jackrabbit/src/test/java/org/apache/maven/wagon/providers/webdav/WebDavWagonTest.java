@@ -160,9 +160,9 @@ public class WebDavWagonTest
     public void testMkdirs()
         throws Exception
     {
-        setupRepositories();
-
         setupWagonTestingFixtures();
+
+        setupRepositories();
 
         WebDavWagon wagon = (WebDavWagon) getWagon();
         wagon.connect( testRepository, getAuthInfo() );
@@ -210,9 +210,9 @@ public class WebDavWagonTest
         throws Exception
     {
         // WAGON-244
-        setupRepositories();
-
         setupWagonTestingFixtures();
+
+        setupRepositories();
 
         // reconstruct with no basedir
         testRepository.setUrl(
@@ -255,9 +255,9 @@ public class WebDavWagonTest
     public void testWagonWebDavGetFileList()
         throws Exception
     {
-        setupRepositories();
-
         setupWagonTestingFixtures();
+
+        setupRepositories();
 
         String dirName = "file-list";
 
@@ -325,9 +325,9 @@ public class WebDavWagonTest
     public void testWagonFailsOnPutFailureByDefault()
         throws Exception
     {
-        setupRepositories();
-
         setupWagonTestingFixtures();
+
+        setupRepositories();
 
         File testFile = getTempFile();
 
@@ -388,9 +388,9 @@ public class WebDavWagonTest
     public void testWagonContinuesOnPutFailureIfPropertySet()
         throws Exception
     {
-        setupRepositories();
-
         setupWagonTestingFixtures();
+
+        setupRepositories();
 
         File testFile = getTempFile();
 

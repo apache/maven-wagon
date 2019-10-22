@@ -34,6 +34,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpRequestRetryHandler;
+import org.apache.http.client.ServiceUnavailableRetryStrategy;
 import org.apache.http.client.config.AuthSchemes;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
@@ -61,6 +62,7 @@ import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
+import org.apache.http.impl.client.DefaultServiceUnavailableRetryStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.StandardHttpRequestRetryHandler;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -451,6 +453,55 @@ public abstract class AbstractHttpClientWagon
         }
     }
 
+    /**
+     * The type of the serviceUnavailableRetryStrategy, defaults to {@code none}.
+     * Values can be {@link default DefaultServiceUnavailableRetryStrategy},
+     * or {@link standard StandardServiceUnavailableRetryStrategy}, or
+     * a fully qualified name class with a no-arg or none to not use a ServiceUnavailableRetryStrategy.
+     */
+    private static final String SERVICE_UNAVAILABLE_RETRY_STRATEGY_CLASS =
+            System.getProperty( "maven.wagon.http.serviceUnavailableRetryStrategy.class", "none" );
+
+    /**
+     * Interval in milliseconds between retries when using a serviceUnavailableRetryStrategy.
+     * <b>1000 by default</b>
+     */
+    private static final int SERVICE_UNAVAILABLE_RETRY_STRATEGY_RETRY_INTERVAL =
+        Integer.getInteger( "maven.wagon.http.serviceUnavailableRetryStrategy.retryInterval", 1000 );
+
+    /**
+     * Maximum number of retries when using a serviceUnavailableRetryStrategy.
+     * <b>5 by default</b>
+     */
+    private static final int SERVICE_UNAVAILABLE_RETRY_STRATEGY_MAX_RETRIES =
+        Integer.getInteger( "maven.wagon.http.serviceUnavailableRetryStrategy.maxRetries", 5 );
+
+    private static ServiceUnavailableRetryStrategy createServiceUnavailableRetryStrategy()
+    {
+        switch ( SERVICE_UNAVAILABLE_RETRY_STRATEGY_CLASS )
+        {
+            case "none": return null;
+            case "default":
+                return new DefaultServiceUnavailableRetryStrategy(
+                    SERVICE_UNAVAILABLE_RETRY_STRATEGY_MAX_RETRIES, SERVICE_UNAVAILABLE_RETRY_STRATEGY_RETRY_INTERVAL );
+            case "standard":
+                return new StandardServiceUnavailableRetryStrategy(
+                    SERVICE_UNAVAILABLE_RETRY_STRATEGY_MAX_RETRIES, SERVICE_UNAVAILABLE_RETRY_STRATEGY_RETRY_INTERVAL );
+            default:
+                try
+                {
+                    final ClassLoader classLoader = AbstractHttpClientWagon.class.getClassLoader();
+                    return ServiceUnavailableRetryStrategy.class.cast(
+                            classLoader.loadClass( SERVICE_UNAVAILABLE_RETRY_STRATEGY_CLASS )
+                                                                          .getConstructor().newInstance() );
+                }
+                catch ( final Exception e )
+                {
+                    throw new IllegalArgumentException( e );
+                }
+        }
+    }
+
     private static Registry<AuthSchemeProvider> createAuthSchemeRegistry()
     {
         return RegistryBuilder.<AuthSchemeProvider>create()
@@ -487,6 +538,7 @@ public abstract class AbstractHttpClientWagon
             .disableConnectionState() //
             .setConnectionManager( httpClientConnectionManager ) //
             .setRetryHandler( createRetryHandler() )
+            .setServiceUnavailableRetryStrategy( createServiceUnavailableRetryStrategy() )
             .setDefaultAuthSchemeRegistry( createAuthSchemeRegistry() )
             .build();
     }

@@ -96,7 +96,7 @@ public abstract class AbstractJschWagon
     private volatile InteractiveUserInfo interactiveUserInfo;
 
     /**
-     * @plexus.configuration default-value="gssapi-with-mic,publickey,password,keyboard-interactive"
+     * @plexus.configuration
      */
     private volatile String preferredAuthentications;
 
@@ -251,7 +251,7 @@ public abstract class AbstractJschWagon
             config.setProperty( "StrictHostKeyChecking", strictHostKeyChecking );
         }
 
-        if ( authenticationInfo.getPassword() != null )
+        if ( preferredAuthentications != null )
         {
             config.setProperty( "PreferredAuthentications", preferredAuthentications );
         }

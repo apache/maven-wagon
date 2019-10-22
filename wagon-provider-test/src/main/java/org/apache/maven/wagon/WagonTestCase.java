@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
@@ -135,23 +134,6 @@ public abstract class WagonTestCase
      * @return the protocol id
      */
     protected abstract String getProtocol();
-
-    public static ServerSocket newServerSocket( int... ports )
-    {
-        for ( int port : ports )
-        {
-            try
-            {
-                return new ServerSocket( port );
-            }
-            catch ( IOException ex )
-            {
-                continue;
-            }
-        }
-
-        throw new RuntimeException( "no port available" );
-    }
 
     // ----------------------------------------------------------------------
     // 1. Create a local file repository which mimic a users local file
@@ -270,9 +252,9 @@ public abstract class WagonTestCase
     public void testWagon()
         throws Exception
     {
-        setupRepositories();
-
         setupWagonTestingFixtures();
+
+        setupRepositories();
 
         fileRoundTripTesting();
 
@@ -284,8 +266,8 @@ public abstract class WagonTestCase
     {
         if ( supportsGetIfNewer() )
         {
-            setupRepositories();
             setupWagonTestingFixtures();
+            setupRepositories();
             int expectedSize = putFile();
             // CHECKSTYLE_OFF: MagicNumber
             getIfNewer( getExpectedLastModifiedOnGet( testRepository, new Resource( resource ) ) + 30000, false,
@@ -315,8 +297,8 @@ public abstract class WagonTestCase
     {
         if ( supportsGetIfNewer() )
         {
-            setupRepositories();
             setupWagonTestingFixtures();
+            setupRepositories();
             int expectedSize = putFile();
             getIfNewer( getExpectedLastModifiedOnGet( testRepository, new Resource( resource ) ), false, expectedSize );
         }
@@ -327,8 +309,8 @@ public abstract class WagonTestCase
     {
         if ( supportsGetIfNewer() )
         {
-            setupRepositories();
             setupWagonTestingFixtures();
+            setupRepositories();
             int expectedSize = putFile();
             getIfNewer( new SimpleDateFormat( "yyyy-MM-dd" ).parse( "2006-01-01" ).getTime(), true, expectedSize );
         }
@@ -431,9 +413,9 @@ public abstract class WagonTestCase
     public void testWagonPutDirectory()
         throws Exception
     {
-        setupRepositories();
-
         setupWagonTestingFixtures();
+
+        setupRepositories();
 
         Wagon wagon = getWagon();
 
@@ -479,9 +461,9 @@ public abstract class WagonTestCase
     public void testWagonPutDirectoryDeepDestination()
         throws Exception
     {
-        setupRepositories();
-
         setupWagonTestingFixtures();
+
+        setupRepositories();
 
         Wagon wagon = getWagon();
 
@@ -533,9 +515,9 @@ public abstract class WagonTestCase
 
         final String[] resources = { "a/test-resource-2.txt", "a/b/test-resource-3.txt", "c/test-resource-4.txt" };
 
-        setupRepositories();
-
         setupWagonTestingFixtures();
+
+        setupRepositories();
 
         Wagon wagon = getWagon();
 
@@ -585,9 +567,9 @@ public abstract class WagonTestCase
 
         final String[] resources = { "a/test-resource-2.txt", "a/b/test-resource-3.txt", "c/test-resource-4.txt" };
 
-        setupRepositories();
-
         setupWagonTestingFixtures();
+
+        setupRepositories();
 
         Wagon wagon = getWagon();
 
@@ -688,9 +670,9 @@ public abstract class WagonTestCase
     public void testFailedGet()
         throws Exception
     {
-        setupRepositories();
-
         setupWagonTestingFixtures();
+
+        setupRepositories();
 
         message( "Getting test artifact from test repository " + testRepository );
 
@@ -729,8 +711,8 @@ public abstract class WagonTestCase
     {
         if ( supportsGetIfNewer() )
         {
-            setupRepositories();
             setupWagonTestingFixtures();
+            setupRepositories();
             message( "Getting test artifact from test repository " + testRepository );
             Wagon wagon = getWagon();
             wagon.addTransferListener( checksumObserver );
@@ -767,9 +749,9 @@ public abstract class WagonTestCase
     public void testWagonGetFileList()
         throws Exception
     {
-        setupRepositories();
-
         setupWagonTestingFixtures();
+
+        setupRepositories();
 
         String dirName = "file-list";
 
@@ -821,9 +803,9 @@ public abstract class WagonTestCase
     public void testWagonGetFileListWhenDirectoryDoesNotExist()
         throws Exception
     {
-        setupRepositories();
-
         setupWagonTestingFixtures();
+
+        setupRepositories();
 
         String dirName = "file-list-unexisting";
 
@@ -857,9 +839,9 @@ public abstract class WagonTestCase
     public void testWagonResourceExists()
         throws Exception
     {
-        setupRepositories();
-
         setupWagonTestingFixtures();
+
+        setupRepositories();
 
         Wagon wagon = getWagon();
 
@@ -883,9 +865,9 @@ public abstract class WagonTestCase
     public void testWagonResourceNotExists()
         throws Exception
     {
-        setupRepositories();
-
         setupWagonTestingFixtures();
+
+        setupRepositories();
 
         Wagon wagon = getWagon();
 
