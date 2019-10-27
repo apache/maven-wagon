@@ -27,7 +27,24 @@ import org.codehaus.plexus.util.StringUtils;
 
 /**
  * Helper for HTTP related messages.
- *
+ * <p>
+ * <b>Important notice on Reason Phrase</b>:
+ * <ul>
+ * <li>reason phrase was <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec6.html">defined by initial HTTP/1.1
+ * RFC 2616</a>: <cite>The Reason-Phrase is intended to give a short textual description of the Status-Code. The
+ * Status-Code is intended for use by automata and the Reason-Phrase is intended for the human user. The client is not
+ * required to examine or display the Reason- Phrase.</cite></li>
+ * <li>it has been later largely deprecated in <a href="https://tools.ietf.org/html/rfc7230#section-3.1.2">the updated
+ * HTTP/1.1 RFC-7230</a>: <cite>The reason-phrase element exists for the sole purpose of providing a textual description
+ * associated with the numeric status code, mostly out of deference to earlier Internet application protocols that were
+ * more frequently used with interactive text clients. A client SHOULD ignore the reason-phrase content.</cite></li>
+ * <li>it has been removed from <a href="https://tools.ietf.org/html/rfc7540#section-8.1.2.4">HTTP/2 RFC 7540</a>:
+ * <cite>HTTP/2 does not define a way to carry the version or reason phrase that is included in an HTTP/1.1 status
+ * line.</cite>.</li>
+ * </ul>
+ * The use of Reason Phrase done here to improve the message to the end-user (particularly in case of failures) will
+ * disappear while HTTP/2 is deployed: a new mechanism to provide such a message needs to be defined... 
+ * 
  * @since 3.3.4
  */
 public class HttpMessageUtils
