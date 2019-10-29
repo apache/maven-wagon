@@ -117,7 +117,7 @@ import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatTransfer
 public abstract class AbstractHttpClientWagon
     extends StreamWagon
 {
-    private final class RequestEntityImplementation
+    private final class WagonHttpEntity
         extends AbstractHttpEntity
     {
         private final Resource resource;
@@ -132,7 +132,7 @@ public abstract class AbstractHttpClientWagon
 
         private boolean repeatable;
 
-        private RequestEntityImplementation( final InputStream stream, final Resource resource, final Wagon wagon,
+        private WagonHttpEntity( final InputStream stream, final Resource resource, final Wagon wagon,
                                              final File source )
             throws TransferFailedException
         {
@@ -648,7 +648,7 @@ public abstract class AbstractHttpClientWagon
     private void put( final InputStream stream, Resource resource, File source )
         throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
     {
-        put( resource, source, new RequestEntityImplementation( stream, resource, this, source ) );
+        put( resource, source, new WagonHttpEntity( stream, resource, this, source ) );
     }
 
     private void put( Resource resource, File source, HttpEntity httpEntity )
