@@ -24,6 +24,7 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.util.EntityUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
@@ -82,18 +83,22 @@ public class HttpWagon
                     case HttpStatus.SC_FORBIDDEN:
                     case HttpStatus.SC_UNAUTHORIZED:
                     case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
+                        EntityUtils.consumeQuietly( response.getEntity() );
                         throw new AuthorizationException( HttpMessageUtils.formatAuthorizationMessage( url, statusCode,
                                 reasonPhrase, getProxyInfo() ) );
 
                     case HttpStatus.SC_NOT_FOUND:
+                        EntityUtils.consumeQuietly( response.getEntity() );
                         throw new ResourceDoesNotExistException( formatResourceDoesNotExistMessage( url, statusCode,
                                 reasonPhrase, getProxyInfo() ) );
 
                     case SC_TOO_MANY_REQUESTS:
+                        EntityUtils.consumeQuietly( response.getEntity() );
                         return getFileList( backoff( wait, url ), destinationDirectory );
 
                     //add more entries here
                     default:
+                        EntityUtils.consumeQuietly( response.getEntity() );
                         throw new TransferFailedException( formatTransferFailedMessage( url, statusCode, reasonPhrase,
                                 getProxyInfo() ) );
                 }

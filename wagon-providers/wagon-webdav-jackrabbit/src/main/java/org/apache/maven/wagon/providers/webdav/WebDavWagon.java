@@ -25,6 +25,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.util.EntityUtils;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.MultiStatus;
@@ -300,6 +301,7 @@ public class WebDavWagon
 
                 if ( closeableHttpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND )
                 {
+                    EntityUtils.consumeQuietly( closeableHttpResponse.getEntity() );
                     throw new ResourceDoesNotExistException( "Destination directory does not exist: " + url );
                 }
             }
