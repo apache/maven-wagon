@@ -798,25 +798,30 @@ public abstract class AbstractHttpClientWagon
                     case HttpStatus.SC_MOVED_PERMANENTLY: // 301
                     case HttpStatus.SC_MOVED_TEMPORARILY: // 302
                     case HttpStatus.SC_SEE_OTHER: // 303
+                        EntityUtils.consumeQuietly( response.getEntity() );
                         put( resource, source, httpEntity, calculateRelocatedUrl( response ) );
                         return;
                     //case HttpStatus.SC_UNAUTHORIZED:
                     case HttpStatus.SC_FORBIDDEN:
+                        EntityUtils.consumeQuietly( response.getEntity() );
                         fireSessionConnectionRefused();
                         throw new AuthorizationException( formatAuthorizationMessage( url,
                                 response.getStatusLine().getStatusCode(),
                                 response.getStatusLine().getReasonPhrase(), getProxyInfo() ) );
 
                     case HttpStatus.SC_NOT_FOUND:
+                        EntityUtils.consumeQuietly( response.getEntity() );
                         throw new ResourceDoesNotExistException( formatResourceDoesNotExistMessage( url,
                                 response.getStatusLine().getStatusCode(),
                                 response.getStatusLine().getReasonPhrase(), getProxyInfo() ) );
 
                     case SC_TOO_MANY_REQUESTS:
+                        EntityUtils.consumeQuietly( response.getEntity() );
                         put( backoff( wait, url ), resource, source, httpEntity, url );
                         break;
                     //add more entries here
                     default:
+                        EntityUtils.consumeQuietly( response.getEntity() );
                         TransferFailedException e = new TransferFailedException( formatTransferFailedMessage( url,
                                 response.getStatusLine().getStatusCode(),
                                 response.getStatusLine().getReasonPhrase(), getProxyInfo() ) );
@@ -905,7 +910,6 @@ public abstract class AbstractHttpClientWagon
                                 response.getStatusLine().getReasonPhrase(), getProxyInfo() ) );
                 }
 
-                EntityUtils.consume( response.getEntity() );
                 return result;
             }
             finally
@@ -1176,22 +1180,26 @@ public abstract class AbstractHttpClientWagon
                 case HttpStatus.SC_FORBIDDEN:
                 case HttpStatus.SC_UNAUTHORIZED:
                 case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
+                    EntityUtils.consumeQuietly( response.getEntity() );
                     fireSessionConnectionRefused();
                     throw new AuthorizationException( formatAuthorizationMessage( url,
                             response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase(),
                             getProxyInfo() ) );
 
                 case HttpStatus.SC_NOT_FOUND:
+                    EntityUtils.consumeQuietly( response.getEntity() );
                     throw new ResourceDoesNotExistException( formatResourceDoesNotExistMessage( url,
                             response.getStatusLine().getStatusCode(),
                             response.getStatusLine().getReasonPhrase(), getProxyInfo() ) );
 
                 case SC_TOO_MANY_REQUESTS:
+                    EntityUtils.consumeQuietly( response.getEntity() );
                     fillInputData( backoff( wait, url ), inputData );
                     break;
 
                 // add more entries here
                 default:
+                    EntityUtils.consumeQuietly( response.getEntity() );
                     cleanupGetTransfer( resource );
                     TransferFailedException e = new TransferFailedException( formatTransferFailedMessage( url,
                             response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase(),
