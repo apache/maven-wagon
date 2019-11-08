@@ -33,6 +33,19 @@ under the License.
     Wagon provider that gets and puts artifacts through HTTP(S) using Apache HttpClient-4.x.
   </description>
 
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+    <license>
+      <name>MIT License</name>
+      <url>https://raw.githubusercontent.com/jhy/jsoup/jsoup-1.12.1/LICENSE</url>
+      <distribution>repo</distribution>
+      <comments>shaded jar is bundled with jsoup, Copyright (c) 2009-2019 Jonathan Hedley (jonathan@hedley.net)</comments>
+    </license>
+  </licenses>
 
   <dependencies>
     <dependency>
