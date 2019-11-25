@@ -44,6 +44,7 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import java.io.File;
@@ -226,7 +227,23 @@ public class WebDavWagon
                 DavProperty<?> property = propertySet.get( DavConstants.PROPERTY_RESOURCETYPE );
                 if ( property != null )
                 {
-                    Node node = (Node) property.getValue();
+                    Object value = property.getValue();
+                    Node node = null;
+                    if ( value instanceof Element )
+                    {
+                        node = ( Node ) value;
+                    }
+                    else if ( value instanceof List )
+                    {
+                        for ( Object o : ( List ) value )
+                        {
+                            if ( o instanceof Element )
+                            {
+                                node = ( Node ) o;
+                                break;
+                            }
+                        }
+                    }
                     return node.getLocalName().equals( DavConstants.XML_COLLECTION );
                 }
             }
