@@ -23,7 +23,6 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthSchemeProvider;
 import org.apache.http.auth.AuthScope;
@@ -545,6 +544,7 @@ public abstract class AbstractHttpClientWagon
             .setRetryHandler( createRetryHandler() )
             .setServiceUnavailableRetryStrategy( createServiceUnavailableRetryStrategy() )
             .setDefaultAuthSchemeRegistry( createAuthSchemeRegistry() )
+            .setRedirectStrategy( new WagonRedirectStrategy() )
             .build();
     }
 
@@ -793,14 +793,6 @@ public abstract class AbstractHttpClientWagon
                     case HttpStatus.SC_ACCEPTED: // 202
                     case HttpStatus.SC_NO_CONTENT:  // 204
                         break;
-                    // handle all redirect even if http specs says " the user agent MUST NOT automatically redirect
-                    // the request unless it can be confirmed by the user"
-                    case HttpStatus.SC_MOVED_PERMANENTLY: // 301
-                    case HttpStatus.SC_MOVED_TEMPORARILY: // 302
-                    case HttpStatus.SC_SEE_OTHER: // 303
-                        EntityUtils.consumeQuietly( response.getEntity() );
-                        put( resource, source, httpEntity, calculateRelocatedUrl( response ) );
-                        return;
                     //case HttpStatus.SC_UNAUTHORIZED:
                     case HttpStatus.SC_FORBIDDEN:
                         EntityUtils.consumeQuietly( response.getEntity() );
@@ -845,14 +837,6 @@ public abstract class AbstractHttpClientWagon
             throw new TransferFailedException( formatTransferFailedMessage( url, getProxyInfo() ), e );
         }
 
-    }
-
-    protected String calculateRelocatedUrl( HttpResponse response )
-    {
-        Header locationHeader = response.getFirstHeader( "Location" );
-        String locationField = locationHeader.getValue();
-        // is it a relative Location or a full ?
-        return locationField.startsWith( "http" ) ? locationField : getURL( getRepository() ) + '/' + locationField;
     }
 
     protected void mkdirs( String dirname )
@@ -960,11 +944,6 @@ public abstract class AbstractHttpClientWagon
             {
                 requestConfigBuilder.setExpectContinueEnabled( true );
             }
-        }
-
-        if ( httpMethod instanceof HttpPut )
-        {
-            requestConfigBuilder.setRedirectsEnabled( false );
         }
 
         HttpClientContext localContext = HttpClientContext.create();

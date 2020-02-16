@@ -500,7 +500,7 @@ public class WebDavWagonTest
         assertEquals( "found:" + putHandler.handlerRequestResponses, 1, putHandler.handlerRequestResponses.size() );
         assertEquals( "found:" + putHandler.handlerRequestResponses, HttpServletResponse.SC_CREATED,
                       putHandler.handlerRequestResponses.get( 0 ).responseCode );
-        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 3,
+        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 2,
                       redirectHandler.handlerRequestResponses.size() );
         assertEquals( "found:" + redirectHandler.handlerRequestResponses, HttpServletResponse.SC_SEE_OTHER,
                       redirectHandler.handlerRequestResponses.get( 0 ).responseCode );
@@ -512,7 +512,7 @@ public class WebDavWagonTest
     {
         assertEquals( "found:" + putHandler.handlerRequestResponses, 0, putHandler.handlerRequestResponses.size() );
 
-        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 6,
+        assertEquals( "found:" + redirectHandler.handlerRequestResponses, 4,
                       redirectHandler.handlerRequestResponses.size() );
         assertEquals( "found:" + redirectHandler.handlerRequestResponses, HttpServletResponse.SC_SEE_OTHER,
                       redirectHandler.handlerRequestResponses.get( 0 ).responseCode );
