@@ -40,23 +40,23 @@ public class ErrorWithMessageServlet
     public void service( HttpServletRequest request, HttpServletResponse response )
         throws ServletException, IOException
     {
-        if ( request.getRequestURL().toString().contains( "401" ) )
+        if ( request.getPathInfo().endsWith( "/401" ) )
         {
             response.sendError( 401, MESSAGE );
         }
-        else if ( request.getRequestURL().toString().contains( "403" ) )
+        else if ( request.getPathInfo().endsWith( "/403" ) )
         {
             response.sendError( 403, MESSAGE );
         }
-        else if ( request.getRequestURL().toString().contains( "404" ) )
+        else if ( request.getPathInfo().endsWith( "/404" ) )
         {
             response.sendError( 404, MESSAGE );
         }
-        else if ( request.getRequestURL().toString().contains( "407" ) )
+        else if ( request.getPathInfo().endsWith( "/407" ) )
         {
             response.sendError( 407, MESSAGE );
         }
-        else if ( request.getRequestURL().toString().contains( "500" ) )
+        else if ( request.getPathInfo().endsWith( "/500" ) )
         {
             response.sendError( 500, MESSAGE );
         }
