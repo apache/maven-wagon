@@ -25,12 +25,12 @@
  ~~ under the License.
 
  ~~ NOTE: For help with the syntax of this file, see:
- ~~ http://maven.apache.org/doxia/references/apt-format.html
+ ~~ https://maven.apache.org/doxia/references/apt-format.html
 
 Maven Wagon HTTP
 
  This component is an implementation of Wagon provider for HTTP access.
- It uses {{{http://hc.apache.org/httpcomponents-client-ga/}Apache HttpComponents client}} as lower level layer.
+ It uses {{{https://hc.apache.org/httpcomponents-client-4.5.x/}Apache HttpComponents Client 4.5.x}} as lower level layer.
 
  It enables Maven to use remote repositories stored in HTTP servers.
 
@@ -64,15 +64,22 @@ Features
 
  * <<<maven.wagon.http.retryHandler.class>>> supports this set of values:
 
-    * <<<default>>> will use an instance of {{{http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/impl/client/DefaultHttpRequestRetryHandler.html}<<<DefaultHttpRequestRetryHandler>>>}} respecting <<<requestSentEnabled>>>, <<<count>>> and <<<nonRetryableClasses>>>.
+    * <<<default>>> will use an instance of {{{https://hc.apache.org/httpcomponents-client-4.5.x/httpclient/apidocs/org/apache/http/impl/client/DefaultHttpRequestRetryHandler.html}<<<DefaultHttpRequestRetryHandler>>>}} respecting <<<requestSentEnabled>>>, <<<count>>> and <<<nonRetryableClasses>>>.
 
-    *<< <standard>>> will use an instance of {{{http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/impl/client/StandardHttpRequestRetryHandler.html}<<<StandardHttpRequestRetryHandler>>>}} respecting <<<requestSentEnabled>>> and <<<count>>>.
+    * <<<standard>>> will use an instance of {{{https://hc.apache.org/httpcomponents-client-4.5.x/httpclient/apidocs/org/apache/http/impl/client/StandardHttpRequestRetryHandler.html}<<<StandardHttpRequestRetryHandler>>>}} respecting <<<requestSentEnabled>>> and <<<count>>>.
 
-    * Any fully qualified name of a {{{https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/client/HttpRequestRetryHandler.html}<<<HttpRequestRetryHandler>>>}} implementation will be instantiated with its default constructor.
+    * Any fully qualified name of a {{{https://hc.apache.org/httpcomponents-client-4.5.x/httpclient/apidocs/org/apache/http/client/HttpRequestRetryHandler.html}<<<HttpRequestRetryHandler>>>}} implementation will be instantiated with its default constructor.
+
+        [Attention] This will not work with the shaded version bundled with Maven.
 
  * <<<maven.wagon.http.retryHandler.requestSentEnabled>>> = <<<requestSentEnabled>>> for <<<default>>> or <<<standard>>> implementations.
 
  * <<<maven.wagon.http.retryHandler.count>>> = number of retries for <<<default>>> or <<<standard>>> implementations.
 
  * <<<maven.wagon.http.retryHandler.nonRetryableClasses>>> = a comma-separated list of fully qualified class names bypassing the retries (only the <<<default>>> implementation).
- If not set, the default value from {{{http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/impl/client/DefaultHttpRequestRetryHandler.html}<<<DefaultHttpRequestRetryHandler>>>}} will be used.
+ If not set, the default value from {{{https://hc.apache.org/httpcomponents-client-4.5.x/httpclient/apidocs/org/apache/http/impl/client/DefaultHttpRequestRetryHandler.html}<<<DefaultHttpRequestRetryHandler>>>}} will be used.
+
+ []
+
+        [Attention] Any retry handler can only react to exceptions when executing the request and receiving the response head.
+                    It will <not> salvage in-flight failures of ongoing response body streams.
