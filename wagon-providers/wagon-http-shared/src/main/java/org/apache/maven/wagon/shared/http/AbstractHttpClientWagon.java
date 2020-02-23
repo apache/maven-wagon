@@ -793,8 +793,10 @@ public abstract class AbstractHttpClientWagon
                     case HttpStatus.SC_ACCEPTED: // 202
                     case HttpStatus.SC_NO_CONTENT:  // 204
                         break;
-                    //case HttpStatus.SC_UNAUTHORIZED:
+
                     case HttpStatus.SC_FORBIDDEN:
+                    case HttpStatus.SC_UNAUTHORIZED:
+                    case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
                         EntityUtils.consumeQuietly( response.getEntity() );
                         fireSessionConnectionRefused();
                         throw new AuthorizationException( formatAuthorizationMessage( url,

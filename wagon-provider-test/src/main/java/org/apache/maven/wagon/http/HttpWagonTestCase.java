@@ -1810,7 +1810,7 @@ public abstract class HttpWagonTestCase
             runTestSecuredPut( null );
             fail();
         }
-        catch ( TransferFailedException e )
+        catch ( AuthorizationException e )
         {
             assertTrue( true );
         }
@@ -1827,7 +1827,7 @@ public abstract class HttpWagonTestCase
             runTestSecuredPut( authInfo );
             fail();
         }
-        catch ( TransferFailedException e )
+        catch ( AuthorizationException e )
         {
             assertTrue( true );
         }

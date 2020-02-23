@@ -170,7 +170,8 @@ public class LightweightHttpWagon
                 String reasonPhrase = urlConnection.getResponseMessage();
 
                 if ( responseCode == HttpURLConnection.HTTP_FORBIDDEN
-                        || responseCode == HttpURLConnection.HTTP_UNAUTHORIZED )
+                        || responseCode == HttpURLConnection.HTTP_UNAUTHORIZED
+                        || responseCode == HttpURLConnection.HTTP_PROXY_AUTH )
                 {
                     throw new AuthorizationException( formatAuthorizationMessage( buildUrl( resource ),
                             responseCode, reasonPhrase, getProxyInfo() ) );
@@ -276,8 +277,9 @@ public class LightweightHttpWagon
                 case HttpURLConnection.HTTP_NO_CONTENT: // 204
                     break;
 
-                // TODO: handle 401 explicitly?
                 case HttpURLConnection.HTTP_FORBIDDEN:
+                case HttpURLConnection.HTTP_UNAUTHORIZED:
+                case HttpURLConnection.HTTP_PROXY_AUTH:
                     throw new AuthorizationException( formatAuthorizationMessage( buildUrl( resource ), statusCode,
                             reasonPhrase, getProxyInfo() ) );
 
@@ -453,6 +455,7 @@ public class LightweightHttpWagon
                     return false;
 
                 case HttpURLConnection.HTTP_UNAUTHORIZED:
+                case HttpURLConnection.HTTP_PROXY_AUTH:
                     throw new AuthorizationException( "Access denied to: " + url );
 
                 default:
