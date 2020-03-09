@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * 
+ *
  */
 public class HttpMethodConfiguration
 {
@@ -158,12 +158,12 @@ public class HttpMethodConfiguration
         copy.setReadTimeout( getReadTimeout() );
         if ( getHeaders() != null )
         {
-            copy.setHeaders( getHeaders() );
+            copy.getHeaders().putAll( getHeaders() );
         }
 
         if ( getParams() != null )
         {
-            copy.setParams( getParams() );
+            copy.getParams().putAll( getParams() );
         }
 
         copy.setUseDefaultHeaders( isUseDefaultHeaders() );
