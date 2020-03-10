@@ -42,12 +42,13 @@ public class HttpWagonTest
         return getProtocol() + "://localhost:" + getTestRepositoryPort();
     }
 
-    protected void setHttpHeaders( StreamingWagon wagon, Properties properties )
+    protected void setHttpConfiguration( StreamingWagon wagon, Properties headers, Properties params )
     {
         HttpConfiguration config = new HttpConfiguration();
 
         HttpMethodConfiguration methodConfiguration = new HttpMethodConfiguration();
-        methodConfiguration.setHeaders( properties );
+        methodConfiguration.setHeaders( headers );
+        methodConfiguration.setParams( params );
         config.setAll( methodConfiguration );
         ( (HttpWagon) wagon ).setHttpConfiguration( config );
     }

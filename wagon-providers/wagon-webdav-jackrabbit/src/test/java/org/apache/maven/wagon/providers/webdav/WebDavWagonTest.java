@@ -242,9 +242,15 @@ public class WebDavWagonTest
         }
     }
 
-    protected void setHttpHeaders( StreamingWagon wagon, Properties properties )
+    protected void setHttpConfiguration( StreamingWagon wagon, Properties headers, Properties params )
     {
-        ( (WebDavWagon) wagon ).setHttpHeaders( properties );
+        HttpConfiguration config = new HttpConfiguration();
+
+        HttpMethodConfiguration methodConfiguration = new HttpMethodConfiguration();
+        methodConfiguration.setHeaders( headers );
+        methodConfiguration.setParams( params );
+        config.setAll( methodConfiguration );
+        ( (WebDavWagon) wagon ).setHttpConfiguration( config );
     }
 
     /**

@@ -49,9 +49,9 @@ public class LightweightHttpWagonTest
         return getProtocol() + "://localhost:" + getTestRepositoryPort() + "/";
     }
 
-    protected void setHttpHeaders( StreamingWagon wagon, Properties properties )
+    protected void setHttpConfiguration( StreamingWagon wagon, Properties headers, Properties params )
     {
-        ( (LightweightHttpWagon) wagon ).setHttpHeaders( properties );
+        ( (LightweightHttpWagon) wagon ).setHttpHeaders( headers );
     }
 
     @Override

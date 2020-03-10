@@ -59,6 +59,7 @@ import org.eclipse.jetty.util.security.Password;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -167,12 +168,12 @@ public abstract class HttpWagonTestCase
     public void testHttpHeaders()
         throws Exception
     {
-        Properties properties = new Properties();
-        properties.setProperty( "User-Agent", "Maven-Wagon/1.0" );
+        Properties headers = new Properties();
+        headers.setProperty( "User-Agent", "Maven-Wagon/1.0" );
 
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
-        setHttpHeaders( wagon, properties );
+        setHttpConfiguration( wagon, headers, new Properties() );
 
         Server server = new Server(  );
         TestHeaderHandler handler = new TestHeaderHandler();
@@ -251,7 +252,7 @@ public abstract class HttpWagonTestCase
         // 1. set User-Agent header via HttpConfiguration
         Properties headers1 = new Properties();
         headers1.setProperty( "User-Agent", "test-user-agent" );
-        setHttpHeaders( wagon, headers1 );
+        setHttpConfiguration( wagon, headers1, new Properties() );
 
         // 2. redundantly set User-Agent header via setHttpHeaders()
         Properties headers2 = new Properties();
@@ -273,7 +274,7 @@ public abstract class HttpWagonTestCase
 
     }
 
-    protected abstract void setHttpHeaders( StreamingWagon wagon, Properties properties );
+    protected abstract void setHttpConfiguration( StreamingWagon wagon, Properties headers, Properties params );
 
     protected ServerConnector addConnector( Server server )
     {
@@ -348,7 +349,7 @@ public abstract class HttpWagonTestCase
             };
 
             server.setHandler( handler );
-            ServerConnector serverConnector = addConnector( server );
+            addConnector( server );
             server.start();
 
             wagon.connect( new Repository( "id", getRepositoryUrl( server ) ) );
@@ -1167,6 +1168,73 @@ public abstract class HttpWagonTestCase
         }
     }
 
+    public void testRedirectPutFailureNonRepeatableStream()
+            throws Exception
+        {
+            File repositoryDirectory = getRepositoryDirectory();
+            FileUtils.deleteDirectory( repositoryDirectory );
+            repositoryDirectory.mkdirs();
+
+            Server redirectServer = new Server( );
+
+            addConnector( redirectServer );
+
+            RedirectHandler redirectHandler =
+                new RedirectHandler( "See Other", HttpServletResponse.SC_SEE_OTHER, "/redirectRequest/foo",
+                                     null );
+
+            redirectServer.setHandler( redirectHandler );
+
+            redirectServer.start();
+
+            try
+            {
+                StreamingWagon wagon = (StreamingWagon) getWagon();
+
+                Properties params = new Properties();
+                params.put( "http.protocol.expect-continue", "%b,false" );
+                setHttpConfiguration( wagon, new Properties(), params );
+                Repository repository = new Repository( "foo", getRepositoryUrl( redirectServer ) );
+                wagon.connect( repository );
+
+                File sourceFile = new File( repositoryDirectory, "/redirectRequest/foo/test-secured-put-resource" );
+                sourceFile.delete();
+                assertFalse( sourceFile.exists() );
+
+                File tempFile = File.createTempFile( "wagon", "tmp" );
+                tempFile.deleteOnExit();
+                String content = "put top secret";
+                FileUtils.fileWrite( tempFile.getAbsolutePath(), content );
+
+                try ( FileInputStream fileInputStream = new FileInputStream( tempFile ) )
+                {
+                    wagon.putFromStream( fileInputStream, "test-secured-put-resource", content.length(), -1 );
+                    // This does not behave as expected because LightweightWagon does buffering by default
+                    if ( wagon.getClass().getName().contains( "Lightweight" ) )
+                    {
+                        assertTrue( true );
+                    }
+                    else
+                    {
+                        fail();
+                    }
+                }
+                catch ( TransferFailedException e )
+                {
+                    assertTrue( true );
+                }
+                finally
+                {
+                    wagon.disconnect();
+                    tempFile.delete();
+                }
+
+            }
+            finally
+            {
+                redirectServer.stop();
+            }
+        }
 
     /**
      *

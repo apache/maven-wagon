@@ -51,6 +51,10 @@ public class WagonRedirectStrategy extends DefaultRedirectStrategy
                 HttpGet.METHOD_NAME,
                 HttpHead.METHOD_NAME,
                 HttpPut.METHOD_NAME,
+                /**
+                 * This covers the most basic case where the redirection relocates to another
+                 * collection which has an existing parent collection.
+                 */
                 "MKCOL" } );
     }
 
