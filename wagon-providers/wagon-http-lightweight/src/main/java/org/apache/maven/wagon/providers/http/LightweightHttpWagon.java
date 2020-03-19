@@ -249,7 +249,6 @@ public class LightweightHttpWagon
             putConnection = (HttpURLConnection) url.openConnection( this.proxy );
 
             addHeaders( putConnection );
-            putConnection.setRequestProperty( "Expect", "100-continue" );
 
             putConnection.setRequestMethod( "PUT" );
             putConnection.setDoOutput( true );
