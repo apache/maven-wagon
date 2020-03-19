@@ -249,9 +249,19 @@ public class LightweightHttpWagon
             putConnection = (HttpURLConnection) url.openConnection( this.proxy );
 
             addHeaders( putConnection );
+            putConnection.setRequestProperty( "Expect", "100-continue" );
 
             putConnection.setRequestMethod( "PUT" );
             putConnection.setDoOutput( true );
+
+            if ( resource.getContentLength() != -1 )
+            {
+                putConnection.setFixedLengthStreamingMode( resource.getContentLength() );
+            }
+            else
+            {
+                putConnection.setChunkedStreamingMode( 0 );
+            }
             outputData.setOutputStream( putConnection.getOutputStream() );
         }
         catch ( IOException e )
