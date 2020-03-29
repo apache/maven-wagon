@@ -50,11 +50,11 @@ Features
 
  Other features can be configured through system properties:
 
- * <<<maven.wagon.http.ssl.insecure>>> = true/false (default false), enable/disable use of relaxed ssl check for user generated certificates.
+ * <<<maven.wagon.http.ssl.insecure>>> = <<<true>>>/<<<false>>> (<<<false>>> by default), enable/disable relaxed check of public key certificates (e.g. self-signed ones). Relaxed check means that any chain with 1 or more certificates will be considered valid if all the certificate dates in the chain are valid (dates check can be overridden as well - see below). Setting it to <<<true>>> also enables usage of the following properties:
 
- * <<<maven.wagon.http.ssl.allowall>>> = true/false (default false), enable/disable match of the server's X.509 certificate with hostname. If disabled, a browser like check will be used.
+    * <<<maven.wagon.http.ssl.allowall>>> = <<<true>>>/<<<false>>> (<<<false>>> by default), whether to match the server's X.509 certificate against a requested IP/DNS name. If <<<false>>>/unset, a regular server check will be used, which means that the server's IP/DNS must match either the first CN, the Subject field or one of the Subject Alternative Name extension values (in case Subject or SAN type is either <<<dNSName>>> or <<<iPAddress>>> - see {{{https://tools.ietf.org/html/rfc5280}RFC 5280 for more details}}). Otherwise, no such matching will be applied.
 
- * <<<maven.wagon.http.ssl.ignore.validity.dates>>> = true/false (default false), ignore issues with certificate dates.
+    * <<<maven.wagon.http.ssl.ignore.validity.dates>>> = <<<true>>>/<<<false>>> (<<<false>>> by default), whether to ignore issues with certificate dates (i.e. when a certificate is expired or not yet valid).
 
  * <<<maven.wagon.rto>>> = time in ms (default 1800000), read time out.
 
