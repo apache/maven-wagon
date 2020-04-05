@@ -23,7 +23,7 @@ under the License.
   <parent>
     <groupId>org.apache.maven</groupId>
     <artifactId>maven-parent</artifactId>
-    <version>33</version>
+    <version>34</version>
     <relativePath>../pom/maven/pom.xml</relativePath>
   </parent>
 
@@ -41,8 +41,8 @@ under the License.
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
     <slf4jVersion>1.7.25</slf4jVersion>
     <maven.site.path>wagon-archives/wagon-LATEST</maven.site.path>
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
+    <javaVersion>7</javaVersion>
+    <project.build.outputTimestamp>2019-10-02T08:04:00Z</project.build.outputTimestamp>
   </properties>
 
   <contributors>
