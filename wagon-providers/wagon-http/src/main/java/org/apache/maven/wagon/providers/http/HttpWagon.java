@@ -89,6 +89,7 @@ public class HttpWagon
                                 reasonPhrase, getProxyInfo() ) );
 
                     case HttpStatus.SC_NOT_FOUND:
+                    case HttpStatus.SC_GONE:
                         EntityUtils.consumeQuietly( response.getEntity() );
                         throw new ResourceDoesNotExistException( formatResourceDoesNotExistMessage( url, statusCode,
                                 reasonPhrase, getProxyInfo() ) );

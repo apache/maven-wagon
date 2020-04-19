@@ -286,6 +286,7 @@ public class LightweightHttpWagon
                             reasonPhrase, getProxyInfo() ) );
 
                 case HttpURLConnection.HTTP_NOT_FOUND:
+                case HttpURLConnection.HTTP_GONE:
                     throw new ResourceDoesNotExistException( formatResourceDoesNotExistMessage( buildUrl( resource ),
                             statusCode, reasonPhrase, getProxyInfo() ) );
 
@@ -453,6 +454,7 @@ public class LightweightHttpWagon
                     throw new AuthorizationException( "Access denied to: " + url );
 
                 case HttpURLConnection.HTTP_NOT_FOUND:
+                case HttpURLConnection.HTTP_GONE:
                     return false;
 
                 // TODO Move 401/407 to AuthenticationException after WAGON-587

@@ -805,6 +805,7 @@ public abstract class AbstractHttpClientWagon
                                 response.getStatusLine().getReasonPhrase(), getProxyInfo() ) );
 
                     case HttpStatus.SC_NOT_FOUND:
+                    case HttpStatus.SC_GONE:
                         EntityUtils.consumeQuietly( response.getEntity() );
                         throw new ResourceDoesNotExistException( formatResourceDoesNotExistMessage( url,
                                 response.getStatusLine().getStatusCode(),
@@ -885,6 +886,7 @@ public abstract class AbstractHttpClientWagon
                                 response.getStatusLine().getReasonPhrase(), getProxyInfo() ) );
 
                     case HttpStatus.SC_NOT_FOUND:
+                    case HttpStatus.SC_GONE:
                         result = false;
                         break;
 
@@ -1171,6 +1173,7 @@ public abstract class AbstractHttpClientWagon
                             getProxyInfo() ) );
 
                 case HttpStatus.SC_NOT_FOUND:
+                case HttpStatus.SC_GONE:
                     EntityUtils.consumeQuietly( response.getEntity() );
                     throw new ResourceDoesNotExistException( formatResourceDoesNotExistMessage( url,
                             response.getStatusLine().getStatusCode(),
