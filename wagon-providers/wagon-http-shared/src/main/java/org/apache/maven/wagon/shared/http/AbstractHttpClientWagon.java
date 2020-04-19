@@ -794,6 +794,7 @@ public abstract class AbstractHttpClientWagon
                     case HttpStatus.SC_NO_CONTENT:  // 204
                         break;
 
+                    // TODO Move 401/407 to AuthenticationException after WAGON-587
                     case HttpStatus.SC_FORBIDDEN:
                     case HttpStatus.SC_UNAUTHORIZED:
                     case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
@@ -875,6 +876,7 @@ public abstract class AbstractHttpClientWagon
                         result = true;
                         break;
 
+                    // TODO Move 401/407 to AuthenticationException after WAGON-587
                     case HttpStatus.SC_FORBIDDEN:
                     case HttpStatus.SC_UNAUTHORIZED:
                     case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
@@ -1158,6 +1160,7 @@ public abstract class AbstractHttpClientWagon
                     // return, leaving last modified set to original value so getIfNewer should return unmodified
                     return;
 
+                // TODO Move 401/407 to AuthenticationException after WAGON-587
                 case HttpStatus.SC_FORBIDDEN:
                 case HttpStatus.SC_UNAUTHORIZED:
                 case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:

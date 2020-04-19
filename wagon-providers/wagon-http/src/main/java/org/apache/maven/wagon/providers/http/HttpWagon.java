@@ -80,6 +80,7 @@ public class HttpWagon
                     case HttpStatus.SC_OK:
                         break;
 
+                    // TODO Move 401/407 to AuthenticationException after WAGON-587
                     case HttpStatus.SC_FORBIDDEN:
                     case HttpStatus.SC_UNAUTHORIZED:
                     case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:

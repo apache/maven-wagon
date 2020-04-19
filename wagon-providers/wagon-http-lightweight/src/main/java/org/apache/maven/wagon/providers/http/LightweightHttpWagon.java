@@ -169,6 +169,7 @@ public class LightweightHttpWagon
                 int responseCode = urlConnection.getResponseCode();
                 String reasonPhrase = urlConnection.getResponseMessage();
 
+                // TODO Move 401/407 to AuthenticationException after WAGON-587
                 if ( responseCode == HttpURLConnection.HTTP_FORBIDDEN
                         || responseCode == HttpURLConnection.HTTP_UNAUTHORIZED
                         || responseCode == HttpURLConnection.HTTP_PROXY_AUTH )
@@ -277,6 +278,7 @@ public class LightweightHttpWagon
                 case HttpURLConnection.HTTP_NO_CONTENT: // 204
                     break;
 
+                // TODO Move 401/407 to AuthenticationException after WAGON-587
                 case HttpURLConnection.HTTP_FORBIDDEN:
                 case HttpURLConnection.HTTP_UNAUTHORIZED:
                 case HttpURLConnection.HTTP_PROXY_AUTH:
@@ -454,6 +456,7 @@ public class LightweightHttpWagon
                 case HttpURLConnection.HTTP_NOT_FOUND:
                     return false;
 
+                // TODO Move 401/407 to AuthenticationException after WAGON-587
                 case HttpURLConnection.HTTP_UNAUTHORIZED:
                 case HttpURLConnection.HTTP_PROXY_AUTH:
                     throw new AuthorizationException( "Access denied to: " + url );
