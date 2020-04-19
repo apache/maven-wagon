@@ -53,6 +53,8 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatResourceDoesNotExistMessage;
+
 /**
  * <p>WebDavWagon</p>
  * <p/>
@@ -299,10 +301,13 @@ public class WebDavWagon
                     return dirs;
                 }
 
-                if ( closeableHttpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND )
+                int statusCode = closeableHttpResponse.getStatusLine().getStatusCode();
+                String reasonPhrase = closeableHttpResponse.getStatusLine().getReasonPhrase();
+                if ( statusCode == HttpStatus.SC_NOT_FOUND || statusCode == HttpStatus.SC_GONE )
                 {
                     EntityUtils.consumeQuietly( closeableHttpResponse.getEntity() );
-                    throw new ResourceDoesNotExistException( "Destination directory does not exist: " + url );
+                    throw new ResourceDoesNotExistException( formatResourceDoesNotExistMessage( url, statusCode,
+                            reasonPhrase, getProxyInfo() ) );
                 }
             }
         }
@@ -337,6 +342,7 @@ public class WebDavWagon
                 }
             }
         }
+        // FIXME WAGON-580; actually the exception is wrong here; we need an IllegalStateException here
         throw new ResourceDoesNotExistException(
             "Destination path exists but is not a " + "WebDAV collection (directory): " + url );
     }

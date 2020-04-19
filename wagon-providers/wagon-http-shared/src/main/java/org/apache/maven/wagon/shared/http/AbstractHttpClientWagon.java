@@ -329,8 +329,8 @@ public abstract class AbstractHttpClientWagon
         int nextWait = wait * 2;
         if ( nextWait >= getMaxBackoffWaitSeconds() )
         {
-            throw new TransferFailedException(
-                "Waited too long to access: " + url + ". Return code is: " + SC_TOO_MANY_REQUESTS );
+            throw new TransferFailedException( formatTransferFailedMessage( url, SC_TOO_MANY_REQUESTS,
+                    null, getProxyInfo() ) );
         }
         return nextWait;
     }

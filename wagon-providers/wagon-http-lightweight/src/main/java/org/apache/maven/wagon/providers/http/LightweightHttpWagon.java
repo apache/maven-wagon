@@ -444,27 +444,27 @@ public class LightweightHttpWagon
             headConnection.setRequestMethod( "HEAD" );
 
             int statusCode = headConnection.getResponseCode();
+            String reasonPhrase = headConnection.getResponseMessage();
 
             switch ( statusCode )
             {
                 case HttpURLConnection.HTTP_OK:
                     return true;
 
-                case HttpURLConnection.HTTP_FORBIDDEN:
-                    throw new AuthorizationException( "Access denied to: " + url );
-
                 case HttpURLConnection.HTTP_NOT_FOUND:
                 case HttpURLConnection.HTTP_GONE:
                     return false;
 
                 // TODO Move 401/407 to AuthenticationException after WAGON-587
+                case HttpURLConnection.HTTP_FORBIDDEN:
                 case HttpURLConnection.HTTP_UNAUTHORIZED:
                 case HttpURLConnection.HTTP_PROXY_AUTH:
-                    throw new AuthorizationException( "Access denied to: " + url );
+                    throw new AuthorizationException( formatAuthorizationMessage( buildUrl( resource ),
+                            statusCode, reasonPhrase, getProxyInfo() ) );
 
                 default:
-                    throw new TransferFailedException(
-                        "Failed to look for file: " + buildUrl( resource ) + ". Return code is: " + statusCode );
+                    throw new TransferFailedException( formatTransferFailedMessage( buildUrl( resource ),
+                            statusCode, reasonPhrase, getProxyInfo() ) );
             }
         }
         catch ( IOException e )

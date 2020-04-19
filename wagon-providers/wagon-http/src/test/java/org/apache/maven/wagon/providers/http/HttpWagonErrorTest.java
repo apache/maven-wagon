@@ -79,7 +79,7 @@ public class HttpWagonErrorTest
 
         assertNotNull( thrown );
         assertEquals( AuthorizationException.class, thrown.getClass() );
-        assertEquals( "Authentication failed for http://localhost:" + serverPort + "/401 401 "
+        assertEquals( "authentication failed for http://localhost:" + serverPort + "/401, status: 401 "
             + ErrorWithMessageServlet.MESSAGE, thrown.getMessage() );
     }
 
@@ -115,7 +115,7 @@ public class HttpWagonErrorTest
 
         assertNotNull( thrown );
         assertEquals( AuthorizationException.class, thrown.getClass() );
-        assertEquals( "Authorization failed for http://localhost:" + serverPort + "/403 403 "
+        assertEquals( "authorization failed for http://localhost:" + serverPort + "/403, status: 403 "
             + ErrorWithMessageServlet.MESSAGE, thrown.getMessage() );
     }
 
@@ -151,7 +151,7 @@ public class HttpWagonErrorTest
 
         assertNotNull( thrown );
         assertEquals( ResourceDoesNotExistException.class, thrown.getClass() );
-        assertEquals( "Resource missing at http://localhost:" + serverPort + "/404 404 "
+        assertEquals( "resource missing at http://localhost:" + serverPort + "/404, status: 404 "
             + ErrorWithMessageServlet.MESSAGE, thrown.getMessage() );
     }
 
@@ -187,7 +187,7 @@ public class HttpWagonErrorTest
 
         assertNotNull( thrown );
         assertEquals( AuthorizationException.class, thrown.getClass() );
-        assertEquals( "HTTP proxy server authentication failed for http://localhost:" + serverPort + "/407 407 "
+        assertEquals( "proxy authentication failed for http://localhost:" + serverPort + "/407, status: 407 "
             + ErrorWithMessageServlet.MESSAGE, thrown.getMessage() );
     }
 
@@ -223,7 +223,7 @@ public class HttpWagonErrorTest
 
         assertNotNull( thrown );
         assertEquals( TransferFailedException.class, thrown.getClass() );
-        assertEquals( "Transfer failed for http://localhost:" + serverPort + "/500 500 "
+        assertEquals( "transfer failed for http://localhost:" + serverPort + "/500, status: 500 "
             + ErrorWithMessageServlet.MESSAGE, thrown.getMessage() );
     }
 }

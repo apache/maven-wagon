@@ -40,7 +40,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * 
+ *
  */
 public final class Assertions
 {
@@ -119,7 +119,7 @@ public final class Assertions
                     assertTrue( "404 not found response should throw ResourceDoesNotExistException",
                             e instanceof ResourceDoesNotExistException );
                     reasonPhrase = StringUtils.isEmpty( forReasonPhrase ) ? " Not Found" : ( " " + forReasonPhrase );
-                    assertEquals( assertMessageForBadMessage, "Resource missing at " + forUrl + " 404"
+                    assertEquals( assertMessageForBadMessage, "resource missing at " + forUrl + ", status: 404"
                             + reasonPhrase, e.getMessage() );
                     break;
 
@@ -130,7 +130,7 @@ public final class Assertions
                                     + "methods",
                             e instanceof AuthorizationException );
                     reasonPhrase = StringUtils.isEmpty( forReasonPhrase ) ? " Unauthorized" : ( " " + forReasonPhrase );
-                    assertEquals( assertMessageForBadMessage, "Authentication failed for " + forUrl + " 401"
+                    assertEquals( assertMessageForBadMessage, "authentication failed for " + forUrl + ", status: 401"
                             + reasonPhrase, e.getMessage() );
                     break;
 
@@ -139,15 +139,15 @@ public final class Assertions
                             e instanceof AuthorizationException );
                     reasonPhrase = StringUtils.isEmpty( forReasonPhrase ) ? " Proxy Authentication Required"
                             : ( " " + forReasonPhrase );
-                    assertEquals( assertMessageForBadMessage, "HTTP proxy server authentication failed for "
-                            + forUrl + " 407" + reasonPhrase, e.getMessage() );
+                    assertEquals( assertMessageForBadMessage, "proxy authentication failed for "
+                            + forUrl + ", status: 407" + reasonPhrase, e.getMessage() );
                     break;
 
                 case HttpServletResponse.SC_FORBIDDEN:
                     assertTrue( "403 Forbidden should throw AuthorizationException",
                             e instanceof AuthorizationException );
                     reasonPhrase = StringUtils.isEmpty( forReasonPhrase ) ? " Forbidden" : ( " " + forReasonPhrase );
-                    assertEquals( assertMessageForBadMessage, "Authorization failed for " + forUrl + " 403"
+                    assertEquals( assertMessageForBadMessage, "authorization failed for " + forUrl + ", status: 403"
                             + reasonPhrase, e.getMessage() );
                     break;
 
@@ -158,29 +158,29 @@ public final class Assertions
                     // the status code and reason phrase cannot always be learned due to implementation limitations
                     // so the message may not include them, but the implementation should use a consistent format
                     assertTrue( "message should always include url tried: " + e.getMessage(),
-                            e.getMessage().startsWith( "Transfer failed for " + forUrl ) );
+                            e.getMessage().startsWith( "transfer failed for " + forUrl ) );
 
                     String statusCodeStr = forStatusCode == NO_RESPONSE_STATUS_CODE ? ""
-                            : String.valueOf( forStatusCode );
+                            : ", status: " +  forStatusCode;
                     if ( forStatusCode != NO_RESPONSE_STATUS_CODE )
                     {
 
                         assertTrue( "if there was a response status line, the status code should be >= 400",
                                 forStatusCode >= HttpServletResponse.SC_BAD_REQUEST );
 
-                        if ( e.getMessage().length() > ( "Transfer failed for " + forUrl ).length() )
+                        if ( e.getMessage().length() > ( "transfer failed for " + forUrl ).length() )
                         {
                             assertTrue( "message should include url and status code: " + e.getMessage(),
-                                    e.getMessage().startsWith( "Transfer failed for " + forUrl + statusCodeStr ) );
+                                    e.getMessage().startsWith( "transfer failed for " + forUrl + statusCodeStr ) );
                         }
 
                         reasonPhrase = forReasonPhrase == null ? "" : " " + forReasonPhrase;
 
-                        if ( reasonPhrase.length() > 0 && e.getMessage().length() > ( "Transfer failed for " + forUrl
+                        if ( reasonPhrase.length() > 0 && e.getMessage().length() > ( "transfer failed for " + forUrl
                                 + statusCodeStr ).length() )
                         {
                             assertTrue( "message should include url and status code and reason phrase: "
-                                    + e.getMessage(), e.getMessage().startsWith( "Transfer failed for "
+                                    + e.getMessage(), e.getMessage().startsWith( "transfer failed for "
                                             + forUrl + statusCodeStr
                                             + reasonPhrase ) );
                         }

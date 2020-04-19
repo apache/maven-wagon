@@ -99,12 +99,12 @@ public class LightweightHttpWagonTest
                                 e.getCause() instanceof FileNotFoundException );
                         // the status code and reason phrase cannot always be learned due to implementation limitations
                         // which means the message may not include them
-                        assertEquals( assertMessageForBadMessage, "Resource missing at " + forUrl, e.getMessage() );
+                        assertEquals( assertMessageForBadMessage, "resource missing at " + forUrl, e.getMessage() );
                     }
                     else
                     {
-                        assertEquals( assertMessageForBadMessage, "Resource missing at " + forUrl
-                                + " " + forStatusCode + " " + forReasonPhrase, e.getMessage() );
+                        assertEquals( assertMessageForBadMessage, "resource missing at " + forUrl
+                                + ", status: " + forStatusCode + " " + forReasonPhrase, e.getMessage() );
                     }
 
                     break;
@@ -113,7 +113,7 @@ public class LightweightHttpWagonTest
                     assertTrue( "403 Forbidden throws AuthorizationException",
                             e instanceof AuthorizationException );
 
-                    assertEquals( assertMessageForBadMessage, "Authorization failed for " + forUrl + " 403"
+                    assertEquals( assertMessageForBadMessage, "authorization failed for " + forUrl + ", status: 403"
                             + ( StringUtils.isEmpty( forReasonPhrase ) ? " Forbidden" : ( " " + forReasonPhrase ) ),
                             e.getMessage() );
                     break;
@@ -122,7 +122,7 @@ public class LightweightHttpWagonTest
                     assertTrue( "401 Unauthorized throws AuthorizationException",
                             e instanceof AuthorizationException );
 
-                    assertEquals( assertMessageForBadMessage, "Authentication failed for " + forUrl + " 401"
+                    assertEquals( assertMessageForBadMessage, "authentication failed for " + forUrl + ", status: 401"
                                     + ( StringUtils.isEmpty( forReasonPhrase ) ? " Unauthorized" :
                                     ( " " + forReasonPhrase ) ),
                             e.getMessage() );
@@ -144,18 +144,18 @@ public class LightweightHttpWagonTest
                     // the status code and reason phrase cannot always be learned due to implementation limitations
                     // so the message may not include them, but the implementation should use a consistent format
                     assertTrue( "message should always include url",
-                            e.getMessage().startsWith( "Transfer failed for " + forUrl ) );
+                            e.getMessage().startsWith( "transfer failed for " + forUrl ) );
 
-                    if ( e.getMessage().length() > ( "Transfer failed for " + forUrl ).length() )
+                    if ( e.getMessage().length() > ( "transfer failed for " + forUrl ).length() )
                     {
                         assertTrue( "message should include url and status code",
-                                e.getMessage().startsWith( "Transfer failed for " + forUrl + " " + forStatusCode ) );
+                                e.getMessage().startsWith( "transfer failed for " + forUrl + ", status: " + forStatusCode ) );
                     }
 
-                    if ( e.getMessage().length() > ( "Transfer failed for " + forUrl + " " + forStatusCode ).length() )
+                    if ( e.getMessage().length() > ( "transfer failed for " + forUrl + ", status: " + forStatusCode ).length() )
                     {
                         assertEquals( "message should include url and status code and reason phrase",
-                                "Transfer failed for " + forUrl + " " + forStatusCode + " " + forReasonPhrase,
+                                "transfer failed for " + forUrl + ", status: " + forStatusCode + " " + forReasonPhrase,
                                 e.getMessage() );
                     }
 

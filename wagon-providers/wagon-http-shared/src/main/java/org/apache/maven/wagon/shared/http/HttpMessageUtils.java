@@ -19,6 +19,8 @@ package org.apache.maven.wagon.shared.http;
  * under the License.
  */
 
+import java.util.Objects;
+
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
@@ -35,16 +37,17 @@ import org.codehaus.plexus.util.StringUtils;
  * Status-Code is intended for use by automata and the Reason-Phrase is intended for the human user. The client is not
  * required to examine or display the Reason- Phrase.</cite></li>
  * <li>it has been later largely deprecated in <a href="https://tools.ietf.org/html/rfc7230#section-3.1.2">the updated
- * HTTP/1.1 RFC-7230</a>: <cite>The reason-phrase element exists for the sole purpose of providing a textual description
- * associated with the numeric status code, mostly out of deference to earlier Internet application protocols that were
- * more frequently used with interactive text clients. A client SHOULD ignore the reason-phrase content.</cite></li>
- * <li>it has been removed from <a href="https://tools.ietf.org/html/rfc7540#section-8.1.2.4">HTTP/2 RFC 7540</a>:
+ * HTTP/1.1 in RFC 7230</a>: <cite>The reason-phrase element exists for the sole purpose of providing a textual
+ * description associated with the numeric status code, mostly out of deference to earlier Internet application
+ * protocols that were more frequently used with interactive text clients. A client SHOULD ignore the reason-phrase
+ * content.</cite></li>
+ * <li>it has been removed from <a href="https://tools.ietf.org/html/rfc7540#section-8.1.2.4">HTTP/2 in RFC 7540</a>:
  * <cite>HTTP/2 does not define a way to carry the version or reason phrase that is included in an HTTP/1.1 status
  * line.</cite>.</li>
  * </ul>
  * The use of Reason Phrase done here to improve the message to the end-user (particularly in case of failures) will
- * disappear while HTTP/2 is deployed: a new mechanism to provide such a message needs to be defined... 
- * 
+ * disappear while HTTP/2 is deployed: a new mechanism to provide such a message needs to be defined...
+ *
  * @since 3.3.4
  */
 public class HttpMessageUtils
@@ -63,16 +66,16 @@ public class HttpMessageUtils
     public static final int UNKNOWN_STATUS_CODE = -1;
 
     /**
-     * Format a consistent HTTP transfer debug message combining url, status code, status line reason phrase and HTTP
+     * Format a consistent HTTP transfer debug message combining URL, status code, reason phrase and HTTP
      * proxy server info.
      * <p>
-     * Url will always be included in the message. A status code other than {@link #UNKNOWN_STATUS_CODE} will be
+     * URL will always be included in the message. A status code other than {@link #UNKNOWN_STATUS_CODE} will be
      * included. A reason phrase will only be included if non-empty and status code is not {@link #UNKNOWN_STATUS_CODE}.
      * Proxy information will only be included if not null.
      *
      * @param url          the required non-null URL associated with the message
      * @param statusCode   an HTTP response status code
-     * @param reasonPhrase an HTTP status line reason phrase
+     * @param reasonPhrase an HTTP reason phrase
      * @param proxyInfo    proxy server used during the transfer, may be null if none used
      * @return a formatted debug message combining the parameters of this method
      * @throws NullPointerException if url is null
@@ -80,6 +83,7 @@ public class HttpMessageUtils
     public static String formatTransferDebugMessage( String url, int statusCode, String reasonPhrase,
                                                      ProxyInfo proxyInfo )
     {
+        Objects.requireNonNull( url, "url cannot be null" );
         String msg = url;
         if ( statusCode != UNKNOWN_STATUS_CODE )
         {
@@ -91,7 +95,7 @@ public class HttpMessageUtils
         }
         if ( proxyInfo != null )
         {
-            msg += " -- " + proxyInfo.toString();
+            msg += " -- proxy: " + proxyInfo;
         }
         return msg;
     }
@@ -125,7 +129,7 @@ public class HttpMessageUtils
     public static String formatTransferFailedMessage( String url, int statusCode, String reasonPhrase,
                                                       ProxyInfo proxyInfo )
     {
-        return formatMessage( "Transfer failed for ", url, statusCode, reasonPhrase, proxyInfo );
+        return formatMessage( "transfer failed for ", url, statusCode, reasonPhrase, proxyInfo );
     }
 
     /**
@@ -140,26 +144,27 @@ public class HttpMessageUtils
      * @param proxyInfo    proxy server used during the transfer, may be null if none used
      * @return a consistent message for a HTTP related {@link AuthorizationException}
      */
+    // TODO Split when WAGON-568 is implemented
     public static String formatAuthorizationMessage( String url, int statusCode, String reasonPhrase,
                                                      ProxyInfo proxyInfo )
     {
         switch ( statusCode )
         {
             case SC_UNAUTHORIZED: // no credentials or auth was not valid
-                return formatMessage( "Authentication failed for ", url, statusCode, reasonPhrase, null );
+                return formatMessage( "authentication failed for ", url, statusCode, reasonPhrase, null );
 
             case SC_FORBIDDEN: // forbidden based on permissions usually
-                return formatMessage( "Authorization failed for ", url, statusCode, reasonPhrase, null );
+                return formatMessage( "authorization failed for ", url, statusCode, reasonPhrase, null );
 
             case SC_PROXY_AUTH_REQUIRED:
-                return formatMessage( "HTTP proxy server authentication failed for ", url, statusCode,
+                return formatMessage( "proxy authentication failed for ", url, statusCode,
                         reasonPhrase, null );
 
             default:
                 break;
         }
 
-        return formatMessage( "Authorization failed for ", url, statusCode, reasonPhrase, proxyInfo );
+        return formatMessage( "authorization failed for ", url, statusCode, reasonPhrase, proxyInfo );
     }
 
     /**
@@ -177,16 +182,18 @@ public class HttpMessageUtils
     public static String formatResourceDoesNotExistMessage( String url, int statusCode, String reasonPhrase,
                                                             ProxyInfo proxyInfo )
     {
-        return formatMessage( "Resource missing at ", url, statusCode, reasonPhrase, proxyInfo );
+        return formatMessage( "resource missing at ", url, statusCode, reasonPhrase, proxyInfo );
     }
 
     private static String formatMessage( String message, String url, int statusCode, String reasonPhrase,
                                          ProxyInfo proxyInfo )
     {
+        Objects.requireNonNull( message, "message cannot be null" );
+        Objects.requireNonNull( url, "url cannot be null" );
         String msg = message + url;
         if ( statusCode != UNKNOWN_STATUS_CODE )
         {
-            msg += " " + statusCode;
+            msg += ", status: " + statusCode;
 
             if ( StringUtils.isNotEmpty( reasonPhrase ) )
             {
@@ -223,7 +230,7 @@ public class HttpMessageUtils
         }
         if ( proxyInfo != null )
         {
-            msg += " " + proxyInfo.toString();
+            msg += ", proxy: " + proxyInfo;
         }
         return msg;
     }
