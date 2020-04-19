@@ -441,7 +441,6 @@ public class LightweightHttpWagon
             addHeaders( headConnection );
 
             headConnection.setRequestMethod( "HEAD" );
-            headConnection.setDoOutput( true );
 
             int statusCode = headConnection.getResponseCode();
 
