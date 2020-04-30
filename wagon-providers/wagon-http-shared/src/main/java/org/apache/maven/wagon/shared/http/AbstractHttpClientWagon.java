@@ -597,7 +597,7 @@ public abstract class AbstractHttpClientWagon
                 String host = getRepository().getHost();
                 int port = getRepository().getPort();
 
-                credentialsProvider.setCredentials( getBasicAuthScope().getScope( host, port ), creds );
+                credentialsProvider.setCredentials( AuthScope.ANY, creds );
             }
         }
 
@@ -760,14 +760,14 @@ public abstract class AbstractHttpClientWagon
         // TODO: is it a good idea, though? 'Expect-continue' handshake would serve much better
 
         Repository repo = getRepository();
-        HttpHost targetHost = new HttpHost( repo.getHost(), repo.getPort(), repo.getProtocol() );
+        /*HttpHost targetHost = new HttpHost( repo.getHost(), repo.getPort(), repo.getProtocol() );
         AuthScope targetScope = getBasicAuthScope().getScope( targetHost );
 
         if ( credentialsProvider.getCredentials( targetScope ) != null )
         {
             BasicScheme targetAuth = new BasicScheme();
             authCache.put( targetHost, targetAuth );
-        }
+        }*/
 
         HttpPut putMethod = new HttpPut( url );
 
@@ -960,13 +960,13 @@ public abstract class AbstractHttpClientWagon
         if ( config != null && config.isUsePreemptive() )
         {
             HttpHost targetHost = new HttpHost( repo.getHost(), repo.getPort(), repo.getProtocol() );
-            AuthScope targetScope = getBasicAuthScope().getScope( targetHost );
+            /*AuthScope targetScope = getBasicAuthScope().getScope( targetHost );
 
             if ( credentialsProvider.getCredentials( targetScope ) != null )
             {
                 BasicScheme targetAuth = new BasicScheme();
                 authCache.put( targetHost, targetAuth );
-            }
+            }*/
         }
 
         if ( proxyInfo != null )
