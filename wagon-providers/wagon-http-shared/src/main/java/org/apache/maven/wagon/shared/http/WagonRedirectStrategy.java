@@ -21,6 +21,7 @@ package org.apache.maven.wagon.shared.http;
 
 import java.net.URI;
 
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -33,6 +34,10 @@ import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.Args;
+import org.apache.maven.wagon.events.TransferEvent;
+import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon.WagonHttpEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A custom redirect strategy for Apache Maven Wagon HttpClient.
@@ -42,6 +47,8 @@ import org.apache.http.util.Args;
  */
 public class WagonRedirectStrategy extends DefaultRedirectStrategy
 {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger( WagonRedirectStrategy.class );
 
     private static final int SC_PERMANENT_REDIRECT = 308;
 
@@ -85,6 +92,34 @@ public class WagonRedirectStrategy extends DefaultRedirectStrategy
             final HttpContext context ) throws ProtocolException
     {
         final URI uri = getLocationURI( request, response, context );
+        if ( request instanceof HttpEntityEnclosingRequest )
+        {
+            HttpEntityEnclosingRequest encRequest = (HttpEntityEnclosingRequest) request;
+            if ( encRequest.getEntity() instanceof AbstractHttpClientWagon.WagonHttpEntity )
+            {
+                AbstractHttpClientWagon.WagonHttpEntity whe = (WagonHttpEntity) encRequest.getEntity();
+                if ( whe.getWagon() instanceof AbstractHttpClientWagon )
+                {
+                    // Re-execute AbstractWagon#firePutStarted(Resource, File)
+                    AbstractHttpClientWagon httpWagon = (AbstractHttpClientWagon) whe.getWagon();
+                    TransferEvent transferEvent =
+                            new TransferEvent( httpWagon, whe.getResource(),
+                                               TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_PUT );
+                    transferEvent.setTimestamp( System.currentTimeMillis() );
+                    transferEvent.setLocalFile( whe.getSource() );
+                    httpWagon.getTransferEventSupport().fireDebug(
+                            String.format( "Following redirect from '%s' to '%s'",
+                                          request.getRequestLine().getUri(), uri.toASCIIString() ) );
+                    httpWagon.getTransferEventSupport().fireTransferStarted( transferEvent );
+                }
+                else
+                {
+                    LOGGER.warn( "Cannot properly handle redirect transfer event, wagon has unexpected class: {}",
+                                whe.getWagon().getClass() );
+                }
+            }
+        }
+
         return RequestBuilder.copy( request ).setUri( uri ).build();
     }
 

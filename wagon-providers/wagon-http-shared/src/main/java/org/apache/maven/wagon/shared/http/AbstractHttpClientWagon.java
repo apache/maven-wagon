@@ -118,7 +118,7 @@ import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatTransfer
 public abstract class AbstractHttpClientWagon
     extends StreamWagon
 {
-    private final class WagonHttpEntity
+    final class WagonHttpEntity
         extends AbstractHttpEntity
     {
         private final Resource resource;
@@ -153,9 +153,14 @@ public abstract class AbstractHttpClientWagon
             this.wagon = wagon;
         }
 
-        public long getContentLength()
+        public Resource getResource()
         {
-            return length;
+            return resource;
+        }
+
+        public Wagon getWagon()
+        {
+            return wagon;
         }
 
         public InputStream getContent()
@@ -166,6 +171,16 @@ public abstract class AbstractHttpClientWagon
                 return new FileInputStream( this.source );
             }
             return stream;
+        }
+
+        public File getSource()
+        {
+            return source;
+        }
+
+        public long getContentLength()
+        {
+            return length;
         }
 
         public boolean isRepeatable()
