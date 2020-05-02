@@ -155,6 +155,10 @@ public class WebDavWagon
     private int doMkCol( String url )
         throws IOException
     {
+        // preemptive for mkcol
+        // TODO: is it a good idea, though? 'Expect-continue' handshake would serve much better
+
+        // FIXME Perform only when preemptive has been configured
         Repository repo = getRepository();
         HttpHost targetHost = new HttpHost( repo.getHost(), repo.getPort(), repo.getProtocol() );
         AuthScope targetScope = getBasicAuthScope().getScope( targetHost );

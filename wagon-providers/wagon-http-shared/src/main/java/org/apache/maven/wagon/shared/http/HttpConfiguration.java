@@ -25,11 +25,11 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 
 /**
- * 
+ *
  */
 public class HttpConfiguration
 {
-    
+
     private static final HttpMethodConfiguration DEFAULT_PUT =
         new HttpMethodConfiguration().addParam( "http.protocol.expect-continue", "%b,true" );
 
