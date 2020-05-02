@@ -610,10 +610,9 @@ public abstract class AbstractHttpClientWagon
             {
                 Credentials creds = new UsernamePasswordCredentials( username, password );
 
-                String host = getRepository().getHost();
-                int port = getRepository().getPort();
-
-                credentialsProvider.setCredentials( getBasicAuthScope().getScope( host, port ), creds );
+                AuthScope targetScope = getBasicAuthScope().getScope( getRepository().getHost(),
+                                                                    getRepository().getPort() );
+                credentialsProvider.setCredentials( targetScope, creds );
             }
         }
 
@@ -639,10 +638,8 @@ public abstract class AbstractHttpClientWagon
                         creds = new UsernamePasswordCredentials( proxyUsername, proxyPassword );
                     }
 
-                    int proxyPort = proxyInfo.getPort();
-
-                    AuthScope authScope = getProxyBasicAuthScope().getScope( proxyHost, proxyPort );
-                    credentialsProvider.setCredentials( authScope, creds );
+                    AuthScope proxyScope = getProxyBasicAuthScope().getScope( proxyHost, proxyInfo.getPort() );
+                    credentialsProvider.setCredentials( proxyScope, creds );
                 }
             }
         }
