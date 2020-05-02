@@ -91,6 +91,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -213,29 +214,29 @@ public abstract class AbstractHttpClientWagon
                     if ( read == -1 )
                     {
                         // EOF, but some data has not been written yet.
-                        if ( buffer.position() != 0 )
+                        if ( ( (Buffer) buffer ).position() != 0 )
                         {
-                            buffer.flip();
-                            fireTransferProgress( transferEvent, buffer.array(), buffer.limit() );
-                            output.write( buffer.array(), 0, buffer.limit() );
-                            buffer.clear();
+                            ( (Buffer) buffer ).flip();
+                            fireTransferProgress( transferEvent, buffer.array(), ( (Buffer) buffer ).limit() );
+                            output.write( buffer.array(), 0, ( (Buffer) buffer ).limit() );
+                            ( (Buffer) buffer ).clear();
                         }
 
                         break;
                     }
 
-                    // Prevent minichunking / fragmentation: when less than half the buffer is utilized,
+                    // Prevent minichunking/fragmentation: when less than half the buffer is utilized,
                     // read some more bytes before writing and firing progress.
-                    if ( buffer.position() < halfBufferCapacity )
+                    if ( ( (Buffer) buffer ).position() < halfBufferCapacity )
                     {
                         continue;
                     }
 
-                    buffer.flip();
-                    fireTransferProgress( transferEvent, buffer.array(), buffer.limit() );
-                    output.write( buffer.array(), 0, buffer.limit() );
-                    remaining -= buffer.limit();
-                    buffer.clear();
+                    ( (Buffer) buffer ).flip();
+                    fireTransferProgress( transferEvent, buffer.array(), ( (Buffer) buffer ).limit() );
+                    output.write( buffer.array(), 0, ( (Buffer) buffer ).limit() );
+                    remaining -= ( (Buffer) buffer ).limit();
+                    ( (Buffer) buffer ).clear();
 
                 }
                 output.flush();
