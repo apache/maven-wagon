@@ -138,8 +138,6 @@ public class Debug
                 + transferEvent.getWagon().getRepository().getUrl();
 
             out.println( message );
-
-            out.println( "" );
         }
         else
         {
@@ -147,8 +145,6 @@ public class Debug
                 + transferEvent.getWagon().getRepository().getUrl();
 
             out.println( message );
-
-            out.println( "" );
 
         }
     }
