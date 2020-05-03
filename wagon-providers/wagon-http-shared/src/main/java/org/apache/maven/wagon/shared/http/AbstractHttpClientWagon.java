@@ -610,8 +610,7 @@ public abstract class AbstractHttpClientWagon
             {
                 Credentials creds = new UsernamePasswordCredentials( username, password );
 
-                AuthScope targetScope = getBasicAuthScope().getScope( getRepository().getHost(),
-                                                                    getRepository().getPort() );
+                AuthScope targetScope = AuthScope.ANY;
                 credentialsProvider.setCredentials( targetScope, creds );
             }
         }
@@ -775,7 +774,7 @@ public abstract class AbstractHttpClientWagon
         // FIXME Perform only when preemptive has been configured
         Repository repo = getRepository();
         HttpHost targetHost = new HttpHost( repo.getHost(), repo.getPort(), repo.getProtocol() );
-        AuthScope targetScope = getBasicAuthScope().getScope( targetHost );
+        AuthScope targetScope = AuthScope.ANY;
 
         if ( credentialsProvider.getCredentials( targetScope ) != null )
         {
@@ -974,7 +973,7 @@ public abstract class AbstractHttpClientWagon
         if ( config != null && config.isUsePreemptive() )
         {
             HttpHost targetHost = new HttpHost( repo.getHost(), repo.getPort(), repo.getProtocol() );
-            AuthScope targetScope = getBasicAuthScope().getScope( targetHost );
+            AuthScope targetScope = AuthScope.ANY;
 
             if ( credentialsProvider.getCredentials( targetScope ) != null )
             {
