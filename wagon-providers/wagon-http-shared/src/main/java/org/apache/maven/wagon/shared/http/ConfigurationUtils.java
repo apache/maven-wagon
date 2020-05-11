@@ -54,6 +54,7 @@ public class ConfigurationUtils
     private static final String MAX_REDIRECTS               = "http.protocol.max-redirects";
     private static final String HANDLE_REDIRECTS            = "http.protocol.handle-redirects";
     private static final String REJECT_RELATIVE_REDIRECT    = "http.protocol.reject-relative-redirect";
+    // TODO Add contentCompressionEnabled and normalizeUri
 
     private static final String COERCE_PATTERN = "%(\\w+),(.+)";
 
@@ -100,6 +101,7 @@ public class ConfigurationUtils
                 }
                 else if ( key.equals( DEFAULT_PROXY ) )
                 {
+                    // FIXME This passes host only, ignoring the port
                     builder.setProxy( new HttpHost( value ) );
                 }
                 else if ( key.equals( LOCAL_ADDRESS ) )

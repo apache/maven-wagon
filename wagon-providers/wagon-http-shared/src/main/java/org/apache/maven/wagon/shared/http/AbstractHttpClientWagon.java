@@ -1013,6 +1013,7 @@ public abstract class AbstractHttpClientWagon
         {
             // TODO: merge with the other headers and have some better defaults, unify with lightweight headers
             method.addHeader(  "Cache-control", "no-cache" );
+            // FIXME This header does not exist, remove it
             method.addHeader( "Cache-store", "no-store" );
             method.addHeader( "Pragma", "no-cache" );
         }
