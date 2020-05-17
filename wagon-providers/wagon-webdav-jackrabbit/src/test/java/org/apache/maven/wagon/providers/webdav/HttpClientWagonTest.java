@@ -93,17 +93,12 @@ public class HttpClientWagonTest
 
         // these are the default headers.
         // method.addRequestHeader( "Cache-control", "no-cache" );
-        // method.addRequestHeader( "Cache-store", "no-store" );
         // method.addRequestHeader( "Pragma", "no-cache" );
         // "Accept-Encoding" is automatically set by HttpClient at runtime
 
         Header header = method.getFirstHeader( "Cache-control" );
         assertNotNull( header );
         assertEquals( "no-cache", header.getValue() );
-
-        header = method.getFirstHeader( "Cache-store" );
-        assertNotNull( header );
-        assertEquals( "no-store", header.getValue() );
 
         header = method.getFirstHeader( "Pragma" );
         assertNotNull( header );
@@ -123,13 +118,9 @@ public class HttpClientWagonTest
 
         // these are the default headers.
         // method.addRequestHeader( "Cache-control", "no-cache" );
-        // method.addRequestHeader( "Cache-store", "no-store" );
         // method.addRequestHeader( "Pragma", "no-cache" );
 
         Header header = method.getFirstHeader( "Cache-control" );
-        assertNull( header );
-
-        header = method.getFirstHeader( "Cache-store" );
         assertNull( header );
 
         header = method.getFirstHeader( "Pragma" );
