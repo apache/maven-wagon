@@ -54,6 +54,7 @@ public class ConfigurationUtils
     private static final String MAX_REDIRECTS               = "http.protocol.max-redirects";
     private static final String HANDLE_REDIRECTS            = "http.protocol.handle-redirects";
     private static final String REJECT_RELATIVE_REDIRECT    = "http.protocol.reject-relative-redirect";
+    private static final String HANDLE_CONTENT_COMPRESSION  = "http.protocol.handle-content-compression";
     // TODO Add contentCompressionEnabled and normalizeUri
 
     private static final String COERCE_PATTERN = "%(\\w+),(.+)";
@@ -149,6 +150,10 @@ public class ConfigurationUtils
                 else if ( key.equals( REJECT_RELATIVE_REDIRECT ) )
                 {
                     builder.setRelativeRedirectsAllowed( !Boolean.valueOf( value ) );
+                }
+                else if ( key.equals ( HANDLE_CONTENT_COMPRESSION ) )
+                {
+                    builder.setContentCompressionEnabled( Boolean.valueOf( value ) );
                 }
             }
         }
