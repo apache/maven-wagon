@@ -101,8 +101,7 @@ public class ConfigurationUtils
                 }
                 else if ( key.equals( DEFAULT_PROXY ) )
                 {
-                    // FIXME This passes host only, ignoring the port
-                    builder.setProxy( new HttpHost( value ) );
+                    builder.setProxy( HttpHost.create( value ) );
                 }
                 else if ( key.equals( LOCAL_ADDRESS ) )
                 {
