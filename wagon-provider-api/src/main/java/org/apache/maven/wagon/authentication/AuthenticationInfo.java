@@ -24,9 +24,10 @@ import java.io.Serializable;
 /**
  * This class holds the set of properties used when instance of the <code>Wagon</code>
  * will use during login operation.
+ * <br>May 2020, added PKI settings, see MNG-5583
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- *
+ * 
  */
 public class AuthenticationInfo
     implements Serializable
@@ -52,7 +53,7 @@ public class AuthenticationInfo
      */
     private String privateKey;
     
-    /**
+     /**
      *
      *
      * The path to the trust store. If not defined, the JRE's cacert store is
@@ -344,11 +345,7 @@ public class AuthenticationInfo
     {
         this.keyStoreType = keyStoreType;
     }
-
-
     
-    
-
     /**
      * Get the passphrase of the private key file. The passphrase is used only
      * when host/protocol supports authentication via exchange of
