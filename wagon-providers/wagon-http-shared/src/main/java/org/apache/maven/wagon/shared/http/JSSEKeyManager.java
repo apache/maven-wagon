@@ -1,21 +1,23 @@
-/*
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
-
 package org.apache.maven.wagon.shared.http;
+
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 import java.net.Socket;
 import java.security.Principal;
@@ -35,7 +37,8 @@ import javax.net.ssl.X509KeyManager;
  *
  * @author Jan Luehe
  */
-public final class JSSEKeyManager extends X509ExtendedKeyManager {
+public final class JSSEKeyManager extends X509ExtendedKeyManager 
+{
 
     private X509KeyManager delegate;
     private String serverKeyAlias;
@@ -64,11 +67,12 @@ public final class JSSEKeyManager extends X509ExtendedKeyManager {
     @Override
     public String chooseServerAlias( String keyType, Principal[] issuers, Socket socket )
     {
-        if (serverKeyAlias != null) {
+        if ( serverKeyAlias != null ) 
+        {
             return serverKeyAlias;
         }
 
-        return delegate.chooseServerAlias(keyType, issuers, socket);
+        return delegate.chooseServerAlias( keyType, issuers, socket );
     }
 
 
@@ -81,11 +85,12 @@ public final class JSSEKeyManager extends X509ExtendedKeyManager {
     public String chooseEngineServerAlias( String keyType, Principal[] issuers,
             SSLEngine engine )
     {
-        if (serverKeyAlias!=null) {
+        if ( serverKeyAlias != null ) 
+        {
             return serverKeyAlias;
         }
 
-        return super.chooseEngineServerAlias(keyType, issuers, engine);
+        return super.chooseEngineServerAlias( keyType, issuers, engine );
     }
 
 
@@ -93,35 +98,35 @@ public final class JSSEKeyManager extends X509ExtendedKeyManager {
     public String chooseClientAlias( String[] keyType, Principal[] issuers,
                                     Socket socket )
     {
-        return delegate.chooseClientAlias(keyType, issuers, socket);
+        return delegate.chooseClientAlias( keyType, issuers, socket );
     }
 
 
     @Override
     public X509Certificate[] getCertificateChain( String alias )
     {
-        return delegate.getCertificateChain(alias);
+        return delegate.getCertificateChain( alias );
     }
 
 
     @Override
     public String[] getClientAliases( String keyType, Principal[] issuers )
     {
-        return delegate.getClientAliases(keyType, issuers);
+        return delegate.getClientAliases( keyType, issuers );
     }
 
 
     @Override
     public String[] getServerAliases( String keyType, Principal[] issuers )
     {
-        return delegate.getServerAliases(keyType, issuers);
+        return delegate.getServerAliases( keyType, issuers );
     }
 
 
     @Override
     public PrivateKey getPrivateKey( String alias )
     {
-        return delegate.getPrivateKey(alias);
+        return delegate.getPrivateKey( alias );
     }
 
 
@@ -129,6 +134,6 @@ public final class JSSEKeyManager extends X509ExtendedKeyManager {
     public String chooseEngineClientAlias( String[] keyType, Principal[] issuers,
             SSLEngine engine )
     {
-        return delegate.chooseClientAlias(keyType, issuers, null);
+        return delegate.chooseClientAlias( keyType, issuers, null );
     }
 }
