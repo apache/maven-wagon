@@ -19,39 +19,6 @@ package org.apache.maven.wagon.shared.http;
  * under the License.
  */
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.charset.StandardCharsets;
-import java.security.KeyStore;
-import java.security.SecureRandom;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509KeyManager;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
@@ -84,7 +51,6 @@ import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContextBuilder;
-import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.SSLInitializationException;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.impl.auth.BasicScheme;
@@ -114,11 +80,52 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
+import org.codehaus.plexus.util.StringUtils;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509KeyManager;
+import org.apache.http.conn.ssl.SSLContexts;
+
 import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatAuthorizationMessage;
 import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatResourceDoesNotExistMessage;
 import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatTransferDebugMessage;
 import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatTransferFailedMessage;
-import org.codehaus.plexus.util.StringUtils;
+
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -393,7 +400,7 @@ public abstract class AbstractHttpClientWagon
                     cipherSuites,
                                                 SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER );
         }
-        
+
         Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create().register( "http",
                         PlainConnectionSocketFactory.INSTANCE ).register(
             "https", sslConnectionSocketFactory ).build();
@@ -556,7 +563,7 @@ public abstract class AbstractHttpClientWagon
         }
         return exceptions;
     }
-    
+
     private CloseableHttpClient httpClientWithCustomSslSocketFactory = null;
     private static Map<String, CloseableHttpClient> httpClientWithCustomSslSocketFactoryCache = new HashMap<>();
     private static CloseableHttpClient httpClient = createClient();
@@ -606,11 +613,11 @@ public abstract class AbstractHttpClientWagon
     /**
      * initializes a custom http client given user specified keystore/truststore
      * information from settings.xml
-     * see httsp://issues.apache.org/jira/browser/MNG-5583
+     * see https://issues.apache.org/jira/browser/MNG-5583
      * @return a client
      * @throws SSLInitializationException if there's an issue loading keystore/truststore
      */
-    private CloseableHttpClient initilaizeLocalHttpClientWithCustomSslSocketFactory() throws SSLInitializationException 
+    private CloseableHttpClient initilaizeLocalHttpClientWithCustomSslSocketFactory() throws SSLInitializationException
     {
         String sslProtocolsStr = System.getProperty( "https.protocols" );
         String cipherSuitesStr = System.getProperty( "https.cipherSuites" );
@@ -620,109 +627,68 @@ public abstract class AbstractHttpClientWagon
         SSLSocketFactory socketFactory = null;
         TrustManager[] trustManagers = null;
         KeyManager[] keyManagers = null;
-        try 
+        try
         {
-            if ( authenticationInfo.getTrustStore() != null ) 
+            if ( authenticationInfo.getTrustStore() != null )
             {
-                KeyStore keystore = KeyStore.getInstance( authenticationInfo.getTrustStoreType() == null ? "JKS"
-                        : authenticationInfo.getTrustStoreType() );
-                FileInputStream fis = null;
-                //on windows platforms, the truststoreType of "WINDOWS" mounts
-                //to the windows certificate store, so a null input stream is just fine
-                File file = new File( ( authenticationInfo.getTrustStore() ) );
-                if ( file.exists() ) 
-                {
-                    fis = new FileInputStream( file );
-                } 
-                //also a null password is fine with windows and even with JKS files
-                char[] keyPass = authenticationInfo.getTrustStorePassword() != null
-                        ? authenticationInfo.getTrustStorePassword().toCharArray()
-                        : null;
-                keystore.load( fis, keyPass );
-                if ( keyPass != null ) 
-                {
-                    for ( int i = 0; i < keyPass.length; i++ ) 
-                    {
-                        keyPass[i] = 0;
-                    }
-                }
-                if ( fis != null ) 
-                {
-                    fis.close();
-                }
+                KeyStore keystore = initializeKeyStore( authenticationInfo.getTrustStoreType(),
+                    authenticationInfo.getTrustStore(),
+                    authenticationInfo.getTrustStorePassword() );
                 String alg = KeyManagerFactory.getDefaultAlgorithm();
                 TrustManagerFactory fac = TrustManagerFactory.getInstance( alg );
                 fac.init( keystore );
                 trustManagers = fac.getTrustManagers();
             }
 
-            if ( authenticationInfo.getKeyStore() != null ) 
+            if ( authenticationInfo.getKeyStore() != null )
             {
-                KeyStore keystore = KeyStore.getInstance( authenticationInfo.getKeyStoreType() == null ? "JKS"
-                        : authenticationInfo.getKeyStoreType() );
-                FileInputStream fis = null;
-                //on windows platforms, the truststoreType of "WINDOWS" mounts
-                //to the windows certificate store, so a null input stream is just fine
-                File file = new File( ( authenticationInfo.getTrustStore() ) );
-                if ( file.exists() ) 
-                {
-                    fis = new FileInputStream( file );
-                }
+                KeyStore keystore = initializeKeyStore( authenticationInfo.getKeyStoreType(),
+                        authenticationInfo.getKeyStore(),
+                        authenticationInfo.getKeyStorePassword() );
                 String alg = KeyManagerFactory.getDefaultAlgorithm();
-                char[] keyStorePass = authenticationInfo.getKeyStorePassword() != null
-                        ? authenticationInfo.getKeyStorePassword().toCharArray()
-                        : null;
                 char[] keyPass = authenticationInfo.getKeyPassword() != null
                         ? authenticationInfo.getKeyPassword().toCharArray()
                         : null;
                 KeyManagerFactory fac = KeyManagerFactory.getInstance( alg );
-                keystore.load( fis, keyStorePass );
                 fac.init( keystore, keyPass );
-                if ( keyPass != null ) 
-                {
-                    for ( int i = 0; i < keyPass.length; i++ ) 
-                    {
-                        keyPass[i] = 0;
-                    }
-                }
-                keyPass = null;
                 String alias = authenticationInfo.getKeyAlias();
                 if ( alias != null )
                 {
                     //borrowed from tomcat's code
                     //user has explicitly specified a key alias, great.
-                    //let's make sure it exists in the key store that it has a 
+                    //let's make sure it exists in the key store that it has a
                     //key pair
-                    if ( keystore.containsAlias( alias ) ) 
+                    if ( keystore.containsAlias( alias ) )
                     {
-                        if ( !keystore.isKeyEntry( alias ) ) 
-                        {
-                            alias = null;
-                        }
-                    } 
-                    else if ( keystore.containsAlias( alias.toLowerCase() ) ) 
-                    {
-                        alias = alias.toLowerCase();
-                        if ( !keystore.isKeyEntry( alias ) ) 
+                        if ( !keystore.isKeyEntry( alias ) )
                         {
                             alias = null;
                         }
                     }
-                    if ( alias == null ) 
+                    else if ( keystore.containsAlias( alias.toLowerCase() ) )
+                    {
+                        alias = alias.toLowerCase( Locale.getDefault() );
+                        if ( !keystore.isKeyEntry( alias ) )
+                        {
+                            alias = null;
+                        }
+                    }
+                    if ( alias == null )
                     {
                         //TODO this should be I18N
-                        throw new IOException( "key alias not found" );
+                        throw new SSLInitializationException( "key alias not found",
+                                new Exception ( authenticationInfo.getKeyAlias() ) );
                     }
                     //ok we found the alias with a key.
                 }
 
                 keyManagers = fac.getKeyManagers();
-                if ( alias != null ) 
+                if ( alias != null )
                 {
                     //filter down the key managers to just the user's selected cert.
-                    for ( int k = 0; k < keyManagers.length; k++ ) 
+                    for ( int k = 0; k < keyManagers.length; k++ )
                     {
-                        if ( keyManagers[k] instanceof X509KeyManager ) 
+                        if ( keyManagers[k] instanceof X509KeyManager )
                         {
                             keyManagers[k] = new JSSEKeyManager( (X509KeyManager) keyManagers[k], alias );
                         }
@@ -737,8 +703,8 @@ public abstract class AbstractHttpClientWagon
             {
                 socketFactory = HttpsURLConnection.getDefaultSSLSocketFactory();
             }
-        } 
-        catch ( Exception ex ) 
+        }
+        catch ( Exception ex )
         {
             throw new SSLInitializationException( ex.getMessage(), ex );
         }
@@ -765,11 +731,11 @@ public abstract class AbstractHttpClientWagon
         {
             connManager.setMaxTotal( 1 );
         }
-  
-        CloseableHttpClient httpClientWithCustomSslSocketFactory = HttpClientBuilder.create() 
-            .useSystemProperties() 
-            .disableConnectionState() 
-            .setConnectionManager( connManager ) 
+
+        CloseableHttpClient httpClientWithCustomSslSocketFactory = HttpClientBuilder.create()
+            .useSystemProperties()
+            .disableConnectionState()
+            .setConnectionManager( connManager )
             .setRetryHandler( createRetryHandler() )
             .setServiceUnavailableRetryStrategy( createServiceUnavailableRetryStrategy() )
             .setDefaultAuthSchemeRegistry( createAuthSchemeRegistry() )
@@ -777,15 +743,15 @@ public abstract class AbstractHttpClientWagon
             .build();
         return httpClientWithCustomSslSocketFactory;
     }
-    
-    
+
+
     public void openConnectionInternal()
     {
         repository.setUrl( getURL( repository ) );
 
         credentialsProvider = new BasicCredentialsProvider();
         authCache = new BasicAuthCache();
-        
+
         if ( authenticationInfo != null )
         {
 
@@ -801,13 +767,13 @@ public abstract class AbstractHttpClientWagon
                 credentialsProvider.setCredentials( targetScope, creds );
             }
             //MNG-5583 per endpoint PKI authentication
-            if ( authenticationInfo.getTrustStore() != null || authenticationInfo.getKeyStore() != null ) 
+            if ( authenticationInfo.getTrustStore() != null || authenticationInfo.getKeyStore() != null )
             {
                 //cache the client for this specific server host:port combination
                 String key = repository.getProtocol() + repository.getHost() + repository.getPort();
                 if ( !httpClientWithCustomSslSocketFactoryCache.containsKey( key ) )
                 {
-                    httpClientWithCustomSslSocketFactoryCache.put( key, 
+                    httpClientWithCustomSslSocketFactoryCache.put( key,
                             initilaizeLocalHttpClientWithCustomSslSocketFactory() );
                 }
             }
@@ -816,7 +782,6 @@ public abstract class AbstractHttpClientWagon
         ProxyInfo proxyInfo = getProxyInfo( getRepository().getProtocol(), getRepository().getHost() );
         if ( proxyInfo != null )
         {
-            //TODO add PKI support?
             String proxyUsername = proxyInfo.getUserName();
             String proxyPassword = proxyInfo.getPassword();
             String proxyHost = proxyInfo.getHost();
@@ -1203,9 +1168,9 @@ public abstract class AbstractHttpClientWagon
         String key = repository.getProtocol() + repository.getHost() + repository.getPort();
         if ( httpClientWithCustomSslSocketFactoryCache.containsKey( key ) )
         {
-            return httpClientWithCustomSslSocketFactoryCache.get( key ).execute( httpMethod, localContext ); 
+            return httpClientWithCustomSslSocketFactoryCache.get( key ).execute( httpMethod, localContext );
         }
-       
+
         return httpClient.execute( httpMethod, localContext );
     }
 
@@ -1529,5 +1494,31 @@ public abstract class AbstractHttpClientWagon
     public static int getMaxBackoffWaitSeconds()
     {
         return MAX_BACKOFF_WAIT_SECONDS;
+    }
+
+
+    private KeyStore initializeKeyStore( String keyStoreType, String keyStore, String keyStorePassword )
+            throws KeyStoreException, FileNotFoundException, IOException,
+            NoSuchAlgorithmException, CertificateException
+    {
+        KeyStore keystore = KeyStore.getInstance( keyStoreType == null ? "JKS"
+                : keyStoreType );
+
+        char[] keyStorePass = keyStorePassword != null
+                ? keyStorePassword.toCharArray()
+                : null;
+        File file = null;
+        if ( keyStore != null )
+        {
+            file = new File( keyStore );
+        }
+        //on windows platforms, the truststoreType of "WINDOWS" mounts
+        //to the windows certificate store, so a null input stream is just fine
+        //macos has a similar setup
+        try ( FileInputStream fis = file != null && file.exists() ? new FileInputStream( file ) : null )
+        {
+            keystore.load( fis, keyStorePass );
+        }
+        return keystore;
     }
 }

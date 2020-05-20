@@ -19,11 +19,12 @@ package org.apache.maven.wagon.repository;
  * under the License.
  */
 
-import java.io.Serializable;
 import java.util.Properties;
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.WagonConstants;
 import org.codehaus.plexus.util.StringUtils;
+
+import java.io.Serializable;
 
 /**
  * This class is an abstraction of the location from/to resources
@@ -52,7 +53,7 @@ public class Repository
 
     private String url;
 
-    private RepositoryPermissions permissions; 
+    private RepositoryPermissions permissions;
 
     /**
      * Properties influencing wagon behaviour
@@ -64,7 +65,7 @@ public class Repository
     private String username = null;
 
     private String password = null;
-    
+
     /**
      * @deprecated use {@link #Repository(String, String)}
      */

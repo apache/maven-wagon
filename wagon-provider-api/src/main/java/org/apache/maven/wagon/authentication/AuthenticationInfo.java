@@ -24,10 +24,9 @@ import java.io.Serializable;
 /**
  * This class holds the set of properties used when instance of the <code>Wagon</code>
  * will use during login operation.
- * <br>May 2020, added PKI settings, see MNG-5583
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * 
+ *
  */
 public class AuthenticationInfo
     implements Serializable
@@ -52,89 +51,53 @@ public class AuthenticationInfo
      * The absolute path to private key file
      */
     private String privateKey;
-    
+
      /**
-     *
-     *
      * The path to the trust store. If not defined, the JRE's cacert store is
      * used.
-     *
-     *
      */
     private String trustStore;
 
     /**
-     *
-     *
      * The password to the trust store.
-     *
-     *
      */
     private String trustStorePassword;
 
     /**
-     *
-     *
      * The type of trust store, default is JKS
-     *
-     * .
      */
     private String trustStoreType;
 
     /**
-     *
-     *
      * The path to the keystore used for authentication purposes, or null
-     *
-     * .
      */
     private String keyStore;
 
     /**
-     *
-     *
      * Keystore password, can be null
-     *
-     * .
      */
     private String keyStorePassword;
 
     /**
-     *
-     *
      * Keystore if the key store has multiple key pairs, this can be used to
      * explicitly select a specific certificate via it's alias. If null, the
      * most appropriate certificate is automatically selected by the SSL Factory
-     *
-     * .
      */
     private String keyAlias;
 
     /**
-     *
-     *
      * The password to unlock the key, can be null
-     *
-     * .
      */
     private String keyPassword;
 
     /**
-     *
-     *
      * The key store type, defaults to JKS
-     *
-     * .
      */
     private String keyStoreType;
 
     /**
-     *
-     *
      * The path to the trust store. If not defined, the JRE's cacert store is
      * used.
-     *
-     *
      * @return path, name or null
      */
     public String getTrustStore()
@@ -143,12 +106,8 @@ public class AuthenticationInfo
     }
 
     /**
-     *
-     *
      * The path to the trust store. If not defined, the JRE's cacert store is
      * used.
-     *
-     *
      * @param trustStore path name or null
      */
     public void setTrustStore( String trustStore )
@@ -157,11 +116,7 @@ public class AuthenticationInfo
     }
 
     /**
-     *
-     *
      * The password to the trust store.
-     *
-     *
      * @return password or null
      */
     public String getTrustStorePassword()
@@ -170,25 +125,16 @@ public class AuthenticationInfo
     }
 
     /**
-     *
-     *
      * The password to the trust store.
-     *
-     *
      * @param trustStorePassword password or null
      */
-    public void setTrustStorePassword( String trustStorePassword ) 
+    public void setTrustStorePassword( String trustStorePassword )
     {
         this.trustStorePassword = trustStorePassword;
     }
 
     /**
-     *
-     *
      * The type of trust store, default is JKS
-     *
-     * .
-     *
      * @return type
      */
     public String getTrustStoreType()
@@ -197,12 +143,7 @@ public class AuthenticationInfo
     }
 
     /**
-     *
-     *
      * The type of trust store, default is JKS
-     *
-     * .
-     *
      * @param trustStoreType key store type
      */
     public void setTrustStoreType( String trustStoreType )
@@ -211,13 +152,8 @@ public class AuthenticationInfo
     }
 
     /**
-     *
-     *
      * The path to the keystore used for authentication purposes, or null
-     *
-     * .
-     *
-     * @return path, named keystore (such as MY) or null
+     * @return path, named keystore  or null
      */
     public String getKeyStore()
     {
@@ -225,12 +161,7 @@ public class AuthenticationInfo
     }
 
     /**
-     *
-     *
      * The path to the keystore used for authentication purposes, or null
-     *
-     * .
-     *
      * @param keyStore keystore path, name or null
      */
     public void setKeyStore( String keyStore )
@@ -239,12 +170,7 @@ public class AuthenticationInfo
     }
 
     /**
-     *
-     *
      * Keystore password, can be null
-     *
-     * .
-     *
      * @return password or null
      */
     public String getKeyStorePassword()
@@ -253,12 +179,7 @@ public class AuthenticationInfo
     }
 
     /**
-     *
-     *
      * Keystore password, can be null
-     *
-     * .
-     *
      * @param keyStorePassword password or null
      */
     public void setKeyStorePassword( String keyStorePassword )
@@ -267,14 +188,9 @@ public class AuthenticationInfo
     }
 
     /**
-     *
-     *
      * Keystore if the key store has multiple key pairs, this can be used to
      * explicitly select a specific certificate via it's alias. If null, the
      * most appropriate certificate is automatically selected by the SSL Factory
-     *
-     * .
-     *
      * @return the alias or null
      */
     public String getKeyAlias()
@@ -283,14 +199,9 @@ public class AuthenticationInfo
     }
 
     /**
-     *
-     *
      * Keystore if the key store has multiple key pairs, this can be used to
      * explicitly select a specific certificate via it's alias. If null, the
      * most appropriate certificate is automatically selected by the SSL Factory
-     *
-     * .
-     *
      * @param keyAlias alias
      */
     public void setKeyAlias( String keyAlias )
@@ -299,11 +210,7 @@ public class AuthenticationInfo
     }
 
     /**
-     *
-     *
      * The password to unlock the key, can be null
-     *
-     * .
      */
     public String getKeyPassword()
     {
@@ -311,11 +218,7 @@ public class AuthenticationInfo
     }
 
     /**
-     *
-     *
      * The password to unlock the key, can be null
-     *
-     * .
      */
     public void setKeyPassword( String keyPassword )
     {
@@ -323,11 +226,7 @@ public class AuthenticationInfo
     }
 
     /**
-     *
-     *
      * The key store type, defaults to JKS
-     *
-     * .
      */
     public String getKeyStoreType()
     {
@@ -335,17 +234,13 @@ public class AuthenticationInfo
     }
 
     /**
-     *
-     *
      * The key store type, defaults to JKS
-     *
-     * .
      */
     public void setKeyStoreType( String keyStoreType )
     {
         this.keyStoreType = keyStoreType;
     }
-    
+
     /**
      * Get the passphrase of the private key file. The passphrase is used only
      * when host/protocol supports authentication via exchange of
