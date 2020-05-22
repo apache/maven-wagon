@@ -77,7 +77,7 @@ public class ServerFixture
 
     private int httpPort;
 
-    public ServerFixture( final boolean ssl )
+    public ServerFixture( final boolean ssl, final boolean requireClientCertificateAuthentication )
         throws URISyntaxException, IOException
     {
         server = new Server();
@@ -93,6 +93,9 @@ public class ServerFixture
             sslContextFactory.setKeyStorePath( keystore );
             sslContextFactory.setKeyStorePassword( SERVER_SSL_KEYSTORE_PASSWORD );
             sslContextFactory.setKeyManagerPassword( SERVER_SSL_KEYSTORE_PASSWORD );
+            sslContextFactory.setWantClientAuth( requireClientCertificateAuthentication );
+            sslContextFactory.setNeedClientAuth( requireClientCertificateAuthentication );
+
             serverConnector = new ServerConnector( server, sslContextFactory );
             server.addConnector( serverConnector );
         }

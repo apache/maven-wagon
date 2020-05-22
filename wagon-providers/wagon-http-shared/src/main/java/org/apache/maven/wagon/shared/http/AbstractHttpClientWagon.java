@@ -631,18 +631,18 @@ public abstract class AbstractHttpClientWagon
         {
             if ( authenticationInfo.getTrustStore() != null )
             {
-                KeyStore keystore = initializeKeyStore( authenticationInfo.getTrustStoreType(),
+                KeyStore trustStore = initializeKeyStore( authenticationInfo.getTrustStoreType(),
                     authenticationInfo.getTrustStore(),
                     authenticationInfo.getTrustStorePassword() );
                 String alg = KeyManagerFactory.getDefaultAlgorithm();
                 TrustManagerFactory fac = TrustManagerFactory.getInstance( alg );
-                fac.init( keystore );
+                fac.init( trustStore );
                 trustManagers = fac.getTrustManagers();
             }
 
             if ( authenticationInfo.getKeyStore() != null )
             {
-                KeyStore keystore = initializeKeyStore( authenticationInfo.getKeyStoreType(),
+                KeyStore keyStore = initializeKeyStore( authenticationInfo.getKeyStoreType(),
                         authenticationInfo.getKeyStore(),
                         authenticationInfo.getKeyStorePassword() );
                 String alg = KeyManagerFactory.getDefaultAlgorithm();
@@ -650,7 +650,7 @@ public abstract class AbstractHttpClientWagon
                         ? authenticationInfo.getKeyPassword().toCharArray()
                         : null;
                 KeyManagerFactory fac = KeyManagerFactory.getInstance( alg );
-                fac.init( keystore, keyPass );
+                fac.init( keyStore, keyPass );
                 String alias = authenticationInfo.getKeyAlias();
                 if ( alias != null )
                 {
@@ -658,17 +658,17 @@ public abstract class AbstractHttpClientWagon
                     //user has explicitly specified a key alias, great.
                     //let's make sure it exists in the key store that it has a
                     //key pair
-                    if ( keystore.containsAlias( alias ) )
+                    if ( keyStore.containsAlias( alias ) )
                     {
-                        if ( !keystore.isKeyEntry( alias ) )
+                        if ( !keyStore.isKeyEntry( alias ) )
                         {
                             alias = null;
                         }
                     }
-                    else if ( keystore.containsAlias( alias.toLowerCase() ) )
+                    else if ( keyStore.containsAlias( alias.toLowerCase() ) )
                     {
                         alias = alias.toLowerCase( Locale.getDefault() );
-                        if ( !keystore.isKeyEntry( alias ) )
+                        if ( !keyStore.isKeyEntry( alias ) )
                         {
                             alias = null;
                         }
