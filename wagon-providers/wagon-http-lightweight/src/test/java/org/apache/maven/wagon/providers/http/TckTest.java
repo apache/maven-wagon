@@ -20,7 +20,6 @@ package org.apache.maven.wagon.providers.http;
  */
 
 import org.apache.maven.wagon.tck.http.GetWagonTests;
-import org.apache.maven.wagon.tck.http.HttpsClientCertGetWagonTests;
 import org.apache.maven.wagon.tck.http.HttpsGetWagonTests;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
