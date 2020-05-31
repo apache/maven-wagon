@@ -33,8 +33,6 @@ import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.DSAPublicKeySpec;
 import java.security.spec.RSAPublicKeySpec;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Olivier Lamy
@@ -42,9 +40,6 @@ import java.util.List;
 public class TestPublickeyAuthenticator
     implements PublickeyAuthenticator
 {
-    private List<PublickeyAuthenticatorRequest> publickeyAuthenticatorRequests =
-        new ArrayList<PublickeyAuthenticatorRequest>();
-
     private boolean keyAuthz;
 
     public TestPublickeyAuthenticator( boolean keyAuthz )
@@ -66,7 +61,7 @@ public class TestPublickeyAuthenticator
             in.close();
             in = null;
 
-            publickeyAuthenticatorRequests.add( new PublickeyAuthenticatorRequest( username, key ) );
+            new PublickeyAuthenticatorRequest( username, key );
 
             return ( (RSAPublicKey) publicKey ).getModulus().equals( ( (RSAPublicKey) publicKey ).getModulus() );
         }
