@@ -670,9 +670,9 @@ public abstract class AbstractHttpClientWagon
         return httpClient;
     }
 
-    public static void setPersistentPool( boolean persistentPool )
+    public static void setPersistentPool( boolean persistent )
     {
-        persistentPool = persistentPool;
+        persistentPool = persistent;
     }
 
     public static void setPoolingHttpClientConnectionManager(
