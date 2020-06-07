@@ -83,33 +83,6 @@ public class TestPublickeyAuthenticator
         return dectyptedText;
     }
 
-    /**
-     * 
-     */
-    public static class PublickeyAuthenticatorRequest
-    {
-        private String username;
-
-        private PublicKey publicKey;
-
-        public PublickeyAuthenticatorRequest( String username, PublicKey publicKey )
-        {
-            this.username = username;
-            this.publicKey = publicKey;
-        }
-
-        @Override
-        public String toString()
-        {
-            final StringBuilder sb = new StringBuilder();
-            sb.append( "PublickeyAuthenticatorRequest" );
-            sb.append( "{username='" ).append( username ).append( '\'' );
-            sb.append( ", publicKey=" ).append( publicKey );
-            sb.append( '}' );
-            return sb.toString();
-        }
-    }
-
     private byte[] bytes;
 
     private int pos;
