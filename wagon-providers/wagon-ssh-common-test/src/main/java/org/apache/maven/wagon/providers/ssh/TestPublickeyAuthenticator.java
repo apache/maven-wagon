@@ -61,8 +61,6 @@ public class TestPublickeyAuthenticator
             in.close();
             in = null;
 
-            new PublickeyAuthenticatorRequest( username, key );
-
             return ( (RSAPublicKey) publicKey ).getModulus().equals( ( (RSAPublicKey) publicKey ).getModulus() );
         }
         catch ( Exception e )
