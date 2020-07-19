@@ -23,11 +23,12 @@ under the License.
   <parent>
     <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon-providers</artifactId>
-    <version>3.4.2-SNAPSHOT</version>
+    <version>${wagon-providers.version}</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>wagon-http-shared</artifactId>
+  <version>${wagon-http-shared.version}</version>
   <name>Apache Maven Wagon :: Providers :: HTTP Shared Library</name>
   <description>
     Shared Library for wagon providers supporting HTTP.

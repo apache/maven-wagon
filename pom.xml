@@ -28,7 +28,7 @@ under the License.
 
   <groupId>org.apache.maven.wagon</groupId>
   <artifactId>wagon</artifactId>
-  <version>3.4.2-SNAPSHOT</version>
+  <version>${wagon.version}</version>
   <packaging>pom</packaging>
 
   <name>Apache Maven Wagon</name>
@@ -230,22 +230,22 @@ under the License.
       <dependency>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-provider-api</artifactId>
-        <version>${project.version}</version>
+        <version>${wagon-provider-api.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-provider-test</artifactId>
-        <version>${project.version}</version>
+        <version>${wagon-provider-test.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-ssh-common-test</artifactId>
-        <version>${project.version}</version>
+        <version>${wagon-ssh-common-test.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-ssh-common</artifactId>
-        <version>${project.version}</version>
+        <version>${wagon-ssh-common.version}</version>
       </dependency>
       <dependency>
         <groupId>junit</groupId>
@@ -356,6 +356,8 @@ under the License.
           <artifactId>apache-rat-plugin</artifactId>
           <configuration>
             <excludes combine.children="append">
+              <exclude>versions.properties</exclude>
+              <exclude>.mvn/extensions.xml</exclude>
               <exclude>.checkstyle</exclude>
               <exclude>**/*.odg</exclude>
               <exclude>src/test/resources/**</exclude>
@@ -445,6 +447,31 @@ under the License.
                 </requireJavaVersion>
               </rules>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <version>1.2.2</version>
+        <configuration>
+        </configuration>
+        <executions>
+          <!-- enable flattening -->
+          <execution>
+            <id>flatten</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>flatten</goal>
+            </goals>
+          </execution>
+          <!-- ensure proper cleanup -->
+          <execution>
+            <id>flatten.clean</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>clean</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>

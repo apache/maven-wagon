@@ -23,11 +23,12 @@ under the License.
   <parent>
     <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon</artifactId>
-    <version>3.4.2-SNAPSHOT</version>
+    <version>${wagon.version}</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>wagon-tcks</artifactId>
+  <version>${wagon-tcks.version}</version>
   <packaging>pom</packaging>
   <name>Apache Maven Wagon :: Test Compatibility Kits</name>
 

@@ -23,11 +23,12 @@ under the License.
   <parent>
     <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon-providers</artifactId>
-    <version>3.4.2-SNAPSHOT</version>
+    <version>${wagon-providers.version}</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>wagon-http-lightweight</artifactId>
+  <version>${wagon-http-lightweight.version}</version>
   <name>Apache Maven Wagon :: Providers :: Lightweight HTTP Provider</name>
   <description>
     Wagon provider that gets and puts artifacts through http using standard Java library
@@ -37,14 +38,14 @@ under the License.
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>wagon-http-shared</artifactId>
-      <version>${project.version}</version>
+      <version>${wagon-http-shared.version}</version>
     </dependency>
 
     <!-- used fo the TCK -->
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>
       <artifactId>wagon-tck-http</artifactId>
-      <version>${project.version}</version>
+      <version>${wagon-tck-http.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

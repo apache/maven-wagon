@@ -23,11 +23,12 @@ under the License.
   <parent>
     <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon</artifactId>
-    <version>3.4.2-SNAPSHOT</version>
+    <version>${wagon.version}</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>wagon-provider-test</artifactId>
+  <version>${wagon-provider-test.version}</version>
   <name>Apache Maven Wagon :: Provider Test</name>
   <description>Suite of tests for Wagon implementations</description>
 

@@ -23,11 +23,12 @@ under the License.
   <parent>
     <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon-providers</artifactId>
-    <version>3.4.2-SNAPSHOT</version>
+    <version>${wagon-providers.version}</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>wagon-ssh-common-test</artifactId>
+  <version>${wagon-ssh-common-test.version}</version>
   <name>Apache Maven Wagon :: Providers :: SSH Common Tests</name>
 
   <dependencies>

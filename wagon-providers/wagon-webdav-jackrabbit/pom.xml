@@ -23,11 +23,12 @@ under the License.
   <parent>
     <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon-providers</artifactId>
-    <version>3.4.2-SNAPSHOT</version>
+    <version>${wagon-providers.version}</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>wagon-webdav-jackrabbit</artifactId>
+  <version>${wagon-webdav-jackrabbit.version}</version>
   <name>Apache Maven Wagon :: Providers :: WebDAV Provider</name>
   <description>
     Wagon provider that gets and puts artifacts through WebDAV protocol
@@ -49,7 +50,7 @@ under the License.
       <!-- Workaround for QDOX-148, see also MNG-3686 -->
       <groupId>${project.groupId}</groupId>
       <artifactId>wagon-http-shared</artifactId>
-      <version>${project.version}</version>
+      <version>${wagon-http-shared.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.jackrabbit</groupId>

@@ -23,11 +23,12 @@ under the License.
   <parent>
     <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon-providers</artifactId>
-    <version>3.4.2-SNAPSHOT</version>
+    <version>${wagon-providers.version}</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>wagon-ssh-common</artifactId>
+  <version>${wagon-ssh-common.version}</version>
   <name>Apache Maven Wagon :: Providers :: SSH Common Library</name>
 
   <dependencies>

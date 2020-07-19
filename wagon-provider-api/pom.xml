@@ -23,11 +23,12 @@ under the License.
   <parent>
     <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon</artifactId>
-    <version>3.4.2-SNAPSHOT</version>
+    <version>${wagon.version}</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>wagon-provider-api</artifactId>
+  <version>${wagon-provider-api.version}</version>
   <name>Apache Maven Wagon :: API</name>
   <description>Maven Wagon API that defines the contract between different Wagon implementations</description>
 

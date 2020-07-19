@@ -14,6 +14,13 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
+Fork Info
+======================
+This fork is to test the [hashver-maven-plugin](https://github.com/avodonosov/hashver-maven-plugin).
+
+Original README is below.
+======================
+
 Contributing to [Apache Maven Wagon](https://maven.apache.org/wagon/)
 ======================
 
