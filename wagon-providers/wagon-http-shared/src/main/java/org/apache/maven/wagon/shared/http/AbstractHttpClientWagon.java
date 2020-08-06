@@ -334,7 +334,7 @@ public abstract class AbstractHttpClientWagon
 
     /**
      * If enabled, then the content-type HTTP header will be set using the file extension
-     * or the stream header to determine the type, <b>disabled by default</b>
+     * or the stream header to determine the type, <b>enabled by default</b>
      */
     private static final boolean AUTOSET_CONTENT_TYPE =
             Boolean.valueOf( System.getProperty( "maven.wagon.http.autocontenttype", "true" ) );
