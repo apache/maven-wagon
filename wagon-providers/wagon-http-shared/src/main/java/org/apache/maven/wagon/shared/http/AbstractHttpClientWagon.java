@@ -82,6 +82,7 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.StringUtils;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import java.io.Closeable;
@@ -119,6 +120,8 @@ import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatTransfer
 public abstract class AbstractHttpClientWagon
     extends StreamWagon
 {
+    private static final MimetypesFileTypeMap FILE_TYPE_MAP = new MimetypesFileTypeMap();
+
     final class WagonHttpEntity
         extends AbstractHttpEntity
     {
@@ -142,6 +145,11 @@ public abstract class AbstractHttpClientWagon
             {
                 this.source = source;
                 this.repeatable = true;
+                final String mimeType = FILE_TYPE_MAP.getContentType( source );
+                if ( mimeType != null && !mimeType.isEmpty() )
+                {
+                    setContentType( mimeType );
+                }
             }
             else
             {
@@ -152,6 +160,7 @@ public abstract class AbstractHttpClientWagon
             this.length = resource == null ? -1 : resource.getContentLength();
 
             this.wagon = wagon;
+
         }
 
         public Resource getResource()
