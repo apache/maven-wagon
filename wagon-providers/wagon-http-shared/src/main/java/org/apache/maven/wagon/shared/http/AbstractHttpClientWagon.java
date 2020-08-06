@@ -145,7 +145,7 @@ public abstract class AbstractHttpClientWagon
             {
                 this.source = source;
                 this.repeatable = true;
-                final String mimeType = FILE_TYPE_MAP.getContentType( source );
+                final String mimeType = SET_CONTENT_TYPE_FROM_FILE_EXTENSION ? FILE_TYPE_MAP.getContentType( source ) : null;
                 if ( mimeType != null && !mimeType.isEmpty() )
                 {
                     setContentType( mimeType );
@@ -288,6 +288,12 @@ public abstract class AbstractHttpClientWagon
     private static final boolean SSL_ALLOW_ALL =
         Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.allowall", "false" ) );
 
+    /**
+     * If enabled, ssl hostname verifier does not check hostname. Disable this will use a browser compat hostname
+     * verifier <b>disabled by default</b>
+     */
+    private static final boolean SET_CONTENT_TYPE_FROM_FILE_EXTENSION =
+            Boolean.valueOf( System.getProperty( "maven.wagon.http.file.autocontenttype", "false" ) );
 
     /**
      * Maximum concurrent connections per distinct route.
