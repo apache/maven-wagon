@@ -175,11 +175,24 @@ public abstract class AbstractHttpClientWagon
             }
         }
 
+        /**
+         * Try to determine the content type and set the content-type header if successful.
+         *
+         * if the content-type has not been set then
+         * if the (AUTOSET_CONTENT_TYPE) option flag is TRUE
+         * and
+         * the content is coming from a file and the content type is determinable from the file extension
+         * or
+         * the content is coming from a stream and the content type is determinable from the stream
+         *     (guessContentTypeFromStream will return null if the InputStream does not support mark())
+         * then determine and set the content type
+         * Note: the content-type will never be set to null or an empty string by this method.
+         *
+         * @throws IOException - indicates a failure when trying to determine the content type of a stream, will
+         * never occur when the content is coming from File
+         */
         private void autosetContentType() throws IOException
         {
-            // if the content-type has not been set then
-            // if the option flag is TRUE and the content type is determinable from the file extension
-            // then set it from the file extension
             final String mimeType = AUTOSET_CONTENT_TYPE
                     ? this.source != null
                         ? URLConnection.guessContentTypeFromName( source.getName() )
