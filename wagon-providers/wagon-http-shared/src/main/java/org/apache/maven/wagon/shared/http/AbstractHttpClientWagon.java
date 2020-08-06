@@ -82,7 +82,6 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.StringUtils;
 
-import javax.activation.MimetypesFileTypeMap;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import java.io.Closeable;
@@ -92,6 +91,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.net.URLConnection;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
@@ -120,8 +120,6 @@ import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatTransfer
 public abstract class AbstractHttpClientWagon
     extends StreamWagon
 {
-    private static final MimetypesFileTypeMap FILE_TYPE_MAP = new MimetypesFileTypeMap();
-
     final class WagonHttpEntity
         extends AbstractHttpEntity
     {
@@ -145,19 +143,6 @@ public abstract class AbstractHttpClientWagon
             {
                 this.source = source;
                 this.repeatable = true;
-                // if the content-type has not been set then
-                // if the option flag is TRUE and the content type is determinable from the file extension
-                // then set it from the file extension
-                if ( getContentType() == null )
-                {
-                    final String mimeType = SET_CONTENT_TYPE_FROM_FILE_EXTENSION
-                            ? FILE_TYPE_MAP.getContentType( source )
-                            : null;
-                    if ( mimeType != null && !mimeType.isEmpty() )
-                    {
-                        setContentType( mimeType );
-                    }
-                }
             }
             else
             {
@@ -168,6 +153,44 @@ public abstract class AbstractHttpClientWagon
             this.length = resource == null ? -1 : resource.getContentLength();
 
             this.wagon = wagon;
+
+            // if the autoset content flag is SET and the content type is blank
+            // then try to determine what the content type is and set it
+            if ( AUTOSET_CONTENT_TYPE && getContentType() == null )
+            {
+                try
+                {
+                    autosetContentType();
+                }
+                catch ( IOException ioX )
+                {
+                    if ( AUTOSET_CONTENT_TYPE_FATAL )
+                    {
+                        throw new TransferFailedException(
+                                "Failed to determine content type, "
+                                + " unset 'maven.wagon.http.autocontenttype.fatal' to allow continued processing",
+                                ioX );
+                    }
+                }
+            }
+        }
+
+        private void autosetContentType() throws IOException
+        {
+            // if the content-type has not been set then
+            // if the option flag is TRUE and the content type is determinable from the file extension
+            // then set it from the file extension
+            final String mimeType = AUTOSET_CONTENT_TYPE
+                    ? this.source != null
+                        ? URLConnection.guessContentTypeFromName( source.getName() )
+                        : this.stream != null
+                            ? URLConnection.guessContentTypeFromStream( this.stream )
+                            : null
+                    : null;
+            if ( mimeType != null && !mimeType.isEmpty() )
+            {
+                setContentType( mimeType );
+            }
 
         }
 
@@ -297,12 +320,19 @@ public abstract class AbstractHttpClientWagon
         Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.allowall", "false" ) );
 
     /**
-     * If enabled, then the content-type HTTP header will be set using the file extension to determine the type,
-     * <b>disabled by default</b>
-     * This flag is only effective when uploading from a File, not directly from a Stream.
+     * If enabled, then the content-type HTTP header will be set using the file extension
+     * or the stream header to determine the type, <b>disabled by default</b>
      */
-    private static final boolean SET_CONTENT_TYPE_FROM_FILE_EXTENSION =
-            Boolean.valueOf( System.getProperty( "maven.wagon.http.file.autocontenttype", "false" ) );
+    private static final boolean AUTOSET_CONTENT_TYPE =
+            Boolean.valueOf( System.getProperty( "maven.wagon.http.autocontenttype", "true" ) );
+
+    /**
+     * If enabled, then an when determining the content type will result in a fatal exception
+     * <b>disabled by default</b>
+     * This flag is only effective when maven.wagon.http.autocontenttype is set.
+     */
+    private static final boolean AUTOSET_CONTENT_TYPE_FATAL =
+            Boolean.valueOf( System.getProperty( "maven.wagon.http.autocontenttype.fatal", "false" ) );
 
     /**
      * Maximum concurrent connections per distinct route.
