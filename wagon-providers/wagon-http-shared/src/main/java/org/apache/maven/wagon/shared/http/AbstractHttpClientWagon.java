@@ -145,7 +145,9 @@ public abstract class AbstractHttpClientWagon
             {
                 this.source = source;
                 this.repeatable = true;
-                final String mimeType = SET_CONTENT_TYPE_FROM_FILE_EXTENSION ? FILE_TYPE_MAP.getContentType( source ) : null;
+                final String mimeType = SET_CONTENT_TYPE_FROM_FILE_EXTENSION
+                        ? FILE_TYPE_MAP.getContentType( source )
+                        : null;
                 if ( mimeType != null && !mimeType.isEmpty() )
                 {
                     setContentType( mimeType );
