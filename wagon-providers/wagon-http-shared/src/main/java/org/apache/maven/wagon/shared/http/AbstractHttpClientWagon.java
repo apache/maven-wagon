@@ -291,8 +291,9 @@ public abstract class AbstractHttpClientWagon
         Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.allowall", "false" ) );
 
     /**
-     * If enabled, ssl hostname verifier does not check hostname. Disable this will use a browser compat hostname
-     * verifier <b>disabled by default</b>
+     * If enabled, then the content-type HTTP header will be set using the file extension to determine the type,
+     * <b>disabled by default</b>
+     * This flag is only effective when uploading from a File, not directly from a Stream.
      */
     private static final boolean SET_CONTENT_TYPE_FROM_FILE_EXTENSION =
             Boolean.valueOf( System.getProperty( "maven.wagon.http.file.autocontenttype", "false" ) );
