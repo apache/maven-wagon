@@ -123,6 +123,7 @@ public abstract class AbstractHttpClientWagon
     final class WagonHttpEntity
         extends AbstractHttpEntity
     {
+        public static final String DEFAULT_CONTENT_TYPE = "application/octet-stream";
         private final Resource resource;
 
         private final Wagon wagon;
@@ -158,53 +159,46 @@ public abstract class AbstractHttpClientWagon
             // then try to determine what the content type is and set it
             if ( AUTOSET_CONTENT_TYPE && getContentType() == null )
             {
-                try
-                {
-                    autosetContentType();
-                }
-                catch ( IOException ioX )
-                {
-                    if ( AUTOSET_CONTENT_TYPE_FATAL )
-                    {
-                        throw new TransferFailedException(
-                                "Failed to determine content type, "
-                                + " unset 'maven.wagon.http.autocontenttype.fatal' to allow continued processing",
-                                ioX );
-                    }
-                }
+                setContentType( determineContentType() );
             }
         }
 
         /**
-         * Try to determine the content type and set the content-type header if successful.
+         * Best effort to determine the content type.
          *
-         * if the content-type has not been set then
-         * if the (AUTOSET_CONTENT_TYPE) option flag is TRUE
-         * and
-         * the content is coming from a file and the content type is determinable from the file extension
+         * if the content is coming from a file and the content type is determinable from the file extension
          * or
-         * the content is coming from a stream and the content type is determinable from the stream
+         * if the content is coming from a stream and the content type is determinable from the stream
          *     (guessContentTypeFromStream will return null if the InputStream does not support mark())
-         * then determine and set the content type
-         * Note: the content-type will never be set to null or an empty string by this method.
+         * then determine and return the content type
+         * if the content type is not determinable then return "application/octet-stream"
          *
-         * @throws IOException - indicates a failure when trying to determine the content type of a stream, will
-         * never occur when the content is coming from File
+         * NOTE: this method is expected to always return a non-empty String
          */
-        private void autosetContentType() throws IOException
+        private String determineContentType()
         {
-            final String mimeType = AUTOSET_CONTENT_TYPE
-                    ? this.source != null
-                        ? URLConnection.guessContentTypeFromName( source.getName() )
-                        : this.stream != null
-                            ? URLConnection.guessContentTypeFromStream( this.stream )
-                            : null
-                    : null;
-            if ( mimeType != null && !mimeType.isEmpty() )
+            String mimeType;
+            try
             {
-                setContentType( mimeType );
+                mimeType = this.source != null
+                            ? URLConnection.guessContentTypeFromName( this.source.getName() )
+                            : this.stream != null
+                                ? URLConnection.guessContentTypeFromStream( this.stream )
+                                : DEFAULT_CONTENT_TYPE;
+
+                // if URLConnection was unable to determine the type then default it
+                if ( mimeType == null )
+                {
+                    mimeType = DEFAULT_CONTENT_TYPE;
+                }
+            }
+            catch ( IOException e )
+            {
+                // will only occur when guessContentTypeFromStream gets an IOException
+                mimeType = DEFAULT_CONTENT_TYPE;
             }
 
+            return mimeType;
         }
 
         public Resource getResource()
@@ -338,14 +332,6 @@ public abstract class AbstractHttpClientWagon
      */
     private static final boolean AUTOSET_CONTENT_TYPE =
             Boolean.valueOf( System.getProperty( "maven.wagon.http.autocontenttype", "true" ) );
-
-    /**
-     * If enabled, then an when determining the content type will result in a fatal exception
-     * <b>disabled by default</b>
-     * This flag is only effective when maven.wagon.http.autocontenttype is set.
-     */
-    private static final boolean AUTOSET_CONTENT_TYPE_FATAL =
-            Boolean.valueOf( System.getProperty( "maven.wagon.http.autocontenttype.fatal", "false" ) );
 
     /**
      * Maximum concurrent connections per distinct route.
