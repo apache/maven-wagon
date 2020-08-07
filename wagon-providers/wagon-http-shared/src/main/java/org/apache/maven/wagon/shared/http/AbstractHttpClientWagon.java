@@ -177,10 +177,9 @@ public abstract class AbstractHttpClientWagon
          */
         private String determineContentType()
         {
-            String mimeType;
             try
             {
-                mimeType = this.source != null
+                String mimeType = this.source != null
                             ? URLConnection.guessContentTypeFromName( this.source.getName() )
                             : this.stream != null
                                 ? URLConnection.guessContentTypeFromStream( this.stream )
@@ -191,14 +190,13 @@ public abstract class AbstractHttpClientWagon
                 {
                     mimeType = DEFAULT_CONTENT_TYPE;
                 }
+                return mimeType;
             }
             catch ( IOException e )
             {
                 // will only occur when guessContentTypeFromStream gets an IOException
-                mimeType = DEFAULT_CONTENT_TYPE;
+                return DEFAULT_CONTENT_TYPE;
             }
-
-            return mimeType;
         }
 
         public Resource getResource()
