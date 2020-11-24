@@ -28,26 +28,9 @@ public class EncodingUtilTest
         extends TestCase {
     public void testEncodeURLWithTrailingSlash()
     {
-        String baseUrl = "https://host:1234/test";
-        String path = "demo.zip/";
-        String expectedUrl = String.format( "%s/%s", baseUrl, path );
+        String encodedURL = EncodingUtil.encodeURLToString( "https://host:1234/test", "demo/" );
 
-        String encodedURL = EncodingUtil.encodeURLToString( baseUrl, path );
-
-        assertEquals( expectedUrl, encodedURL );
-    }
-
-    public void testEncodeUrlApisConsistent()
-    {
-        String baseUrl = "https://host:1234/test";
-        String path = "demo.zip/";
-        String fullUrl = String.format( "%s/%s", baseUrl, path );
-
-        String encodedFullURLToString = EncodingUtil.encodeURLToString( fullUrl );
-        String encodedURLToString = EncodingUtil.encodeURLToString( baseUrl, path );
-
-        assertEquals( encodedFullURLToString, fullUrl );
-        assertEquals( encodedFullURLToString, encodedURLToString );
+        assertEquals( "https://host:1234/test/demo/", encodedURL );
     }
 
     public void testEncodeURLWithSpaces()
@@ -137,5 +120,13 @@ public class EncodingUtilTest
         String encodedURL = EncodingUtil.encodeURLToString( "file://host:1", new String[0] );
 
         assertEquals( "file://host:1", encodedURL );
+    }
+
+    public void testEncodeURLWithNonLatin()
+            throws URISyntaxException, MalformedURLException
+    {
+        String encodedURL = EncodingUtil.encodeURLToString( "file://host:1", "пипец/" );
+
+        assertEquals( "file://host:1/%D0%BF%D0%B8%D0%BF%D0%B5%D1%86/", encodedURL );
     }
 }
