@@ -27,6 +27,13 @@ import java.net.URISyntaxException;
 public class EncodingUtilTest
     extends TestCase
 {
+    public void testEncodeURLWithTrailingSlash()
+    {
+        String encodedURL = EncodingUtil.encodeURLToString( "https://host:1234/test", "demo/" );
+
+        assertEquals( "https://host:1234/test/demo/", encodedURL );
+    }
+
     public void testEncodeURLWithSpaces()
         throws URISyntaxException, MalformedURLException
     {
@@ -114,5 +121,13 @@ public class EncodingUtilTest
         String encodedURL = EncodingUtil.encodeURLToString( "file://host:1", new String[0] );
 
         assertEquals( "file://host:1", encodedURL );
+    }
+
+    public void testEncodeURLWithNonLatin()
+            throws URISyntaxException, MalformedURLException
+    {
+        String encodedURL = EncodingUtil.encodeURLToString( "file://host:1", "пипец/" );
+
+        assertEquals( "file://host:1/%D0%BF%D0%B8%D0%BF%D0%B5%D1%86/", encodedURL );
     }
 }
