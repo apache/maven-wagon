@@ -25,8 +25,31 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
 public class EncodingUtilTest
-    extends TestCase
-{
+        extends TestCase {
+    public void testEncodeURLWithTrailingSlash()
+    {
+        String baseUrl = "https://host:1234/test";
+        String path = "demo.zip/";
+        String expectedUrl = String.format( "%s/%s", baseUrl, path );
+
+        String encodedURL = EncodingUtil.encodeURLToString( baseUrl, path );
+
+        assertEquals( expectedUrl, encodedURL );
+    }
+
+    public void testEncodeUrlApisConsistent()
+    {
+        String baseUrl = "https://host:1234/test";
+        String path = "demo.zip/";
+        String fullUrl = String.format( "%s/%s", baseUrl, path );
+
+        String encodedFullURLToString = EncodingUtil.encodeURLToString( fullUrl );
+        String encodedURLToString = EncodingUtil.encodeURLToString( baseUrl, path );
+
+        assertEquals( encodedFullURLToString, fullUrl );
+        assertEquals( encodedFullURLToString, encodedURLToString );
+    }
+
     public void testEncodeURLWithSpaces()
         throws URISyntaxException, MalformedURLException
     {

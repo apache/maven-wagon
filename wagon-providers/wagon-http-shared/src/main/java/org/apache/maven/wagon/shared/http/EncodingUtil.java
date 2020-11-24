@@ -92,7 +92,13 @@ public class EncodingUtil
     {
         String[] pathSegments = path == null ? new String[0] : path.split( "/" );
 
-        return encodeURLToString( baseUrl, pathSegments );
+        String encodedUrl = encodeURLToString( baseUrl, pathSegments );
+        if ( path != null && path.endsWith( "/" ) )
+        {
+            return encodedUrl + "/";
+        }
+
+        return encodedUrl;
     }
 
     /**
