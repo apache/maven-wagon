@@ -77,6 +77,24 @@ public abstract class StreamWagon
     public boolean getIfNewer( String resourceName, File destination, long timestamp )
         throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
     {
+        TransferFailedException finalException = null;
+        for (int i = 0; i < 5; i++)
+        {
+            try {
+                return getIfNewerInternal(resourceName, destination, timestamp);
+            } catch (TransferFailedException e) {
+                if (finalException  != null) {
+                    e.addSuppressed(finalException);
+                }
+                finalException = e;
+            }
+        }
+        throw finalException;
+    }
+
+    private boolean getIfNewerInternal( String resourceName, File destination, long timestamp )
+        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
+    {
         boolean retValue = false;
 
         Resource resource = new Resource( resourceName );
