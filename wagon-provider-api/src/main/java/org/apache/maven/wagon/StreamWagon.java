@@ -83,7 +83,7 @@ public abstract class StreamWagon
             try {
                 return getIfNewerInternal(resourceName, destination, timestamp);
             } catch (TransferFailedException e) {
-                if (finalException  != null) {
+                if (finalException != null) {
                     e.addSuppressed(finalException);
                 }
                 finalException = e;
