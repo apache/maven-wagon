@@ -23,7 +23,7 @@ under the License.
   <parent>
     <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon</artifactId>
-    <version>3.4.3</version>
+    <version>3.4.4-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
