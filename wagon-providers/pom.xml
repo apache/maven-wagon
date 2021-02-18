@@ -52,6 +52,12 @@ under the License.
         <artifactId>httpclient</artifactId>
         <version>4.5.13</version>
       </dependency>
+      <!-- Overwrite transitive dependency version of HttpClient -->
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>1.15</version>
+      </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpcore</artifactId>
