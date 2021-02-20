@@ -20,6 +20,7 @@ package org.apache.maven.wagon.providers.http;
  */
 
 import org.apache.maven.wagon.tck.http.GetWagonTests;
+import org.apache.maven.wagon.tck.http.HttpsClientCertGetWagonTests;
 import org.apache.maven.wagon.tck.http.HttpsGetWagonTests;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -28,7 +29,7 @@ import org.junit.runners.Suite;
  * This test will run the TCK suite on wagon-http-lightweight
  */
 @RunWith( Suite.class )
-@Suite.SuiteClasses( { GetWagonTests.class, HttpsGetWagonTests.class } )
+@Suite.SuiteClasses( { GetWagonTests.class, HttpsGetWagonTests.class, HttpsClientCertGetWagonTests.class } )
 public class TckTest
 {
     // no op
