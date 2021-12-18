@@ -19,7 +19,6 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
-import org.apache.commons.io.IOUtils;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.OutputData;
@@ -32,7 +31,6 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.resource.Resource;
 import org.apache.maven.wagon.shared.http.EncodingUtil;
-import org.apache.maven.wagon.shared.http.HtmlFileListParser;
 import org.codehaus.plexus.util.Base64;
 
 import java.io.FileNotFoundException;
@@ -382,50 +380,6 @@ public class LightweightHttpWagon
             putConnection.disconnect();
         }
         authenticator.resetWagon();
-    }
-
-    public List<String> getFileList( String destinationDirectory )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        InputData inputData = new InputData();
-
-        if ( destinationDirectory.length() > 0 && !destinationDirectory.endsWith( "/" ) )
-        {
-            destinationDirectory += "/";
-        }
-
-        String url = buildUrl( new Resource( destinationDirectory ) );
-
-        Resource resource = new Resource( destinationDirectory );
-
-        inputData.setResource( resource );
-
-        fillInputData( inputData );
-
-        InputStream is = inputData.getInputStream();
-
-        try
-        {
-
-            if ( is == null )
-            {
-                throw new TransferFailedException(
-                    url + " - Could not open input stream for resource: '" + resource + "'" );
-            }
-
-            final List<String> htmlFileList = HtmlFileListParser.parseFileList( url, is );
-            is.close();
-            is = null;
-            return htmlFileList;
-        }
-        catch ( final IOException e )
-        {
-            throw new TransferFailedException( "Failure transferring " + resource.getName(), e );
-        }
-        finally
-        {
-            IOUtils.closeQuietly( is );
-        }
     }
 
     public boolean resourceExists( String resourceName )

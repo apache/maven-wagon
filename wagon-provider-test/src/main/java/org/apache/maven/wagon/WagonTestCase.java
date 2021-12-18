@@ -32,6 +32,7 @@ import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.util.FileUtils;
 import org.easymock.IAnswer;
+import org.junit.Assume;
 
 // CHECKSTYLE_OFF: AvoidStarImport
 import static org.easymock.EasyMock.*;
@@ -768,30 +769,40 @@ public abstract class WagonTestCase
 
         wagon.connect( testRepository, getAuthInfo() );
 
-        List<String> list = wagon.getFileList( dirName );
-        assertNotNull( "file list should not be null.", list );
-        assertTrue( "file list should contain more items (actually contains '" + list + "').",
-                    list.size() >= filenames.length );
-
-        for ( String filename : filenames )
+        try
         {
-            assertTrue( "Filename '" + filename + "' should be in list.", list.contains( filename ) );
+            List<String> list = wagon.getFileList( dirName );
+            assertNotNull( "file list should not be null.", list );
+            assertTrue( "file list should contain more items (actually contains '" + list + "').",
+                        list.size() >= filenames.length );
+
+            for ( String filename : filenames )
+            {
+                assertTrue( "Filename '" + filename + "' should be in list.", list.contains( filename ) );
+            }
+
+            // WAGON-250
+            list = wagon.getFileList( "" );
+            assertNotNull( "file list should not be null.", list );
+            assertTrue( "file list should contain items (actually contains '" + list + "').", !list.isEmpty() );
+            assertTrue( list.contains( "file-list/" ) );
+            assertFalse( list.contains( "file-list" ) );
+            assertFalse( list.contains( "." ) );
+            assertFalse( list.contains( ".." ) );
+            assertFalse( list.contains( "./" ) );
+            assertFalse( list.contains( "../" ) );
         }
+        catch ( UnsupportedOperationException e )
+        {
+            // Some providers don't support this
+            Assume.assumeFalse( false );
+        }
+        finally
+        {
+            wagon.disconnect();
 
-        // WAGON-250
-        list = wagon.getFileList( "" );
-        assertNotNull( "file list should not be null.", list );
-        assertTrue( "file list should contain items (actually contains '" + list + "').", !list.isEmpty() );
-        assertTrue( list.contains( "file-list/" ) );
-        assertFalse( list.contains( "file-list" ) );
-        assertFalse( list.contains( "." ) );
-        assertFalse( list.contains( ".." ) );
-        assertFalse( list.contains( "./" ) );
-        assertFalse( list.contains( "../" ) );
-
-        wagon.disconnect();
-
-        tearDownWagonTestingFixtures();
+            tearDownWagonTestingFixtures();
+        }
     }
 
     /**
@@ -821,6 +832,11 @@ public abstract class WagonTestCase
         catch ( ResourceDoesNotExistException e )
         {
             // expected
+        }
+        catch ( UnsupportedOperationException e )
+        {
+            // Some providers don't support this
+            Assume.assumeFalse( false );
         }
         finally
         {
