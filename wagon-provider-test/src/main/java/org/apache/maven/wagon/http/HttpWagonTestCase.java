@@ -153,18 +153,6 @@ public abstract class HttpWagonTestCase
         server.stop();
     }
 
-    public void testWagonGetFileList()
-        throws Exception
-    {
-        File dir = getRepositoryDirectory();
-        FileUtils.deleteDirectory( dir );
-
-        File f = new File( dir, "file-list" );
-        f.mkdirs();
-
-        super.testWagonGetFileList();
-    }
-
     public void testHttpHeaders()
         throws Exception
     {
@@ -315,73 +303,6 @@ public abstract class HttpWagonTestCase
         catch ( ResourceDoesNotExistException e )
         {
             assertTrue( true );
-        }
-    }
-
-    public void testList429()
-        throws Exception
-    {
-        StreamingWagon wagon = (StreamingWagon) getWagon();
-        try
-        {
-
-            Server server = new Server(  );
-            final AtomicBoolean called = new AtomicBoolean();
-
-            AbstractHandler handler = new AbstractHandler()
-            {
-                public void handle( String target, Request baseRequest, HttpServletRequest request,
-                    HttpServletResponse response ) throws IOException, ServletException
-                {
-                    if ( called.get() )
-                    {
-                        response.setStatus( HttpServletResponse.SC_OK );
-                        baseRequest.setHandled( true );
-                    }
-                    else
-                    {
-                        called.set( true );
-                        response.setStatus( SC_TOO_MANY_REQUESTS );
-                        baseRequest.setHandled( true );
-
-                    }
-                }
-            };
-
-            server.setHandler( handler );
-            addConnector( server );
-            server.start();
-
-            wagon.connect( new Repository( "id", getRepositoryUrl( server ) ) );
-
-            try
-            {
-                wagon.getFileList( "resource" );
-            }
-            finally
-            {
-                wagon.disconnect();
-
-                server.stop();
-            }
-
-        }
-        catch ( ResourceDoesNotExistException e )
-        {
-            assertTrue( true );
-        }
-        catch ( TransferFailedException e )
-        {
-            if ( wagon.getClass().getName().contains( "Lightweight" ) )
-            {
-                //we don't care about lightweight
-                assertTrue( true );
-            }
-            else
-            {
-                fail();
-            }
-
         }
     }
 

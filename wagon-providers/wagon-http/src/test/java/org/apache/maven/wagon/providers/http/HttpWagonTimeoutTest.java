@@ -112,38 +112,6 @@ public class HttpWagonTimeoutTest
         assertEquals( TransferFailedException.class, thrown.getClass() );
     }
 
-    public void testGetFileList()
-        throws Exception
-    {
-        Exception thrown = null;
-
-        try
-        {
-            Wagon wagon = getWagon();
-            wagon.setReadTimeout( 1000 );
-
-            Repository testRepository = new Repository();
-            testRepository.setUrl( "http://localhost:" + getPort() );
-
-            wagon.connect( testRepository );
-
-            wagon.getFileList( "/timeoutfile" );
-
-            wagon.disconnect();
-        }
-        catch ( Exception e )
-        {
-            thrown = e;
-        }
-        finally
-        {
-            stopServer();
-        }
-
-        assertNotNull( thrown );
-        assertEquals( TransferFailedException.class, thrown.getClass() );
-    }
-
     public void testPutTimeout()
         throws Exception
     {
@@ -197,7 +165,7 @@ public class HttpWagonTimeoutTest
             wagon.connect( testRepository );
 
             long start = System.currentTimeMillis();
-            wagon.getFileList( "/foobar" );
+            wagon.resourceExists( "/foobar" );
             long end = System.currentTimeMillis();
 
             wagon.disconnect();
