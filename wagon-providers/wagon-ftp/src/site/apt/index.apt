@@ -26,6 +26,10 @@
  ~~ NOTE: For help with the syntax of this file, see:
  ~~ http://maven.apache.org/doxia/references/apt-format.html
 
+Deprecation Notice
+
+  This Wagon provider is deprecated and will be removed in version 4.0.0.
+
 Maven Wagon FTP
 
  This component is an implementation of Wagon provider for FTP access.
