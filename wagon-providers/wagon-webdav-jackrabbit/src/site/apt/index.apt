@@ -26,11 +26,16 @@
  ~~ NOTE: For help with the syntax of this file, see:
  ~~ http://maven.apache.org/doxia/references/apt-format.html
 
+Deprecation Notice
+
+  This Wagon provider is deprecated and will be removed in version 4.0.0. Its features will be
+  partially folded into the default HTTP provider.
+
 Maven Wagon WebDAV
 
  This component is an implementation of Wagon provider for WebDAV server access.
  You will need to use at least Java 1.6 if you want to use this Wagon provider.
- 
+
  It enables Maven to deploy artifacts and files to WebDAV enabled servers.
  Getting files from WebDAV servers is not fully tested.
 
