@@ -35,9 +35,9 @@
 
       <p>Maven Wagon is a transport abstraction that is used in Maven's artifact and
  repository handling code.</p>
- 
+
       <p>Wagon defines a <a href="./wagon-provider-api/">unified API</a>, and it currently has the following providers:</p>
-      <ul> 
+      <ul>
        <li><a href="./wagon-providers/wagon-file/">File</a></li>
        <li><a href="./wagon-providers/wagon-http/">HTTP</a></li>
        <li><a href="./wagon-providers/wagon-http-lightweight/">HTTP lightweight</a></li>
@@ -73,6 +73,19 @@
       </p>
 
     </section>
+
+    <section name="Deprecation Notice">
+
+        <p>The following Wagon providers are deprecated and will be removed in version 4.0.0:</p>
+          <ul>
+           <li><a href="./wagon-providers/wagon-http-lightweight/">HTTP lightweight</a></li>
+           <li><a href="./wagon-providers/wagon-ftp/">FTP</a></li>
+           <li><a href="./wagon-providers/wagon-ssh/">SSH/SCP</a></li>
+           <li><a href="./wagon-providers/wagon-webdav-jackrabbit/">WebDAV</a></li>
+          </ul>
+
+      </section>
+
 
   </body>
 
