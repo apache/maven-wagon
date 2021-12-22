@@ -124,7 +124,6 @@ under the License.
                   <include>org.apache.httpcomponents:httpcore</include>
                   <include>commons-codec:commons-codec</include>
                   <include>commons-io:commons-io</include>
-                  <include>org.jsoup:jsoup</include>
                   <include>org.apache.maven.wagon:wagon-http-shared</include>
                 </includes>
               </artifactSet>
@@ -138,10 +137,6 @@ under the License.
                 <relocation>
                   <pattern>org.apache.commons.io</pattern>
                   <shadedPattern>org.apache.maven.wagon.providers.http.commons.io</shadedPattern>
-                </relocation>
-                <relocation>
-                  <pattern>org.jsoup</pattern>
-                  <shadedPattern>org.apache.maven.wagon.providers.http.org.jsoup</shadedPattern>
                 </relocation>
                 <relocation>
                   <pattern>org.apache.http</pattern>
