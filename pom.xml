@@ -28,7 +28,7 @@ under the License.
 
   <groupId>org.apache.maven.wagon</groupId>
   <artifactId>wagon</artifactId>
-  <version>3.5.1-SNAPSHOT</version>
+  <version>3.5.1</version>
   <packaging>pom</packaging>
 
   <name>Apache Maven Wagon</name>
@@ -41,7 +41,7 @@ under the License.
     <slf4jVersion>1.7.32</slf4jVersion>
     <maven.site.path>wagon-archives/wagon-LATEST</maven.site.path>
     <javaVersion>7</javaVersion>
-    <project.build.outputTimestamp>2021-12-19T16:57:49Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2021-12-22T22:40:17Z</project.build.outputTimestamp>
   </properties>
 
   <contributors>
@@ -199,7 +199,7 @@ under the License.
     <connection>scm:git:https://gitbox.apache.org/repos/asf/maven-wagon.git</connection>
     <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/maven-wagon.git</developerConnection>
     <url>https://github.com/apache/maven-wagon/tree/${project.scm.tag}</url>
-    <tag>wagon-3.4.1</tag>
+    <tag>wagon-3.5.1</tag>
   </scm>
 
   <issueManagement>
