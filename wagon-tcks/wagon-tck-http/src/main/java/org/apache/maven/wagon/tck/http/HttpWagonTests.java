@@ -75,7 +75,7 @@ public abstract class HttpWagonTests
     public void beforeEach()
         throws Exception
     {
-        serverFixture = new ServerFixture( isSsl() );
+        serverFixture = new ServerFixture( isSsl(), isClientCertAuth() );
         serverFixture.start();
         wagon = (Wagon) container.lookup( Wagon.ROLE, configurator.getWagonHint() );
     }
@@ -185,6 +185,11 @@ public abstract class HttpWagonTests
         f.deleteOnExit();
 
         return f;
+    }
+    
+    protected boolean isClientCertAuth()
+    {
+        return false;
     }
 
     protected boolean isSsl()
