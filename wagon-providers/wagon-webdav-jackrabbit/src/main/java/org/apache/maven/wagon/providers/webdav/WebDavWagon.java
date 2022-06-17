@@ -50,6 +50,7 @@ import org.w3c.dom.Node;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -165,7 +166,7 @@ public class WebDavWagon
 
         if ( getCredentialsProvider().getCredentials( targetScope ) != null )
         {
-            BasicScheme targetAuth = new BasicScheme();
+            BasicScheme targetAuth = new BasicScheme( StandardCharsets.UTF_8 );
             getAuthCache().put( targetHost, targetAuth );
         }
         HttpMkcol method = new HttpMkcol( url );

@@ -779,7 +779,7 @@ public abstract class AbstractHttpClientWagon
 
         if ( credentialsProvider.getCredentials( targetScope ) != null )
         {
-            BasicScheme targetAuth = new BasicScheme();
+            BasicScheme targetAuth = new BasicScheme( StandardCharsets.UTF_8 );
             authCache.put( targetHost, targetAuth );
         }
 
@@ -978,7 +978,7 @@ public abstract class AbstractHttpClientWagon
 
             if ( credentialsProvider.getCredentials( targetScope ) != null )
             {
-                BasicScheme targetAuth = new BasicScheme();
+                BasicScheme targetAuth = new BasicScheme( StandardCharsets.UTF_8 );
                 authCache.put( targetHost, targetAuth );
             }
         }
