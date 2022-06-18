@@ -950,20 +950,18 @@ public abstract class AbstractHttpClientWagon
             requestConfigBuilder.setProxy( proxy );
         }
 
-        HttpMethodConfiguration config =
-            httpConfiguration == null ? null : httpConfiguration.getMethodConfiguration( httpMethod );
+        requestConfigBuilder.setConnectTimeout( getTimeout() );
+        requestConfigBuilder.setSocketTimeout( getReadTimeout() );
+        if ( httpMethod instanceof HttpPut )
+        {
+            requestConfigBuilder.setExpectContinueEnabled( true );
+        }
 
+        HttpMethodConfiguration config =
+                httpConfiguration == null ? null : httpConfiguration.getMethodConfiguration( httpMethod );
         if ( config != null )
         {
             ConfigurationUtils.copyConfig( config, requestConfigBuilder );
-        }
-        else
-        {
-            requestConfigBuilder.setSocketTimeout( getReadTimeout() );
-            if ( httpMethod instanceof HttpPut )
-            {
-                requestConfigBuilder.setExpectContinueEnabled( true );
-            }
         }
 
         HttpClientContext localContext = HttpClientContext.create();

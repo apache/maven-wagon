@@ -61,14 +61,9 @@ public class ConfigurationUtils
 
     public static void copyConfig( HttpMethodConfiguration config, RequestConfig.Builder builder )
     {
-        if ( config.getConnectionTimeout() > 0 )
-        {
-            builder.setConnectTimeout( config.getConnectionTimeout() );
-        }
-        if ( config.getReadTimeout() > 0 )
-        {
-            builder.setSocketTimeout( config.getReadTimeout() );
-        }
+        builder.setConnectTimeout( config.getConnectionTimeout() );
+        builder.setSocketTimeout( config.getReadTimeout() );
+
         Properties params = config.getParams();
         if ( params != null )
         {
