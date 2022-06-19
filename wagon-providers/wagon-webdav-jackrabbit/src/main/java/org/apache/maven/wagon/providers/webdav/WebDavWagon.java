@@ -20,11 +20,8 @@ package org.apache.maven.wagon.providers.webdav;
  */
 
 import org.apache.http.HttpException;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
-import org.apache.http.auth.AuthScope;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.util.EntityUtils;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
@@ -50,7 +47,6 @@ import org.w3c.dom.Node;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -156,19 +152,6 @@ public class WebDavWagon
     private int doMkCol( String url )
         throws IOException
     {
-        // preemptive for mkcol
-        // TODO: is it a good idea, though? 'Expect-continue' handshake would serve much better
-
-        // FIXME Perform only when preemptive has been configured
-        Repository repo = getRepository();
-        HttpHost targetHost = new HttpHost( repo.getHost(), repo.getPort(), repo.getProtocol() );
-        AuthScope targetScope = getBasicAuthScope().getScope( targetHost );
-
-        if ( getCredentialsProvider().getCredentials( targetScope ) != null )
-        {
-            BasicScheme targetAuth = new BasicScheme( StandardCharsets.UTF_8 );
-            getAuthCache().put( targetHost, targetAuth );
-        }
         HttpMkcol method = new HttpMkcol( url );
         try ( CloseableHttpResponse closeableHttpResponse = execute( method ) )
         {

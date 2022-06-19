@@ -35,6 +35,8 @@ public class HttpConfiguration
 
     private HttpMethodConfiguration head;
 
+    private HttpMethodConfiguration mkcol;
+
     public HttpMethodConfiguration getAll()
     {
         return all;
@@ -79,6 +81,17 @@ public class HttpConfiguration
         return this;
     }
 
+    public HttpMethodConfiguration getMkcol()
+    {
+        return mkcol;
+    }
+
+    public HttpConfiguration setMkcol( HttpMethodConfiguration mkcol )
+    {
+        this.mkcol = mkcol;
+        return this;
+    }
+
     public HttpMethodConfiguration getMethodConfiguration( HttpUriRequest method )
     {
         switch ( method.getMethod() )
@@ -89,6 +102,8 @@ public class HttpConfiguration
             return ConfigurationUtils.merge( all, put );
         case "HEAD":
             return ConfigurationUtils.merge( all, head );
+        case "MKCOL":
+            return ConfigurationUtils.merge( all, mkcol );
         default:
             return all;
         }

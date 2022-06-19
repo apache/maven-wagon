@@ -45,7 +45,7 @@ public class HttpClientWagonTest
         methodConfig.addParam("http.protocol.max-redirects", "%i," + maxRedirects);
 
         HttpConfiguration config = new HttpConfiguration();
-        config.setAll(methodConfig);
+        config.setAll( methodConfig );
 
         HttpHead method = new HttpHead();
         RequestConfig.Builder builder = RequestConfig.custom();

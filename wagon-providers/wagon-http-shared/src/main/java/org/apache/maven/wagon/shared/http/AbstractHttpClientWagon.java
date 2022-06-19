@@ -952,6 +952,8 @@ public abstract class AbstractHttpClientWagon
 
         requestConfigBuilder.setConnectTimeout( getTimeout() );
         requestConfigBuilder.setSocketTimeout( getReadTimeout() );
+        // We don't apply this to MKCOL because RFC 7231 says that this will not work without a body
+        // and our MKCOL requests don't have a body. They will logically behave like GET.
         if ( httpMethod instanceof HttpPut )
         {
             requestConfigBuilder.setExpectContinueEnabled( true );

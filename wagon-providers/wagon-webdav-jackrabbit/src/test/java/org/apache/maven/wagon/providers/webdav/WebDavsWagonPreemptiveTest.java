@@ -19,6 +19,9 @@ package org.apache.maven.wagon.providers.webdav;
  * under the License.
  */
 
+import org.apache.maven.wagon.Wagon;
+import org.apache.maven.wagon.shared.http.HttpConfiguration;
+import org.apache.maven.wagon.shared.http.HttpMethodConfiguration;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -29,7 +32,7 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
  * @author <a href="mailto:carlos@apache.org">Carlos Sanchez</a>
  */
-public class WebDavsWagonTest
+public class WebDavsWagonPreemptiveTest
     extends WebDavWagonTest
 {
     protected String getProtocol()
@@ -52,6 +55,29 @@ public class WebDavsWagonTest
         ServerConnector serverConnector = new ServerConnector( server, sslContextFactory );
         server.addConnector( serverConnector );
         return serverConnector;
+    }
+
+    @Override
+    protected Wagon getWagon()
+        throws Exception
+    {
+        WebDavWagon wagon = (WebDavWagon) super.getWagon();
+        wagon.setHttpConfiguration(
+            new HttpConfiguration() //
+                .setAll( new HttpMethodConfiguration().setUsePreemptive( true ) ) );
+        return wagon;
+    }
+
+    @Override
+    protected boolean supportPreemptiveAuthenticationPut()
+    {
+        return true;
+    }
+
+    @Override
+    protected boolean supportPreemptiveAuthenticationGet()
+    {
+        return true;
     }
 
 }
