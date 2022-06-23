@@ -23,7 +23,7 @@ under the License.
   <parent>
     <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon-tcks</artifactId>
-    <version>3.5.2-SNAPSHOT</version>
+    <version>3.5.2</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
