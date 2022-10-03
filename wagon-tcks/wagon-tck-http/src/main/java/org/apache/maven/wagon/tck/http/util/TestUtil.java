@@ -91,7 +91,11 @@ public final class TestUtil
                     for ( Enumeration<JarEntry> en = jf.entries(); en.hasMoreElements(); )
                     {
                         JarEntry je = en.nextElement();
-                        File target = new File( base, je.getName() ).getAbsoluteFile();
+                        final File zipEntryFile = new File( base, je.getName() );
+                        if (!zipEntryFile.toPath().normalize().startsWith(base.toPath().normalize())) {
+                            throw new IOException("Bad zip entry");
+                        }
+                        File target = zipEntryFile.getAbsoluteFile();
                         if ( je.isDirectory() )
                         {
                             target.mkdirs();
