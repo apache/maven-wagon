@@ -38,7 +38,7 @@ under the License.
 
   <properties>
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
-    <slf4jVersion>1.7.32</slf4jVersion>
+    <slf4jVersion>1.7.36</slf4jVersion>
     <maven.site.path>wagon-archives/wagon-LATEST</maven.site.path>
     <javaVersion>7</javaVersion>
     <project.build.outputTimestamp>2022-06-23T20:54:45Z</project.build.outputTimestamp>
@@ -279,7 +279,7 @@ under the License.
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-utils</artifactId>
-        <version>3.3.0</version>
+        <version>3.3.1</version>
       </dependency>
 
       <!-- for slf4j -->
@@ -315,7 +315,7 @@ under the License.
       <dependency>
         <groupId>org.eclipse.jetty.aggregate</groupId>
         <artifactId>jetty-all</artifactId>
-        <version>9.2.24.v20180105</version>
+        <version>9.2.30.v20200428</version>
       </dependency>
       <dependency>
         <groupId>javax.servlet</groupId>
