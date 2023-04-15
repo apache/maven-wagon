@@ -92,8 +92,9 @@ public final class TestUtil
                     {
                         JarEntry je = en.nextElement();
                         final File zipEntryFile = new File( base, je.getName() );
-                        if (!zipEntryFile.toPath().normalize().startsWith(base.toPath().normalize())) {
-                            throw new IOException("Bad zip entry");
+                        if ( !zipEntryFile.toPath().normalize().startsWith( base.toPath().normalize() ) )
+                        {
+                            throw new IOException( "Bad zip entry" );
                         }
                         File target = zipEntryFile.getAbsoluteFile();
                         if ( je.isDirectory() )
