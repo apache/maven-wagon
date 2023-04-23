@@ -40,7 +40,7 @@ under the License.
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
     <slf4jVersion>1.7.36</slf4jVersion>
     <maven.site.path>wagon-archives/wagon-LATEST</maven.site.path>
-    <javaVersion>7</javaVersion>
+    <javaVersion>8</javaVersion>
     <project.build.outputTimestamp>2022-12-18T21:06:44Z</project.build.outputTimestamp>
   </properties>
 
