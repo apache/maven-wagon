@@ -25,7 +25,6 @@ import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.proxy.ProxyInfo;
-import org.codehaus.plexus.util.StringUtils;
 
 /**
  * Helper for HTTP related messages.
@@ -88,7 +87,7 @@ public class HttpMessageUtils
         if ( statusCode != UNKNOWN_STATUS_CODE )
         {
             msg += " -- status code: " + statusCode;
-            if ( StringUtils.isNotEmpty( reasonPhrase ) )
+            if ( reasonPhrase != null && !reasonPhrase.isEmpty() )
             {
                 msg += ", reason phrase: " + reasonPhrase;
             }
@@ -195,7 +194,7 @@ public class HttpMessageUtils
         {
             msg += ", status: " + statusCode;
 
-            if ( StringUtils.isNotEmpty( reasonPhrase ) )
+            if ( reasonPhrase != null && !reasonPhrase.isEmpty() )
             {
                 msg += " " + reasonPhrase;
             }

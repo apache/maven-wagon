@@ -25,7 +25,6 @@ import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.http.HttpWagonTestCase;
-import org.codehaus.plexus.util.StringUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileNotFoundException;
@@ -114,7 +113,7 @@ public class LightweightHttpWagonTest
                             e instanceof AuthorizationException );
 
                     assertEquals( assertMessageForBadMessage, "authorization failed for " + forUrl + ", status: 403"
-                            + ( StringUtils.isEmpty( forReasonPhrase ) ? " Forbidden" : ( " " + forReasonPhrase ) ),
+                            + ( (forReasonPhrase == null || forReasonPhrase.isEmpty()) ? " Forbidden" : ( " " + forReasonPhrase ) ),
                             e.getMessage() );
                     break;
 
@@ -123,7 +122,7 @@ public class LightweightHttpWagonTest
                             e instanceof AuthorizationException );
 
                     assertEquals( assertMessageForBadMessage, "authentication failed for " + forUrl + ", status: 401"
-                                    + ( StringUtils.isEmpty( forReasonPhrase ) ? " Unauthorized" :
+                                    + ( (forReasonPhrase == null || forReasonPhrase.isEmpty()) ? " Unauthorized" :
                                     ( " " + forReasonPhrase ) ),
                             e.getMessage() );
                     break;

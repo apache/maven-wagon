@@ -41,7 +41,6 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;
 import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.util.StringUtils;
 import org.w3c.dom.Node;
 
 import java.io.File;
@@ -281,7 +280,7 @@ public class WebDavWagon
                             fileName = PathUtils.filename( PathUtils.dirname( URLDecoder.decode( entryUrl ) ) ) + "/";
                         }
 
-                        if ( !StringUtils.isEmpty( fileName ) )
+                        if ( !(fileName == null || fileName.isEmpty()) )
                         {
                             dirs.add( fileName );
                         }

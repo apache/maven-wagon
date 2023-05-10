@@ -80,7 +80,6 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.StringUtils;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -448,7 +447,7 @@ public abstract class AbstractHttpClientWagon
         switch ( RETRY_HANDLER_CLASS )
         {
             case "default":
-                if ( StringUtils.isEmpty( RETRY_HANDLER_EXCEPTIONS ) )
+                if ( RETRY_HANDLER_EXCEPTIONS == null || RETRY_HANDLER_EXCEPTIONS.isEmpty() )
                 {
                     return new DefaultHttpRequestRetryHandler(
                             RETRY_HANDLER_COUNT, RETRY_HANDLER_REQUEST_SENT_ENABLED );
@@ -606,7 +605,7 @@ public abstract class AbstractHttpClientWagon
             String username = authenticationInfo.getUserName();
             String password = authenticationInfo.getPassword();
 
-            if ( StringUtils.isNotEmpty( username ) && StringUtils.isNotEmpty( password ) )
+            if ( (username != null && !username.isEmpty()) && (password != null && !password.isEmpty()) )
             {
                 Credentials creds = new UsernamePasswordCredentials( username, password );
 
