@@ -313,12 +313,12 @@ public class ScmWagon
 
         ScmProviderRepository providerRepository = scmRepository.getProviderRepository();
 
-        if ( StringUtils.isNotEmpty( username ) )
+        if ( username != null && !username.isEmpty() )
         {
             providerRepository.setUser( username );
         }
 
-        if ( StringUtils.isNotEmpty( password ) )
+        if ( password != null && !password.isEmpty() )
         {
             providerRepository.setPassword( password );
         }
@@ -327,12 +327,12 @@ public class ScmWagon
         {
             ScmProviderRepositoryWithHost providerRepo = (ScmProviderRepositoryWithHost) providerRepository;
 
-            if ( StringUtils.isNotEmpty( privateKey ) )
+            if ( privateKey != null && !privateKey.isEmpty() )
             {
                 providerRepo.setPrivateKey( privateKey );
             }
 
-            if ( StringUtils.isNotEmpty( passphrase ) )
+            if ( passphrase != null && !passphrase.isEmpty() )
             {
                 providerRepo.setPassphrase( passphrase );
             }
@@ -648,13 +648,13 @@ public class ScmWagon
     private boolean supportsPartialCheckout( ScmProvider scmProvider )
     {
         String scmType = scmProvider.getScmType();
-        return ( "svn".equals( scmType ) || "cvs".equals( scmType ) );
+        return "svn".equals( scmType ) || "cvs".equals( scmType );
     }
 
     private boolean isAlwaysRecursive( ScmProvider scmProvider )
     {
         String scmType = scmProvider.getScmType();
-        return ( "git".equals( scmType ) || "cvs".equals( scmType ) );
+        return "git".equals( scmType ) || "cvs".equals( scmType );
     }
 
     public void putDirectory( File sourceDirectory, String destinationDirectory )
