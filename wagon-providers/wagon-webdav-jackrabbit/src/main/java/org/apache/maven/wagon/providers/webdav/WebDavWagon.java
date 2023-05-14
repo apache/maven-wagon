@@ -280,7 +280,7 @@ public class WebDavWagon
                             fileName = PathUtils.filename( PathUtils.dirname( URLDecoder.decode( entryUrl ) ) ) + "/";
                         }
 
-                        if ( !(fileName == null || fileName.isEmpty()) )
+                        if ( !( fileName == null || fileName.isEmpty() ) )
                         {
                             dirs.add( fileName );
                         }

@@ -605,7 +605,7 @@ public abstract class AbstractHttpClientWagon
             String username = authenticationInfo.getUserName();
             String password = authenticationInfo.getPassword();
 
-            if ( (username != null && !username.isEmpty()) && (password != null && !password.isEmpty()) )
+            if ( ( username != null && !username.isEmpty() ) && ( password != null && !password.isEmpty() ) )
             {
                 Credentials creds = new UsernamePasswordCredentials( username, password );
 

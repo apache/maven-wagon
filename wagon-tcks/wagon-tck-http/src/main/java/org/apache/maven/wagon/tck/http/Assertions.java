@@ -117,7 +117,8 @@ public final class Assertions
                     // TODO: add test for 410: Gone?
                     assertTrue( "404 not found response should throw ResourceDoesNotExistException",
                             e instanceof ResourceDoesNotExistException );
-                    reasonPhrase = (forReasonPhrase == null || forReasonPhrase.isEmpty()) ? " Not Found" : ( " " + forReasonPhrase );
+                    reasonPhrase = ( forReasonPhrase == null || forReasonPhrase.isEmpty() )
+                            ? " Not Found" : ( " " + forReasonPhrase );
                     assertEquals( assertMessageForBadMessage, "resource missing at " + forUrl + ", status: 404"
                             + reasonPhrase, e.getMessage() );
                     break;
@@ -128,7 +129,8 @@ public final class Assertions
                                     + " AuthenticationException is not explicitly declared as thrown from wagon "
                                     + "methods",
                             e instanceof AuthorizationException );
-                    reasonPhrase = (forReasonPhrase == null || forReasonPhrase.isEmpty()) ? " Unauthorized" : ( " " + forReasonPhrase );
+                    reasonPhrase = ( forReasonPhrase == null || forReasonPhrase.isEmpty() )
+                            ? " Unauthorized" : ( " " + forReasonPhrase );
                     assertEquals( assertMessageForBadMessage, "authentication failed for " + forUrl + ", status: 401"
                             + reasonPhrase, e.getMessage() );
                     break;
@@ -136,7 +138,9 @@ public final class Assertions
                 case HttpServletResponse.SC_PROXY_AUTHENTICATION_REQUIRED:
                     assertTrue( "407 Proxy authentication required should throw AuthorizationException",
                             e instanceof AuthorizationException );
-                    reasonPhrase = (forReasonPhrase == null || forReasonPhrase.isEmpty()) ? " Proxy Authentication Required"
+                    reasonPhrase = ( forReasonPhrase == null || forReasonPhrase.isEmpty() )
+
+                            ? " Proxy Authentication Required"
                             : ( " " + forReasonPhrase );
                     assertEquals( assertMessageForBadMessage, "proxy authentication failed for "
                             + forUrl + ", status: 407" + reasonPhrase, e.getMessage() );
@@ -145,7 +149,8 @@ public final class Assertions
                 case HttpServletResponse.SC_FORBIDDEN:
                     assertTrue( "403 Forbidden should throw AuthorizationException",
                             e instanceof AuthorizationException );
-                    reasonPhrase = (forReasonPhrase == null || forReasonPhrase.isEmpty()) ? " Forbidden" : ( " " + forReasonPhrase );
+                    reasonPhrase = ( forReasonPhrase == null || forReasonPhrase.isEmpty() )
+                            ? " Forbidden" : ( " " + forReasonPhrase );
                     assertEquals( assertMessageForBadMessage, "authorization failed for " + forUrl + ", status: 403"
                             + reasonPhrase, e.getMessage() );
                     break;
