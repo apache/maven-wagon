@@ -509,7 +509,7 @@ public class ScmWagon
         String res =
             partCOSubdir.length() >= targetName.length() ? "" : targetName.substring( partCOSubdir.length() ) + '/';
 
-        ArrayList<File> createdDirs = new ArrayList<File>();
+        ArrayList<File> createdDirs = new ArrayList<>();
         File deepDir = new File( checkoutDirectory, res );
 
         boolean added = false;
@@ -842,7 +842,7 @@ public class ScmWagon
                 throw new ResourceDoesNotExistException( result.getProviderMessage() );
             }
 
-            List<String> files = new ArrayList<String>();
+            List<String> files = new ArrayList<>();
 
             for ( ScmFile f : result.getFiles() )
             {

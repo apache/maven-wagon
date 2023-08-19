@@ -466,7 +466,7 @@ public class FtpWagon
                 throw new ResourceDoesNotExistException( "Could not find file: '" + resource + "'" );
             }
 
-            List<String> ret = new ArrayList<String>();
+            List<String> ret = new ArrayList<>();
             for ( FTPFile file : ftpFiles )
             {
                 String name = file.getName();

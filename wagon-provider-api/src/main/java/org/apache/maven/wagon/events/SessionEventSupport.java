@@ -33,7 +33,7 @@ public final class SessionEventSupport
     /**
      * registered listeners
      */
-    private final List<SessionListener> listeners = new ArrayList<SessionListener>();
+    private final List<SessionListener> listeners = new ArrayList<>();
 
     /**
      * Adds the listener to the collection of listeners

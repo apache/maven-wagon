@@ -64,7 +64,7 @@ public class StreamKnownHostsProvider
     protected Set<KnownHostEntry> loadKnownHosts( String contents )
         throws IOException
     {
-        Set<KnownHostEntry> hosts = new HashSet<KnownHostEntry>();
+        Set<KnownHostEntry> hosts = new HashSet<>();
         
         BufferedReader br = new BufferedReader( new StringReader( contents ) );
         
