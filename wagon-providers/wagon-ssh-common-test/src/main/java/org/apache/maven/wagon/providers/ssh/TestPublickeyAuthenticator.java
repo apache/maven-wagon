@@ -43,7 +43,7 @@ public class TestPublickeyAuthenticator
     implements PublickeyAuthenticator
 {
     private List<PublickeyAuthenticatorRequest> publickeyAuthenticatorRequests =
-        new ArrayList<PublickeyAuthenticatorRequest>();
+        new ArrayList<>();
 
     private boolean keyAuthz;
 

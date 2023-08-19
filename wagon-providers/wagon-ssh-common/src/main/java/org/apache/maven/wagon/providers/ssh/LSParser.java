@@ -67,7 +67,7 @@ public class LSParser
     public List<String> parseFiles( String rawLS )
         throws TransferFailedException
     {
-        List<String> ret = new ArrayList<String>();
+        List<String> ret = new ArrayList<>();
         try
         {
             BufferedReader br = new BufferedReader( new StringReader( rawLS ) );

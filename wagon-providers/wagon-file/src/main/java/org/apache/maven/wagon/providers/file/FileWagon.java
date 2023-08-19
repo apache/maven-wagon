@@ -240,7 +240,7 @@ public class FileWagon
 
         File[] files = path.listFiles();
 
-        List<String> list = new ArrayList<String>( files.length );
+        List<String> list = new ArrayList<>( files.length );
         for ( File file : files )
         {
             String name = file.getName();

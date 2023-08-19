@@ -373,7 +373,7 @@ public class SftpWagon
 
             @SuppressWarnings( "unchecked" )
             List<ChannelSftp.LsEntry> fileList = channel.ls( filename );
-            List<String> files = new ArrayList<String>( fileList.size() );
+            List<String> files = new ArrayList<>( fileList.size() );
             for ( ChannelSftp.LsEntry entry : fileList )
             {
                 String name = entry.getFilename();

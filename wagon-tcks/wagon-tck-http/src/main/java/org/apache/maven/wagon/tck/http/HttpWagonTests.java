@@ -61,11 +61,11 @@ public abstract class HttpWagonTests
 
     private String baseUrl;
 
-    private static final Set<File> TMP_FILES = new HashSet<File>();
+    private static final Set<File> TMP_FILES = new HashSet<>();
 
     private Repository repo;
 
-    private final Set<Object> notificationTargets = new HashSet<Object>();
+    private final Set<Object> notificationTargets = new HashSet<>();
 
     // CHECKSTYLE_OFF: ConstantName
     protected static final Logger logger = LoggerFactory.getLogger( HttpWagonTests.class );

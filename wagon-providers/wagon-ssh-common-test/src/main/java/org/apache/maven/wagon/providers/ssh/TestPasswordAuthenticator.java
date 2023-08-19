@@ -33,7 +33,7 @@ public class TestPasswordAuthenticator
     implements PasswordAuthenticator
 {
     List<PasswordAuthenticatorRequest> requests =
-        new ArrayList<PasswordAuthenticatorRequest>();
+        new ArrayList<>();
 
     public boolean authenticate( String username, String password, ServerSession session )
     {

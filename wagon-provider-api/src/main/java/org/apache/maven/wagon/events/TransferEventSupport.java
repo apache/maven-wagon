@@ -35,7 +35,7 @@ public final class TransferEventSupport
     /**
      * registered listeners
      */
-    private final List<TransferListener> listeners = new ArrayList<TransferListener>();
+    private final List<TransferListener> listeners = new ArrayList<>();
 
     /**
      * Adds the listener to the collection of listeners
