@@ -29,7 +29,7 @@ import java.net.PasswordAuthentication;
 public class LightweightHttpWagonAuthenticator
     extends Authenticator
 {
-    ThreadLocal<LightweightHttpWagon> localWagon = new ThreadLocal<LightweightHttpWagon>();
+    ThreadLocal<LightweightHttpWagon> localWagon = new ThreadLocal<>();
 
     protected PasswordAuthentication getPasswordAuthentication()
     {

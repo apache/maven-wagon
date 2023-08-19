@@ -46,7 +46,7 @@ public final class TestUtil
     private static final Logger logger = LoggerFactory.getLogger( TestUtil.class );
     // CHECKSTYLE_ON: ConstantName
 
-    private static final Map<String, File> BASES = new HashMap<String, File>();
+    private static final Map<String, File> BASES = new HashMap<>();
 
     private TestUtil()
     {

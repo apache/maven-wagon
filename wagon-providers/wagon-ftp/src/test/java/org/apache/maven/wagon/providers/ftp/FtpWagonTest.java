@@ -90,7 +90,7 @@ public class FtpWagonTest
             user.setName("admin");
             user.setPassword("admin");
 
-            List<Authority> authorities = new ArrayList<Authority>();
+            List<Authority> authorities = new ArrayList<>();
             authorities.add( new WritePermission() );
 
             user.setAuthorities( authorities );

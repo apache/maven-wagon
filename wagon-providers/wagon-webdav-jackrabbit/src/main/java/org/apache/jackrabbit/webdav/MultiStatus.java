@@ -41,7 +41,7 @@ public class MultiStatus
      * Map collecting the responses for this multistatus, where every href must
      * only occur one single time.
      */
-    private Map<String, MultiStatusResponse> responses = new LinkedHashMap<String, MultiStatusResponse>();
+    private Map<String, MultiStatusResponse> responses = new LinkedHashMap<>();
 
     /**
      * A general response description at the multistatus top level is used to

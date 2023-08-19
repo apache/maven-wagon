@@ -539,7 +539,7 @@ public abstract class WagonTestCase
 
             wagon.putDirectory( sourceFile, dirName );
 
-            List<String> resourceNames = new ArrayList<String>( resources.length + 1 );
+            List<String> resourceNames = new ArrayList<>( resources.length + 1 );
 
             resourceNames.add( dirName + "/" + resourceToCreate );
             for ( String resource : resources )
@@ -591,7 +591,7 @@ public abstract class WagonTestCase
 
             wagon.putDirectory( sourceFile, "." );
 
-            List<String> resourceNames = new ArrayList<String>( resources.length + 1 );
+            List<String> resourceNames = new ArrayList<>( resources.length + 1 );
 
             resourceNames.add( resourceToCreate );
             Collections.addAll( resourceNames, resources );

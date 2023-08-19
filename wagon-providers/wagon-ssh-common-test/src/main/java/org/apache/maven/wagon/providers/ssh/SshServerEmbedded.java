@@ -54,7 +54,7 @@ public class SshServerEmbedded
 
     private SshServer sshd;
 
-    private List<String> sshKeysResources = new ArrayList<String>();
+    private List<String> sshKeysResources = new ArrayList<>();
 
     private TestPublickeyAuthenticator publickeyAuthenticator;
 

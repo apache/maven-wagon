@@ -82,7 +82,7 @@ public class ScpCommandFactory
         }
 
         String[] args = command.split( " " );
-        List<String> parts = new ArrayList<String>();
+        List<String> parts = new ArrayList<>();
         parts.add( args[0] );
         for ( int i = 1; i < args.length; i++ )
         {

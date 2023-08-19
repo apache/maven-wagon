@@ -1172,7 +1172,7 @@ public abstract class HttpWagonTestCase
 
         File repositoryDirectory;
 
-        public List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<HandlerRequestResponse>();
+        public List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<>();
 
         RedirectHandler( String reason, int retCode, String redirectUrl, File repositoryDirectory )
         {
@@ -2079,11 +2079,11 @@ public abstract class HttpWagonTestCase
     {
         private final File resourceBase;
 
-        public List<DeployedResource> deployedResources = new ArrayList<DeployedResource>();
+        public List<DeployedResource> deployedResources = new ArrayList<>();
 
         public int putCallNumber = 0;
 
-        public List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<HandlerRequestResponse>();
+        public List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<>();
 
         public PutHandler( File repositoryDirectory )
         {
@@ -2140,7 +2140,7 @@ public abstract class HttpWagonTestCase
         extends TestHeaderHandler
     {
 
-        List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<HandlerRequestResponse>();
+        List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<>();
 
         public void handle( String target, Request baseRequest, HttpServletRequest request,
             HttpServletResponse response ) throws IOException, ServletException
@@ -2173,7 +2173,7 @@ public abstract class HttpWagonTestCase
     {
         public Map<String, String> headers = Collections.emptyMap();
 
-        public List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<HandlerRequestResponse>();
+        public List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<>();
 
         TestHeaderHandler()
         {
@@ -2182,7 +2182,7 @@ public abstract class HttpWagonTestCase
         public void handle( String target, Request baseRrequest, HttpServletRequest request,
             HttpServletResponse response ) throws IOException, ServletException
         {
-            headers = new HashMap<String, String>();
+            headers = new HashMap<>();
             for ( Enumeration<String> e = baseRrequest.getHeaderNames(); e.hasMoreElements(); )
             {
                 String name = e.nextElement();
@@ -2243,7 +2243,7 @@ public abstract class HttpWagonTestCase
         extends ConstraintSecurityHandler
     {
 
-        public List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<HandlerRequestResponse>();
+        public List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<>();
 
         @Override
         public void handle( String target, Request baseRequest, HttpServletRequest request,
