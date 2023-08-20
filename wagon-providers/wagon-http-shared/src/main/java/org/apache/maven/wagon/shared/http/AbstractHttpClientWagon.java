@@ -90,6 +90,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.net.URLConnection;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
@@ -121,6 +122,7 @@ public abstract class AbstractHttpClientWagon
     final class WagonHttpEntity
         extends AbstractHttpEntity
     {
+        public static final String DEFAULT_CONTENT_TYPE = "application/octet-stream";
         private final Resource resource;
 
         private final Wagon wagon;
@@ -151,6 +153,49 @@ public abstract class AbstractHttpClientWagon
             this.length = resource == null ? -1 : resource.getContentLength();
 
             this.wagon = wagon;
+
+            // if the autoset content flag is SET and the content type is blank
+            // then try to determine what the content type is and set it
+            if ( AUTOSET_CONTENT_TYPE && getContentType() == null )
+            {
+                setContentType( determineContentType() );
+            }
+        }
+
+        /**
+         * Best effort to determine the content type.
+         *
+         * if the content is coming from a file and the content type is determinable from the file extension
+         * or
+         * if the content is coming from a stream and the content type is determinable from the stream
+         *     (guessContentTypeFromStream will return null if the InputStream does not support mark())
+         * then determine and return the content type
+         * if the content type is not determinable then return "application/octet-stream"
+         *
+         * NOTE: this method is expected to always return a non-empty String
+         */
+        private String determineContentType()
+        {
+            try
+            {
+                String mimeType = this.source != null
+                            ? URLConnection.guessContentTypeFromName( this.source.getName() )
+                            : this.stream != null
+                                ? URLConnection.guessContentTypeFromStream( this.stream )
+                                : DEFAULT_CONTENT_TYPE;
+
+                // if URLConnection was unable to determine the type then default it
+                if ( mimeType == null )
+                {
+                    mimeType = DEFAULT_CONTENT_TYPE;
+                }
+                return mimeType;
+            }
+            catch ( IOException e )
+            {
+                // will only occur when guessContentTypeFromStream gets an IOException
+                return DEFAULT_CONTENT_TYPE;
+            }
         }
 
         public Resource getResource()
@@ -278,6 +323,12 @@ public abstract class AbstractHttpClientWagon
     private static final boolean SSL_ALLOW_ALL =
         Boolean.valueOf( System.getProperty( "maven.wagon.http.ssl.allowall", "false" ) );
 
+    /**
+     * If enabled, then the content-type HTTP header will be set using the file extension
+     * or the stream header to determine the type, <b>enabled by default</b>
+     */
+    private static final boolean AUTOSET_CONTENT_TYPE =
+            Boolean.valueOf( System.getProperty( "maven.wagon.http.autocontenttype", "true" ) );
 
     /**
      * Maximum concurrent connections per distinct route.
