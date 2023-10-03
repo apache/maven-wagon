@@ -29,9 +29,7 @@ under the License.
 
   <artifactId>wagon-webdav-jackrabbit</artifactId>
   <name>Apache Maven Wagon :: Providers :: WebDAV Provider</name>
-  <description>
-    Wagon provider that gets and puts artifacts through WebDAV protocol
-  </description>
+  <description>Wagon provider that gets and puts artifacts through WebDAV protocol</description>
 
   <contributors>
     <contributor>
@@ -57,8 +55,8 @@ under the License.
       <version>2.14.4</version>
       <exclusions>
         <exclusion>
-          <artifactId>commons-logging</artifactId>
           <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
         </exclusion>
         <exclusion>
           <groupId>commons-httpclient</groupId>
@@ -75,7 +73,8 @@ under the License.
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
-    <dependency> <!-- required for org.apache.httpcomponents:httpclient -->
+    <dependency>
+      <!-- required for org.apache.httpcomponents:httpclient -->
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
       <scope>runtime</scope>
@@ -86,8 +85,8 @@ under the License.
       <artifactId>httpclient</artifactId>
       <exclusions>
         <exclusion>
-          <artifactId>commons-logging</artifactId>
           <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
         </exclusion>
       </exclusions>
     </dependency>

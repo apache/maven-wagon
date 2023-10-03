@@ -23,7 +23,7 @@ under the License.
   <parent>
     <groupId>org.apache.maven</groupId>
     <artifactId>maven-parent</artifactId>
-    <version>34</version>
+    <version>40</version>
   </parent>
 
   <groupId>org.apache.maven.wagon</groupId>
@@ -35,14 +35,6 @@ under the License.
   <description>Tools to manage artifacts and deployment</description>
   <url>https://maven.apache.org/wagon</url>
   <inceptionYear>2003</inceptionYear>
-
-  <properties>
-    <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
-    <slf4jVersion>1.7.36</slf4jVersion>
-    <maven.site.path>wagon-archives/wagon-LATEST</maven.site.path>
-    <javaVersion>7</javaVersion>
-    <project.build.outputTimestamp>2022-12-18T21:06:44Z</project.build.outputTimestamp>
-  </properties>
 
   <contributors>
     <contributor>
@@ -162,9 +154,9 @@ under the License.
 
     <mailingList>
       <name>LEGACY Wagon User List (deprecated)</name>
-      <post>wagon-users@maven.apache.org</post>
       <subscribe>wagon-users-subscribe@maven.apache.org</subscribe>
       <unsubscribe>wagon-users-unsubscribe@maven.apache.org</unsubscribe>
+      <post>wagon-users@maven.apache.org</post>
       <archive>http://mail-archives.apache.org/mod_mbox/maven-wagon-users/</archive>
       <otherArchives>
         <otherArchive>http://www.mail-archive.com/wagon-users@maven.apache.org</otherArchive>
@@ -174,9 +166,9 @@ under the License.
     </mailingList>
     <mailingList>
       <name>LEGACY Wagon Developer List (deprecated)</name>
-      <post>wagon-dev@maven.apache.org</post>
       <subscribe>wagon-dev-subscribe@maven.apache.org</subscribe>
       <unsubscribe>wagon-dev-unsubscribe@maven.apache.org</unsubscribe>
+      <post>wagon-dev@maven.apache.org</post>
       <archive>http://mail-archives.apache.org/mod_mbox/maven-wagon-dev/</archive>
       <otherArchives>
         <otherArchive>http://www.mail-archive.com/wagon-dev@maven.apache.org</otherArchive>
@@ -195,11 +187,18 @@ under the License.
     </mailingList>
   </mailingLists>
 
+  <modules>
+    <module>wagon-provider-api</module>
+    <module>wagon-providers</module>
+    <module>wagon-provider-test</module>
+    <module>wagon-tcks</module>
+  </modules>
+
   <scm>
     <connection>scm:git:https://gitbox.apache.org/repos/asf/maven-wagon.git</connection>
     <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/maven-wagon.git</developerConnection>
-    <url>https://github.com/apache/maven-wagon/tree/${project.scm.tag}</url>
     <tag>wagon-4.0.0-M1</tag>
+    <url>https://github.com/apache/maven-wagon/tree/${project.scm.tag}</url>
   </scm>
 
   <issueManagement>
@@ -218,12 +217,12 @@ under the License.
     </site>
   </distributionManagement>
 
-  <modules>
-    <module>wagon-provider-api</module>
-    <module>wagon-providers</module>
-    <module>wagon-provider-test</module>
-    <module>wagon-tcks</module>
-  </modules>
+  <properties>
+    <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
+    <slf4jVersion>1.7.36</slf4jVersion>
+    <maven.site.path>wagon-archives/wagon-LATEST</maven.site.path>
+    <project.build.outputTimestamp>2022-12-18T21:06:44Z</project.build.outputTimestamp>
+  </properties>
 
   <dependencyManagement>
     <dependencies>
@@ -321,22 +320,16 @@ under the License.
         <groupId>javax.servlet</groupId>
         <artifactId>javax.servlet-api</artifactId>
         <version>3.1.0</version>
-    </dependency>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
   <build>
     <pluginManagement>
       <plugins>
-        <plugin><!-- TODO remove when parent POM upgraded to 35 -->
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-shade-plugin</artifactId>
-          <version>3.2.3</version>
-        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.22.2</version>
           <configuration>
             <forkedProcessTimeoutInSeconds>800</forkedProcessTimeoutInSeconds>
             <systemPropertyVariables>
@@ -357,13 +350,16 @@ under the License.
           <configuration>
             <excludes combine.children="append">
               <exclude>.checkstyle</exclude>
+              <exclude>.gitattributes</exclude>
               <exclude>**/*.odg</exclude>
               <exclude>src/test/resources/**</exclude>
               <exclude>src/main/resources/default-server-root/**</exclude>
               <exclude>src/main/resources/ssh-keys/**</exclude>
               <exclude>src/test/ssh-keys/**</exclude>
-              <exclude>.repository/**</exclude><!-- for CI -->
-              <exclude>out/**</exclude> <!-- for intellij -->
+              <!-- for CI -->
+              <exclude>.repository/**</exclude>
+              <!-- for intellij -->
+              <exclude>out/**</exclude>
             </excludes>
           </configuration>
         </plugin>
@@ -392,6 +388,11 @@ under the License.
             </lifecycleMappingMetadata>
           </configuration>
         </plugin>
+        <plugin>
+          <groupId>org.codehaus.plexus</groupId>
+          <artifactId>plexus-component-metadata</artifactId>
+          <version>2.1.1</version>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
@@ -404,47 +405,6 @@ under the License.
             <goals>
               <goal>generate-metadata</goal>
             </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>animal-sniffer-maven-plugin</artifactId>
-        <version>1.15</version>
-        <configuration>
-          <signature>
-            <groupId>org.codehaus.mojo.signature</groupId>
-            <artifactId>java17</artifactId>
-            <version>1.0</version>
-          </signature>
-        </configuration>
-        <executions>
-          <execution>
-            <id>check-java-1.7-compat</id>
-            <phase>process-classes</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <version>3.0.0-M2</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <requireJavaVersion>
-                  <version>1.7.0</version>
-                </requireJavaVersion>
-              </rules>
-            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -525,10 +485,10 @@ under the License.
               </reportSet>
               <reportSet>
                 <id>aggregate</id>
-                <inherited>false</inherited>
                 <reports>
                   <report>aggregate</report>
                 </reports>
+                <inherited>false</inherited>
               </reportSet>
             </reportSets>
           </plugin>
@@ -545,10 +505,10 @@ under the License.
               </reportSet>
               <reportSet>
                 <id>aggregate</id>
-                <inherited>false</inherited>
                 <reports>
                   <report>aggregate</report>
                 </reports>
+                <inherited>false</inherited>
               </reportSet>
             </reportSets>
           </plugin>
@@ -564,10 +524,10 @@ under the License.
               </reportSet>
               <reportSet>
                 <id>aggregate</id>
-                <inherited>false</inherited>
                 <reports>
                   <report>checkstyle-aggregate</report>
                 </reports>
+                <inherited>false</inherited>
               </reportSet>
             </reportSets>
           </plugin>

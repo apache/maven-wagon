@@ -73,7 +73,6 @@ under the License.
     </dependencies>
   </dependencyManagement>
 
-
   <dependencies>
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>
