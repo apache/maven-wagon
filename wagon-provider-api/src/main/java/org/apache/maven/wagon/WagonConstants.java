@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon;
 
 /**
  * This class contains constants used in Wagon API.
@@ -25,8 +24,7 @@ package org.apache.maven.wagon;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public final class WagonConstants
-{
+public final class WagonConstants {
     /**
      * Indicates that port has not been set.
      */

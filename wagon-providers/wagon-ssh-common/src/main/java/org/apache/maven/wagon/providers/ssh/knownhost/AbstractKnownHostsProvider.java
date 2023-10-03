@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh.knownhost;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh.knownhost;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -29,9 +28,7 @@ import java.util.Set;
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  *
  */
-public abstract class AbstractKnownHostsProvider
-    implements KnownHostsProvider
-{
+public abstract class AbstractKnownHostsProvider implements KnownHostsProvider {
     /**
      * Valid values are ask, yes, no.
      *
@@ -46,30 +43,19 @@ public abstract class AbstractKnownHostsProvider
 
     protected Set<KnownHostEntry> knownHosts = new HashSet<>();
 
-    public void setHostKeyChecking( String hostKeyChecking )
-    {
+    public void setHostKeyChecking(String hostKeyChecking) {
         this.hostKeyChecking = hostKeyChecking;
     }
 
-    public String getHostKeyChecking()
-    {
+    public String getHostKeyChecking() {
         return hostKeyChecking;
     }
 
-    public String getContents()
-    {
+    public String getContents() {
         return contents;
     }
 
-    public void storeKnownHosts( String contents )
-        throws IOException
-    {
-    }
+    public void storeKnownHosts(String contents) throws IOException {}
 
-    public void addKnownHost( KnownHostEntry knownHost )
-        throws IOException
-    {
-    }
-
-
+    public void addKnownHost(KnownHostEntry knownHost) throws IOException {}
 }

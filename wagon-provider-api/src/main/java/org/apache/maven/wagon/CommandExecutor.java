@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,19 +16,16 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon;
 
 /**
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  *
  */
-public interface CommandExecutor
-    extends Wagon
-{
+public interface CommandExecutor extends Wagon {
     String ROLE = CommandExecutor.class.getName();
 
-    void executeCommand( String command )
-        throws CommandExecutionException;
+    void executeCommand(String command) throws CommandExecutionException;
 
-    Streams executeCommand( String command, boolean ignoreFailures )
-        throws CommandExecutionException;
+    Streams executeCommand(String command, boolean ignoreFailures) throws CommandExecutionException;
 }

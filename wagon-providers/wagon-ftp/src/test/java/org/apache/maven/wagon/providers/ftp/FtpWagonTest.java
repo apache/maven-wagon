@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ftp;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.ftp;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ftp;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -45,43 +44,36 @@ import org.apache.maven.wagon.resource.Resource;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public class FtpWagonTest
-    extends StreamingWagonTestCase
-{
+public class FtpWagonTest extends StreamingWagonTestCase {
     private FtpServer server;
-    
+
     private int testRepositoryPort;
-    
-    protected String getProtocol()
-    {
+
+    protected String getProtocol() {
         return "ftp";
     }
-    
+
     protected int getTestRepositoryPort() {
         return testRepositoryPort;
     }
 
-    protected void setupWagonTestingFixtures()
-        throws Exception
-    {
+    protected void setupWagonTestingFixtures() throws Exception {
         File ftpHomeDir = getRepositoryDirectory();
-        if ( !ftpHomeDir.exists() )
-        {
+        if (!ftpHomeDir.exists()) {
             ftpHomeDir.mkdirs();
         }
 
-        if ( server == null )
-        {
+        if (server == null) {
             FtpServerFactory serverFactory = new FtpServerFactory();
 
             ListenerFactory factory = new ListenerFactory();
 
             // set the port of the listener
-            factory.setPort( 0 );
-            
+            factory.setPort(0);
+
             // replace the default listener
             Listener defaultListener = factory.createListener();
-            serverFactory.addListener("default", defaultListener );
+            serverFactory.addListener("default", defaultListener);
 
             PropertiesUserManagerFactory userManagerFactory = new PropertiesUserManagerFactory();
             UserManager um = userManagerFactory.createUserManager();
@@ -91,16 +83,15 @@ public class FtpWagonTest
             user.setPassword("admin");
 
             List<Authority> authorities = new ArrayList<>();
-            authorities.add( new WritePermission() );
+            authorities.add(new WritePermission());
 
-            user.setAuthorities( authorities );
+            user.setAuthorities(authorities);
 
-            user.setHomeDirectory( ftpHomeDir.getAbsolutePath() );
-
+            user.setHomeDirectory(ftpHomeDir.getAbsolutePath());
 
             um.save(user);
 
-            serverFactory.setUserManager( um );
+            serverFactory.setUserManager(um);
 
             server = serverFactory.createServer();
 
@@ -111,130 +102,107 @@ public class FtpWagonTest
         }
     }
 
-    protected void createDirectory( Wagon wagon, String resourceToCreate, String dirName )
-        throws Exception
-    {
-        super.createDirectory( wagon, resourceToCreate, dirName );
+    protected void createDirectory(Wagon wagon, String resourceToCreate, String dirName) throws Exception {
+        super.createDirectory(wagon, resourceToCreate, dirName);
 
         getRepositoryDirectory().mkdirs();
     }
 
-    protected void tearDownWagonTestingFixtures()
-        throws Exception
-    {
+    protected void tearDownWagonTestingFixtures() throws Exception {
         server.stop();
         server = null;
     }
 
-    protected String getTestRepositoryUrl()
-    {
+    protected String getTestRepositoryUrl() {
         return "ftp://localhost:" + getTestRepositoryPort();
     }
 
-    public AuthenticationInfo getAuthInfo()
-    {
+    public AuthenticationInfo getAuthInfo() {
         AuthenticationInfo authInfo = new AuthenticationInfo();
 
-        authInfo.setUserName( "admin" );
+        authInfo.setUserName("admin");
 
-        authInfo.setPassword( "admin" );
+        authInfo.setPassword("admin");
 
         return authInfo;
     }
 
-    protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
-    {
-        File file = new File( getRepositoryDirectory(), resource.getName() );
+    protected long getExpectedLastModifiedOnGet(Repository repository, Resource resource) {
+        File file = new File(getRepositoryDirectory(), resource.getName());
 
         // granularity for FTP is minutes
-        return ( file.lastModified() / 60000 ) * 60000;
+        return (file.lastModified() / 60000) * 60000;
     }
 
-    private File getRepositoryDirectory()
-    {
-        return getTestFile( "target/test-output/local-repository" );
+    private File getRepositoryDirectory() {
+        return getTestFile("target/test-output/local-repository");
     }
 
-    public void testNoPassword()
-        throws Exception
-    {
+    public void testNoPassword() throws Exception {
         AuthenticationInfo authenticationInfo = new AuthenticationInfo();
-        authenticationInfo.setUserName( "me" );
-        try
-        {
-            getWagon().connect( new Repository( "id", getTestRepositoryUrl() ), authenticationInfo );
+        authenticationInfo.setUserName("me");
+        try {
+            getWagon().connect(new Repository("id", getTestRepositoryUrl()), authenticationInfo);
             fail();
-        }
-        catch ( AuthenticationException e )
-        {
-            assertTrue( true );
+        } catch (AuthenticationException e) {
+            assertTrue(true);
         }
     }
 
-    public void testDefaultUserName()
-        throws Exception
-    {
+    public void testDefaultUserName() throws Exception {
         AuthenticationInfo authenticationInfo = new AuthenticationInfo();
-        authenticationInfo.setPassword( "secret" );
-        try
-        {
-            getWagon().connect( new Repository( "id", getTestRepositoryUrl() ), authenticationInfo );
+        authenticationInfo.setPassword("secret");
+        try {
+            getWagon().connect(new Repository("id", getTestRepositoryUrl()), authenticationInfo);
             fail();
-        }
-        catch ( AuthenticationException e )
-        {
-            assertEquals( System.getProperty( "user.name" ), authenticationInfo.getUserName() );
+        } catch (AuthenticationException e) {
+            assertEquals(System.getProperty("user.name"), authenticationInfo.getUserName());
         }
     }
 
     /**
      * This is a unit test to show WAGON-265
      */
-    public void testPutDirectoryCreation()
-        throws Exception
-    {
+    public void testPutDirectoryCreation() throws Exception {
         setupWagonTestingFixtures();
 
         setupRepositories();
 
         Wagon wagon = getWagon();
 
-        if ( wagon.supportsDirectoryCopy() )
-        {
+        if (wagon.supportsDirectoryCopy()) {
             // do the cleanup first
-            File destDir = new File( getRepositoryDirectory(), "dirExists" );
-            FileUtils.deleteDirectory( destDir );
+            File destDir = new File(getRepositoryDirectory(), "dirExists");
+            FileUtils.deleteDirectory(destDir);
             destDir.mkdirs();
-            destDir = new File( destDir, "not_yet_existing/also_not" );
+            destDir = new File(destDir, "not_yet_existing/also_not");
 
-            File sourceDir = new File( getRepositoryDirectory(), "testDirectory" );
+            File sourceDir = new File(getRepositoryDirectory(), "testDirectory");
 
             FileUtils.deleteDirectory(sourceDir);
             sourceDir.mkdir();
 
-            File testRes = new File( sourceDir, "test-resource-1.txt" );
+            File testRes = new File(sourceDir, "test-resource-1.txt");
             testRes.createNewFile();
 
             // This is the difference to our normal use case:
             // the directory specified in the repo string doesn't yet exist!
 
-            testRepository.setUrl( testRepository.getUrl() + "/dirExists/not_yet_existing/also_not" );
+            testRepository.setUrl(testRepository.getUrl() + "/dirExists/not_yet_existing/also_not");
 
-            wagon.connect( testRepository, getAuthInfo() );
+            wagon.connect(testRepository, getAuthInfo());
 
-            wagon.putDirectory( sourceDir, "testDirectory" );
+            wagon.putDirectory(sourceDir, "testDirectory");
 
             destFile = FileTestUtils.createUniqueFile(getName(), getName());
 
             destFile.deleteOnExit();
 
-            wagon.get( "testDirectory/test-resource-1.txt", destFile );
+            wagon.get("testDirectory/test-resource-1.txt", destFile);
 
             wagon.disconnect();
         }
 
         tearDownWagonTestingFixtures();
-
-
     }
 }

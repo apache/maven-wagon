@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.shared.http;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.shared.http;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.shared.http;
 
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -25,8 +24,7 @@ import org.apache.http.auth.AuthScope;
 /**
  * @since 2.8
  */
-public class BasicAuthScope
-{
+public class BasicAuthScope {
     private String host;
 
     private String port;
@@ -36,32 +34,28 @@ public class BasicAuthScope
     /**
      * @return the host
      */
-    public String getHost()
-    {
+    public String getHost() {
         return host;
     }
 
     /**
      * @param host the host to set
      */
-    public void setHost( String host )
-    {
+    public void setHost(String host) {
         this.host = host;
     }
 
     /**
      * @return the realm
      */
-    public String getRealm()
-    {
+    public String getRealm() {
         return realm;
     }
 
     /**
      * @param realm the realm to set
      */
-    public void setRealm( String realm )
-    {
+    public void setRealm(String realm) {
         this.realm = realm;
     }
 
@@ -78,26 +72,20 @@ public class BasicAuthScope
      * @param port The server setting's /server/port value
      * @return
      */
-    public AuthScope getScope( String host, int port )
-    {
-        if ( getHost() != null //
-            && "ANY".compareTo( getHost() ) == 0 //
-            && getPort() != null //
-            && "ANY".compareTo( getPort() ) == 0 //
-            && getRealm() != null //
-            && "ANY".compareTo( getRealm() ) == 0 )
-        {
+    public AuthScope getScope(String host, int port) {
+        if (getHost() != null //
+                && "ANY".compareTo(getHost()) == 0 //
+                && getPort() != null //
+                && "ANY".compareTo(getPort()) == 0 //
+                && getRealm() != null //
+                && "ANY".compareTo(getRealm()) == 0) {
             return AuthScope.ANY;
         }
         String scopeHost = host;
-        if ( getHost() != null )
-        {
-            if ( "ANY".compareTo( getHost() ) == 0 )
-            {
+        if (getHost() != null) {
+            if ("ANY".compareTo(getHost()) == 0) {
                 scopeHost = AuthScope.ANY_HOST;
-            }
-            else
-            {
+            } else {
                 scopeHost = getHost();
             }
         }
@@ -106,47 +94,37 @@ public class BasicAuthScope
         // -1 for server/port settings does this, but providing an override here
         // in
         // the BasicAuthScope config
-        if ( getPort() != null )
-        {
-            if ( "ANY".compareTo( getPort() ) == 0 )
-            {
+        if (getPort() != null) {
+            if ("ANY".compareTo(getPort()) == 0) {
                 scopePort = AuthScope.ANY_PORT;
-            }
-            else
-            {
-                scopePort = Integer.parseInt( getPort() );
+            } else {
+                scopePort = Integer.parseInt(getPort());
             }
         }
 
         String scopeRealm = AuthScope.ANY_REALM;
-        if ( getRealm() != null )
-        {
-            if ( "ANY".compareTo( getRealm() ) != 0 )
-            {
+        if (getRealm() != null) {
+            if ("ANY".compareTo(getRealm()) != 0) {
                 scopeRealm = getRealm();
-            }
-            else
-            {
+            } else {
                 scopeRealm = getRealm();
             }
         }
 
-        return new AuthScope( scopeHost, scopePort, scopeRealm );
+        return new AuthScope(scopeHost, scopePort, scopeRealm);
     }
 
     /**
      * @return the port
      */
-    public String getPort()
-    {
+    public String getPort() {
         return port;
     }
 
     /**
      * @param port the port to set
      */
-    public void setPort( String port )
-    {
+    public void setPort(String port) {
         this.port = port;
     }
 
@@ -161,8 +139,7 @@ public class BasicAuthScope
      * @param targetHost
      * @return
      */
-    public AuthScope getScope( HttpHost targetHost )
-    {
-        return getScope( targetHost.getHostName(), targetHost.getPort() );
+    public AuthScope getScope(HttpHost targetHost) {
+        return getScope(targetHost.getHostName(), targetHost.getPort());
     }
 }

@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.events;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,41 +16,39 @@ package org.apache.maven.wagon.events;
  * specific language governing permissions and limitations
  * under the License.
  */
-
+package org.apache.maven.wagon.events;
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public interface TransferListener
-{
+public interface TransferListener {
     /**
      * @param transferEvent
      */
-    void transferInitiated( TransferEvent transferEvent );
+    void transferInitiated(TransferEvent transferEvent);
 
     /**
      * @param transferEvent
      */
-    void transferStarted( TransferEvent transferEvent );
+    void transferStarted(TransferEvent transferEvent);
 
     /**
      * @param transferEvent
      */
-    void transferProgress( TransferEvent transferEvent, byte[] buffer, int length );
+    void transferProgress(TransferEvent transferEvent, byte[] buffer, int length);
 
     /**
      * @param transferEvent
      */
-    void transferCompleted( TransferEvent transferEvent );
+    void transferCompleted(TransferEvent transferEvent);
 
     /**
      * @param transferEvent
      */
-    void transferError( TransferEvent transferEvent );
+    void transferError(TransferEvent transferEvent);
 
     /**
      * @param message
      */
-    void debug( String message );
-
+    void debug(String message);
 }

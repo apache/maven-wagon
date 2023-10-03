@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh.knownhost;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh.knownhost;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -36,55 +35,42 @@ import org.codehaus.plexus.util.StringUtils;
  * @author Juan F. Codagnone
  * @since Sep 12, 2005
  */
-public class StreamKnownHostsProvider
-    extends AbstractKnownHostsProvider
-{
+public class StreamKnownHostsProvider extends AbstractKnownHostsProvider {
 
-    public StreamKnownHostsProvider( InputStream stream )
-        throws IOException
-    {
-        try
-        {
+    public StreamKnownHostsProvider(InputStream stream) throws IOException {
+        try {
             StringOutputStream stringOutputStream = new StringOutputStream();
-            IOUtil.copy( stream, stringOutputStream );
+            IOUtil.copy(stream, stringOutputStream);
 
             stream.close();
             stream = null;
 
             this.contents = stringOutputStream.toString();
-            
-            this.knownHosts = this.loadKnownHosts( this.contents );
-        }
-        finally
-        {
-            IOUtil.close( stream );
+
+            this.knownHosts = this.loadKnownHosts(this.contents);
+        } finally {
+            IOUtil.close(stream);
         }
     }
-    
-    protected Set<KnownHostEntry> loadKnownHosts( String contents )
-        throws IOException
-    {
+
+    protected Set<KnownHostEntry> loadKnownHosts(String contents) throws IOException {
         Set<KnownHostEntry> hosts = new HashSet<>();
-        
-        BufferedReader br = new BufferedReader( new StringReader( contents ) );
-        
+
+        BufferedReader br = new BufferedReader(new StringReader(contents));
+
         String line;
-        
-        do 
-        {
+
+        do {
             line = br.readLine();
-            if ( line != null )
-            {
-                String tokens[] = StringUtils.split( line );
-                if ( tokens.length == 3 )
-                {
-                    hosts.add( new KnownHostEntry( tokens[0], tokens[1], tokens[2] ) );
+            if (line != null) {
+                String tokens[] = StringUtils.split(line);
+                if (tokens.length == 3) {
+                    hosts.add(new KnownHostEntry(tokens[0], tokens[1], tokens[2]));
                 }
             }
-            
-        }
-        while ( line != null );
-        
+
+        } while (line != null);
+
         return hosts;
     }
 }

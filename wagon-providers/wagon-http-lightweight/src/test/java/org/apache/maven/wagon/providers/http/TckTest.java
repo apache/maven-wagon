@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.http;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.http;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.http;
 
 import org.apache.maven.wagon.tck.http.GetWagonTests;
 import org.apache.maven.wagon.tck.http.HttpsGetWagonTests;
@@ -27,9 +26,8 @@ import org.junit.runners.Suite;
 /**
  * This test will runn the TCK suite on wagon-http-lightweight
  */
-@RunWith( Suite.class )
-@Suite.SuiteClasses( { GetWagonTests.class, HttpsGetWagonTests.class } )
-public class TckTest
-{
+@RunWith(Suite.class)
+@Suite.SuiteClasses({GetWagonTests.class, HttpsGetWagonTests.class})
+public class TckTest {
     // no op
 }

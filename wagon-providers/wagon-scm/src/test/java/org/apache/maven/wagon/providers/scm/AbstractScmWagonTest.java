@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.scm;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,11 @@ package org.apache.maven.wagon.providers.scm;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.scm;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 import org.apache.maven.scm.manager.plexus.DefaultScmManager;
 import org.apache.maven.scm.provider.ScmProvider;
@@ -32,23 +35,16 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-
 /**
  * Test for {@link ScmWagon}. You need a subclass for each SCM provider you want to test.
  *
  * @author <a href="carlos@apache.org">Carlos Sanchez</a>
  *
  */
-public abstract class AbstractScmWagonTest
-    extends WagonTestCase
-{
+public abstract class AbstractScmWagonTest extends WagonTestCase {
 
     @Override
-    public void testWagonPutDirectory() throws Exception
-    {
+    public void testWagonPutDirectory() throws Exception {
         super.testWagonPutDirectory();
         // repeat the test on a non-empty repo
         // ScmWagon should checkout all involved subdirs before calling
@@ -60,31 +56,26 @@ public abstract class AbstractScmWagonTest
 
     private String providerClassName;
 
-    protected void setUp()
-        throws Exception
-    {
+    protected void setUp() throws Exception {
         super.setUp();
 
-        FileUtils.deleteDirectory( getCheckoutDirectory() );
+        FileUtils.deleteDirectory(getCheckoutDirectory());
 
-        if ( wagon == null )
-        {
+        if (wagon == null) {
             wagon = (ScmWagon) super.getWagon();
 
             DefaultScmManager scmManager = (DefaultScmManager) wagon.getScmManager();
 
-            if ( getScmProvider() != null )
-            {
-                scmManager.setScmProvider( getScmId(), getScmProvider() );
+            if (getScmProvider() != null) {
+                scmManager.setScmProvider(getScmId(), getScmProvider());
 
                 providerClassName = getScmProvider().getClass().getName();
-            }
-            else
-            {
-                providerClassName = scmManager.getProviderByType( getScmId() ).getClass().getName();
+            } else {
+                providerClassName =
+                        scmManager.getProviderByType(getScmId()).getClass().getName();
             }
 
-            wagon.setCheckoutDirectory( getCheckoutDirectory() );
+            wagon.setCheckoutDirectory(getCheckoutDirectory());
         }
     }
 
@@ -95,29 +86,23 @@ public abstract class AbstractScmWagonTest
      *
      * @return the {@link ScmProvider} to use in the {@link ScmWagon}
      */
-    protected ScmProvider getScmProvider()
-    {
+    protected ScmProvider getScmProvider() {
         return null;
     }
 
-    protected Wagon getWagon()
-        throws Exception
-    {
+    protected Wagon getWagon() throws Exception {
         return wagon;
     }
 
-    private File getCheckoutDirectory()
-    {
-        return new File( FileTestUtils.getTestOutputDir(), "/checkout-" + providerClassName );
+    private File getCheckoutDirectory() {
+        return new File(FileTestUtils.getTestOutputDir(), "/checkout-" + providerClassName);
     }
 
-    protected int getExpectedContentLengthOnGet( int expectedSize )
-    {
+    protected int getExpectedContentLengthOnGet(int expectedSize) {
         return WagonConstants.UNKNOWN_LENGTH;
     }
-    
-    protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
-    {
+
+    protected long getExpectedLastModifiedOnGet(Repository repository, Resource resource) {
         return 0;
     }
 
@@ -128,22 +113,18 @@ public abstract class AbstractScmWagonTest
      */
     protected abstract String getScmId();
 
-    protected String getProtocol()
-    {
+    protected String getProtocol() {
         return "scm";
     }
 
-    protected void createDirectory( Wagon wagon, String resourceToCreate, String dirName )
-        throws Exception
-    {
-        super.createDirectory( wagon, resourceToCreate, dirName );
-        FileUtils.deleteDirectory( getCheckoutDirectory() );
+    protected void createDirectory(Wagon wagon, String resourceToCreate, String dirName) throws Exception {
+        super.createDirectory(wagon, resourceToCreate, dirName);
+        FileUtils.deleteDirectory(getCheckoutDirectory());
     }
 
-    protected void assertResourcesAreInRemoteSide( Wagon wagon, List<String> resourceNames )
-        throws IOException, TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        FileUtils.deleteDirectory( getCheckoutDirectory() );
-        super.assertResourcesAreInRemoteSide( wagon, resourceNames );
+    protected void assertResourcesAreInRemoteSide(Wagon wagon, List<String> resourceNames)
+            throws IOException, TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+        FileUtils.deleteDirectory(getCheckoutDirectory());
+        super.assertResourcesAreInRemoteSide(wagon, resourceNames);
     }
 }

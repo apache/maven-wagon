@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.tck.http.fixture;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,14 @@ package org.apache.maven.wagon.tck.http.fixture;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.tck.http.fixture;
+
+import javax.servlet.Filter;
+import javax.servlet.Servlet;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
@@ -39,20 +45,13 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-
 import static org.apache.maven.wagon.tck.http.util.TestUtil.getResource;
 
 /**
  *
  */
-public class ServerFixture
-{
-    private static Logger logger = LoggerFactory.getLogger( ServerFixture.class );
+public class ServerFixture {
+    private static Logger logger = LoggerFactory.getLogger(ServerFixture.class);
 
     public static final String SERVER_ROOT_RESOURCE_PATH = "default-server-root";
 
@@ -77,135 +76,116 @@ public class ServerFixture
 
     private int httpPort;
 
-    public ServerFixture( final boolean ssl )
-        throws URISyntaxException, IOException
-    {
+    public ServerFixture(final boolean ssl) throws URISyntaxException, IOException {
         server = new Server();
-        if ( ssl )
-        {
-            String keystore = getResource( SERVER_SSL_KEYSTORE_RESOURCE_PATH ).getAbsolutePath();
+        if (ssl) {
+            String keystore = getResource(SERVER_SSL_KEYSTORE_RESOURCE_PATH).getAbsolutePath();
 
-            LoggerFactory.getLogger( ServerFixture.class ).info( "TCK Keystore path: " + keystore );
-            System.setProperty( "javax.net.ssl.keyStore", keystore );
-            System.setProperty( "javax.net.ssl.trustStore", keystore );
+            LoggerFactory.getLogger(ServerFixture.class).info("TCK Keystore path: " + keystore);
+            System.setProperty("javax.net.ssl.keyStore", keystore);
+            System.setProperty("javax.net.ssl.trustStore", keystore);
 
             SslContextFactory sslContextFactory = new SslContextFactory();
-            sslContextFactory.setKeyStorePath( keystore );
-            sslContextFactory.setKeyStorePassword( SERVER_SSL_KEYSTORE_PASSWORD );
-            sslContextFactory.setKeyManagerPassword( SERVER_SSL_KEYSTORE_PASSWORD );
-            serverConnector = new ServerConnector( server, sslContextFactory );
-            server.addConnector( serverConnector );
-        }
-        else
-        {
-            serverConnector = new ServerConnector( server );
-            serverConnector.setHost( "localhost" );
-            //connector.setPort( port );
-            server.addConnector( serverConnector );
+            sslContextFactory.setKeyStorePath(keystore);
+            sslContextFactory.setKeyStorePassword(SERVER_SSL_KEYSTORE_PASSWORD);
+            sslContextFactory.setKeyManagerPassword(SERVER_SSL_KEYSTORE_PASSWORD);
+            serverConnector = new ServerConnector(server, sslContextFactory);
+            server.addConnector(serverConnector);
+        } else {
+            serverConnector = new ServerConnector(server);
+            serverConnector.setHost("localhost");
+            // connector.setPort( port );
+            server.addConnector(serverConnector);
         }
 
         Constraint constraint = new Constraint();
-        constraint.setName( Constraint.__BASIC_AUTH );
+        constraint.setName(Constraint.__BASIC_AUTH);
 
-        constraint.setRoles( new String[]{ "allowed" } );
-        constraint.setAuthenticate( true );
+        constraint.setRoles(new String[] {"allowed"});
+        constraint.setAuthenticate(true);
 
         ConstraintMapping cm = new ConstraintMapping();
-        cm.setConstraint( constraint );
-        cm.setPathSpec( "/protected/*" );
+        cm.setConstraint(constraint);
+        cm.setPathSpec("/protected/*");
 
         securityHandler = new ConstraintSecurityHandler();
 
-        loginService = new HashLoginService( "Test Server" );
+        loginService = new HashLoginService("Test Server");
 
-        securityHandler.setLoginService( loginService );
-        securityHandler.setConstraintMappings( new ConstraintMapping[]{ cm } );
+        securityHandler.setLoginService(loginService);
+        securityHandler.setConstraintMappings(new ConstraintMapping[] {cm});
 
         webappContext = new WebAppContext();
-        webappContext.setContextPath( "/" );
+        webappContext.setContextPath("/");
 
-        File base = getResource( SERVER_ROOT_RESOURCE_PATH );
-        logger.info( "docroot: " + base );
-        webappContext.setWar( base.getAbsolutePath() );
-        webappContext.setHandler( securityHandler );
+        File base = getResource(SERVER_ROOT_RESOURCE_PATH);
+        logger.info("docroot: " + base);
+        webappContext.setWar(base.getAbsolutePath());
+        webappContext.setHandler(securityHandler);
 
         SessionHandler sessionHandler = webappContext.getSessionHandler();
-        ( (AbstractSessionManager) sessionHandler.getSessionManager() ).setUsingCookies( false );
+        ((AbstractSessionManager) sessionHandler.getSessionManager()).setUsingCookies(false);
 
         HandlerCollection handlers = new HandlerCollection();
-        handlers.setHandlers( new Handler[]{ webappContext, new DefaultHandler() } );
+        handlers.setHandlers(new Handler[] {webappContext, new DefaultHandler()});
 
-        server.setHandler( handlers );
+        server.setHandler(handlers);
     }
 
-    public void addFilter( final String pathSpec, final Filter filter )
-    {
+    public void addFilter(final String pathSpec, final Filter filter) {
         String name = "filter" + filterCount++;
 
         FilterMapping fm = new FilterMapping();
-        fm.setPathSpec( pathSpec );
-        fm.setFilterName( name );
+        fm.setPathSpec(pathSpec);
+        fm.setFilterName(name);
 
-        FilterHolder fh = new FilterHolder( filter );
-        fh.setName( name );
+        FilterHolder fh = new FilterHolder(filter);
+        fh.setName(name);
 
-        webappContext.getServletHandler().addFilter( fh, fm );
+        webappContext.getServletHandler().addFilter(fh, fm);
     }
 
-    public void addServlet( final String pathSpec, final Servlet servlet )
-    {
-        webappContext.getServletHandler().addServletWithMapping( new ServletHolder( servlet ), pathSpec );
+    public void addServlet(final String pathSpec, final Servlet servlet) {
+        webappContext.getServletHandler().addServletWithMapping(new ServletHolder(servlet), pathSpec);
     }
 
-    public void addUser( final String user, final String password )
-    {
-        loginService.putUser( user, new Password( password ), new String[] { "allowed" } );
+    public void addUser(final String user, final String password) {
+        loginService.putUser(user, new Password(password), new String[] {"allowed"});
     }
 
-    public Server getServer()
-    {
+    public Server getServer() {
         return server;
     }
 
-    public WebAppContext getWebappContext()
-    {
+    public WebAppContext getWebappContext() {
         return webappContext;
     }
 
-    public void stop()
-        throws Exception
-    {
-        if ( server != null )
-        {
+    public void stop() throws Exception {
+        if (server != null) {
             server.stop();
         }
     }
 
-    public void start()
-        throws Exception
-    {
-        if ( server.isStarted() || server.isRunning() )
-        {
+    public void start() throws Exception {
+        if (server.isStarted() || server.isRunning()) {
             return;
         }
         server.start();
 
         int total = 0;
-        while ( total < 3 * 1000 && !server.isStarted() )
-        {
-            server.wait( 10 );
+        while (total < 3 * 1000 && !server.isStarted()) {
+            server.wait(10);
             total += 10;
         }
 
-        if ( !server.isStarted() )
-        {
-            throw new IllegalStateException( "Server didn't start in: " + total + "ms." );
+        if (!server.isStarted()) {
+            throw new IllegalStateException("Server didn't start in: " + total + "ms.");
         }
         this.httpPort = serverConnector.getLocalPort();
     }
 
-    public int getHttpPort()
-    {
+    public int getHttpPort() {
         return httpPort;
     }
 }

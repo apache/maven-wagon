@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.scm;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,25 +16,21 @@ package org.apache.maven.wagon.providers.scm;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.scm;
 
 import org.apache.maven.scm.provider.ScmProvider;
 
 /**
  * Test for ScmWagon using Git Exe as underlying SCM
  */
-public class ScmGitExeWagonTest
-    extends AbstractScmGitWagonTest
-{
+public class ScmGitExeWagonTest extends AbstractScmGitWagonTest {
 
-    protected ScmProvider getScmProvider()
-    {
+    protected ScmProvider getScmProvider() {
         return new UserSafeGitExeScmProvider();
     }
 
     @Override
-    public void testWagonGetFileList()
-        throws Exception
-    {
+    public void testWagonGetFileList() throws Exception {
         // remote list unsupported
         // When a command is unsupported, SCM throws NoSuchCommandScmException.
         // However, there's no equivalent exception in the Wagon API.
@@ -46,29 +40,22 @@ public class ScmGitExeWagonTest
     }
 
     @Override
-    public void testWagonGetFileListWhenDirectoryDoesNotExist()
-        throws Exception
-    {
+    public void testWagonGetFileListWhenDirectoryDoesNotExist() throws Exception {
         // remote list unsupported
     }
 
     @Override
-    public void testWagonResourceExists()
-        throws Exception
-    {
+    public void testWagonResourceExists() throws Exception {
         // remote list unsupported
     }
 
     @Override
-    public void testWagonResourceNotExists()
-        throws Exception
-    {
+    public void testWagonResourceNotExists() throws Exception {
         // remote list unsupported
     }
 
     @Override
-    protected boolean supportsGetIfNewer()
-    {
+    protected boolean supportsGetIfNewer() {
         return false;
     }
 }

@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.tck.http.fixture;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,20 +16,19 @@ package org.apache.maven.wagon.tck.http.fixture;
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import java.io.IOException;
+package org.apache.maven.wagon.tck.http.fixture;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
+
 /**
- * 
+ *
  */
-public class ErrorCodeServlet
-    extends HttpServlet
-{
+public class ErrorCodeServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
@@ -39,17 +36,14 @@ public class ErrorCodeServlet
 
     private final String message;
 
-    public ErrorCodeServlet( final int code, final String message )
-    {
+    public ErrorCodeServlet(final int code, final String message) {
         this.code = code;
         this.message = message;
     }
 
     @Override
-    protected void service( final HttpServletRequest req, final HttpServletResponse resp )
-        throws ServletException, IOException
-    {
-        resp.sendError( code, message );
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp)
+            throws ServletException, IOException {
+        resp.sendError(code, message);
     }
-
 }

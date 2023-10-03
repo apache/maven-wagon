@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.tck.http;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,17 +16,14 @@ package org.apache.maven.wagon.tck.http;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.tck.http;
 
 /**
- * 
+ *
  */
-public class HttpsGetWagonTests
-    extends GetWagonTests
-{
+public class HttpsGetWagonTests extends GetWagonTests {
     @Override
-    protected boolean isSsl()
-    {
+    protected boolean isSsl() {
         return true;
     }
-
 }

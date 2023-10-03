@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,8 +16,7 @@ package org.apache.maven.wagon.providers.ssh;
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import org.apache.maven.wagon.TransferFailedException;
+package org.apache.maven.wagon.providers.ssh;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,14 +26,15 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.maven.wagon.TransferFailedException;
+
 /**
  * Parser for the output of <code>ls</code> command from any ssh server on any OS.
  *
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
  *
  */
-public class LSParser
-{
+public class LSParser {
     /**
      * output samples see LSParserTest:
      * <ul></ul>
@@ -46,15 +44,15 @@ public class LSParser
      * <li>linux :  "-rw-r--r--   1 joakim  joakim  1194 2006-12-11 09:25 pom.xml"</li>
      * </ul>
      */
-    private static final Pattern PATTERN = Pattern.compile( ".+\\s+[0-9]+\\s+.+\\s+.+\\s+[0-9]+\\s+"
-                                                                //2006-12-11
-                                                                + "([0-9]{4}-[0-9]{2}-[0-9]{2}"
-                                                                // Dec 11
-                                                                + "|.+\\s+[0-9]+"
-                                                                // 21 sep
-                                                                + "|.+\\s+.+)"
-                                                                // 09:25 pom.xml
-                                                                + "\\s+[0-9:]+\\s+(.+?)" );
+    private static final Pattern PATTERN = Pattern.compile(".+\\s+[0-9]+\\s+.+\\s+.+\\s+[0-9]+\\s+"
+            // 2006-12-11
+            + "([0-9]{4}-[0-9]{2}-[0-9]{2}"
+            // Dec 11
+            + "|.+\\s+[0-9]+"
+            // 21 sep
+            + "|.+\\s+.+)"
+            // 09:25 pom.xml
+            + "\\s+[0-9:]+\\s+(.+?)");
 
     /**
      * Parse a raw "ls -FlA", and obtain the list of files.
@@ -64,31 +62,24 @@ public class LSParser
      * @throws TransferFailedException
      * @todo use ls -1a and do away with the method all together
      */
-    public List<String> parseFiles( String rawLS )
-        throws TransferFailedException
-    {
+    public List<String> parseFiles(String rawLS) throws TransferFailedException {
         List<String> ret = new ArrayList<>();
-        try
-        {
-            BufferedReader br = new BufferedReader( new StringReader( rawLS ) );
+        try {
+            BufferedReader br = new BufferedReader(new StringReader(rawLS));
 
             String line = br.readLine();
 
-            while ( line != null )
-            {
+            while (line != null) {
                 line = line.trim();
 
-                Matcher m = PATTERN.matcher( line );
-                if ( m.matches() )
-                {
-                    ret.add( m.group( 2 ) );
+                Matcher m = PATTERN.matcher(line);
+                if (m.matches()) {
+                    ret.add(m.group(2));
                 }
                 line = br.readLine();
             }
-        }
-        catch ( IOException e )
-        {
-            throw new TransferFailedException( "Error parsing file listing.", e );
+        } catch (IOException e) {
+            throw new TransferFailedException("Error parsing file listing.", e);
         }
 
         return ret;

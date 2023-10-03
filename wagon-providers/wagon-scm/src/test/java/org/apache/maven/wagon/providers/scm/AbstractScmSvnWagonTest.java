@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.scm;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.scm;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.scm;
 
 import java.io.File;
 
@@ -29,41 +28,34 @@ import org.codehaus.plexus.util.FileUtils;
  * @author <a href="brett@apache.org">Brett Porter</a>
  *
  */
-public abstract class AbstractScmSvnWagonTest
-    extends AbstractScmWagonTest
-{
+public abstract class AbstractScmSvnWagonTest extends AbstractScmWagonTest {
     private String repository;
 
-    protected void setUp()
-        throws Exception
-    {
+    protected void setUp() throws Exception {
         super.setUp();
 
         // copy the repo for the test
 
-        File origRepo = getTestFile( "target/test-classes/test-repo-svn" );
+        File origRepo = getTestFile("target/test-classes/test-repo-svn");
 
-        File testRepo = getTestFile( "target/test-classes/test-repo-svn-test" );
+        File testRepo = getTestFile("target/test-classes/test-repo-svn-test");
 
-        FileUtils.deleteDirectory( testRepo );
+        FileUtils.deleteDirectory(testRepo);
 
-        FileUtils.copyDirectoryStructure( origRepo, testRepo );
+        FileUtils.copyDirectoryStructure(origRepo, testRepo);
 
         repository = "scm:svn:" + testRepo.getAbsoluteFile().toPath().toUri().toASCIIString();
     }
 
-    protected String getScmId()
-    {
+    protected String getScmId() {
         return "svn";
     }
 
-    protected String getTestRepositoryUrl()
-    {
+    protected String getTestRepositoryUrl() {
         return repository;
     }
 
-    protected boolean supportsGetIfNewer()
-    {
+    protected boolean supportsGetIfNewer() {
         return false;
     }
 }

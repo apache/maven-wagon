@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.webdav;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,53 +16,46 @@ package org.apache.maven.wagon.providers.webdav;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.webdav;
+
+import java.util.Arrays;
+import java.util.List;
 
 import org.codehaus.plexus.util.StringUtils;
-
-import java.util.List;
-import java.util.Arrays;
 
 /**
  * @author <a href="mailto:james@atlassian.com">James William Dumay</a>
  */
-public class PathNavigator
-{
+public class PathNavigator {
     private final List<String> list;
 
     private int currentPosition;
 
-    public PathNavigator( String path )
-    {
-        list = Arrays.asList( StringUtils.split( path, "/" ) );
+    public PathNavigator(String path) {
+        list = Arrays.asList(StringUtils.split(path, "/"));
         currentPosition = list.size();
     }
 
-    public String getPath()
-    {
-        List<String> currentPathList = list.subList( 0, currentPosition );
+    public String getPath() {
+        List<String> currentPathList = list.subList(0, currentPosition);
         StringBuilder sb = new StringBuilder();
-        for ( String path : currentPathList )
-        {
-            sb.append( path );
-            sb.append( '/' );
+        for (String path : currentPathList) {
+            sb.append(path);
+            sb.append('/');
         }
         return sb.toString();
     }
 
-    public boolean backward()
-    {
-        if ( currentPosition == 0 )
-        {
+    public boolean backward() {
+        if (currentPosition == 0) {
             return false;
         }
         currentPosition--;
         return true;
     }
 
-    public boolean forward()
-    {
-        if ( currentPosition + 1 > list.size() )
-        {
+    public boolean forward() {
+        if (currentPosition + 1 > list.size()) {
             return false;
         }
         currentPosition++;

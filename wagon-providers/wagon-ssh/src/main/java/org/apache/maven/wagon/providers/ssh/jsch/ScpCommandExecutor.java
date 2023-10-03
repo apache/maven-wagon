@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh.jsch;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,24 +16,22 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh.jsch;
 
 /**
- * ScpCommandExecutor - bridge class for plexus:descriptor 
+ * ScpCommandExecutor - bridge class for plexus:descriptor
  *
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
  *
- * 
+ *
  * @todo is this even needed anymore?
- * 
+ *
  * @plexus.component role="org.apache.maven.wagon.CommandExecutor"
- *   role-hint="scp" 
+ *   role-hint="scp"
  *   instantiation-strategy="per-lookup"
  */
-public class ScpCommandExecutor
-    extends ScpWagon
-{
-    public ScpCommandExecutor()
-    {
+public class ScpCommandExecutor extends ScpWagon {
+    public ScpCommandExecutor() {
         super();
     }
 }

@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.authentication;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.authentication;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.authentication;
 
 import junit.framework.TestCase;
 
@@ -26,44 +25,36 @@ import junit.framework.TestCase;
  *
  * @todo test defaults
  */
-public class AuthenticationInfoTest
-    extends TestCase
-{
-    public AuthenticationInfoTest( final String name )
-    {
-        super( name );
+public class AuthenticationInfoTest extends TestCase {
+    public AuthenticationInfoTest(final String name) {
+        super(name);
     }
 
-    public void setUp()
-        throws Exception
-    {
+    public void setUp() throws Exception {
         super.setUp();
     }
 
-    public void tearDown()
-        throws Exception
-    {
+    public void tearDown() throws Exception {
         super.tearDown();
     }
 
-    public void testAuthenticationInfoProperties()
-    {
+    public void testAuthenticationInfoProperties() {
         final AuthenticationInfo authenticationInfo = new AuthenticationInfo();
 
-        authenticationInfo.setUserName( "username" );
+        authenticationInfo.setUserName("username");
 
-        assertEquals( "username", authenticationInfo.getUserName() );
+        assertEquals("username", authenticationInfo.getUserName());
 
-        authenticationInfo.setPassword( "password" );
+        authenticationInfo.setPassword("password");
 
-        assertEquals( "password", authenticationInfo.getPassword() );
+        assertEquals("password", authenticationInfo.getPassword());
 
-        authenticationInfo.setPassphrase( "passphrase" );
+        authenticationInfo.setPassphrase("passphrase");
 
-        assertEquals( "passphrase", authenticationInfo.getPassphrase() );
+        assertEquals("passphrase", authenticationInfo.getPassphrase());
 
-        authenticationInfo.setPrivateKey( "privatekey" );
+        authenticationInfo.setPrivateKey("privatekey");
 
-        assertEquals( "privatekey", authenticationInfo.getPrivateKey() );
+        assertEquals("privatekey", authenticationInfo.getPrivateKey());
     }
 }

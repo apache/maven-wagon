@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.repository;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.repository;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.repository;
 
 import java.io.Serializable;
 
@@ -27,8 +26,7 @@ import java.io.Serializable;
  * @author Brett Porter
  *
  */
-public class RepositoryPermissions implements Serializable
-{
+public class RepositoryPermissions implements Serializable {
     /**
      * Repository group name.
      */
@@ -50,8 +48,7 @@ public class RepositoryPermissions implements Serializable
      *
      * @return mode
      */
-    public String getDirectoryMode()
-    {
+    public String getDirectoryMode() {
         return directoryMode;
     }
 
@@ -60,8 +57,7 @@ public class RepositoryPermissions implements Serializable
      *
      * @param directoryMode repository directory mode for deployed artifacts
      */
-    public void setDirectoryMode( final String directoryMode )
-    {
+    public void setDirectoryMode(final String directoryMode) {
         this.directoryMode = directoryMode;
     }
 
@@ -71,8 +67,7 @@ public class RepositoryPermissions implements Serializable
      *
      * @return repository group name
      */
-    public String getFileMode()
-    {
+    public String getFileMode() {
         return fileMode;
     }
 
@@ -81,8 +76,7 @@ public class RepositoryPermissions implements Serializable
      *
      * @param fileMode repository file mode for deployed artifacts
      */
-    public void setFileMode( final String fileMode )
-    {
+    public void setFileMode(final String fileMode) {
         this.fileMode = fileMode;
     }
 
@@ -93,8 +87,7 @@ public class RepositoryPermissions implements Serializable
      *
      * @return repository group name
      */
-    public String getGroup()
-    {
+    public String getGroup() {
         return group;
     }
 
@@ -103,9 +96,7 @@ public class RepositoryPermissions implements Serializable
      *
      * @param group repository group for deployed artifacts
      */
-    public void setGroup( final String group )
-    {
+    public void setGroup(final String group) {
         this.group = group;
     }
-
 }

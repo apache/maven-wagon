@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.proxy;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,10 +16,11 @@ package org.apache.maven.wagon.proxy;
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import org.apache.maven.wagon.WagonConstants;
+package org.apache.maven.wagon.proxy;
 
 import java.io.Serializable;
+
+import org.apache.maven.wagon.WagonConstants;
 
 /**
  * Contains set of properties used by <code>Wagon</code> objects
@@ -32,9 +31,7 @@ import java.io.Serializable;
  * @todo Propose standard types of proxy servers (e.g. <i>SOCKSv4</i>),
  * which can be shared between wagon api and providers
  */
-public class ProxyInfo
-    implements Serializable
-{
+public class ProxyInfo implements Serializable {
     public static final String PROXY_SOCKS5 = "SOCKS_5";
 
     public static final String PROXY_SOCKS4 = "SOCKS4";
@@ -86,8 +83,7 @@ public class ProxyInfo
      *
      * @return proxy server host name
      */
-    public String getHost()
-    {
+    public String getHost() {
         return host;
     }
 
@@ -96,8 +92,7 @@ public class ProxyInfo
      *
      * @param host proxy server host name
      */
-    public void setHost( final String host )
-    {
+    public void setHost(final String host) {
         this.host = host;
     }
 
@@ -106,8 +101,7 @@ public class ProxyInfo
      *
      * @return user's password at proxy host
      */
-    public String getPassword()
-    {
+    public String getPassword() {
         return password;
     }
 
@@ -116,8 +110,7 @@ public class ProxyInfo
      *
      * @param password password to use to login to a proxy server
      */
-    public void setPassword( final String password )
-    {
+    public void setPassword(final String password) {
         this.password = password;
     }
 
@@ -126,8 +119,7 @@ public class ProxyInfo
      *
      * @return proxy server port
      */
-    public int getPort()
-    {
+    public int getPort() {
         return port;
     }
 
@@ -136,8 +128,7 @@ public class ProxyInfo
      *
      * @param port proxy server port
      */
-    public void setPort( final int port )
-    {
+    public void setPort(final int port) {
         this.port = port;
     }
 
@@ -146,8 +137,7 @@ public class ProxyInfo
      *
      * @return username for the proxy server
      */
-    public String getUserName()
-    {
+    public String getUserName() {
         return userName;
     }
 
@@ -156,8 +146,7 @@ public class ProxyInfo
      *
      * @param userName username for the proxy server
      */
-    public void setUserName( final String userName )
-    {
+    public void setUserName(final String userName) {
         this.userName = userName;
     }
 
@@ -166,53 +155,44 @@ public class ProxyInfo
      *
      * @return the type of the proxy server
      */
-    public String getType()
-    {
+    public String getType() {
         return type;
     }
 
     /**
      * @param type the type of the proxy server like <i>SOCKSv4</i>
      */
-    public void setType( final String type )
-    {
+    public void setType(final String type) {
         this.type = type;
     }
 
-    public String getNonProxyHosts()
-    {
+    public String getNonProxyHosts() {
         return nonProxyHosts;
     }
 
-    public void setNonProxyHosts( String nonProxyHosts )
-    {
+    public void setNonProxyHosts(String nonProxyHosts) {
         this.nonProxyHosts = nonProxyHosts;
     }
 
-    public String getNtlmHost()
-    {
+    public String getNtlmHost() {
         return ntlmHost;
     }
 
-    public void setNtlmHost( String ntlmHost )
-    {
+    public void setNtlmHost(String ntlmHost) {
         this.ntlmHost = ntlmHost;
     }
 
-    public void setNtlmDomain( String ntlmDomain )
-    {
+    public void setNtlmDomain(String ntlmDomain) {
         this.ntlmDomain = ntlmDomain;
     }
 
-    public String getNtlmDomain()
-    {
+    public String getNtlmDomain() {
         return ntlmDomain;
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "ProxyInfo{" + "host='" + host + '\'' + ", userName='" + userName + '\'' + ", port=" + port + ", type='"
-            + type + '\'' + ", nonProxyHosts='" + nonProxyHosts + '\'' + '}';
+                + type + '\'' + ", nonProxyHosts='" + nonProxyHosts + '\'' + '}';
     }
 }

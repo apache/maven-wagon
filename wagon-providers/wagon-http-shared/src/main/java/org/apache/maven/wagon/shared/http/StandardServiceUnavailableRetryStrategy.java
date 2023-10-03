@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.shared.http;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.shared.http;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.shared.http;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -32,9 +31,8 @@ import org.apache.http.util.Args;
  * that retries {@code 408} (Request Timeout), {@code 429} (Too Many Requests),
  * and {@code 500} (Server side error) responses for a fixed number of times at a fixed interval.
  */
-@Contract( threading = ThreadingBehavior.IMMUTABLE )
-public class StandardServiceUnavailableRetryStrategy implements ServiceUnavailableRetryStrategy
-{
+@Contract(threading = ThreadingBehavior.IMMUTABLE)
+public class StandardServiceUnavailableRetryStrategy implements ServiceUnavailableRetryStrategy {
     /**
      * Maximum number of allowed retries if the server responds with a HTTP code
      * in our retry code list.
@@ -46,18 +44,16 @@ public class StandardServiceUnavailableRetryStrategy implements ServiceUnavailab
      */
     private final long retryInterval;
 
-    public StandardServiceUnavailableRetryStrategy( final int maxRetries, final int retryInterval )
-    {
+    public StandardServiceUnavailableRetryStrategy(final int maxRetries, final int retryInterval) {
         super();
-        Args.positive( maxRetries, "Max retries" );
-        Args.positive( retryInterval, "Retry interval" );
+        Args.positive(maxRetries, "Max retries");
+        Args.positive(retryInterval, "Retry interval");
         this.maxRetries = maxRetries;
         this.retryInterval = retryInterval;
     }
 
     @Override
-    public boolean retryRequest( final HttpResponse response, final int executionCount, final HttpContext context )
-    {
+    public boolean retryRequest(final HttpResponse response, final int executionCount, final HttpContext context) {
         int statusCode = response.getStatusLine().getStatusCode();
         boolean retryableStatusCode = statusCode == HttpStatus.SC_REQUEST_TIMEOUT
                 // Too Many Requests ("standard" rate-limiting)
@@ -71,9 +67,7 @@ public class StandardServiceUnavailableRetryStrategy implements ServiceUnavailab
     }
 
     @Override
-    public long getRetryInterval()
-    {
+    public long getRetryInterval() {
         return retryInterval;
     }
-
 }

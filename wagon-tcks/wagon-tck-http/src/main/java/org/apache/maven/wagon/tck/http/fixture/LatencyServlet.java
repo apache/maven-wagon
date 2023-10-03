@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.tck.http.fixture;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,29 +16,27 @@ package org.apache.maven.wagon.tck.http.fixture;
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+package org.apache.maven.wagon.tck.http.fixture;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.codehaus.plexus.util.IOUtil;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
+import org.codehaus.plexus.util.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ *
  */
-public class LatencyServlet
-    extends HttpServlet
-{
-    private static Logger logger = LoggerFactory.getLogger( LatencyServlet.class );
+public class LatencyServlet extends HttpServlet {
+    private static Logger logger = LoggerFactory.getLogger(LatencyServlet.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -48,26 +44,19 @@ public class LatencyServlet
 
     private final int latencyMs;
 
-    public LatencyServlet( final int latencyMs )
-    {
+    public LatencyServlet(final int latencyMs) {
         this.latencyMs = latencyMs;
     }
 
     @Override
-    protected void doGet( final HttpServletRequest req, final HttpServletResponse resp )
-        throws ServletException, IOException
-    {
-        if ( latencyMs < 0 )
-        {
-            logger.info( "Starting infinite wait." );
-            synchronized ( this )
-            {
-                try
-                {
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
+            throws ServletException, IOException {
+        if (latencyMs < 0) {
+            logger.info("Starting infinite wait.");
+            synchronized (this) {
+                try {
                     wait();
-                }
-                catch ( InterruptedException e )
-                {
+                } catch (InterruptedException e) {
                     // ignore
                 }
             }
@@ -79,50 +68,42 @@ public class LatencyServlet
 
         // ignore the servlet's path here, since the servlet path is really only to provide a
         // binding for the servlet.
-        String realPath = getServletContext().getRealPath( path );
-        File f = new File( realPath );
+        String realPath = getServletContext().getRealPath(path);
+        File f = new File(realPath);
 
         FileInputStream in = null;
         long total = 0;
         long start = System.currentTimeMillis();
-        try
-        {
-            in = new FileInputStream( f );
+        try {
+            in = new FileInputStream(f);
             OutputStream out = resp.getOutputStream();
 
-            logger.info( "Starting high-latency transfer. This should take about "
-                + ( ( f.length() / BUFFER_SIZE * latencyMs / 1000 ) + ( latencyMs / 1000 ) ) + " seconds." );
+            logger.info("Starting high-latency transfer. This should take about "
+                    + ((f.length() / BUFFER_SIZE * latencyMs / 1000) + (latencyMs / 1000)) + " seconds.");
 
             int read;
             byte[] buf = new byte[BUFFER_SIZE];
-            while ( ( read = in.read( buf ) ) > -1 )
-            {
-                try
-                {
-                    Thread.sleep( latencyMs );
-                }
-                catch ( InterruptedException e )
-                {
+            while ((read = in.read(buf)) > -1) {
+                try {
+                    Thread.sleep(latencyMs);
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
 
-                logger.info( "Writing bytes " + total + "-" + ( total + read - 1 ) + " of " + f.length()
-                    + ". Elapsed time so far: " + ( ( System.currentTimeMillis() - start ) / 1000 ) + " seconds" );
+                logger.info("Writing bytes " + total + "-" + (total + read - 1) + " of " + f.length()
+                        + ". Elapsed time so far: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
 
-                out.write( buf, 0, read );
+                out.write(buf, 0, read);
 
                 total += read;
             }
 
             in.close();
             in = null;
-        }
-        finally
-        {
-            IOUtil.close( in );
+        } finally {
+            IOUtil.close(in);
         }
 
-        logger.info( "High-latency transfer done in " + ( System.currentTimeMillis() - start ) + "ms" );
+        logger.info("High-latency transfer done in " + (System.currentTimeMillis() - start) + "ms");
     }
-
 }

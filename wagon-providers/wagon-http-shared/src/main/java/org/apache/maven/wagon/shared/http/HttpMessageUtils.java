@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.shared.http;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.shared.http;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.shared.http;
 
 import java.util.Objects;
 
@@ -49,8 +48,7 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
  *
  * @since 3.3.4
  */
-public class HttpMessageUtils
-{
+public class HttpMessageUtils {
     // status codes here to avoid checkstyle magic number and not have have hard depend on non-wagon classes
     private static final int SC_UNAUTHORIZED = 401;
     private static final int SC_FORBIDDEN = 403;
@@ -79,21 +77,17 @@ public class HttpMessageUtils
      * @return a formatted debug message combining the parameters of this method
      * @throws NullPointerException if url is null
      */
-    public static String formatTransferDebugMessage( String url, int statusCode, String reasonPhrase,
-                                                     ProxyInfo proxyInfo )
-    {
-        Objects.requireNonNull( url, "url cannot be null" );
+    public static String formatTransferDebugMessage(
+            String url, int statusCode, String reasonPhrase, ProxyInfo proxyInfo) {
+        Objects.requireNonNull(url, "url cannot be null");
         String msg = url;
-        if ( statusCode != UNKNOWN_STATUS_CODE )
-        {
+        if (statusCode != UNKNOWN_STATUS_CODE) {
             msg += " -- status code: " + statusCode;
-            if ( reasonPhrase != null && !reasonPhrase.isEmpty() )
-            {
+            if (reasonPhrase != null && !reasonPhrase.isEmpty()) {
                 msg += ", reason phrase: " + reasonPhrase;
             }
         }
-        if ( proxyInfo != null )
-        {
+        if (proxyInfo != null) {
             msg += " -- proxy: " + proxyInfo;
         }
         return msg;
@@ -110,10 +104,8 @@ public class HttpMessageUtils
      * @param proxyInfo proxy server used during the transfer, may be null if none used
      * @return a formatted failure message combining the parameters of this method
      */
-    public static String formatTransferFailedMessage( String url, ProxyInfo proxyInfo )
-    {
-        return formatTransferFailedMessage( url, UNKNOWN_STATUS_CODE, null,
-                proxyInfo );
+    public static String formatTransferFailedMessage(String url, ProxyInfo proxyInfo) {
+        return formatTransferFailedMessage(url, UNKNOWN_STATUS_CODE, null, proxyInfo);
     }
 
     /**
@@ -125,10 +117,9 @@ public class HttpMessageUtils
      * @param proxyInfo    proxy server used during the transfer, may be null if none used
      * @return a formatted failure message combining the parameters of this method
      */
-    public static String formatTransferFailedMessage( String url, int statusCode, String reasonPhrase,
-                                                      ProxyInfo proxyInfo )
-    {
-        return formatMessage( "transfer failed for ", url, statusCode, reasonPhrase, proxyInfo );
+    public static String formatTransferFailedMessage(
+            String url, int statusCode, String reasonPhrase, ProxyInfo proxyInfo) {
+        return formatMessage("transfer failed for ", url, statusCode, reasonPhrase, proxyInfo);
     }
 
     /**
@@ -144,26 +135,23 @@ public class HttpMessageUtils
      * @return a consistent message for a HTTP related {@link AuthorizationException}
      */
     // TODO Split when WAGON-568 is implemented
-    public static String formatAuthorizationMessage( String url, int statusCode, String reasonPhrase,
-                                                     ProxyInfo proxyInfo )
-    {
-        switch ( statusCode )
-        {
+    public static String formatAuthorizationMessage(
+            String url, int statusCode, String reasonPhrase, ProxyInfo proxyInfo) {
+        switch (statusCode) {
             case SC_UNAUTHORIZED: // no credentials or auth was not valid
-                return formatMessage( "authentication failed for ", url, statusCode, reasonPhrase, null );
+                return formatMessage("authentication failed for ", url, statusCode, reasonPhrase, null);
 
             case SC_FORBIDDEN: // forbidden based on permissions usually
-                return formatMessage( "authorization failed for ", url, statusCode, reasonPhrase, null );
+                return formatMessage("authorization failed for ", url, statusCode, reasonPhrase, null);
 
             case SC_PROXY_AUTH_REQUIRED:
-                return formatMessage( "proxy authentication failed for ", url, statusCode,
-                        reasonPhrase, null );
+                return formatMessage("proxy authentication failed for ", url, statusCode, reasonPhrase, null);
 
             default:
                 break;
         }
 
-        return formatMessage( "authorization failed for ", url, statusCode, reasonPhrase, proxyInfo );
+        return formatMessage("authorization failed for ", url, statusCode, reasonPhrase, proxyInfo);
     }
 
     /**
@@ -178,30 +166,23 @@ public class HttpMessageUtils
      * @param proxyInfo    proxy server used during the transfer, may be null if none used
      * @return a consistent message for a HTTP related {@link ResourceDoesNotExistException}
      */
-    public static String formatResourceDoesNotExistMessage( String url, int statusCode, String reasonPhrase,
-                                                            ProxyInfo proxyInfo )
-    {
-        return formatMessage( "resource missing at ", url, statusCode, reasonPhrase, proxyInfo );
+    public static String formatResourceDoesNotExistMessage(
+            String url, int statusCode, String reasonPhrase, ProxyInfo proxyInfo) {
+        return formatMessage("resource missing at ", url, statusCode, reasonPhrase, proxyInfo);
     }
 
-    private static String formatMessage( String message, String url, int statusCode, String reasonPhrase,
-                                         ProxyInfo proxyInfo )
-    {
-        Objects.requireNonNull( message, "message cannot be null" );
-        Objects.requireNonNull( url, "url cannot be null" );
+    private static String formatMessage(
+            String message, String url, int statusCode, String reasonPhrase, ProxyInfo proxyInfo) {
+        Objects.requireNonNull(message, "message cannot be null");
+        Objects.requireNonNull(url, "url cannot be null");
         String msg = message + url;
-        if ( statusCode != UNKNOWN_STATUS_CODE )
-        {
+        if (statusCode != UNKNOWN_STATUS_CODE) {
             msg += ", status: " + statusCode;
 
-            if ( reasonPhrase != null && !reasonPhrase.isEmpty() )
-            {
+            if (reasonPhrase != null && !reasonPhrase.isEmpty()) {
                 msg += " " + reasonPhrase;
-            }
-            else
-            {
-                switch ( statusCode )
-                {
+            } else {
+                switch (statusCode) {
                     case SC_UNAUTHORIZED:
                         msg += " Unauthorized";
                         break;
@@ -227,8 +208,7 @@ public class HttpMessageUtils
                 }
             }
         }
-        if ( proxyInfo != null )
-        {
+        if (proxyInfo != null) {
             msg += ", proxy: " + proxyInfo;
         }
         return msg;

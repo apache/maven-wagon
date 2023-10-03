@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,39 +16,34 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import org.apache.maven.wagon.resource.Resource;
+package org.apache.maven.wagon;
 
 import java.io.InputStream;
+
+import org.apache.maven.wagon.resource.Resource;
 
 /**
  * @author <a href="mailto:michal@codehaus.org">Michal Maczka</a>
  *
  */
-public class InputData
-{
+public class InputData {
     private InputStream inputStream;
 
     private Resource resource;
 
-    public InputStream getInputStream()
-    {
+    public InputStream getInputStream() {
         return inputStream;
     }
 
-    public void setInputStream( InputStream inputStream )
-    {
+    public void setInputStream(InputStream inputStream) {
         this.inputStream = inputStream;
     }
 
-    public Resource getResource()
-    {
+    public Resource getResource() {
         return resource;
     }
 
-    public void setResource( Resource resource )
-    {
+    public void setResource(Resource resource) {
         this.resource = resource;
     }
-
 }

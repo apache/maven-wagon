@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.authentication;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.authentication;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.authentication;
 
 import java.io.Serializable;
 
@@ -28,9 +27,7 @@ import java.io.Serializable;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public class AuthenticationInfo
-    implements Serializable
-{
+public class AuthenticationInfo implements Serializable {
 
     /**
      * Username used to login to the host
@@ -59,8 +56,7 @@ public class AuthenticationInfo
      *
      * @return passphrase of the private key file
      */
-    public String getPassphrase()
-    {
+    public String getPassphrase() {
         return passphrase;
     }
 
@@ -69,8 +65,7 @@ public class AuthenticationInfo
      *
      * @param passphrase passphrase of the private key file
      */
-    public void setPassphrase( final String passphrase )
-    {
+    public void setPassphrase(final String passphrase) {
         this.passphrase = passphrase;
     }
 
@@ -79,8 +74,7 @@ public class AuthenticationInfo
      *
      * @return absolute path to private key
      */
-    public String getPrivateKey()
-    {
+    public String getPrivateKey() {
         return privateKey;
     }
 
@@ -89,8 +83,7 @@ public class AuthenticationInfo
      *
      * @param privateKey path to private key in local file system
      */
-    public void setPrivateKey( final String privateKey )
-    {
+    public void setPrivateKey(final String privateKey) {
         this.privateKey = privateKey;
     }
 
@@ -99,8 +92,7 @@ public class AuthenticationInfo
      *
      * @return password of user
      */
-    public String getPassword()
-    {
+    public String getPassword() {
         return password;
     }
 
@@ -109,8 +101,7 @@ public class AuthenticationInfo
      *
      * @param password password of the user
      */
-    public void setPassword( final String password )
-    {
+    public void setPassword(final String password) {
         this.password = password;
     }
 
@@ -119,8 +110,7 @@ public class AuthenticationInfo
      *
      * @return username at repository
      */
-    public String getUserName()
-    {
+    public String getUserName() {
         return userName;
     }
 
@@ -129,8 +119,7 @@ public class AuthenticationInfo
      *
      * @param userName the username used to access repository
      */
-    public void setUserName( final String userName )
-    {
+    public void setUserName(final String userName) {
         this.userName = userName;
     }
 }

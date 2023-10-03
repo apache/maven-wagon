@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh.jsch;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh.jsch;
 
 import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProviderTestCase;
 
@@ -28,8 +27,4 @@ import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProviderTestCase
  * @see org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider
  * @since Sep 12, 2005
  */
-public class KnownHostsProviderTest
-    extends KnownHostsProviderTestCase
-{
-
-}
+public class KnownHostsProviderTest extends KnownHostsProviderTestCase {}

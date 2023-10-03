@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon;
 
 /**
  * Root class for all exception in Wagon API
@@ -25,14 +24,11 @@ package org.apache.maven.wagon;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public abstract class WagonException
-    extends Exception
-{
+public abstract class WagonException extends Exception {
     /**
      * the throwable that caused this exception to get thrown
      */
     private Throwable cause;
-
 
     /**
      * Constructs a new WagonException with the specified detail message.
@@ -42,10 +38,9 @@ public abstract class WagonException
      * @param cause   - the cause (which is saved for later retrieval by the getCause() method).
      *                (A null value is permitted, and indicates that the cause is nonexistent or unknown.)
      */
-    public WagonException( final String message, final Throwable cause )
-    {
-        super( message );
-        initCause( cause );
+    public WagonException(final String message, final Throwable cause) {
+        super(message);
+        initCause(cause);
     }
 
     /**
@@ -53,9 +48,8 @@ public abstract class WagonException
      *
      * @param message - the detail message (which is saved for later retrieval by the getMessage() method).
      */
-    public WagonException( final String message )
-    {
-        super( message );
+    public WagonException(final String message) {
+        super(message);
     }
 
     /**
@@ -64,25 +58,23 @@ public abstract class WagonException
      *
      * @return the cause of this exception or null if the cause is nonexistent or unknown.
      */
-    public Throwable getCause()
-    {
-//        try
-//        {
-//           Class clazz = getClass().getSuperclass();
-//           
-//           Method method = clazz.getMethod( "gatCause" , null );
-//           
-//           Throwable retValue = (Throwable) method.invoke( this, null );
-//         return retValue;
-//        }   
-//        catch( Exception e)
-//        {
-//        
-//        }
-        
+    public Throwable getCause() {
+        //        try
+        //        {
+        //           Class clazz = getClass().getSuperclass();
+        //
+        //           Method method = clazz.getMethod( "gatCause" , null );
+        //
+        //           Throwable retValue = (Throwable) method.invoke( this, null );
+        //         return retValue;
+        //        }
+        //        catch( Exception e)
+        //        {
+        //
+        //        }
+
         return cause;
     }
-
 
     /**
      * Initializes the cause of this throwable to the specified value.
@@ -94,23 +86,21 @@ public abstract class WagonException
      *
      * @return a reference to this Throwable instance.
      */
-    public Throwable initCause( final Throwable cause )
-    {
-//        try
-//        {
-//           Class clazz = getClass().getSuperclass();
-//           Class[] parameterTypes = new Class[1];
-//           parameterTypes[0] = Throwable.class;
-//           Method method = clazz.getMethod( "initCause" , parameterTypes);
-//           Object[] params = { cause };
-//           method.invoke( this, params );
-//        }   
-//        catch( Exception e)
-//        {
-//        
-//        }        
+    public Throwable initCause(final Throwable cause) {
+        //        try
+        //        {
+        //           Class clazz = getClass().getSuperclass();
+        //           Class[] parameterTypes = new Class[1];
+        //           parameterTypes[0] = Throwable.class;
+        //           Method method = clazz.getMethod( "initCause" , parameterTypes);
+        //           Object[] params = { cause };
+        //           method.invoke( this, params );
+        //        }
+        //        catch( Exception e)
+        //        {
+        //
+        //        }
         this.cause = cause;
         return this;
     }
-
 }

@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,10 +16,11 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon;
 
-import org.codehaus.plexus.PlexusTestCase;
-import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.apache.maven.wagon.repository.Repository;
+import org.codehaus.plexus.PlexusTestCase;
 
 /**
  * Base class for command executor tests.
@@ -29,78 +28,59 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  *
  */
-public abstract class CommandExecutorTestCase
-    extends PlexusTestCase
-{
-    public void testErrorInCommandExecuted()
-        throws Exception
-    {
-        CommandExecutor exec = (CommandExecutor) lookup( CommandExecutor.ROLE );
+public abstract class CommandExecutorTestCase extends PlexusTestCase {
+    public void testErrorInCommandExecuted() throws Exception {
+        CommandExecutor exec = (CommandExecutor) lookup(CommandExecutor.ROLE);
 
         Repository repository = getTestRepository();
 
         AuthenticationInfo authenticationInfo = new AuthenticationInfo();
-        authenticationInfo.setUserName( System.getProperty( "user.name" ) );
+        authenticationInfo.setUserName(System.getProperty("user.name"));
 
-        exec.connect( repository, authenticationInfo );
+        exec.connect(repository, authenticationInfo);
 
-        try
-        {
-            exec.executeCommand( "fail" );
-            fail( "Command should have failed" );
-        }
-        catch ( CommandExecutionException e )
-        {
-            assertTrue( e.getMessage().trim().endsWith( "fail: command not found" ) );
-        }
-        finally
-        {
+        try {
+            exec.executeCommand("fail");
+            fail("Command should have failed");
+        } catch (CommandExecutionException e) {
+            assertTrue(e.getMessage().trim().endsWith("fail: command not found"));
+        } finally {
             exec.disconnect();
         }
     }
 
-    public void testIgnoreFailuresInCommandExecuted()
-        throws Exception
-    {
-        CommandExecutor exec = (CommandExecutor) lookup( CommandExecutor.ROLE );
+    public void testIgnoreFailuresInCommandExecuted() throws Exception {
+        CommandExecutor exec = (CommandExecutor) lookup(CommandExecutor.ROLE);
 
         Repository repository = getTestRepository();
 
         AuthenticationInfo authenticationInfo = new AuthenticationInfo();
-        authenticationInfo.setUserName( System.getProperty( "user.name" ) );
+        authenticationInfo.setUserName(System.getProperty("user.name"));
 
-        exec.connect( repository, authenticationInfo );
+        exec.connect(repository, authenticationInfo);
 
-        try
-        {
-            Streams streams = exec.executeCommand( "fail", true );
-            //expect no exception, and stderr has something.
-            assertTrue( streams.getErr().length() > 0 );
-        }
-        finally
-        {
+        try {
+            Streams streams = exec.executeCommand("fail", true);
+            // expect no exception, and stderr has something.
+            assertTrue(streams.getErr().length() > 0);
+        } finally {
             exec.disconnect();
         }
     }
 
-    public void testExecuteSuccessfulCommand()
-        throws Exception
-    {
-        CommandExecutor exec = (CommandExecutor) lookup( CommandExecutor.ROLE );
+    public void testExecuteSuccessfulCommand() throws Exception {
+        CommandExecutor exec = (CommandExecutor) lookup(CommandExecutor.ROLE);
 
         Repository repository = getTestRepository();
 
         AuthenticationInfo authenticationInfo = new AuthenticationInfo();
-        authenticationInfo.setUserName( System.getProperty( "user.name" ) );
+        authenticationInfo.setUserName(System.getProperty("user.name"));
 
-        exec.connect( repository, authenticationInfo );
+        exec.connect(repository, authenticationInfo);
 
-        try
-        {
-            exec.executeCommand( "ls" );
-        }
-        finally
-        {
+        try {
+            exec.executeCommand("ls");
+        } finally {
             exec.disconnect();
         }
     }

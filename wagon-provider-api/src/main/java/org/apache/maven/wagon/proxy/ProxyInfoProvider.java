@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.proxy;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,16 +16,16 @@ package org.apache.maven.wagon.proxy;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.proxy;
 
 /**
  * Interface of an object, which provides the proxy settings. Typically, this is the artifact manager.
  */
-public interface ProxyInfoProvider
-{
+public interface ProxyInfoProvider {
     /**
      * Returns the proxy settings for the given protocol.
-     * 
+     *
      * @return Proxy settings or null, if no proxy is configured for this protocol.
      */
-    ProxyInfo getProxyInfo( String protocol );
+    ProxyInfo getProxyInfo(String protocol);
 }

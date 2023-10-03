@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.webdav;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,13 @@ package org.apache.maven.wagon.providers.webdav;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.webdav;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.HttpException;
 import org.apache.http.HttpStatus;
@@ -43,12 +48,6 @@ import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;
 import org.codehaus.plexus.util.FileUtils;
 import org.w3c.dom.Node;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatResourceDoesNotExistMessage;
 
 /**
@@ -64,12 +63,10 @@ import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatResource
  * role-hint="dav"
  * instantiation-strategy="per-lookup"
  */
-public class WebDavWagon
-    extends AbstractHttpClientWagon
-{
+public class WebDavWagon extends AbstractHttpClientWagon {
     protected static final String CONTINUE_ON_FAILURE_PROPERTY = "wagon.webdav.continueOnFailure";
 
-    private final boolean continueOnFailure = Boolean.getBoolean( CONTINUE_ON_FAILURE_PROPERTY );
+    private final boolean continueOnFailure = Boolean.getBoolean(CONTINUE_ON_FAILURE_PROPERTY);
 
     /**
      * Defines the protocol mapping to use.
@@ -79,21 +76,21 @@ public class WebDavWagon
      * <p/>
      * NOTE: The order of the mapping becomes the search order.
      */
-    private static final String[][] PROTOCOL_MAP =
-        new String[][]{ { "dav:http://", "http://" },    /* maven 2.0.x url string format. (violates URI spec) */
-            { "dav:https://", "https://" },  /* maven 2.0.x url string format. (violates URI spec) */
-            { "dav+http://", "http://" },    /* URI spec compliant (protocol+transport) */
-            { "dav+https://", "https://" },  /* URI spec compliant (protocol+transport) */
-            { "dav://", "http://" },         /* URI spec compliant (protocol only) */
-            { "davs://", "https://" }        /* URI spec compliant (protocol only) */ };
+    private static final String[][] PROTOCOL_MAP = new String[][] {
+        {"dav:http://", "http://"}, /* maven 2.0.x url string format. (violates URI spec) */
+        {"dav:https://", "https://"}, /* maven 2.0.x url string format. (violates URI spec) */
+        {"dav+http://", "http://"}, /* URI spec compliant (protocol+transport) */
+        {"dav+https://", "https://"}, /* URI spec compliant (protocol+transport) */
+        {"dav://", "http://"}, /* URI spec compliant (protocol only) */
+        {"davs://", "https://"} /* URI spec compliant (protocol only) */
+    };
 
     /**
      * This wagon supports directory copying
      *
      * @return <code>true</code> always
      */
-    public boolean supportsDirectoryCopy()
-    {
+    public boolean supportsDirectoryCopy() {
         return true;
     }
 
@@ -105,65 +102,49 @@ public class WebDavWagon
      * @throws IOException
      * @throws TransferFailedException
      */
-    protected void mkdirs( String dir )
-        throws IOException
-    {
+    protected void mkdirs(String dir) throws IOException {
         Repository repository = getRepository();
         String basedir = repository.getBasedir();
 
         String baseUrl = repository.getProtocol() + "://" + repository.getHost();
-        if ( repository.getPort() != WagonConstants.UNKNOWN_PORT )
-        {
+        if (repository.getPort() != WagonConstants.UNKNOWN_PORT) {
             baseUrl += ":" + repository.getPort();
         }
 
         // create relative path that will always have a leading and trailing slash
-        String relpath = FileUtils.normalize( getPath( basedir, dir ) + "/" );
+        String relpath = FileUtils.normalize(getPath(basedir, dir) + "/");
 
-        PathNavigator navigator = new PathNavigator( relpath );
+        PathNavigator navigator = new PathNavigator(relpath);
 
         // traverse backwards until we hit a directory that already exists (OK/NOT_ALLOWED), or that we were able to
         // create (CREATED), or until we get to the top of the path
         int status = -1;
-        do
-        {
+        do {
             String url = baseUrl + "/" + navigator.getPath();
-            status = doMkCol( url );
-            if ( status == HttpStatus.SC_CREATED || status == HttpStatus.SC_METHOD_NOT_ALLOWED )
-            {
+            status = doMkCol(url);
+            if (status == HttpStatus.SC_CREATED || status == HttpStatus.SC_METHOD_NOT_ALLOWED) {
                 break;
             }
-        }
-        while ( navigator.backward() );
+        } while (navigator.backward());
 
         // traverse forward creating missing directories
-        while ( navigator.forward() )
-        {
+        while (navigator.forward()) {
             String url = baseUrl + "/" + navigator.getPath();
-            status = doMkCol( url );
-            if ( status != HttpStatus.SC_CREATED )
-            {
-                throw new IOException( "Unable to create collection: " + url + "; status code = " + status );
+            status = doMkCol(url);
+            if (status != HttpStatus.SC_CREATED) {
+                throw new IOException("Unable to create collection: " + url + "; status code = " + status);
             }
         }
     }
 
-    private int doMkCol( String url )
-        throws IOException
-    {
-        HttpMkcol method = new HttpMkcol( url );
-        try ( CloseableHttpResponse closeableHttpResponse = execute( method ) )
-        {
+    private int doMkCol(String url) throws IOException {
+        HttpMkcol method = new HttpMkcol(url);
+        try (CloseableHttpResponse closeableHttpResponse = execute(method)) {
             return closeableHttpResponse.getStatusLine().getStatusCode();
-        }
-        catch ( HttpException e )
-        {
-            throw new IOException( e.getMessage(), e );
-        }
-        finally
-        {
-            if ( method != null )
-            {
+        } catch (HttpException e) {
+            throw new IOException(e.getMessage(), e);
+        } finally {
+            if (method != null) {
                 method.releaseConnection();
             }
         }
@@ -178,111 +159,88 @@ public class WebDavWagon
      * @throws ResourceDoesNotExistException
      * @throws AuthorizationException
      */
-    public void putDirectory( File sourceDirectory, String destinationDirectory )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        for ( File file : sourceDirectory.listFiles() )
-        {
-            if ( file.isDirectory() )
-            {
-                putDirectory( file, destinationDirectory + "/" + file.getName() );
-            }
-            else
-            {
+    public void putDirectory(File sourceDirectory, String destinationDirectory)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+        for (File file : sourceDirectory.listFiles()) {
+            if (file.isDirectory()) {
+                putDirectory(file, destinationDirectory + "/" + file.getName());
+            } else {
                 String target = destinationDirectory + "/" + file.getName();
 
-                put( file, target );
+                put(file, target);
             }
         }
     }
-    private boolean isDirectory( String url )
-        throws IOException, DavException
-    {
+
+    private boolean isDirectory(String url) throws IOException, DavException {
         DavPropertyNameSet nameSet = new DavPropertyNameSet();
-        nameSet.add( DavPropertyName.create( DavConstants.PROPERTY_RESOURCETYPE ) );
+        nameSet.add(DavPropertyName.create(DavConstants.PROPERTY_RESOURCETYPE));
 
         CloseableHttpResponse closeableHttpResponse = null;
         HttpPropfind method = null;
-        try
-        {
-            method = new HttpPropfind( url, nameSet, DavConstants.DEPTH_0 );
-            closeableHttpResponse = execute( method );
+        try {
+            method = new HttpPropfind(url, nameSet, DavConstants.DEPTH_0);
+            closeableHttpResponse = execute(method);
 
-            if ( method.succeeded( closeableHttpResponse ) )
-            {
-                MultiStatus multiStatus = method.getResponseBodyAsMultiStatus( closeableHttpResponse );
+            if (method.succeeded(closeableHttpResponse)) {
+                MultiStatus multiStatus = method.getResponseBodyAsMultiStatus(closeableHttpResponse);
                 MultiStatusResponse response = multiStatus.getResponses()[0];
-                DavPropertySet propertySet = response.getProperties( HttpStatus.SC_OK );
-                DavProperty<?> property = propertySet.get( DavConstants.PROPERTY_RESOURCETYPE );
-                if ( property != null )
-                {
+                DavPropertySet propertySet = response.getProperties(HttpStatus.SC_OK);
+                DavProperty<?> property = propertySet.get(DavConstants.PROPERTY_RESOURCETYPE);
+                if (property != null) {
                     Node node = (Node) property.getValue();
-                    return node.getLocalName().equals( DavConstants.XML_COLLECTION );
+                    return node.getLocalName().equals(DavConstants.XML_COLLECTION);
                 }
             }
             return false;
-        }
-        catch ( HttpException e )
-        {
-            throw new IOException( e.getMessage(), e );
-        }
-        finally
-        {
-            //TODO olamy: not sure we still need this!!
-            if ( method != null )
-            {
+        } catch (HttpException e) {
+            throw new IOException(e.getMessage(), e);
+        } finally {
+            // TODO olamy: not sure we still need this!!
+            if (method != null) {
                 method.releaseConnection();
             }
-            if ( closeableHttpResponse != null )
-            {
+            if (closeableHttpResponse != null) {
                 closeableHttpResponse.close();
             }
         }
     }
 
-    public List<String> getFileList( String destinationDirectory )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
+    public List<String> getFileList(String destinationDirectory)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
         String repositoryUrl = repository.getUrl();
-        String url = repositoryUrl + ( repositoryUrl.endsWith( "/" ) ? "" : "/" ) + destinationDirectory;
+        String url = repositoryUrl + (repositoryUrl.endsWith("/") ? "" : "/") + destinationDirectory;
 
         HttpPropfind method = null;
         CloseableHttpResponse closeableHttpResponse = null;
-        try
-        {
-            if ( isDirectory( url ) )
-            {
+        try {
+            if (isDirectory(url)) {
                 DavPropertyNameSet nameSet = new DavPropertyNameSet();
-                nameSet.add( DavPropertyName.create( DavConstants.PROPERTY_DISPLAYNAME ) );
+                nameSet.add(DavPropertyName.create(DavConstants.PROPERTY_DISPLAYNAME));
 
-                method = new HttpPropfind( url, nameSet, DavConstants.DEPTH_1 );
-                closeableHttpResponse = execute( method );
-                if ( method.succeeded( closeableHttpResponse ) )
-                {
+                method = new HttpPropfind(url, nameSet, DavConstants.DEPTH_1);
+                closeableHttpResponse = execute(method);
+                if (method.succeeded(closeableHttpResponse)) {
                     ArrayList<String> dirs = new ArrayList<>();
-                    MultiStatus multiStatus = method.getResponseBodyAsMultiStatus( closeableHttpResponse );
-                    for ( int i = 0; i < multiStatus.getResponses().length; i++ )
-                    {
+                    MultiStatus multiStatus = method.getResponseBodyAsMultiStatus(closeableHttpResponse);
+                    for (int i = 0; i < multiStatus.getResponses().length; i++) {
                         MultiStatusResponse response = multiStatus.getResponses()[i];
                         String entryUrl = response.getHref();
-                        String fileName = PathUtils.filename( URLDecoder.decode( entryUrl ) );
-                        if ( entryUrl.endsWith( "/" ) )
-                        {
-                            if ( i == 0 )
-                            {
+                        String fileName = PathUtils.filename(URLDecoder.decode(entryUrl));
+                        if (entryUrl.endsWith("/")) {
+                            if (i == 0) {
                                 // by design jackrabbit WebDAV sticks parent directory as the first entry
                                 // so we need to ignore this entry
                                 // http://www.webdav.org/specs/rfc4918.html#rfc.section.9.1
                                 continue;
                             }
 
-                            //extract "dir/" part of "path.to.dir/"
-                            fileName = PathUtils.filename( PathUtils.dirname( URLDecoder.decode( entryUrl ) ) ) + "/";
+                            // extract "dir/" part of "path.to.dir/"
+                            fileName = PathUtils.filename(PathUtils.dirname(URLDecoder.decode(entryUrl))) + "/";
                         }
 
-                        if ( !( fileName == null || fileName.isEmpty() ) )
-                        {
-                            dirs.add( fileName );
+                        if (!(fileName == null || fileName.isEmpty())) {
+                            dirs.add(fileName);
                         }
                     }
                     return dirs;
@@ -290,61 +248,44 @@ public class WebDavWagon
 
                 int statusCode = closeableHttpResponse.getStatusLine().getStatusCode();
                 String reasonPhrase = closeableHttpResponse.getStatusLine().getReasonPhrase();
-                if ( statusCode == HttpStatus.SC_NOT_FOUND || statusCode == HttpStatus.SC_GONE )
-                {
-                    EntityUtils.consumeQuietly( closeableHttpResponse.getEntity() );
-                    throw new ResourceDoesNotExistException( formatResourceDoesNotExistMessage( url, statusCode,
-                            reasonPhrase, getProxyInfo() ) );
+                if (statusCode == HttpStatus.SC_NOT_FOUND || statusCode == HttpStatus.SC_GONE) {
+                    EntityUtils.consumeQuietly(closeableHttpResponse.getEntity());
+                    throw new ResourceDoesNotExistException(
+                            formatResourceDoesNotExistMessage(url, statusCode, reasonPhrase, getProxyInfo()));
                 }
             }
-        }
-        catch ( HttpException e )
-        {
-            throw new TransferFailedException( e.getMessage(), e );
-        }
-        catch ( DavException e )
-        {
-            throw new TransferFailedException( e.getMessage(), e );
-        }
-        catch ( IOException e )
-        {
-            throw new TransferFailedException( e.getMessage(), e );
-        }
-        finally
-        {
-            //TODO olamy: not sure we still need this!!
-            if ( method != null )
-            {
+        } catch (HttpException e) {
+            throw new TransferFailedException(e.getMessage(), e);
+        } catch (DavException e) {
+            throw new TransferFailedException(e.getMessage(), e);
+        } catch (IOException e) {
+            throw new TransferFailedException(e.getMessage(), e);
+        } finally {
+            // TODO olamy: not sure we still need this!!
+            if (method != null) {
                 method.releaseConnection();
             }
-            if ( closeableHttpResponse != null )
-            {
-                try
-                {
+            if (closeableHttpResponse != null) {
+                try {
                     closeableHttpResponse.close();
-                }
-                catch ( IOException e )
-                {
+                } catch (IOException e) {
                     // ignore
                 }
             }
         }
         // FIXME WAGON-580; actually the exception is wrong here; we need an IllegalStateException here
         throw new ResourceDoesNotExistException(
-            "Destination path exists but is not a " + "WebDAV collection (directory): " + url );
+                "Destination path exists but is not a " + "WebDAV collection (directory): " + url);
     }
 
-    public String getURL( Repository repository )
-    {
+    public String getURL(Repository repository) {
         String url = repository.getUrl();
 
         // Process mappings first.
-        for ( String[] entry : PROTOCOL_MAP )
-        {
+        for (String[] entry : PROTOCOL_MAP) {
             String protocol = entry[0];
-            if ( url.startsWith( protocol ) )
-            {
-                return entry[1] + url.substring( protocol.length() );
+            if (url.startsWith(protocol)) {
+                return entry[1] + url.substring(protocol.length());
             }
         }
 
@@ -352,25 +293,16 @@ public class WebDavWagon
         return url;
     }
 
-
-    public void put( File source, String resourceName )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        try
-        {
-            super.put( source, resourceName );
-        }
-        catch ( TransferFailedException e )
-        {
-            if ( continueOnFailure )
-            {
+    public void put(File source, String resourceName)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+        try {
+            super.put(source, resourceName);
+        } catch (TransferFailedException e) {
+            if (continueOnFailure) {
                 // TODO use a logging mechanism here or a fireTransferWarning
-                System.out.println(
-                    "WARN: Skip unable to transfer '" + resourceName + "' from '" + source.getPath() + "' due to "
-                        + e.getMessage() );
-            }
-            else
-            {
+                System.out.println("WARN: Skip unable to transfer '" + resourceName + "' from '" + source.getPath()
+                        + "' due to " + e.getMessage());
+            } else {
                 throw e;
             }
         }

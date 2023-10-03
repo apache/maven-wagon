@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.scm;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,23 +16,20 @@ package org.apache.maven.wagon.providers.scm;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.scm;
 
 import org.apache.maven.scm.provider.ScmProvider;
 import org.apache.maven.scm.provider.svn.svnexe.SvnExeScmProvider;
 
 /**
  * Test for ScmWagon using SVN Exe as underlying SCM
- * 
+ *
  * @author <a href="carlos@apache.org">Carlos Sanchez</a>
  *
  */
-public class ScmSvnExeWagonTest
-    extends AbstractScmSvnWagonTest
-{
+public class ScmSvnExeWagonTest extends AbstractScmSvnWagonTest {
 
-    protected ScmProvider getScmProvider()
-    {
+    protected ScmProvider getScmProvider() {
         return new SvnExeScmProvider();
     }
-
 }

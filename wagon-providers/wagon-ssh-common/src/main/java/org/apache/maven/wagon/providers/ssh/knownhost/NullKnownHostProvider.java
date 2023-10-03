@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh.knownhost;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,18 +16,16 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh.knownhost;
 
 /**
  * Dummy <code>KnownHostsProvider</code>
  *
  * @author Juan F. Codagnone
  * @since Sep 12, 2005
- * 
+ *
  * @plexus.component role="org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider"
  *    role-hint="null"
  *    instantiation-strategy="per-lookup"
  */
-public final class NullKnownHostProvider
-    extends AbstractKnownHostsProvider
-{
-}
+public final class NullKnownHostProvider extends AbstractKnownHostsProvider {}

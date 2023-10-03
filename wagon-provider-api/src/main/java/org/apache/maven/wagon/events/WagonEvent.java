@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.events;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.events;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.events;
 
 import java.util.EventObject;
 
@@ -29,9 +28,7 @@ import org.apache.maven.wagon.Wagon;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public class WagonEvent
-    extends EventObject
-{
+public class WagonEvent extends EventObject {
     /**
      * The time when event occurred
      */
@@ -40,9 +37,8 @@ public class WagonEvent
     /**
      * @param source The Wagon object on which the WagonEvent initially occurred
      */
-    public WagonEvent( final Wagon source )
-    {
-        super( source );
+    public WagonEvent(final Wagon source) {
+        super(source);
     }
 
     /**
@@ -50,8 +46,7 @@ public class WagonEvent
      *
      * @return The Wagon object on which the WagonEvent initially occurred
      */
-    public Wagon getWagon()
-    {
+    public Wagon getWagon() {
         return (Wagon) getSource();
     }
 
@@ -60,8 +55,7 @@ public class WagonEvent
      *
      * @return Returns the timestamp.
      */
-    public long getTimestamp()
-    {
+    public long getTimestamp() {
         return timestamp;
     }
 
@@ -70,9 +64,7 @@ public class WagonEvent
      *
      * @param timestamp The timestamp to set.
      */
-    public void setTimestamp( final long timestamp )
-    {
+    public void setTimestamp(final long timestamp) {
         this.timestamp = timestamp;
     }
-
 }

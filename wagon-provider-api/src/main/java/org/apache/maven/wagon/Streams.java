@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,33 +16,29 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon;
 
 /**
- * 
+ *
  */
-public class Streams
-{
+public class Streams {
     private String out = "";
 
     private String err = "";
 
-    public String getOut()
-    {
+    public String getOut() {
         return out;
     }
 
-    public void setOut( String out )
-    {
+    public void setOut(String out) {
         this.out = out;
     }
 
-    public String getErr()
-    {
+    public String getErr() {
         return err;
     }
 
-    public void setErr( String err )
-    {
+    public void setErr(String err) {
         this.err = err;
     }
 }

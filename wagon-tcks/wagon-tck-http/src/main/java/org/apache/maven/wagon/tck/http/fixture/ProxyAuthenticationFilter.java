@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.tck.http.fixture;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,9 +16,7 @@ package org.apache.maven.wagon.tck.http.fixture;
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+package org.apache.maven.wagon.tck.http.fixture;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -31,60 +27,49 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
 import org.codehaus.plexus.util.Base64;
 
 /**
  *
  */
-public class ProxyAuthenticationFilter
-    implements Filter
-{
+public class ProxyAuthenticationFilter implements Filter {
 
     private final String username;
 
     private final String password;
 
-    public ProxyAuthenticationFilter( final String username, final String password )
-    {
+    public ProxyAuthenticationFilter(final String username, final String password) {
         this.username = username;
         this.password = password;
     }
 
-    public void destroy()
-    {
-    }
+    public void destroy() {}
 
-    public void doFilter( final ServletRequest req, final ServletResponse resp, final FilterChain chain )
-        throws IOException, ServletException
-    {
+    public void doFilter(final ServletRequest req, final ServletResponse resp, final FilterChain chain)
+            throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) resp;
 
-        String header = request.getHeader( "Proxy-Authorization" );
-        if ( header == null )
-        {
-            response.setStatus( HttpServletResponse.SC_PROXY_AUTHENTICATION_REQUIRED );
-            response.addHeader( "Proxy-Authenticate", "Basic realm=\"Squid proxy-caching web server\"" );
+        String header = request.getHeader("Proxy-Authorization");
+        if (header == null) {
+            response.setStatus(HttpServletResponse.SC_PROXY_AUTHENTICATION_REQUIRED);
+            response.addHeader("Proxy-Authenticate", "Basic realm=\"Squid proxy-caching web server\"");
             return;
-        }
-        else
-        {
-            String data = header.substring( "BASIC ".length() );
-            data = new String( Base64.decodeBase64( data.getBytes( StandardCharsets.US_ASCII ) ) );
-            String[] creds = data.split( ":" );
+        } else {
+            String data = header.substring("BASIC ".length());
+            data = new String(Base64.decodeBase64(data.getBytes(StandardCharsets.US_ASCII)));
+            String[] creds = data.split(":");
 
-            if ( !creds[0].equals( username ) || !creds[1].equals( password ) )
-            {
-                response.sendError( HttpServletResponse.SC_UNAUTHORIZED );
+            if (!creds[0].equals(username) || !creds[1].equals(password)) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             }
         }
 
-        chain.doFilter( req, resp );
+        chain.doFilter(req, resp);
     }
 
-    public void init( final FilterConfig filterConfig )
-        throws ServletException
-    {
-    }
-
+    public void init(final FilterConfig filterConfig) throws ServletException {}
 }

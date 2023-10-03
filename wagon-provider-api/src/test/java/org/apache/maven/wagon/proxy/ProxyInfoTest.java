@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.proxy;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.proxy;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.proxy;
 
 import junit.framework.TestCase;
 
@@ -25,49 +24,41 @@ import junit.framework.TestCase;
  * @author <a href="mailto:jvanzyl@maven.org">Jason van Zyl</a>
  *
  */
-public class ProxyInfoTest
-    extends TestCase
-{
-    public ProxyInfoTest( final String name )
-    {
-        super( name );
+public class ProxyInfoTest extends TestCase {
+    public ProxyInfoTest(final String name) {
+        super(name);
     }
 
-    public void setUp()
-        throws Exception
-    {
+    public void setUp() throws Exception {
         super.setUp();
     }
 
-    public void tearDown()
-        throws Exception
-    {
+    public void tearDown() throws Exception {
         super.tearDown();
     }
 
-    public void testProxyInfoProperties()
+    public void testProxyInfoProperties() {
 
-    {
         final ProxyInfo proxyInfo = new ProxyInfo();
 
-        proxyInfo.setUserName( "username" );
+        proxyInfo.setUserName("username");
 
-        assertEquals( "username", proxyInfo.getUserName() );
+        assertEquals("username", proxyInfo.getUserName());
 
-        proxyInfo.setPassword( "password" );
+        proxyInfo.setPassword("password");
 
-        assertEquals( "password", proxyInfo.getPassword() );
+        assertEquals("password", proxyInfo.getPassword());
 
-        proxyInfo.setHost( "http://www.ibiblio.org" );
+        proxyInfo.setHost("http://www.ibiblio.org");
 
-        assertEquals( "http://www.ibiblio.org", proxyInfo.getHost() );
+        assertEquals("http://www.ibiblio.org", proxyInfo.getHost());
 
-        proxyInfo.setPort( 0 );
+        proxyInfo.setPort(0);
 
-        assertEquals( 0, proxyInfo.getPort() );
+        assertEquals(0, proxyInfo.getPort());
 
-        proxyInfo.setType( "SOCKSv4" );
+        proxyInfo.setType("SOCKSv4");
 
-        assertEquals( "SOCKSv4", proxyInfo.getType() );
+        assertEquals("SOCKSv4", proxyInfo.getType());
     }
 }

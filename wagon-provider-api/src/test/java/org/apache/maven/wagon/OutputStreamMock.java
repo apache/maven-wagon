@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -26,55 +25,43 @@ import java.io.OutputStream;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public class OutputStreamMock
-    extends OutputStream
-{
+public class OutputStreamMock extends OutputStream {
 
     private boolean closed = false;
 
     private boolean forcedError = false;
 
-    public void close()
-    {
+    public void close() {
         closed = true;
     }
 
     /**
      * @see java.io.OutputStream#write(int)
      */
-    public void write( final int b )
-        throws IOException
-    {
-        if ( forcedError )
-        {
-            throw new IOException( "Mock exception" );
+    public void write(final int b) throws IOException {
+        if (forcedError) {
+            throw new IOException("Mock exception");
         }
-
     }
 
     /**
      * @return Returns the closed.
      */
-    public boolean isClosed()
-    {
+    public boolean isClosed() {
         return closed;
     }
-
 
     /**
      * @return Returns the forcedError.
      */
-    public boolean isForcedError()
-    {
+    public boolean isForcedError() {
         return forcedError;
     }
 
     /**
      * @param forcedError The forcedError to set.
      */
-    public void setForcedError( final boolean forcedError )
-    {
+    public void setForcedError(final boolean forcedError) {
         this.forcedError = forcedError;
     }
-
 }

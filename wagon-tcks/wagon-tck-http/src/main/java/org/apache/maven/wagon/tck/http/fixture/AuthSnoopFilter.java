@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.tck.http.fixture;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,9 +16,7 @@ package org.apache.maven.wagon.tck.http.fixture;
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+package org.apache.maven.wagon.tck.http.fixture;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -30,6 +26,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
 import org.codehaus.plexus.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,36 +36,26 @@ import org.slf4j.LoggerFactory;
 /**
  *
  */
-public class AuthSnoopFilter
-    implements Filter
-{
-    private static Logger logger = LoggerFactory.getLogger( AuthSnoopFilter.class );
+public class AuthSnoopFilter implements Filter {
+    private static Logger logger = LoggerFactory.getLogger(AuthSnoopFilter.class);
 
-    public void destroy()
-    {
-    }
+    public void destroy() {}
 
-    public void doFilter( final ServletRequest req, final ServletResponse response, final FilterChain chain )
-        throws IOException, ServletException
-    {
+    public void doFilter(final ServletRequest req, final ServletResponse response, final FilterChain chain)
+            throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) req;
-        String authHeader = request.getHeader( "Authorization" );
+        String authHeader = request.getHeader("Authorization");
 
-        if ( authHeader != null )
-        {
-            logger.info( "Authorization: " + authHeader );
-            String data = authHeader.substring( "BASIC ".length() );
-            String decoded = new String( Base64.decodeBase64( data.getBytes( StandardCharsets.US_ASCII ) ) );
-            logger.info( decoded );
-            String[] creds = decoded.split( ":" );
+        if (authHeader != null) {
+            logger.info("Authorization: " + authHeader);
+            String data = authHeader.substring("BASIC ".length());
+            String decoded = new String(Base64.decodeBase64(data.getBytes(StandardCharsets.US_ASCII)));
+            logger.info(decoded);
+            String[] creds = decoded.split(":");
 
-            logger.info( "User: " + creds[0] + "\nPassword: " + creds[1] );
+            logger.info("User: " + creds[0] + "\nPassword: " + creds[1]);
         }
     }
 
-    public void init( final FilterConfig filterConfig )
-        throws ServletException
-    {
-    }
-
+    public void init(final FilterConfig filterConfig) throws ServletException {}
 }

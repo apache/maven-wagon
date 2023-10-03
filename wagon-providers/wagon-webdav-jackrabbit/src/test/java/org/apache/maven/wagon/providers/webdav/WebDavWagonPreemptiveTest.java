@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.webdav;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,35 +16,29 @@ package org.apache.maven.wagon.providers.webdav;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.webdav;
 
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.shared.http.HttpConfiguration;
 import org.apache.maven.wagon.shared.http.HttpMethodConfiguration;
 
-public class WebDavWagonPreemptiveTest
-    extends WebDavWagonTest
-{
+public class WebDavWagonPreemptiveTest extends WebDavWagonTest {
     @Override
-    protected Wagon getWagon()
-        throws Exception
-    {
+    protected Wagon getWagon() throws Exception {
         WebDavWagon wagon = (WebDavWagon) super.getWagon();
         wagon.setHttpConfiguration(
-            new HttpConfiguration() //
-                .setAll( new HttpMethodConfiguration().setUsePreemptive( true ) ) );
+                new HttpConfiguration() //
+                        .setAll(new HttpMethodConfiguration().setUsePreemptive(true)));
         return wagon;
     }
 
     @Override
-    protected boolean supportPreemptiveAuthenticationPut()
-    {
+    protected boolean supportPreemptiveAuthenticationPut() {
         return true;
     }
 
     @Override
-    protected boolean supportPreemptiveAuthenticationGet()
-    {
+    protected boolean supportPreemptiveAuthenticationGet() {
         return true;
     }
-
 }

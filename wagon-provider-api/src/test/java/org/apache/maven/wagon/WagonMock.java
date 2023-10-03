@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -32,99 +31,71 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
  *
  */
-public class WagonMock
-    extends StreamWagon
-{
+public class WagonMock extends StreamWagon {
     private boolean errorInputStream;
     private int timeout = 0;
 
-    public WagonMock()
-    {
-    }
+    public WagonMock() {}
 
-    public WagonMock( boolean errorInputStream )
-    {
+    public WagonMock(boolean errorInputStream) {
         this.errorInputStream = errorInputStream;
     }
 
-
-    public void fillInputData( InputData inputData )
-        throws TransferFailedException
-    {
+    public void fillInputData(InputData inputData) throws TransferFailedException {
 
         InputStream is;
 
-        if ( errorInputStream )
-        {
+        if (errorInputStream) {
             InputStreamMock mockInputStream = new InputStreamMock();
 
-            mockInputStream.setForcedError( true );
+            mockInputStream.setForcedError(true);
 
             is = mockInputStream;
 
-        }
-        else
-        {
+        } else {
             byte[] buffer = new byte[1024 * 4 * 5];
 
-            is = new ByteArrayInputStream( buffer );
+            is = new ByteArrayInputStream(buffer);
         }
 
-        inputData.setInputStream( is );
-
+        inputData.setInputStream(is);
     }
 
-    public void fillOutputData( OutputData outputData )
-        throws TransferFailedException
-    {
+    public void fillOutputData(OutputData outputData) throws TransferFailedException {
 
         OutputStream os;
 
-        if ( errorInputStream )
-        {
+        if (errorInputStream) {
             OutputStreamMock mockOutputStream = new OutputStreamMock();
 
-            mockOutputStream.setForcedError( true );
+            mockOutputStream.setForcedError(true);
 
             os = mockOutputStream;
-        }
-        else
-        {
+        } else {
             os = new ByteArrayOutputStream();
         }
 
-        outputData.setOutputStream( os );
-
+        outputData.setOutputStream(os);
     }
 
-    public void openConnectionInternal()
-    {
+    public void openConnectionInternal() {}
+
+    public void closeConnection() {}
+
+    public void setTimeout(int timeoutValue) {
+        timeout = timeoutValue;
     }
 
-    public void closeConnection()
-    {
-    }
-    
-    public void setTimeout( int timeoutValue )
-    {
-    	timeout = timeoutValue;
-    }
-    
-    public int getTimeout()
-    {
-    	return timeout;
+    public int getTimeout() {
+        return timeout;
     }
 
-    public List<String> getFileList( String destinationDirectory )
-        throws TransferFailedException, AuthorizationException
-    {
+    public List<String> getFileList(String destinationDirectory)
+            throws TransferFailedException, AuthorizationException {
         return Collections.<String>emptyList();
     }
 
-    public boolean resourceExists( String resourceName )
-        throws AuthorizationException
-    {
+    public boolean resourceExists(String resourceName) throws AuthorizationException {
         return false;
     }
-
 }

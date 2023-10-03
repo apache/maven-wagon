@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.http;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.http;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.http;
 
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
@@ -26,36 +25,27 @@ import java.net.PasswordAuthentication;
  * @author <a href="mailto:nicolas.deloof@cloudbees.com">Nicolas De loof</a>
  * @plexus.component role="org.apache.maven.wagon.providers.http.LightweightHttpWagonAuthenticator"
  */
-public class LightweightHttpWagonAuthenticator
-    extends Authenticator
-{
+public class LightweightHttpWagonAuthenticator extends Authenticator {
     ThreadLocal<LightweightHttpWagon> localWagon = new ThreadLocal<>();
 
-    protected PasswordAuthentication getPasswordAuthentication()
-    {
+    protected PasswordAuthentication getPasswordAuthentication() {
         LightweightHttpWagon wagon = localWagon.get();
-        if ( wagon != null )
-        {
-            if ( getRequestorType() == RequestorType.PROXY )
-            {
+        if (wagon != null) {
+            if (getRequestorType() == RequestorType.PROXY) {
                 return wagon.requestProxyAuthentication();
-            }
-            else
-            {
+            } else {
                 return wagon.requestServerAuthentication();
             }
         }
         return null;
     }
 
-    public void setWagon( LightweightHttpWagon wagon )
-    {
-        localWagon.set( wagon );
-        Authenticator.setDefault( this );
+    public void setWagon(LightweightHttpWagon wagon) {
+        localWagon.set(wagon);
+        Authenticator.setDefault(this);
     }
 
-    public void resetWagon()
-    {
+    public void resetWagon() {
         localWagon.remove();
     }
 }

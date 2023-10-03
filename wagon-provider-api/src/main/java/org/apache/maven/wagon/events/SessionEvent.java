@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.events;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.events;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.events;
 
 import org.apache.maven.wagon.Wagon;
 
@@ -39,9 +38,7 @@ import org.apache.maven.wagon.Wagon;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public class SessionEvent
-    extends WagonEvent
-{
+public class SessionEvent extends WagonEvent {
 
     /**
      * A SESSION was closed.
@@ -101,11 +98,9 @@ public class SessionEvent
      * @param wagon     <code>Wagon<code> object which created this event
      * @param eventType the type of the event
      */
-    public SessionEvent( final Wagon wagon, final int eventType )
-    {
-        super( wagon );
+    public SessionEvent(final Wagon wagon, final int eventType) {
+        super(wagon);
         this.eventType = eventType;
-
     }
 
     /**
@@ -114,37 +109,31 @@ public class SessionEvent
      * @param wagon     <code>Wagon<code> object which created this event
      * @param exception the exception
      */
-    public SessionEvent( final Wagon wagon, final Exception exception )
-    {
-        super( wagon );
+    public SessionEvent(final Wagon wagon, final Exception exception) {
+        super(wagon);
         this.exception = exception;
         this.eventType = SESSION_ERROR_OCCURRED;
-
     }
 
     /**
      * @return Returns the type.
      */
-    public int getEventType()
-    {
+    public int getEventType() {
         return eventType;
     }
 
     /**
      * @return Returns the exception.
      */
-    public Exception getException()
-    {
+    public Exception getException() {
         return exception;
     }
 
     /**
      * @param eventType The eventType to set.
      */
-    public void setEventType( final int eventType )
-    {
-        switch ( eventType )
-        {
+    public void setEventType(final int eventType) {
+        switch (eventType) {
             case SessionEvent.SESSION_CLOSED:
             case SessionEvent.SESSION_DISCONNECTED:
             case SessionEvent.SESSION_DISCONNECTING:
@@ -155,8 +144,8 @@ public class SessionEvent
             case SessionEvent.SESSION_OPENING:
             case SessionEvent.SESSION_CONNECTION_REFUSED:
                 break;
-            default :
-                throw new IllegalArgumentException( "Illegal event type: " + eventType );
+            default:
+                throw new IllegalArgumentException("Illegal event type: " + eventType);
         }
         this.eventType = eventType;
     }
@@ -164,62 +153,58 @@ public class SessionEvent
     /**
      * @param exception The exception to set.
      */
-    public void setException( final Exception exception )
-    {
+    public void setException(final Exception exception) {
         this.exception = exception;
     }
 
-    public String toString()
-    {
+    public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append( "SessionEvent[" );
+        sb.append("SessionEvent[");
 
-        switch ( this.eventType )
-        {
+        switch (this.eventType) {
             case SessionEvent.SESSION_CLOSED:
-                sb.append( "CONNECTION_CLOSED" );
+                sb.append("CONNECTION_CLOSED");
                 break;
             case SessionEvent.SESSION_DISCONNECTED:
-                sb.append( "CONNECTION_DISCONNECTED" );
+                sb.append("CONNECTION_DISCONNECTED");
                 break;
             case SessionEvent.SESSION_DISCONNECTING:
-                sb.append( "CONNECTION_DISCONNECTING" );
+                sb.append("CONNECTION_DISCONNECTING");
                 break;
             case SessionEvent.SESSION_ERROR_OCCURRED:
-                sb.append( "CONNECTION_ERROR_OCCURRED" );
+                sb.append("CONNECTION_ERROR_OCCURRED");
                 break;
             case SessionEvent.SESSION_LOGGED_IN:
-                sb.append( "CONNECTION_LOGGED_IN" );
+                sb.append("CONNECTION_LOGGED_IN");
                 break;
             case SessionEvent.SESSION_LOGGED_OFF:
-                sb.append( "CONNECTION_LOGGED_OFF" );
+                sb.append("CONNECTION_LOGGED_OFF");
                 break;
             case SessionEvent.SESSION_OPENED:
-                sb.append( "CONNECTION_OPENED" );
+                sb.append("CONNECTION_OPENED");
                 break;
             case SessionEvent.SESSION_OPENING:
-                sb.append( "CONNECTION_OPENING" );
+                sb.append("CONNECTION_OPENING");
                 break;
             case SessionEvent.SESSION_CONNECTION_REFUSED:
-                sb.append( "CONNECTION_CONNECTION_REFUSED" );
+                sb.append("CONNECTION_CONNECTION_REFUSED");
                 break;
             default:
-                sb.append( eventType );
+                sb.append(eventType);
         }
-        sb.append( "|" );
+        sb.append("|");
 
-        sb.append( this.getWagon().getRepository() ).append( "|" );
-        sb.append( this.source );
+        sb.append(this.getWagon().getRepository()).append("|");
+        sb.append(this.source);
 
-        if ( exception != null )
-        {
-            sb.append( "|" );
-            sb.append( exception.getClass().getName() ).append( ":" );
-            sb.append( exception.getMessage() );
+        if (exception != null) {
+            sb.append("|");
+            sb.append(exception.getClass().getName()).append(":");
+            sb.append(exception.getMessage());
         }
 
-        sb.append( "]" );
+        sb.append("]");
 
         return sb.toString();
     }

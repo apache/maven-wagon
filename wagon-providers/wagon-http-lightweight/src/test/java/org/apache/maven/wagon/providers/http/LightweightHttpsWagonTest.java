@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.http;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,39 +16,36 @@ package org.apache.maven.wagon.providers.http;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.http;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 
-public class LightweightHttpsWagonTest
-    extends LightweightHttpWagonTest
-{
-    protected String getProtocol()
-    {
+public class LightweightHttpsWagonTest extends LightweightHttpWagonTest {
+    protected String getProtocol() {
         return "https";
     }
 
-    protected ServerConnector addConnector( Server server )
-    {
-        System.setProperty( "javax.net.ssl.trustStore",
-                            getTestFile( "src/test/resources/ssl/keystore" ).getAbsolutePath() );
+    protected ServerConnector addConnector(Server server) {
+        System.setProperty(
+                "javax.net.ssl.trustStore",
+                getTestFile("src/test/resources/ssl/keystore").getAbsolutePath());
 
         SslContextFactory sslContextFactory = new SslContextFactory();
-        sslContextFactory.setKeyStorePath( getTestPath( "src/test/resources/ssl/keystore" ) );
-        sslContextFactory.setKeyStorePassword( "wagonhttp" );
-        sslContextFactory.setKeyManagerPassword( "wagonhttp" );
-        sslContextFactory.setTrustStorePath( getTestPath( "src/test/resources/ssl/keystore" ) );
-        sslContextFactory.setTrustStorePassword( "wagonhttp" );
+        sslContextFactory.setKeyStorePath(getTestPath("src/test/resources/ssl/keystore"));
+        sslContextFactory.setKeyStorePassword("wagonhttp");
+        sslContextFactory.setKeyManagerPassword("wagonhttp");
+        sslContextFactory.setTrustStorePath(getTestPath("src/test/resources/ssl/keystore"));
+        sslContextFactory.setTrustStorePassword("wagonhttp");
 
-        ServerConnector serverConnector = new ServerConnector( server, sslContextFactory );
-        server.addConnector( serverConnector );
+        ServerConnector serverConnector = new ServerConnector(server, sslContextFactory);
+        server.addConnector(serverConnector);
         return serverConnector;
     }
 
     @Override
-    protected boolean assertOnTransferProgress()
-    {
+    protected boolean assertOnTransferProgress() {
         return false;
     }
 }

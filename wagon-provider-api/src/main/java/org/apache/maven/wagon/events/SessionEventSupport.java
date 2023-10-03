@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.events;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.events;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.events;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,8 +27,7 @@ import java.util.List;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public final class SessionEventSupport
-{
+public final class SessionEventSupport {
     /**
      * registered listeners
      */
@@ -46,11 +44,9 @@ public final class SessionEventSupport
      * @see #removeSessionListener(SessionListener)
      * @see TransferListener
      */
-    public void addSessionListener( final SessionListener listener )
-    {
-        if ( listener != null )
-        {
-            listeners.add( listener );
+    public void addSessionListener(final SessionListener listener) {
+        if (listener != null) {
+            listeners.add(listener);
         }
     }
 
@@ -65,9 +61,8 @@ public final class SessionEventSupport
      * @param listener the session listener
      * @see #addSessionListener(org.apache.maven.wagon.events.SessionListener)
      */
-    public void removeSessionListener( final SessionListener listener )
-    {
-        listeners.remove( listener );
+    public void removeSessionListener(final SessionListener listener) {
+        listeners.remove(listener);
     }
 
     /**
@@ -82,9 +77,8 @@ public final class SessionEventSupport
      * @see org.apache.maven.wagon.events.SessionListener
      * @see #addSessionListener(org.apache.maven.wagon.events.SessionListener)
      */
-    public boolean hasSessionListener( final SessionListener listener )
-    {
-        return listeners.contains( listener );
+    public boolean hasSessionListener(final SessionListener listener) {
+        return listeners.contains(listener);
     }
 
     /**
@@ -94,11 +88,9 @@ public final class SessionEventSupport
      *
      * @param sessionEvent the SessionEvent which will be dispatched to listeners
      */
-    public void fireSessionDisconnected( final SessionEvent sessionEvent )
-    {
-        for ( SessionListener listener : listeners )
-        {
-            listener.sessionDisconnected( sessionEvent );
+    public void fireSessionDisconnected(final SessionEvent sessionEvent) {
+        for (SessionListener listener : listeners) {
+            listener.sessionDisconnected(sessionEvent);
         }
     }
 
@@ -109,11 +101,9 @@ public final class SessionEventSupport
      *
      * @param sessionEvent the SessionEvent which will be dispatched to listeners
      */
-    public void fireSessionDisconnecting( final SessionEvent sessionEvent )
-    {
-        for ( SessionListener listener : listeners )
-        {
-            listener.sessionDisconnecting( sessionEvent );
+    public void fireSessionDisconnecting(final SessionEvent sessionEvent) {
+        for (SessionListener listener : listeners) {
+            listener.sessionDisconnecting(sessionEvent);
         }
     }
 
@@ -124,11 +114,9 @@ public final class SessionEventSupport
      *
      * @param sessionEvent the SessionEvent which will be dispatched to listeners
      */
-    public void fireSessionLoggedIn( final SessionEvent sessionEvent )
-    {
-        for ( SessionListener listener : listeners )
-        {
-            listener.sessionLoggedIn( sessionEvent );
+    public void fireSessionLoggedIn(final SessionEvent sessionEvent) {
+        for (SessionListener listener : listeners) {
+            listener.sessionLoggedIn(sessionEvent);
         }
     }
 
@@ -139,11 +127,9 @@ public final class SessionEventSupport
      *
      * @param sessionEvent the SessionEvent which will be dispatched to listeners
      */
-    public void fireSessionLoggedOff( final SessionEvent sessionEvent )
-    {
-        for ( SessionListener listener : listeners )
-        {
-            listener.sessionLoggedOff( sessionEvent );
+    public void fireSessionLoggedOff(final SessionEvent sessionEvent) {
+        for (SessionListener listener : listeners) {
+            listener.sessionLoggedOff(sessionEvent);
         }
     }
 
@@ -154,11 +140,9 @@ public final class SessionEventSupport
      *
      * @param sessionEvent the SessionEvent which will be dispatched to listeners
      */
-    public void fireSessionOpened( final SessionEvent sessionEvent )
-    {
-        for ( SessionListener listener : listeners )
-        {
-            listener.sessionOpened( sessionEvent );
+    public void fireSessionOpened(final SessionEvent sessionEvent) {
+        for (SessionListener listener : listeners) {
+            listener.sessionOpened(sessionEvent);
         }
     }
 
@@ -169,11 +153,9 @@ public final class SessionEventSupport
      *
      * @param sessionEvent the SessionEvent which will be dispatched to listeners
      */
-    public void fireSessionOpening( final SessionEvent sessionEvent )
-    {
-        for ( SessionListener listener : listeners )
-        {
-            listener.sessionOpening( sessionEvent );
+    public void fireSessionOpening(final SessionEvent sessionEvent) {
+        for (SessionListener listener : listeners) {
+            listener.sessionOpening(sessionEvent);
         }
     }
 
@@ -184,11 +166,9 @@ public final class SessionEventSupport
      *
      * @param sessionEvent the SessionEvent which will be dispatched to listeners
      */
-    public void fireSessionConnectionRefused( final SessionEvent sessionEvent )
-    {
-        for ( SessionListener listener : listeners )
-        {
-            listener.sessionConnectionRefused( sessionEvent );
+    public void fireSessionConnectionRefused(final SessionEvent sessionEvent) {
+        for (SessionListener listener : listeners) {
+            listener.sessionConnectionRefused(sessionEvent);
         }
     }
 
@@ -198,11 +178,9 @@ public final class SessionEventSupport
      *
      * @param message the debug message which will be dispatched to listeners
      */
-    public void fireDebug( final String message )
-    {
-        for ( SessionListener listener : listeners )
-        {
-            listener.debug( message );
+    public void fireDebug(final String message) {
+        for (SessionListener listener : listeners) {
+            listener.debug(message);
         }
     }
 
@@ -214,11 +192,9 @@ public final class SessionEventSupport
      *
      * @param sessionEvent the SessionEvent which will be dispatched to listeners
      */
-    public void fireSessionError( final SessionEvent sessionEvent )
-    {
-        for ( SessionListener listener : listeners )
-        {
-            listener.sessionError( sessionEvent );
+    public void fireSessionError(final SessionEvent sessionEvent) {
+        for (SessionListener listener : listeners) {
+            listener.sessionError(sessionEvent);
         }
     }
 }

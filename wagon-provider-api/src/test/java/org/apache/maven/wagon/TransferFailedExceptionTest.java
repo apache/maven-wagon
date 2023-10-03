@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon;
 
 import junit.framework.TestCase;
 
@@ -25,19 +24,16 @@ import junit.framework.TestCase;
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
  *
  */
-public class TransferFailedExceptionTest
-    extends TestCase
-{
-    public void testTransferFailedExceptionTest()
-    {
-        TransferFailedException ae = new TransferFailedException( "message" );
+public class TransferFailedExceptionTest extends TestCase {
+    public void testTransferFailedExceptionTest() {
+        TransferFailedException ae = new TransferFailedException("message");
 
-        assertEquals( "message", ae.getMessage() );
+        assertEquals("message", ae.getMessage());
 
-        ae = new TransferFailedException( "full-message", new Throwable( "cause" ) );
+        ae = new TransferFailedException("full-message", new Throwable("cause"));
 
-        assertEquals( "full-message", ae.getMessage() );
+        assertEquals("full-message", ae.getMessage());
 
-        assertEquals( "cause", ae.getCause().getMessage() );
+        assertEquals("cause", ae.getCause().getMessage());
     }
 }

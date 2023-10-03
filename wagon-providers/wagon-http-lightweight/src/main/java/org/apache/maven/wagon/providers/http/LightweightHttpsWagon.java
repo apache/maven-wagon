@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.http;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.http;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.http;
 
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.authentication.AuthenticationException;
@@ -28,55 +27,45 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
  *
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
  *
- * 
- * @plexus.component role="org.apache.maven.wagon.Wagon" 
+ *
+ * @plexus.component role="org.apache.maven.wagon.Wagon"
  *   role-hint="https"
  *   instantiation-strategy="per-lookup"
  */
-public class LightweightHttpsWagon
-    extends LightweightHttpWagon
-{
+public class LightweightHttpsWagon extends LightweightHttpWagon {
     private String previousHttpsProxyHost;
-    
+
     private String previousHttpsProxyPort;
 
     private String previousHttpsProxyExclusions;
 
-    public LightweightHttpsWagon()
-    {
+    public LightweightHttpsWagon() {
         super();
     }
 
-    public void openConnection()
-        throws ConnectionException, AuthenticationException
-    {
-        previousHttpsProxyHost = System.getProperty( "https.proxyHost" );
-        previousHttpsProxyPort = System.getProperty( "https.proxyPort" );
-        previousHttpsProxyExclusions = System.getProperty( "https.nonProxyHosts" );
-        
-        final ProxyInfo proxyInfo = getProxyInfo( "https", getRepository().getHost() );
-        if ( proxyInfo != null )
-        {
-            setSystemProperty( "https.proxyHost", proxyInfo.getHost() );
-            setSystemProperty( "https.proxyPort", String.valueOf( proxyInfo.getPort() ) );
-            setSystemProperty( "https.nonProxyHosts", proxyInfo.getNonProxyHosts() );
+    public void openConnection() throws ConnectionException, AuthenticationException {
+        previousHttpsProxyHost = System.getProperty("https.proxyHost");
+        previousHttpsProxyPort = System.getProperty("https.proxyPort");
+        previousHttpsProxyExclusions = System.getProperty("https.nonProxyHosts");
+
+        final ProxyInfo proxyInfo = getProxyInfo("https", getRepository().getHost());
+        if (proxyInfo != null) {
+            setSystemProperty("https.proxyHost", proxyInfo.getHost());
+            setSystemProperty("https.proxyPort", String.valueOf(proxyInfo.getPort()));
+            setSystemProperty("https.nonProxyHosts", proxyInfo.getNonProxyHosts());
+        } else {
+            setSystemProperty("https.proxyHost", null);
+            setSystemProperty("https.proxyPort", null);
         }
-        else
-        {
-            setSystemProperty( "https.proxyHost", null );
-            setSystemProperty( "https.proxyPort", null );
-        }
-        
+
         super.openConnection();
     }
 
-    public void closeConnection()
-        throws ConnectionException
-    {
+    public void closeConnection() throws ConnectionException {
         super.closeConnection();
 
-        setSystemProperty( "https.proxyHost", previousHttpsProxyHost );
-        setSystemProperty( "https.proxyPort", previousHttpsProxyPort );
-        setSystemProperty( "https.nonProxyHosts", previousHttpsProxyExclusions );
+        setSystemProperty("https.proxyHost", previousHttpsProxyHost);
+        setSystemProperty("https.proxyPort", previousHttpsProxyPort);
+        setSystemProperty("https.nonProxyHosts", previousHttpsProxyExclusions);
     }
 }

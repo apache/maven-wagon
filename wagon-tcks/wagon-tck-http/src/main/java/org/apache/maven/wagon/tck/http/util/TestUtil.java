@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.tck.http.util;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.tck.http.util;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.tck.http.util;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -33,123 +32,99 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import org.codehaus.plexus.util.IOUtil;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ *
  */
-public final class TestUtil
-{
+public final class TestUtil {
     // CHECKSTYLE_OFF: ConstantName
-    private static final Logger logger = LoggerFactory.getLogger( TestUtil.class );
+    private static final Logger logger = LoggerFactory.getLogger(TestUtil.class);
     // CHECKSTYLE_ON: ConstantName
 
     private static final Map<String, File> BASES = new HashMap<>();
 
-    private TestUtil()
-    {
-    }
+    private TestUtil() {}
 
-    public static File getResource( final String path )
-        throws URISyntaxException, IOException
-    {
-        URL resource = Thread.currentThread().getContextClassLoader().getResource( path );
-        if ( resource == null )
-        {
-            throw new IllegalStateException( "Cannot find classpath resource: " + path );
+    public static File getResource(final String path) throws URISyntaxException, IOException {
+        URL resource = Thread.currentThread().getContextClassLoader().getResource(path);
+        if (resource == null) {
+            throw new IllegalStateException("Cannot find classpath resource: " + path);
         }
 
-        if ( resource.getProtocol().startsWith( "jar" ) )
-        {
+        if (resource.getProtocol().startsWith("jar")) {
             // File f = new File( path );
             // f = File.createTempFile( f.getName() + ".", ".tmp" );
 
             String url = resource.toExternalForm();
-            int startIdx = url.lastIndexOf( ':' ) + 1;
-            int endIdx = url.indexOf( "!" );
-            url = url.substring( startIdx, endIdx );
+            int startIdx = url.lastIndexOf(':') + 1;
+            int endIdx = url.indexOf("!");
+            url = url.substring(startIdx, endIdx);
 
-            File base = BASES.get( url );
-            if ( base == null )
-            {
-                File urlFile = new File( url );
+            File base = BASES.get(url);
+            if (base == null) {
+                File urlFile = new File(url);
 
-                base = new File( "target/tck-resources/" + urlFile.getName() );
+                base = new File("target/tck-resources/" + urlFile.getName());
                 base.getParentFile().mkdirs();
 
-                logger.info( "unpacking test resources in jar: " + url );
+                logger.info("unpacking test resources in jar: " + url);
                 JarFile jf = null;
-                try
-                {
-                    jf = new JarFile( urlFile );
+                try {
+                    jf = new JarFile(urlFile);
 
                     InputStream in = null;
                     OutputStream out = null;
 
-                    for ( Enumeration<JarEntry> en = jf.entries(); en.hasMoreElements(); )
-                    {
+                    for (Enumeration<JarEntry> en = jf.entries(); en.hasMoreElements(); ) {
                         JarEntry je = en.nextElement();
-                        final File zipEntryFile = new File( base, je.getName() );
-                        if ( !zipEntryFile.toPath().normalize().startsWith( base.toPath().normalize() ) )
-                        {
-                            throw new IOException( "Bad zip entry" );
+                        final File zipEntryFile = new File(base, je.getName());
+                        if (!zipEntryFile
+                                .toPath()
+                                .normalize()
+                                .startsWith(base.toPath().normalize())) {
+                            throw new IOException("Bad zip entry");
                         }
                         File target = zipEntryFile.getAbsoluteFile();
-                        if ( je.isDirectory() )
-                        {
+                        if (je.isDirectory()) {
                             target.mkdirs();
-                        }
-                        else
-                        {
+                        } else {
                             target.getParentFile().mkdirs();
 
-                            try
-                            {
-                                in = jf.getInputStream( je );
-                                out = new FileOutputStream( target );
+                            try {
+                                in = jf.getInputStream(je);
+                                out = new FileOutputStream(target);
 
-                                IOUtil.copy( in, out );
+                                IOUtil.copy(in, out);
 
                                 out.close();
                                 out = null;
 
                                 in.close();
                                 in = null;
-                            }
-                            finally
-                            {
-                                IOUtil.close( in );
-                                IOUtil.close( out );
+                            } finally {
+                                IOUtil.close(in);
+                                IOUtil.close(out);
                             }
                         }
                     }
 
-                    BASES.put( url, base );
-                }
-                finally
-                {
-                    if ( jf != null )
-                    {
-                        try
-                        {
+                    BASES.put(url, base);
+                } finally {
+                    if (jf != null) {
+                        try {
                             jf.close();
-                        }
-                        catch ( Exception e )
-                        {
+                        } catch (Exception e) {
                             // ignore
                         }
                     }
                 }
             }
 
-            return new File( base, path );
-        }
-        else
-        {
-            return new File( resource.toURI().normalize() );
+            return new File(base, path);
+        } else {
+            return new File(resource.toURI().normalize());
         }
     }
-
 }
