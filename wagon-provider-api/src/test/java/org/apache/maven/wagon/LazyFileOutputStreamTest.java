@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,45 +16,40 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon;
+
+import java.io.File;
 
 import junit.framework.TestCase;
 import org.codehaus.plexus.util.FileUtils;
-
-import java.io.File;
 
 /**
  * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a>
  *
  */
-public class LazyFileOutputStreamTest
-    extends TestCase
-{
+public class LazyFileOutputStreamTest extends TestCase {
 
-    public void testFileCreation()
-        throws Exception
-    {
-        File file = File.createTempFile( getName(), null );
+    public void testFileCreation() throws Exception {
+        File file = File.createTempFile(getName(), null);
 
         file.delete();
 
-        assertFalse( file.exists() );
+        assertFalse(file.exists());
 
-        LazyFileOutputStream stream = new LazyFileOutputStream( file );
+        LazyFileOutputStream stream = new LazyFileOutputStream(file);
 
-        assertFalse( file.exists() );
+        assertFalse(file.exists());
 
         String expected = "michal";
 
-        stream.write( expected.getBytes() );
+        stream.write(expected.getBytes());
 
         stream.close();
 
-        assertTrue( file.exists() );
+        assertTrue(file.exists());
 
-        String actual = FileUtils.fileRead( file );
+        String actual = FileUtils.fileRead(file);
 
-        assertEquals( expected, actual );
-
+        assertEquals(expected, actual);
     }
-
 }

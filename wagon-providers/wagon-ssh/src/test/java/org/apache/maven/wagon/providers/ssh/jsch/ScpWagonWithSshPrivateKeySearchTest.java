@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh.jsch;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,11 +16,10 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh.jsch;
 
 import java.io.File;
-import java.io.IOException;
 
-import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.StreamingWagonTestCase;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
@@ -34,75 +31,57 @@ import org.apache.maven.wagon.resource.Resource;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public class ScpWagonWithSshPrivateKeySearchTest
-    extends StreamingWagonTestCase
-{
-    protected String getProtocol()
-    {
+public class ScpWagonWithSshPrivateKeySearchTest extends StreamingWagonTestCase {
+    protected String getProtocol() {
         return "scp";
     }
 
-    public String getTestRepositoryUrl()
-    {
+    public String getTestRepositoryUrl() {
         return TestData.getTestRepositoryUrl(0);
     }
 
-    protected AuthenticationInfo getAuthInfo()
-    {
+    protected AuthenticationInfo getAuthInfo() {
         AuthenticationInfo authInfo = super.getAuthInfo();
 
-        authInfo.setUserName( TestData.getUserName() );
+        authInfo.setUserName(TestData.getUserName());
 
-        authInfo.setPassphrase( "" );
+        authInfo.setPassphrase("");
 
         return authInfo;
     }
 
-    protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
-    {
-        return new File( repository.getBasedir(), resource.getName() ).lastModified();
+    protected long getExpectedLastModifiedOnGet(Repository repository, Resource resource) {
+        return new File(repository.getBasedir(), resource.getName()).lastModified();
     }
 
-    public void testMissingPrivateKey()
-        throws Exception
-    {
-        File file = File.createTempFile( "wagon", "tmp" );
+    public void testMissingPrivateKey() throws Exception {
+        File file = File.createTempFile("wagon", "tmp");
         file.delete();
 
         AuthenticationInfo authInfo = new AuthenticationInfo();
-        authInfo.setPrivateKey( file.getAbsolutePath() );
+        authInfo.setPrivateKey(file.getAbsolutePath());
 
-        try
-        {
-            getWagon().connect( new Repository(), authInfo );
+        try {
+            getWagon().connect(new Repository(), authInfo);
             fail();
-        }
-        catch ( AuthenticationException e )
-        {
-            assertTrue( true );
+        } catch (AuthenticationException e) {
+            assertTrue(true);
         }
     }
 
-    public void testBadPrivateKey()
-        throws Exception
-    {
-        File file = File.createTempFile( "wagon", "tmp" );
+    public void testBadPrivateKey() throws Exception {
+        File file = File.createTempFile("wagon", "tmp");
         file.deleteOnExit();
 
         AuthenticationInfo authInfo = new AuthenticationInfo();
-        authInfo.setPrivateKey( file.getAbsolutePath() );
+        authInfo.setPrivateKey(file.getAbsolutePath());
 
-        try
-        {
-            getWagon().connect( new Repository(), authInfo );
+        try {
+            getWagon().connect(new Repository(), authInfo);
             fail();
-        }
-        catch ( AuthenticationException e )
-        {
-            assertTrue( true );
-        }
-        finally
-        {
+        } catch (AuthenticationException e) {
+            assertTrue(true);
+        } finally {
             file.delete();
         }
     }

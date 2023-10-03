@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,105 +16,80 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.codehaus.plexus.util.FileUtils;
+package org.apache.maven.wagon;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
+
+import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.codehaus.plexus.util.FileUtils;
 
 /**
  * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a>
  *
  * @deprecated
  */
-public final class WagonUtils
-{
-    private WagonUtils()
-    {
-    }
+public final class WagonUtils {
+    private WagonUtils() {}
 
-    public static String toString( String resource, Wagon wagon )
-        throws IOException, TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
+    public static String toString(String resource, Wagon wagon)
+            throws IOException, TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
 
         File file = null;
 
-        try
-        {
-            file = File.createTempFile( "wagon", "tmp" );
+        try {
+            file = File.createTempFile("wagon", "tmp");
 
-            wagon.get( resource, file );
+            wagon.get(resource, file);
 
-            return FileUtils.fileRead( file );
-        }
-        finally
-        {
-            if ( file != null )
-            {
+            return FileUtils.fileRead(file);
+        } finally {
+            if (file != null) {
                 boolean deleted = file.delete();
 
-                if ( !deleted )
-                {
+                if (!deleted) {
                     file.deleteOnExit();
                 }
             }
         }
-
     }
 
-
-    public static void putDirectory( File dir, Wagon wagon, boolean includeBasdir )
-        throws ResourceDoesNotExistException, TransferFailedException, AuthorizationException
-    {
+    public static void putDirectory(File dir, Wagon wagon, boolean includeBasdir)
+            throws ResourceDoesNotExistException, TransferFailedException, AuthorizationException {
 
         LinkedList queue = new LinkedList();
 
-        if ( includeBasdir )
-        {
-            queue.add( dir.getName() );
-        }
-        else
-        {
-            queue.add( "" );
+        if (includeBasdir) {
+            queue.add(dir.getName());
+        } else {
+            queue.add("");
         }
 
-        while ( !queue.isEmpty() )
-        {
+        while (!queue.isEmpty()) {
             String path = (String) queue.removeFirst();
 
-            File currentDir = new File( dir, path );
+            File currentDir = new File(dir, path);
 
             File[] files = currentDir.listFiles();
 
-            for ( int i = 0; i < files.length; i++ )
-            {
+            for (int i = 0; i < files.length; i++) {
                 File file = files[i];
 
                 String resource;
 
-                if ( path.length() > 0 )
-                {
+                if (path.length() > 0) {
                     resource = path + "/" + file.getName();
-                }
-                else
-                {
+                } else {
                     resource = file.getName();
                 }
 
-                if ( file.isDirectory() )
-                {
-                    queue.add( resource );
+                if (file.isDirectory()) {
+                    queue.add(resource);
+                } else {
+                    wagon.put(file, resource);
                 }
-                else
-                {
-                    wagon.put( file, resource );
-                }
-
             }
-
         }
-
     }
 }

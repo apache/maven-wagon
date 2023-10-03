@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon;
 
 /**
  * This exception is thrown when no Wagon provider is supporting protocol required by some repository
@@ -25,26 +24,19 @@ package org.apache.maven.wagon;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public class UnsupportedProtocolException
-    extends WagonException
-{
-
+public class UnsupportedProtocolException extends WagonException {
 
     /**
      * @see WagonException
      */
-    public UnsupportedProtocolException( final String message )
-    {
-        super( message );
+    public UnsupportedProtocolException(final String message) {
+        super(message);
     }
 
     /**
      * @see WagonException
      */
-    public UnsupportedProtocolException( final String message, final Throwable cause )
-    {
-        super( message, cause );
+    public UnsupportedProtocolException(final String message, final Throwable cause) {
+        super(message, cause);
     }
-
-
 }

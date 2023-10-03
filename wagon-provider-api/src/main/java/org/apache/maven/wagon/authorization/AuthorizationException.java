@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.authorization;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.authorization;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.authorization;
 
 import org.apache.maven.wagon.WagonException;
 
@@ -28,26 +27,19 @@ import org.apache.maven.wagon.WagonException;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public class AuthorizationException
-    extends WagonException
-{
-
+public class AuthorizationException extends WagonException {
 
     /**
      * @see org.apache.maven.wagon.WagonException
      */
-    public AuthorizationException( final String message )
-    {
-        super( message );
+    public AuthorizationException(final String message) {
+        super(message);
     }
 
     /**
      * @see org.apache.maven.wagon.WagonException
      */
-    public AuthorizationException( final String message, final Throwable cause )
-    {
-        super( message, cause );
+    public AuthorizationException(final String message, final Throwable cause) {
+        super(message, cause);
     }
-
-
 }

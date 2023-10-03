@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.http;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.http;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.http;
 
 import org.apache.maven.wagon.Wagon;
 
@@ -25,27 +24,21 @@ import org.apache.maven.wagon.Wagon;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public class LightweightHttpWagonWithPreemptiveAuthenticationTest
-    extends LightweightHttpWagonTest
-{
+public class LightweightHttpWagonWithPreemptiveAuthenticationTest extends LightweightHttpWagonTest {
     @Override
-    protected Wagon getWagon()
-        throws Exception
-    {
+    protected Wagon getWagon() throws Exception {
         LightweightHttpWagon wagon = (LightweightHttpWagon) super.getWagon();
-        wagon.setPreemptiveAuthentication( true );
+        wagon.setPreemptiveAuthentication(true);
         return wagon;
     }
 
     @Override
-    protected boolean supportPreemptiveAuthenticationGet()
-    {
+    protected boolean supportPreemptiveAuthenticationGet() {
         return true;
     }
 
     @Override
-    protected boolean supportPreemptiveAuthenticationPut()
-    {
+    protected boolean supportPreemptiveAuthenticationPut() {
         return true;
     }
 }

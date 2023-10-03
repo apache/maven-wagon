@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ftp;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.ftp;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ftp;
 
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPHTTPClient;
@@ -33,21 +32,17 @@ import org.slf4j.LoggerFactory;
  * role-hint="ftph"
  * instantiation-strategy="per-lookup"
  */
-public class FtpHttpWagon
-    extends FtpWagon
-{
+public class FtpHttpWagon extends FtpWagon {
 
-    private static final Logger LOG = LoggerFactory.getLogger( FtpHttpWagon.class );
+    private static final Logger LOG = LoggerFactory.getLogger(FtpHttpWagon.class);
 
     @Override
-    protected FTPClient createClient()
-    {
+    protected FTPClient createClient() {
         ProxyInfo proxyInfo = getProxyInfo();
-        
-        LOG.debug( "Creating FTP over HTTP proxy client. Proxy Host: [{}].", proxyInfo.getHost() );
 
-        return new FTPHTTPClient( proxyInfo.getHost(), proxyInfo.getPort(), proxyInfo.getUserName(), 
-                proxyInfo.getPassword() );
+        LOG.debug("Creating FTP over HTTP proxy client. Proxy Host: [{}].", proxyInfo.getHost());
+
+        return new FTPHTTPClient(
+                proxyInfo.getHost(), proxyInfo.getPort(), proxyInfo.getUserName(), proxyInfo.getPassword());
     }
-
 }

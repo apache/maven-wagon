@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -27,7 +26,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 
-
 /**
  * Variant of FileOutputStream which creates the file only when first portion
  * of data is written.
@@ -35,122 +33,87 @@ import java.nio.channels.FileChannel;
  * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a>
  *
  */
-public class LazyFileOutputStream
-    extends OutputStream
-{
+public class LazyFileOutputStream extends OutputStream {
 
     private File file;
 
     private FileOutputStream delegee;
 
-
-    public LazyFileOutputStream( String filename )
-    {
-        this.file = new File( filename );
+    public LazyFileOutputStream(String filename) {
+        this.file = new File(filename);
     }
 
-    public LazyFileOutputStream( File file )
-    {
+    public LazyFileOutputStream(File file) {
         this.file = file;
     }
 
-
-    public void close()
-        throws IOException
-    {
-        if ( delegee != null )
-        {
+    public void close() throws IOException {
+        if (delegee != null) {
             delegee.close();
         }
     }
 
-
-    public boolean equals( Object obj )
-    {
-        return delegee.equals( obj );
+    public boolean equals(Object obj) {
+        return delegee.equals(obj);
     }
 
-
-    public void flush()
-        throws IOException
-    {
-        if ( delegee != null )
-        {
+    public void flush() throws IOException {
+        if (delegee != null) {
             delegee.flush();
         }
     }
 
-
-    public FileChannel getChannel()
-    {
+    public FileChannel getChannel() {
         return delegee.getChannel();
     }
 
-
-    public FileDescriptor getFD()
-        throws IOException
-    {
+    public FileDescriptor getFD() throws IOException {
         return delegee.getFD();
     }
 
-    public int hashCode()
-    {
+    public int hashCode() {
         return delegee.hashCode();
     }
 
-
-    public String toString()
-    {
+    public String toString() {
         return delegee.toString();
     }
 
-    public void write( byte[] b )
-        throws IOException
-    {
-        if ( delegee == null )
-        {
+    public void write(byte[] b) throws IOException {
+        if (delegee == null) {
             initialize();
         }
 
-        delegee.write( b );
+        delegee.write(b);
     }
 
     /**
      * @see java.io.OutputStream#write(byte[], int, int)
      */
-    public void write( byte[] b, int off, int len )
-        throws IOException
-    {
-        if ( delegee == null )
-        {
+    public void write(byte[] b, int off, int len) throws IOException {
+        if (delegee == null) {
             initialize();
         }
 
-        delegee.write( b, off, len );
+        delegee.write(b, off, len);
     }
 
     /**
      * @param b
      * @throws java.io.IOException
      */
-    public void write( int b )
-        throws IOException
-    {
-        if ( delegee == null )
-        {
+    public void write(int b) throws IOException {
+        if (delegee == null) {
             initialize();
         }
 
-        delegee.write( b );
+        delegee.write(b);
     }
 
-
     /**
-     * 
+     *
      */
-    private void initialize()
-        throws FileNotFoundException
-    {
-        delegee = new FileOutputStream( file );
+    private void initialize() throws FileNotFoundException {
+        delegee = new FileOutputStream(file);
     }
 }

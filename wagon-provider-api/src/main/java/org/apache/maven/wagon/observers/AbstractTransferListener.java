@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.observers;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.observers;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.observers;
 
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferListener;
@@ -28,36 +27,22 @@ import org.apache.maven.wagon.events.TransferListener;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public abstract class AbstractTransferListener
-    implements TransferListener
-{
-    public void transferInitiated( TransferEvent transferEvent )
-    {
-    }
+public abstract class AbstractTransferListener implements TransferListener {
+    public void transferInitiated(TransferEvent transferEvent) {}
 
     /**
      * @see org.apache.maven.wagon.events.TransferListener#transferStarted(org.apache.maven.wagon.events.TransferEvent)
      */
-    public void transferStarted( TransferEvent transferEvent )
-    {
-    }
+    public void transferStarted(TransferEvent transferEvent) {}
 
     /**
      * @see org.apache.maven.wagon.events.TransferListener#transferProgress(org.apache.maven.wagon.events.TransferEvent,byte[],int)
      */
-    public void transferProgress( TransferEvent transferEvent, byte[] buffer, int length )
-    {
-    }
+    public void transferProgress(TransferEvent transferEvent, byte[] buffer, int length) {}
 
-    public void transferCompleted( TransferEvent transferEvent )
-    {
-    }
+    public void transferCompleted(TransferEvent transferEvent) {}
 
-    public void transferError( TransferEvent transferEvent )
-    {
-    }
+    public void transferError(TransferEvent transferEvent) {}
 
-    public void debug( String message )
-    {
-    }
+    public void debug(String message) {}
 }

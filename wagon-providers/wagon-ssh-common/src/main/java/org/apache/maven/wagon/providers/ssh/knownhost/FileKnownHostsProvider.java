@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh.knownhost;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh.knownhost;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -38,9 +37,7 @@ import org.codehaus.plexus.util.FileUtils;
  *    role-hint="file"
  *    instantiation-strategy="per-lookup"
  */
-public class FileKnownHostsProvider
-    extends StreamKnownHostsProvider
-{
+public class FileKnownHostsProvider extends StreamKnownHostsProvider {
     private final File file;
 
     /**
@@ -49,10 +46,8 @@ public class FileKnownHostsProvider
      * @param file the file that holds the known hosts, in the openssh format
      * @throws IOException
      */
-    public FileKnownHostsProvider( File file )
-        throws IOException
-    {
-        super( file.exists() ? (InputStream) new FileInputStream( file ) : new ByteArrayInputStream( "".getBytes() ) );
+    public FileKnownHostsProvider(File file) throws IOException {
+        super(file.exists() ? (InputStream) new FileInputStream(file) : new ByteArrayInputStream("".getBytes()));
         this.file = file;
     }
 
@@ -62,38 +57,29 @@ public class FileKnownHostsProvider
      * @throws IOException
      * @see #FileKnownHostsProvider(File)
      */
-    public FileKnownHostsProvider()
-        throws IOException
-    {
-        this( new File( System.getProperty( "user.home" ), ".ssh/known_hosts" ) );
+    public FileKnownHostsProvider() throws IOException {
+        this(new File(System.getProperty("user.home"), ".ssh/known_hosts"));
     }
 
-    public void storeKnownHosts( String contents )
-        throws IOException
-    {
-        Set<KnownHostEntry> hosts = this.loadKnownHosts( contents );
+    public void storeKnownHosts(String contents) throws IOException {
+        Set<KnownHostEntry> hosts = this.loadKnownHosts(contents);
 
-        if ( ! this.knownHosts.equals( hosts ) )
-        {
+        if (!this.knownHosts.equals(hosts)) {
             file.getParentFile().mkdirs();
-            FileUtils.fileWrite( file.getAbsolutePath(), contents );
+            FileUtils.fileWrite(file.getAbsolutePath(), contents);
             this.knownHosts = hosts;
         }
     }
 
-    public void addKnownHost( KnownHostEntry knownHostEntry )
-        throws IOException
-    {
-        if ( !this.knownHosts.contains( knownHostEntry ) )
-        {
+    public void addKnownHost(KnownHostEntry knownHostEntry) throws IOException {
+        if (!this.knownHosts.contains(knownHostEntry)) {
             String knownHost = knownHostEntry.getHostName() + " " + knownHostEntry.getKeyType() + " "
-                + knownHostEntry.getKeyValue() + "\n";
-            FileUtils.fileAppend( file.getAbsolutePath(), knownHost );
+                    + knownHostEntry.getKeyValue() + "\n";
+            FileUtils.fileAppend(file.getAbsolutePath(), knownHost);
         }
     }
 
-    public File getFile()
-    {
+    public File getFile() {
         return file;
     }
 }

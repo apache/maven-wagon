@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.scm;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.scm;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.scm;
 
 import org.apache.maven.scm.provider.ScmProvider;
 import org.apache.maven.scm.provider.cvslib.cvsexe.CvsExeScmProvider;
@@ -28,60 +27,45 @@ import org.apache.maven.scm.provider.cvslib.cvsexe.CvsExeScmProvider;
  * @author <a href="carlos@apache.org">Carlos Sanchez</a>
  *
  */
-public class ScmCvsExeWagonTest
-    extends AbstractScmCvsWagonTest
-{
+public class ScmCvsExeWagonTest extends AbstractScmCvsWagonTest {
 
     @Override
-    protected void setUp()
-        throws Exception
-    {
+    protected void setUp() throws Exception {
         assumeHaveCvsBinary();
-        if ( !testSkipped )
-        {
+        if (!testSkipped) {
             super.setUp();
         }
     }
 
-    protected ScmProvider getScmProvider()
-    {
+    protected ScmProvider getScmProvider() {
         return new CvsExeScmProvider();
     }
 
     @Override
-    public void testWagonGetFileList()
-        throws Exception
-    {
+    public void testWagonGetFileList() throws Exception {
         // cvs rls is rare
     }
 
     @Override
-    public void testWagonResourceExists()
-        throws Exception
-    {
+    public void testWagonResourceExists() throws Exception {
         // cvs rls is rare
     }
 
     @Override
-    public void testWagonResourceNotExists()
-        throws Exception
-    {
+    public void testWagonResourceNotExists() throws Exception {
         // cvs rls is rare
     }
 
     @Override
-    protected boolean supportsGetIfNewer()
-    {
+    protected boolean supportsGetIfNewer() {
         return false;
     }
 
     /** Optionally set the testSkipped flag */
-    protected void assumeHaveCvsBinary()
-    {
-        if ( !isSystemCmd( CVS_COMMAND_LINE ) )
-        {
+    protected void assumeHaveCvsBinary() {
+        if (!isSystemCmd(CVS_COMMAND_LINE)) {
             testSkipped = true;
-            System.err.println( "'" + CVS_COMMAND_LINE + "' is not a system command. Ignored " + getName() + "." );
+            System.err.println("'" + CVS_COMMAND_LINE + "' is not a system command. Ignored " + getName() + ".");
         }
     }
 

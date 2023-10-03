@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,13 @@ package org.apache.maven.wagon.providers.ssh;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.mina.core.session.IoSession;
 import org.apache.sshd.SshServer;
@@ -37,17 +42,10 @@ import org.apache.sshd.server.session.SessionFactory;
 import org.apache.sshd.server.shell.ProcessShellFactory;
 import org.codehaus.plexus.util.FileUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * @author Olivier Lamy
  */
-public class SshServerEmbedded
-{
+public class SshServerEmbedded {
     private String wagonProtocol;
 
     private int port;
@@ -62,147 +60,122 @@ public class SshServerEmbedded
 
     private boolean keyAuthz;
 
-
     /**
      * @param wagonProtocol    scp scpexe
      * @param sshKeysResources paths in the classlaoder with ssh keys
      */
-    public SshServerEmbedded( String wagonProtocol, List<String> sshKeysResources, boolean keyAuthz )
-    {
+    public SshServerEmbedded(String wagonProtocol, List<String> sshKeysResources, boolean keyAuthz) {
         this.wagonProtocol = wagonProtocol;
 
         this.sshKeysResources = sshKeysResources;
 
         this.sshd = SshServer.setUpDefaultServer();
 
-        //this.sshd.setKeyExchangeFactories(  );
+        // this.sshd.setKeyExchangeFactories(  );
 
         this.keyAuthz = keyAuthz;
 
-        publickeyAuthenticator = new TestPublickeyAuthenticator( this.keyAuthz );
+        publickeyAuthenticator = new TestPublickeyAuthenticator(this.keyAuthz);
     }
 
     /**
      * @return random port used
      */
-    public int start()
-        throws IOException
-    {
-        sshd.setPort( 0 );
+    public int start() throws IOException {
+        sshd.setPort(0);
 
-        sshd.setUserAuthFactories( Arrays.asList( new UserAuthPublicKey.Factory(), new UserAuthPassword.Factory() ) );
+        sshd.setUserAuthFactories(Arrays.asList(new UserAuthPublicKey.Factory(), new UserAuthPassword.Factory()));
 
-        sshd.setPublickeyAuthenticator( this.publickeyAuthenticator );
+        sshd.setPublickeyAuthenticator(this.publickeyAuthenticator);
 
-        sshd.setPasswordAuthenticator( this.passwordAuthenticator );
+        sshd.setPasswordAuthenticator(this.passwordAuthenticator);
 
-        sshd.setUserAuthFactories( Arrays.asList( new UserAuthPublicKey.Factory(), new UserAuthPassword.Factory() ) );
+        sshd.setUserAuthFactories(Arrays.asList(new UserAuthPublicKey.Factory(), new UserAuthPassword.Factory()));
 
-        //ResourceKeyPairProvider resourceKeyPairProvider =
+        // ResourceKeyPairProvider resourceKeyPairProvider =
         //    new ResourceKeyPairProvider( sshKeysResources.toArray( new String[sshKeysResources.size()] ) );
 
-        File path = new File( "target/keys" );
+        File path = new File("target/keys");
         path.mkdirs();
-        path = new File( path, "simple.key" );
+        path = new File(path, "simple.key");
         path.delete();
 
         PEMGeneratorHostKeyProvider provider = new PEMGeneratorHostKeyProvider();
-        provider.setAlgorithm( "RSA" );
-        provider.setKeySize( 1024 );
-        provider.setPath( path.getPath() );
+        provider.setAlgorithm("RSA");
+        provider.setKeySize(1024);
+        provider.setPath(path.getPath());
 
-        sshd.setKeyPairProvider( provider );
-        SessionFactory sessionFactory = new SessionFactory()
-        {
+        sshd.setKeyPairProvider(provider);
+        SessionFactory sessionFactory = new SessionFactory() {
             @Override
-            protected AbstractSession doCreateSession( IoSession ioSession )
-                throws Exception
-            {
-                return super.doCreateSession( ioSession );
+            protected AbstractSession doCreateSession(IoSession ioSession) throws Exception {
+                return super.doCreateSession(ioSession);
             }
         };
-        sshd.setSessionFactory( sessionFactory );
+        sshd.setSessionFactory(sessionFactory);
 
-        //sshd.setFileSystemFactory(  );
+        // sshd.setFileSystemFactory(  );
 
-        final ProcessShellFactory processShellFactory =
-            new ProcessShellFactory( new String[]{ "/bin/sh", "-i", "-l" } );
-        sshd.setShellFactory( processShellFactory );
+        final ProcessShellFactory processShellFactory = new ProcessShellFactory(new String[] {"/bin/sh", "-i", "-l"});
+        sshd.setShellFactory(processShellFactory);
 
-        CommandFactory delegateCommandFactory = new CommandFactory()
-        {
-            public Command createCommand( String command )
-            {
-                return new ShellCommand( command );
+        CommandFactory delegateCommandFactory = new CommandFactory() {
+            public Command createCommand(String command) {
+                return new ShellCommand(command);
             }
         };
 
-        ScpCommandFactory commandFactory = new ScpCommandFactory( delegateCommandFactory );
-        sshd.setCommandFactory( commandFactory );
+        ScpCommandFactory commandFactory = new ScpCommandFactory(delegateCommandFactory);
+        sshd.setCommandFactory(commandFactory);
 
-        FileSystemFactory fileSystemFactory = new FileSystemFactory()
-        {
-            public FileSystemView createFileSystemView( Session session )
-                throws IOException
-            {
-                return new FileSystemView()
-                {
-                    public SshFile getFile( String file )
-                    {
-                        file = file.replace( "\\", "" );
-                        file = file.replace( "\"", "" );
-                        File f = new File( FileUtils.normalize( file ) );
+        FileSystemFactory fileSystemFactory = new FileSystemFactory() {
+            public FileSystemView createFileSystemView(Session session) throws IOException {
+                return new FileSystemView() {
+                    public SshFile getFile(String file) {
+                        file = file.replace("\\", "");
+                        file = file.replace("\"", "");
+                        File f = new File(FileUtils.normalize(file));
 
-                        return new SshServerEmbedded.TestSshFile( f.getAbsolutePath(), f,
-                                                                  System.getProperty( "user.name" ) );
+                        return new SshServerEmbedded.TestSshFile(
+                                f.getAbsolutePath(), f, System.getProperty("user.name"));
                     }
 
-                    public SshFile getFile( SshFile baseDir, String file )
-                    {
-                        file = file.replace( "\\", "" );
-                        file = file.replace( "\"", "" );
-                        File f = new File( FileUtils.normalize( file ) );
-                        return new SshServerEmbedded.TestSshFile( f.getAbsolutePath(), f,
-                                                                  System.getProperty( "user.name" ) );
+                    public SshFile getFile(SshFile baseDir, String file) {
+                        file = file.replace("\\", "");
+                        file = file.replace("\"", "");
+                        File f = new File(FileUtils.normalize(file));
+                        return new SshServerEmbedded.TestSshFile(
+                                f.getAbsolutePath(), f, System.getProperty("user.name"));
                     }
                 };
             }
         };
-        sshd.setNioWorkers( 0 );
-        //sshd.setScheduledExecutorService(  );
-        sshd.setFileSystemFactory( fileSystemFactory );
+        sshd.setNioWorkers(0);
+        // sshd.setScheduledExecutorService(  );
+        sshd.setFileSystemFactory(fileSystemFactory);
         sshd.start();
         this.port = sshd.getPort();
         return this.port;
     }
 
-
-    public void stop()
-        throws InterruptedException
-    {
-        sshd.stop( Boolean.getBoolean( "sshd.stopImmediatly" ) );
+    public void stop() throws InterruptedException {
+        sshd.stop(Boolean.getBoolean("sshd.stopImmediatly"));
     }
 
-    public int getPort()
-    {
+    public int getPort() {
         return port;
     }
 
-    public PasswordAuthenticator getPasswordAuthenticator()
-    {
+    public PasswordAuthenticator getPasswordAuthenticator() {
         return passwordAuthenticator;
     }
     /**
-     * 
+     *
      */
-    public static class TestSshFile
-        extends NativeSshFile
-    {
-        public TestSshFile( String fileName, File file, String userName )
-        {
+    public static class TestSshFile extends NativeSshFile {
+        public TestSshFile(String fileName, File file, String userName) {
 
-            super( FileUtils.normalize( fileName ), file, userName );
+            super(FileUtils.normalize(fileName), file, userName);
         }
     }
-
 }

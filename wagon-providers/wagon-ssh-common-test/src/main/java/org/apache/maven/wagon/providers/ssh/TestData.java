@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,68 +16,56 @@ package org.apache.maven.wagon.providers.ssh;
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import org.codehaus.plexus.util.FileUtils;
+package org.apache.maven.wagon.providers.ssh;
 
 import java.io.File;
 import java.io.IOException;
+
+import org.codehaus.plexus.util.FileUtils;
 
 /**
  * @author <a href="michal@codehaus.org">Michal Maczka</a>
  *
  */
-public class TestData
-{
-    public static String getTempDirectory()
-    {
-        return System.getProperty( "java.io.tmpdir", "target" );
+public class TestData {
+    public static String getTempDirectory() {
+        return System.getProperty("java.io.tmpdir", "target");
     }
 
-    public static String getTestRepositoryUrl( int port )
-    {
+    public static String getTestRepositoryUrl(int port) {
         return "scp://" + getHostname() + ":" + port + getRepoPath();
     }
 
-    public static String getTestRepositoryUrl()
-    {
+    public static String getTestRepositoryUrl() {
         return "scp://" + getHostname() + getRepoPath();
     }
 
-    public static String getRepoPath()
-    {
+    public static String getRepoPath() {
         return getTempDirectory() + "/wagon-ssh-test/" + getUserName();
     }
 
-    public static String getUserName()
-    {
-        return System.getProperty( "test.user", System.getProperty( "user.name" ) );
+    public static String getUserName() {
+        return System.getProperty("test.user", System.getProperty("user.name"));
     }
 
-    public static String getUserPassword()
-    {
+    public static String getUserPassword() {
         return "comeonFrance!:-)";
     }
 
-    public static File getPrivateKey()
-    {
-        return new File( System.getProperty( "sshKeysPath", "src/test/ssh-keys" ), "id_rsa" );
+    public static File getPrivateKey() {
+        return new File(System.getProperty("sshKeysPath", "src/test/ssh-keys"), "id_rsa");
     }
 
-    public static String getHostname()
-    {
-        return System.getProperty( "test.host", "localhost" );
+    public static String getHostname() {
+        return System.getProperty("test.host", "localhost");
     }
 
-    public static String getHostKey()
-    {
-        try
-        {
-            return FileUtils.fileRead(
-                new File( System.getProperty( "sshKeysPath" ), "id_rsa.pub" ).getPath() ).substring(
-                "ssh-rsa".length() ).trim();
-        }
-        catch ( IOException e )
-        {
+    public static String getHostKey() {
+        try {
+            return FileUtils.fileRead(new File(System.getProperty("sshKeysPath"), "id_rsa.pub").getPath())
+                    .substring("ssh-rsa".length())
+                    .trim();
+        } catch (IOException e) {
             return null;
         }
     }

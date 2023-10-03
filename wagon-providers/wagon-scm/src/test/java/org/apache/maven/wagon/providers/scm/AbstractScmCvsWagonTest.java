@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.scm;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.scm;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.scm;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,41 +25,33 @@ import org.codehaus.plexus.util.FileUtils;
 
 /**
  * Test for ScmWagon using CVS as underlying SCM
- * 
+ *
  * @author <a href="brett@apache.org">Brett Porter</a>
  *
  */
-public abstract class AbstractScmCvsWagonTest
-    extends AbstractScmWagonTest
-{
+public abstract class AbstractScmCvsWagonTest extends AbstractScmWagonTest {
     private String repository;
 
     @Override
-    protected void setUp()
-        throws Exception
-    {
+    protected void setUp() throws Exception {
         super.setUp();
 
-        File origRepo = getTestFile( "target/test-classes/test-repo-cvs" );
+        File origRepo = getTestFile("target/test-classes/test-repo-cvs");
 
-        File testRepo = getTestFile( "target/test-classes/test-repo-cvs-test" );
+        File testRepo = getTestFile("target/test-classes/test-repo-cvs-test");
 
-        FileUtils.deleteDirectory( testRepo );
+        FileUtils.deleteDirectory(testRepo);
 
-        FileUtils.copyDirectoryStructure( origRepo, testRepo );
+        FileUtils.copyDirectoryStructure(origRepo, testRepo);
 
         repository = "scm:cvs|local|" + testRepo.getAbsolutePath() + "|repository";
-
     }
 
-    protected String getScmId()
-    {
+    protected String getScmId() {
         return "cvs";
     }
 
-    protected String getTestRepositoryUrl()
-        throws IOException
-    {
+    protected String getTestRepositoryUrl() throws IOException {
         return repository;
     }
 }

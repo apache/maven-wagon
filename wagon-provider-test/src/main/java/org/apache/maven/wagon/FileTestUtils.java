@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,101 +16,83 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import org.codehaus.plexus.util.FileUtils;
+package org.apache.maven.wagon;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 
+import org.codehaus.plexus.util.FileUtils;
+
 /**
  * @author <a href="michal@apache.org>Michal Maczka</a>
  *
  */
-public class FileTestUtils
-{
+public class FileTestUtils {
 
-    public static File createUniqueFile( final String dirname, final String name )
-        throws IOException
-    {
+    public static File createUniqueFile(final String dirname, final String name) throws IOException {
 
-        final File dir = createDir( dirname );
+        final File dir = createDir(dirname);
 
-        final File retValue = new File( dir, name );
+        final File retValue = new File(dir, name);
 
         return retValue;
-
     }
 
-
-    public static File createUniqueDir( final String name )
-        throws IOException
-    {
+    public static File createUniqueDir(final String name) throws IOException {
 
         String filename = name + System.currentTimeMillis();
 
-        return createDir( filename );
-
+        return createDir(filename);
     }
 
-
-    public static File createDir( final String name )
-        throws IOException
-    {
+    public static File createDir(final String name) throws IOException {
 
         final File baseDirectory = getTestOutputDir();
 
-        final File retValue = new File( baseDirectory, name );
-       
-        if ( retValue.exists() )
-        {
-            FileUtils.cleanDirectory( retValue );
+        final File retValue = new File(baseDirectory, name);
+
+        if (retValue.exists()) {
+            FileUtils.cleanDirectory(retValue);
             return retValue;
         }
-        
+
         retValue.mkdirs();
 
-        if ( !retValue.exists() )
-        {
-            throw new IOException( "Unable to create the directory for testdata " + retValue.getPath() );
+        if (!retValue.exists()) {
+            throw new IOException("Unable to create the directory for testdata " + retValue.getPath());
         }
 
         return retValue;
     }
 
-    public static File getTestOutputDir()
-    {
-        final String tempDir = System.getProperty( "java.io.tmpdir" );
+    public static File getTestOutputDir() {
+        final String tempDir = System.getProperty("java.io.tmpdir");
 
-        final String baseDir = System.getProperty( "basedir", tempDir );
+        final String baseDir = System.getProperty("basedir", tempDir);
 
-        final File base = new File( baseDir ).getAbsoluteFile();
+        final File base = new File(baseDir).getAbsoluteFile();
 
         final String pathname = base + File.separator + "target" + File.separator + "test-output";
 
-        final File retValue = new File( pathname );
+        final File retValue = new File(pathname);
 
         retValue.mkdirs();
 
         return retValue;
     }
 
-    public static File generateFile( String file, String content )
-        throws IOException
-    {
-        File f = new File( file );
+    public static File generateFile(String file, String content) throws IOException {
+        File f = new File(file);
 
         f.getParentFile().mkdirs();
 
-        Writer writer = new FileWriter( f );
+        Writer writer = new FileWriter(f);
 
-        try
-        {
-            writer.write( content );
-        }
-        finally
-        {
+        try {
+            writer.write(content);
+        } finally {
             writer.close();
         }
 

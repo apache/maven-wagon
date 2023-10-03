@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,10 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon;
+
+import java.io.File;
+import java.util.List;
 
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
@@ -28,14 +30,10 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.proxy.ProxyInfoProvider;
 import org.apache.maven.wagon.repository.Repository;
 
-import java.io.File;
-import java.util.List;
-
 /**
- * 
+ *
  */
-public interface Wagon
-{
+public interface Wagon {
     String ROLE = Wagon.class.getName();
 
     /**
@@ -63,8 +61,8 @@ public interface Wagon
      * @throws ResourceDoesNotExistException
      * @throws AuthorizationException
      */
-    void get( String resourceName, File destination )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
+    void get(String resourceName, File destination)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
 
     /**
      * Downloads specified resource from the repository
@@ -81,8 +79,8 @@ public interface Wagon
      * @throws ResourceDoesNotExistException
      * @throws AuthorizationException
      */
-    boolean getIfNewer( String resourceName, File destination, long timestamp )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
+    boolean getIfNewer(String resourceName, File destination, long timestamp)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
 
     /**
      * Copy a file from local system to remote
@@ -93,8 +91,8 @@ public interface Wagon
      * @throws ResourceDoesNotExistException
      * @throws AuthorizationException
      */
-    void put( File source, String destination )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
+    void put(File source, String destination)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
 
     /**
      * Copy a directory from local system to remote
@@ -105,8 +103,8 @@ public interface Wagon
      * @throws ResourceDoesNotExistException
      * @throws AuthorizationException
      */
-    void putDirectory( File sourceDirectory, String destinationDirectory )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
+    void putDirectory(File sourceDirectory, String destinationDirectory)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
 
     /**
      * Check if a remote resource exists
@@ -116,8 +114,7 @@ public interface Wagon
      * @throws TransferFailedException if there's an error trying to access the remote side
      * @throws AuthorizationException  if not authorized to verify the existence of the resource
      */
-    boolean resourceExists( String resourceName )
-        throws TransferFailedException, AuthorizationException;
+    boolean resourceExists(String resourceName) throws TransferFailedException, AuthorizationException;
 
     /**
      * <p/>
@@ -143,8 +140,8 @@ public interface Wagon
      * @throws ResourceDoesNotExistException if destinationDirectory does not exist or is not a directory
      * @throws AuthorizationException        if not authorized to list the contents of the directory
      */
-    List<String> getFileList( String destinationDirectory )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
+    List<String> getFileList(String destinationDirectory)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
 
     /**
      * Flag indicating if this wagon supports directory copy operations.
@@ -167,8 +164,7 @@ public interface Wagon
      * @throws org.apache.maven.wagon.authentication.AuthenticationException
      *                             if the credentials for connecting are not sufficient
      */
-    void connect( Repository source )
-        throws ConnectionException, AuthenticationException;
+    void connect(Repository source) throws ConnectionException, AuthenticationException;
 
     /**
      * Initiate the connection to the repository.
@@ -178,8 +174,7 @@ public interface Wagon
      * @throws org.apache.maven.wagon.authentication.AuthenticationException
      *                             if the credentials for connecting are not sufficient
      */
-    void connect( Repository source, ProxyInfo proxyInfo )
-        throws ConnectionException, AuthenticationException;
+    void connect(Repository source, ProxyInfo proxyInfo) throws ConnectionException, AuthenticationException;
 
     /**
      * Initiate the connection to the repository.
@@ -190,8 +185,8 @@ public interface Wagon
      * @throws org.apache.maven.wagon.authentication.AuthenticationException
      *                             if the credentials for connecting are not sufficient
      */
-    void connect( Repository source, ProxyInfoProvider proxyInfoProvider )
-        throws ConnectionException, AuthenticationException;
+    void connect(Repository source, ProxyInfoProvider proxyInfoProvider)
+            throws ConnectionException, AuthenticationException;
 
     /**
      * Initiate the connection to the repository.
@@ -202,8 +197,8 @@ public interface Wagon
      * @throws org.apache.maven.wagon.authentication.AuthenticationException
      *                             if the credentials for connecting are not sufficient
      */
-    void connect( Repository source, AuthenticationInfo authenticationInfo )
-        throws ConnectionException, AuthenticationException;
+    void connect(Repository source, AuthenticationInfo authenticationInfo)
+            throws ConnectionException, AuthenticationException;
 
     /**
      * Initiate the connection to the repository.
@@ -215,8 +210,8 @@ public interface Wagon
      * @throws org.apache.maven.wagon.authentication.AuthenticationException
      *                             if the credentials for connecting are not sufficient
      */
-    void connect( Repository source, AuthenticationInfo authenticationInfo, ProxyInfo proxyInfo )
-        throws ConnectionException, AuthenticationException;
+    void connect(Repository source, AuthenticationInfo authenticationInfo, ProxyInfo proxyInfo)
+            throws ConnectionException, AuthenticationException;
 
     /**
      * Initiate the connection to the repository.
@@ -228,8 +223,8 @@ public interface Wagon
      * @throws org.apache.maven.wagon.authentication.AuthenticationException
      *                             if the credentials for connecting are not sufficient
      */
-    void connect( Repository source, AuthenticationInfo authenticationInfo, ProxyInfoProvider proxyInfoProvider )
-        throws ConnectionException, AuthenticationException;
+    void connect(Repository source, AuthenticationInfo authenticationInfo, ProxyInfoProvider proxyInfoProvider)
+            throws ConnectionException, AuthenticationException;
 
     /**
      * Initiate the connection to the repository.
@@ -241,22 +236,20 @@ public interface Wagon
      * @deprecated connect using the {@link #connect(org.apache.maven.wagon.repository.Repository)} or related methods
      *             - this is an internal method
      */
-    void openConnection()
-        throws ConnectionException, AuthenticationException;
+    void openConnection() throws ConnectionException, AuthenticationException;
 
     /**
      * Disconnect from the repository.
      *
      * @throws ConnectionException if there is a problem disconnecting
      */
-    void disconnect()
-        throws ConnectionException;
-    
+    void disconnect() throws ConnectionException;
+
     /**
      * Set the connection timeout limit in milliseconds
      */
-    void setTimeout( int timeoutValue );
-    
+    void setTimeout(int timeoutValue);
+
     /**
      * Get the connection timeout limit in milliseconds
      */
@@ -266,7 +259,7 @@ public interface Wagon
      * Set the read timeout limit in milliseconds
      * @since 2.2
      */
-    void setReadTimeout( int timeoutValue );
+    void setReadTimeout(int timeoutValue);
 
     /**
      * Get the read timeout limit in milliseconds
@@ -278,23 +271,23 @@ public interface Wagon
     //  Session listener
     // ----------------------------------------------------------------------
 
-    void addSessionListener( SessionListener listener );
+    void addSessionListener(SessionListener listener);
 
-    void removeSessionListener( SessionListener listener );
+    void removeSessionListener(SessionListener listener);
 
-    boolean hasSessionListener( SessionListener listener );
+    boolean hasSessionListener(SessionListener listener);
 
     // ----------------------------------------------------------------------
     // Transfer listener
     // ----------------------------------------------------------------------
 
-    void addTransferListener( TransferListener listener );
+    void addTransferListener(TransferListener listener);
 
-    void removeTransferListener( TransferListener listener );
+    void removeTransferListener(TransferListener listener);
 
-    boolean hasTransferListener( TransferListener listener );
+    boolean hasTransferListener(TransferListener listener);
 
     boolean isInteractive();
 
-    void setInteractive( boolean interactive );
+    void setInteractive(boolean interactive);
 }

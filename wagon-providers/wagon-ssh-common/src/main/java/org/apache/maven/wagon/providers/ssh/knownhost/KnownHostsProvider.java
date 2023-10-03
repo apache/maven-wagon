@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh.knownhost;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh.knownhost;
 
 import java.io.IOException;
 
@@ -27,17 +26,14 @@ import java.io.IOException;
  * @author Juan F. Codagnone
  * @since Sep 12, 2005
  */
-public interface KnownHostsProvider
-{
+public interface KnownHostsProvider {
     String ROLE = KnownHostsProvider.class.getName();
 
-    void storeKnownHosts( String contents )
-        throws IOException;
+    void storeKnownHosts(String contents) throws IOException;
 
-    void addKnownHost( KnownHostEntry knownHost )
-        throws IOException;
+    void addKnownHost(KnownHostEntry knownHost) throws IOException;
 
-    void setHostKeyChecking( String hostKeyChecking );
+    void setHostKeyChecking(String hostKeyChecking);
 
     String getHostKeyChecking();
 

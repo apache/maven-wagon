@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.repository;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.repository;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.repository;
 
 import junit.framework.TestCase;
 
@@ -26,41 +25,32 @@ import junit.framework.TestCase;
  *
  * @todo test defaults
  */
-public class RepositoryPermissionsTest
-    extends TestCase
-{
-    public RepositoryPermissionsTest( final String name )
-    {
-        super( name );
+public class RepositoryPermissionsTest extends TestCase {
+    public RepositoryPermissionsTest(final String name) {
+        super(name);
     }
 
-    public void setUp()
-        throws Exception
-    {
+    public void setUp() throws Exception {
         super.setUp();
     }
 
-    public void tearDown()
-        throws Exception
-    {
+    public void tearDown() throws Exception {
         super.tearDown();
     }
 
-    public void testAuthenticationInfoProperties()
-    {
+    public void testAuthenticationInfoProperties() {
         final RepositoryPermissions repositoryPermissions = new RepositoryPermissions();
 
-        repositoryPermissions.setDirectoryMode( "directoryMode" );
+        repositoryPermissions.setDirectoryMode("directoryMode");
 
-        assertEquals( "directoryMode", repositoryPermissions.getDirectoryMode() );
+        assertEquals("directoryMode", repositoryPermissions.getDirectoryMode());
 
-        repositoryPermissions.setFileMode( "fileMode" );
+        repositoryPermissions.setFileMode("fileMode");
 
-        assertEquals( "fileMode", repositoryPermissions.getFileMode() );
+        assertEquals("fileMode", repositoryPermissions.getFileMode());
 
-        repositoryPermissions.setGroup( "group" );
+        repositoryPermissions.setGroup("group");
 
-        assertEquals( "group", repositoryPermissions.getGroup() );
-
+        assertEquals("group", repositoryPermissions.getGroup());
     }
 }

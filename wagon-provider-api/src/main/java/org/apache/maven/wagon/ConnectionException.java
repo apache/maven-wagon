@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon;
 
 /**
  * The exception is thrown when a connection
@@ -26,25 +25,19 @@ package org.apache.maven.wagon;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public class ConnectionException
-    extends WagonException
-{
-
+public class ConnectionException extends WagonException {
 
     /**
      * @see org.apache.maven.wagon.WagonException
      */
-    public ConnectionException( final String message )
-    {
-        super( message );
+    public ConnectionException(final String message) {
+        super(message);
     }
 
     /**
      * @see org.apache.maven.wagon.WagonException
      */
-    public ConnectionException( final String message, final Throwable cause )
-    {
-        super( message, cause );
+    public ConnectionException(final String message, final Throwable cause) {
+        super(message, cause);
     }
-
 }

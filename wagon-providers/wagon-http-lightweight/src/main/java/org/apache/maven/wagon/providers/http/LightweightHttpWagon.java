@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.http;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,20 +16,7 @@ package org.apache.maven.wagon.providers.http;
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import org.apache.maven.wagon.ConnectionException;
-import org.apache.maven.wagon.InputData;
-import org.apache.maven.wagon.OutputData;
-import org.apache.maven.wagon.ResourceDoesNotExistException;
-import org.apache.maven.wagon.StreamWagon;
-import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.authentication.AuthenticationException;
-import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.apache.maven.wagon.events.TransferEvent;
-import org.apache.maven.wagon.proxy.ProxyInfo;
-import org.apache.maven.wagon.resource.Resource;
-import org.apache.maven.wagon.shared.http.EncodingUtil;
-import org.codehaus.plexus.util.Base64;
+package org.apache.maven.wagon.providers.http;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -53,6 +38,20 @@ import java.util.regex.Pattern;
 import java.util.zip.DeflaterInputStream;
 import java.util.zip.GZIPInputStream;
 
+import org.apache.maven.wagon.ConnectionException;
+import org.apache.maven.wagon.InputData;
+import org.apache.maven.wagon.OutputData;
+import org.apache.maven.wagon.ResourceDoesNotExistException;
+import org.apache.maven.wagon.StreamWagon;
+import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.authentication.AuthenticationException;
+import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.apache.maven.wagon.events.TransferEvent;
+import org.apache.maven.wagon.proxy.ProxyInfo;
+import org.apache.maven.wagon.resource.Resource;
+import org.apache.maven.wagon.shared.http.EncodingUtil;
+import org.codehaus.plexus.util.Base64;
+
 import static java.lang.Integer.parseInt;
 import static org.apache.maven.wagon.shared.http.HttpMessageUtils.UNKNOWN_STATUS_CODE;
 import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatAuthorizationMessage;
@@ -66,17 +65,15 @@ import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatTransfer
  * @plexus.component role="org.apache.maven.wagon.Wagon" role-hint="http" instantiation-strategy="per-lookup"
  * @see HttpURLConnection
  */
-public class LightweightHttpWagon
-    extends StreamWagon
-{
+public class LightweightHttpWagon extends StreamWagon {
     private boolean preemptiveAuthentication;
 
     private HttpURLConnection putConnection;
 
     private Proxy proxy = Proxy.NO_PROXY;
 
-    private static final Pattern IOEXCEPTION_MESSAGE_PATTERN = Pattern.compile( "Server returned HTTP response code: "
-            + "(\\d\\d\\d) for URL: (.*)" );
+    private static final Pattern IOEXCEPTION_MESSAGE_PATTERN =
+            Pattern.compile("Server returned HTTP response code: " + "(\\d\\d\\d) for URL: (.*)");
 
     public static final int MAX_REDIRECTS = 10;
 
@@ -103,305 +100,246 @@ public class LightweightHttpWagon
      * @param resource the resource to extract the relative path from.
      * @return the complete URL
      */
-    private String buildUrl( Resource resource )
-    {
-        return EncodingUtil.encodeURLToString( getRepository().getUrl(), resource.getName() );
+    private String buildUrl(Resource resource) {
+        return EncodingUtil.encodeURLToString(getRepository().getUrl(), resource.getName());
     }
 
-    public void fillInputData( InputData inputData )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
+    public void fillInputData(InputData inputData)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
         Resource resource = inputData.getResource();
 
-        String visitingUrl = buildUrl( resource );
+        String visitingUrl = buildUrl(resource);
 
         List<String> visitedUrls = new ArrayList<>();
 
-        for ( int redirectCount = 0; redirectCount < MAX_REDIRECTS; redirectCount++ )
-        {
-            if ( visitedUrls.contains( visitingUrl ) )
-            {
+        for (int redirectCount = 0; redirectCount < MAX_REDIRECTS; redirectCount++) {
+            if (visitedUrls.contains(visitingUrl)) {
                 // TODO add a test for this message
-                throw new TransferFailedException( "Cyclic http redirect detected. Aborting! " + visitingUrl );
+                throw new TransferFailedException("Cyclic http redirect detected. Aborting! " + visitingUrl);
             }
-            visitedUrls.add( visitingUrl );
+            visitedUrls.add(visitingUrl);
 
             URL url = null;
-            try
-            {
-                url = new URL( visitingUrl );
-            }
-            catch ( MalformedURLException e )
-            {
+            try {
+                url = new URL(visitingUrl);
+            } catch (MalformedURLException e) {
                 // TODO add test for this
-                throw new ResourceDoesNotExistException( "Invalid repository URL: " + e.getMessage(), e );
+                throw new ResourceDoesNotExistException("Invalid repository URL: " + e.getMessage(), e);
             }
 
             HttpURLConnection urlConnection = null;
 
-            try
-            {
-                urlConnection = ( HttpURLConnection ) url.openConnection( this.proxy );
-            }
-            catch ( IOException e )
-            {
+            try {
+                urlConnection = (HttpURLConnection) url.openConnection(this.proxy);
+            } catch (IOException e) {
                 // TODO: add test for this
-                String message = formatTransferFailedMessage( visitingUrl, UNKNOWN_STATUS_CODE,
-                        null, getProxyInfo() );
+                String message = formatTransferFailedMessage(visitingUrl, UNKNOWN_STATUS_CODE, null, getProxyInfo());
                 // TODO include e.getMessage appended to main message?
-                throw new TransferFailedException( message, e );
+                throw new TransferFailedException(message, e);
             }
 
-            try
-            {
+            try {
 
-                urlConnection.setRequestProperty( "Accept-Encoding", "gzip,deflate" );
-                if ( !useCache )
-                {
-                    urlConnection.setRequestProperty( "Pragma", "no-cache" );
+                urlConnection.setRequestProperty("Accept-Encoding", "gzip,deflate");
+                if (!useCache) {
+                    urlConnection.setRequestProperty("Pragma", "no-cache");
                 }
 
-                addHeaders( urlConnection );
+                addHeaders(urlConnection);
 
                 // TODO: handle all response codes
                 int responseCode = urlConnection.getResponseCode();
                 String reasonPhrase = urlConnection.getResponseMessage();
 
                 // TODO Move 401/407 to AuthenticationException after WAGON-587
-                if ( responseCode == HttpURLConnection.HTTP_FORBIDDEN
+                if (responseCode == HttpURLConnection.HTTP_FORBIDDEN
                         || responseCode == HttpURLConnection.HTTP_UNAUTHORIZED
-                        || responseCode == HttpURLConnection.HTTP_PROXY_AUTH )
-                {
-                    throw new AuthorizationException( formatAuthorizationMessage( buildUrl( resource ),
-                            responseCode, reasonPhrase, getProxyInfo() ) );
+                        || responseCode == HttpURLConnection.HTTP_PROXY_AUTH) {
+                    throw new AuthorizationException(
+                            formatAuthorizationMessage(buildUrl(resource), responseCode, reasonPhrase, getProxyInfo()));
                 }
-                if ( responseCode == HttpURLConnection.HTTP_MOVED_PERM
-                        || responseCode == HttpURLConnection.HTTP_MOVED_TEMP )
-                {
-                    visitingUrl = urlConnection.getHeaderField( "Location" );
+                if (responseCode == HttpURLConnection.HTTP_MOVED_PERM
+                        || responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {
+                    visitingUrl = urlConnection.getHeaderField("Location");
                     continue;
                 }
 
                 InputStream is = urlConnection.getInputStream();
-                String contentEncoding = urlConnection.getHeaderField( "Content-Encoding" );
-                boolean isGZipped = contentEncoding != null && "gzip".equalsIgnoreCase( contentEncoding );
-                if ( isGZipped )
-                {
-                    is = new GZIPInputStream( is );
+                String contentEncoding = urlConnection.getHeaderField("Content-Encoding");
+                boolean isGZipped = contentEncoding != null && "gzip".equalsIgnoreCase(contentEncoding);
+                if (isGZipped) {
+                    is = new GZIPInputStream(is);
                 }
-                boolean isDeflated = contentEncoding != null && "deflate".equalsIgnoreCase( contentEncoding );
-                if ( isDeflated )
-                {
-                    is = new DeflaterInputStream( is );
+                boolean isDeflated = contentEncoding != null && "deflate".equalsIgnoreCase(contentEncoding);
+                if (isDeflated) {
+                    is = new DeflaterInputStream(is);
                 }
-                inputData.setInputStream( is );
-                resource.setLastModified( urlConnection.getLastModified() );
-                resource.setContentLength( urlConnection.getContentLength() );
+                inputData.setInputStream(is);
+                resource.setLastModified(urlConnection.getLastModified());
+                resource.setContentLength(urlConnection.getContentLength());
                 break;
 
-            }
-            catch ( FileNotFoundException e )
-            {
+            } catch (FileNotFoundException e) {
                 // this could be 404 Not Found or 410 Gone - we don't have access to which it was.
                 // TODO: 2019-10-03 url used should list all visited/redirected urls, not just the original
-                throw new ResourceDoesNotExistException( formatResourceDoesNotExistMessage( buildUrl( resource ),
-                        UNKNOWN_STATUS_CODE, null, getProxyInfo() ), e );
-            }
-            catch ( IOException originalIOException )
-            {
-                throw convertHttpUrlConnectionException( originalIOException, urlConnection, buildUrl( resource ) );
-            }
-
-        }
-
-    }
-
-    private void addHeaders( HttpURLConnection urlConnection )
-    {
-        if ( httpHeaders != null )
-        {
-            for ( Object header : httpHeaders.keySet() )
-            {
-                urlConnection.setRequestProperty( (String) header, httpHeaders.getProperty( (String) header ) );
+                throw new ResourceDoesNotExistException(
+                        formatResourceDoesNotExistMessage(
+                                buildUrl(resource), UNKNOWN_STATUS_CODE, null, getProxyInfo()),
+                        e);
+            } catch (IOException originalIOException) {
+                throw convertHttpUrlConnectionException(originalIOException, urlConnection, buildUrl(resource));
             }
         }
-        setAuthorization( urlConnection );
     }
 
-    private void setAuthorization( HttpURLConnection urlConnection )
-    {
-        if ( preemptiveAuthentication && authenticationInfo != null && authenticationInfo.getUserName() != null )
-        {
+    private void addHeaders(HttpURLConnection urlConnection) {
+        if (httpHeaders != null) {
+            for (Object header : httpHeaders.keySet()) {
+                urlConnection.setRequestProperty((String) header, httpHeaders.getProperty((String) header));
+            }
+        }
+        setAuthorization(urlConnection);
+    }
+
+    private void setAuthorization(HttpURLConnection urlConnection) {
+        if (preemptiveAuthentication && authenticationInfo != null && authenticationInfo.getUserName() != null) {
             String credentials = authenticationInfo.getUserName() + ":" + authenticationInfo.getPassword();
-            String encoded = new String( Base64.encodeBase64( credentials.getBytes() ) );
-            urlConnection.setRequestProperty( "Authorization", "Basic " + encoded );
+            String encoded = new String(Base64.encodeBase64(credentials.getBytes()));
+            urlConnection.setRequestProperty("Authorization", "Basic " + encoded);
         }
     }
 
-    public void fillOutputData( OutputData outputData )
-        throws TransferFailedException
-    {
+    public void fillOutputData(OutputData outputData) throws TransferFailedException {
         Resource resource = outputData.getResource();
-        try
-        {
-            URL url = new URL( buildUrl( resource ) );
-            putConnection = (HttpURLConnection) url.openConnection( this.proxy );
+        try {
+            URL url = new URL(buildUrl(resource));
+            putConnection = (HttpURLConnection) url.openConnection(this.proxy);
 
-            addHeaders( putConnection );
+            addHeaders(putConnection);
 
-            putConnection.setRequestMethod( "PUT" );
-            putConnection.setDoOutput( true );
-            outputData.setOutputStream( putConnection.getOutputStream() );
-        }
-        catch ( IOException e )
-        {
-            throw new TransferFailedException( "Error transferring file: " + e.getMessage(), e );
+            putConnection.setRequestMethod("PUT");
+            putConnection.setDoOutput(true);
+            outputData.setOutputStream(putConnection.getOutputStream());
+        } catch (IOException e) {
+            throw new TransferFailedException("Error transferring file: " + e.getMessage(), e);
         }
     }
 
-    protected void finishPutTransfer( Resource resource, InputStream input, OutputStream output )
-        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
-    {
-        try
-        {
+    protected void finishPutTransfer(Resource resource, InputStream input, OutputStream output)
+            throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException {
+        try {
             String reasonPhrase = putConnection.getResponseMessage();
             int statusCode = putConnection.getResponseCode();
 
-            switch ( statusCode )
-            {
-                // Success Codes
+            switch (statusCode) {
+                    // Success Codes
                 case HttpURLConnection.HTTP_OK: // 200
                 case HttpURLConnection.HTTP_CREATED: // 201
                 case HttpURLConnection.HTTP_ACCEPTED: // 202
                 case HttpURLConnection.HTTP_NO_CONTENT: // 204
                     break;
 
-                // TODO Move 401/407 to AuthenticationException after WAGON-587
+                    // TODO Move 401/407 to AuthenticationException after WAGON-587
                 case HttpURLConnection.HTTP_FORBIDDEN:
                 case HttpURLConnection.HTTP_UNAUTHORIZED:
                 case HttpURLConnection.HTTP_PROXY_AUTH:
-                    throw new AuthorizationException( formatAuthorizationMessage( buildUrl( resource ), statusCode,
-                            reasonPhrase, getProxyInfo() ) );
+                    throw new AuthorizationException(
+                            formatAuthorizationMessage(buildUrl(resource), statusCode, reasonPhrase, getProxyInfo()));
 
                 case HttpURLConnection.HTTP_NOT_FOUND:
                 case HttpURLConnection.HTTP_GONE:
-                    throw new ResourceDoesNotExistException( formatResourceDoesNotExistMessage( buildUrl( resource ),
-                            statusCode, reasonPhrase, getProxyInfo() ) );
+                    throw new ResourceDoesNotExistException(formatResourceDoesNotExistMessage(
+                            buildUrl(resource), statusCode, reasonPhrase, getProxyInfo()));
 
-                // add more entries here
+                    // add more entries here
                 default:
-                    throw new TransferFailedException( formatTransferFailedMessage( buildUrl( resource ),
-                            statusCode, reasonPhrase, getProxyInfo() ) ) ;
+                    throw new TransferFailedException(
+                            formatTransferFailedMessage(buildUrl(resource), statusCode, reasonPhrase, getProxyInfo()));
             }
-        }
-        catch ( IOException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
-            throw convertHttpUrlConnectionException( e, putConnection, buildUrl( resource ) );
+        } catch (IOException e) {
+            fireTransferError(resource, e, TransferEvent.REQUEST_PUT);
+            throw convertHttpUrlConnectionException(e, putConnection, buildUrl(resource));
         }
     }
 
-    protected void openConnectionInternal()
-        throws ConnectionException, AuthenticationException
-    {
-        final ProxyInfo proxyInfo = getProxyInfo( "http", getRepository().getHost() );
-        if ( proxyInfo != null )
-        {
-            this.proxy = getProxy( proxyInfo );
+    protected void openConnectionInternal() throws ConnectionException, AuthenticationException {
+        final ProxyInfo proxyInfo = getProxyInfo("http", getRepository().getHost());
+        if (proxyInfo != null) {
+            this.proxy = getProxy(proxyInfo);
             this.proxyInfo = proxyInfo;
         }
-        authenticator.setWagon( this );
+        authenticator.setWagon(this);
 
-        boolean usePreemptiveAuthentication =
-            Boolean.getBoolean( "maven.wagon.http.preemptiveAuthentication" ) || Boolean.parseBoolean(
-                repository.getParameter( "preemptiveAuthentication" ) ) || this.preemptiveAuthentication;
+        boolean usePreemptiveAuthentication = Boolean.getBoolean("maven.wagon.http.preemptiveAuthentication")
+                || Boolean.parseBoolean(repository.getParameter("preemptiveAuthentication"))
+                || this.preemptiveAuthentication;
 
-        setPreemptiveAuthentication( usePreemptiveAuthentication );
+        setPreemptiveAuthentication(usePreemptiveAuthentication);
     }
 
-    @SuppressWarnings( "deprecation" )
-    public PasswordAuthentication requestProxyAuthentication()
-    {
-        if ( proxyInfo != null && proxyInfo.getUserName() != null )
-        {
+    @SuppressWarnings("deprecation")
+    public PasswordAuthentication requestProxyAuthentication() {
+        if (proxyInfo != null && proxyInfo.getUserName() != null) {
             String password = "";
-            if ( proxyInfo.getPassword() != null )
-            {
+            if (proxyInfo.getPassword() != null) {
                 password = proxyInfo.getPassword();
             }
-            return new PasswordAuthentication( proxyInfo.getUserName(), password.toCharArray() );
+            return new PasswordAuthentication(proxyInfo.getUserName(), password.toCharArray());
         }
         return null;
     }
 
-    public PasswordAuthentication requestServerAuthentication()
-    {
-        if ( authenticationInfo != null && authenticationInfo.getUserName() != null )
-        {
+    public PasswordAuthentication requestServerAuthentication() {
+        if (authenticationInfo != null && authenticationInfo.getUserName() != null) {
             String password = "";
-            if ( authenticationInfo.getPassword() != null )
-            {
+            if (authenticationInfo.getPassword() != null) {
                 password = authenticationInfo.getPassword();
             }
-            return new PasswordAuthentication( authenticationInfo.getUserName(), password.toCharArray() );
+            return new PasswordAuthentication(authenticationInfo.getUserName(), password.toCharArray());
         }
         return null;
     }
 
-    private Proxy getProxy( ProxyInfo proxyInfo )
-    {
-        return new Proxy( getProxyType( proxyInfo ), getSocketAddress( proxyInfo ) );
+    private Proxy getProxy(ProxyInfo proxyInfo) {
+        return new Proxy(getProxyType(proxyInfo), getSocketAddress(proxyInfo));
     }
 
-    private Type getProxyType( ProxyInfo proxyInfo )
-    {
-        if ( ProxyInfo.PROXY_SOCKS4.equals( proxyInfo.getType() ) || ProxyInfo.PROXY_SOCKS5.equals(
-            proxyInfo.getType() ) )
-        {
+    private Type getProxyType(ProxyInfo proxyInfo) {
+        if (ProxyInfo.PROXY_SOCKS4.equals(proxyInfo.getType()) || ProxyInfo.PROXY_SOCKS5.equals(proxyInfo.getType())) {
             return Type.SOCKS;
-        }
-        else
-        {
+        } else {
             return Type.HTTP;
         }
     }
 
-    public SocketAddress getSocketAddress( ProxyInfo proxyInfo )
-    {
-        return InetSocketAddress.createUnresolved( proxyInfo.getHost(), proxyInfo.getPort() );
+    public SocketAddress getSocketAddress(ProxyInfo proxyInfo) {
+        return InetSocketAddress.createUnresolved(proxyInfo.getHost(), proxyInfo.getPort());
     }
 
-    public void closeConnection()
-        throws ConnectionException
-    {
-        //FIXME WAGON-375 use persistent connection feature provided by the jdk
-        if ( putConnection != null )
-        {
+    public void closeConnection() throws ConnectionException {
+        // FIXME WAGON-375 use persistent connection feature provided by the jdk
+        if (putConnection != null) {
             putConnection.disconnect();
         }
         authenticator.resetWagon();
     }
 
-    public boolean resourceExists( String resourceName )
-        throws TransferFailedException, AuthorizationException
-    {
+    public boolean resourceExists(String resourceName) throws TransferFailedException, AuthorizationException {
         HttpURLConnection headConnection;
 
-        try
-        {
-            Resource resource = new Resource( resourceName );
-            URL url = new URL( buildUrl( resource ) );
-            headConnection = (HttpURLConnection) url.openConnection( this.proxy );
+        try {
+            Resource resource = new Resource(resourceName);
+            URL url = new URL(buildUrl(resource));
+            headConnection = (HttpURLConnection) url.openConnection(this.proxy);
 
-            addHeaders( headConnection );
+            addHeaders(headConnection);
 
-            headConnection.setRequestMethod( "HEAD" );
+            headConnection.setRequestMethod("HEAD");
 
             int statusCode = headConnection.getResponseCode();
             String reasonPhrase = headConnection.getResponseMessage();
 
-            switch ( statusCode )
-            {
+            switch (statusCode) {
                 case HttpURLConnection.HTTP_OK:
                     return true;
 
@@ -409,68 +347,55 @@ public class LightweightHttpWagon
                 case HttpURLConnection.HTTP_GONE:
                     return false;
 
-                // TODO Move 401/407 to AuthenticationException after WAGON-587
+                    // TODO Move 401/407 to AuthenticationException after WAGON-587
                 case HttpURLConnection.HTTP_FORBIDDEN:
                 case HttpURLConnection.HTTP_UNAUTHORIZED:
                 case HttpURLConnection.HTTP_PROXY_AUTH:
-                    throw new AuthorizationException( formatAuthorizationMessage( buildUrl( resource ),
-                            statusCode, reasonPhrase, getProxyInfo() ) );
+                    throw new AuthorizationException(
+                            formatAuthorizationMessage(buildUrl(resource), statusCode, reasonPhrase, getProxyInfo()));
 
                 default:
-                    throw new TransferFailedException( formatTransferFailedMessage( buildUrl( resource ),
-                            statusCode, reasonPhrase, getProxyInfo() ) );
+                    throw new TransferFailedException(
+                            formatTransferFailedMessage(buildUrl(resource), statusCode, reasonPhrase, getProxyInfo()));
             }
-        }
-        catch ( IOException e )
-        {
-            throw new TransferFailedException( "Error transferring file: " + e.getMessage(), e );
+        } catch (IOException e) {
+            throw new TransferFailedException("Error transferring file: " + e.getMessage(), e);
         }
     }
 
-    public boolean isUseCache()
-    {
+    public boolean isUseCache() {
         return useCache;
     }
 
-    public void setUseCache( boolean useCache )
-    {
+    public void setUseCache(boolean useCache) {
         this.useCache = useCache;
     }
 
-    public Properties getHttpHeaders()
-    {
+    public Properties getHttpHeaders() {
         return httpHeaders;
     }
 
-    public void setHttpHeaders( Properties httpHeaders )
-    {
+    public void setHttpHeaders(Properties httpHeaders) {
         this.httpHeaders = httpHeaders;
     }
 
-    void setSystemProperty( String key, String value )
-    {
-        if ( value != null )
-        {
-            System.setProperty( key, value );
-        }
-        else
-        {
-            System.getProperties().remove( key );
+    void setSystemProperty(String key, String value) {
+        if (value != null) {
+            System.setProperty(key, value);
+        } else {
+            System.getProperties().remove(key);
         }
     }
 
-    public void setPreemptiveAuthentication( boolean preemptiveAuthentication )
-    {
+    public void setPreemptiveAuthentication(boolean preemptiveAuthentication) {
         this.preemptiveAuthentication = preemptiveAuthentication;
     }
 
-    public LightweightHttpWagonAuthenticator getAuthenticator()
-    {
+    public LightweightHttpWagonAuthenticator getAuthenticator() {
         return authenticator;
     }
 
-    public void setAuthenticator( LightweightHttpWagonAuthenticator authenticator )
-    {
+    public void setAuthenticator(LightweightHttpWagonAuthenticator authenticator) {
         this.authenticator = authenticator;
     }
 
@@ -487,27 +412,21 @@ public class LightweightHttpWagon
      * @param url                 originating url that triggered the IOException
      * @return exception that is representative of the original cause
      */
-    private TransferFailedException convertHttpUrlConnectionException( IOException originalIOException,
-                                                                       HttpURLConnection urlConnection,
-                                                                       String url )
-    {
+    private TransferFailedException convertHttpUrlConnectionException(
+            IOException originalIOException, HttpURLConnection urlConnection, String url) {
         // javadoc of HttpUrlConnection, HTTP transfer errors throw IOException
         // In that case, one may attempt to get the status code and reason phrase
         // from the errorstream. We do this, but by way of the following code path
         // getResponseCode()/getResponseMessage() - calls -> getHeaderFields()
         // getHeaderFields() - calls -> getErrorStream()
-        try
-        {
+        try {
             // call getResponseMessage first since impl calls getResponseCode as part of that anyways
             String errorResponseMessage = urlConnection.getResponseMessage(); // may be null
             int errorResponseCode = urlConnection.getResponseCode(); // may be -1 if the code cannot be discerned
-            String message = formatTransferFailedMessage( url, errorResponseCode, errorResponseMessage,
-                    getProxyInfo() );
-            return new TransferFailedException( message, originalIOException );
+            String message = formatTransferFailedMessage(url, errorResponseCode, errorResponseMessage, getProxyInfo());
+            return new TransferFailedException(message, originalIOException);
 
-        }
-        catch ( IOException errorStreamException )
-        {
+        } catch (IOException errorStreamException) {
             // there was a problem using the standard methods, need to fall back to other options
         }
 
@@ -515,31 +434,25 @@ public class LightweightHttpWagon
         // https://github.com/AdoptOpenJDK/openjdk-jdk11/blame/999dbd4192d0f819cb5224f26e9e7fa75ca6f289/src/java
         // .base/share/classes/sun/net/www/protocol/http/HttpURLConnection.java#L1911L1913
         String ioMsg = originalIOException.getMessage();
-        if ( ioMsg != null )
-        {
-            Matcher matcher = IOEXCEPTION_MESSAGE_PATTERN.matcher( ioMsg );
-            if ( matcher.matches() )
-            {
-                String codeStr = matcher.group( 1 );
-                String urlStr = matcher.group( 2 );
+        if (ioMsg != null) {
+            Matcher matcher = IOEXCEPTION_MESSAGE_PATTERN.matcher(ioMsg);
+            if (matcher.matches()) {
+                String codeStr = matcher.group(1);
+                String urlStr = matcher.group(2);
 
                 int code = UNKNOWN_STATUS_CODE;
-                try
-                {
-                    code = parseInt( codeStr );
-                }
-                catch ( NumberFormatException nfe )
-                {
+                try {
+                    code = parseInt(codeStr);
+                } catch (NumberFormatException nfe) {
                     // if here there is a regex problem
                 }
 
-                String message = formatTransferFailedMessage( urlStr, code, null, getProxyInfo() );
-                return new TransferFailedException( message, originalIOException );
+                String message = formatTransferFailedMessage(urlStr, code, null, getProxyInfo());
+                return new TransferFailedException(message, originalIOException);
             }
         }
 
-        String message = formatTransferFailedMessage( url, UNKNOWN_STATUS_CODE, null, getProxyInfo() );
-        return new TransferFailedException( message, originalIOException );
+        String message = formatTransferFailedMessage(url, UNKNOWN_STATUS_CODE, null, getProxyInfo());
+        return new TransferFailedException(message, originalIOException);
     }
-
 }

@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh.knownhost;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh.knownhost;
 
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.providers.ssh.SshWagon;
@@ -26,11 +25,9 @@ import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.plexus.PlexusTestCase;
 
 /**
- * 
+ *
  */
-public class KnownHostsProviderTestCase
-    extends PlexusTestCase
-{
+public class KnownHostsProviderTestCase extends PlexusTestCase {
     protected KnownHostsProvider okHostsProvider;
 
     protected KnownHostsProvider failHostsProvider;
@@ -44,10 +41,10 @@ public class KnownHostsProviderTestCase
     private static final String CORRECT_KEY = TestData.getHostKey();
 
     private static final String CHANGED_KEY =
-        "AAAAB3NzaC1yc2EAAAABIwAAAQEA8VLKkfHl2CNqW+m0603z07dyweWzzdVGQlMPUX4z1264E7M/h+6lPKiOo+u49CL7eQVA+FtW"
-        + "TZoJ3oBAMABcKnHx41TnSpQUkbdR6rzyC6IG1lXiVtEjG2w7DUnxpCtVo5PaQuJobwoXv5NNL3vx03THPgcDJquLPWvGnDWhnXoEh"
-        + "3/6c7rprwT+PrjZ6LIT35ZCUGajoehhF151oNbFMQHllfR6EAiZIP0z0nIVI+Jiv6g+XZapumVPVYjdOfxvLKQope1H9HJamT3bDI"
-        + "m8mkebUB10DzQJYxFt4/0wiNH3L4jsIFn+CiW1/IQm5yyff1CUO87OqVbtp9BlaXZNmw==";
+            "AAAAB3NzaC1yc2EAAAABIwAAAQEA8VLKkfHl2CNqW+m0603z07dyweWzzdVGQlMPUX4z1264E7M/h+6lPKiOo+u49CL7eQVA+FtW"
+                    + "TZoJ3oBAMABcKnHx41TnSpQUkbdR6rzyC6IG1lXiVtEjG2w7DUnxpCtVo5PaQuJobwoXv5NNL3vx03THPgcDJquLPWvGnDWhnXoEh"
+                    + "3/6c7rprwT+PrjZ6LIT35ZCUGajoehhF151oNbFMQHllfR6EAiZIP0z0nIVI+Jiv6g+XZapumVPVYjdOfxvLKQope1H9HJamT3bDI"
+                    + "m8mkebUB10DzQJYxFt4/0wiNH3L4jsIFn+CiW1/IQm5yyff1CUO87OqVbtp9BlaXZNmw==";
 
     /**
      * tests what happens if the remote host has a different key than the one
@@ -55,19 +52,14 @@ public class KnownHostsProviderTestCase
      *
      * @throws Exception on error
      */
-    public void testIncorrectKey()
-        throws Exception
-    {
-        wagon.setKnownHostsProvider( failHostsProvider );
+    public void testIncorrectKey() throws Exception {
+        wagon.setKnownHostsProvider(failHostsProvider);
 
-        try
-        {
-            wagon.connect( source );
+        try {
+            wagon.connect(source);
 
-            fail( "Should not have successfully connected - host is not known" );
-        }
-        catch ( UnknownHostException e )
-        {
+            fail("Should not have successfully connected - host is not known");
+        } catch (UnknownHostException e) {
             // ok
         }
     }
@@ -77,19 +69,14 @@ public class KnownHostsProviderTestCase
      *
      * @throws Exception on error
      */
-    public void testChangedKey()
-        throws Exception
-    {
-        wagon.setKnownHostsProvider( changedHostsProvider );
+    public void testChangedKey() throws Exception {
+        wagon.setKnownHostsProvider(changedHostsProvider);
 
-        try
-        {
-            wagon.connect( source );
+        try {
+            wagon.connect(source);
 
-            fail( "Should not have successfully connected - host is changed" );
-        }
-        catch ( KnownHostChangedException e )
-        {
+            fail("Should not have successfully connected - host is changed");
+        } catch (KnownHostChangedException e) {
             // ok
         }
     }
@@ -99,28 +86,23 @@ public class KnownHostsProviderTestCase
      *
      * @throws Exception on error
      */
-    public void testCorrectKey()
-        throws Exception
-    {
-        wagon.setKnownHostsProvider( okHostsProvider );
+    public void testCorrectKey() throws Exception {
+        wagon.setKnownHostsProvider(okHostsProvider);
 
-        wagon.connect( source );
+        wagon.connect(source);
 
-        assertTrue( true );
+        assertTrue(true);
     }
 
-    protected void setUp()
-        throws Exception
-    {
+    protected void setUp() throws Exception {
         super.setUp();
-        source =
-            new Repository( "test", "scp://" + TestData.getUserName() + "@" + TestData.getHostname() + "/tmp/foo" );
+        source = new Repository("test", "scp://" + TestData.getUserName() + "@" + TestData.getHostname() + "/tmp/foo");
 
-        wagon = (SshWagon) lookup( Wagon.ROLE, "scp" );
-        wagon.setInteractive( false );
+        wagon = (SshWagon) lookup(Wagon.ROLE, "scp");
+        wagon.setInteractive(false);
 
-        this.okHostsProvider = new SingleKnownHostProvider( TestData.getHostname(), CORRECT_KEY );
-        this.failHostsProvider = new SingleKnownHostProvider( "beaver.codehaus.org", CORRECT_KEY );
-        this.changedHostsProvider = new SingleKnownHostProvider( TestData.getHostname(), CHANGED_KEY );
+        this.okHostsProvider = new SingleKnownHostProvider(TestData.getHostname(), CORRECT_KEY);
+        this.failHostsProvider = new SingleKnownHostProvider("beaver.codehaus.org", CORRECT_KEY);
+        this.changedHostsProvider = new SingleKnownHostProvider(TestData.getHostname(), CHANGED_KEY);
     }
 }

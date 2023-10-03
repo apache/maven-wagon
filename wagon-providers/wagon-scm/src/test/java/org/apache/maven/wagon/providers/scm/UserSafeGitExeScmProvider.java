@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.scm;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.scm;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.scm;
 
 import org.apache.maven.scm.ScmException;
 import org.apache.maven.scm.ScmFileSet;
@@ -33,12 +32,10 @@ import org.apache.maven.scm.repository.ScmRepository;
 public class UserSafeGitExeScmProvider extends GitExeScmProvider {
 
     @Override
-    public CheckInScmResult checkIn( ScmRepository repository, ScmFileSet fileSet,
-                                     ScmVersion scmVersion, String message )
-        throws ScmException
-    {
-        GitScmTestUtils.setDefaultUser( fileSet.getBasedir() );
+    public CheckInScmResult checkIn(ScmRepository repository, ScmFileSet fileSet, ScmVersion scmVersion, String message)
+            throws ScmException {
+        GitScmTestUtils.setDefaultUser(fileSet.getBasedir());
 
-        return super.checkIn( repository, fileSet, scmVersion, message );
+        return super.checkIn(repository, fileSet, scmVersion, message);
     }
 }

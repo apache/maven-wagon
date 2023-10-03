@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.file;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.file;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.file;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -48,115 +47,90 @@ import org.codehaus.plexus.util.FileUtils;
  *
  * @plexus.component role="org.apache.maven.wagon.Wagon" role-hint="file" instantiation-strategy="per-lookup"
  */
-public class FileWagon
-    extends StreamWagon
-{
-    public void fillInputData( InputData inputData )
-        throws TransferFailedException, ResourceDoesNotExistException
-    {
-        if ( getRepository().getBasedir() == null )
-        {
-            throw new TransferFailedException( "Unable to operate with a null basedir." );
+public class FileWagon extends StreamWagon {
+    public void fillInputData(InputData inputData) throws TransferFailedException, ResourceDoesNotExistException {
+        if (getRepository().getBasedir() == null) {
+            throw new TransferFailedException("Unable to operate with a null basedir.");
         }
 
         Resource resource = inputData.getResource();
 
-        File file = new File( getRepository().getBasedir(), resource.getName() );
+        File file = new File(getRepository().getBasedir(), resource.getName());
 
-        if ( !file.exists() )
-        {
-            throw new ResourceDoesNotExistException( "File: " + file + " does not exist" );
+        if (!file.exists()) {
+            throw new ResourceDoesNotExistException("File: " + file + " does not exist");
         }
 
-        try
-        {
-            InputStream in = new BufferedInputStream( new FileInputStream( file ) );
+        try {
+            InputStream in = new BufferedInputStream(new FileInputStream(file));
 
-            inputData.setInputStream( in );
+            inputData.setInputStream(in);
 
-            resource.setContentLength( file.length() );
+            resource.setContentLength(file.length());
 
-            resource.setLastModified( file.lastModified() );
-        }
-        catch ( FileNotFoundException e )
-        {
-            throw new TransferFailedException( "Could not read from file: " + file.getAbsolutePath(), e );
+            resource.setLastModified(file.lastModified());
+        } catch (FileNotFoundException e) {
+            throw new TransferFailedException("Could not read from file: " + file.getAbsolutePath(), e);
         }
     }
 
-    public void fillOutputData( OutputData outputData )
-        throws TransferFailedException
-    {
-        if ( getRepository().getBasedir() == null )
-        {
-            throw new TransferFailedException( "Unable to operate with a null basedir." );
+    public void fillOutputData(OutputData outputData) throws TransferFailedException {
+        if (getRepository().getBasedir() == null) {
+            throw new TransferFailedException("Unable to operate with a null basedir.");
         }
 
         Resource resource = outputData.getResource();
 
-        File file = new File( getRepository().getBasedir(), resource.getName() );
+        File file = new File(getRepository().getBasedir(), resource.getName());
 
-        createParentDirectories( file );
+        createParentDirectories(file);
 
-        OutputStream outputStream = new BufferedOutputStream( new LazyFileOutputStream( file ) );
+        OutputStream outputStream = new BufferedOutputStream(new LazyFileOutputStream(file));
 
-        outputData.setOutputStream( outputStream );
+        outputData.setOutputStream(outputStream);
     }
 
-    protected void openConnectionInternal()
-        throws ConnectionException
-    {
-        if ( getRepository() == null )
-        {
-            throw new ConnectionException( "Unable to operate with a null repository." );
+    protected void openConnectionInternal() throws ConnectionException {
+        if (getRepository() == null) {
+            throw new ConnectionException("Unable to operate with a null repository.");
         }
 
-        if ( getRepository().getBasedir() == null )
-        {
+        if (getRepository().getBasedir() == null) {
             // This condition is possible when using wagon-file under integration testing conditions.
-            fireSessionDebug( "Using a null basedir." );
+            fireSessionDebug("Using a null basedir.");
             return;
         }
 
         // Check the File repository exists
-        File basedir = new File( getRepository().getBasedir() );
-        if ( !basedir.exists() )
-        {
-            if ( !basedir.mkdirs() )
-            {
-                throw new ConnectionException( "Repository path " + basedir + " does not exist,"
-                                               + " and cannot be created." );
+        File basedir = new File(getRepository().getBasedir());
+        if (!basedir.exists()) {
+            if (!basedir.mkdirs()) {
+                throw new ConnectionException(
+                        "Repository path " + basedir + " does not exist," + " and cannot be created.");
             }
         }
 
-        if ( !basedir.canRead() )
-        {
-            throw new ConnectionException( "Repository path " + basedir + " cannot be read" );
+        if (!basedir.canRead()) {
+            throw new ConnectionException("Repository path " + basedir + " cannot be read");
         }
     }
 
-    public void closeConnection()
-    {
-    }
+    public void closeConnection() {}
 
-    public boolean supportsDirectoryCopy()
-    {
+    public boolean supportsDirectoryCopy() {
         // TODO: should we test for null basedir here?
         return true;
     }
 
-    public void putDirectory( File sourceDirectory, String destinationDirectory )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        if ( getRepository().getBasedir() == null )
-        {
-            throw new TransferFailedException( "Unable to putDirectory() with a null basedir." );
+    public void putDirectory(File sourceDirectory, String destinationDirectory)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+        if (getRepository().getBasedir() == null) {
+            throw new TransferFailedException("Unable to putDirectory() with a null basedir.");
         }
 
-        File path = resolveDestinationPath( destinationDirectory );
+        File path = resolveDestinationPath(destinationDirectory);
 
-        try
-        {
+        try {
             /*
              * Done to address issue found in HP-UX with regards to "." directory references. Details found in ..
              * WAGON-30 - wagon-file failed when used by maven-site-plugin WAGON-33 - FileWagon#putDirectory() fails in
@@ -167,104 +141,83 @@ public class FileWagon
              */
             File realFile = path.getCanonicalFile();
             realFile.mkdirs();
-        }
-        catch ( IOException e )
-        {
+        } catch (IOException e) {
             // Fall back to standard way if getCanonicalFile() fails.
             path.mkdirs();
         }
 
-        if ( !path.exists() || !path.isDirectory() )
-        {
+        if (!path.exists() || !path.isDirectory()) {
             String emsg = "Could not make directory '" + path.getAbsolutePath() + "'.";
 
             // Add assistive message in case of failure.
-            File basedir = new File( getRepository().getBasedir() );
-            if ( !basedir.canWrite() )
-            {
+            File basedir = new File(getRepository().getBasedir());
+            if (!basedir.canWrite()) {
                 emsg += "  The base directory " + basedir + " is read-only.";
             }
 
-            throw new TransferFailedException( emsg );
+            throw new TransferFailedException(emsg);
         }
 
-        try
-        {
-            FileUtils.copyDirectoryStructure( sourceDirectory, path );
-        }
-        catch ( IOException e )
-        {
-            throw new TransferFailedException( "Error copying directory structure", e );
+        try {
+            FileUtils.copyDirectoryStructure(sourceDirectory, path);
+        } catch (IOException e) {
+            throw new TransferFailedException("Error copying directory structure", e);
         }
     }
 
-    private File resolveDestinationPath( String destinationPath )
-    {
+    private File resolveDestinationPath(String destinationPath) {
         String basedir = getRepository().getBasedir();
 
-        destinationPath = destinationPath.replace( "\\", "/" );
+        destinationPath = destinationPath.replace("\\", "/");
 
         File path;
 
-        if ( destinationPath.equals( "." ) )
-        {
-            path = new File( basedir );
-        }
-        else
-        {
-            path = new File( basedir, destinationPath );
+        if (destinationPath.equals(".")) {
+            path = new File(basedir);
+        } else {
+            path = new File(basedir, destinationPath);
         }
 
         return path;
     }
 
-    public List<String> getFileList( String destinationDirectory )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        if ( getRepository().getBasedir() == null )
-        {
-            throw new TransferFailedException( "Unable to getFileList() with a null basedir." );
+    public List<String> getFileList(String destinationDirectory)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+        if (getRepository().getBasedir() == null) {
+            throw new TransferFailedException("Unable to getFileList() with a null basedir.");
         }
 
-        File path = resolveDestinationPath( destinationDirectory );
+        File path = resolveDestinationPath(destinationDirectory);
 
-        if ( !path.exists() )
-        {
-            throw new ResourceDoesNotExistException( "Directory does not exist: " + destinationDirectory );
+        if (!path.exists()) {
+            throw new ResourceDoesNotExistException("Directory does not exist: " + destinationDirectory);
         }
 
-        if ( !path.isDirectory() )
-        {
-            throw new ResourceDoesNotExistException( "Path is not a directory: " + destinationDirectory );
+        if (!path.isDirectory()) {
+            throw new ResourceDoesNotExistException("Path is not a directory: " + destinationDirectory);
         }
 
         File[] files = path.listFiles();
 
-        List<String> list = new ArrayList<>( files.length );
-        for ( File file : files )
-        {
+        List<String> list = new ArrayList<>(files.length);
+        for (File file : files) {
             String name = file.getName();
-            if ( file.isDirectory() && !name.endsWith( "/" ) )
-            {
+            if (file.isDirectory() && !name.endsWith("/")) {
                 name += "/";
             }
-            list.add( name );
+            list.add(name);
         }
         return list;
     }
 
-    public boolean resourceExists( String resourceName )
-        throws TransferFailedException, AuthorizationException
-    {
-        if ( getRepository().getBasedir() == null )
-        {
-            throw new TransferFailedException( "Unable to getFileList() with a null basedir." );
+    public boolean resourceExists(String resourceName) throws TransferFailedException, AuthorizationException {
+        if (getRepository().getBasedir() == null) {
+            throw new TransferFailedException("Unable to getFileList() with a null basedir.");
         }
 
-        File file = resolveDestinationPath( resourceName );
+        File file = resolveDestinationPath(resourceName);
 
-        if ( resourceName.endsWith( "/" ) )
-        {
+        if (resourceName.endsWith("/")) {
             return file.isDirectory();
         }
 

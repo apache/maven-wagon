@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.http;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.http;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.http;
 
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.plexus.PlexusTestCase;
@@ -29,48 +28,36 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 /**
  * User: jdumay Date: 24/01/2008 Time: 18:15:53
  */
-public abstract class HttpWagonHttpServerTestCase
-    extends PlexusTestCase
-{
+public abstract class HttpWagonHttpServerTestCase extends PlexusTestCase {
     private Server server;
 
     protected ResourceHandler resourceHandler;
 
     protected ServletContextHandler context;
 
-    protected void setUp()
-        throws Exception
-    {
+    protected void setUp() throws Exception {
         super.setUp();
-        server = new Server( 0 );
+        server = new Server(0);
 
-        context = new ServletContextHandler( ServletContextHandler.SESSIONS );
+        context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         resourceHandler = new ResourceHandler();
-        context.setHandler( resourceHandler );
-        server.setHandler( context );
+        context.setHandler(resourceHandler);
+        server.setHandler(context);
     }
 
-    protected Wagon getWagon()
-        throws Exception
-    {
-        return (Wagon) lookup( HttpWagon.ROLE );
+    protected Wagon getWagon() throws Exception {
+        return (Wagon) lookup(HttpWagon.ROLE);
     }
 
-    protected void startServer()
-        throws Exception
-    {
+    protected void startServer() throws Exception {
         server.start();
     }
 
-    protected void stopServer()
-        throws Exception
-    {
+    protected void stopServer() throws Exception {
         server.stop();
     }
-    
-    protected final int getPort()
-    {
+
+    protected final int getPort() {
         return ((ServerConnector) server.getConnectors()[0]).getLocalPort();
     }
-    
 }

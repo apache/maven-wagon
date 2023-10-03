@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,30 +16,26 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public class ResourceDoesNotExistException
-    extends WagonException
-{
+public class ResourceDoesNotExistException extends WagonException {
 
     /**
      * @param message
      */
-    public ResourceDoesNotExistException( final String message )
-    {
-        super( message );
+    public ResourceDoesNotExistException(final String message) {
+        super(message);
     }
 
     /**
      * @param message
      * @param cause
      */
-    public ResourceDoesNotExistException( final String message, final Throwable cause )
-    {
-        super( message, cause );
+    public ResourceDoesNotExistException(final String message, final Throwable cause) {
+        super(message, cause);
     }
-
 }

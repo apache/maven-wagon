@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh.external;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,9 @@ package org.apache.maven.wagon.providers.ssh.external;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh.external;
+
+import java.io.File;
 
 import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.WagonTestCase;
@@ -26,85 +27,72 @@ import org.apache.maven.wagon.providers.ssh.TestData;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 
-import java.io.File;
-
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public class ScpExternalWagonTest
-    extends WagonTestCase
-{
-    protected int getExpectedContentLengthOnGet( int expectedSize )
-    {
+public class ScpExternalWagonTest extends WagonTestCase {
+    protected int getExpectedContentLengthOnGet(int expectedSize) {
         return WagonConstants.UNKNOWN_LENGTH;
     }
 
-    protected boolean supportsGetIfNewer()
-    {
+    protected boolean supportsGetIfNewer() {
         return false;
     }
 
-    protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
-    {
+    protected long getExpectedLastModifiedOnGet(Repository repository, Resource resource) {
         return 0;
     }
 
-    protected String getProtocol()
-    {
+    protected String getProtocol() {
         return "scpexe";
     }
 
-    public String getTestRepositoryUrl()
-    {
+    public String getTestRepositoryUrl() {
         return TestData.getTestRepositoryUrl();
     }
 
-    protected AuthenticationInfo getAuthInfo()
-    {
+    protected AuthenticationInfo getAuthInfo() {
         AuthenticationInfo authInfo = new AuthenticationInfo();
 
         String userName = TestData.getUserName();
 
-        authInfo.setUserName( userName );
+        authInfo.setUserName(userName);
 
         File privateKey = TestData.getPrivateKey();
 
-        if ( privateKey.exists() )
-        {
-            authInfo.setPrivateKey( privateKey.getAbsolutePath() );
+        if (privateKey.exists()) {
+            authInfo.setPrivateKey(privateKey.getAbsolutePath());
 
-            authInfo.setPassphrase( "" );
+            authInfo.setPassphrase("");
         }
 
         return authInfo;
     }
 
-    public void testIsPuTTY()
-        throws Exception
-    {
+    public void testIsPuTTY() throws Exception {
         ScpExternalWagon wagon = (ScpExternalWagon) getWagon();
 
-        wagon.setSshExecutable( "c:\\program files\\PuTTY\\plink.exe" );
-        assertTrue( wagon.isPuTTY() );
-        wagon.setSshExecutable( "plink" );
-        assertTrue( wagon.isPuTTY() );
-        wagon.setSshExecutable( "PLINK" );
-        assertTrue( wagon.isPuTTY() );
-        wagon.setSshExecutable( "PlInK" );
-        assertTrue( wagon.isPuTTY() );
-        wagon.setSshExecutable( "ssh" );
-        assertFalse( wagon.isPuTTY() );
+        wagon.setSshExecutable("c:\\program files\\PuTTY\\plink.exe");
+        assertTrue(wagon.isPuTTY());
+        wagon.setSshExecutable("plink");
+        assertTrue(wagon.isPuTTY());
+        wagon.setSshExecutable("PLINK");
+        assertTrue(wagon.isPuTTY());
+        wagon.setSshExecutable("PlInK");
+        assertTrue(wagon.isPuTTY());
+        wagon.setSshExecutable("ssh");
+        assertFalse(wagon.isPuTTY());
 
-        wagon.setScpExecutable( "c:\\program files\\PuTTY\\pscp.exe" );
-        assertTrue( wagon.isPuTTYSCP() );
-        wagon.setScpExecutable( "pscp" );
-        assertTrue( wagon.isPuTTYSCP() );
-        wagon.setScpExecutable( "PSCP" );
-        assertTrue( wagon.isPuTTYSCP() );
-        wagon.setScpExecutable( "PsCp" );
-        assertTrue( wagon.isPuTTYSCP() );
-        wagon.setScpExecutable( "scp" );
-        assertFalse( wagon.isPuTTYSCP() );
+        wagon.setScpExecutable("c:\\program files\\PuTTY\\pscp.exe");
+        assertTrue(wagon.isPuTTYSCP());
+        wagon.setScpExecutable("pscp");
+        assertTrue(wagon.isPuTTYSCP());
+        wagon.setScpExecutable("PSCP");
+        assertTrue(wagon.isPuTTYSCP());
+        wagon.setScpExecutable("PsCp");
+        assertTrue(wagon.isPuTTYSCP());
+        wagon.setScpExecutable("scp");
+        assertFalse(wagon.isPuTTYSCP());
     }
 }

@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh.jsch;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,9 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh.jsch;
+
+import java.io.File;
 
 import org.apache.maven.wagon.StreamingWagonTestCase;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
@@ -25,36 +26,28 @@ import org.apache.maven.wagon.providers.ssh.TestData;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 
-import java.io.File;
-
 /**
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  *
  */
-public class SftpWagonTest
-    extends StreamingWagonTestCase
-{
-    protected String getProtocol()
-    {
+public class SftpWagonTest extends StreamingWagonTestCase {
+    protected String getProtocol() {
         return "sftp";
     }
 
-    public String getTestRepositoryUrl()
-    {
+    public String getTestRepositoryUrl() {
         return TestData.getTestRepositoryUrl(0);
     }
 
-    protected AuthenticationInfo getAuthInfo()
-    {
+    protected AuthenticationInfo getAuthInfo() {
         AuthenticationInfo authInfo = super.getAuthInfo();
 
-        authInfo.setUserName( TestData.getUserName() );
+        authInfo.setUserName(TestData.getUserName());
 
         return authInfo;
     }
 
-    protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
-    {
-        return new File( repository.getBasedir(), resource.getName() ).lastModified();
+    protected long getExpectedLastModifiedOnGet(Repository repository, Resource resource) {
+        return new File(repository.getBasedir(), resource.getName()).lastModified();
     }
 }

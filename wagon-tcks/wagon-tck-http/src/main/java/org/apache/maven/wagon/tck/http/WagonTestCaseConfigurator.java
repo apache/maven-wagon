@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.tck.http;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.tck.http;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.tck.http;
 
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.plexus.PlexusConstants;
@@ -30,16 +29,13 @@ import org.codehaus.plexus.configuration.PlexusConfiguration;
 import org.codehaus.plexus.context.Context;
 import org.codehaus.plexus.context.ContextException;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ *
  */
-public class WagonTestCaseConfigurator
-    implements Contextualizable
-{
+public class WagonTestCaseConfigurator implements Contextualizable {
     private static final String UNSUPPORTED_ELEMENT = "unsupported";
 
     private PlexusConfiguration useCaseConfigs;
@@ -50,17 +46,14 @@ public class WagonTestCaseConfigurator
 
     private String wagonHint;
 
-    private static Logger logger = LoggerFactory.getLogger( WagonTestCaseConfigurator.class );
+    private static Logger logger = LoggerFactory.getLogger(WagonTestCaseConfigurator.class);
 
-    public boolean isSupported( final String useCaseId )
-    {
-        if ( useCaseConfigs != null )
-        {
-            PlexusConfiguration config = useCaseConfigs.getChild( useCaseId, false );
+    public boolean isSupported(final String useCaseId) {
+        if (useCaseConfigs != null) {
+            PlexusConfiguration config = useCaseConfigs.getChild(useCaseId, false);
 
-            if ( config != null && config.getChild( UNSUPPORTED_ELEMENT, false ) != null )
-            {
-                logger.info( "Test case '" + useCaseId + "' is marked as unsupported by this wagon." );
+            if (config != null && config.getChild(UNSUPPORTED_ELEMENT, false) != null) {
+                logger.info("Test case '" + useCaseId + "' is marked as unsupported by this wagon.");
                 return false;
             }
         }
@@ -68,72 +61,52 @@ public class WagonTestCaseConfigurator
         return true;
     }
 
-    public boolean configureWagonForTest( final Wagon wagon, final String useCaseId )
-        throws ComponentConfigurationException
-    {
-        if ( useCaseConfigs != null )
-        {
-            PlexusConfiguration config = useCaseConfigs.getChild( useCaseId, false );
+    public boolean configureWagonForTest(final Wagon wagon, final String useCaseId)
+            throws ComponentConfigurationException {
+        if (useCaseConfigs != null) {
+            PlexusConfiguration config = useCaseConfigs.getChild(useCaseId, false);
 
-            if ( config != null )
-            {
-                if ( config.getChild( UNSUPPORTED_ELEMENT, false ) != null )
-                {
-                    logger.error( "Test case '" + useCaseId + "' is marked as unsupported by this wagon." );
+            if (config != null) {
+                if (config.getChild(UNSUPPORTED_ELEMENT, false) != null) {
+                    logger.error("Test case '" + useCaseId + "' is marked as unsupported by this wagon.");
                     return false;
+                } else {
+                    logger.info("Configuring wagon for test case: " + useCaseId + " with:\n\n" + config);
+                    configurator.configureComponent(wagon, useCaseConfigs.getChild(useCaseId, false), realm);
                 }
-                else
-                {
-                    logger.info( "Configuring wagon for test case: " + useCaseId + " with:\n\n" + config );
-                    configurator.configureComponent( wagon, useCaseConfigs.getChild( useCaseId, false ), realm );
-                }
+            } else {
+                logger.info("No wagon configuration found for test case: " + useCaseId);
             }
-            else
-            {
-                logger.info( "No wagon configuration found for test case: " + useCaseId );
-            }
-        }
-        else
-        {
-            logger.info( "No test case configurations found." );
+        } else {
+            logger.info("No test case configurations found.");
         }
 
         return true;
     }
 
-    public void contextualize( final Context context )
-        throws ContextException
-    {
-        PlexusContainer container = (PlexusContainer) context.get( PlexusConstants.PLEXUS_KEY );
+    public void contextualize(final Context context) throws ContextException {
+        PlexusContainer container = (PlexusContainer) context.get(PlexusConstants.PLEXUS_KEY);
         this.realm = container.getContainerRealm();
-        try
-        {
-            configurator = (ComponentConfigurator) container.lookup( ComponentConfigurator.ROLE );
-        }
-        catch ( ComponentLookupException e )
-        {
-            throw new ContextException( "Failed to lookup component configurator: " + e.getMessage(), e );
+        try {
+            configurator = (ComponentConfigurator) container.lookup(ComponentConfigurator.ROLE);
+        } catch (ComponentLookupException e) {
+            throw new ContextException("Failed to lookup component configurator: " + e.getMessage(), e);
         }
     }
 
-    public PlexusConfiguration getUseCaseConfigs()
-    {
+    public PlexusConfiguration getUseCaseConfigs() {
         return useCaseConfigs;
     }
 
-    public void setUseCaseConfigs( final PlexusConfiguration useCaseConfigs )
-    {
+    public void setUseCaseConfigs(final PlexusConfiguration useCaseConfigs) {
         this.useCaseConfigs = useCaseConfigs;
     }
 
-    public String getWagonHint()
-    {
+    public String getWagonHint() {
         return wagonHint;
     }
 
-    public void setWagonHint( final String wagonHint )
-    {
+    public void setWagonHint(final String wagonHint) {
         this.wagonHint = wagonHint;
     }
-
 }

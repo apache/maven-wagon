@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.events;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,11 +16,12 @@ package org.apache.maven.wagon.events;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.events;
+
+import java.io.File;
 
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.resource.Resource;
-
-import java.io.File;
 
 /**
  * TransferEvent is used to notify TransferListeners about progress
@@ -31,9 +30,7 @@ import java.io.File;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public class TransferEvent
-    extends WagonEvent
-{
+public class TransferEvent extends WagonEvent {
 
     /**
      * A transfer was attempted, but has not yet commenced.
@@ -80,21 +77,18 @@ public class TransferEvent
 
     private File localFile;
 
-    public TransferEvent( final Wagon wagon, final Resource resource, final int eventType, final int requestType )
-    {
-        super( wagon );
+    public TransferEvent(final Wagon wagon, final Resource resource, final int eventType, final int requestType) {
+        super(wagon);
 
         this.resource = resource;
 
-        setEventType( eventType );
+        setEventType(eventType);
 
-        setRequestType( requestType );
-
+        setRequestType(requestType);
     }
 
-    public TransferEvent( final Wagon wagon, final Resource resource, final Exception exception, final int requestType )
-    {
-        this( wagon, resource, TRANSFER_ERROR, requestType );
+    public TransferEvent(final Wagon wagon, final Resource resource, final Exception exception, final int requestType) {
+        this(wagon, resource, TRANSFER_ERROR, requestType);
 
         this.exception = exception;
     }
@@ -102,16 +96,14 @@ public class TransferEvent
     /**
      * @return Returns the resource.
      */
-    public Resource getResource()
-    {
+    public Resource getResource() {
         return resource;
     }
 
     /**
      * @return Returns the exception.
      */
-    public Exception getException()
-    {
+    public Exception getException() {
         return exception;
     }
 
@@ -121,8 +113,7 @@ public class TransferEvent
      * @return Returns the request type. The Request type is one of
      *         <code>TransferEvent.REQUEST_GET<code> or <code>TransferEvent.REQUEST_PUT<code>
      */
-    public int getRequestType()
-    {
+    public int getRequestType() {
         return requestType;
     }
 
@@ -134,17 +125,14 @@ public class TransferEvent
      *                    <code>TransferEvent.REQUEST_GET<code> or <code>TransferEvent.REQUEST_PUT<code>.
      * @throws IllegalArgumentException when
      */
-    public void setRequestType( final int requestType )
-    {
-        switch ( requestType )
-        {
-
+    public void setRequestType(final int requestType) {
+        switch (requestType) {
             case REQUEST_PUT:
             case REQUEST_GET:
                 break;
 
-            default :
-                throw new IllegalArgumentException( "Illegal request type: " + requestType );
+            default:
+                throw new IllegalArgumentException("Illegal request type: " + requestType);
         }
 
         this.requestType = requestType;
@@ -153,27 +141,23 @@ public class TransferEvent
     /**
      * @return Returns the eventType.
      */
-    public int getEventType()
-    {
+    public int getEventType() {
         return eventType;
     }
 
     /**
      * @param eventType The eventType to set.
      */
-    public void setEventType( final int eventType )
-    {
-        switch ( eventType )
-        {
-
+    public void setEventType(final int eventType) {
+        switch (eventType) {
             case TRANSFER_INITIATED:
             case TRANSFER_STARTED:
             case TRANSFER_COMPLETED:
             case TRANSFER_PROGRESS:
             case TRANSFER_ERROR:
                 break;
-            default :
-                throw new IllegalArgumentException( "Illegal event type: " + eventType );
+            default:
+                throw new IllegalArgumentException("Illegal event type: " + eventType);
         }
 
         this.eventType = eventType;
@@ -182,137 +166,114 @@ public class TransferEvent
     /**
      * @param resource The resource to set.
      */
-    public void setResource( final Resource resource )
-    {
+    public void setResource(final Resource resource) {
         this.resource = resource;
     }
 
     /**
      * @return Returns the local file.
      */
-    public File getLocalFile()
-    {
+    public File getLocalFile() {
         return localFile;
     }
 
     /**
      * @param localFile The local file to set.
      */
-    public void setLocalFile( File localFile )
-    {
+    public void setLocalFile(File localFile) {
         this.localFile = localFile;
     }
 
-    public String toString()
-    {
+    public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append( "TransferEvent[" );
+        sb.append("TransferEvent[");
 
-        switch ( this.getRequestType() )
-        {
+        switch (this.getRequestType()) {
             case REQUEST_GET:
-                sb.append( "GET" );
+                sb.append("GET");
                 break;
             case REQUEST_PUT:
-                sb.append( "PUT" );
+                sb.append("PUT");
                 break;
             default:
-                sb.append( this.getRequestType() );
+                sb.append(this.getRequestType());
                 break;
         }
 
-        sb.append( "|" );
-        switch ( this.getEventType() )
-        {
+        sb.append("|");
+        switch (this.getEventType()) {
             case TRANSFER_COMPLETED:
-                sb.append( "COMPLETED" );
+                sb.append("COMPLETED");
                 break;
             case TRANSFER_ERROR:
-                sb.append( "ERROR" );
+                sb.append("ERROR");
                 break;
             case TRANSFER_INITIATED:
-                sb.append( "INITIATED" );
+                sb.append("INITIATED");
                 break;
             case TRANSFER_PROGRESS:
-                sb.append( "PROGRESS" );
+                sb.append("PROGRESS");
                 break;
             case TRANSFER_STARTED:
-                sb.append( "STARTED" );
+                sb.append("STARTED");
                 break;
             default:
-                sb.append( this.getEventType() );
+                sb.append(this.getEventType());
                 break;
         }
 
-        sb.append( "|" );
+        sb.append("|");
 
-        sb.append( this.getWagon().getRepository() ).append( "|" );
-        sb.append( this.getLocalFile() ).append( "|" );
-        sb.append( this.getResource().inspect() );
-        sb.append( "]" );
+        sb.append(this.getWagon().getRepository()).append("|");
+        sb.append(this.getLocalFile()).append("|");
+        sb.append(this.getResource().inspect());
+        sb.append("]");
 
         return sb.toString();
     }
 
-    public int hashCode()
-    {
+    public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + eventType;
-        result = prime * result + ( ( exception == null ) ? 0 : exception.hashCode() );
-        result = prime * result + ( ( localFile == null ) ? 0 : localFile.hashCode() );
+        result = prime * result + ((exception == null) ? 0 : exception.hashCode());
+        result = prime * result + ((localFile == null) ? 0 : localFile.hashCode());
         result = prime * result + requestType;
-        result = prime * result + ( ( resource == null ) ? 0 : resource.hashCode() );
+        result = prime * result + ((resource == null) ? 0 : resource.hashCode());
         return result;
     }
 
-    public boolean equals( Object obj )
-    {
-        if ( this == obj )
-        {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if ( ( obj == null ) || ( getClass() != obj.getClass() ) )
-        {
+        if ((obj == null) || (getClass() != obj.getClass())) {
             return false;
         }
         final TransferEvent other = (TransferEvent) obj;
-        if ( eventType != other.eventType )
-        {
+        if (eventType != other.eventType) {
             return false;
         }
-        if ( exception == null )
-        {
-            if ( other.exception != null )
-            {
+        if (exception == null) {
+            if (other.exception != null) {
                 return false;
             }
-        }
-        else if ( !exception.getClass().equals( other.exception.getClass() ) )
-        {
+        } else if (!exception.getClass().equals(other.exception.getClass())) {
             return false;
         }
-        if ( requestType != other.requestType )
-        {
+        if (requestType != other.requestType) {
             return false;
         }
-        if ( resource == null )
-        {
-            if ( other.resource != null )
-            {
+        if (resource == null) {
+            if (other.resource != null) {
                 return false;
             }
-        }
-        else if ( !resource.equals( other.resource ) )
-        {
+        } else if (!resource.equals(other.resource)) {
             return false;
-        }
-        else if ( !source.equals( other.source ) )
-        {
+        } else if (!source.equals(other.source)) {
             return false;
         }
         return true;
     }
-    
 }

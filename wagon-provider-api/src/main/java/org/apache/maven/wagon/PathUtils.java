@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon;
 
 import java.io.File;
 import java.util.StringTokenizer;
@@ -28,11 +27,8 @@ import java.util.StringTokenizer;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public final class PathUtils
-{
-    private PathUtils()
-    {
-    }
+public final class PathUtils {
+    private PathUtils() {}
 
     /**
      * Returns the directory path portion of a file specification string.
@@ -40,11 +36,10 @@ public final class PathUtils
      *
      * @return The directory portion excluding the ending file separator.
      */
-    public static String dirname( final String path )
-    {
-        final int i = path.lastIndexOf( "/" );
+    public static String dirname(final String path) {
+        final int i = path.lastIndexOf("/");
 
-        return ( ( i >= 0 ) ? path.substring( 0, i ) : "" );
+        return ((i >= 0) ? path.substring(0, i) : "");
     }
 
     /**
@@ -52,38 +47,30 @@ public final class PathUtils
      *
      * @return The filename string with extension.
      */
-    public static String filename( final String path )
-    {
-        final int i = path.lastIndexOf( "/" );
-        return ( ( i >= 0 ) ? path.substring( i + 1 ) : path );
+    public static String filename(final String path) {
+        final int i = path.lastIndexOf("/");
+        return ((i >= 0) ? path.substring(i + 1) : path);
     }
 
-    public static String[] dirnames( final String path )
-    {
-        final String dirname = PathUtils.dirname( path );
-        return split( dirname, "/", -1 );
-
+    public static String[] dirnames(final String path) {
+        final String dirname = PathUtils.dirname(path);
+        return split(dirname, "/", -1);
     }
 
-    private static String[] split( final String str, final String separator, final int max )
-    {
+    private static String[] split(final String str, final String separator, final int max) {
         final StringTokenizer tok;
 
-        if ( separator == null )
-        {
+        if (separator == null) {
             // Null separator means we're using StringTokenizer's default
             // delimiter, which comprises all whitespace characters.
-            tok = new StringTokenizer( str );
-        }
-        else
-        {
-            tok = new StringTokenizer( str, separator );
+            tok = new StringTokenizer(str);
+        } else {
+            tok = new StringTokenizer(str, separator);
         }
 
         int listSize = tok.countTokens();
 
-        if ( max > 0 && listSize > max )
-        {
+        if (max > 0 && listSize > max) {
             listSize = max;
         }
 
@@ -94,27 +81,23 @@ public final class PathUtils
         int lastTokenBegin;
         int lastTokenEnd = 0;
 
-        while ( tok.hasMoreTokens() )
-        {
-            if ( max > 0 && i == listSize - 1 )
-            {
+        while (tok.hasMoreTokens()) {
+            if (max > 0 && i == listSize - 1) {
                 // In the situation where we hit the max yet have
                 // tokens left over in our input, the last list
                 // element gets all remaining text.
                 final String endToken = tok.nextToken();
 
-                lastTokenBegin = str.indexOf( endToken, lastTokenEnd );
+                lastTokenBegin = str.indexOf(endToken, lastTokenEnd);
 
-                list[i] = str.substring( lastTokenBegin );
+                list[i] = str.substring(lastTokenBegin);
 
                 break;
 
-            }
-            else
-            {
+            } else {
                 list[i] = tok.nextToken();
 
-                lastTokenBegin = str.indexOf( list[i], lastTokenEnd );
+                lastTokenBegin = str.indexOf(list[i], lastTokenEnd);
 
                 lastTokenEnd = lastTokenBegin + list[i].length();
             }
@@ -131,84 +114,73 @@ public final class PathUtils
      * @param url the url
      * @return the host name
      */
-    public static String host( final String url )
-    {
-        if ( url == null || url.length() == 0 )
-        {
+    public static String host(final String url) {
+        if (url == null || url.length() == 0) {
             return "localhost";
         }
-        String authorization = authorization( url );
-        int index = authorization.indexOf( '@' );
-        String host = ( index >= 0 ) ? authorization.substring( index + 1 ) : authorization;
+        String authorization = authorization(url);
+        int index = authorization.indexOf('@');
+        String host = (index >= 0) ? authorization.substring(index + 1) : authorization;
         // In case we have IPv6 in the host portion of url
         // we have to remove brackets '[' and ']'
-        return ( ( host.charAt( 0 ) == '[' ) && ( host.charAt( host.length() - 1 ) == ']' ) )
-                        ? host.substring( 1, host.length() - 1 )
-                        : host;
+        return ((host.charAt(0) == '[') && (host.charAt(host.length() - 1) == ']'))
+                ? host.substring(1, host.length() - 1)
+                : host;
     }
 
     /**
      * This was changed from private to package local so that it can be unit tested.
      */
-    static String authorization( final String url )
-    {
-        if ( url == null )
-        {
+    static String authorization(final String url) {
+        if (url == null) {
             return "localhost";
         }
 
-        String protocol = PathUtils.protocol( url );
+        String protocol = PathUtils.protocol(url);
 
-        if ( protocol == null || protocol.equalsIgnoreCase( "file" ) )
-        {
+        if (protocol == null || protocol.equalsIgnoreCase("file")) {
             return "localhost";
         }
 
         String host = url;
-        if ( protocol.equalsIgnoreCase( "scm" ) )
-        {
+        if (protocol.equalsIgnoreCase("scm")) {
             // skip over type
-            host = host.substring( host.indexOf( ":", 4 ) + 1 ).trim();
+            host = host.substring(host.indexOf(":", 4) + 1).trim();
         }
 
-        protocol = PathUtils.protocol( host );
+        protocol = PathUtils.protocol(host);
 
-        if ( protocol.equalsIgnoreCase( "file" ) )
-        {
+        if (protocol.equalsIgnoreCase("file")) {
             return "localhost";
         }
 
         // skip over protocol
-        host = host.substring( host.indexOf( ":" ) + 1 ).trim();
-        if ( host.startsWith( "//" ) )
-        {
-            host = host.substring( 2 );
+        host = host.substring(host.indexOf(":") + 1).trim();
+        if (host.startsWith("//")) {
+            host = host.substring(2);
         }
 
-        int pos = host.indexOf( "/" );
+        int pos = host.indexOf("/");
 
-        if ( pos > 0 )
-        {
-            host = host.substring( 0, pos );
+        if (pos > 0) {
+            host = host.substring(0, pos);
         }
 
-        pos = host.indexOf( '@' );
+        pos = host.indexOf('@');
 
-        pos = ( pos > 0 ) ? endOfHostPosition( host, pos ) : endOfHostPosition( host, 0 );
+        pos = (pos > 0) ? endOfHostPosition(host, pos) : endOfHostPosition(host, 0);
 
-        if ( pos > 0 )
-        {
-            host = host.substring( 0, pos );
+        if (pos > 0) {
+            host = host.substring(0, pos);
         }
         return host;
     }
 
-    private static int endOfHostPosition( String host, int pos )
-    {
+    private static int endOfHostPosition(String host, int pos) {
         // if this is IPv6 then it will be in IPv6 Literal Addresses in URL's format
         // see: http://www.ietf.org/rfc/rfc2732.txt
-        int endOfIPv6Pos = host.indexOf( ']', pos );
-        return ( endOfIPv6Pos > 0 ) ? endOfIPv6Pos + 1 : host.indexOf( ":", pos );
+        int endOfIPv6Pos = host.indexOf(']', pos);
+        return (endOfIPv6Pos > 0) ? endOfIPv6Pos + 1 : host.indexOf(":", pos);
     }
 
     /**
@@ -221,80 +193,66 @@ public final class PathUtils
      * @param url the url
      * @return the host name
      */
-    public static String protocol( final String url )
-    {
-        final int pos = url.indexOf( ":" );
+    public static String protocol(final String url) {
+        final int pos = url.indexOf(":");
 
-        if ( pos == -1 )
-        {
+        if (pos == -1) {
             return "";
         }
-        return url.substring( 0, pos ).trim();
+        return url.substring(0, pos).trim();
     }
 
     /**
      * @param url
      * @return the port or {@link WagonConstants#UNKNOWN_PORT} if not existent
      */
-    public static int port( String url )
-    {
+    public static int port(String url) {
 
-        final String protocol = PathUtils.protocol( url );
+        final String protocol = PathUtils.protocol(url);
 
-        if ( protocol == null || protocol.equalsIgnoreCase( "file" ) )
-        {
+        if (protocol == null || protocol.equalsIgnoreCase("file")) {
             return WagonConstants.UNKNOWN_PORT;
         }
 
-        final String authorization = PathUtils.authorization( url );
+        final String authorization = PathUtils.authorization(url);
 
-        if ( authorization == null )
-        {
+        if (authorization == null) {
             return WagonConstants.UNKNOWN_PORT;
         }
 
-        if ( protocol.equalsIgnoreCase( "scm" ) )
-        {
+        if (protocol.equalsIgnoreCase("scm")) {
             // skip over type
-            url = url.substring( url.indexOf( ":", 4 ) + 1 ).trim();
+            url = url.substring(url.indexOf(":", 4) + 1).trim();
         }
 
-        if ( url.regionMatches( true, 0, "file:", 0, 5 ) || url.regionMatches( true, 0, "local:", 0, 6 ) )
-        {
+        if (url.regionMatches(true, 0, "file:", 0, 5) || url.regionMatches(true, 0, "local:", 0, 6)) {
             return WagonConstants.UNKNOWN_PORT;
         }
 
         // skip over protocol
-        url = url.substring( url.indexOf( ":" ) + 1 ).trim();
-        if ( url.startsWith( "//" ) )
-        {
-            url = url.substring( 2 );
+        url = url.substring(url.indexOf(":") + 1).trim();
+        if (url.startsWith("//")) {
+            url = url.substring(2);
         }
 
         int start = authorization.length();
 
-        if ( url.length() > start && url.charAt( start ) == ':' )
-        {
-            int end = url.indexOf( '/', start );
+        if (url.length() > start && url.charAt(start) == ':') {
+            int end = url.indexOf('/', start);
 
-            if ( end == start + 1 )
-            {
+            if (end == start + 1) {
                 // it is :/
                 return WagonConstants.UNKNOWN_PORT;
             }
 
-            if ( end == -1 )
-            {
+            if (end == -1) {
                 end = url.length();
             }
 
-            return Integer.parseInt( url.substring( start + 1, end ) );
-        }
-        else
-        {
+            return Integer.parseInt(url.substring(start + 1, end));
+        } else {
             return WagonConstants.UNKNOWN_PORT;
         }
-
     }
 
     /**
@@ -304,52 +262,40 @@ public final class PathUtils
      * @return the basedir of the repository
      * @todo need to URL decode for spaces?
      */
-    public static String basedir( String url )
-    {
-        String protocol = PathUtils.protocol( url );
+    public static String basedir(String url) {
+        String protocol = PathUtils.protocol(url);
 
         String retValue = null;
 
-        if ( protocol.equalsIgnoreCase( "scm" ) )
-        {
+        if (protocol.equalsIgnoreCase("scm")) {
             // skip over SCM bits
-            if ( url.regionMatches( true, 0, "scm:svn:", 0, 8 ) )
-            {
-                url = url.substring( url.indexOf( ":", 4 ) + 1 );
-                protocol = PathUtils.protocol( url );
+            if (url.regionMatches(true, 0, "scm:svn:", 0, 8)) {
+                url = url.substring(url.indexOf(":", 4) + 1);
+                protocol = PathUtils.protocol(url);
             }
         }
 
-        if ( protocol.equalsIgnoreCase( "file" ) )
-        {
-            retValue = url.substring( protocol.length() + 1 );
-            retValue = decode( retValue );
+        if (protocol.equalsIgnoreCase("file")) {
+            retValue = url.substring(protocol.length() + 1);
+            retValue = decode(retValue);
             // special case: if omitted // on protocol, keep path as is
-            if ( retValue.startsWith( "//" ) )
-            {
-                retValue = retValue.substring( 2 );
+            if (retValue.startsWith("//")) {
+                retValue = retValue.substring(2);
 
-                if ( retValue.length() >= 2 && ( retValue.charAt( 1 ) == '|' || retValue.charAt( 1 ) == ':' ) )
-                {
+                if (retValue.length() >= 2 && (retValue.charAt(1) == '|' || retValue.charAt(1) == ':')) {
                     // special case: if there is a windows drive letter, then keep the original return value
-                    retValue = retValue.charAt( 0 ) + ":" + retValue.substring( 2 );
-                }
-                else
-                {
+                    retValue = retValue.charAt(0) + ":" + retValue.substring(2);
+                } else {
                     // Now we expect the host
-                    int index = retValue.indexOf( "/" );
-                    if ( index >= 0 )
-                    {
-                        retValue = retValue.substring( index + 1 );
+                    int index = retValue.indexOf("/");
+                    if (index >= 0) {
+                        retValue = retValue.substring(index + 1);
                     }
 
                     // special case: if there is a windows drive letter, then keep the original return value
-                    if ( retValue.length() >= 2 && ( retValue.charAt( 1 ) == '|' || retValue.charAt( 1 ) == ':' ) )
-                    {
-                        retValue = retValue.charAt( 0 ) + ":" + retValue.substring( 2 );
-                    }
-                    else if ( index >= 0 )
-                    {
+                    if (retValue.length() >= 2 && (retValue.charAt(1) == '|' || retValue.charAt(1) == ':')) {
+                        retValue = retValue.charAt(0) + ":" + retValue.substring(2);
+                    } else if (index >= 0) {
                         // leading / was previously stripped
                         retValue = "/" + retValue;
                     }
@@ -357,56 +303,45 @@ public final class PathUtils
             }
 
             // special case: if there is a windows drive letter using |, switch to :
-            if ( retValue.length() >= 2 && retValue.charAt( 1 ) == '|' )
-            {
-                retValue = retValue.charAt( 0 ) + ":" + retValue.substring( 2 );
+            if (retValue.length() >= 2 && retValue.charAt(1) == '|') {
+                retValue = retValue.charAt(0) + ":" + retValue.substring(2);
             }
-        }
-        else
-        {
-            final String authorization = PathUtils.authorization( url );
+        } else {
+            final String authorization = PathUtils.authorization(url);
 
-            final int port = PathUtils.port( url );
+            final int port = PathUtils.port(url);
 
             int pos = 0;
 
-            if ( protocol.equalsIgnoreCase( "scm" ) )
-            {
-                pos = url.indexOf( ":", 4 ) + 1;
-                pos = url.indexOf( ":", pos ) + 1;
-            }
-            else
-            {
-                int index = url.indexOf( "://" );
-                if ( index != -1 )
-                {
+            if (protocol.equalsIgnoreCase("scm")) {
+                pos = url.indexOf(":", 4) + 1;
+                pos = url.indexOf(":", pos) + 1;
+            } else {
+                int index = url.indexOf("://");
+                if (index != -1) {
                     pos = index + 3;
                 }
             }
 
             pos += authorization.length();
 
-            if ( port != WagonConstants.UNKNOWN_PORT )
-            {
-                pos = pos + Integer.toString( port ).length() + 1;
+            if (port != WagonConstants.UNKNOWN_PORT) {
+                pos = pos + Integer.toString(port).length() + 1;
             }
 
-            if ( url.length() > pos )
-            {
-                retValue = url.substring( pos );
-                if ( retValue.startsWith( ":" ) )
-                {
+            if (url.length() > pos) {
+                retValue = url.substring(pos);
+                if (retValue.startsWith(":")) {
                     // this is for :/ after the host
-                    retValue = retValue.substring( 1 );
+                    retValue = retValue.substring(1);
                 }
 
                 // one module may be allowed in the path in CVS
-                retValue = retValue.replace( ':', '/' );
+                retValue = retValue.replace(':', '/');
             }
         }
 
-        if ( retValue == null )
-        {
+        if (retValue == null) {
             retValue = "/";
         }
         return retValue.trim();
@@ -419,83 +354,65 @@ public final class PathUtils
      * @param url The URL to decode, may be <code>null</code>.
      * @return The decoded URL or <code>null</code> if the input was <code>null</code>.
      */
-    private static String decode( String url )
-    {
+    private static String decode(String url) {
         String decoded = url;
-        if ( url != null )
-        {
+        if (url != null) {
             int pos = -1;
-            while ( ( pos = decoded.indexOf( '%', pos + 1 ) ) >= 0 )
-            {
-                if ( pos + 2 < decoded.length() )
-                {
-                    String hexStr = decoded.substring( pos + 1, pos + 3 );
-                    char ch = (char) Integer.parseInt( hexStr, 16 );
-                    decoded = decoded.substring( 0, pos ) + ch + decoded.substring( pos + 3 );
+            while ((pos = decoded.indexOf('%', pos + 1)) >= 0) {
+                if (pos + 2 < decoded.length()) {
+                    String hexStr = decoded.substring(pos + 1, pos + 3);
+                    char ch = (char) Integer.parseInt(hexStr, 16);
+                    decoded = decoded.substring(0, pos) + ch + decoded.substring(pos + 3);
                 }
             }
         }
         return decoded;
     }
 
-    public static String user( String url )
-    {
-        String host = authorization( url );
-        int index = host.indexOf( '@' );
-        if ( index > 0 )
-        {
-            String userInfo = host.substring( 0, index );
-            index = userInfo.indexOf( ':' );
-            if ( index > 0 )
-            {
-                return userInfo.substring( 0, index );
-            }
-            else if ( index < 0 )
-            {
+    public static String user(String url) {
+        String host = authorization(url);
+        int index = host.indexOf('@');
+        if (index > 0) {
+            String userInfo = host.substring(0, index);
+            index = userInfo.indexOf(':');
+            if (index > 0) {
+                return userInfo.substring(0, index);
+            } else if (index < 0) {
                 return userInfo;
             }
         }
         return null;
     }
 
-    public static String password( String url )
-    {
-        String host = authorization( url );
-        int index = host.indexOf( '@' );
-        if ( index > 0 )
-        {
-            String userInfo = host.substring( 0, index );
-            index = userInfo.indexOf( ':' );
-            if ( index >= 0 )
-            {
-                return userInfo.substring( index + 1 );
+    public static String password(String url) {
+        String host = authorization(url);
+        int index = host.indexOf('@');
+        if (index > 0) {
+            String userInfo = host.substring(0, index);
+            index = userInfo.indexOf(':');
+            if (index >= 0) {
+                return userInfo.substring(index + 1);
             }
         }
         return null;
     }
 
     // TODO: move to plexus-utils or use something appropriate from there
-    public static String toRelative( File basedir, String absolutePath )
-    {
+    public static String toRelative(File basedir, String absolutePath) {
         String relative;
 
-        absolutePath = absolutePath.replace( '\\', '/' );
-        String basedirPath = basedir.getAbsolutePath().replace( '\\', '/' );
+        absolutePath = absolutePath.replace('\\', '/');
+        String basedirPath = basedir.getAbsolutePath().replace('\\', '/');
 
-        if ( absolutePath.startsWith( basedirPath ) )
-        {
-            relative = absolutePath.substring( basedirPath.length() );
-            if ( relative.startsWith( "/" ) )
-            {
-                relative = relative.substring( 1 );
+        if (absolutePath.startsWith(basedirPath)) {
+            relative = absolutePath.substring(basedirPath.length());
+            if (relative.startsWith("/")) {
+                relative = relative.substring(1);
             }
-            if ( relative.length() <= 0 )
-            {
+            if (relative.length() <= 0) {
                 relative = ".";
             }
-        }
-        else
-        {
+        } else {
             relative = absolutePath;
         }
 

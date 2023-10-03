@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,16 @@ package org.apache.maven.wagon.providers.ssh;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.apache.maven.wagon.CommandExecutionException;
 import org.apache.maven.wagon.CommandExecutor;
@@ -36,107 +44,77 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
 /**
  * Scp helper for general algorithms on ssh server.
  * See {@link #putDirectory(Wagon, File, String) putDirectory(...)} for more info on bulk directory upload.
  */
-public class ScpHelper
-{
+public class ScpHelper {
     public static final char PATH_SEPARATOR = '/';
 
     public static final int DEFAULT_SSH_PORT = 22;
 
     private final CommandExecutor executor;
 
-    public ScpHelper( CommandExecutor executor )
-    {
+    public ScpHelper(CommandExecutor executor) {
         this.executor = executor;
     }
 
-    public static String getResourceDirectory( String resourceName )
-    {
-        String dir = PathUtils.dirname( resourceName );
-        dir = StringUtils.replace( dir, "\\", "/" );
+    public static String getResourceDirectory(String resourceName) {
+        String dir = PathUtils.dirname(resourceName);
+        dir = StringUtils.replace(dir, "\\", "/");
         return dir;
     }
 
-    public static String getResourceFilename( String r )
-    {
+    public static String getResourceFilename(String r) {
         String filename;
-        if ( r.lastIndexOf( PATH_SEPARATOR ) > 0 )
-        {
-            filename = r.substring( r.lastIndexOf( PATH_SEPARATOR ) + 1 );
-        }
-        else
-        {
+        if (r.lastIndexOf(PATH_SEPARATOR) > 0) {
+            filename = r.substring(r.lastIndexOf(PATH_SEPARATOR) + 1);
+        } else {
             filename = r;
         }
         return filename;
     }
 
-    public static Resource getResource( String resourceName )
-    {
-        String r = StringUtils.replace( resourceName, "\\", "/" );
-        return new Resource( r );
+    public static Resource getResource(String resourceName) {
+        String r = StringUtils.replace(resourceName, "\\", "/");
+        return new Resource(r);
     }
 
-    public static File getPrivateKey( AuthenticationInfo authenticationInfo )
-        throws FileNotFoundException
-    {
+    public static File getPrivateKey(AuthenticationInfo authenticationInfo) throws FileNotFoundException {
         // If user don't define a password, he want to use a private key
         File privateKey = null;
-        if ( authenticationInfo.getPassword() == null )
-        {
+        if (authenticationInfo.getPassword() == null) {
 
-            if ( authenticationInfo.getPrivateKey() != null )
-            {
-                privateKey = new File( authenticationInfo.getPrivateKey() );
-                if ( !privateKey.exists() )
-                {
-                    throw new FileNotFoundException( "Private key '" + privateKey + "' not found" );
+            if (authenticationInfo.getPrivateKey() != null) {
+                privateKey = new File(authenticationInfo.getPrivateKey());
+                if (!privateKey.exists()) {
+                    throw new FileNotFoundException("Private key '" + privateKey + "' not found");
                 }
-            }
-            else
-            {
+            } else {
                 privateKey = findPrivateKey();
             }
 
-            if ( privateKey != null && privateKey.exists() )
-            {
-                if ( authenticationInfo.getPassphrase() == null )
-                {
-                    authenticationInfo.setPassphrase( "" );
+            if (privateKey != null && privateKey.exists()) {
+                if (authenticationInfo.getPassphrase() == null) {
+                    authenticationInfo.setPassphrase("");
                 }
             }
         }
         return privateKey;
     }
 
-    private static File findPrivateKey()
-    {
-        String privateKeyDirectory = System.getProperty( "wagon.privateKeyDirectory" );
+    private static File findPrivateKey() {
+        String privateKeyDirectory = System.getProperty("wagon.privateKeyDirectory");
 
-        if ( privateKeyDirectory == null )
-        {
-            privateKeyDirectory = System.getProperty( "user.home" );
+        if (privateKeyDirectory == null) {
+            privateKeyDirectory = System.getProperty("user.home");
         }
 
-        File privateKey = new File( privateKeyDirectory, ".ssh/id_dsa" );
+        File privateKey = new File(privateKeyDirectory, ".ssh/id_dsa");
 
-        if ( !privateKey.exists() )
-        {
-            privateKey = new File( privateKeyDirectory, ".ssh/id_rsa" );
-            if ( !privateKey.exists() )
-            {
+        if (!privateKey.exists()) {
+            privateKey = new File(privateKeyDirectory, ".ssh/id_rsa");
+            if (!privateKey.exists()) {
                 privateKey = null;
             }
         }
@@ -144,62 +122,48 @@ public class ScpHelper
         return privateKey;
     }
 
-    public static void createZip( List<String> files, File zipName, File basedir )
-        throws IOException
-    {
+    public static void createZip(List<String> files, File zipName, File basedir) throws IOException {
         ZipOutputStream zos = null;
-        try
-        {
-            zos = new ZipOutputStream( new FileOutputStream( zipName ) );
+        try {
+            zos = new ZipOutputStream(new FileOutputStream(zipName));
 
-            for ( String file : files )
-            {
-                file = file.replace( '\\', '/' );
+            for (String file : files) {
+                file = file.replace('\\', '/');
 
-                writeZipEntry( zos, new File( basedir, file ), file );
+                writeZipEntry(zos, new File(basedir, file), file);
             }
 
             zos.close();
             zos = null;
-        }
-        finally
-        {
-            IOUtil.close( zos );
+        } finally {
+            IOUtil.close(zos);
         }
     }
 
-    private static void writeZipEntry( ZipOutputStream jar, File source, String entryName )
-        throws IOException
-    {
+    private static void writeZipEntry(ZipOutputStream jar, File source, String entryName) throws IOException {
         byte[] buffer = new byte[1024];
 
         int bytesRead;
 
-        FileInputStream is = new FileInputStream( source );
+        FileInputStream is = new FileInputStream(source);
 
-        try
-        {
-            ZipEntry entry = new ZipEntry( entryName );
+        try {
+            ZipEntry entry = new ZipEntry(entryName);
 
-            jar.putNextEntry( entry );
+            jar.putNextEntry(entry);
 
-            while ( ( bytesRead = is.read( buffer ) ) != -1 )
-            {
-                jar.write( buffer, 0, bytesRead );
+            while ((bytesRead = is.read(buffer)) != -1) {
+                jar.write(buffer, 0, bytesRead);
             }
-        }
-        finally
-        {
+        } finally {
             is.close();
         }
     }
 
-    protected static String getPath( String basedir, String dir )
-    {
+    protected static String getPath(String basedir, String dir) {
         String path;
         path = basedir;
-        if ( !basedir.endsWith( "/" ) && !dir.startsWith( "/" ) )
-        {
+        if (!basedir.endsWith("/") && !dir.startsWith("/")) {
             path += "/";
         }
         path += dir;
@@ -210,156 +174,125 @@ public class ScpHelper
      * Put a whole directory content, by transferring a unique zip file and uncompressing it
      * on the target ssh server with <code>unzip</code> command.
      */
-    public void putDirectory( Wagon wagon, File sourceDirectory, String destinationDirectory )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
+    public void putDirectory(Wagon wagon, File sourceDirectory, String destinationDirectory)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
         Repository repository = wagon.getRepository();
 
         String basedir = repository.getBasedir();
 
-        String destDir = StringUtils.replace( destinationDirectory, "\\", "/" );
+        String destDir = StringUtils.replace(destinationDirectory, "\\", "/");
 
-        String path = getPath( basedir, destDir );
-        try
-        {
-            if ( repository.getPermissions() != null )
-            {
+        String path = getPath(basedir, destDir);
+        try {
+            if (repository.getPermissions() != null) {
                 String dirPerms = repository.getPermissions().getDirectoryMode();
 
-                if ( dirPerms != null )
-                {
-                    String umaskCmd = "umask " + PermissionModeUtils.getUserMaskFor( dirPerms );
-                    executor.executeCommand( umaskCmd );
+                if (dirPerms != null) {
+                    String umaskCmd = "umask " + PermissionModeUtils.getUserMaskFor(dirPerms);
+                    executor.executeCommand(umaskCmd);
                 }
             }
 
-            //String mkdirCmd = "mkdir -p " + path;
+            // String mkdirCmd = "mkdir -p " + path;
             String mkdirCmd = "mkdir -p \"" + path + "\"";
 
-            executor.executeCommand( mkdirCmd );
-        }
-        catch ( CommandExecutionException e )
-        {
-            throw new TransferFailedException( "Error performing commands for file transfer", e );
+            executor.executeCommand(mkdirCmd);
+        } catch (CommandExecutionException e) {
+            throw new TransferFailedException("Error performing commands for file transfer", e);
         }
 
         File zipFile;
-        try
-        {
-            zipFile = File.createTempFile( "wagon", ".zip" );
+        try {
+            zipFile = File.createTempFile("wagon", ".zip");
             zipFile.deleteOnExit();
 
-            List<String> files = FileUtils.getFileNames( sourceDirectory, "**/**", "", false );
+            List<String> files = FileUtils.getFileNames(sourceDirectory, "**/**", "", false);
 
-            createZip( files, zipFile, sourceDirectory );
-        }
-        catch ( IOException e )
-        {
-            throw new TransferFailedException( "Unable to create ZIP archive of directory", e );
+            createZip(files, zipFile, sourceDirectory);
+        } catch (IOException e) {
+            throw new TransferFailedException("Unable to create ZIP archive of directory", e);
         }
 
-        wagon.put( zipFile, getPath( destDir, zipFile.getName() ) );
+        wagon.put(zipFile, getPath(destDir, zipFile.getName()));
 
-        try
-        {
-            //executor.executeCommand(
+        try {
+            // executor.executeCommand(
             //    "cd " + path + "; unzip -q -o " + zipFile.getName() + "; rm -f " + zipFile.getName() );
-            executor.executeCommand( "cd \"" + path + "\"; unzip -q -o \"" + zipFile.getName() + "\"; rm -f \""
-                + zipFile.getName() + "\"" );
+            executor.executeCommand("cd \"" + path + "\"; unzip -q -o \"" + zipFile.getName() + "\"; rm -f \""
+                    + zipFile.getName() + "\"");
 
             zipFile.delete();
 
             RepositoryPermissions permissions = repository.getPermissions();
 
-            if ( permissions != null && permissions.getGroup() != null )
-            {
-                //executor.executeCommand( "chgrp -Rf " + permissions.getGroup() + " " + path );
-                executor.executeCommand( "chgrp -Rf " + permissions.getGroup() + " \"" + path + "\"" );
+            if (permissions != null && permissions.getGroup() != null) {
+                // executor.executeCommand( "chgrp -Rf " + permissions.getGroup() + " " + path );
+                executor.executeCommand("chgrp -Rf " + permissions.getGroup() + " \"" + path + "\"");
             }
 
-            if ( permissions != null && permissions.getFileMode() != null )
-            {
-                //executor.executeCommand( "chmod -Rf " + permissions.getFileMode() + " " + path );
-                executor.executeCommand( "chmod -Rf " + permissions.getFileMode() + " \"" + path + "\"" );
+            if (permissions != null && permissions.getFileMode() != null) {
+                // executor.executeCommand( "chmod -Rf " + permissions.getFileMode() + " " + path );
+                executor.executeCommand("chmod -Rf " + permissions.getFileMode() + " \"" + path + "\"");
             }
-        }
-        catch ( CommandExecutionException e )
-        {
-            throw new TransferFailedException( "Error performing commands for file transfer", e );
+        } catch (CommandExecutionException e) {
+            throw new TransferFailedException("Error performing commands for file transfer", e);
         }
     }
 
-    public List<String> getFileList( String destinationDirectory, Repository repository )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        try
-        {
-            String path = getPath( repository.getBasedir(), destinationDirectory );
-            //Streams streams = executor.executeCommand( "ls -FlA " + path, false );
-            Streams streams = executor.executeCommand( "ls -FlA \"" + path + "\"", false );
+    public List<String> getFileList(String destinationDirectory, Repository repository)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+        try {
+            String path = getPath(repository.getBasedir(), destinationDirectory);
+            // Streams streams = executor.executeCommand( "ls -FlA " + path, false );
+            Streams streams = executor.executeCommand("ls -FlA \"" + path + "\"", false);
 
-            return new LSParser().parseFiles( streams.getOut() );
-        }
-        catch ( CommandExecutionException e )
-        {
-            if ( e.getMessage().trim().endsWith( "No such file or directory" ) )
-            {
-                throw new ResourceDoesNotExistException( e.getMessage().trim(), e );
-            }
-            else if ( e.getMessage().trim().endsWith( "Not a directory" ) )
-            {
-                throw new ResourceDoesNotExistException( e.getMessage().trim(), e );
-            }
-            else
-            {
-                throw new TransferFailedException( "Error performing file listing.", e );
+            return new LSParser().parseFiles(streams.getOut());
+        } catch (CommandExecutionException e) {
+            if (e.getMessage().trim().endsWith("No such file or directory")) {
+                throw new ResourceDoesNotExistException(e.getMessage().trim(), e);
+            } else if (e.getMessage().trim().endsWith("Not a directory")) {
+                throw new ResourceDoesNotExistException(e.getMessage().trim(), e);
+            } else {
+                throw new TransferFailedException("Error performing file listing.", e);
             }
         }
     }
 
-    public boolean resourceExists( String resourceName, Repository repository )
-        throws TransferFailedException, AuthorizationException
-    {
-        try
-        {
-            String path = getPath( repository.getBasedir(), resourceName );
-            //executor.executeCommand( "ls " + path, false );
-            executor.executeCommand( "ls \"" + path + "\"" );
+    public boolean resourceExists(String resourceName, Repository repository)
+            throws TransferFailedException, AuthorizationException {
+        try {
+            String path = getPath(repository.getBasedir(), resourceName);
+            // executor.executeCommand( "ls " + path, false );
+            executor.executeCommand("ls \"" + path + "\"");
 
             // Parsing of output not really needed.  As a failed ls results in a
             // CommandExectionException on the 'ls' command.
 
             return true;
-        }
-        catch ( CommandExecutionException e )
-        {
+        } catch (CommandExecutionException e) {
             // Error?  Then the 'ls' command failed.  No such file found.
             return false;
         }
     }
 
-    public void createRemoteDirectories( String path, RepositoryPermissions permissions )
-        throws CommandExecutionException
-    {
+    public void createRemoteDirectories(String path, RepositoryPermissions permissions)
+            throws CommandExecutionException {
         String umaskCmd = null;
-        if ( permissions != null )
-        {
+        if (permissions != null) {
             String dirPerms = permissions.getDirectoryMode();
 
-            if ( dirPerms != null )
-            {
-                umaskCmd = "umask " + PermissionModeUtils.getUserMaskFor( dirPerms );
+            if (dirPerms != null) {
+                umaskCmd = "umask " + PermissionModeUtils.getUserMaskFor(dirPerms);
             }
         }
 
-        //String mkdirCmd = "mkdir -p " + path;
+        // String mkdirCmd = "mkdir -p " + path;
         String mkdirCmd = "mkdir -p \"" + path + "\"";
 
-        if ( umaskCmd != null )
-        {
+        if (umaskCmd != null) {
             mkdirCmd = umaskCmd + "; " + mkdirCmd;
         }
 
-        executor.executeCommand( mkdirCmd );
+        executor.executeCommand(mkdirCmd);
     }
 }

@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh.jsch;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,16 +16,17 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh.jsch;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.Random;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
@@ -42,164 +41,120 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
-public class ScpWagonWithProxyTest
-    extends PlexusTestCase
-{
+public class ScpWagonWithProxyTest extends PlexusTestCase {
     private boolean handled;
 
-    public void testHttpProxy()
-        throws Exception
-    {
+    public void testHttpProxy() throws Exception {
         handled = false;
-        Handler handler = new AbstractHandler()
-        {
-            public void handle( String target, Request baseRequest, HttpServletRequest request,
-                HttpServletResponse response ) throws IOException, ServletException
-            {
-                assertEquals( "CONNECT", request.getMethod() );
+        Handler handler = new AbstractHandler() {
+            public void handle(
+                    String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
+                    throws IOException, ServletException {
+                assertEquals("CONNECT", request.getMethod());
 
                 handled = true;
-                baseRequest.setHandled( true );
+                baseRequest.setHandled(true);
             }
         };
 
-        Server server = new Server(  );
-        ServerConnector connector = new ServerConnector( server, new HttpConnectionFactory( new HttpConfiguration() ) );
-        server.addConnector( connector );
-        server.setHandler( handler );
+        Server server = new Server();
+        ServerConnector connector = new ServerConnector(server, new HttpConnectionFactory(new HttpConfiguration()));
+        server.addConnector(connector);
+        server.setHandler(handler);
         server.start();
 
         int port = connector.getLocalPort();
         ProxyInfo proxyInfo = new ProxyInfo();
-        proxyInfo.setHost( "localhost" );
-        proxyInfo.setPort( port );
-        proxyInfo.setType( "http" );
-        proxyInfo.setNonProxyHosts( null );
+        proxyInfo.setHost("localhost");
+        proxyInfo.setPort(port);
+        proxyInfo.setType("http");
+        proxyInfo.setNonProxyHosts(null);
 
-        Wagon wagon = (Wagon) lookup( Wagon.ROLE, "scp" );
-        try
-        {
-            wagon.connect( new Repository( "id", "scp://localhost/tmp" ), proxyInfo );
+        Wagon wagon = (Wagon) lookup(Wagon.ROLE, "scp");
+        try {
+            wagon.connect(new Repository("id", "scp://localhost/tmp"), proxyInfo);
             fail();
-        }
-        catch ( AuthenticationException e )
-        {
-            assertTrue( handled );
-        }
-        finally
-        {
+        } catch (AuthenticationException e) {
+            assertTrue(handled);
+        } finally {
             wagon.disconnect();
             server.stop();
         }
     }
 
-    public void testSocksProxy()
-        throws Exception
-    {
+    public void testSocksProxy() throws Exception {
         handled = false;
 
-        int port = ( Math.abs( new Random().nextInt() ) % 2048 ) + 1024;
+        int port = (Math.abs(new Random().nextInt()) % 2048) + 1024;
 
-        SocksServer s = new SocksServer( port );
-        Thread t = new Thread( s );
-        t.setDaemon( true );
+        SocksServer s = new SocksServer(port);
+        Thread t = new Thread(s);
+        t.setDaemon(true);
         t.start();
 
         ProxyInfo proxyInfo = new ProxyInfo();
-        proxyInfo.setHost( "localhost" );
-        proxyInfo.setPort( port );
-        proxyInfo.setType( "socks_5" );
-        proxyInfo.setNonProxyHosts( null );
+        proxyInfo.setHost("localhost");
+        proxyInfo.setPort(port);
+        proxyInfo.setType("socks_5");
+        proxyInfo.setNonProxyHosts(null);
 
-        Wagon wagon = (Wagon) lookup( Wagon.ROLE, "scp" );
-        try
-        {
-            wagon.connect( new Repository( "id", "scp://localhost/tmp" ), proxyInfo );
+        Wagon wagon = (Wagon) lookup(Wagon.ROLE, "scp");
+        try {
+            wagon.connect(new Repository("id", "scp://localhost/tmp"), proxyInfo);
             fail();
-        }
-        catch ( AuthenticationException e )
-        {
-            assertTrue( handled );
-        }
-        finally
-        {
+        } catch (AuthenticationException e) {
+            assertTrue(handled);
+        } finally {
             wagon.disconnect();
             t.interrupt();
         }
     }
 
-    private final class SocksServer
-        implements Runnable
-    {
+    private final class SocksServer implements Runnable {
 
         private final int port;
 
         private String userAgent;
 
-        private SocksServer( int port )
-        {
+        private SocksServer(int port) {
             this.port = port;
         }
 
-        public void run()
-        {
+        public void run() {
             ServerSocket ssock = null;
-            try
-            {
-                try
-                {
-                    ssock = new ServerSocket( port );
-                    ssock.setSoTimeout( 2000 );
-                }
-                catch ( IOException e )
-                {
+            try {
+                try {
+                    ssock = new ServerSocket(port);
+                    ssock.setSoTimeout(2000);
+                } catch (IOException e) {
                     return;
                 }
 
-                while ( !Thread.currentThread().isInterrupted() )
-                {
+                while (!Thread.currentThread().isInterrupted()) {
                     Socket sock = null;
-                    try
-                    {
-                        try
-                        {
+                    try {
+                        try {
                             sock = ssock.accept();
-                        }
-                        catch ( SocketTimeoutException e )
-                        {
+                        } catch (SocketTimeoutException e) {
                             continue;
                         }
 
                         handled = true;
-                    }
-                    catch ( IOException e )
-                    {
-                    }
-                    finally
-                    {
-                        if ( sock != null )
-                        {
-                            try
-                            {
+                    } catch (IOException e) {
+                    } finally {
+                        if (sock != null) {
+                            try {
                                 sock.close();
-                            }
-                            catch ( IOException e )
-                            {
+                            } catch (IOException e) {
                             }
                         }
                     }
                 }
-            }
-            finally
-            {
-                if ( ssock != null )
-                {
-                    try
-                    {
+            } finally {
+                if (ssock != null) {
+                    try {
                         ssock.close();
-                    }
-                    catch ( IOException e )
-                    {
+                    } catch (IOException e) {
                     }
                 }
             }

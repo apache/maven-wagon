@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh.interactive;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.ssh.interactive;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh.interactive;
 
 /**
  * Interactive part for <code>UserInfo</code>
@@ -26,15 +25,14 @@ package org.apache.maven.wagon.providers.ssh.interactive;
  * @see com.jcraft.jsch.UserInfo
  * @since Sep 12, 2005
  */
-public interface InteractiveUserInfo
-{
+public interface InteractiveUserInfo {
     String ROLE = InteractiveUserInfo.class.getName();
 
-    boolean promptYesNo( String message );
+    boolean promptYesNo(String message);
 
-    void showMessage( String message );
+    void showMessage(String message);
 
-    String promptPassword( String message );
+    String promptPassword(String message);
 
-    String promptPassphrase( String message );
+    String promptPassphrase(String message);
 }

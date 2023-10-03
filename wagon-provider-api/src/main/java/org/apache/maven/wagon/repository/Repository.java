@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.repository;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,13 +16,14 @@ package org.apache.maven.wagon.repository;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.repository;
+
+import java.io.Serializable;
+import java.util.Properties;
 
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.WagonConstants;
 import org.codehaus.plexus.util.StringUtils;
-
-import java.io.Serializable;
-import java.util.Properties;
 
 /**
  * This class is an abstraction of the location from/to resources
@@ -34,9 +33,7 @@ import java.util.Properties;
  *
  * @todo [BP] some things are specific to certain wagons (eg key stuff in authInfo, permissions)
  */
-public class Repository
-    implements Serializable
-{
+public class Repository implements Serializable {
     private static final long serialVersionUID = 1312227676322136247L;
 
     private String id;
@@ -69,35 +66,27 @@ public class Repository
     /**
      * @deprecated use {@link #Repository(String, String)}
      */
-    public Repository()
-    {
+    public Repository() {}
 
-    }
-
-    public Repository( String id, String url )
-    {
-        if ( id == null )
-        {
-            throw new NullPointerException( "id cannot be null" );
+    public Repository(String id, String url) {
+        if (id == null) {
+            throw new NullPointerException("id cannot be null");
         }
 
-        setId( id );
+        setId(id);
 
-        if ( url == null )
-        {
-            throw new NullPointerException( "url cannot be null" );
+        if (url == null) {
+            throw new NullPointerException("url cannot be null");
         }
 
-        setUrl( url );
+        setUrl(url);
     }
 
-    public String getId()
-    {
+    public String getId() {
         return id;
     }
 
-    public void setId( String id )
-    {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -107,56 +96,48 @@ public class Repository
      *
      * @return the base directory
      */
-    public String getBasedir()
-    {
+    public String getBasedir() {
         return basedir;
     }
 
-    public void setBasedir( String basedir )
-    {
+    public void setBasedir(String basedir) {
         this.basedir = basedir;
     }
 
-    public void setName( String name )
-    {
+    public void setName(String name) {
         this.name = name;
     }
 
-    public int getPort()
-    {
+    public int getPort() {
         return port;
     }
 
-    public void setPort( int port )
-    {
+    public void setPort(int port) {
         this.port = port;
     }
 
-    public void setUrl( String url )
-    {
+    public void setUrl(String url) {
         this.url = url;
 
         // TODO [BP]: refactor out the PathUtils URL stuff into a class like java.net.URL, so you only parse once
         //  can't use URL class as is because it won't recognise our protocols, though perhaps we could attempt to
         //  register handlers for scp, etc?
 
-        this.protocol = PathUtils.protocol( url );
+        this.protocol = PathUtils.protocol(url);
 
-        this.host = PathUtils.host( url );
+        this.host = PathUtils.host(url);
 
-        this.port = PathUtils.port( url );
+        this.port = PathUtils.port(url);
 
-        this.basedir = PathUtils.basedir( url );
+        this.basedir = PathUtils.basedir(url);
 
-        String username = PathUtils.user( url );
+        String username = PathUtils.user(url);
         this.username = username;
 
-        if ( username != null )
-        {
-            String password = PathUtils.password( url );
+        if (username != null) {
+            String password = PathUtils.password(url);
 
-            if ( password != null )
-            {
+            if (password != null) {
                 this.password = password;
 
                 username += ":" + password;
@@ -164,43 +145,37 @@ public class Repository
 
             username += "@";
 
-            int index = url.indexOf( username );
-            this.url = url.substring( 0, index ) + url.substring( index + username.length() );
+            int index = url.indexOf(username);
+            this.url = url.substring(0, index) + url.substring(index + username.length());
         }
     }
 
-    public String getUrl()
-    {
-        if ( url != null )
-        {
+    public String getUrl() {
+        if (url != null) {
             return url;
         }
 
         StringBuilder sb = new StringBuilder();
 
-        sb.append( protocol );
+        sb.append(protocol);
 
-        sb.append( "://" );
+        sb.append("://");
 
-        if ( isIPv6Address() )
-        {
+        if (isIPv6Address()) {
             // If this is IPv6 then we have to surround it
             // with brackets '[' and ']'
-            sb.append( "[" ).append( getHost() ).append( "]" );
-        }
-        else
-        {
-            sb.append( getHost() );
+            sb.append("[").append(getHost()).append("]");
+        } else {
+            sb.append(getHost());
         }
 
-        if ( port != WagonConstants.UNKNOWN_PORT )
-        {
-            sb.append( ":" );
+        if (port != WagonConstants.UNKNOWN_PORT) {
+            sb.append(":");
 
-            sb.append( port );
+            sb.append(port);
         }
 
-        sb.append( basedir );
+        sb.append(basedir);
 
         return sb.toString();
     }
@@ -210,121 +185,96 @@ public class Repository
      *
      * @return true if provide host part is of IPv6 format
      */
-    private boolean isIPv6Address()
-    {
-        return getHost().contains( ":" );
+    private boolean isIPv6Address() {
+        return getHost().contains(":");
     }
 
-    public String getHost()
-    {
-        if ( host == null )
-        {
+    public String getHost() {
+        if (host == null) {
             return "localhost";
         }
         return host;
     }
 
-    public String getName()
-    {
-        if ( name == null )
-        {
+    public String getName() {
+        if (name == null) {
             return getId();
         }
         return name;
     }
 
-    public String toString()
-    {
+    public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append( "Repository[" );
+        sb.append("Repository[");
 
-        if ( StringUtils.isNotEmpty( getName() ) )
-        {
-            sb.append( getName() ).append( "|" );
+        if (StringUtils.isNotEmpty(getName())) {
+            sb.append(getName()).append("|");
         }
 
-        sb.append( getUrl() );
-        sb.append( "]" );
+        sb.append(getUrl());
+        sb.append("]");
 
         return sb.toString();
     }
 
-    public String getProtocol()
-    {
+    public String getProtocol() {
         return protocol;
     }
 
-    public RepositoryPermissions getPermissions()
-    {
+    public RepositoryPermissions getPermissions() {
         return permissions;
     }
 
-    public void setPermissions( RepositoryPermissions permissions )
-    {
+    public void setPermissions(RepositoryPermissions permissions) {
         this.permissions = permissions;
     }
 
-    public String getParameter( String key )
-    {
-        return parameters.getProperty( key );
+    public String getParameter(String key) {
+        return parameters.getProperty(key);
     }
 
-    public void setParameters( Properties parameters )
-    {
+    public void setParameters(Properties parameters) {
         this.parameters = parameters;
     }
 
-    public int hashCode()
-    {
+    public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ( ( id == null ) ? 0 : id.hashCode() );
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
 
-    public boolean equals( Object obj )
-    {
-        if ( this == obj )
-        {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if ( obj == null )
-        {
+        if (obj == null) {
             return false;
         }
-        if ( getClass() != obj.getClass() )
-        {
+        if (getClass() != obj.getClass()) {
             return false;
         }
         final Repository other = (Repository) obj;
-        if ( id == null )
-        {
-            if ( other.id != null )
-            {
+        if (id == null) {
+            if (other.id != null) {
                 return false;
             }
-        }
-        else if ( !id.equals( other.id ) )
-        {
+        } else if (!id.equals(other.id)) {
             return false;
         }
         return true;
     }
 
-    public String getUsername()
-    {
+    public String getUsername() {
         return username;
     }
 
-    public String getPassword()
-    {
+    public String getPassword() {
         return password;
     }
 
-    public void setProtocol( String protocol )
-    {
+    public void setProtocol(String protocol) {
         this.protocol = protocol;
     }
-
 }

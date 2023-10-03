@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh.knownhost;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,17 +16,15 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh.knownhost;
 
 import org.apache.maven.wagon.authentication.AuthenticationException;
 
 /**
  * Exception related to known_host check failures.
  */
-public class KnownHostChangedException
-    extends AuthenticationException
-{
-    public KnownHostChangedException( String host, Throwable cause )
-    {
-        super( "The host key was different to that in the known_hosts configuration for host: " + host, cause );
+public class KnownHostChangedException extends AuthenticationException {
+    public KnownHostChangedException(String host, Throwable cause) {
+        super("The host key was different to that in the known_hosts configuration for host: " + host, cause);
     }
 }

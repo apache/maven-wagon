@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon;
 
 /**
  * Exception which should be thrown when a command fails to execute on the repository.
@@ -25,24 +24,19 @@ package org.apache.maven.wagon;
  * @author <a href="brett@apache.org">Brett Porter</a>
  *
  */
-public class CommandExecutionException
-    extends WagonException
-{
+public class CommandExecutionException extends WagonException {
 
     /**
      * @see org.apache.maven.wagon.WagonException
      */
-    public CommandExecutionException( String message )
-    {
-        super( message );
+    public CommandExecutionException(String message) {
+        super(message);
     }
 
     /**
      * @see org.apache.maven.wagon.WagonException
      */
-    public CommandExecutionException( String message, Throwable cause )
-    {
-        super( message, cause );
+    public CommandExecutionException(String message, Throwable cause) {
+        super(message, cause);
     }
-
 }

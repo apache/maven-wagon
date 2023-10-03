@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.http;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,13 +16,10 @@ package org.apache.maven.wagon.providers.http;
  * specific language governing permissions and limitations
  * under the License.
  */
-
+package org.apache.maven.wagon.providers.http;
 
 import junit.framework.TestCase;
-
 import org.apache.http.Header;
-
-
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.maven.wagon.OutputData;
@@ -34,83 +29,71 @@ import org.apache.maven.wagon.shared.http.ConfigurationUtils;
 import org.apache.maven.wagon.shared.http.HttpConfiguration;
 import org.apache.maven.wagon.shared.http.HttpMethodConfiguration;
 
-public class HttpClientWagonTest
-    extends TestCase
-{
+public class HttpClientWagonTest extends TestCase {
 
-    public void testSetMaxRedirectsParamViaConfig()
-    {
+    public void testSetMaxRedirectsParamViaConfig() {
         HttpMethodConfiguration methodConfig = new HttpMethodConfiguration();
         int maxRedirects = 2;
         methodConfig.addParam("http.protocol.max-redirects", "%i," + maxRedirects);
 
         HttpConfiguration config = new HttpConfiguration();
-        config.setAll( methodConfig );
+        config.setAll(methodConfig);
 
         HttpHead method = new HttpHead();
         RequestConfig.Builder builder = RequestConfig.custom();
-        ConfigurationUtils.copyConfig( config.getMethodConfiguration( method ), builder );
+        ConfigurationUtils.copyConfig(config.getMethodConfiguration(method), builder);
         RequestConfig requestConfig = builder.build();
 
         assertEquals(2, requestConfig.getMaxRedirects());
     }
 
-    public void testDefaultHeadersUsedByDefault()
-    {
+    public void testDefaultHeadersUsedByDefault() {
         HttpConfiguration config = new HttpConfiguration();
-        config.setAll( new HttpMethodConfiguration() );
+        config.setAll(new HttpMethodConfiguration());
 
         TestWagon wagon = new TestWagon();
-        wagon.setHttpConfiguration( config );
+        wagon.setHttpConfiguration(config);
 
         HttpHead method = new HttpHead();
-        wagon.setHeaders( method );
+        wagon.setHeaders(method);
 
         // these are the default headers.
         // method.addRequestHeader( "Cache-control", "no-cache" );
         // method.addRequestHeader( "Pragma", "no-cache" );
         // "Accept-Encoding" is automatically set by HttpClient at runtime
 
-        Header header = method.getFirstHeader( "Cache-control" );
-        assertNotNull( header );
-        assertEquals( "no-cache", header.getValue() );
+        Header header = method.getFirstHeader("Cache-control");
+        assertNotNull(header);
+        assertEquals("no-cache", header.getValue());
 
-        header = method.getFirstHeader( "Pragma" );
-        assertNotNull( header );
-        assertEquals( "no-cache", header.getValue() );
+        header = method.getFirstHeader("Pragma");
+        assertNotNull(header);
+        assertEquals("no-cache", header.getValue());
     }
 
-    public void testTurnOffDefaultHeaders()
-    {
+    public void testTurnOffDefaultHeaders() {
         HttpConfiguration config = new HttpConfiguration();
-        config.setAll( new HttpMethodConfiguration().setUseDefaultHeaders( false ) );
+        config.setAll(new HttpMethodConfiguration().setUseDefaultHeaders(false));
 
         TestWagon wagon = new TestWagon();
-        wagon.setHttpConfiguration( config );
+        wagon.setHttpConfiguration(config);
 
         HttpHead method = new HttpHead();
-        wagon.setHeaders( method );
+        wagon.setHeaders(method);
 
         // these are the default headers.
         // method.addRequestHeader( "Cache-control", "no-cache" );
         // method.addRequestHeader( "Pragma", "no-cache" );
 
-        Header header = method.getFirstHeader( "Cache-control" );
-        assertNull( header );
+        Header header = method.getFirstHeader("Cache-control");
+        assertNull(header);
 
-        header = method.getFirstHeader( "Pragma" );
-        assertNull( header );
+        header = method.getFirstHeader("Pragma");
+        assertNull(header);
     }
 
-    private static final class TestWagon
-        extends AbstractHttpClientWagon
-    {
+    private static final class TestWagon extends AbstractHttpClientWagon {
         @Override
-        public void fillOutputData( OutputData outputData )
-            throws TransferFailedException
-        {
-
-        }
+        public void fillOutputData(OutputData outputData) throws TransferFailedException {}
     }
-
 }

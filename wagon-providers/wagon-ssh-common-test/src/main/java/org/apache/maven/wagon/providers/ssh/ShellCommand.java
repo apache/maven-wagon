@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,12 @@ package org.apache.maven.wagon.providers.ssh;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.Environment;
@@ -26,146 +30,117 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
 import org.codehaus.plexus.util.cli.Commandline;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 /**
  * @author Olivier Lamy
  */
-public class ShellCommand implements Command
-{
-protected static final int OK = 0;
+public class ShellCommand implements Command {
+    protected static final int OK = 0;
 
-        protected static final int WARNING = 1;
+    protected static final int WARNING = 1;
 
-        protected static final int ERROR = 2;
+    protected static final int ERROR = 2;
 
-        private InputStream in;
+    private InputStream in;
 
-        private OutputStream out;
+    private OutputStream out;
 
-        private OutputStream err;
+    private OutputStream err;
 
-        private ExitCallback callback;
+    private ExitCallback callback;
 
-        private Thread thread;
+    private Thread thread;
 
-        private String commandLine;
+    private String commandLine;
 
-        public ShellCommand( String commandLine )
-        {
-            this.commandLine = commandLine;
-        }
+    public ShellCommand(String commandLine) {
+        this.commandLine = commandLine;
+    }
 
-        public void setInputStream( InputStream in )
-        {
-            this.in = in;
-        }
+    public void setInputStream(InputStream in) {
+        this.in = in;
+    }
 
-        public void setOutputStream( OutputStream out )
-        {
-            this.out = out;
-        }
+    public void setOutputStream(OutputStream out) {
+        this.out = out;
+    }
 
-        public void setErrorStream( OutputStream err )
-        {
-            this.err = err;
-        }
+    public void setErrorStream(OutputStream err) {
+        this.err = err;
+    }
 
-        public void setExitCallback( ExitCallback callback )
-        {
-            this.callback = callback;
-        }
+    public void setExitCallback(ExitCallback callback) {
+        this.callback = callback;
+    }
 
-        public void start( Environment env )
-            throws IOException
-        {
-            File tmpFile = File.createTempFile( "wagon", "test-sh" );
-            tmpFile.deleteOnExit();
-            int exitValue = 0;
-            CommandLineUtils.StringStreamConsumer stderr = new CommandLineUtils.StringStreamConsumer();
-            CommandLineUtils.StringStreamConsumer stdout = new CommandLineUtils.StringStreamConsumer();
-            try
-            {
+    public void start(Environment env) throws IOException {
+        File tmpFile = File.createTempFile("wagon", "test-sh");
+        tmpFile.deleteOnExit();
+        int exitValue = 0;
+        CommandLineUtils.StringStreamConsumer stderr = new CommandLineUtils.StringStreamConsumer();
+        CommandLineUtils.StringStreamConsumer stdout = new CommandLineUtils.StringStreamConsumer();
+        try {
 
-                // hackhish defaut commandline tools not support ; or && so write a file with the script
-                // and "/bin/sh -e " + tmpFile.getPath();
-                FileUtils.fileWrite( tmpFile, commandLine );
+            // hackhish defaut commandline tools not support ; or && so write a file with the script
+            // and "/bin/sh -e " + tmpFile.getPath();
+            FileUtils.fileWrite(tmpFile, commandLine);
 
-                Commandline cl = new Commandline();
-                cl.setExecutable( "/bin/sh" );
-                //cl.createArg().setValue( "-e" );
-                //cl.createArg().setValue( tmpFile.getPath() );
-                cl.createArg().setFile( tmpFile );
+            Commandline cl = new Commandline();
+            cl.setExecutable("/bin/sh");
+            // cl.createArg().setValue( "-e" );
+            // cl.createArg().setValue( tmpFile.getPath() );
+            cl.createArg().setFile(tmpFile);
 
-                exitValue = CommandLineUtils.executeCommandLine( cl, stdout, stderr );
-                System.out.println( "exit value " + exitValue );
-                /*
-                if ( exitValue == 0 )
-                {
-                    out.write( stdout.getOutput().getBytes() );
-                    out.write( '\n' );
-                    out.flush();
-
-                }
-                else
-                {
-                    out.write( stderr.getOutput().getBytes() );
-                    out.write( '\n' );
-                    out.flush();
-
-                }*/
-
-            }
-            catch ( Exception e )
-            {
-                exitValue = ERROR;
-                e.printStackTrace();
-            }
-            finally
-            {
-                deleteQuietly( tmpFile );
-                if ( exitValue != 0 )
-                {
-                    err.write( stderr.getOutput().getBytes() );
-                    err.write( '\n' );
-                    err.flush();
-                    callback.onExit( exitValue, stderr.getOutput() );
-                }
-                else
-                {
-                    out.write( stdout.getOutput().getBytes() );
-                    out.write( '\n' );
-                    out.flush();
-                    callback.onExit( exitValue, stdout.getOutput() );
-                }
-
-            }
+            exitValue = CommandLineUtils.executeCommandLine(cl, stdout, stderr);
+            System.out.println("exit value " + exitValue);
             /*
-            out.write( exitValue );
-            out.write( '\n' );
-
-            */
-            out.flush();
-        }
-
-        public void destroy()
-        {
-
-        }
-
-        private void deleteQuietly( File f )
-        {
-
-            try
+            if ( exitValue == 0 )
             {
-                f.delete();
+                out.write( stdout.getOutput().getBytes() );
+                out.write( '\n' );
+                out.flush();
+
             }
-            catch ( Exception e )
+            else
             {
-                // ignore
+                out.write( stderr.getOutput().getBytes() );
+                out.write( '\n' );
+                out.flush();
+
+            }*/
+
+        } catch (Exception e) {
+            exitValue = ERROR;
+            e.printStackTrace();
+        } finally {
+            deleteQuietly(tmpFile);
+            if (exitValue != 0) {
+                err.write(stderr.getOutput().getBytes());
+                err.write('\n');
+                err.flush();
+                callback.onExit(exitValue, stderr.getOutput());
+            } else {
+                out.write(stdout.getOutput().getBytes());
+                out.write('\n');
+                out.flush();
+                callback.onExit(exitValue, stdout.getOutput());
             }
         }
+        /*
+        out.write( exitValue );
+        out.write( '\n' );
+
+        */
+        out.flush();
+    }
+
+    public void destroy() {}
+
+    private void deleteQuietly(File f) {
+
+        try {
+            f.delete();
+        } catch (Exception e) {
+            // ignore
+        }
+    }
 }

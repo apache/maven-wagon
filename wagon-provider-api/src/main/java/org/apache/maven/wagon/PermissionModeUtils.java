@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon;
 
 /**
  * Utility class for common operations for file/directory permissions.
@@ -26,47 +25,36 @@ package org.apache.maven.wagon;
  * @see PermissionModeUtils
  * @since Sep 3, 2005
  */
-public final class PermissionModeUtils
-{
-    private PermissionModeUtils()
-    {
-    }
-    
+public final class PermissionModeUtils {
+    private PermissionModeUtils() {}
+
     /**
      * See the System Interfaces volume of IEEE Std 1003.1-2001, umask(1)
      *
      * @param modeStr permission mode (numeric or symbolic)
      * @return the mode that can be used with umask to accomplish modeStr.
      */
-    public static String getUserMaskFor( String modeStr )
-    {
+    public static String getUserMaskFor(String modeStr) {
         String ret = null;
 
-        try
-        {
-            int mode = Integer.valueOf( modeStr, 8 ).intValue();
+        try {
+            int mode = Integer.valueOf(modeStr, 8).intValue();
 
-            mode = mode % 8 + ( ( mode / 8 ) % 8 ) * 8 + ( ( mode / 64 ) % 8 ) * 64;
+            mode = mode % 8 + ((mode / 8) % 8) * 8 + ((mode / 64) % 8) * 64;
 
             // CHECKSTYLE_OFF: MagicNumber
-            ret = Integer.toOctalString( 0777 - mode );
+            ret = Integer.toOctalString(0777 - mode);
             // CHECKSTYLE_ON: MagicNumber
-        }
-        catch ( final NumberFormatException e )
-        {
-            try
-            {
-                Integer.parseInt( modeStr );
-            }
-            catch ( final NumberFormatException e1 )
-            {
+        } catch (final NumberFormatException e) {
+            try {
+                Integer.parseInt(modeStr);
+            } catch (final NumberFormatException e1) {
                 ret = modeStr;
             }
         }
 
-        if ( ret == null )
-        {
-            throw new IllegalArgumentException( "The mode is a number but is not octal" );
+        if (ret == null) {
+            throw new IllegalArgumentException("The mode is a number but is not octal");
         }
 
         return ret;

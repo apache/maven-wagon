@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.webdav;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,46 +16,45 @@ package org.apache.maven.wagon.providers.webdav;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.webdav;
 
 import junit.framework.TestCase;
 
 /**
  * @author <a href="mailto:james@atlassian.com">James William Dumay</a>
  */
-public class PathNavigatorTest extends TestCase
-{
+public class PathNavigatorTest extends TestCase {
     private static final String TEST_PATH = "foo/bar/baz";
 
-    public void testBackAndForward()
-    {
-        PathNavigator navigator = new PathNavigator( TEST_PATH );
+    public void testBackAndForward() {
+        PathNavigator navigator = new PathNavigator(TEST_PATH);
 
-        assertEquals( "foo/bar/baz/", navigator.getPath() );
-        
+        assertEquals("foo/bar/baz/", navigator.getPath());
+
         // Nav backward
-        assertTrue( navigator.backward() );
-        assertEquals( "foo/bar/", navigator.getPath() );
+        assertTrue(navigator.backward());
+        assertEquals("foo/bar/", navigator.getPath());
 
-        assertTrue( navigator.backward() );
-        assertEquals( "foo/", navigator.getPath() );
+        assertTrue(navigator.backward());
+        assertEquals("foo/", navigator.getPath());
 
-        assertTrue( navigator.backward() );
-        assertEquals( "", navigator.getPath() );
+        assertTrue(navigator.backward());
+        assertEquals("", navigator.getPath());
 
-        assertFalse( navigator.backward() );
-        assertEquals( "", navigator.getPath() );
-        
+        assertFalse(navigator.backward());
+        assertEquals("", navigator.getPath());
+
         // Nav forward
-        assertTrue( navigator.forward() );
-        assertEquals( "foo/", navigator.getPath() );
+        assertTrue(navigator.forward());
+        assertEquals("foo/", navigator.getPath());
 
-        assertTrue( navigator.forward() );
-        assertEquals( "foo/bar/", navigator.getPath() );
+        assertTrue(navigator.forward());
+        assertEquals("foo/bar/", navigator.getPath());
 
-        assertTrue( navigator.forward() );
-        assertEquals( "foo/bar/baz/", navigator.getPath() );
+        assertTrue(navigator.forward());
+        assertEquals("foo/bar/baz/", navigator.getPath());
 
-        assertFalse( navigator.forward() );
-        assertEquals( "foo/bar/baz/", navigator.getPath() );
+        assertFalse(navigator.forward());
+        assertEquals("foo/bar/baz/", navigator.getPath());
     }
 }

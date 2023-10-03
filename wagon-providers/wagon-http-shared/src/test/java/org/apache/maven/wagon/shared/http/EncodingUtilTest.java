@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.shared.http;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,116 +16,91 @@ package org.apache.maven.wagon.shared.http;
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import junit.framework.TestCase;
+package org.apache.maven.wagon.shared.http;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
-public class EncodingUtilTest
-    extends TestCase
-{
-    public void testEncodeURLWithTrailingSlash()
-    {
-        String encodedURL = EncodingUtil.encodeURLToString( "https://host:1234/test", "demo/" );
+import junit.framework.TestCase;
 
-        assertEquals( "https://host:1234/test/demo/", encodedURL );
+public class EncodingUtilTest extends TestCase {
+    public void testEncodeURLWithTrailingSlash() {
+        String encodedURL = EncodingUtil.encodeURLToString("https://host:1234/test", "demo/");
+
+        assertEquals("https://host:1234/test/demo/", encodedURL);
     }
 
-    public void testEncodeURLWithSpaces()
-        throws URISyntaxException, MalformedURLException
-    {
-        String encodedURL = EncodingUtil.encodeURLToString( "file://host:1/path with spaces" );
+    public void testEncodeURLWithSpaces() throws URISyntaxException, MalformedURLException {
+        String encodedURL = EncodingUtil.encodeURLToString("file://host:1/path with spaces");
 
-        assertEquals( "file://host:1/path%20with%20spaces", encodedURL );
+        assertEquals("file://host:1/path%20with%20spaces", encodedURL);
     }
 
-    public void testEncodeURLWithSpacesInPath()
-        throws URISyntaxException, MalformedURLException
-    {
-        String encodedURL = EncodingUtil.encodeURLToString( "file://host:1", "path with spaces" );
+    public void testEncodeURLWithSpacesInPath() throws URISyntaxException, MalformedURLException {
+        String encodedURL = EncodingUtil.encodeURLToString("file://host:1", "path with spaces");
 
-        assertEquals( "file://host:1/path%20with%20spaces", encodedURL );
+        assertEquals("file://host:1/path%20with%20spaces", encodedURL);
     }
 
-    public void testEncodeURLWithSpacesInBothBaseAndPath()
-        throws URISyntaxException, MalformedURLException
-    {
-        String encodedURL = EncodingUtil.encodeURLToString( "file://host:1/with%20a", "path with spaces" );
+    public void testEncodeURLWithSpacesInBothBaseAndPath() throws URISyntaxException, MalformedURLException {
+        String encodedURL = EncodingUtil.encodeURLToString("file://host:1/with%20a", "path with spaces");
 
-        assertEquals( "file://host:1/with%20a/path%20with%20spaces", encodedURL );
+        assertEquals("file://host:1/with%20a/path%20with%20spaces", encodedURL);
     }
 
-    public void testEncodeURLWithSlashes1()
-        throws URISyntaxException, MalformedURLException
-    {
-        String encodedURL = EncodingUtil.encodeURLToString( "file://host:1/basePath", "a", "b", "c" );
+    public void testEncodeURLWithSlashes1() throws URISyntaxException, MalformedURLException {
+        String encodedURL = EncodingUtil.encodeURLToString("file://host:1/basePath", "a", "b", "c");
 
-        assertEquals( "file://host:1/basePath/a/b/c", encodedURL );
+        assertEquals("file://host:1/basePath/a/b/c", encodedURL);
 
-        encodedURL = EncodingUtil.encodeURLToString( "file://host:1/basePath", "a/b/c" );
+        encodedURL = EncodingUtil.encodeURLToString("file://host:1/basePath", "a/b/c");
 
-        assertEquals( "file://host:1/basePath/a/b/c", encodedURL );
+        assertEquals("file://host:1/basePath/a/b/c", encodedURL);
     }
 
-    public void testEncodeURLWithSlashes2()
-        throws URISyntaxException, MalformedURLException
-    {
-        String encodedURL = EncodingUtil.encodeURLToString( "file://host:1/basePath/", "a", "b", "c" );
+    public void testEncodeURLWithSlashes2() throws URISyntaxException, MalformedURLException {
+        String encodedURL = EncodingUtil.encodeURLToString("file://host:1/basePath/", "a", "b", "c");
 
-        assertEquals( "file://host:1/basePath/a/b/c", encodedURL );
+        assertEquals("file://host:1/basePath/a/b/c", encodedURL);
 
-        encodedURL = EncodingUtil.encodeURLToString( "file://host:1/basePath/", "a/b/c" );
+        encodedURL = EncodingUtil.encodeURLToString("file://host:1/basePath/", "a/b/c");
 
-        assertEquals( "file://host:1/basePath/a/b/c", encodedURL );
+        assertEquals("file://host:1/basePath/a/b/c", encodedURL);
     }
 
-    public void testEncodeURLWithSlashes3()
-            throws URISyntaxException, MalformedURLException
-    {
-        String encodedURL = EncodingUtil.encodeURLToString( "file://host:1/basePath/", new String[0] );
+    public void testEncodeURLWithSlashes3() throws URISyntaxException, MalformedURLException {
+        String encodedURL = EncodingUtil.encodeURLToString("file://host:1/basePath/", new String[0]);
 
-        assertEquals( "file://host:1/basePath/", encodedURL );
+        assertEquals("file://host:1/basePath/", encodedURL);
     }
 
-    public void testEncodeURLWithSlashes4()
-        throws URISyntaxException, MalformedURLException
-    {
-        String encodedURL = EncodingUtil.encodeURLToString( "file://host:1/basePath", new String[0] );
+    public void testEncodeURLWithSlashes4() throws URISyntaxException, MalformedURLException {
+        String encodedURL = EncodingUtil.encodeURLToString("file://host:1/basePath", new String[0]);
 
-        assertEquals( "file://host:1/basePath", encodedURL );
+        assertEquals("file://host:1/basePath", encodedURL);
     }
 
-    public void testEncodeURLWithSlashes5()
-        throws URISyntaxException, MalformedURLException
-    {
-        String encodedURL = EncodingUtil.encodeURLToString( "file://host:1/basePath",
-                                                            "a/1", "b/1", "c/1" );
+    public void testEncodeURLWithSlashes5() throws URISyntaxException, MalformedURLException {
+        String encodedURL = EncodingUtil.encodeURLToString("file://host:1/basePath", "a/1", "b/1", "c/1");
 
-        assertEquals( "file://host:1/basePath/a%2F1/b%2F1/c%2F1", encodedURL );
+        assertEquals("file://host:1/basePath/a%2F1/b%2F1/c%2F1", encodedURL);
     }
 
-    public void testEncodeURLWithSlashes6()
-        throws URISyntaxException, MalformedURLException
-    {
-        String encodedURL = EncodingUtil.encodeURLToString( "file://host:1/", new String[0] );
+    public void testEncodeURLWithSlashes6() throws URISyntaxException, MalformedURLException {
+        String encodedURL = EncodingUtil.encodeURLToString("file://host:1/", new String[0]);
 
-        assertEquals( "file://host:1/", encodedURL );
+        assertEquals("file://host:1/", encodedURL);
     }
 
-    public void testEncodeURLWithSlashes7()
-        throws URISyntaxException, MalformedURLException
-    {
-        String encodedURL = EncodingUtil.encodeURLToString( "file://host:1", new String[0] );
+    public void testEncodeURLWithSlashes7() throws URISyntaxException, MalformedURLException {
+        String encodedURL = EncodingUtil.encodeURLToString("file://host:1", new String[0]);
 
-        assertEquals( "file://host:1", encodedURL );
+        assertEquals("file://host:1", encodedURL);
     }
 
-    public void testEncodeURLWithNonLatin()
-            throws URISyntaxException, MalformedURLException
-    {
-        String encodedURL = EncodingUtil.encodeURLToString( "file://host:1", "пипец/" );
+    public void testEncodeURLWithNonLatin() throws URISyntaxException, MalformedURLException {
+        String encodedURL = EncodingUtil.encodeURLToString("file://host:1", "пипец/");
 
-        assertEquals( "file://host:1/%D0%BF%D0%B8%D0%BF%D0%B5%D1%86/", encodedURL );
+        assertEquals("file://host:1/%D0%BF%D0%B8%D0%BF%D0%B5%D1%86/", encodedURL);
     }
 }

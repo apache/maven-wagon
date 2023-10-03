@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,11 +16,7 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import org.apache.maven.wagon.observers.ChecksumObserver;
-import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.util.IOUtil;
+package org.apache.maven.wagon;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,17 +25,17 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 
+import org.apache.maven.wagon.observers.ChecksumObserver;
+import org.apache.maven.wagon.resource.Resource;
+import org.codehaus.plexus.util.FileUtils;
+import org.codehaus.plexus.util.IOUtil;
+
 /**
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  */
-public abstract class StreamingWagonTestCase
-    extends WagonTestCase
-{
-    public void testStreamingWagon()
-        throws Exception
-    {
-        if ( supportsGetIfNewer() )
-        {
+public abstract class StreamingWagonTestCase extends WagonTestCase {
+    public void testStreamingWagon() throws Exception {
+        if (supportsGetIfNewer()) {
             setupWagonTestingFixtures();
 
             setupRepositories();
@@ -52,266 +46,221 @@ public abstract class StreamingWagonTestCase
         }
     }
 
-    public void testFailedGetToStream()
-        throws Exception
-    {
+    public void testFailedGetToStream() throws Exception {
         setupWagonTestingFixtures();
 
         setupRepositories();
 
-        message( "Getting test artifact from test repository " + testRepository );
+        message("Getting test artifact from test repository " + testRepository);
 
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
-        wagon.addTransferListener( checksumObserver );
+        wagon.addTransferListener(checksumObserver);
 
-        wagon.connect( testRepository, getAuthInfo() );
+        wagon.connect(testRepository, getAuthInfo());
 
-        destFile = FileTestUtils.createUniqueFile( getName(), getName() );
+        destFile = FileTestUtils.createUniqueFile(getName(), getName());
 
         destFile.deleteOnExit();
 
         OutputStream stream = null;
 
-        try
-        {
-            stream = new FileOutputStream( destFile );
-            wagon.getToStream( "fubar.txt", stream );
-            fail( "File was found when it shouldn't have been" );
+        try {
+            stream = new FileOutputStream(destFile);
+            wagon.getToStream("fubar.txt", stream);
+            fail("File was found when it shouldn't have been");
             stream.close();
             stream = null;
-        }
-        catch ( ResourceDoesNotExistException e )
-        {
+        } catch (ResourceDoesNotExistException e) {
             // expected
-            assertTrue( true );
-        }
-        finally
-        {
-            wagon.removeTransferListener( checksumObserver );
+            assertTrue(true);
+        } finally {
+            wagon.removeTransferListener(checksumObserver);
 
             wagon.disconnect();
 
-            IOUtil.close( stream );
+            IOUtil.close(stream);
 
             tearDownWagonTestingFixtures();
         }
     }
 
-    public void testWagonGetIfNewerToStreamIsNewer()
-        throws Exception
-    {
-        if ( supportsGetIfNewer() )
-        {
+    public void testWagonGetIfNewerToStreamIsNewer() throws Exception {
+        if (supportsGetIfNewer()) {
             setupWagonTestingFixtures();
             setupRepositories();
 
             int expectedSize = putFile();
             // CHECKSTYLE_OFF: MagicNumber
-            getIfNewerToStream( getExpectedLastModifiedOnGet( testRepository, new Resource( resource ) ) + 30000, false,
-                                expectedSize );
+            getIfNewerToStream(
+                    getExpectedLastModifiedOnGet(testRepository, new Resource(resource)) + 30000, false, expectedSize);
             // CHECKSTYLE_ON: MagicNumber
         }
     }
 
-    public void testWagonGetIfNewerToStreamIsOlder()
-        throws Exception
-    {
-        if ( supportsGetIfNewer() )
-        {
+    public void testWagonGetIfNewerToStreamIsOlder() throws Exception {
+        if (supportsGetIfNewer()) {
             setupWagonTestingFixtures();
             setupRepositories();
             int expectedSize = putFile();
-            getIfNewerToStream( new SimpleDateFormat( "yyyy-MM-dd" ).parse( "2006-01-01" ).getTime(), true,
-                                expectedSize );
+            getIfNewerToStream(
+                    new SimpleDateFormat("yyyy-MM-dd").parse("2006-01-01").getTime(), true, expectedSize);
         }
     }
 
-    public void testWagonGetIfNewerToStreamIsSame()
-        throws Exception
-    {
-        if ( supportsGetIfNewer() )
-        {
+    public void testWagonGetIfNewerToStreamIsSame() throws Exception {
+        if (supportsGetIfNewer()) {
             setupWagonTestingFixtures();
             setupRepositories();
             int expectedSize = putFile();
-            getIfNewerToStream( getExpectedLastModifiedOnGet( testRepository, new Resource( resource ) ), false,
-                                expectedSize );
+            getIfNewerToStream(
+                    getExpectedLastModifiedOnGet(testRepository, new Resource(resource)), false, expectedSize);
         }
     }
 
-    private void getIfNewerToStream( long timestamp, boolean expectedResult, int expectedSize )
-        throws Exception
-    {
+    private void getIfNewerToStream(long timestamp, boolean expectedResult, int expectedSize) throws Exception {
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
-        ProgressAnswer progressAnswer = setupGetIfNewerTest( wagon, expectedResult, expectedSize );
+        ProgressAnswer progressAnswer = setupGetIfNewerTest(wagon, expectedResult, expectedSize);
 
-        connectWagon( wagon );
+        connectWagon(wagon);
 
-        OutputStream stream = new LazyFileOutputStream( destFile );
+        OutputStream stream = new LazyFileOutputStream(destFile);
 
-        try
-        {
-            boolean result = wagon.getIfNewerToStream( this.resource, stream, timestamp );
-            assertEquals( expectedResult, result );
-        }
-        finally
-        {
+        try {
+            boolean result = wagon.getIfNewerToStream(this.resource, stream, timestamp);
+            assertEquals(expectedResult, result);
+        } finally {
             stream.close();
         }
 
-        disconnectWagon( wagon );
+        disconnectWagon(wagon);
 
-        assertGetIfNewerTest( progressAnswer, expectedResult, expectedSize );
+        assertGetIfNewerTest(progressAnswer, expectedResult, expectedSize);
 
         tearDownWagonTestingFixtures();
     }
 
-    public void testFailedGetIfNewerToStream()
-        throws Exception
-    {
-        if ( supportsGetIfNewer() )
-        {
+    public void testFailedGetIfNewerToStream() throws Exception {
+        if (supportsGetIfNewer()) {
             setupWagonTestingFixtures();
             setupRepositories();
-            message( "Getting test artifact from test repository " + testRepository );
+            message("Getting test artifact from test repository " + testRepository);
             StreamingWagon wagon = (StreamingWagon) getWagon();
-            wagon.addTransferListener( checksumObserver );
-            wagon.connect( testRepository, getAuthInfo() );
-            destFile = FileTestUtils.createUniqueFile( getName(), getName() );
+            wagon.addTransferListener(checksumObserver);
+            wagon.connect(testRepository, getAuthInfo());
+            destFile = FileTestUtils.createUniqueFile(getName(), getName());
             destFile.deleteOnExit();
             OutputStream stream = null;
-            try
-            {
-                stream = new FileOutputStream( destFile );
-                wagon.getIfNewerToStream( "fubar.txt", stream, 0 );
-                fail( "File was found when it shouldn't have been" );
+            try {
+                stream = new FileOutputStream(destFile);
+                wagon.getIfNewerToStream("fubar.txt", stream, 0);
+                fail("File was found when it shouldn't have been");
                 stream.close();
                 stream = null;
-            }
-            catch ( ResourceDoesNotExistException e )
-            {
+            } catch (ResourceDoesNotExistException e) {
                 // expected
-                assertTrue( true );
-            }
-            finally
-            {
-                wagon.removeTransferListener( checksumObserver );
+                assertTrue(true);
+            } finally {
+                wagon.removeTransferListener(checksumObserver);
 
                 wagon.disconnect();
 
-                IOUtil.close( stream );
+                IOUtil.close(stream);
 
                 tearDownWagonTestingFixtures();
             }
         }
     }
 
-    protected void streamRoundTripTesting()
-        throws Exception
-    {
-        message( "Stream round trip testing ..." );
+    protected void streamRoundTripTesting() throws Exception {
+        message("Stream round trip testing ...");
 
         int expectedSize = putStream();
 
-        assertNotNull( "check checksum is not null", checksumObserver.getActualChecksum() );
+        assertNotNull("check checksum is not null", checksumObserver.getActualChecksum());
 
-        assertEquals( "compare checksums", "6b144b7285ffd6b0bc8300da162120b9", checksumObserver.getActualChecksum() );
+        assertEquals("compare checksums", "6b144b7285ffd6b0bc8300da162120b9", checksumObserver.getActualChecksum());
 
         checksumObserver = new ChecksumObserver();
 
-        getStream( expectedSize );
+        getStream(expectedSize);
 
-        assertNotNull( "check checksum is not null", checksumObserver.getActualChecksum() );
+        assertNotNull("check checksum is not null", checksumObserver.getActualChecksum());
 
-        assertEquals( "compare checksums", "6b144b7285ffd6b0bc8300da162120b9", checksumObserver.getActualChecksum() );
+        assertEquals("compare checksums", "6b144b7285ffd6b0bc8300da162120b9", checksumObserver.getActualChecksum());
 
         // Now compare the conents of the artifact that was placed in
         // the repository with the contents of the artifact that was
         // retrieved from the repository.
 
-        String sourceContent = FileUtils.fileRead( sourceFile );
+        String sourceContent = FileUtils.fileRead(sourceFile);
 
-        String destContent = FileUtils.fileRead( destFile );
+        String destContent = FileUtils.fileRead(destFile);
 
-        assertEquals( sourceContent, destContent );
+        assertEquals(sourceContent, destContent);
     }
 
-    private int putStream()
-        throws Exception
-    {
+    private int putStream() throws Exception {
         String content = "test-resource.txt\n";
-        sourceFile = new File( FileTestUtils.getTestOutputDir(), "test-resource" );
+        sourceFile = new File(FileTestUtils.getTestOutputDir(), "test-resource");
         sourceFile.getParentFile().mkdirs();
-        FileUtils.fileWrite( sourceFile.getAbsolutePath(), content );
+        FileUtils.fileWrite(sourceFile.getAbsolutePath(), content);
 
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
-        ProgressAnswer progressAnswer = replayMockForPut( resource, content, wagon );
+        ProgressAnswer progressAnswer = replayMockForPut(resource, content, wagon);
 
-        message( "Putting test artifact: " + resource + " into test repository " + testRepository );
+        message("Putting test artifact: " + resource + " into test repository " + testRepository);
 
-        connectWagon( wagon );
+        connectWagon(wagon);
 
         InputStream stream = null;
 
-        try
-        {
-            stream = new FileInputStream( sourceFile );
-            wagon.putFromStream( stream, resource, sourceFile.length(), sourceFile.lastModified() );
+        try {
+            stream = new FileInputStream(sourceFile);
+            wagon.putFromStream(stream, resource, sourceFile.length(), sourceFile.lastModified());
             stream.close();
             stream = null;
-        }
-        catch ( Exception e )
-        {
-            logger.error( "error while putting resources to the FTP Server", e );
-        }
-        finally
-        {
-            IOUtil.close( stream );
+        } catch (Exception e) {
+            logger.error("error while putting resources to the FTP Server", e);
+        } finally {
+            IOUtil.close(stream);
         }
 
-        disconnectWagon( wagon );
+        disconnectWagon(wagon);
 
-        verifyMock( progressAnswer, content.length() );
+        verifyMock(progressAnswer, content.length());
         return content.length();
     }
 
-    private void getStream( int expectedSize )
-        throws Exception
-    {
-        destFile = FileTestUtils.createUniqueFile( getName(), getName() );
+    private void getStream(int expectedSize) throws Exception {
+        destFile = FileTestUtils.createUniqueFile(getName(), getName());
         destFile.deleteOnExit();
 
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
-        ProgressAnswer progressAnswer = replaceMockForGet( wagon, expectedSize );
+        ProgressAnswer progressAnswer = replaceMockForGet(wagon, expectedSize);
 
-        message( "Getting test artifact from test repository " + testRepository );
+        message("Getting test artifact from test repository " + testRepository);
 
-        connectWagon( wagon );
+        connectWagon(wagon);
 
         OutputStream stream = null;
 
-        try
-        {
-            stream = new FileOutputStream( destFile );
-            wagon.getToStream( this.resource, stream );
+        try {
+            stream = new FileOutputStream(destFile);
+            wagon.getToStream(this.resource, stream);
             stream.close();
             stream = null;
-        }
-        catch ( Exception e )
-        {
-            logger.error( "error while reading resources from the FTP Server", e );
-        }
-        finally
-        {
-            IOUtil.close( stream );
+        } catch (Exception e) {
+            logger.error("error while reading resources from the FTP Server", e);
+        } finally {
+            IOUtil.close(stream);
         }
 
-        disconnectWagon( wagon );
+        disconnectWagon(wagon);
 
-        verifyMock( progressAnswer, expectedSize );
+        verifyMock(progressAnswer, expectedSize);
     }
 }

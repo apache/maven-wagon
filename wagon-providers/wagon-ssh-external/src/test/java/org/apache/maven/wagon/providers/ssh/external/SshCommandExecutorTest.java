@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh.external;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.ssh.external;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh.external;
 
 import org.apache.maven.wagon.CommandExecutorTestCase;
 import org.apache.maven.wagon.repository.Repository;
@@ -28,12 +27,9 @@ import org.apache.maven.wagon.repository.Repository;
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  *
  */
-public class SshCommandExecutorTest
-    extends CommandExecutorTestCase
-{
+public class SshCommandExecutorTest extends CommandExecutorTestCase {
 
-    protected Repository getTestRepository()
-    {
-        return new Repository( "test", "scpexe://localhost/" );
+    protected Repository getTestRepository() {
+        return new Repository("test", "scpexe://localhost/");
     }
 }

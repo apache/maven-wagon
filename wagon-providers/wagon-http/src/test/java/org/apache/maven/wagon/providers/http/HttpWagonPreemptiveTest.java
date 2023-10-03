@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.http;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.http;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.http;
 
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.shared.http.HttpConfiguration;
@@ -27,34 +26,27 @@ import org.apache.maven.wagon.shared.http.HttpMethodConfiguration;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public class HttpWagonPreemptiveTest
-    extends HttpWagonTest
-{
+public class HttpWagonPreemptiveTest extends HttpWagonTest {
     @Override
-    protected Wagon getWagon()
-        throws Exception
-    {
+    protected Wagon getWagon() throws Exception {
         HttpWagon wagon = (HttpWagon) super.getWagon();
         wagon.setHttpConfiguration(
-            new HttpConfiguration().setAll( new HttpMethodConfiguration().setUsePreemptive( true ) ) );
+                new HttpConfiguration().setAll(new HttpMethodConfiguration().setUsePreemptive(true)));
         return wagon;
     }
 
     @Override
-    protected boolean supportPreemptiveAuthenticationPut()
-    {
+    protected boolean supportPreemptiveAuthenticationPut() {
         return true;
     }
 
     @Override
-    protected boolean supportPreemptiveAuthenticationGet()
-    {
+    protected boolean supportPreemptiveAuthenticationGet() {
         return true;
     }
 
     @Override
-    protected boolean supportProxyPreemptiveAuthentication()
-    {
+    protected boolean supportProxyPreemptiveAuthentication() {
         return true;
     }
 }

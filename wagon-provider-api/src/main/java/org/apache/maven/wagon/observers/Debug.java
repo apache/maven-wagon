@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.observers;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,185 +16,154 @@ package org.apache.maven.wagon.observers;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.observers;
+
+import java.io.PrintStream;
 
 import org.apache.maven.wagon.events.SessionEvent;
 import org.apache.maven.wagon.events.SessionListener;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferListener;
 
-import java.io.PrintStream;
-
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public class Debug
-    implements SessionListener, TransferListener
-{
+public class Debug implements SessionListener, TransferListener {
     private PrintStream out;
 
     long timestamp;
 
     long transfer;
 
-    public Debug()
-    {
-        this( System.out );
+    public Debug() {
+        this(System.out);
     }
 
-    public Debug( PrintStream out )
-    {
+    public Debug(PrintStream out) {
         this.out = out;
     }
 
     /**
      * @see SessionListener#sessionOpening(SessionEvent)
      */
-    public void sessionOpening( final SessionEvent sessionEvent )
-    {
-        //out.println( .getUrl() + " - Session: Opening  ");
+    public void sessionOpening(final SessionEvent sessionEvent) {
+        // out.println( .getUrl() + " - Session: Opening  ");
     }
 
     /**
      * @see SessionListener#sessionOpened(SessionEvent)
      */
-    public void sessionOpened( final SessionEvent sessionEvent )
-    {
-        out.println( sessionEvent.getWagon().getRepository().getUrl() + " - Session: Opened  " );
+    public void sessionOpened(final SessionEvent sessionEvent) {
+        out.println(sessionEvent.getWagon().getRepository().getUrl() + " - Session: Opened  ");
     }
 
     /**
      * @see SessionListener#sessionDisconnecting(SessionEvent)
      */
-    public void sessionDisconnecting( final SessionEvent sessionEvent )
-    {
-        out.println( sessionEvent.getWagon().getRepository().getUrl() + " - Session: Disconnecting  " );
-
+    public void sessionDisconnecting(final SessionEvent sessionEvent) {
+        out.println(sessionEvent.getWagon().getRepository().getUrl() + " - Session: Disconnecting  ");
     }
 
     /**
      * @see SessionListener#sessionDisconnected(SessionEvent)
      */
-    public void sessionDisconnected( final SessionEvent sessionEvent )
-    {
-        out.println( sessionEvent.getWagon().getRepository().getUrl() + " - Session: Disconnected" );
+    public void sessionDisconnected(final SessionEvent sessionEvent) {
+        out.println(sessionEvent.getWagon().getRepository().getUrl() + " - Session: Disconnected");
     }
 
     /**
      * @see SessionListener#sessionConnectionRefused(SessionEvent)
      */
-    public void sessionConnectionRefused( final SessionEvent sessionEvent )
-    {
-        out.println( sessionEvent.getWagon().getRepository().getUrl() + " - Session: Connection refused" );
-
+    public void sessionConnectionRefused(final SessionEvent sessionEvent) {
+        out.println(sessionEvent.getWagon().getRepository().getUrl() + " - Session: Connection refused");
     }
 
     /**
      * @see SessionListener#sessionLoggedIn(SessionEvent)
      */
-    public void sessionLoggedIn( final SessionEvent sessionEvent )
-    {
-        out.println( sessionEvent.getWagon().getRepository().getUrl() + " - Session: Logged in" );
-
+    public void sessionLoggedIn(final SessionEvent sessionEvent) {
+        out.println(sessionEvent.getWagon().getRepository().getUrl() + " - Session: Logged in");
     }
 
     /**
      * @see SessionListener#sessionLoggedOff(SessionEvent)
      */
-    public void sessionLoggedOff( final SessionEvent sessionEvent )
-    {
-        out.println( sessionEvent.getWagon().getRepository().getUrl() + " - Session: Logged off" );
-
+    public void sessionLoggedOff(final SessionEvent sessionEvent) {
+        out.println(sessionEvent.getWagon().getRepository().getUrl() + " - Session: Logged off");
     }
 
     /**
      * @see TransferListener#debug(String)
      */
-    public void debug( final String message )
-    {
-        out.println( message );
-
+    public void debug(final String message) {
+        out.println(message);
     }
 
-    public void transferInitiated( TransferEvent transferEvent )
-    {
+    public void transferInitiated(TransferEvent transferEvent) {
         // This space left intentionally blank
     }
 
     /**
      * @see TransferListener#transferStarted(TransferEvent)
      */
-    public void transferStarted( final TransferEvent transferEvent )
-    {
+    public void transferStarted(final TransferEvent transferEvent) {
         timestamp = transferEvent.getTimestamp();
 
         transfer = 0;
 
-        if ( transferEvent.getRequestType() == TransferEvent.REQUEST_GET )
-        {
+        if (transferEvent.getRequestType() == TransferEvent.REQUEST_GET) {
             final String message = "Downloading: " + transferEvent.getResource().getName() + " from "
-                + transferEvent.getWagon().getRepository().getUrl();
+                    + transferEvent.getWagon().getRepository().getUrl();
 
-            out.println( message );
-        }
-        else
-        {
+            out.println(message);
+        } else {
             final String message = "Uploading: " + transferEvent.getResource().getName() + " to "
-                + transferEvent.getWagon().getRepository().getUrl();
+                    + transferEvent.getWagon().getRepository().getUrl();
 
-            out.println( message );
-
+            out.println(message);
         }
     }
 
     /**
      * @see TransferListener#transferProgress(TransferEvent,byte[],int)
      */
-    public void transferProgress( final TransferEvent transferEvent, byte[] buffer, int length )
-    {
+    public void transferProgress(final TransferEvent transferEvent, byte[] buffer, int length) {
 
-        out.print( "#" );
-        //String data = new String( transferEvent.getData(),0, transferEvent.getDataLength());
-        //out.println(data);
+        out.print("#");
+        // String data = new String( transferEvent.getData(),0, transferEvent.getDataLength());
+        // out.println(data);
         transfer += length;
     }
 
     /**
      * @see TransferListener#transferCompleted(TransferEvent)
      */
-    public void transferCompleted( final TransferEvent transferEvent )
-    {
-        final double duration = (double) ( transferEvent.getTimestamp() - timestamp ) / 1000;
+    public void transferCompleted(final TransferEvent transferEvent) {
+        final double duration = (double) (transferEvent.getTimestamp() - timestamp) / 1000;
 
         out.println();
 
         final String message = "Transfer finished. " + transfer + " bytes copied in " + duration + " seconds";
 
-        out.println( message );
-
+        out.println(message);
     }
 
     /**
      * @see TransferListener#transferError(TransferEvent)
      */
-    public void transferError( final TransferEvent transferEvent )
-    {
-        out.println( " Transfer error: " + transferEvent.getException() );
-
+    public void transferError(final TransferEvent transferEvent) {
+        out.println(" Transfer error: " + transferEvent.getException());
     }
 
     /**
      * @see SessionListener#sessionError(SessionEvent)
      */
-    public void sessionError( final SessionEvent sessionEvent )
-    {
-        out.println( " Session error: " + sessionEvent.getException() );
-
+    public void sessionError(final SessionEvent sessionEvent) {
+        out.println(" Session error: " + sessionEvent.getException());
     }
 
-    public PrintStream getOut()
-    {
+    public PrintStream getOut() {
         return out;
     }
-
 }

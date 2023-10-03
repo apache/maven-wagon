@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh.interactive;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,85 +16,68 @@ package org.apache.maven.wagon.providers.ssh.interactive;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh.interactive;
+
+import java.util.Arrays;
 
 import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
-
-import java.util.Arrays;
 
 /**
  * Shows messages to System.out, and ask replies using an InputHandler
  *
  * @author Juan F. Codagnone
  * @since Sep 12, 2005
- * 
+ *
  * @plexus.component role="org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo"
  *    instantiation-strategy="per-lookup"
  */
-public class ConsoleInteractiveUserInfo
-    implements InteractiveUserInfo
-{
+public class ConsoleInteractiveUserInfo implements InteractiveUserInfo {
     /**
      * @plexus.requirement role-hint="default"
      */
     private volatile Prompter prompter;
 
-    public ConsoleInteractiveUserInfo()
-    {
-    }
+    public ConsoleInteractiveUserInfo() {}
 
-    public ConsoleInteractiveUserInfo( Prompter prompter )
-    {
+    public ConsoleInteractiveUserInfo(Prompter prompter) {
         this.prompter = prompter;
     }
 
     /**
      * @see InteractiveUserInfo#promptYesNo(String)
      */
-    public boolean promptYesNo( String message )
-    {
+    public boolean promptYesNo(String message) {
         String ret;
-        try
-        {
-            ret = prompter.prompt( message, Arrays.asList( "yes", "no" ) );
-        }
-        catch ( PrompterException e )
-        {
+        try {
+            ret = prompter.prompt(message, Arrays.asList("yes", "no"));
+        } catch (PrompterException e) {
             // no op
             ret = null;
         }
-        return "yes".equalsIgnoreCase( ret );
+        return "yes".equalsIgnoreCase(ret);
     }
 
     /**
      * @see InteractiveUserInfo#showMessage(String)
      */
-    public void showMessage( String message )
-    {
-        try
-        {
-            prompter.showMessage( message );
-        }
-        catch ( PrompterException e )
-        {
+    public void showMessage(String message) {
+        try {
+            prompter.showMessage(message);
+        } catch (PrompterException e) {
             // no op
         }
     }
 
-    public String promptPassword( String message )
-    {
-        try
-        {
-            return prompter.promptForPassword( message );
-        }
-        catch ( PrompterException e )
-        {
+    public String promptPassword(String message) {
+        try {
+            return prompter.promptForPassword(message);
+        } catch (PrompterException e) {
             return null;
         }
     }
 
-    public String promptPassphrase( String message )
-    {
-        return promptPassword( message );
+    public String promptPassphrase(String message) {
+        return promptPassword(message);
     }
 }

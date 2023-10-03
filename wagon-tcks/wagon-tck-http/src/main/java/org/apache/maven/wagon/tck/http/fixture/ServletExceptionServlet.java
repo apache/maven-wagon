@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.tck.http.fixture;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,35 +16,31 @@ package org.apache.maven.wagon.tck.http.fixture;
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import java.io.IOException;
+package org.apache.maven.wagon.tck.http.fixture;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
+
 /**
- * 
+ *
  */
-public class ServletExceptionServlet
-    extends HttpServlet
-{
+public class ServletExceptionServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
     private final String message;
 
-    public ServletExceptionServlet( final String message )
-    {
+    public ServletExceptionServlet(final String message) {
         this.message = message;
     }
 
     @Override
-    protected void service( final HttpServletRequest request, final HttpServletResponse response )
-        throws ServletException, IOException
-    {
-        throw new ServletException( message );
+    protected void service(final HttpServletRequest request, final HttpServletResponse response)
+            throws ServletException, IOException {
+        throw new ServletException(message);
     }
-
 }

@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.http;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,84 +16,79 @@ package org.apache.maven.wagon.providers.http;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.http;
 
 import org.apache.http.auth.AuthScope;
 import org.apache.maven.wagon.shared.http.BasicAuthScope;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class BasicAuthScopeTest
-{
+public class BasicAuthScopeTest {
 
     /**
      * Test AuthScope override with no overriding values set. Nothing should
      * change in original host/port.
      */
     @Test
-    public void testGetScopeNothingOverridden()
-    {
+    public void testGetScopeNothingOverridden() {
         BasicAuthScope scope = new BasicAuthScope();
 
-        AuthScope authScope = scope.getScope( "original.host.com", 3456 );
-        Assert.assertEquals( "original.host.com", authScope.getHost() );
-        Assert.assertEquals( 3456, authScope.getPort() );
-        Assert.assertEquals( AuthScope.ANY_REALM, authScope.getRealm() );
+        AuthScope authScope = scope.getScope("original.host.com", 3456);
+        Assert.assertEquals("original.host.com", authScope.getHost());
+        Assert.assertEquals(3456, authScope.getPort());
+        Assert.assertEquals(AuthScope.ANY_REALM, authScope.getRealm());
     }
 
     /**
      * Test AuthScope override for all values overridden
      */
     @Test
-    public void testGetScopeAllOverridden()
-    {
+    public void testGetScopeAllOverridden() {
         BasicAuthScope scope = new BasicAuthScope();
-        scope.setHost( "override.host.com" );
-        scope.setPort( "1234" );
-        scope.setRealm( "override-realm" );
-        AuthScope authScope = scope.getScope( "original.host.com", 3456 );
-        Assert.assertEquals( "override.host.com", authScope.getHost() );
-        Assert.assertEquals( 1234, authScope.getPort() );
-        Assert.assertEquals( "override-realm", authScope.getRealm() );
+        scope.setHost("override.host.com");
+        scope.setPort("1234");
+        scope.setRealm("override-realm");
+        AuthScope authScope = scope.getScope("original.host.com", 3456);
+        Assert.assertEquals("override.host.com", authScope.getHost());
+        Assert.assertEquals(1234, authScope.getPort());
+        Assert.assertEquals("override-realm", authScope.getRealm());
     }
 
     /**
      * Test AuthScope override for all values overridden with "ANY"
      */
     @Test
-    public void testGetScopeAllAny()
-    {
+    public void testGetScopeAllAny() {
         BasicAuthScope scope = new BasicAuthScope();
-        scope.setHost( "ANY" );
-        scope.setPort( "ANY" );
-        scope.setRealm( "ANY" );
-        AuthScope authScope = scope.getScope( "original.host.com", 3456 );
-        Assert.assertEquals( AuthScope.ANY_HOST, authScope.getHost() );
-        Assert.assertEquals( AuthScope.ANY_PORT, authScope.getPort() );
-        Assert.assertEquals( AuthScope.ANY_REALM, authScope.getRealm() );
+        scope.setHost("ANY");
+        scope.setPort("ANY");
+        scope.setRealm("ANY");
+        AuthScope authScope = scope.getScope("original.host.com", 3456);
+        Assert.assertEquals(AuthScope.ANY_HOST, authScope.getHost());
+        Assert.assertEquals(AuthScope.ANY_PORT, authScope.getPort());
+        Assert.assertEquals(AuthScope.ANY_REALM, authScope.getRealm());
     }
 
     /**
      * Test AuthScope override for realm value overridden
      */
     @Test
-    public void testGetScopeRealmOverridden()
-    {
+    public void testGetScopeRealmOverridden() {
         BasicAuthScope scope = new BasicAuthScope();
-        scope.setRealm( "override-realm" );
-        AuthScope authScope = scope.getScope( "original.host.com", 3456 );
-        Assert.assertEquals( "original.host.com", authScope.getHost() );
-        Assert.assertEquals( 3456, authScope.getPort() );
-        Assert.assertEquals( "override-realm", authScope.getRealm() );
+        scope.setRealm("override-realm");
+        AuthScope authScope = scope.getScope("original.host.com", 3456);
+        Assert.assertEquals("original.host.com", authScope.getHost());
+        Assert.assertEquals(3456, authScope.getPort());
+        Assert.assertEquals("override-realm", authScope.getRealm());
     }
 
     /**
      * Test AuthScope where original port is -1, which should result in ANY
      */
     @Test
-    public void testGetScopeOriginalPortIsNegativeOne()
-    {
+    public void testGetScopeOriginalPortIsNegativeOne() {
         BasicAuthScope scope = new BasicAuthScope();
-        AuthScope authScope = scope.getScope( "original.host.com", -1 );
-        Assert.assertEquals( AuthScope.ANY_PORT, authScope.getPort() );
+        AuthScope authScope = scope.getScope("original.host.com", -1);
+        Assert.assertEquals(AuthScope.ANY_PORT, authScope.getPort());
     }
 }

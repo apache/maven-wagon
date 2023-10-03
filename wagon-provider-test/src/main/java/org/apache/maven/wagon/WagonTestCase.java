@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,16 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
@@ -33,52 +41,34 @@ import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.util.FileUtils;
 import org.easymock.IAnswer;
 import org.junit.Assume;
-
-// CHECKSTYLE_OFF: AvoidStarImport
-import static org.easymock.EasyMock.*;
-//CHECKSTYLE_ON: AvoidStarImport
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import static org.easymock.EasyMock.*;
 
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
  */
-public abstract class WagonTestCase
-    extends PlexusTestCase
-{
-    protected static Logger logger = LoggerFactory.getLogger( WagonTestCase.class );
+public abstract class WagonTestCase extends PlexusTestCase {
+    protected static Logger logger = LoggerFactory.getLogger(WagonTestCase.class);
 
-
-    static final class ProgressAnswer implements IAnswer
-    {
+    static final class ProgressAnswer implements IAnswer {
         private int size;
 
-        public Object answer() throws Throwable
-        {
+        public Object answer() throws Throwable {
             int length = (Integer) getCurrentArguments()[2];
             size += length;
             return null;
         }
 
-        public int getSize()
-        {
+        public int getSize() {
             return size;
         }
     }
 
     protected static final String TEST_CONTENT = "test-resource.txt\n";
 
-    protected static final String TEST_CKSUM = cksum( TEST_CONTENT );
+    protected static final String TEST_CKSUM = cksum(TEST_CONTENT);
 
     protected static final String POM = "pom.xml";
 
@@ -108,12 +98,10 @@ public abstract class WagonTestCase
     // Constructors
     // ----------------------------------------------------------------------
 
-    protected void setUp()
-        throws Exception
-    {
+    protected void setUp() throws Exception {
         checksumObserver = new ChecksumObserver();
 
-        mockTransferListener = createMock( TransferListener.class );
+        mockTransferListener = createMock(TransferListener.class);
 
         super.setUp();
     }
@@ -126,8 +114,7 @@ public abstract class WagonTestCase
      * URL of the repository. For a complete test it should point to a non existing folder so we also check for the
      * creation of new folders in the remote site. <p/> return the URL of the repository as specified by Wagon syntax
      */
-    protected abstract String getTestRepositoryUrl()
-        throws IOException;
+    protected abstract String getTestRepositoryUrl() throws IOException;
 
     /**
      * Protocol id of the Wagon to use, eg. <code>scp</code>, <code>ftp</code>
@@ -145,9 +132,7 @@ public abstract class WagonTestCase
     // repository url of file://${basedir}/target/file-repository.
     // ----------------------------------------------------------------------
 
-    protected void setupRepositories()
-        throws Exception
-    {
+    protected void setupRepositories() throws Exception {
         resource = "test-resource";
 
         // ----------------------------------------------------------------------
@@ -156,69 +141,56 @@ public abstract class WagonTestCase
 
         testRepository = new Repository();
 
-        testRepository.setUrl( getTestRepositoryUrl() );
+        testRepository.setUrl(getTestRepositoryUrl());
 
-        testRepository.setPermissions( getPermissions() );
+        testRepository.setPermissions(getPermissions());
 
         // ----------------------------------------------------------------------
         // Create a test local repository.
         // ----------------------------------------------------------------------
 
-        File file = FileTestUtils.createDir( "local-repository" );
+        File file = FileTestUtils.createDir("local-repository");
         localRepositoryPath = file.getPath();
 
-        localRepository = createFileRepository( file.toPath().toUri().toASCIIString() );
+        localRepository = createFileRepository(file.toPath().toUri().toASCIIString());
 
-        message( "Local repository: " + localRepository );
+        message("Local repository: " + localRepository);
 
-        File f = new File( localRepositoryPath );
+        File f = new File(localRepositoryPath);
 
-        if ( !f.exists() )
-        {
+        if (!f.exists()) {
             f.mkdirs();
         }
     }
 
-    protected void customizeContext()
-        throws Exception
-    {
-        getContainer().addContextValue( "test.repository", localRepositoryPath );
+    protected void customizeContext() throws Exception {
+        getContainer().addContextValue("test.repository", localRepositoryPath);
     }
 
-    protected void setupWagonTestingFixtures()
-        throws Exception
-    {
-    }
+    protected void setupWagonTestingFixtures() throws Exception {}
 
-    protected void tearDownWagonTestingFixtures()
-        throws Exception
-    {
-    }
+    protected void tearDownWagonTestingFixtures() throws Exception {}
 
     // ----------------------------------------------------------------------
     //
     // ----------------------------------------------------------------------
 
-    protected AuthenticationInfo getAuthInfo()
-    {
+    protected AuthenticationInfo getAuthInfo() {
         return new AuthenticationInfo();
     }
 
-    protected RepositoryPermissions getPermissions()
-    {
+    protected RepositoryPermissions getPermissions() {
         return new RepositoryPermissions();
     }
 
-    protected Wagon getWagon()
-        throws Exception
-    {
-        Wagon wagon = (Wagon) lookup( Wagon.ROLE, getProtocol() );
+    protected Wagon getWagon() throws Exception {
+        Wagon wagon = (Wagon) lookup(Wagon.ROLE, getProtocol());
 
         Debug debug = new Debug();
 
-        wagon.addSessionListener( debug );
+        wagon.addSessionListener(debug);
 
-        wagon.addTransferListener( debug );
+        wagon.addTransferListener(debug);
 
         return wagon;
     }
@@ -227,32 +199,25 @@ public abstract class WagonTestCase
      * @param cmd the executable to run, not null.
      * @return <code>true</code>
      */
-    public static boolean isSystemCmd( String cmd )
-    {
-        try
-        {
-            Runtime.getRuntime().exec( cmd );
+    public static boolean isSystemCmd(String cmd) {
+        try {
+            Runtime.getRuntime().exec(cmd);
 
             return true;
-        }
-        catch ( IOException e )
-        {
+        } catch (IOException e) {
             return false;
         }
     }
 
-    protected void message( String message )
-    {
-        logger.info( message );
+    protected void message(String message) {
+        logger.info(message);
     }
 
     // ----------------------------------------------------------------------
     //
     // ----------------------------------------------------------------------
 
-    public void testWagon()
-        throws Exception
-    {
+    public void testWagon() throws Exception {
         setupWagonTestingFixtures();
 
         setupRepositories();
@@ -262,189 +227,157 @@ public abstract class WagonTestCase
         tearDownWagonTestingFixtures();
     }
 
-    public void testWagonGetIfNewerIsNewer()
-        throws Exception
-    {
-        if ( supportsGetIfNewer() )
-        {
+    public void testWagonGetIfNewerIsNewer() throws Exception {
+        if (supportsGetIfNewer()) {
             setupWagonTestingFixtures();
             setupRepositories();
             int expectedSize = putFile();
             // CHECKSTYLE_OFF: MagicNumber
-            getIfNewer( getExpectedLastModifiedOnGet( testRepository, new Resource( resource ) ) + 30000, false,
-                        expectedSize );
+            getIfNewer(
+                    getExpectedLastModifiedOnGet(testRepository, new Resource(resource)) + 30000, false, expectedSize);
             // CHECKSTYLE_ON: MagicNumber
         }
     }
 
     @Override
-    protected void runTest()
-        throws Throwable
-    {
-        if ( !testSkipped )
-        {
+    protected void runTest() throws Throwable {
+        if (!testSkipped) {
             super.runTest();
         }
     }
 
-    protected boolean supportsGetIfNewer()
-    {
+    protected boolean supportsGetIfNewer() {
         return true;
     }
 
-
-    public void testWagonGetIfNewerIsSame()
-        throws Exception
-    {
-        if ( supportsGetIfNewer() )
-        {
+    public void testWagonGetIfNewerIsSame() throws Exception {
+        if (supportsGetIfNewer()) {
             setupWagonTestingFixtures();
             setupRepositories();
             int expectedSize = putFile();
-            getIfNewer( getExpectedLastModifiedOnGet( testRepository, new Resource( resource ) ), false, expectedSize );
+            getIfNewer(getExpectedLastModifiedOnGet(testRepository, new Resource(resource)), false, expectedSize);
         }
     }
 
-    public void testWagonGetIfNewerIsOlder()
-        throws Exception
-    {
-        if ( supportsGetIfNewer() )
-        {
+    public void testWagonGetIfNewerIsOlder() throws Exception {
+        if (supportsGetIfNewer()) {
             setupWagonTestingFixtures();
             setupRepositories();
             int expectedSize = putFile();
-            getIfNewer( new SimpleDateFormat( "yyyy-MM-dd" ).parse( "2006-01-01" ).getTime(), true, expectedSize );
+            getIfNewer(new SimpleDateFormat("yyyy-MM-dd").parse("2006-01-01").getTime(), true, expectedSize);
         }
     }
 
-    private void getIfNewer( long timestamp, boolean expectedResult, int expectedSize )
-        throws Exception
-    {
+    private void getIfNewer(long timestamp, boolean expectedResult, int expectedSize) throws Exception {
         Wagon wagon = getWagon();
 
-        ProgressAnswer progressAnswer = setupGetIfNewerTest( wagon, expectedResult, expectedSize );
+        ProgressAnswer progressAnswer = setupGetIfNewerTest(wagon, expectedResult, expectedSize);
 
-        connectWagon( wagon );
+        connectWagon(wagon);
 
-        boolean result = wagon.getIfNewer( this.resource, destFile, timestamp );
-        assertEquals( expectedResult, result );
+        boolean result = wagon.getIfNewer(this.resource, destFile, timestamp);
+        assertEquals(expectedResult, result);
 
-        disconnectWagon( wagon );
+        disconnectWagon(wagon);
 
-        assertGetIfNewerTest( progressAnswer, expectedResult, expectedSize );
+        assertGetIfNewerTest(progressAnswer, expectedResult, expectedSize);
 
         tearDownWagonTestingFixtures();
     }
 
-    protected ProgressAnswer setupGetIfNewerTest( Wagon wagon, boolean expectedResult, int expectedSize )
-        throws NoSuchAlgorithmException, IOException
-    {
+    protected ProgressAnswer setupGetIfNewerTest(Wagon wagon, boolean expectedResult, int expectedSize)
+            throws NoSuchAlgorithmException, IOException {
         checksumObserver = new ChecksumObserver();
 
-        destFile = FileTestUtils.createUniqueFile( getName(), getName() );
+        destFile = FileTestUtils.createUniqueFile(getName(), getName());
         destFile.delete();
-        assertFalse( destFile.exists() );
+        assertFalse(destFile.exists());
         destFile.deleteOnExit();
 
         ProgressAnswer progressAnswer = null;
-        if ( expectedResult )
-        {
-            progressAnswer = replaceMockForGet( wagon, expectedSize );
-        }
-        else
-        {
-            replaceMockForSkippedGetIfNewer( wagon, expectedSize );
+        if (expectedResult) {
+            progressAnswer = replaceMockForGet(wagon, expectedSize);
+        } else {
+            replaceMockForSkippedGetIfNewer(wagon, expectedSize);
         }
         return progressAnswer;
     }
 
-    protected void assertGetIfNewerTest( ProgressAnswer progressAnswer, boolean expectedResult,
-                                         int expectedSize )
-        throws IOException
-    {
-        if ( expectedResult )
-        {
-            verifyMock( progressAnswer, expectedSize );
+    protected void assertGetIfNewerTest(ProgressAnswer progressAnswer, boolean expectedResult, int expectedSize)
+            throws IOException {
+        if (expectedResult) {
+            verifyMock(progressAnswer, expectedSize);
 
-            assertNotNull( "check checksum is not null", checksumObserver.getActualChecksum() );
+            assertNotNull("check checksum is not null", checksumObserver.getActualChecksum());
 
-            assertEquals( "compare checksums", TEST_CKSUM,
-                          checksumObserver.getActualChecksum() );
+            assertEquals("compare checksums", TEST_CKSUM, checksumObserver.getActualChecksum());
 
             // Now compare the contents of the artifact that was placed in
             // the repository with the contents of the artifact that was
             // retrieved from the repository.
 
-            String sourceContent = FileUtils.fileRead( sourceFile );
-            String destContent = FileUtils.fileRead( destFile );
-            assertEquals( sourceContent, destContent );
-        }
-        else
-        {
-            verify( mockTransferListener );
+            String sourceContent = FileUtils.fileRead(sourceFile);
+            String destContent = FileUtils.fileRead(destFile);
+            assertEquals(sourceContent, destContent);
+        } else {
+            verify(mockTransferListener);
 
-            reset( mockTransferListener );
+            reset(mockTransferListener);
 
-            assertNull( "check checksum is null", checksumObserver.getActualChecksum() );
+            assertNull("check checksum is null", checksumObserver.getActualChecksum());
 
-            assertFalse( destFile.exists() );
+            assertFalse(destFile.exists());
         }
     }
 
-
-    private void replaceMockForSkippedGetIfNewer( Wagon wagon, int expectedSize )
-    {
-        Resource resource = new Resource( this.resource );
-        mockTransferListener.transferInitiated(
-            createTransferEvent( wagon, resource, TransferEvent.TRANSFER_INITIATED, TransferEvent.REQUEST_GET,
-                                 destFile ) );
-        resource = new Resource( this.resource );
-        resource.setContentLength( getExpectedContentLengthOnGet( expectedSize ) );
-        resource.setLastModified( getExpectedLastModifiedOnGet( testRepository, resource ) );
+    private void replaceMockForSkippedGetIfNewer(Wagon wagon, int expectedSize) {
+        Resource resource = new Resource(this.resource);
+        mockTransferListener.transferInitiated(createTransferEvent(
+                wagon, resource, TransferEvent.TRANSFER_INITIATED, TransferEvent.REQUEST_GET, destFile));
+        resource = new Resource(this.resource);
+        resource.setContentLength(getExpectedContentLengthOnGet(expectedSize));
+        resource.setLastModified(getExpectedLastModifiedOnGet(testRepository, resource));
         // TODO: transfer skipped event?
         // mockTransferListener.transferSkipped( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED,
         // TransferEvent.REQUEST_GET, destFile ) );
 
-        mockTransferListener.debug( anyString() );
+        mockTransferListener.debug(anyString());
         expectLastCall().anyTimes();
 
-        replay( mockTransferListener );
+        replay(mockTransferListener);
     }
 
-    public void testWagonPutDirectory()
-        throws Exception
-    {
+    public void testWagonPutDirectory() throws Exception {
         setupWagonTestingFixtures();
 
         setupRepositories();
 
         Wagon wagon = getWagon();
 
-        if ( wagon.supportsDirectoryCopy() )
-        {
-            sourceFile = new File( FileTestUtils.getTestOutputDir(), "directory-copy" );
+        if (wagon.supportsDirectoryCopy()) {
+            sourceFile = new File(FileTestUtils.getTestOutputDir(), "directory-copy");
 
-            FileUtils.deleteDirectory( sourceFile );
+            FileUtils.deleteDirectory(sourceFile);
 
-            writeTestFile( "test-resource-1.txt" );
-            writeTestFile( "a/test-resource-2.txt" );
-            writeTestFile( "a/b/test-resource-3.txt" );
-            writeTestFile( "c/test-resource-4.txt" );
-            writeTestFile( "d/e/f/test-resource-5.txt" );
+            writeTestFile("test-resource-1.txt");
+            writeTestFile("a/test-resource-2.txt");
+            writeTestFile("a/b/test-resource-3.txt");
+            writeTestFile("c/test-resource-4.txt");
+            writeTestFile("d/e/f/test-resource-5.txt");
 
-            wagon.connect( testRepository, getAuthInfo() );
+            wagon.connect(testRepository, getAuthInfo());
 
-            wagon.putDirectory( sourceFile, "directory-copy" );
+            wagon.putDirectory(sourceFile, "directory-copy");
 
-            destFile = FileTestUtils.createUniqueFile( getName(), getName() );
+            destFile = FileTestUtils.createUniqueFile(getName(), getName());
 
             destFile.deleteOnExit();
 
-            wagon.get( "directory-copy/test-resource-1.txt", destFile );
-            wagon.get( "directory-copy/a/test-resource-2.txt", destFile );
-            wagon.get( "directory-copy/a/b/test-resource-3.txt", destFile );
-            wagon.get( "directory-copy/c/test-resource-4.txt", destFile );
-            wagon.get( "directory-copy/d/e/f/test-resource-5.txt", destFile );
+            wagon.get("directory-copy/test-resource-1.txt", destFile);
+            wagon.get("directory-copy/a/test-resource-2.txt", destFile);
+            wagon.get("directory-copy/a/b/test-resource-3.txt", destFile);
+            wagon.get("directory-copy/c/test-resource-4.txt", destFile);
+            wagon.get("directory-copy/d/e/f/test-resource-5.txt", destFile);
 
             wagon.disconnect();
         }
@@ -459,40 +392,37 @@ public abstract class WagonTestCase
      * @throws Exception
      * @since 1.0-beta-2
      */
-    public void testWagonPutDirectoryDeepDestination()
-        throws Exception
-    {
+    public void testWagonPutDirectoryDeepDestination() throws Exception {
         setupWagonTestingFixtures();
 
         setupRepositories();
 
         Wagon wagon = getWagon();
 
-        if ( wagon.supportsDirectoryCopy() )
-        {
-            sourceFile = new File( FileTestUtils.getTestOutputDir(), "deep0/deep1/deep2" );
+        if (wagon.supportsDirectoryCopy()) {
+            sourceFile = new File(FileTestUtils.getTestOutputDir(), "deep0/deep1/deep2");
 
-            FileUtils.deleteDirectory( sourceFile );
+            FileUtils.deleteDirectory(sourceFile);
 
-            writeTestFile( "test-resource-1.txt" );
-            writeTestFile( "a/test-resource-2.txt" );
-            writeTestFile( "a/b/test-resource-3.txt" );
-            writeTestFile( "c/test-resource-4.txt" );
-            writeTestFile( "d/e/f/test-resource-5.txt" );
+            writeTestFile("test-resource-1.txt");
+            writeTestFile("a/test-resource-2.txt");
+            writeTestFile("a/b/test-resource-3.txt");
+            writeTestFile("c/test-resource-4.txt");
+            writeTestFile("d/e/f/test-resource-5.txt");
 
-            wagon.connect( testRepository, getAuthInfo() );
+            wagon.connect(testRepository, getAuthInfo());
 
-            wagon.putDirectory( sourceFile, "deep0/deep1/deep2" );
+            wagon.putDirectory(sourceFile, "deep0/deep1/deep2");
 
-            destFile = FileTestUtils.createUniqueFile( getName(), getName() );
+            destFile = FileTestUtils.createUniqueFile(getName(), getName());
 
             destFile.deleteOnExit();
 
-            wagon.get( "deep0/deep1/deep2/test-resource-1.txt", destFile );
-            wagon.get( "deep0/deep1/deep2/a/test-resource-2.txt", destFile );
-            wagon.get( "deep0/deep1/deep2/a/b/test-resource-3.txt", destFile );
-            wagon.get( "deep0/deep1/deep2/c/test-resource-4.txt", destFile );
-            wagon.get( "deep0/deep1/deep2/d/e/f/test-resource-5.txt", destFile );
+            wagon.get("deep0/deep1/deep2/test-resource-1.txt", destFile);
+            wagon.get("deep0/deep1/deep2/a/test-resource-2.txt", destFile);
+            wagon.get("deep0/deep1/deep2/a/b/test-resource-3.txt", destFile);
+            wagon.get("deep0/deep1/deep2/c/test-resource-4.txt", destFile);
+            wagon.get("deep0/deep1/deep2/d/e/f/test-resource-5.txt", destFile);
 
             wagon.disconnect();
         }
@@ -506,15 +436,13 @@ public abstract class WagonTestCase
      * @throws Exception
      * @since 1.0-beta-1
      */
-    public void testWagonPutDirectoryWhenDirectoryAlreadyExists()
-        throws Exception
-    {
+    public void testWagonPutDirectoryWhenDirectoryAlreadyExists() throws Exception {
 
         final String dirName = "directory-copy-existing";
 
         final String resourceToCreate = "test-resource-1.txt";
 
-        final String[] resources = { "a/test-resource-2.txt", "a/b/test-resource-3.txt", "c/test-resource-4.txt" };
+        final String[] resources = {"a/test-resource-2.txt", "a/b/test-resource-3.txt", "c/test-resource-4.txt"};
 
         setupWagonTestingFixtures();
 
@@ -522,32 +450,29 @@ public abstract class WagonTestCase
 
         Wagon wagon = getWagon();
 
-        if ( wagon.supportsDirectoryCopy() )
-        {
-            sourceFile = new File( FileTestUtils.getTestOutputDir(), dirName );
+        if (wagon.supportsDirectoryCopy()) {
+            sourceFile = new File(FileTestUtils.getTestOutputDir(), dirName);
 
-            FileUtils.deleteDirectory( sourceFile );
+            FileUtils.deleteDirectory(sourceFile);
 
-            createDirectory( wagon, resourceToCreate, dirName );
+            createDirectory(wagon, resourceToCreate, dirName);
 
-            for ( String resource : resources )
-            {
-                writeTestFile( resource );
+            for (String resource : resources) {
+                writeTestFile(resource);
             }
 
-            wagon.connect( testRepository, getAuthInfo() );
+            wagon.connect(testRepository, getAuthInfo());
 
-            wagon.putDirectory( sourceFile, dirName );
+            wagon.putDirectory(sourceFile, dirName);
 
-            List<String> resourceNames = new ArrayList<>( resources.length + 1 );
+            List<String> resourceNames = new ArrayList<>(resources.length + 1);
 
-            resourceNames.add( dirName + "/" + resourceToCreate );
-            for ( String resource : resources )
-            {
-                resourceNames.add( dirName + "/" + resource );
+            resourceNames.add(dirName + "/" + resourceToCreate);
+            for (String resource : resources) {
+                resourceNames.add(dirName + "/" + resource);
             }
 
-            assertResourcesAreInRemoteSide( wagon, resourceNames );
+            assertResourcesAreInRemoteSide(wagon, resourceNames);
 
             wagon.disconnect();
         }
@@ -561,12 +486,10 @@ public abstract class WagonTestCase
      * @throws Exception
      * @since 1.0-beta-1
      */
-    public void testWagonPutDirectoryForDot()
-        throws Exception
-    {
+    public void testWagonPutDirectoryForDot() throws Exception {
         final String resourceToCreate = "test-resource-1.txt";
 
-        final String[] resources = { "a/test-resource-2.txt", "a/b/test-resource-3.txt", "c/test-resource-4.txt" };
+        final String[] resources = {"a/test-resource-2.txt", "a/b/test-resource-3.txt", "c/test-resource-4.txt"};
 
         setupWagonTestingFixtures();
 
@@ -574,29 +497,27 @@ public abstract class WagonTestCase
 
         Wagon wagon = getWagon();
 
-        if ( wagon.supportsDirectoryCopy() )
-        {
-            sourceFile = new File( FileTestUtils.getTestOutputDir(), "dot-repo" );
+        if (wagon.supportsDirectoryCopy()) {
+            sourceFile = new File(FileTestUtils.getTestOutputDir(), "dot-repo");
 
-            FileUtils.deleteDirectory( sourceFile );
+            FileUtils.deleteDirectory(sourceFile);
 
-            createDirectory( wagon, resourceToCreate, "." );
+            createDirectory(wagon, resourceToCreate, ".");
 
-            for ( String resource : resources )
-            {
-                writeTestFile( resource );
+            for (String resource : resources) {
+                writeTestFile(resource);
             }
 
-            wagon.connect( testRepository, getAuthInfo() );
+            wagon.connect(testRepository, getAuthInfo());
 
-            wagon.putDirectory( sourceFile, "." );
+            wagon.putDirectory(sourceFile, ".");
 
-            List<String> resourceNames = new ArrayList<>( resources.length + 1 );
+            List<String> resourceNames = new ArrayList<>(resources.length + 1);
 
-            resourceNames.add( resourceToCreate );
-            Collections.addAll( resourceNames, resources );
+            resourceNames.add(resourceToCreate);
+            Collections.addAll(resourceNames, resources);
 
-            assertResourcesAreInRemoteSide( wagon, resourceNames );
+            assertResourcesAreInRemoteSide(wagon, resourceNames);
 
             wagon.disconnect();
         }
@@ -612,22 +533,18 @@ public abstract class WagonTestCase
      * @param dirName          directory name to create
      * @throws Exception
      */
-    protected void createDirectory( Wagon wagon, String resourceToCreate, String dirName )
-        throws Exception
-    {
-        writeTestFile( resourceToCreate );
+    protected void createDirectory(Wagon wagon, String resourceToCreate, String dirName) throws Exception {
+        writeTestFile(resourceToCreate);
     }
 
-    protected void assertResourcesAreInRemoteSide( Wagon wagon, List<String> resourceNames )
-        throws IOException, TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        for ( String resourceName : resourceNames )
-        {
-            File destFile = FileTestUtils.createUniqueFile( getName(), resourceName );
+    protected void assertResourcesAreInRemoteSide(Wagon wagon, List<String> resourceNames)
+            throws IOException, TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+        for (String resourceName : resourceNames) {
+            File destFile = FileTestUtils.createUniqueFile(getName(), resourceName);
 
             destFile.deleteOnExit();
 
-            wagon.get( resourceName, destFile );
+            wagon.get(resourceName, destFile);
         }
     }
 
@@ -641,65 +558,50 @@ public abstract class WagonTestCase
      * @throws TransferFailedException
      * @since 1.0-beta-1
      */
-    protected void assertNotExists( Wagon wagon, String resourceName )
-        throws IOException, TransferFailedException, AuthorizationException
-    {
-        File tmpFile = File.createTempFile( "wagon", null );
-        try
-        {
-            wagon.get( resourceName, tmpFile );
-            fail( "Resource exists: " + resourceName );
-        }
-        catch ( ResourceDoesNotExistException e )
-        {
+    protected void assertNotExists(Wagon wagon, String resourceName)
+            throws IOException, TransferFailedException, AuthorizationException {
+        File tmpFile = File.createTempFile("wagon", null);
+        try {
+            wagon.get(resourceName, tmpFile);
+            fail("Resource exists: " + resourceName);
+        } catch (ResourceDoesNotExistException e) {
             // ok
-        }
-        finally
-        {
+        } finally {
             tmpFile.delete();
         }
     }
 
-    private void writeTestFile( String child )
-        throws IOException
-    {
-        File dir = new File( sourceFile, child );
+    private void writeTestFile(String child) throws IOException {
+        File dir = new File(sourceFile, child);
         dir.getParentFile().mkdirs();
-        FileUtils.fileWrite( dir.getAbsolutePath(), child );
+        FileUtils.fileWrite(dir.getAbsolutePath(), child);
     }
 
-    public void testFailedGet()
-        throws Exception
-    {
+    public void testFailedGet() throws Exception {
         setupWagonTestingFixtures();
 
         setupRepositories();
 
-        message( "Getting test artifact from test repository " + testRepository );
+        message("Getting test artifact from test repository " + testRepository);
 
         Wagon wagon = getWagon();
 
-        wagon.addTransferListener( checksumObserver );
+        wagon.addTransferListener(checksumObserver);
 
-        wagon.connect( testRepository, getAuthInfo() );
+        wagon.connect(testRepository, getAuthInfo());
 
-        destFile = FileTestUtils.createUniqueFile( getName(), getName() );
+        destFile = FileTestUtils.createUniqueFile(getName(), getName());
 
         destFile.deleteOnExit();
 
-        try
-        {
-            wagon.get( "fubar.txt", destFile );
-            fail( "File was found when it shouldn't have been" );
-        }
-        catch ( ResourceDoesNotExistException e )
-        {
+        try {
+            wagon.get("fubar.txt", destFile);
+            fail("File was found when it shouldn't have been");
+        } catch (ResourceDoesNotExistException e) {
             // expected
-            assertTrue( true );
-        }
-        finally
-        {
-            wagon.removeTransferListener( checksumObserver );
+            assertTrue(true);
+        } finally {
+            wagon.removeTransferListener(checksumObserver);
 
             wagon.disconnect();
 
@@ -707,32 +609,24 @@ public abstract class WagonTestCase
         }
     }
 
-    public void testFailedGetIfNewer()
-        throws Exception
-    {
-        if ( supportsGetIfNewer() )
-        {
+    public void testFailedGetIfNewer() throws Exception {
+        if (supportsGetIfNewer()) {
             setupWagonTestingFixtures();
             setupRepositories();
-            message( "Getting test artifact from test repository " + testRepository );
+            message("Getting test artifact from test repository " + testRepository);
             Wagon wagon = getWagon();
-            wagon.addTransferListener( checksumObserver );
-            wagon.connect( testRepository, getAuthInfo() );
-            destFile = FileTestUtils.createUniqueFile( getName(), getName() );
+            wagon.addTransferListener(checksumObserver);
+            wagon.connect(testRepository, getAuthInfo());
+            destFile = FileTestUtils.createUniqueFile(getName(), getName());
             destFile.deleteOnExit();
-            try
-            {
-                wagon.getIfNewer( "fubar.txt", destFile, 0 );
-                fail( "File was found when it shouldn't have been" );
-            }
-            catch ( ResourceDoesNotExistException e )
-            {
+            try {
+                wagon.getIfNewer("fubar.txt", destFile, 0);
+                fail("File was found when it shouldn't have been");
+            } catch (ResourceDoesNotExistException e) {
                 // expected
-                assertTrue( true );
-            }
-            finally
-            {
-                wagon.removeTransferListener( checksumObserver );
+                assertTrue(true);
+            } finally {
+                wagon.removeTransferListener(checksumObserver);
 
                 wagon.disconnect();
 
@@ -747,58 +641,50 @@ public abstract class WagonTestCase
      * @throws Exception
      * @since 1.0-beta-2
      */
-    public void testWagonGetFileList()
-        throws Exception
-    {
+    public void testWagonGetFileList() throws Exception {
         setupWagonTestingFixtures();
 
         setupRepositories();
 
         String dirName = "file-list";
 
-        String filenames[] =
-            new String[]{ "test-resource.txt", "test-resource.pom", "test-resource b.txt", "more-resources.dat",
-                ".index.txt" };
+        String filenames[] = new String[] {
+            "test-resource.txt", "test-resource.pom", "test-resource b.txt", "more-resources.dat", ".index.txt"
+        };
 
-        for ( String filename : filenames )
-        {
-            putFile( dirName + "/" + filename, dirName + "/" + filename, filename + "\n" );
+        for (String filename : filenames) {
+            putFile(dirName + "/" + filename, dirName + "/" + filename, filename + "\n");
         }
 
         Wagon wagon = getWagon();
 
-        wagon.connect( testRepository, getAuthInfo() );
+        wagon.connect(testRepository, getAuthInfo());
 
-        try
-        {
-            List<String> list = wagon.getFileList( dirName );
-            assertNotNull( "file list should not be null.", list );
-            assertTrue( "file list should contain more items (actually contains '" + list + "').",
-                        list.size() >= filenames.length );
+        try {
+            List<String> list = wagon.getFileList(dirName);
+            assertNotNull("file list should not be null.", list);
+            assertTrue(
+                    "file list should contain more items (actually contains '" + list + "').",
+                    list.size() >= filenames.length);
 
-            for ( String filename : filenames )
-            {
-                assertTrue( "Filename '" + filename + "' should be in list.", list.contains( filename ) );
+            for (String filename : filenames) {
+                assertTrue("Filename '" + filename + "' should be in list.", list.contains(filename));
             }
 
             // WAGON-250
-            list = wagon.getFileList( "" );
-            assertNotNull( "file list should not be null.", list );
-            assertTrue( "file list should contain items (actually contains '" + list + "').", !list.isEmpty() );
-            assertTrue( list.contains( "file-list/" ) );
-            assertFalse( list.contains( "file-list" ) );
-            assertFalse( list.contains( "." ) );
-            assertFalse( list.contains( ".." ) );
-            assertFalse( list.contains( "./" ) );
-            assertFalse( list.contains( "../" ) );
-        }
-        catch ( UnsupportedOperationException e )
-        {
+            list = wagon.getFileList("");
+            assertNotNull("file list should not be null.", list);
+            assertTrue("file list should contain items (actually contains '" + list + "').", !list.isEmpty());
+            assertTrue(list.contains("file-list/"));
+            assertFalse(list.contains("file-list"));
+            assertFalse(list.contains("."));
+            assertFalse(list.contains(".."));
+            assertFalse(list.contains("./"));
+            assertFalse(list.contains("../"));
+        } catch (UnsupportedOperationException e) {
             // Some providers don't support this
-            Assume.assumeFalse( false );
-        }
-        finally
-        {
+            Assume.assumeFalse(false);
+        } finally {
             wagon.disconnect();
 
             tearDownWagonTestingFixtures();
@@ -811,9 +697,7 @@ public abstract class WagonTestCase
      * @throws Exception
      * @since 1.0-beta-2
      */
-    public void testWagonGetFileListWhenDirectoryDoesNotExist()
-        throws Exception
-    {
+    public void testWagonGetFileListWhenDirectoryDoesNotExist() throws Exception {
         setupWagonTestingFixtures();
 
         setupRepositories();
@@ -822,24 +706,17 @@ public abstract class WagonTestCase
 
         Wagon wagon = getWagon();
 
-        wagon.connect( testRepository, getAuthInfo() );
+        wagon.connect(testRepository, getAuthInfo());
 
-        try
-        {
-            wagon.getFileList( dirName );
-            fail( "getFileList on unexisting directory must throw ResourceDoesNotExistException" );
-        }
-        catch ( ResourceDoesNotExistException e )
-        {
+        try {
+            wagon.getFileList(dirName);
+            fail("getFileList on unexisting directory must throw ResourceDoesNotExistException");
+        } catch (ResourceDoesNotExistException e) {
             // expected
-        }
-        catch ( UnsupportedOperationException e )
-        {
+        } catch (UnsupportedOperationException e) {
             // Some providers don't support this
-            Assume.assumeFalse( false );
-        }
-        finally
-        {
+            Assume.assumeFalse(false);
+        } finally {
             wagon.disconnect();
 
             tearDownWagonTestingFixtures();
@@ -852,9 +729,7 @@ public abstract class WagonTestCase
      * @throws Exception
      * @since 1.0-beta-2
      */
-    public void testWagonResourceExists()
-        throws Exception
-    {
+    public void testWagonResourceExists() throws Exception {
         setupWagonTestingFixtures();
 
         setupRepositories();
@@ -863,9 +738,9 @@ public abstract class WagonTestCase
 
         putFile();
 
-        wagon.connect( testRepository, getAuthInfo() );
+        wagon.connect(testRepository, getAuthInfo());
 
-        assertTrue( sourceFile.getName() + " does not exist", wagon.resourceExists( sourceFile.getName() ) );
+        assertTrue(sourceFile.getName() + " does not exist", wagon.resourceExists(sourceFile.getName()));
 
         wagon.disconnect();
 
@@ -878,18 +753,16 @@ public abstract class WagonTestCase
      * @throws Exception
      * @since 1.0-beta-2
      */
-    public void testWagonResourceNotExists()
-        throws Exception
-    {
+    public void testWagonResourceNotExists() throws Exception {
         setupWagonTestingFixtures();
 
         setupRepositories();
 
         Wagon wagon = getWagon();
 
-        wagon.connect( testRepository, getAuthInfo() );
+        wagon.connect(testRepository, getAuthInfo());
 
-        assertFalse( wagon.resourceExists( "a/bad/resource/name/that/should/not/exist.txt" ) );
+        assertFalse(wagon.resourceExists("a/bad/resource/name/that/should/not/exist.txt"));
 
         wagon.disconnect();
 
@@ -903,122 +776,107 @@ public abstract class WagonTestCase
     // test repository that we have setup.
     // ----------------------------------------------------------------------
 
-    protected void putFile( String resourceName, String testFileName, String content )
-        throws Exception
-    {
-        sourceFile = new File( FileTestUtils.getTestOutputDir(), testFileName );
+    protected void putFile(String resourceName, String testFileName, String content) throws Exception {
+        sourceFile = new File(FileTestUtils.getTestOutputDir(), testFileName);
         sourceFile.getParentFile().mkdirs();
-        FileUtils.fileWrite( sourceFile.getAbsolutePath(), content );
+        FileUtils.fileWrite(sourceFile.getAbsolutePath(), content);
 
         Wagon wagon = getWagon();
 
-        ProgressAnswer progressAnswer = replayMockForPut( resourceName, content, wagon );
+        ProgressAnswer progressAnswer = replayMockForPut(resourceName, content, wagon);
 
-        message( "Putting test artifact: " + resourceName + " into test repository " + testRepository );
+        message("Putting test artifact: " + resourceName + " into test repository " + testRepository);
 
-        connectWagon( wagon );
+        connectWagon(wagon);
 
-        wagon.put( sourceFile, resourceName );
+        wagon.put(sourceFile, resourceName);
 
-        disconnectWagon( wagon );
+        disconnectWagon(wagon);
 
-        verifyMock( progressAnswer, content.length() );
+        verifyMock(progressAnswer, content.length());
     }
 
-    protected ProgressAnswer replayMockForPut( String resourceName, String content, Wagon wagon )
-    {
-        Resource resource = new Resource( resourceName );
-        mockTransferListener.transferInitiated(
-            createTransferEvent( wagon, resource, TransferEvent.TRANSFER_INITIATED, TransferEvent.REQUEST_PUT,
-                                 sourceFile ) );
-        resource = new Resource( resourceName );
-        resource.setContentLength( content.length() );
-        resource.setLastModified( sourceFile.lastModified() );
-        mockTransferListener.transferStarted(
-            createTransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_PUT,
-                                 sourceFile ) );
+    protected ProgressAnswer replayMockForPut(String resourceName, String content, Wagon wagon) {
+        Resource resource = new Resource(resourceName);
+        mockTransferListener.transferInitiated(createTransferEvent(
+                wagon, resource, TransferEvent.TRANSFER_INITIATED, TransferEvent.REQUEST_PUT, sourceFile));
+        resource = new Resource(resourceName);
+        resource.setContentLength(content.length());
+        resource.setLastModified(sourceFile.lastModified());
+        mockTransferListener.transferStarted(createTransferEvent(
+                wagon, resource, TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_PUT, sourceFile));
         mockTransferListener.transferProgress(
-            eq( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT,
-                                 sourceFile ) ), anyObject( byte[].class ), anyInt() );
+                eq(createTransferEvent(
+                        wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT, sourceFile)),
+                anyObject(byte[].class),
+                anyInt());
         ProgressAnswer progressAnswer = new ProgressAnswer();
-        expectLastCall().andStubAnswer( progressAnswer );
+        expectLastCall().andStubAnswer(progressAnswer);
 
-        mockTransferListener.debug( anyString() );
+        mockTransferListener.debug(anyString());
         expectLastCall().anyTimes();
 
-        mockTransferListener.transferCompleted(
-            createTransferEvent( wagon, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_PUT,
-                                 sourceFile ) );
+        mockTransferListener.transferCompleted(createTransferEvent(
+                wagon, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_PUT, sourceFile));
 
-        replay( mockTransferListener );
+        replay(mockTransferListener);
         return progressAnswer;
     }
 
-    protected TransferEvent createTransferEvent( Wagon wagon, Resource resource, int eventType, int requestType,
-                                                 File file )
-    {
-        TransferEvent transferEvent = new TransferEvent( wagon, resource, eventType, requestType );
-        transferEvent.setLocalFile( file );
+    protected TransferEvent createTransferEvent(
+            Wagon wagon, Resource resource, int eventType, int requestType, File file) {
+        TransferEvent transferEvent = new TransferEvent(wagon, resource, eventType, requestType);
+        transferEvent.setLocalFile(file);
         return transferEvent;
     }
 
-    protected int putFile()
-        throws Exception
-    {
+    protected int putFile() throws Exception {
         String content = TEST_CONTENT;
-        putFile( resource, "test-resource", content );
+        putFile(resource, "test-resource", content);
         return content.length();
     }
 
-    protected void getFile( int expectedSize )
-        throws Exception
-    {
-        destFile = FileTestUtils.createUniqueFile( getName(), getName() );
+    protected void getFile(int expectedSize) throws Exception {
+        destFile = FileTestUtils.createUniqueFile(getName(), getName());
         destFile.deleteOnExit();
 
         Wagon wagon = getWagon();
 
-        ProgressAnswer progressAnswer = replaceMockForGet( wagon, expectedSize );
+        ProgressAnswer progressAnswer = replaceMockForGet(wagon, expectedSize);
 
-        message( "Getting test artifact from test repository " + testRepository );
+        message("Getting test artifact from test repository " + testRepository);
 
-        connectWagon( wagon );
+        connectWagon(wagon);
 
-        wagon.get( this.resource, destFile );
+        wagon.get(this.resource, destFile);
 
-        disconnectWagon( wagon );
+        disconnectWagon(wagon);
 
-        verifyMock( progressAnswer, expectedSize );
+        verifyMock(progressAnswer, expectedSize);
     }
 
+    protected void verifyMock(ProgressAnswer progressAnswer, int length) {
+        verify(mockTransferListener);
 
-    protected void verifyMock( ProgressAnswer progressAnswer, int length )
-    {
-        verify( mockTransferListener );
+        assertEquals(length, progressAnswer.getSize());
 
-        assertEquals( length, progressAnswer.getSize() );
-
-        reset( mockTransferListener );
+        reset(mockTransferListener);
     }
 
-    protected void disconnectWagon( Wagon wagon )
-        throws ConnectionException
-    {
-        wagon.removeTransferListener( mockTransferListener );
+    protected void disconnectWagon(Wagon wagon) throws ConnectionException {
+        wagon.removeTransferListener(mockTransferListener);
 
-        wagon.removeTransferListener( checksumObserver );
+        wagon.removeTransferListener(checksumObserver);
 
         wagon.disconnect();
     }
 
-    protected void connectWagon( Wagon wagon )
-        throws ConnectionException, AuthenticationException
-    {
-        wagon.addTransferListener( checksumObserver );
+    protected void connectWagon(Wagon wagon) throws ConnectionException, AuthenticationException {
+        wagon.addTransferListener(checksumObserver);
 
-        wagon.addTransferListener( mockTransferListener );
+        wagon.addTransferListener(mockTransferListener);
 
-        wagon.connect( testRepository, getAuthInfo() );
+        wagon.connect(testRepository, getAuthInfo());
     }
 
     /**
@@ -1026,125 +884,109 @@ public abstract class WagonTestCase
      * some test (mock on transfertprogress call) relies on the fact that InputStream #read(byte[] b, int off, int len)
      * read all bytes. But javadoc says: ""
      */
-    protected boolean assertOnTransferProgress()
-    {
+    protected boolean assertOnTransferProgress() {
         return false;
     }
 
-    protected ProgressAnswer replaceMockForGet( Wagon wagon, int expectedSize )
-    {
-        Resource resource = new Resource( this.resource );
-        mockTransferListener.transferInitiated(
-            createTransferEvent( wagon, resource, TransferEvent.TRANSFER_INITIATED, TransferEvent.REQUEST_GET,
-                                 destFile ) );
-        resource = new Resource( this.resource );
-        resource.setContentLength( getExpectedContentLengthOnGet( expectedSize ) );
-        resource.setLastModified( getExpectedLastModifiedOnGet( testRepository, resource ) );
+    protected ProgressAnswer replaceMockForGet(Wagon wagon, int expectedSize) {
+        Resource resource = new Resource(this.resource);
+        mockTransferListener.transferInitiated(createTransferEvent(
+                wagon, resource, TransferEvent.TRANSFER_INITIATED, TransferEvent.REQUEST_GET, destFile));
+        resource = new Resource(this.resource);
+        resource.setContentLength(getExpectedContentLengthOnGet(expectedSize));
+        resource.setLastModified(getExpectedLastModifiedOnGet(testRepository, resource));
         TransferEvent te =
-            createTransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_GET, null );
-        mockTransferListener.transferStarted( te );
+                createTransferEvent(wagon, resource, TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_GET, null);
+        mockTransferListener.transferStarted(te);
         mockTransferListener.transferProgress(
-            eq( new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_GET ) ),
-            anyObject( byte[].class ), anyInt() );
+                eq(new TransferEvent(wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_GET)),
+                anyObject(byte[].class),
+                anyInt());
 
         ProgressAnswer progressAnswer = new ProgressAnswer();
 
-        if ( assertOnTransferProgress() )
-        {
-            expectLastCall().andAnswer( progressAnswer );
-        }
-        else
-        {
-            expectLastCall().andAnswer( progressAnswer );
+        if (assertOnTransferProgress()) {
+            expectLastCall().andAnswer(progressAnswer);
+        } else {
+            expectLastCall().andAnswer(progressAnswer);
             expectLastCall().anyTimes();
         }
-        mockTransferListener.debug( anyString() );
+        mockTransferListener.debug(anyString());
         expectLastCall().anyTimes();
 
-        mockTransferListener.transferCompleted(
-            createTransferEvent( wagon, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_GET,
-                                 destFile ) );
+        mockTransferListener.transferCompleted(createTransferEvent(
+                wagon, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_GET, destFile));
 
-        replay( mockTransferListener );
+        replay(mockTransferListener);
         return progressAnswer;
     }
 
-    protected int getExpectedContentLengthOnGet( int expectedSize )
-    {
+    protected int getExpectedContentLengthOnGet(int expectedSize) {
         return expectedSize;
     }
 
-    protected long getExpectedLastModifiedOnGet( Repository repository, Resource resource )
-    {
+    protected long getExpectedLastModifiedOnGet(Repository repository, Resource resource) {
         // default implementation - prone to failing if the time between test file creation and completion of putFile()
         // cross the "second" boundary, causing the "remote" and local files to have different times.
 
         return sourceFile.lastModified();
     }
 
-    protected void fileRoundTripTesting()
-        throws Exception
-    {
-        message( "File round trip testing ..." );
+    protected void fileRoundTripTesting() throws Exception {
+        message("File round trip testing ...");
 
         int expectedSize = putFile();
 
-        assertNotNull( "check checksum is not null", checksumObserver.getActualChecksum() );
+        assertNotNull("check checksum is not null", checksumObserver.getActualChecksum());
 
-        assertEquals( "compare checksums", TEST_CKSUM, checksumObserver.getActualChecksum() );
+        assertEquals("compare checksums", TEST_CKSUM, checksumObserver.getActualChecksum());
 
         checksumObserver = new ChecksumObserver();
 
-        getFile( expectedSize );
+        getFile(expectedSize);
 
-        assertNotNull( "check checksum is not null", checksumObserver.getActualChecksum() );
+        assertNotNull("check checksum is not null", checksumObserver.getActualChecksum());
 
-        assertEquals( "compare checksums", TEST_CKSUM, checksumObserver.getActualChecksum() );
+        assertEquals("compare checksums", TEST_CKSUM, checksumObserver.getActualChecksum());
 
         // Now compare the conents of the artifact that was placed in
         // the repository with the contents of the artifact that was
         // retrieved from the repository.
 
-        String sourceContent = FileUtils.fileRead( sourceFile );
+        String sourceContent = FileUtils.fileRead(sourceFile);
 
-        String destContent = FileUtils.fileRead( destFile );
+        String destContent = FileUtils.fileRead(destFile);
 
-        assertEquals( sourceContent, destContent );
+        assertEquals(sourceContent, destContent);
     }
 
     // ----------------------------------------------------------------------
     //
     // ----------------------------------------------------------------------
 
-    protected Repository createFileRepository( String url )
-    {
-        File path = new File( url.substring( 7 ) );
+    protected Repository createFileRepository(String url) {
+        File path = new File(url.substring(7));
 
         path.mkdirs();
 
         Repository repository = new Repository();
 
-        repository.setUrl( url );
+        repository.setUrl(url);
 
         return repository;
     }
 
-    protected static String cksum( String content )
-    {
+    protected static String cksum(String content) {
         String checkSum;
-        try
-        {
+        try {
             ChecksumObserver obs = new ChecksumObserver();
-            byte[] buf = content.getBytes( StandardCharsets.ISO_8859_1 );
-            obs.transferProgress( null, buf, buf.length );
-            obs.transferCompleted( null );
+            byte[] buf = content.getBytes(StandardCharsets.ISO_8859_1);
+            obs.transferProgress(null, buf, buf.length);
+            obs.transferCompleted(null);
             checkSum = obs.getActualChecksum();
-        }
-        catch ( Exception e )
-        {
+        } catch (Exception e) {
             checkSum = null;
         }
         return checkSum;
     }
-
 }

@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh.knownhost;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,12 +16,12 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh.knownhost;
 
 /**
- * 
+ *
  */
-public class KnownHostEntry
-{
+public class KnownHostEntry {
 
     private String hostName;
 
@@ -31,111 +29,84 @@ public class KnownHostEntry
 
     private String keyValue;
 
-    public KnownHostEntry()
-    {
-    }
+    public KnownHostEntry() {}
 
-    public KnownHostEntry( String hostName, String keyType, String keyValue )
-    {
+    public KnownHostEntry(String hostName, String keyType, String keyValue) {
         this.hostName = hostName;
         this.keyType = keyType;
         this.keyValue = keyValue;
     }
 
-    public String getHostName()
-    {
+    public String getHostName() {
         return hostName;
     }
 
-    public void setHostName( String hostName )
-    {
+    public void setHostName(String hostName) {
         this.hostName = hostName;
     }
 
-    public String getKeyType()
-    {
+    public String getKeyType() {
         return keyType;
     }
 
-    public void setKeyType( String keyType )
-    {
+    public void setKeyType(String keyType) {
         this.keyType = keyType;
     }
 
-    public String getKeyValue()
-    {
+    public String getKeyValue() {
         return keyValue;
     }
 
-    public void setKeyValue( String keyValue )
-    {
+    public void setKeyValue(String keyValue) {
         this.keyValue = keyValue;
     }
 
-    public int hashCode()
-    {
+    public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ( ( hostName == null ) ? 0 : hostName.hashCode() );
-        result = prime * result + ( ( keyType == null ) ? 0 : keyType.hashCode() );
-        result = prime * result + ( ( keyValue == null ) ? 0 : keyValue.hashCode() );
+        result = prime * result + ((hostName == null) ? 0 : hostName.hashCode());
+        result = prime * result + ((keyType == null) ? 0 : keyType.hashCode());
+        result = prime * result + ((keyValue == null) ? 0 : keyValue.hashCode());
         return result;
     }
 
-    public boolean equals( Object obj )
-    {
-        if ( this == obj )
-        {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
 
-        if ( obj == null )
-        {
+        if (obj == null) {
             return false;
         }
 
-        if ( getClass() != obj.getClass() )
-        {
+        if (getClass() != obj.getClass()) {
             return false;
         }
 
         KnownHostEntry other = (KnownHostEntry) obj;
-        if ( hostName == null )
-        {
-            if ( other.hostName != null )
-            {
+        if (hostName == null) {
+            if (other.hostName != null) {
                 return false;
             }
-        }
-        else if ( !hostName.equals( other.hostName ) )
-        {
+        } else if (!hostName.equals(other.hostName)) {
             return false;
         }
 
-        if ( keyType == null )
-        {
-            if ( other.keyType != null )
-            {
+        if (keyType == null) {
+            if (other.keyType != null) {
                 return false;
             }
-        }
-        else if ( !keyType.equals( other.keyType ) )
-        {
+        } else if (!keyType.equals(other.keyType)) {
             return false;
         }
 
-        if ( keyValue == null )
-        {
-            if ( other.keyValue != null )
-            {
+        if (keyValue == null) {
+            if (other.keyValue != null) {
                 return false;
             }
-        }
-        else if ( !keyValue.equals( other.keyValue ) )
-        {
+        } else if (!keyValue.equals(other.keyValue)) {
             return false;
         }
         return true;
     }
-
 }

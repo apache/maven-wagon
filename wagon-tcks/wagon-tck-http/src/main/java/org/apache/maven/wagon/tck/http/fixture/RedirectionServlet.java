@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.tck.http.fixture;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,19 +16,19 @@ package org.apache.maven.wagon.tck.http.fixture;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.tck.http.fixture;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 
 /**
- * 
+ *
  */
-public class RedirectionServlet
-    extends HttpServlet
-{
+public class RedirectionServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
@@ -44,53 +42,41 @@ public class RedirectionServlet
 
     private final String myPath;
 
-    public RedirectionServlet( final int code, final String targetPath )
-    {
+    public RedirectionServlet(final int code, final String targetPath) {
         this.code = code;
         this.targetPath = targetPath;
         this.maxRedirects = 1;
         this.myPath = null;
     }
 
-    public RedirectionServlet( final int code, final String myPath, final String targetPath, final int maxRedirects )
-    {
+    public RedirectionServlet(final int code, final String myPath, final String targetPath, final int maxRedirects) {
         this.code = code;
         this.myPath = myPath;
         this.targetPath = targetPath;
         this.maxRedirects = maxRedirects;
     }
 
-    public int getRedirectCount()
-    {
+    public int getRedirectCount() {
         return redirectCount;
     }
 
     @Override
-    protected void service( final HttpServletRequest req, final HttpServletResponse resp )
-        throws ServletException, IOException
-    {
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp)
+            throws ServletException, IOException {
         redirectCount++;
 
-        if ( myPath == null )
-        {
-            resp.setStatus( code );
-            resp.setHeader( "Location", targetPath );
-        }
-        else if ( maxRedirects < 0 )
-        {
-            resp.setStatus( code );
-            resp.setHeader( "Location", myPath );
-        }
-        else if ( redirectCount <= maxRedirects )
-        {
-            resp.setStatus( code );
-            resp.setHeader( "Location", myPath + "/" + redirectCount );
-        }
-        else
-        {
-            resp.setStatus( code );
-            resp.setHeader( "Location", targetPath );
+        if (myPath == null) {
+            resp.setStatus(code);
+            resp.setHeader("Location", targetPath);
+        } else if (maxRedirects < 0) {
+            resp.setStatus(code);
+            resp.setHeader("Location", myPath);
+        } else if (redirectCount <= maxRedirects) {
+            resp.setStatus(code);
+            resp.setHeader("Location", myPath + "/" + redirectCount);
+        } else {
+            resp.setStatus(code);
+            resp.setHeader("Location", targetPath);
         }
     }
-
 }

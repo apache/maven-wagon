@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.events;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.events;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.events;
 
 /**
  * Interface for classes which wants to receive and respond to any session update events.
@@ -25,8 +24,7 @@ package org.apache.maven.wagon.events;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public interface SessionListener
-{
+public interface SessionListener {
 
     /**
      * This method will be called when Wagon is about to open
@@ -36,7 +34,7 @@ public interface SessionListener
      *
      * @param sessionEvent the session event
      */
-    void sessionOpening( SessionEvent sessionEvent );
+    void sessionOpening(SessionEvent sessionEvent);
 
     /**
      * This method will be called when Wagon has successfully connected to
@@ -46,7 +44,7 @@ public interface SessionListener
      *
      * @param sessionEvent the session event
      */
-    void sessionOpened( SessionEvent sessionEvent );
+    void sessionOpened(SessionEvent sessionEvent);
 
     /**
      * This method will be called when Wagon has closed connection to
@@ -56,7 +54,7 @@ public interface SessionListener
      *
      * @param sessionEvent the session event
      */
-    void sessionDisconnecting( SessionEvent sessionEvent );
+    void sessionDisconnecting(SessionEvent sessionEvent);
 
     /**
      * This method will be called when Wagon has closed connection to
@@ -66,7 +64,7 @@ public interface SessionListener
      *
      * @param sessionEvent the session event
      */
-    void sessionDisconnected( SessionEvent sessionEvent );
+    void sessionDisconnected(SessionEvent sessionEvent);
 
     /**
      * This method will be called when Wagon when connection to
@@ -77,7 +75,7 @@ public interface SessionListener
      *
      * @param sessionEvent the session event
      */
-    void sessionConnectionRefused( SessionEvent sessionEvent );
+    void sessionConnectionRefused(SessionEvent sessionEvent);
 
     /**
      * This method will be called by Wagon when Wagon managed
@@ -85,7 +83,7 @@ public interface SessionListener
      *
      * @param sessionEvent the session event
      */
-    void sessionLoggedIn( SessionEvent sessionEvent );
+    void sessionLoggedIn(SessionEvent sessionEvent);
 
     /**
      * This method will be called by Wagon has logged off
@@ -96,7 +94,7 @@ public interface SessionListener
      *
      * @param sessionEvent the session event
      */
-    void sessionLoggedOff( SessionEvent sessionEvent );
+    void sessionLoggedOff(SessionEvent sessionEvent);
 
     /**
      * This method will be called by Wagon when an error occurred.
@@ -106,13 +104,12 @@ public interface SessionListener
      *
      * @param sessionEvent the session event
      */
-    void sessionError( SessionEvent sessionEvent );
+    void sessionError(SessionEvent sessionEvent);
 
     /**
      * This method allows to send arbitrary debug messages.
      *
      * @param message the debug message
      */
-    void debug( String message );
-
+    void debug(String message);
 }

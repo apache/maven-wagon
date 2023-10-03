@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.tck.http.util;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,31 +16,26 @@ package org.apache.maven.wagon.tck.http.util;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.tck.http.util;
 
 /**
- * 
- * @param <T> 
+ *
+ * @param <T>
  */
-public class ValueHolder<T>
-{
+public class ValueHolder<T> {
     private T value;
 
-    public ValueHolder()
-    {
-    }
+    public ValueHolder() {}
 
-    public ValueHolder( final T initial )
-    {
+    public ValueHolder(final T initial) {
         this.value = initial;
     }
 
-    public void setValue( final T value )
-    {
+    public void setValue(final T value) {
         this.value = value;
     }
 
-    public T getValue()
-    {
+    public T getValue() {
         return value;
     }
 }

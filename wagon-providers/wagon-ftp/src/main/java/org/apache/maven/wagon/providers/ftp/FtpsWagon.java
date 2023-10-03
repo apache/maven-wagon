@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ftp;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.ftp;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ftp;
 
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPSClient;
@@ -32,10 +31,8 @@ import org.slf4j.LoggerFactory;
  * role-hint="ftps"
  * instantiation-strategy="per-lookup"
  */
-public class FtpsWagon
-    extends FtpWagon
-{
-    private static final Logger LOG = LoggerFactory.getLogger( FtpsWagon.class );
+public class FtpsWagon extends FtpWagon {
+    private static final Logger LOG = LoggerFactory.getLogger(FtpsWagon.class);
 
     /**
      * @plexus.configuration default-value="TLS"
@@ -53,12 +50,14 @@ public class FtpsWagon
     private boolean endpointChecking = true;
 
     @Override
-    protected FTPClient createClient()
-    {
-        LOG.debug( "Creating secure FTP client. Protocol: [{}], implicit mode: [{}], endpoint checking: [{}].",
-                securityProtocol, implicit, endpointChecking );
-        FTPSClient client = new FTPSClient( securityProtocol, implicit );
-        client.setEndpointCheckingEnabled( endpointChecking );
+    protected FTPClient createClient() {
+        LOG.debug(
+                "Creating secure FTP client. Protocol: [{}], implicit mode: [{}], endpoint checking: [{}].",
+                securityProtocol,
+                implicit,
+                endpointChecking);
+        FTPSClient client = new FTPSClient(securityProtocol, implicit);
+        client.setEndpointCheckingEnabled(endpointChecking);
         return client;
     }
 }

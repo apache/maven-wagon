@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,63 +16,55 @@ package org.apache.maven.wagon.providers.ssh;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.sshd.server.PasswordAuthenticator;
 import org.apache.sshd.server.session.ServerSession;
 import org.codehaus.plexus.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author Olivier Lamy
  */
-public class TestPasswordAuthenticator
-    implements PasswordAuthenticator
-{
-    List<PasswordAuthenticatorRequest> requests =
-        new ArrayList<>();
+public class TestPasswordAuthenticator implements PasswordAuthenticator {
+    List<PasswordAuthenticatorRequest> requests = new ArrayList<>();
 
-    public boolean authenticate( String username, String password, ServerSession session )
-    {
-        requests.add( new PasswordAuthenticatorRequest( username, password ) );
-        return StringUtils.equals( username, TestData.getUserName() )
-            && StringUtils.equals( password, TestData.getUserPassword() );
+    public boolean authenticate(String username, String password, ServerSession session) {
+        requests.add(new PasswordAuthenticatorRequest(username, password));
+        return StringUtils.equals(username, TestData.getUserName())
+                && StringUtils.equals(password, TestData.getUserPassword());
     }
 
     /**
-     * 
+     *
      */
-    public static class PasswordAuthenticatorRequest
-    {
+    public static class PasswordAuthenticatorRequest {
         private String username;
 
         private String password;
 
-        public PasswordAuthenticatorRequest( String username, String password )
-        {
+        public PasswordAuthenticatorRequest(String username, String password) {
             this.username = username;
             this.password = password;
         }
 
         @Override
-        public String toString()
-        {
+        public String toString() {
             final StringBuilder sb = new StringBuilder();
-            sb.append( "PasswordAuthenticatorRequest" );
-            sb.append( "{username='" ).append( username ).append( '\'' );
-            sb.append( ", password='" ).append( password ).append( '\'' );
-            sb.append( '}' );
+            sb.append("PasswordAuthenticatorRequest");
+            sb.append("{username='").append(username).append('\'');
+            sb.append(", password='").append(password).append('\'');
+            sb.append('}');
             return sb.toString();
         }
 
-        public String getUsername()
-        {
+        public String getUsername() {
             return username;
         }
 
-        public String getPassword()
-        {
+        public String getPassword() {
             return password;
         }
     }

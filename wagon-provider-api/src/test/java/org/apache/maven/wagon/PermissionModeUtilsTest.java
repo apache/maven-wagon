@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon;
 
 import junit.framework.TestCase;
 
@@ -28,15 +27,11 @@ import junit.framework.TestCase;
  * @see PermissionModeUtils
  * @since Sep 3, 2005
  */
-public class PermissionModeUtilsTest
-    extends TestCase
-{
+public class PermissionModeUtilsTest extends TestCase {
     /**
      * @throws Exception on error
      */
-    public void testNumeric()
-        throws Exception
-    {
+    public void testNumeric() throws Exception {
         final String[][] tests = {
             {"0", "777"},
             {"0000", "777"},
@@ -48,23 +43,18 @@ public class PermissionModeUtilsTest
             {"ug+rwX,o-rwX", "ug+rwX,o-rwX"},
             {"1770", "7"},
             {"14770", "7"},
-
         };
 
-        for ( String[] test : tests )
-        {
+        for (String[] test : tests) {
             String umask = null;
 
-            try
-            {
-                umask = PermissionModeUtils.getUserMaskFor( test[ 0 ] );
-            }
-            catch ( IllegalArgumentException e )
-            {
+            try {
+                umask = PermissionModeUtils.getUserMaskFor(test[0]);
+            } catch (IllegalArgumentException e) {
                 // nothing to do
             }
 
-            assertEquals( test[ 1 ], umask );
+            assertEquals(test[1], umask);
         }
     }
 }

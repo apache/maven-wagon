@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.shared.http;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,13 +16,14 @@ package org.apache.maven.wagon.shared.http;
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import org.apache.http.conn.ssl.TrustStrategy;
+package org.apache.maven.wagon.shared.http;
 
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
+
+import org.apache.http.conn.ssl.TrustStrategy;
 
 /**
  * Relaxed X509 certificate trust manager: can ignore invalid certificate date.
@@ -32,48 +31,31 @@ import java.security.cert.X509Certificate;
  * @author Olivier Lamy
  * @since 2.0
  */
-public class RelaxedTrustStrategy
-    implements TrustStrategy
-{
+public class RelaxedTrustStrategy implements TrustStrategy {
     private final boolean ignoreSSLValidityDates;
 
-    public RelaxedTrustStrategy( boolean ignoreSSLValidityDates )
-    {
+    public RelaxedTrustStrategy(boolean ignoreSSLValidityDates) {
         this.ignoreSSLValidityDates = ignoreSSLValidityDates;
     }
 
-    public boolean isTrusted( X509Certificate[] certificates, String authType )
-        throws CertificateException
-    {
-        if ( ( certificates != null ) && ( certificates.length > 0 ) )
-        {
-            for ( X509Certificate currentCertificate : certificates )
-            {
-                try
-                {
+    public boolean isTrusted(X509Certificate[] certificates, String authType) throws CertificateException {
+        if ((certificates != null) && (certificates.length > 0)) {
+            for (X509Certificate currentCertificate : certificates) {
+                try {
                     currentCertificate.checkValidity();
-                }
-                catch ( CertificateExpiredException e )
-                {
-                    if ( !ignoreSSLValidityDates )
-                    {
+                } catch (CertificateExpiredException e) {
+                    if (!ignoreSSLValidityDates) {
                         throw e;
                     }
-                }
-                catch ( CertificateNotYetValidException e )
-                {
-                    if ( !ignoreSSLValidityDates )
-                    {
+                } catch (CertificateNotYetValidException e) {
+                    if (!ignoreSSLValidityDates) {
                         throw e;
                     }
                 }
             }
             return true;
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
-
 }

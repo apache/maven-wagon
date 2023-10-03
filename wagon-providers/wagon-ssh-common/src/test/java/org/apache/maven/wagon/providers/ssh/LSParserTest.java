@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,93 +16,84 @@ package org.apache.maven.wagon.providers.ssh;
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import org.apache.maven.wagon.TransferFailedException;
+package org.apache.maven.wagon.providers.ssh;
 
 import java.util.List;
 
 import junit.framework.TestCase;
+import org.apache.maven.wagon.TransferFailedException;
 
-public class LSParserTest
-    extends TestCase
-{
-    public void testParseLinux()
-        throws TransferFailedException
-    {
+public class LSParserTest extends TestCase {
+    public void testParseLinux() throws TransferFailedException {
         String rawLS = "total 32\n" + "drwxr-xr-x  5 joakim joakim 4096 2006-12-11 10:30 .\n"
-            + "drwxr-xr-x 14 joakim joakim 4096 2006-12-11 10:30 ..\n"
-            + "-rw-r--r--  1 joakim joakim  320 2006-12-09 18:46 .classpath\n"
-            + "-rw-r--r--  1 joakim joakim 1194 2006-12-11 09:25 pom.xml\n"
-            + "-rw-r--r--  1 joakim joakim  662 2006-12-09 18:46 .project\n"
-            + "drwxr-xr-x  4 joakim joakim 4096 2006-11-21 12:26 src\n"
-            + "drwxr-xr-x  4 joakim joakim 4096 2006-11-21 12:26 spaced out\n"
-            + "drwxr-xr-x  7 joakim joakim 4096 2006-12-11 10:31 .svn\n"
-            + "drwxr-xr-x  3 joakim joakim 4096 2006-12-11 08:39 target\n";
+                + "drwxr-xr-x 14 joakim joakim 4096 2006-12-11 10:30 ..\n"
+                + "-rw-r--r--  1 joakim joakim  320 2006-12-09 18:46 .classpath\n"
+                + "-rw-r--r--  1 joakim joakim 1194 2006-12-11 09:25 pom.xml\n"
+                + "-rw-r--r--  1 joakim joakim  662 2006-12-09 18:46 .project\n"
+                + "drwxr-xr-x  4 joakim joakim 4096 2006-11-21 12:26 src\n"
+                + "drwxr-xr-x  4 joakim joakim 4096 2006-11-21 12:26 spaced out\n"
+                + "drwxr-xr-x  7 joakim joakim 4096 2006-12-11 10:31 .svn\n"
+                + "drwxr-xr-x  3 joakim joakim 4096 2006-12-11 08:39 target\n";
 
         LSParser parser = new LSParser();
-        List<String> files = parser.parseFiles( rawLS );
-        assertNotNull( files );
-        assertEquals( 9, files.size() );
-        assertTrue( files.contains( "pom.xml" ) );
-        assertTrue( files.contains( "spaced out" ) );
+        List<String> files = parser.parseFiles(rawLS);
+        assertNotNull(files);
+        assertEquals(9, files.size());
+        assertTrue(files.contains("pom.xml"));
+        assertTrue(files.contains("spaced out"));
     }
 
-    public void testParseOSX() throws TransferFailedException
-    {
+    public void testParseOSX() throws TransferFailedException {
         String rawLS = "total 32\n" + "drwxr-xr-x   5  joakim  joakim   238 Dec 11 10:30 .\n"
-            + "drwxr-xr-x  14  joakim  joakim   518 Dec 11 10:30 ..\n"
-            + "-rw-r--r--   1  joakim  joakim   320 May  9  2006 .classpath\n"
-            + "-rw-r--r--   1  joakim  joakim  1194 Dec 11 09:25 pom.xml\n"
-            + "-rw-r--r--   1  joakim  joakim   662 May  9  2006 .project\n"
-            + "drwxr-xr-x   4  joakim  joakim   204 Dec 11 12:26 src\n"
-            + "drwxr-xr-x   4  joakim  joakim   204 Dec 11 12:26 spaced out\n"
-            + "drwxr-xr-x   7  joakim  joakim   476 Dec 11 10:31 .svn\n"
-            + "drwxr-xr-x   3  joakim  joakim   238 Dec 11 08:39 target\n";
+                + "drwxr-xr-x  14  joakim  joakim   518 Dec 11 10:30 ..\n"
+                + "-rw-r--r--   1  joakim  joakim   320 May  9  2006 .classpath\n"
+                + "-rw-r--r--   1  joakim  joakim  1194 Dec 11 09:25 pom.xml\n"
+                + "-rw-r--r--   1  joakim  joakim   662 May  9  2006 .project\n"
+                + "drwxr-xr-x   4  joakim  joakim   204 Dec 11 12:26 src\n"
+                + "drwxr-xr-x   4  joakim  joakim   204 Dec 11 12:26 spaced out\n"
+                + "drwxr-xr-x   7  joakim  joakim   476 Dec 11 10:31 .svn\n"
+                + "drwxr-xr-x   3  joakim  joakim   238 Dec 11 08:39 target\n";
 
         LSParser parser = new LSParser();
-        List<String> files = parser.parseFiles( rawLS );
-        assertNotNull( files );
-        assertEquals( 9, files.size() );
-        assertTrue( files.contains( "pom.xml" ) );
-        assertTrue( files.contains( "spaced out" ) );
+        List<String> files = parser.parseFiles(rawLS);
+        assertNotNull(files);
+        assertEquals(9, files.size());
+        assertTrue(files.contains("pom.xml"));
+        assertTrue(files.contains("spaced out"));
     }
 
-    public void testParseOSXFrLocale() throws TransferFailedException
-    {
+    public void testParseOSXFrLocale() throws TransferFailedException {
         String rawLS = "total 40\n" + "-rw-r--r--  1 olamy  staff  11 21 sep 00:34 .index.txt\n"
                 + "-rw-r--r--  1 olamy  staff  19 21 sep 00:34 more-resources.dat\n"
                 + "-rw-r--r--  1 olamy  staff  20 21 sep 00:34 test-resource b.txt\n"
-                +"-rw-r--r--  1 olamy  staff  18 21 sep 00:34 test-resource.pom\n"
+                + "-rw-r--r--  1 olamy  staff  18 21 sep 00:34 test-resource.pom\n"
                 + "-rw-r--r--  1 olamy  staff  18 21 sep 00:34 test-resource.txt\n";
 
         LSParser parser = new LSParser();
-        List<String> files = parser.parseFiles( rawLS );
-        assertNotNull( files );
-        assertEquals( 5, files.size() );
-        assertTrue( files.contains( "more-resources.dat" ) );
-        assertTrue( files.contains( ".index.txt" ) );
+        List<String> files = parser.parseFiles(rawLS);
+        assertNotNull(files);
+        assertEquals(5, files.size());
+        assertTrue(files.contains("more-resources.dat"));
+        assertTrue(files.contains(".index.txt"));
     }
 
-
-
-    public void testParseCygwin() throws TransferFailedException
-    {
+    public void testParseCygwin() throws TransferFailedException {
         String rawLS = "total 32\n" + "drwxr-xr-x+  5 joakim None    0 Dec 11 10:30 .\n"
-            + "drwxr-xr-x+ 14 joakim None    0 Dec 11 10:30 ..\n"
-            + "-rw-r--r--+  1 joakim None  320 May  9  2006 .classpath\n"
-            + "-rw-r--r--+  1 joakim None 1194 Dec 11 09:25 pom.xml\n"
-            + "-rw-r--r--+  1 joakim None  662 May  9  2006 .project\n"
-            + "drwxr-xr-x+  4 joakim None    0 Dec 11 12:26 src\n"
-            + "drwxr-xr-x+  4 joakim None    0 Dec 11 12:26 spaced out\n"
-            + "drwxr-xr-x+  7 joakim None    0 Dec 11 10:31 .svn\n"
-            + "drwxr-xr-x+  3 joakim None    0 Dec 11 08:39 target\n";
-        
+                + "drwxr-xr-x+ 14 joakim None    0 Dec 11 10:30 ..\n"
+                + "-rw-r--r--+  1 joakim None  320 May  9  2006 .classpath\n"
+                + "-rw-r--r--+  1 joakim None 1194 Dec 11 09:25 pom.xml\n"
+                + "-rw-r--r--+  1 joakim None  662 May  9  2006 .project\n"
+                + "drwxr-xr-x+  4 joakim None    0 Dec 11 12:26 src\n"
+                + "drwxr-xr-x+  4 joakim None    0 Dec 11 12:26 spaced out\n"
+                + "drwxr-xr-x+  7 joakim None    0 Dec 11 10:31 .svn\n"
+                + "drwxr-xr-x+  3 joakim None    0 Dec 11 08:39 target\n";
+
         LSParser parser = new LSParser();
-        List<String> files = parser.parseFiles( rawLS );
-        assertNotNull( files );
-        assertEquals( 9, files.size() );
-        assertTrue( files.contains( "pom.xml" ) );
-        assertTrue( files.contains( "spaced out" ) );
+        List<String> files = parser.parseFiles(rawLS);
+        assertNotNull(files);
+        assertEquals(9, files.size());
+        assertTrue(files.contains("pom.xml"));
+        assertTrue(files.contains("spaced out"));
     }
 
     /**
@@ -112,19 +101,18 @@ public class LSParserTest
      * Just adding a real-world example of the ls to see if it is a problem.
      *   - Joakime
      */
-    public void testParsePeopleApacheStaging() throws TransferFailedException
-    {
+    public void testParsePeopleApacheStaging() throws TransferFailedException {
         String rawLS = "total 6\n"
-            + "drwxr-xr-x  3 snicoll  snicoll  512 Feb  7 11:04 .\n"
-            + "drwxr-xr-x  3 snicoll  snicoll  512 Feb  7 11:04 ..\n"
-            + "drwxr-xr-x  3 snicoll  snicoll  512 Feb  7 11:04 org\n"
-            + "drwxr-xr-x  3 snicoll  snicoll  512 Feb  7 11:04 spaced out\n";
+                + "drwxr-xr-x  3 snicoll  snicoll  512 Feb  7 11:04 .\n"
+                + "drwxr-xr-x  3 snicoll  snicoll  512 Feb  7 11:04 ..\n"
+                + "drwxr-xr-x  3 snicoll  snicoll  512 Feb  7 11:04 org\n"
+                + "drwxr-xr-x  3 snicoll  snicoll  512 Feb  7 11:04 spaced out\n";
 
         LSParser parser = new LSParser();
-        List<String> files = parser.parseFiles( rawLS );
-        assertNotNull( files );
-        assertEquals( 4, files.size() );
-        assertTrue( files.contains( "org" ) );
-        assertTrue( files.contains( "spaced out" ) );
+        List<String> files = parser.parseFiles(rawLS);
+        assertNotNull(files);
+        assertEquals(4, files.size());
+        assertTrue(files.contains("org"));
+        assertTrue(files.contains("spaced out"));
     }
 }

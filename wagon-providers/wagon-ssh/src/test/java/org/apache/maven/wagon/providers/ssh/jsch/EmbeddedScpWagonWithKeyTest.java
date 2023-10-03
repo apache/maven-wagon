@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh.jsch;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,10 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh.jsch;
+
+import java.io.File;
+import java.io.IOException;
 
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
@@ -25,71 +27,45 @@ import org.apache.maven.wagon.providers.ssh.AbstractEmbeddedScpWagonWithKeyTest;
 import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostEntry;
 import org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider;
 
-import java.io.File;
-import java.io.IOException;
-
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public class EmbeddedScpWagonWithKeyTest
-    extends AbstractEmbeddedScpWagonWithKeyTest
-{
-
+public class EmbeddedScpWagonWithKeyTest extends AbstractEmbeddedScpWagonWithKeyTest {
 
     @Override
-    protected Wagon getWagon()
-        throws Exception
-    {
+    protected Wagon getWagon() throws Exception {
         ScpWagon scpWagon = (ScpWagon) super.getWagon();
-        scpWagon.setInteractive( false );
-        scpWagon.setKnownHostsProvider( new KnownHostsProvider()
-        {
-            public void storeKnownHosts( String contents )
-                throws IOException
-            {
+        scpWagon.setInteractive(false);
+        scpWagon.setKnownHostsProvider(new KnownHostsProvider() {
+            public void storeKnownHosts(String contents) throws IOException {}
 
-            }
+            public void addKnownHost(KnownHostEntry knownHost) throws IOException {}
 
-            public void addKnownHost( KnownHostEntry knownHost )
-                    throws IOException
-            {
-            }
+            public void setHostKeyChecking(String hostKeyChecking) {}
 
-            public void setHostKeyChecking( String hostKeyChecking )
-            {
-            }
-
-            public String getHostKeyChecking()
-            {
+            public String getHostKeyChecking() {
                 return "no";
             }
 
-            public String getContents()
-            {
+            public String getContents() {
                 return null;
             }
-        } );
+        });
         return scpWagon;
     }
 
-
-    protected String getProtocol()
-    {
+    protected String getProtocol() {
         return "scp";
     }
 
-
-    protected AuthenticationInfo getAuthInfo()
-    {
+    protected AuthenticationInfo getAuthInfo() {
         AuthenticationInfo authInfo = super.getAuthInfo();
         // user : guest/guest123 -  passphrase : toto01
-        authInfo.setUserName( "guest" );
-        //authInfo.setPassword( TestData.getUserPassword() );
-        authInfo.setPrivateKey( new File( "src/test/ssh-keys/id_rsa" ).getPath() );
+        authInfo.setUserName("guest");
+        // authInfo.setPassword( TestData.getUserPassword() );
+        authInfo.setPrivateKey(new File("src/test/ssh-keys/id_rsa").getPath());
 
         return authInfo;
     }
-
-
 }

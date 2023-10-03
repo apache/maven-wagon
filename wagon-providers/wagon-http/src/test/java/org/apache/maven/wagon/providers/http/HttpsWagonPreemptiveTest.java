@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.http;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.http;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.http;
 
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.shared.http.HttpConfiguration;
@@ -26,60 +25,51 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 
-public class HttpsWagonPreemptiveTest
-    extends HttpWagonTest
-{
-    protected String getProtocol()
-    {
+public class HttpsWagonPreemptiveTest extends HttpWagonTest {
+    protected String getProtocol() {
         return "https";
     }
 
-    protected ServerConnector addConnector( Server server )
-    {
-        System.setProperty( "javax.net.ssl.trustStore",
-                            getTestFile( "src/test/resources/ssl/keystore" ).getAbsolutePath() );
+    protected ServerConnector addConnector(Server server) {
+        System.setProperty(
+                "javax.net.ssl.trustStore",
+                getTestFile("src/test/resources/ssl/keystore").getAbsolutePath());
         SslContextFactory sslContextFactory = new SslContextFactory();
-        sslContextFactory.setKeyStorePath( getTestPath( "src/test/resources/ssl/keystore" ) );
-        sslContextFactory.setKeyStorePassword( "wagonhttp" );
-        sslContextFactory.setKeyManagerPassword( "wagonhttp" );
-        sslContextFactory.setTrustStorePath( getTestPath( "src/test/resources/ssl/keystore" ) );
-        sslContextFactory.setTrustStorePassword( "wagonhttp" );
-        ServerConnector serverConnector = new ServerConnector( server, sslContextFactory );
-        server.addConnector( serverConnector );
+        sslContextFactory.setKeyStorePath(getTestPath("src/test/resources/ssl/keystore"));
+        sslContextFactory.setKeyStorePassword("wagonhttp");
+        sslContextFactory.setKeyManagerPassword("wagonhttp");
+        sslContextFactory.setTrustStorePath(getTestPath("src/test/resources/ssl/keystore"));
+        sslContextFactory.setTrustStorePassword("wagonhttp");
+        ServerConnector serverConnector = new ServerConnector(server, sslContextFactory);
+        server.addConnector(serverConnector);
         return serverConnector;
     }
 
     @Override
-    protected Wagon getWagon()
-        throws Exception
-    {
+    protected Wagon getWagon() throws Exception {
         HttpWagon wagon = (HttpWagon) super.getWagon();
         wagon.setHttpConfiguration(
-            new HttpConfiguration().setAll( new HttpMethodConfiguration().setUsePreemptive( true ) ) );
+                new HttpConfiguration().setAll(new HttpMethodConfiguration().setUsePreemptive(true)));
         return wagon;
     }
 
     @Override
-    protected boolean supportPreemptiveAuthenticationPut()
-    {
+    protected boolean supportPreemptiveAuthenticationPut() {
         return true;
     }
 
     @Override
-    protected boolean supportPreemptiveAuthenticationGet()
-    {
+    protected boolean supportPreemptiveAuthenticationGet() {
         return true;
     }
 
     @Override
-    protected boolean supportProxyPreemptiveAuthentication()
-    {
+    protected boolean supportProxyPreemptiveAuthentication() {
         return true;
     }
 
     @Override
-    protected boolean assertOnTransferProgress()
-    {
+    protected boolean assertOnTransferProgress() {
         return false;
     }
 }

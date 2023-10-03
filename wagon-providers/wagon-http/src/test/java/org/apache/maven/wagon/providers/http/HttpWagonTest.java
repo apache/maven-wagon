@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.http;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.http;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.http;
 
 import java.util.Properties;
 
@@ -29,45 +28,37 @@ import org.apache.maven.wagon.shared.http.HttpMethodConfiguration;
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  */
-public class HttpWagonTest
-    extends HttpWagonTestCase
-{
-    protected String getProtocol()
-    {
+public class HttpWagonTest extends HttpWagonTestCase {
+    protected String getProtocol() {
         return "http";
     }
 
-    protected String getTestRepositoryUrl()
-    {
+    protected String getTestRepositoryUrl() {
         return getProtocol() + "://localhost:" + getTestRepositoryPort();
     }
 
-    protected void setHttpConfiguration( StreamingWagon wagon, Properties headers, Properties params )
-    {
+    protected void setHttpConfiguration(StreamingWagon wagon, Properties headers, Properties params) {
         HttpConfiguration config = new HttpConfiguration();
 
         HttpMethodConfiguration methodConfiguration = new HttpMethodConfiguration();
-        methodConfiguration.setHeaders( headers );
-        methodConfiguration.setParams( params );
-        config.setAll( methodConfiguration );
-        ( (HttpWagon) wagon ).setHttpConfiguration( config );
+        methodConfiguration.setHeaders(headers);
+        methodConfiguration.setParams(params);
+        config.setAll(methodConfiguration);
+        ((HttpWagon) wagon).setHttpConfiguration(config);
     }
 
     @Override
-    protected boolean supportPreemptiveAuthenticationPut()
-    {
+    protected boolean supportPreemptiveAuthenticationPut() {
         return true;
     }
 
     @Override
-    protected boolean supportPreemptiveAuthenticationGet()
-    {
+    protected boolean supportPreemptiveAuthenticationGet() {
         return false;
     }
 
     @Override
-    protected boolean supportProxyPreemptiveAuthentication()
-    {
+    protected boolean supportProxyPreemptiveAuthentication() {
         return true;
     }
 }

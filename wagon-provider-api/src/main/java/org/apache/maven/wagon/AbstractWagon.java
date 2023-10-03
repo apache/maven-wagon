@@ -1,5 +1,3 @@
-package org.apache.maven.wagon;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,19 @@ package org.apache.maven.wagon;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.util.List;
 
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
@@ -36,18 +47,6 @@ import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.IOUtil;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.util.List;
-
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -56,9 +55,7 @@ import static java.lang.Math.min;
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  */
-public abstract class AbstractWagon
-    implements Wagon
-{
+public abstract class AbstractWagon implements Wagon {
     protected static final int DEFAULT_BUFFER_SIZE = 4 * 1024;
     protected static final int MAXIMUM_BUFFER_SIZE = 512 * 1024;
 
@@ -88,7 +85,6 @@ public abstract class AbstractWagon
 
     protected boolean interactive = true;
 
-
     private int connectionTimeout = DEFAULT_CONNECTION_TIMEOUT;
 
     /**
@@ -97,7 +93,7 @@ public abstract class AbstractWagon
      * @since 2.2
      */
     private int readTimeout =
-        Integer.parseInt( System.getProperty( "maven.wagon.rto", Integer.toString( Wagon.DEFAULT_READ_TIMEOUT ) ) );
+            Integer.parseInt(System.getProperty("maven.wagon.rto", Integer.toString(Wagon.DEFAULT_READ_TIMEOUT)));
 
     private ProxyInfoProvider proxyInfoProvider;
 
@@ -112,18 +108,15 @@ public abstract class AbstractWagon
     // Accessors
     // ----------------------------------------------------------------------
 
-    public Repository getRepository()
-    {
+    public Repository getRepository() {
         return repository;
     }
 
-    public ProxyInfo getProxyInfo()
-    {
-        return proxyInfoProvider != null ? proxyInfoProvider.getProxyInfo( null ) : null;
+    public ProxyInfo getProxyInfo() {
+        return proxyInfoProvider != null ? proxyInfoProvider.getProxyInfo(null) : null;
     }
 
-    public AuthenticationInfo getAuthenticationInfo()
-    {
+    public AuthenticationInfo getAuthenticationInfo() {
         return authenticationInfo;
     }
 
@@ -131,101 +124,76 @@ public abstract class AbstractWagon
     // Connection
     // ----------------------------------------------------------------------
 
-    public void openConnection()
-        throws ConnectionException, AuthenticationException
-    {
-        try
-        {
+    public void openConnection() throws ConnectionException, AuthenticationException {
+        try {
             openConnectionInternal();
-        }
-        catch ( ConnectionException e )
-        {
+        } catch (ConnectionException e) {
+            fireSessionConnectionRefused();
+
+            throw e;
+        } catch (AuthenticationException e) {
             fireSessionConnectionRefused();
 
             throw e;
         }
-        catch ( AuthenticationException e )
-        {
-            fireSessionConnectionRefused();
-
-            throw e;
-        }
     }
 
-    public void connect( Repository repository )
-        throws ConnectionException, AuthenticationException
-    {
-        connect( repository, null, (ProxyInfoProvider) null );
+    public void connect(Repository repository) throws ConnectionException, AuthenticationException {
+        connect(repository, null, (ProxyInfoProvider) null);
     }
 
-    public void connect( Repository repository, ProxyInfo proxyInfo )
-        throws ConnectionException, AuthenticationException
-    {
-        connect( repository, null, proxyInfo );
+    public void connect(Repository repository, ProxyInfo proxyInfo)
+            throws ConnectionException, AuthenticationException {
+        connect(repository, null, proxyInfo);
     }
 
-    public void connect( Repository repository, ProxyInfoProvider proxyInfoProvider )
-        throws ConnectionException, AuthenticationException
-    {
-        connect( repository, null, proxyInfoProvider );
+    public void connect(Repository repository, ProxyInfoProvider proxyInfoProvider)
+            throws ConnectionException, AuthenticationException {
+        connect(repository, null, proxyInfoProvider);
     }
 
-    public void connect( Repository repository, AuthenticationInfo authenticationInfo )
-        throws ConnectionException, AuthenticationException
-    {
-        connect( repository, authenticationInfo, (ProxyInfoProvider) null );
+    public void connect(Repository repository, AuthenticationInfo authenticationInfo)
+            throws ConnectionException, AuthenticationException {
+        connect(repository, authenticationInfo, (ProxyInfoProvider) null);
     }
 
-    public void connect( Repository repository, AuthenticationInfo authenticationInfo, ProxyInfo proxyInfo )
-        throws ConnectionException, AuthenticationException
-    {
+    public void connect(Repository repository, AuthenticationInfo authenticationInfo, ProxyInfo proxyInfo)
+            throws ConnectionException, AuthenticationException {
         final ProxyInfo proxy = proxyInfo;
-        connect( repository, authenticationInfo, new ProxyInfoProvider()
-        {
-            public ProxyInfo getProxyInfo( String protocol )
-            {
-                if ( protocol == null || proxy == null || protocol.equalsIgnoreCase( proxy.getType() ) )
-                {
+        connect(repository, authenticationInfo, new ProxyInfoProvider() {
+            public ProxyInfo getProxyInfo(String protocol) {
+                if (protocol == null || proxy == null || protocol.equalsIgnoreCase(proxy.getType())) {
                     return proxy;
-                }
-                else
-                {
+                } else {
                     return null;
                 }
             }
-        } );
+        });
     }
 
-    public void connect( Repository repository, AuthenticationInfo authenticationInfo,
-                         ProxyInfoProvider proxyInfoProvider )
-        throws ConnectionException, AuthenticationException
-    {
-        if ( repository == null )
-        {
-            throw new NullPointerException( "repository cannot be null" );
+    public void connect(
+            Repository repository, AuthenticationInfo authenticationInfo, ProxyInfoProvider proxyInfoProvider)
+            throws ConnectionException, AuthenticationException {
+        if (repository == null) {
+            throw new NullPointerException("repository cannot be null");
         }
 
-        if ( permissionsOverride != null )
-        {
-            repository.setPermissions( permissionsOverride );
+        if (permissionsOverride != null) {
+            repository.setPermissions(permissionsOverride);
         }
 
         this.repository = repository;
 
-        if ( authenticationInfo == null )
-        {
+        if (authenticationInfo == null) {
             authenticationInfo = new AuthenticationInfo();
         }
 
-        if ( authenticationInfo.getUserName() == null )
-        {
+        if (authenticationInfo.getUserName() == null) {
             // Get user/pass that were encoded in the URL.
-            if ( repository.getUsername() != null )
-            {
-                authenticationInfo.setUserName( repository.getUsername() );
-                if ( repository.getPassword() != null && authenticationInfo.getPassword() == null )
-                {
-                    authenticationInfo.setPassword( repository.getPassword() );
+            if (repository.getUsername() != null) {
+                authenticationInfo.setUserName(repository.getUsername());
+                if (repository.getPassword() != null && authenticationInfo.getPassword() == null) {
+                    authenticationInfo.setPassword(repository.getPassword());
                 }
             }
         }
@@ -241,60 +209,44 @@ public abstract class AbstractWagon
         fireSessionOpened();
     }
 
-    protected abstract void openConnectionInternal()
-        throws ConnectionException, AuthenticationException;
+    protected abstract void openConnectionInternal() throws ConnectionException, AuthenticationException;
 
-    public void disconnect()
-        throws ConnectionException
-    {
+    public void disconnect() throws ConnectionException {
         fireSessionDisconnecting();
 
-        try
-        {
+        try {
             closeConnection();
-        }
-        catch ( ConnectionException e )
-        {
-            fireSessionError( e );
+        } catch (ConnectionException e) {
+            fireSessionError(e);
             throw e;
         }
 
         fireSessionDisconnected();
     }
 
-    protected abstract void closeConnection()
-        throws ConnectionException;
+    protected abstract void closeConnection() throws ConnectionException;
 
-    protected void createParentDirectories( File destination )
-        throws TransferFailedException
-    {
+    protected void createParentDirectories(File destination) throws TransferFailedException {
         File destinationDirectory = destination.getParentFile();
-        try
-        {
+        try {
             destinationDirectory = destinationDirectory.getCanonicalFile();
-        }
-        catch ( IOException e )
-        {
+        } catch (IOException e) {
             // not essential to have a canonical file
         }
-        if ( destinationDirectory != null && !destinationDirectory.exists() )
-        {
+        if (destinationDirectory != null && !destinationDirectory.exists()) {
             destinationDirectory.mkdirs();
-            if ( !destinationDirectory.exists() )
-            {
+            if (!destinationDirectory.exists()) {
                 throw new TransferFailedException(
-                    "Specified destination directory cannot be created: " + destinationDirectory );
+                        "Specified destination directory cannot be created: " + destinationDirectory);
             }
         }
     }
 
-    public void setTimeout( int timeoutValue )
-    {
+    public void setTimeout(int timeoutValue) {
         connectionTimeout = timeoutValue;
     }
 
-    public int getTimeout()
-    {
+    public int getTimeout() {
         return connectionTimeout;
     }
 
@@ -302,144 +254,112 @@ public abstract class AbstractWagon
     // Stream i/o
     // ----------------------------------------------------------------------
 
-    protected void getTransfer( Resource resource, File destination, InputStream input )
-        throws TransferFailedException
-    {
-        getTransfer( resource, destination, input, true, Long.MAX_VALUE );
+    protected void getTransfer(Resource resource, File destination, InputStream input) throws TransferFailedException {
+        getTransfer(resource, destination, input, true, Long.MAX_VALUE);
     }
 
-    protected void getTransfer( Resource resource, OutputStream output, InputStream input )
-        throws TransferFailedException
-    {
-        getTransfer( resource, output, input, true, Long.MAX_VALUE );
+    protected void getTransfer(Resource resource, OutputStream output, InputStream input)
+            throws TransferFailedException {
+        getTransfer(resource, output, input, true, Long.MAX_VALUE);
     }
 
     @Deprecated
-    protected void getTransfer( Resource resource, File destination, InputStream input, boolean closeInput,
-                                int maxSize )
-        throws TransferFailedException
-    {
-        getTransfer( resource, destination, input, closeInput, (long) maxSize );
+    protected void getTransfer(Resource resource, File destination, InputStream input, boolean closeInput, int maxSize)
+            throws TransferFailedException {
+        getTransfer(resource, destination, input, closeInput, (long) maxSize);
     }
 
-    protected void getTransfer( Resource resource, File destination, InputStream input, boolean closeInput,
-                                long maxSize )
-        throws TransferFailedException
-    {
+    protected void getTransfer(Resource resource, File destination, InputStream input, boolean closeInput, long maxSize)
+            throws TransferFailedException {
         // ensure that the destination is created only when we are ready to transfer
-        fireTransferDebug( "attempting to create parent directories for destination: " + destination.getName() );
-        createParentDirectories( destination );
+        fireTransferDebug("attempting to create parent directories for destination: " + destination.getName());
+        createParentDirectories(destination);
 
-        fireGetStarted( resource, destination );
+        fireGetStarted(resource, destination);
 
         OutputStream output = null;
-        try
-        {
-            output = new LazyFileOutputStream( destination );
-            getTransfer( resource, output, input, closeInput, maxSize );
+        try {
+            output = new LazyFileOutputStream(destination);
+            getTransfer(resource, output, input, closeInput, maxSize);
             output.close();
             output = null;
-        }
-        catch ( final IOException e )
-        {
-            if ( destination.exists() )
-            {
+        } catch (final IOException e) {
+            if (destination.exists()) {
                 boolean deleted = destination.delete();
 
-                if ( !deleted )
-                {
+                if (!deleted) {
                     destination.deleteOnExit();
                 }
             }
 
-            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+            fireTransferError(resource, e, TransferEvent.REQUEST_GET);
 
             String msg = "GET request of: " + resource.getName() + " from " + repository.getName() + " failed";
 
-            throw new TransferFailedException( msg, e );
-        }
-        catch ( TransferFailedException e )
-        {
-            if ( destination.exists() )
-            {
+            throw new TransferFailedException(msg, e);
+        } catch (TransferFailedException e) {
+            if (destination.exists()) {
                 boolean deleted = destination.delete();
 
-                if ( !deleted )
-                {
+                if (!deleted) {
                     destination.deleteOnExit();
                 }
             }
             throw e;
-        }
-        finally
-        {
-            IOUtil.close( output );
+        } finally {
+            IOUtil.close(output);
         }
 
-        fireGetCompleted( resource, destination );
+        fireGetCompleted(resource, destination);
     }
 
     @Deprecated
-    protected void getTransfer( Resource resource, OutputStream output, InputStream input, boolean closeInput,
-                                int maxSize )
-        throws TransferFailedException
-    {
-        getTransfer( resource, output, input, closeInput, (long) maxSize );
+    protected void getTransfer(
+            Resource resource, OutputStream output, InputStream input, boolean closeInput, int maxSize)
+            throws TransferFailedException {
+        getTransfer(resource, output, input, closeInput, (long) maxSize);
     }
 
-    protected void getTransfer( Resource resource, OutputStream output, InputStream input, boolean closeInput,
-                                long maxSize )
-        throws TransferFailedException
-    {
-        try
-        {
-            transfer( resource, input, output, TransferEvent.REQUEST_GET, maxSize );
+    protected void getTransfer(
+            Resource resource, OutputStream output, InputStream input, boolean closeInput, long maxSize)
+            throws TransferFailedException {
+        try {
+            transfer(resource, input, output, TransferEvent.REQUEST_GET, maxSize);
 
-            finishGetTransfer( resource, input, output );
+            finishGetTransfer(resource, input, output);
 
-            if ( closeInput )
-            {
+            if (closeInput) {
                 input.close();
                 input = null;
             }
 
-        }
-        catch ( IOException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_GET );
+        } catch (IOException e) {
+            fireTransferError(resource, e, TransferEvent.REQUEST_GET);
 
             String msg = "GET request of: " + resource.getName() + " from " + repository.getName() + " failed";
 
-            throw new TransferFailedException( msg, e );
-        }
-        finally
-        {
-            if ( closeInput )
-            {
-                IOUtil.close( input );
+            throw new TransferFailedException(msg, e);
+        } finally {
+            if (closeInput) {
+                IOUtil.close(input);
             }
 
-            cleanupGetTransfer( resource );
+            cleanupGetTransfer(resource);
         }
     }
 
-    protected void finishGetTransfer( Resource resource, InputStream input, OutputStream output )
-        throws TransferFailedException
-    {
-    }
+    protected void finishGetTransfer(Resource resource, InputStream input, OutputStream output)
+            throws TransferFailedException {}
 
-    protected void cleanupGetTransfer( Resource resource )
-    {
-    }
+    protected void cleanupGetTransfer(Resource resource) {}
 
-    protected void putTransfer( Resource resource, File source, OutputStream output, boolean closeOutput )
-        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
-    {
-        firePutStarted( resource, source );
+    protected void putTransfer(Resource resource, File source, OutputStream output, boolean closeOutput)
+            throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException {
+        firePutStarted(resource, source);
 
-        transfer( resource, source, output, closeOutput );
+        transfer(resource, source, output, closeOutput);
 
-        firePutCompleted( resource, source );
+        firePutCompleted(resource, source);
     }
 
     /**
@@ -454,83 +374,67 @@ public abstract class AbstractWagon
      * @throws AuthorizationException
      * @since 1.0-beta-1
      */
-    protected void transfer( Resource resource, File source, OutputStream output, boolean closeOutput )
-        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
-    {
+    protected void transfer(Resource resource, File source, OutputStream output, boolean closeOutput)
+            throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException {
         InputStream input = null;
 
-        try
-        {
-            input = new FileInputStream( source );
+        try {
+            input = new FileInputStream(source);
 
-            putTransfer( resource, input, output, closeOutput );
+            putTransfer(resource, input, output, closeOutput);
 
             input.close();
             input = null;
-        }
-        catch ( FileNotFoundException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+        } catch (FileNotFoundException e) {
+            fireTransferError(resource, e, TransferEvent.REQUEST_PUT);
 
-            throw new TransferFailedException( "Specified source file does not exist: " + source, e );
-        }
-        catch ( final IOException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+            throw new TransferFailedException("Specified source file does not exist: " + source, e);
+        } catch (final IOException e) {
+            fireTransferError(resource, e, TransferEvent.REQUEST_PUT);
 
-            throw new TransferFailedException( "Failure transferring " + source, e );
-        }
-        finally
-        {
-            IOUtil.close( input );
+            throw new TransferFailedException("Failure transferring " + source, e);
+        } finally {
+            IOUtil.close(input);
         }
     }
 
-    protected void putTransfer( Resource resource, InputStream input, OutputStream output, boolean closeOutput )
-        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
-    {
-        try
-        {
-            transfer( resource, input, output, TransferEvent.REQUEST_PUT,
-                      resource.getContentLength() == WagonConstants.UNKNOWN_LENGTH
-                          ? Long.MAX_VALUE
-                          : resource.getContentLength() );
+    protected void putTransfer(Resource resource, InputStream input, OutputStream output, boolean closeOutput)
+            throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException {
+        try {
+            transfer(
+                    resource,
+                    input,
+                    output,
+                    TransferEvent.REQUEST_PUT,
+                    resource.getContentLength() == WagonConstants.UNKNOWN_LENGTH
+                            ? Long.MAX_VALUE
+                            : resource.getContentLength());
 
-            finishPutTransfer( resource, input, output );
+            finishPutTransfer(resource, input, output);
 
-            if ( closeOutput )
-            {
+            if (closeOutput) {
                 output.close();
                 output = null;
             }
-        }
-        catch ( IOException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+        } catch (IOException e) {
+            fireTransferError(resource, e, TransferEvent.REQUEST_PUT);
 
             String msg = "PUT request to: " + resource.getName() + " in " + repository.getName() + " failed";
 
-            throw new TransferFailedException( msg, e );
-        }
-        finally
-        {
-            if ( closeOutput )
-            {
-                IOUtil.close( output );
+            throw new TransferFailedException(msg, e);
+        } finally {
+            if (closeOutput) {
+                IOUtil.close(output);
             }
 
-            cleanupPutTransfer( resource );
+            cleanupPutTransfer(resource);
         }
     }
 
-    protected void cleanupPutTransfer( Resource resource )
-    {
-    }
+    protected void cleanupPutTransfer(Resource resource) {}
 
-    protected void finishPutTransfer( Resource resource, InputStream input, OutputStream output )
-        throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException
-    {
-    }
+    protected void finishPutTransfer(Resource resource, InputStream input, OutputStream output)
+            throws TransferFailedException, AuthorizationException, ResourceDoesNotExistException {}
 
     /**
      * Write from {@link InputStream} to {@link OutputStream}.
@@ -543,10 +447,9 @@ public abstract class AbstractWagon
      * @param requestType one of {@link TransferEvent#REQUEST_GET} or {@link TransferEvent#REQUEST_PUT}
      * @throws IOException
      */
-    protected void transfer( Resource resource, InputStream input, OutputStream output, int requestType )
-        throws IOException
-    {
-        transfer( resource, input, output, requestType, Long.MAX_VALUE );
+    protected void transfer(Resource resource, InputStream input, OutputStream output, int requestType)
+            throws IOException {
+        transfer(resource, input, output, requestType, Long.MAX_VALUE);
     }
 
     /**
@@ -563,10 +466,9 @@ public abstract class AbstractWagon
      * @deprecated Please use the transfer using long as type of maxSize
      */
     @Deprecated
-    protected void transfer( Resource resource, InputStream input, OutputStream output, int requestType, int maxSize )
-        throws IOException
-    {
-        transfer( resource, input, output, requestType, (long) maxSize );
+    protected void transfer(Resource resource, InputStream input, OutputStream output, int requestType, int maxSize)
+            throws IOException {
+        transfer(resource, input, output, requestType, (long) maxSize);
     }
 
     /**
@@ -581,31 +483,27 @@ public abstract class AbstractWagon
      * @param maxSize     size of the buffer
      * @throws IOException
      */
-    protected void transfer( Resource resource, InputStream input, OutputStream output, int requestType, long maxSize )
-        throws IOException
-    {
-        ByteBuffer buffer = ByteBuffer.allocate( getBufferCapacityForTransfer( resource.getContentLength() ) );
+    protected void transfer(Resource resource, InputStream input, OutputStream output, int requestType, long maxSize)
+            throws IOException {
+        ByteBuffer buffer = ByteBuffer.allocate(getBufferCapacityForTransfer(resource.getContentLength()));
         int halfBufferCapacity = buffer.capacity() / 2;
 
-        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_PROGRESS, requestType );
-        transferEvent.setTimestamp( System.currentTimeMillis() );
+        TransferEvent transferEvent = new TransferEvent(this, resource, TransferEvent.TRANSFER_PROGRESS, requestType);
+        transferEvent.setTimestamp(System.currentTimeMillis());
 
-        ReadableByteChannel in = Channels.newChannel( input );
+        ReadableByteChannel in = Channels.newChannel(input);
 
         long remaining = maxSize;
-        while ( remaining > 0L )
-        {
-            int read = in.read( buffer );
+        while (remaining > 0L) {
+            int read = in.read(buffer);
 
-            if ( read == -1 )
-            {
+            if (read == -1) {
                 // EOF, but some data has not been written yet.
-                if ( ( (Buffer) buffer ).position() != 0 )
-                {
-                    ( (Buffer) buffer ).flip();
-                    fireTransferProgress( transferEvent, buffer.array(), ( (Buffer) buffer ).limit() );
-                    output.write( buffer.array(), 0, ( (Buffer) buffer ).limit() );
-                    ( (Buffer) buffer ).clear();
+                if (((Buffer) buffer).position() != 0) {
+                    ((Buffer) buffer).flip();
+                    fireTransferProgress(transferEvent, buffer.array(), ((Buffer) buffer).limit());
+                    output.write(buffer.array(), 0, ((Buffer) buffer).limit());
+                    ((Buffer) buffer).clear();
                 }
 
                 break;
@@ -613,16 +511,15 @@ public abstract class AbstractWagon
 
             // Prevent minichunking/fragmentation: when less than half the buffer is utilized,
             // read some more bytes before writing and firing progress.
-            if ( ( (Buffer) buffer ).position() < halfBufferCapacity )
-            {
+            if (((Buffer) buffer).position() < halfBufferCapacity) {
                 continue;
             }
 
-            ( (Buffer) buffer ).flip();
-            fireTransferProgress( transferEvent, buffer.array(), ( (Buffer) buffer ).limit() );
-            output.write( buffer.array(), 0, ( (Buffer) buffer ).limit() );
-            remaining -= ( (Buffer) buffer ).limit();
-            ( (Buffer) buffer ).clear();
+            ((Buffer) buffer).flip();
+            fireTransferProgress(transferEvent, buffer.array(), ((Buffer) buffer).limit());
+            output.write(buffer.array(), 0, ((Buffer) buffer).limit());
+            remaining -= ((Buffer) buffer).limit();
+            ((Buffer) buffer).clear();
         }
         output.flush();
     }
@@ -638,269 +535,235 @@ public abstract class AbstractWagon
      * @param numberOfBytes can be 0 or less, in which case a default buffer size is used.
      * @return a byte buffer suitable for transferring the given amount of bytes without too many chunks.
      */
-    protected int getBufferCapacityForTransfer( long numberOfBytes )
-    {
-        if ( numberOfBytes <= 0L )
-        {
+    protected int getBufferCapacityForTransfer(long numberOfBytes) {
+        if (numberOfBytes <= 0L) {
             return DEFAULT_BUFFER_SIZE;
         }
 
-        final long numberOfBufferSegments =  numberOfBytes
-                / ( BUFFER_SEGMENT_SIZE * MINIMUM_AMOUNT_OF_TRANSFER_CHUNKS );
+        final long numberOfBufferSegments = numberOfBytes / (BUFFER_SEGMENT_SIZE * MINIMUM_AMOUNT_OF_TRANSFER_CHUNKS);
         final long potentialBufferSize = numberOfBufferSegments * BUFFER_SEGMENT_SIZE;
-        if ( potentialBufferSize > Integer.MAX_VALUE )
-        {
+        if (potentialBufferSize > Integer.MAX_VALUE) {
             return MAXIMUM_BUFFER_SIZE;
         }
-        return min( MAXIMUM_BUFFER_SIZE, max( DEFAULT_BUFFER_SIZE, (int) potentialBufferSize ) );
+        return min(MAXIMUM_BUFFER_SIZE, max(DEFAULT_BUFFER_SIZE, (int) potentialBufferSize));
     }
 
     // ----------------------------------------------------------------------
     //
     // ----------------------------------------------------------------------
 
-    protected void fireTransferProgress( TransferEvent transferEvent, byte[] buffer, int n )
-    {
-        transferEventSupport.fireTransferProgress( transferEvent, buffer, n );
+    protected void fireTransferProgress(TransferEvent transferEvent, byte[] buffer, int n) {
+        transferEventSupport.fireTransferProgress(transferEvent, buffer, n);
     }
 
-    protected void fireGetCompleted( Resource resource, File localFile )
-    {
+    protected void fireGetCompleted(Resource resource, File localFile) {
         long timestamp = System.currentTimeMillis();
 
         TransferEvent transferEvent =
-            new TransferEvent( this, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_GET );
+                new TransferEvent(this, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_GET);
 
-        transferEvent.setTimestamp( timestamp );
+        transferEvent.setTimestamp(timestamp);
 
-        transferEvent.setLocalFile( localFile );
+        transferEvent.setLocalFile(localFile);
 
-        transferEventSupport.fireTransferCompleted( transferEvent );
+        transferEventSupport.fireTransferCompleted(transferEvent);
     }
 
-    protected void fireGetStarted( Resource resource, File localFile )
-    {
+    protected void fireGetStarted(Resource resource, File localFile) {
         long timestamp = System.currentTimeMillis();
 
         TransferEvent transferEvent =
-            new TransferEvent( this, resource, TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_GET );
+                new TransferEvent(this, resource, TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_GET);
 
-        transferEvent.setTimestamp( timestamp );
+        transferEvent.setTimestamp(timestamp);
 
-        transferEvent.setLocalFile( localFile );
+        transferEvent.setLocalFile(localFile);
 
-        transferEventSupport.fireTransferStarted( transferEvent );
+        transferEventSupport.fireTransferStarted(transferEvent);
     }
 
-    protected void fireGetInitiated( Resource resource, File localFile )
-    {
+    protected void fireGetInitiated(Resource resource, File localFile) {
         long timestamp = System.currentTimeMillis();
 
         TransferEvent transferEvent =
-            new TransferEvent( this, resource, TransferEvent.TRANSFER_INITIATED, TransferEvent.REQUEST_GET );
+                new TransferEvent(this, resource, TransferEvent.TRANSFER_INITIATED, TransferEvent.REQUEST_GET);
 
-        transferEvent.setTimestamp( timestamp );
+        transferEvent.setTimestamp(timestamp);
 
-        transferEvent.setLocalFile( localFile );
+        transferEvent.setLocalFile(localFile);
 
-        transferEventSupport.fireTransferInitiated( transferEvent );
+        transferEventSupport.fireTransferInitiated(transferEvent);
     }
 
-    protected void firePutInitiated( Resource resource, File localFile )
-    {
+    protected void firePutInitiated(Resource resource, File localFile) {
         long timestamp = System.currentTimeMillis();
 
         TransferEvent transferEvent =
-            new TransferEvent( this, resource, TransferEvent.TRANSFER_INITIATED, TransferEvent.REQUEST_PUT );
+                new TransferEvent(this, resource, TransferEvent.TRANSFER_INITIATED, TransferEvent.REQUEST_PUT);
 
-        transferEvent.setTimestamp( timestamp );
+        transferEvent.setTimestamp(timestamp);
 
-        transferEvent.setLocalFile( localFile );
+        transferEvent.setLocalFile(localFile);
 
-        transferEventSupport.fireTransferInitiated( transferEvent );
+        transferEventSupport.fireTransferInitiated(transferEvent);
     }
 
-    protected void firePutCompleted( Resource resource, File localFile )
-    {
+    protected void firePutCompleted(Resource resource, File localFile) {
         long timestamp = System.currentTimeMillis();
 
         TransferEvent transferEvent =
-            new TransferEvent( this, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_PUT );
+                new TransferEvent(this, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_PUT);
 
-        transferEvent.setTimestamp( timestamp );
+        transferEvent.setTimestamp(timestamp);
 
-        transferEvent.setLocalFile( localFile );
+        transferEvent.setLocalFile(localFile);
 
-        transferEventSupport.fireTransferCompleted( transferEvent );
+        transferEventSupport.fireTransferCompleted(transferEvent);
     }
 
-    protected void firePutStarted( Resource resource, File localFile )
-    {
+    protected void firePutStarted(Resource resource, File localFile) {
         long timestamp = System.currentTimeMillis();
 
         TransferEvent transferEvent =
-            new TransferEvent( this, resource, TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_PUT );
+                new TransferEvent(this, resource, TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_PUT);
 
-        transferEvent.setTimestamp( timestamp );
+        transferEvent.setTimestamp(timestamp);
 
-        transferEvent.setLocalFile( localFile );
+        transferEvent.setLocalFile(localFile);
 
-        transferEventSupport.fireTransferStarted( transferEvent );
+        transferEventSupport.fireTransferStarted(transferEvent);
     }
 
-    protected void fireSessionDisconnected()
-    {
+    protected void fireSessionDisconnected() {
         long timestamp = System.currentTimeMillis();
 
-        SessionEvent sessionEvent = new SessionEvent( this, SessionEvent.SESSION_DISCONNECTED );
+        SessionEvent sessionEvent = new SessionEvent(this, SessionEvent.SESSION_DISCONNECTED);
 
-        sessionEvent.setTimestamp( timestamp );
+        sessionEvent.setTimestamp(timestamp);
 
-        sessionEventSupport.fireSessionDisconnected( sessionEvent );
+        sessionEventSupport.fireSessionDisconnected(sessionEvent);
     }
 
-    protected void fireSessionDisconnecting()
-    {
+    protected void fireSessionDisconnecting() {
         long timestamp = System.currentTimeMillis();
 
-        SessionEvent sessionEvent = new SessionEvent( this, SessionEvent.SESSION_DISCONNECTING );
+        SessionEvent sessionEvent = new SessionEvent(this, SessionEvent.SESSION_DISCONNECTING);
 
-        sessionEvent.setTimestamp( timestamp );
+        sessionEvent.setTimestamp(timestamp);
 
-        sessionEventSupport.fireSessionDisconnecting( sessionEvent );
+        sessionEventSupport.fireSessionDisconnecting(sessionEvent);
     }
 
-    protected void fireSessionLoggedIn()
-    {
+    protected void fireSessionLoggedIn() {
         long timestamp = System.currentTimeMillis();
 
-        SessionEvent sessionEvent = new SessionEvent( this, SessionEvent.SESSION_LOGGED_IN );
+        SessionEvent sessionEvent = new SessionEvent(this, SessionEvent.SESSION_LOGGED_IN);
 
-        sessionEvent.setTimestamp( timestamp );
+        sessionEvent.setTimestamp(timestamp);
 
-        sessionEventSupport.fireSessionLoggedIn( sessionEvent );
+        sessionEventSupport.fireSessionLoggedIn(sessionEvent);
     }
 
-    protected void fireSessionLoggedOff()
-    {
+    protected void fireSessionLoggedOff() {
         long timestamp = System.currentTimeMillis();
 
-        SessionEvent sessionEvent = new SessionEvent( this, SessionEvent.SESSION_LOGGED_OFF );
+        SessionEvent sessionEvent = new SessionEvent(this, SessionEvent.SESSION_LOGGED_OFF);
 
-        sessionEvent.setTimestamp( timestamp );
+        sessionEvent.setTimestamp(timestamp);
 
-        sessionEventSupport.fireSessionLoggedOff( sessionEvent );
+        sessionEventSupport.fireSessionLoggedOff(sessionEvent);
     }
 
-    protected void fireSessionOpened()
-    {
+    protected void fireSessionOpened() {
         long timestamp = System.currentTimeMillis();
 
-        SessionEvent sessionEvent = new SessionEvent( this, SessionEvent.SESSION_OPENED );
+        SessionEvent sessionEvent = new SessionEvent(this, SessionEvent.SESSION_OPENED);
 
-        sessionEvent.setTimestamp( timestamp );
+        sessionEvent.setTimestamp(timestamp);
 
-        sessionEventSupport.fireSessionOpened( sessionEvent );
+        sessionEventSupport.fireSessionOpened(sessionEvent);
     }
 
-    protected void fireSessionOpening()
-    {
+    protected void fireSessionOpening() {
         long timestamp = System.currentTimeMillis();
 
-        SessionEvent sessionEvent = new SessionEvent( this, SessionEvent.SESSION_OPENING );
+        SessionEvent sessionEvent = new SessionEvent(this, SessionEvent.SESSION_OPENING);
 
-        sessionEvent.setTimestamp( timestamp );
+        sessionEvent.setTimestamp(timestamp);
 
-        sessionEventSupport.fireSessionOpening( sessionEvent );
+        sessionEventSupport.fireSessionOpening(sessionEvent);
     }
 
-    protected void fireSessionConnectionRefused()
-    {
+    protected void fireSessionConnectionRefused() {
         long timestamp = System.currentTimeMillis();
 
-        SessionEvent sessionEvent = new SessionEvent( this, SessionEvent.SESSION_CONNECTION_REFUSED );
+        SessionEvent sessionEvent = new SessionEvent(this, SessionEvent.SESSION_CONNECTION_REFUSED);
 
-        sessionEvent.setTimestamp( timestamp );
+        sessionEvent.setTimestamp(timestamp);
 
-        sessionEventSupport.fireSessionConnectionRefused( sessionEvent );
+        sessionEventSupport.fireSessionConnectionRefused(sessionEvent);
     }
 
-    protected void fireSessionError( Exception exception )
-    {
+    protected void fireSessionError(Exception exception) {
         long timestamp = System.currentTimeMillis();
 
-        SessionEvent sessionEvent = new SessionEvent( this, exception );
+        SessionEvent sessionEvent = new SessionEvent(this, exception);
 
-        sessionEvent.setTimestamp( timestamp );
+        sessionEvent.setTimestamp(timestamp);
 
-        sessionEventSupport.fireSessionError( sessionEvent );
-
+        sessionEventSupport.fireSessionError(sessionEvent);
     }
 
-    protected void fireTransferDebug( String message )
-    {
-        transferEventSupport.fireDebug( message );
+    protected void fireTransferDebug(String message) {
+        transferEventSupport.fireDebug(message);
     }
 
-    protected void fireSessionDebug( String message )
-    {
-        sessionEventSupport.fireDebug( message );
+    protected void fireSessionDebug(String message) {
+        sessionEventSupport.fireDebug(message);
     }
 
-    public boolean hasTransferListener( TransferListener listener )
-    {
-        return transferEventSupport.hasTransferListener( listener );
+    public boolean hasTransferListener(TransferListener listener) {
+        return transferEventSupport.hasTransferListener(listener);
     }
 
-    public void addTransferListener( TransferListener listener )
-    {
-        transferEventSupport.addTransferListener( listener );
+    public void addTransferListener(TransferListener listener) {
+        transferEventSupport.addTransferListener(listener);
     }
 
-    public void removeTransferListener( TransferListener listener )
-    {
-        transferEventSupport.removeTransferListener( listener );
+    public void removeTransferListener(TransferListener listener) {
+        transferEventSupport.removeTransferListener(listener);
     }
 
-    public void addSessionListener( SessionListener listener )
-    {
-        sessionEventSupport.addSessionListener( listener );
+    public void addSessionListener(SessionListener listener) {
+        sessionEventSupport.addSessionListener(listener);
     }
 
-    public boolean hasSessionListener( SessionListener listener )
-    {
-        return sessionEventSupport.hasSessionListener( listener );
+    public boolean hasSessionListener(SessionListener listener) {
+        return sessionEventSupport.hasSessionListener(listener);
     }
 
-    public void removeSessionListener( SessionListener listener )
-    {
-        sessionEventSupport.removeSessionListener( listener );
+    public void removeSessionListener(SessionListener listener) {
+        sessionEventSupport.removeSessionListener(listener);
     }
 
-    protected void fireTransferError( Resource resource, Exception e, int requestType )
-    {
-        TransferEvent transferEvent = new TransferEvent( this, resource, e, requestType );
-        transferEventSupport.fireTransferError( transferEvent );
+    protected void fireTransferError(Resource resource, Exception e, int requestType) {
+        TransferEvent transferEvent = new TransferEvent(this, resource, e, requestType);
+        transferEventSupport.fireTransferError(transferEvent);
     }
 
-
-    public SessionEventSupport getSessionEventSupport()
-    {
+    public SessionEventSupport getSessionEventSupport() {
         return sessionEventSupport;
     }
 
-    public void setSessionEventSupport( SessionEventSupport sessionEventSupport )
-    {
+    public void setSessionEventSupport(SessionEventSupport sessionEventSupport) {
         this.sessionEventSupport = sessionEventSupport;
     }
 
-    public TransferEventSupport getTransferEventSupport()
-    {
+    public TransferEventSupport getTransferEventSupport() {
         return transferEventSupport;
     }
 
-    public void setTransferEventSupport( TransferEventSupport transferEventSupport )
-    {
+    public void setTransferEventSupport(TransferEventSupport transferEventSupport) {
         this.transferEventSupport = transferEventSupport;
     }
 
@@ -908,122 +771,98 @@ public abstract class AbstractWagon
      * This method is used if you are not streaming the transfer, to make sure any listeners dependent on state
      * (eg checksum observers) succeed.
      */
-    protected void postProcessListeners( Resource resource, File source, int requestType )
-        throws TransferFailedException
-    {
+    protected void postProcessListeners(Resource resource, File source, int requestType)
+            throws TransferFailedException {
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
-        TransferEvent transferEvent = new TransferEvent( this, resource, TransferEvent.TRANSFER_PROGRESS, requestType );
-        transferEvent.setTimestamp( System.currentTimeMillis() );
-        transferEvent.setLocalFile( source );
+        TransferEvent transferEvent = new TransferEvent(this, resource, TransferEvent.TRANSFER_PROGRESS, requestType);
+        transferEvent.setTimestamp(System.currentTimeMillis());
+        transferEvent.setLocalFile(source);
 
         InputStream input = null;
-        try
-        {
-            input = new FileInputStream( source );
+        try {
+            input = new FileInputStream(source);
 
-            while ( true )
-            {
-                int n = input.read( buffer );
+            while (true) {
+                int n = input.read(buffer);
 
-                if ( n == -1 )
-                {
+                if (n == -1) {
                     break;
                 }
 
-                fireTransferProgress( transferEvent, buffer, n );
+                fireTransferProgress(transferEvent, buffer, n);
             }
 
             input.close();
             input = null;
-        }
-        catch ( IOException e )
-        {
-            fireTransferError( resource, e, requestType );
+        } catch (IOException e) {
+            fireTransferError(resource, e, requestType);
 
-            throw new TransferFailedException( "Failed to post-process the source file", e );
-        }
-        finally
-        {
-            IOUtil.close( input );
+            throw new TransferFailedException("Failed to post-process the source file", e);
+        } finally {
+            IOUtil.close(input);
         }
     }
 
-    public void putDirectory( File sourceDirectory, String destinationDirectory )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        throw new UnsupportedOperationException( "The wagon you are using has not implemented putDirectory()" );
+    public void putDirectory(File sourceDirectory, String destinationDirectory)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+        throw new UnsupportedOperationException("The wagon you are using has not implemented putDirectory()");
     }
 
-    public boolean supportsDirectoryCopy()
-    {
+    public boolean supportsDirectoryCopy() {
         return false;
     }
 
-    protected static String getPath( String basedir, String dir )
-    {
+    protected static String getPath(String basedir, String dir) {
         String path;
         path = basedir;
-        if ( !basedir.endsWith( "/" ) && !dir.startsWith( "/" ) )
-        {
+        if (!basedir.endsWith("/") && !dir.startsWith("/")) {
             path += "/";
         }
         path += dir;
         return path;
     }
 
-    public boolean isInteractive()
-    {
+    public boolean isInteractive() {
         return interactive;
     }
 
-    public void setInteractive( boolean interactive )
-    {
+    public void setInteractive(boolean interactive) {
         this.interactive = interactive;
     }
 
-    public List<String> getFileList( String destinationDirectory )
-        throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException
-    {
-        throw new UnsupportedOperationException( "The wagon you are using has not implemented getFileList()" );
+    public List<String> getFileList(String destinationDirectory)
+            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+        throw new UnsupportedOperationException("The wagon you are using has not implemented getFileList()");
     }
 
-    public boolean resourceExists( String resourceName )
-        throws TransferFailedException, AuthorizationException
-    {
-        throw new UnsupportedOperationException( "The wagon you are using has not implemented resourceExists()" );
+    public boolean resourceExists(String resourceName) throws TransferFailedException, AuthorizationException {
+        throw new UnsupportedOperationException("The wagon you are using has not implemented resourceExists()");
     }
 
-    protected ProxyInfo getProxyInfo( String protocol, String host )
-    {
-        if ( proxyInfoProvider != null )
-        {
-            ProxyInfo proxyInfo = proxyInfoProvider.getProxyInfo( protocol );
-            if ( !ProxyUtils.validateNonProxyHosts( proxyInfo, host ) )
-            {
+    protected ProxyInfo getProxyInfo(String protocol, String host) {
+        if (proxyInfoProvider != null) {
+            ProxyInfo proxyInfo = proxyInfoProvider.getProxyInfo(protocol);
+            if (!ProxyUtils.validateNonProxyHosts(proxyInfo, host)) {
                 return proxyInfo;
             }
         }
         return null;
     }
 
-    public RepositoryPermissions getPermissionsOverride()
-    {
+    public RepositoryPermissions getPermissionsOverride() {
         return permissionsOverride;
     }
 
-    public void setPermissionsOverride( RepositoryPermissions permissionsOverride )
-    {
+    public void setPermissionsOverride(RepositoryPermissions permissionsOverride) {
         this.permissionsOverride = permissionsOverride;
     }
 
-    public void setReadTimeout( int readTimeout )
-    {
+    public void setReadTimeout(int readTimeout) {
         this.readTimeout = readTimeout;
     }
 
-    public int getReadTimeout()
-    {
+    public int getReadTimeout() {
         return this.readTimeout;
     }
 }

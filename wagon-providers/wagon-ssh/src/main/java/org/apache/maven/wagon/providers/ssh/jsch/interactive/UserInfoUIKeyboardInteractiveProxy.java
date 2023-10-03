@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh.jsch.interactive;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.providers.ssh.jsch.interactive;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh.jsch.interactive;
 
 import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
@@ -29,15 +28,12 @@ import com.jcraft.jsch.UserInfo;
  * @author Juan F. Codagnone
  * @since Sep 22, 2005
  */
-public class UserInfoUIKeyboardInteractiveProxy
-    implements UserInfo, UIKeyboardInteractive
-{
+public class UserInfoUIKeyboardInteractiveProxy implements UserInfo, UIKeyboardInteractive {
     private final UIKeyboardInteractive interactive;
 
     private final UserInfo userInfo;
 
-    public UserInfoUIKeyboardInteractiveProxy( UserInfo userInfo, UIKeyboardInteractive interactive )
-    {
+    public UserInfoUIKeyboardInteractiveProxy(UserInfo userInfo, UIKeyboardInteractive interactive) {
         this.userInfo = userInfo;
         this.interactive = interactive;
     }
@@ -45,62 +41,53 @@ public class UserInfoUIKeyboardInteractiveProxy
     /**
      * @see com.jcraft.jsch.UIKeyboardInteractive#promptKeyboardInteractive(String,String,String,String[],boolean[])
      */
-    public String[] promptKeyboardInteractive( String destination, String name, String instruction, String[] prompt,
-                                               boolean[] echo )
-    {
-        if ( userInfo.getPassword() != null && prompt != null && prompt.length != 0 )
-        {
+    public String[] promptKeyboardInteractive(
+            String destination, String name, String instruction, String[] prompt, boolean[] echo) {
+        if (userInfo.getPassword() != null && prompt != null && prompt.length != 0) {
             prompt[0] = "Keyboard interactive required, supplied password is ignored\n" + prompt[0];
         }
-        return interactive.promptKeyboardInteractive( destination, name, instruction, prompt, echo );
+        return interactive.promptKeyboardInteractive(destination, name, instruction, prompt, echo);
     }
 
     /**
      * @see com.jcraft.jsch.UserInfo#getPassphrase()
      */
-    public String getPassphrase()
-    {
+    public String getPassphrase() {
         return userInfo.getPassphrase();
     }
 
     /**
      * @see com.jcraft.jsch.UserInfo#getPassword()
      */
-    public String getPassword()
-    {
+    public String getPassword() {
         return userInfo.getPassword();
     }
 
     /**
      * @see com.jcraft.jsch.UserInfo#promptPassword(String)
      */
-    public boolean promptPassword( String arg0 )
-    {
-        return userInfo.promptPassword( arg0 );
+    public boolean promptPassword(String arg0) {
+        return userInfo.promptPassword(arg0);
     }
 
     /**
      * @see com.jcraft.jsch.UserInfo#promptPassphrase(String)
      */
-    public boolean promptPassphrase( String arg0 )
-    {
-        return userInfo.promptPassphrase( arg0 );
+    public boolean promptPassphrase(String arg0) {
+        return userInfo.promptPassphrase(arg0);
     }
 
     /**
      * @see com.jcraft.jsch.UserInfo#promptYesNo(String)
      */
-    public boolean promptYesNo( String arg0 )
-    {
-        return userInfo.promptYesNo( arg0 );
+    public boolean promptYesNo(String arg0) {
+        return userInfo.promptYesNo(arg0);
     }
 
     /**
      * @see com.jcraft.jsch.UserInfo#showMessage(String)
      */
-    public void showMessage( String arg0 )
-    {
-        userInfo.showMessage( arg0 );
+    public void showMessage(String arg0) {
+        userInfo.showMessage(arg0);
     }
-
 }

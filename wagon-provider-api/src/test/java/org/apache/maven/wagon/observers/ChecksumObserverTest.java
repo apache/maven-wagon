@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.observers;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,14 +16,13 @@ package org.apache.maven.wagon.observers;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.observers;
 
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
 import junit.framework.TestCase;
-
-import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.Wagon;
@@ -36,88 +33,72 @@ import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 
-public class ChecksumObserverTest
-    extends TestCase
-{
+public class ChecksumObserverTest extends TestCase {
     private Wagon wagon;
 
-    public void setUp()
-        throws Exception
-    {
+    public void setUp() throws Exception {
         super.setUp();
 
-        wagon = new WagonMock( true );
+        wagon = new WagonMock(true);
 
         Repository repository = new Repository();
-        wagon.connect( repository );
+        wagon.connect(repository);
     }
 
-    public void tearDown()
-        throws Exception
-    {
+    public void tearDown() throws Exception {
         wagon.disconnect();
 
         super.tearDown();
     }
 
     public void testSubsequentTransfersAfterTransferError()
-        throws NoSuchAlgorithmException, ResourceDoesNotExistException, AuthorizationException, IOException
-    {
+            throws NoSuchAlgorithmException, ResourceDoesNotExistException, AuthorizationException, IOException {
         TransferListener listener = new ChecksumObserver();
 
-        wagon.addTransferListener( listener );
+        wagon.addTransferListener(listener);
 
-        File testFile = File.createTempFile( "wagon", "tmp" );
+        File testFile = File.createTempFile("wagon", "tmp");
         testFile.deleteOnExit();
 
-        try
-        {
-            wagon.get( "resource", testFile );
+        try {
+            wagon.get("resource", testFile);
             fail();
-        }
-        catch ( TransferFailedException e )
-        {
-            assertTrue( true );
+        } catch (TransferFailedException e) {
+            assertTrue(true);
         }
 
-        try
-        {
-            wagon.get( "resource", testFile );
+        try {
+            wagon.get("resource", testFile);
             fail();
-        }
-        catch ( TransferFailedException e )
-        {
-            assertTrue( true );
+        } catch (TransferFailedException e) {
+            assertTrue(true);
         }
 
         testFile.delete();
     }
 
-    public void testChecksum()
-        throws NoSuchAlgorithmException
-    {
-        ChecksumObserver listener = new ChecksumObserver( "SHA-1" );
+    public void testChecksum() throws NoSuchAlgorithmException {
+        ChecksumObserver listener = new ChecksumObserver("SHA-1");
 
-        Resource resource = new Resource( "resource" );
+        Resource resource = new Resource("resource");
 
         TransferEvent transferEvent =
-            new TransferEvent( wagon, resource, TransferEvent.TRANSFER_INITIATED, TransferEvent.REQUEST_GET );
+                new TransferEvent(wagon, resource, TransferEvent.TRANSFER_INITIATED, TransferEvent.REQUEST_GET);
 
-        listener.transferInitiated( transferEvent );
+        listener.transferInitiated(transferEvent);
 
-        transferEvent = new TransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_GET );
+        transferEvent = new TransferEvent(wagon, resource, TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_GET);
 
-        listener.transferStarted( transferEvent );
+        listener.transferStarted(transferEvent);
 
-        transferEvent = new TransferEvent( wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_GET );
+        transferEvent = new TransferEvent(wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_GET);
 
-        listener.transferProgress( transferEvent, "checksum\n".getBytes(), 9 );
+        listener.transferProgress(transferEvent, "checksum\n".getBytes(), 9);
 
-        transferEvent =
-            new TransferEvent( wagon, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_GET );
+        transferEvent = new TransferEvent(wagon, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_GET);
 
-        listener.transferCompleted( transferEvent );
+        listener.transferCompleted(transferEvent);
 
-        assertEquals( "2e5daf0201ddeb068a62d5e08da18657ab2c6be9", listener.getActualChecksum() );
+        assertEquals("2e5daf0201ddeb068a62d5e08da18657ab2c6be9", listener.getActualChecksum());
     }
 }

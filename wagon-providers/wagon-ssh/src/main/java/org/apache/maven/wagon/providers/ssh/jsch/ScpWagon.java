@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.ssh.jsch;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,12 @@ package org.apache.maven.wagon.providers.ssh.jsch;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.ssh.jsch;
+
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
@@ -30,11 +34,6 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.providers.ssh.ScpHelper;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
-
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * SCP protocol wagon.
@@ -52,9 +51,7 @@ import java.io.OutputStream;
  * role-hint="scp"
  * instantiation-strategy="per-lookup"
  */
-public class ScpWagon
-    extends AbstractJschWagon
-{
+public class ScpWagon extends AbstractJschWagon {
     private static final char COPY_START_CHAR = 'C';
 
     private static final char ACK_SEPARATOR = ' ';
@@ -71,304 +68,247 @@ public class ScpWagon
 
     private OutputStream channelOutputStream;
 
-    private void setFileGroup( RepositoryPermissions permissions, String basedir, Resource resource )
-        throws CommandExecutionException
-    {
-        if ( permissions != null && permissions.getGroup() != null )
-        {
-            //executeCommand( "chgrp -f " + permissions.getGroup() + " " + getPath( basedir, resource.getName() ) );
-            executeCommand( "chgrp -f " + permissions.getGroup() + " \"" + getPath( basedir, resource.getName() )
-                + "\"" );
+    private void setFileGroup(RepositoryPermissions permissions, String basedir, Resource resource)
+            throws CommandExecutionException {
+        if (permissions != null && permissions.getGroup() != null) {
+            // executeCommand( "chgrp -f " + permissions.getGroup() + " " + getPath( basedir, resource.getName() ) );
+            executeCommand("chgrp -f " + permissions.getGroup() + " \"" + getPath(basedir, resource.getName()) + "\"");
         }
     }
 
-    protected void cleanupPutTransfer( Resource resource )
-    {
-        if ( channel != null )
-        {
+    protected void cleanupPutTransfer(Resource resource) {
+        if (channel != null) {
             channel.disconnect();
             channel = null;
         }
     }
 
-    protected void finishPutTransfer( Resource resource, InputStream input, OutputStream output )
-        throws TransferFailedException
-    {
-        try
-        {
-            sendEom( output );
+    protected void finishPutTransfer(Resource resource, InputStream input, OutputStream output)
+            throws TransferFailedException {
+        try {
+            sendEom(output);
 
-            checkAck( channelInputStream );
+            checkAck(channelInputStream);
 
             // This came from SCPClient in Ganymede SSH2. It is sent after all files.
-            output.write( END_OF_FILES_MSG.getBytes() );
+            output.write(END_OF_FILES_MSG.getBytes());
             output.flush();
-        }
-        catch ( IOException e )
-        {
-            handleIOException( resource, e );
+        } catch (IOException e) {
+            handleIOException(resource, e);
         }
 
         String basedir = getRepository().getBasedir();
-        try
-        {
-            setFileGroup( getRepository().getPermissions(), basedir, resource );
-        }
-        catch ( CommandExecutionException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+        try {
+            setFileGroup(getRepository().getPermissions(), basedir, resource);
+        } catch (CommandExecutionException e) {
+            fireTransferError(resource, e, TransferEvent.REQUEST_PUT);
 
-            throw new TransferFailedException( e.getMessage(), e );
+            throw new TransferFailedException(e.getMessage(), e);
         }
     }
 
-    private void checkAck( InputStream in )
-        throws IOException
-    {
+    private void checkAck(InputStream in) throws IOException {
         int code = in.read();
-        if ( code == -1 )
-        {
-            throw new IOException( "Unexpected end of data" );
-        }
-        else if ( code == 1 )
-        {
-            String line = readLine( in );
+        if (code == -1) {
+            throw new IOException("Unexpected end of data");
+        } else if (code == 1) {
+            String line = readLine(in);
 
-            throw new IOException( "SCP terminated with error: '" + line + "'" );
-        }
-        else if ( code == 2 )
-        {
-            throw new IOException( "SCP terminated with error (code: " + code + ")" );
-        }
-        else if ( code != 0 )
-        {
-            throw new IOException( "SCP terminated with unknown error code" );
+            throw new IOException("SCP terminated with error: '" + line + "'");
+        } else if (code == 2) {
+            throw new IOException("SCP terminated with error (code: " + code + ")");
+        } else if (code != 0) {
+            throw new IOException("SCP terminated with unknown error code");
         }
     }
 
-    protected void finishGetTransfer( Resource resource, InputStream input, OutputStream output )
-        throws TransferFailedException
-    {
-        try
-        {
-            checkAck( input );
+    protected void finishGetTransfer(Resource resource, InputStream input, OutputStream output)
+            throws TransferFailedException {
+        try {
+            checkAck(input);
 
-            sendEom( channelOutputStream );
-        }
-        catch ( IOException e )
-        {
-            handleGetException( resource, e );
+            sendEom(channelOutputStream);
+        } catch (IOException e) {
+            handleGetException(resource, e);
         }
     }
 
-    protected void cleanupGetTransfer( Resource resource )
-    {
-        if ( channel != null )
-        {
+    protected void cleanupGetTransfer(Resource resource) {
+        if (channel != null) {
             channel.disconnect();
         }
     }
 
     @Deprecated
-    protected void getTransfer( Resource resource, OutputStream output, InputStream input, boolean closeInput,
-                                int maxSize )
-        throws TransferFailedException
-    {
-        super.getTransfer( resource, output, input, closeInput, (int) resource.getContentLength() );
+    protected void getTransfer(
+            Resource resource, OutputStream output, InputStream input, boolean closeInput, int maxSize)
+            throws TransferFailedException {
+        super.getTransfer(resource, output, input, closeInput, (int) resource.getContentLength());
     }
 
-    protected void getTransfer( Resource resource, OutputStream output, InputStream input, boolean closeInput,
-                                long maxSize )
-        throws TransferFailedException
-    {
-        super.getTransfer( resource, output, input, closeInput, resource.getContentLength() );
+    protected void getTransfer(
+            Resource resource, OutputStream output, InputStream input, boolean closeInput, long maxSize)
+            throws TransferFailedException {
+        super.getTransfer(resource, output, input, closeInput, resource.getContentLength());
     }
 
-    protected String readLine( InputStream in )
-        throws IOException
-    {
+    protected String readLine(InputStream in) throws IOException {
         StringBuilder sb = new StringBuilder();
 
-        while ( true )
-        {
-            if ( sb.length() > LINE_BUFFER_SIZE )
-            {
-                throw new IOException( "Remote server sent a too long line" );
+        while (true) {
+            if (sb.length() > LINE_BUFFER_SIZE) {
+                throw new IOException("Remote server sent a too long line");
             }
 
             int c = in.read();
 
-            if ( c < 0 )
-            {
-                throw new IOException( "Remote connection terminated unexpectedly." );
+            if (c < 0) {
+                throw new IOException("Remote connection terminated unexpectedly.");
             }
 
-            if ( c == LF )
-            {
+            if (c == LF) {
                 break;
             }
 
-            sb.append( (char) c );
+            sb.append((char) c);
         }
         return sb.toString();
     }
 
-    protected static void sendEom( OutputStream out )
-        throws IOException
-    {
-        out.write( 0 );
+    protected static void sendEom(OutputStream out) throws IOException {
+        out.write(0);
 
         out.flush();
     }
 
-    public void fillInputData( InputData inputData )
-        throws TransferFailedException, ResourceDoesNotExistException
-    {
+    public void fillInputData(InputData inputData) throws TransferFailedException, ResourceDoesNotExistException {
         Resource resource = inputData.getResource();
 
-        String path = getPath( getRepository().getBasedir(), resource.getName() );
-        //String cmd = "scp -p -f " + path;
+        String path = getPath(getRepository().getBasedir(), resource.getName());
+        // String cmd = "scp -p -f " + path;
         String cmd = "scp -p -f \"" + path + "\"";
 
-        fireTransferDebug( "Executing command: " + cmd );
+        fireTransferDebug("Executing command: " + cmd);
 
-        try
-        {
-            channel = (ChannelExec) session.openChannel( EXEC_CHANNEL );
+        try {
+            channel = (ChannelExec) session.openChannel(EXEC_CHANNEL);
 
-            channel.setCommand( cmd );
+            channel.setCommand(cmd);
 
             // get I/O streams for remote scp
             channelOutputStream = channel.getOutputStream();
 
             InputStream in = channel.getInputStream();
-            inputData.setInputStream( in );
+            inputData.setInputStream(in);
 
             channel.connect();
 
-            sendEom( channelOutputStream );
+            sendEom(channelOutputStream);
 
             int exitCode = in.read();
 
-            if ( exitCode == 'T' )
-            {
-                String line = readLine( in );
+            if (exitCode == 'T') {
+                String line = readLine(in);
 
-                String[] times = line.split( " " );
+                String[] times = line.split(" ");
 
-                resource.setLastModified( Long.valueOf( times[0] ).longValue() * 1000 );
+                resource.setLastModified(Long.valueOf(times[0]).longValue() * 1000);
 
-                sendEom( channelOutputStream );
+                sendEom(channelOutputStream);
 
                 exitCode = in.read();
             }
 
-            String line = readLine( in );
+            String line = readLine(in);
 
-            if ( exitCode != COPY_START_CHAR )
-            {
-                if ( exitCode == 1 && ( line.contains( "No such file or directory" )
-                    || line.indexOf( "no such file or directory" ) != 1 ) )
-                {
-                    throw new ResourceDoesNotExistException( line );
-                }
-                else
-                {
-                    throw new IOException( "Exit code: " + exitCode + " - " + line );
+            if (exitCode != COPY_START_CHAR) {
+                if (exitCode == 1
+                        && (line.contains("No such file or directory")
+                                || line.indexOf("no such file or directory") != 1)) {
+                    throw new ResourceDoesNotExistException(line);
+                } else {
+                    throw new IOException("Exit code: " + exitCode + " - " + line);
                 }
             }
 
-            if ( line == null )
-            {
-                throw new EOFException( "Unexpected end of data" );
+            if (line == null) {
+                throw new EOFException("Unexpected end of data");
             }
 
-            String perms = line.substring( 0, 4 );
-            fireTransferDebug( "Remote file permissions: " + perms );
+            String perms = line.substring(0, 4);
+            fireTransferDebug("Remote file permissions: " + perms);
 
-            if ( line.charAt( 4 ) != ACK_SEPARATOR && line.charAt( 5 ) != ACK_SEPARATOR )
-            {
-                throw new IOException( "Invalid transfer header: " + line );
+            if (line.charAt(4) != ACK_SEPARATOR && line.charAt(5) != ACK_SEPARATOR) {
+                throw new IOException("Invalid transfer header: " + line);
             }
 
-            int index = line.indexOf( ACK_SEPARATOR, 5 );
-            if ( index < 0 )
-            {
-                throw new IOException( "Invalid transfer header: " + line );
+            int index = line.indexOf(ACK_SEPARATOR, 5);
+            if (index < 0) {
+                throw new IOException("Invalid transfer header: " + line);
             }
 
-            long filesize = Long.parseLong( line.substring( 5, index ) );
-            fireTransferDebug( "Remote file size: " + filesize );
+            long filesize = Long.parseLong(line.substring(5, index));
+            fireTransferDebug("Remote file size: " + filesize);
 
-            resource.setContentLength( filesize );
+            resource.setContentLength(filesize);
 
-            String filename = line.substring( index + 1 );
-            fireTransferDebug( "Remote filename: " + filename );
+            String filename = line.substring(index + 1);
+            fireTransferDebug("Remote filename: " + filename);
 
-            sendEom( channelOutputStream );
-        }
-        catch ( JSchException e )
-        {
-            handleGetException( resource, e );
-        }
-        catch ( IOException e )
-        {
-            handleGetException( resource, e );
+            sendEom(channelOutputStream);
+        } catch (JSchException e) {
+            handleGetException(resource, e);
+        } catch (IOException e) {
+            handleGetException(resource, e);
         }
     }
 
-    public void fillOutputData( OutputData outputData )
-        throws TransferFailedException
-    {
+    public void fillOutputData(OutputData outputData) throws TransferFailedException {
         Resource resource = outputData.getResource();
 
         String basedir = getRepository().getBasedir();
 
-        String path = getPath( basedir, resource.getName() );
+        String path = getPath(basedir, resource.getName());
 
-        String dir = ScpHelper.getResourceDirectory( resource.getName() );
+        String dir = ScpHelper.getResourceDirectory(resource.getName());
 
-        try
-        {
-            sshTool.createRemoteDirectories( getPath( basedir, dir ), getRepository().getPermissions() );
-        }
-        catch ( CommandExecutionException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+        try {
+            sshTool.createRemoteDirectories(
+                    getPath(basedir, dir), getRepository().getPermissions());
+        } catch (CommandExecutionException e) {
+            fireTransferError(resource, e, TransferEvent.REQUEST_PUT);
 
-            throw new TransferFailedException( e.getMessage(), e );
+            throw new TransferFailedException(e.getMessage(), e);
         }
 
-        String octalMode = getOctalMode( getRepository().getPermissions() );
+        String octalMode = getOctalMode(getRepository().getPermissions());
 
         // exec 'scp -p -t rfile' remotely
         String command = "scp";
-        if ( octalMode != null )
-        {
+        if (octalMode != null) {
             command += " -p";
         }
         command += " -t \"" + path + "\"";
 
-        fireTransferDebug( "Executing command: " + command );
+        fireTransferDebug("Executing command: " + command);
 
         String resourceName = resource.getName();
 
         OutputStream out = null;
-        try
-        {
-            channel = (ChannelExec) session.openChannel( EXEC_CHANNEL );
+        try {
+            channel = (ChannelExec) session.openChannel(EXEC_CHANNEL);
 
-            channel.setCommand( command );
+            channel.setCommand(command);
 
             // get I/O streams for remote scp
             out = channel.getOutputStream();
-            outputData.setOutputStream( out );
+            outputData.setOutputStream(out);
 
             channelInputStream = channel.getInputStream();
 
             channel.connect();
 
-            checkAck( channelInputStream );
+            checkAck(channelInputStream);
 
             // send "C0644 filesize filename", where filename should not include '/'
             long filesize = resource.getContentLength();
@@ -376,75 +316,57 @@ public class ScpWagon
             String mode = octalMode == null ? "0644" : octalMode;
             command = "C" + mode + " " + filesize + " ";
 
-            if ( resourceName.lastIndexOf( ScpHelper.PATH_SEPARATOR ) > 0 )
-            {
-                command += resourceName.substring( resourceName.lastIndexOf( ScpHelper.PATH_SEPARATOR ) + 1 );
-            }
-            else
-            {
+            if (resourceName.lastIndexOf(ScpHelper.PATH_SEPARATOR) > 0) {
+                command += resourceName.substring(resourceName.lastIndexOf(ScpHelper.PATH_SEPARATOR) + 1);
+            } else {
                 command += resourceName;
             }
 
             command += "\n";
 
-            out.write( command.getBytes() );
+            out.write(command.getBytes());
 
             out.flush();
 
-            checkAck( channelInputStream );
-        }
-        catch ( JSchException e )
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+            checkAck(channelInputStream);
+        } catch (JSchException e) {
+            fireTransferError(resource, e, TransferEvent.REQUEST_PUT);
 
             String msg = "Error occurred while deploying '" + resourceName + "' to remote repository: "
-                + getRepository().getUrl() + ": " + e.getMessage();
+                    + getRepository().getUrl() + ": " + e.getMessage();
 
-            throw new TransferFailedException( msg, e );
-        }
-        catch ( IOException e )
-        {
-            handleIOException( resource, e );
+            throw new TransferFailedException(msg, e);
+        } catch (IOException e) {
+            handleIOException(resource, e);
         }
     }
 
-    private void handleIOException( Resource resource, IOException e )
-        throws TransferFailedException
-    {
-        if ( e.getMessage().contains( "set mode: Operation not permitted" ) )
-        {
-            fireTransferDebug( e.getMessage() );
-        }
-        else
-        {
-            fireTransferError( resource, e, TransferEvent.REQUEST_PUT );
+    private void handleIOException(Resource resource, IOException e) throws TransferFailedException {
+        if (e.getMessage().contains("set mode: Operation not permitted")) {
+            fireTransferDebug(e.getMessage());
+        } else {
+            fireTransferError(resource, e, TransferEvent.REQUEST_PUT);
 
             String msg = "Error occurred while deploying '" + resource.getName() + "' to remote repository: "
-                + getRepository().getUrl() + ": " + e.getMessage();
+                    + getRepository().getUrl() + ": " + e.getMessage();
 
-            throw new TransferFailedException( msg, e );
+            throw new TransferFailedException(msg, e);
         }
     }
 
-    public String getOctalMode( RepositoryPermissions permissions )
-    {
+    public String getOctalMode(RepositoryPermissions permissions) {
         String mode = null;
-        if ( permissions != null && permissions.getFileMode() != null )
-        {
-            if ( permissions.getFileMode().matches( "[0-9]{3,4}" ) )
-            {
+        if (permissions != null && permissions.getFileMode() != null) {
+            if (permissions.getFileMode().matches("[0-9]{3,4}")) {
                 mode = permissions.getFileMode();
 
-                if ( mode.length() == 3 )
-                {
+                if (mode.length() == 3) {
                     mode = "0" + mode;
                 }
-            }
-            else
-            {
+            } else {
                 // TODO: calculate?
                 // TODO: as warning
-                fireSessionDebug( "Not using non-octal permissions: " + permissions.getFileMode() );
+                fireSessionDebug("Not using non-octal permissions: " + permissions.getFileMode());
             }
         }
         return mode;

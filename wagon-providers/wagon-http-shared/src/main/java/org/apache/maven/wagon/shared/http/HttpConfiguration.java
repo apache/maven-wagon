@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.shared.http;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,14 +16,14 @@ package org.apache.maven.wagon.shared.http;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.shared.http;
 
 import org.apache.http.client.methods.HttpUriRequest;
 
 /**
  *
  */
-public class HttpConfiguration
-{
+public class HttpConfiguration {
 
     private HttpMethodConfiguration all;
 
@@ -37,76 +35,63 @@ public class HttpConfiguration
 
     private HttpMethodConfiguration mkcol;
 
-    public HttpMethodConfiguration getAll()
-    {
+    public HttpMethodConfiguration getAll() {
         return all;
     }
 
-    public HttpConfiguration setAll( HttpMethodConfiguration all )
-    {
+    public HttpConfiguration setAll(HttpMethodConfiguration all) {
         this.all = all;
         return this;
     }
 
-    public HttpMethodConfiguration getGet()
-    {
+    public HttpMethodConfiguration getGet() {
         return get;
     }
 
-    public HttpConfiguration setGet( HttpMethodConfiguration get )
-    {
+    public HttpConfiguration setGet(HttpMethodConfiguration get) {
         this.get = get;
         return this;
     }
 
-    public HttpMethodConfiguration getPut()
-    {
+    public HttpMethodConfiguration getPut() {
         return put;
     }
 
-    public HttpConfiguration setPut( HttpMethodConfiguration put )
-    {
+    public HttpConfiguration setPut(HttpMethodConfiguration put) {
         this.put = put;
         return this;
     }
 
-    public HttpMethodConfiguration getHead()
-    {
+    public HttpMethodConfiguration getHead() {
         return head;
     }
 
-    public HttpConfiguration setHead( HttpMethodConfiguration head )
-    {
+    public HttpConfiguration setHead(HttpMethodConfiguration head) {
         this.head = head;
         return this;
     }
 
-    public HttpMethodConfiguration getMkcol()
-    {
+    public HttpMethodConfiguration getMkcol() {
         return mkcol;
     }
 
-    public HttpConfiguration setMkcol( HttpMethodConfiguration mkcol )
-    {
+    public HttpConfiguration setMkcol(HttpMethodConfiguration mkcol) {
         this.mkcol = mkcol;
         return this;
     }
 
-    public HttpMethodConfiguration getMethodConfiguration( HttpUriRequest method )
-    {
-        switch ( method.getMethod() )
-        {
-        case "GET":
-            return ConfigurationUtils.merge( all, get );
-        case "PUT":
-            return ConfigurationUtils.merge( all, put );
-        case "HEAD":
-            return ConfigurationUtils.merge( all, head );
-        case "MKCOL":
-            return ConfigurationUtils.merge( all, mkcol );
-        default:
-            return all;
+    public HttpMethodConfiguration getMethodConfiguration(HttpUriRequest method) {
+        switch (method.getMethod()) {
+            case "GET":
+                return ConfigurationUtils.merge(all, get);
+            case "PUT":
+                return ConfigurationUtils.merge(all, put);
+            case "HEAD":
+                return ConfigurationUtils.merge(all, head);
+            case "MKCOL":
+                return ConfigurationUtils.merge(all, mkcol);
+            default:
+                return all;
         }
     }
-
 }

@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.events;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.maven.wagon.events;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.events;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +28,7 @@ import java.util.List;
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public final class TransferEventSupport
-{
+public final class TransferEventSupport {
 
     /**
      * registered listeners
@@ -48,11 +46,9 @@ public final class TransferEventSupport
      * @see #removeTransferListener(org.apache.maven.wagon.events.TransferListener)
      * @see TransferListener
      */
-    public synchronized void addTransferListener( final TransferListener listener )
-    {
-        if ( listener != null )
-        {
-            listeners.add( listener );
+    public synchronized void addTransferListener(final TransferListener listener) {
+        if (listener != null) {
+            listeners.add(listener);
         }
     }
 
@@ -67,9 +63,8 @@ public final class TransferEventSupport
      * @param listener the transfer listener
      * @see #addTransferListener(TransferListener)
      */
-    public synchronized void removeTransferListener( final TransferListener listener )
-    {
-        listeners.remove( listener );
+    public synchronized void removeTransferListener(final TransferListener listener) {
+        listeners.remove(listener);
     }
 
     /**
@@ -84,11 +79,9 @@ public final class TransferEventSupport
      * @see org.apache.maven.wagon.events.TransferEvent
      * @see #addTransferListener(TransferListener)
      */
-    public synchronized boolean hasTransferListener( final TransferListener listener )
-    {
-        return listeners.contains( listener );
+    public synchronized boolean hasTransferListener(final TransferListener listener) {
+        return listeners.contains(listener);
     }
-
 
     /**
      * Dispatches the given <code>TransferEvent</code>
@@ -97,11 +90,9 @@ public final class TransferEventSupport
      *
      * @param transferEvent the TransferEvent which will be dispatched to listeners
      */
-    public synchronized void fireTransferStarted( final TransferEvent transferEvent )
-    {
-        for ( TransferListener listener : listeners )
-        {
-            listener.transferStarted( transferEvent );
+    public synchronized void fireTransferStarted(final TransferEvent transferEvent) {
+        for (TransferListener listener : listeners) {
+            listener.transferStarted(transferEvent);
         }
     }
 
@@ -114,12 +105,9 @@ public final class TransferEventSupport
      * @param buffer        the buffer containing the additional content
      * @param length        the length of the content in the buffer
      */
-    public synchronized void fireTransferProgress( final TransferEvent transferEvent, byte[] buffer, int length )
-    {
-        for ( TransferListener listener : listeners )
-        {
-            listener.transferProgress( transferEvent, buffer, length );
-
+    public synchronized void fireTransferProgress(final TransferEvent transferEvent, byte[] buffer, int length) {
+        for (TransferListener listener : listeners) {
+            listener.transferProgress(transferEvent, buffer, length);
         }
     }
 
@@ -130,12 +118,9 @@ public final class TransferEventSupport
      *
      * @param transferEvent the TransferEvent which will be dispatched to listeners
      */
-    public synchronized void fireTransferCompleted( final TransferEvent transferEvent )
-    {
-        for ( TransferListener listener : listeners )
-        {
-            listener.transferCompleted( transferEvent );
-
+    public synchronized void fireTransferCompleted(final TransferEvent transferEvent) {
+        for (TransferListener listener : listeners) {
+            listener.transferCompleted(transferEvent);
         }
     }
 
@@ -147,12 +132,9 @@ public final class TransferEventSupport
      *
      * @param transferEvent the TransferEvent which will be dispatched to listeners
      */
-    public synchronized void fireTransferError( final TransferEvent transferEvent )
-    {
-        for ( TransferListener listener : listeners )
-        {
-            listener.transferError( transferEvent );
-
+    public synchronized void fireTransferError(final TransferEvent transferEvent) {
+        for (TransferListener listener : listeners) {
+            listener.transferError(transferEvent);
         }
     }
 
@@ -162,13 +144,10 @@ public final class TransferEventSupport
      *
      * @param message the debug message which will be dispatched to listeners
      */
-    public synchronized void fireDebug( final String message )
-    {
+    public synchronized void fireDebug(final String message) {
 
-        for ( TransferListener listener : listeners )
-        {
-            listener.debug( message );
-
+        for (TransferListener listener : listeners) {
+            listener.debug(message);
         }
     }
 
@@ -179,11 +158,9 @@ public final class TransferEventSupport
      *
      * @param transferEvent the TransferEvent which will be dispatched to listeners
      */
-    public synchronized void fireTransferInitiated( final TransferEvent transferEvent )
-    {
-        for ( TransferListener listener : listeners )
-        {
-            listener.transferInitiated( transferEvent );
+    public synchronized void fireTransferInitiated(final TransferEvent transferEvent) {
+        for (TransferListener listener : listeners) {
+            listener.transferInitiated(transferEvent);
         }
     }
 }

@@ -1,5 +1,3 @@
-package org.apache.maven.wagon.providers.http;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,11 +16,13 @@ package org.apache.maven.wagon.providers.http;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.wagon.providers.http;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 
 import org.slf4j.Logger;
@@ -33,23 +33,16 @@ import org.slf4j.LoggerFactory;
  * Date: 24/01/2008
  * Time: 17:25:27
  */
-public class WaitForeverServlet
-    extends HttpServlet
-{
+public class WaitForeverServlet extends HttpServlet {
 
-    private Logger logger = LoggerFactory.getLogger( WaitForeverServlet.class );
+    private Logger logger = LoggerFactory.getLogger(WaitForeverServlet.class);
 
-    public void service( HttpServletRequest request, HttpServletResponse response )
-        throws ServletException, IOException
-    {
-        logger.info( "Calling WaitForeverServlet" );
-        try
-        {
-            Thread.sleep( 2000 );
-        }
-        catch ( InterruptedException e )
-        {
-            //eat
+    public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        logger.info("Calling WaitForeverServlet");
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            // eat
         }
     }
 }
