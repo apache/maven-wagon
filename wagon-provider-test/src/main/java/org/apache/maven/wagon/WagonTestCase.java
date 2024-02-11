@@ -50,12 +50,12 @@ import static org.easymock.EasyMock.*;
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
  */
 public abstract class WagonTestCase extends PlexusTestCase {
-    protected static Logger logger = LoggerFactory.getLogger(WagonTestCase.class);
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     static final class ProgressAnswer implements IAnswer {
         private int size;
 
-        public Object answer() throws Throwable {
+        public Object answer() {
             int length = (Integer) getCurrentArguments()[2];
             size += length;
             return null;
@@ -163,7 +163,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
         }
     }
 
-    protected void customizeContext() throws Exception {
+    protected void customizeContext() {
         getContainer().addContextValue("test.repository", localRepositoryPath);
     }
 
@@ -184,7 +184,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
     }
 
     protected Wagon getWagon() throws Exception {
-        Wagon wagon = (Wagon) lookup(Wagon.ROLE, getProtocol());
+        Wagon wagon = lookup(Wagon.ROLE, getProtocol());
 
         Debug debug = new Debug();
 
@@ -648,7 +648,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
 
         String dirName = "file-list";
 
-        String filenames[] = new String[] {
+        String[] filenames = new String[] {
             "test-resource.txt", "test-resource.pom", "test-resource b.txt", "more-resources.dat", ".index.txt"
         };
 
@@ -674,7 +674,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
             // WAGON-250
             list = wagon.getFileList("");
             assertNotNull("file list should not be null.", list);
-            assertTrue("file list should contain items (actually contains '" + list + "').", !list.isEmpty());
+            assertFalse("file list should contain items (actually contains '" + list + "').", list.isEmpty());
             assertTrue(list.contains("file-list/"));
             assertFalse(list.contains("file-list"));
             assertFalse(list.contains("."));

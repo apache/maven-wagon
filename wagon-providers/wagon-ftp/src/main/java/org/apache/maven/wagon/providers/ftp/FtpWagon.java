@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.ProtocolCommandEvent;
 import org.apache.commons.net.ProtocolCommandListener;
 import org.apache.commons.net.ftp.FTP;
@@ -44,7 +43,6 @@ import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
-import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 
@@ -325,8 +323,7 @@ public class FtpWagon extends StreamWagon {
         inputData.setInputStream(is);
     }
 
-    private void ftpChangeDirectory(Resource resource)
-            throws IOException, TransferFailedException, ResourceDoesNotExistException {
+    private void ftpChangeDirectory(Resource resource) throws IOException, ResourceDoesNotExistException {
         if (!ftp.changeWorkingDirectory(getRepository().getBasedir())) {
             throw new ResourceDoesNotExistException(
                     "Required directory: '" + getRepository().getBasedir() + "' " + "is missing");
@@ -373,7 +370,7 @@ public class FtpWagon extends StreamWagon {
 
     @Override
     public List<String> getFileList(String destinationDirectory)
-            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+            throws TransferFailedException, ResourceDoesNotExistException {
         Resource resource = new Resource(destinationDirectory);
 
         try {
@@ -404,7 +401,7 @@ public class FtpWagon extends StreamWagon {
     }
 
     @Override
-    public boolean resourceExists(String resourceName) throws TransferFailedException, AuthorizationException {
+    public boolean resourceExists(String resourceName) throws TransferFailedException {
         Resource resource = new Resource(resourceName);
 
         try {
@@ -431,8 +428,7 @@ public class FtpWagon extends StreamWagon {
     }
 
     @Override
-    public void putDirectory(File sourceDirectory, String destinationDirectory)
-            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+    public void putDirectory(File sourceDirectory, String destinationDirectory) throws TransferFailedException {
 
         // Change to root.
         try {
@@ -515,11 +511,7 @@ public class FtpWagon extends StreamWagon {
             }
         } else {
             // Oh how I hope and pray, in denial, but today I am still just a file.
-
-            FileInputStream sourceFileStream = null;
-            try {
-                sourceFileStream = new FileInputStream(sourceFile);
-
+            try (FileInputStream sourceFileStream = new FileInputStream(sourceFile)) {
                 // It's a file. Upload it in the current directory.
                 if (ftp.storeFile(fileName, sourceFileStream)) {
                     if (permissions != null) {
@@ -547,14 +539,9 @@ public class FtpWagon extends StreamWagon {
                             + "' FTP Server response: " + ftp.getReplyString();
                     throw new TransferFailedException(msg);
                 }
-
-                sourceFileStream.close();
-                sourceFileStream = null;
             } catch (IOException e) {
                 throw new TransferFailedException(
                         "IOException caught while attempting to upload " + sourceFile.getAbsolutePath(), e);
-            } finally {
-                IOUtils.closeQuietly(sourceFileStream);
             }
         }
 

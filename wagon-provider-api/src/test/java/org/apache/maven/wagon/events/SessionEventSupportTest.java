@@ -40,7 +40,7 @@ public class SessionEventSupportTest {
     private Wagon wagon;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
 
         eventSupport = new SessionEventSupport();
 

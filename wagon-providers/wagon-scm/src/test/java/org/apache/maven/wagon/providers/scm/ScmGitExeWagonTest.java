@@ -30,7 +30,7 @@ public class ScmGitExeWagonTest extends AbstractScmGitWagonTest {
     }
 
     @Override
-    public void testWagonGetFileList() throws Exception {
+    public void testWagonGetFileList() {
         // remote list unsupported
         // When a command is unsupported, SCM throws NoSuchCommandScmException.
         // However, there's no equivalent exception in the Wagon API.
@@ -40,22 +40,17 @@ public class ScmGitExeWagonTest extends AbstractScmGitWagonTest {
     }
 
     @Override
-    public void testWagonGetFileListWhenDirectoryDoesNotExist() throws Exception {
+    public void testWagonGetFileListWhenDirectoryDoesNotExist() {
         // remote list unsupported
     }
 
     @Override
-    public void testWagonResourceExists() throws Exception {
+    public void testWagonResourceExists() {
         // remote list unsupported
     }
 
     @Override
-    public void testWagonResourceNotExists() throws Exception {
+    public void testWagonResourceNotExists() {
         // remote list unsupported
-    }
-
-    @Override
-    protected boolean supportsGetIfNewer() {
-        return false;
     }
 }

@@ -27,10 +27,6 @@ public class HttpsWagonTest extends HttpWagonTest {
         return "https";
     }
 
-    protected boolean assertOnTransferProgress() {
-        return false;
-    }
-
     protected ServerConnector addConnector(Server server) {
         System.setProperty(
                 "javax.net.ssl.trustStore",

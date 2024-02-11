@@ -18,7 +18,6 @@
  */
 package org.apache.maven.wagon.tck.http.fixture;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -42,8 +41,7 @@ public class ErrorCodeServlet extends HttpServlet {
     }
 
     @Override
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp)
-            throws ServletException, IOException {
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         resp.sendError(code, message);
     }
 }

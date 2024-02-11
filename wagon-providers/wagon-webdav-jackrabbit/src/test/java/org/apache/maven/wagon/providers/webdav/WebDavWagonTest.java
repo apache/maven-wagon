@@ -52,7 +52,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
  */
 public class WebDavWagonTest extends HttpWagonTestCase {
 
-    protected String getTestRepositoryUrl() throws IOException {
+    protected String getTestRepositoryUrl() {
         return getProtocol() + "://localhost:" + getTestRepositoryPort() + "/newfolder/folder2/";
     }
 
@@ -60,7 +60,7 @@ public class WebDavWagonTest extends HttpWagonTestCase {
         return "dav";
     }
 
-    protected ServletContextHandler createContext(Server server, File repositoryDirectory) throws IOException {
+    protected ServletContextHandler createContext(Server server, File repositoryDirectory) {
         ServletContextHandler dav = new ServletContextHandler(ServletContextHandler.SESSIONS);
         ServletHolder davServletHolder = new ServletHolder(new DAVServlet());
         davServletHolder.setInitParameter("rootPath", repositoryDirectory.getAbsolutePath());
@@ -225,17 +225,17 @@ public class WebDavWagonTest extends HttpWagonTestCase {
 
         String dirName = "file-list";
 
-        String filenames[] =
+        String[] filenames =
                 new String[] {"test-resource.txt", "test-resource.pom", "test-resource b.txt", "more-resources.dat"};
 
-        for (int i = 0; i < filenames.length; i++) {
-            putFile(dirName + "/" + filenames[i], dirName + "/" + filenames[i], filenames[i] + "\n");
+        for (String filename : filenames) {
+            putFile(dirName + "/" + filename, dirName + "/" + filename, filename + "\n");
         }
 
-        String dirnames[] = new String[] {"test-dir1", "test-dir2"};
+        String[] dirnames = new String[] {"test-dir1", "test-dir2"};
 
-        for (int i = 0; i < dirnames.length; i++) {
-            new File(getDavRepository(), dirName + "/" + dirnames[i]).mkdirs();
+        for (String dirname : dirnames) {
+            new File(getDavRepository(), dirName + "/" + dirname).mkdirs();
         }
 
         Wagon wagon = getWagon();
@@ -247,12 +247,12 @@ public class WebDavWagonTest extends HttpWagonTestCase {
         assertNotNull("file list should not be null.", list);
         assertEquals("file list should contain 6 items", 6, list.size());
 
-        for (int i = 0; i < filenames.length; i++) {
-            assertTrue("Filename '" + filenames[i] + "' should be in list.", list.contains(filenames[i]));
+        for (String filename : filenames) {
+            assertTrue("Filename '" + filename + "' should be in list.", list.contains(filename));
         }
 
-        for (int i = 0; i < dirnames.length; i++) {
-            assertTrue("Directory '" + dirnames[i] + "' should be in list.", list.contains(dirnames[i] + "/"));
+        for (String dirname : dirnames) {
+            assertTrue("Directory '" + dirname + "' should be in list.", list.contains(dirname + "/"));
         }
 
         ///////////////////////////////////////////////////////////////////////////
@@ -269,7 +269,7 @@ public class WebDavWagonTest extends HttpWagonTestCase {
         try {
             list = wagon.getFileList(dirName + "/test-dir-bogus");
             fail("Exception expected");
-        } catch (ResourceDoesNotExistException e) {
+        } catch (ResourceDoesNotExistException ignored) {
 
         }
 
@@ -296,7 +296,7 @@ public class WebDavWagonTest extends HttpWagonTestCase {
             try {
                 wagon.put(testFile, filename);
                 fail("Exception expected");
-            } catch (TransferFailedException e) {
+            } catch (TransferFailedException ignored) {
 
             }
         } finally {

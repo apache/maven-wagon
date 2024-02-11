@@ -46,14 +46,14 @@ public class WagonTestCaseConfigurator implements Contextualizable {
 
     private String wagonHint;
 
-    private static Logger logger = LoggerFactory.getLogger(WagonTestCaseConfigurator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WagonTestCaseConfigurator.class);
 
     public boolean isSupported(final String useCaseId) {
         if (useCaseConfigs != null) {
             PlexusConfiguration config = useCaseConfigs.getChild(useCaseId, false);
 
             if (config != null && config.getChild(UNSUPPORTED_ELEMENT, false) != null) {
-                logger.info("Test case '" + useCaseId + "' is marked as unsupported by this wagon.");
+                LOGGER.info("Test case '" + useCaseId + "' is marked as unsupported by this wagon.");
                 return false;
             }
         }
@@ -68,17 +68,17 @@ public class WagonTestCaseConfigurator implements Contextualizable {
 
             if (config != null) {
                 if (config.getChild(UNSUPPORTED_ELEMENT, false) != null) {
-                    logger.error("Test case '" + useCaseId + "' is marked as unsupported by this wagon.");
+                    LOGGER.error("Test case '" + useCaseId + "' is marked as unsupported by this wagon.");
                     return false;
                 } else {
-                    logger.info("Configuring wagon for test case: " + useCaseId + " with:\n\n" + config);
+                    LOGGER.info("Configuring wagon for test case: " + useCaseId + " with:\n\n" + config);
                     configurator.configureComponent(wagon, useCaseConfigs.getChild(useCaseId, false), realm);
                 }
             } else {
-                logger.info("No wagon configuration found for test case: " + useCaseId);
+                LOGGER.info("No wagon configuration found for test case: " + useCaseId);
             }
         } else {
-            logger.info("No test case configurations found.");
+            LOGGER.info("No test case configurations found.");
         }
 
         return true;

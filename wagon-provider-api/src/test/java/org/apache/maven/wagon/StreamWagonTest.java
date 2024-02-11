@@ -38,17 +38,17 @@ import static org.junit.Assert.*;
 
 public class StreamWagonTest {
     private static class TestWagon extends StreamWagon {
-        public void closeConnection() throws ConnectionException {}
+        public void closeConnection() {}
 
         public void fillInputData(InputData inputData)
                 throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {}
 
         public void fillOutputData(OutputData outputData) throws TransferFailedException {}
 
-        protected void openConnectionInternal() throws ConnectionException, AuthenticationException {}
+        protected void openConnectionInternal() {}
     }
 
-    private Repository repository = new Repository("id", "url");
+    private final Repository repository = new Repository("id", "url");
 
     @Test
     public void testNullInputStream() throws Exception {
@@ -122,7 +122,7 @@ public class StreamWagonTest {
     public void testTransferFailedExceptionOnOutput() throws Exception {
         StreamingWagon wagon = new TestWagon() {
             public void fillOutputData(OutputData inputData) throws TransferFailedException {
-                throw (TransferFailedException) new TransferFailedException("");
+                throw new TransferFailedException("");
             }
         };
 
@@ -318,8 +318,8 @@ public class StreamWagonTest {
     }
 
     private boolean runTestGetIfNewerToStream(final long resourceTime, long comparisonTime)
-            throws IOException, ConnectionException, AuthenticationException, TransferFailedException,
-                    ResourceDoesNotExistException, AuthorizationException {
+            throws ConnectionException, AuthenticationException, TransferFailedException, ResourceDoesNotExistException,
+                    AuthorizationException {
         StreamingWagon wagon = new TestWagon() {
             public void fillInputData(InputData inputData) {
                 inputData.setInputStream(new StringInputStream(""));

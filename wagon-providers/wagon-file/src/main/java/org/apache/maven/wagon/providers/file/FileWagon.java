@@ -36,7 +36,6 @@ import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.StreamWagon;
 import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
 
@@ -122,8 +121,7 @@ public class FileWagon extends StreamWagon {
         return true;
     }
 
-    public void putDirectory(File sourceDirectory, String destinationDirectory)
-            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+    public void putDirectory(File sourceDirectory, String destinationDirectory) throws TransferFailedException {
         if (getRepository().getBasedir() == null) {
             throw new TransferFailedException("Unable to putDirectory() with a null basedir.");
         }
@@ -182,7 +180,7 @@ public class FileWagon extends StreamWagon {
     }
 
     public List<String> getFileList(String destinationDirectory)
-            throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+            throws TransferFailedException, ResourceDoesNotExistException {
         if (getRepository().getBasedir() == null) {
             throw new TransferFailedException("Unable to getFileList() with a null basedir.");
         }
@@ -210,7 +208,7 @@ public class FileWagon extends StreamWagon {
         return list;
     }
 
-    public boolean resourceExists(String resourceName) throws TransferFailedException, AuthorizationException {
+    public boolean resourceExists(String resourceName) throws TransferFailedException {
         if (getRepository().getBasedir() == null) {
             throw new TransferFailedException("Unable to getFileList() with a null basedir.");
         }

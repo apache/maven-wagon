@@ -37,7 +37,7 @@ public class TransferEventSupportTest {
     private Wagon wagon;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
 
         eventSupport = new TransferEventSupport();
 

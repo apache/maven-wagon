@@ -90,7 +90,7 @@ public abstract class AbstractScmWagonTest extends WagonTestCase {
         return null;
     }
 
-    protected Wagon getWagon() throws Exception {
+    protected Wagon getWagon() {
         return wagon;
     }
 

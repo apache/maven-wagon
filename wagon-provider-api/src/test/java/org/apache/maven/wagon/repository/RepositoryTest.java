@@ -29,7 +29,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class RepositoryTest {
     @Test
-    public void testRepositoryProperties() throws Exception {
+    public void testRepositoryProperties() {
         Repository repository = new Repository();
 
         repository.setBasedir("directory");

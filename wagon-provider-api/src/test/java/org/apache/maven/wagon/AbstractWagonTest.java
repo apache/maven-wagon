@@ -54,19 +54,14 @@ public class AbstractWagonTest {
 
         protected void openConnectionInternal() throws ConnectionException, AuthenticationException {}
 
-        public void get(String resourceName, File destination)
-                throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {}
+        public void get(String resourceName, File destination) {}
 
-        public boolean getIfNewer(String resourceName, File destination, long timestamp)
-                throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+        public boolean getIfNewer(String resourceName, File destination, long timestamp) {
             return false;
         }
 
-        public void put(File source, String destination)
-                throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {}
+        public void put(File source, String destination) {}
     }
-
-    private String basedir;
 
     private WagonMock wagon = null;
 
@@ -81,9 +76,9 @@ public class AbstractWagonTest {
     private TransferListener transferListener = null;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
 
-        basedir = System.getProperty("basedir");
+        String basedir = System.getProperty("basedir");
 
         destination = new File(basedir, "target/folder/subfolder");
 
@@ -198,15 +193,13 @@ public class AbstractWagonTest {
         final ProxyInfo socksProxyInfo = new ProxyInfo();
         socksProxyInfo.setType("http");
 
-        ProxyInfoProvider proxyInfoProvider = new ProxyInfoProvider() {
-            public ProxyInfo getProxyInfo(String protocol) {
-                if ("http".equals(protocol) || "dav".equals(protocol)) {
-                    return httpProxyInfo;
-                } else if ("scp".equals(protocol)) {
-                    return socksProxyInfo;
-                }
-                return null;
+        ProxyInfoProvider proxyInfoProvider = protocol -> {
+            if ("http".equals(protocol) || "dav".equals(protocol)) {
+                return httpProxyInfo;
+            } else if ("scp".equals(protocol)) {
+                return socksProxyInfo;
             }
+            return null;
         };
 
         Repository repository = new Repository();
@@ -299,9 +292,7 @@ public class AbstractWagonTest {
     }
 
     @Test
-    public void testSessionCloseRefusedEventConnectionException() throws Exception {
-        Repository repository = new Repository();
-
+    public void testSessionCloseRefusedEventConnectionException() {
         sessionListener.sessionDisconnecting(anyObject(SessionEvent.class));
         sessionListener.sessionError(anyObject(SessionEvent.class));
         replay(sessionListener);
@@ -438,7 +429,7 @@ public class AbstractWagonTest {
 
     @Test
     public void testRepositoryUserName() throws ConnectionException, AuthenticationException {
-        Repository repository = new Repository("id", "http://bporter:password@www.example.com/path/to/resource");
+        Repository repository = new Repository("id", "https://bporter:password@www.example.com/path/to/resource");
 
         AuthenticationInfo authenticationInfo = new AuthenticationInfo();
         authenticationInfo.setUserName("brett");
@@ -452,7 +443,7 @@ public class AbstractWagonTest {
 
     @Test
     public void testRepositoryUserNameNotGivenInCredentials() throws ConnectionException, AuthenticationException {
-        Repository repository = new Repository("id", "http://bporter:password@www.example.com/path/to/resource");
+        Repository repository = new Repository("id", "https://bporter:password@www.example.com/path/to/resource");
 
         AuthenticationInfo authenticationInfo = new AuthenticationInfo();
         wagon.connect(repository, authenticationInfo);
@@ -501,11 +492,11 @@ public class AbstractWagonTest {
     }
 
     static final class ProgressAnswer implements IAnswer {
-        private ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        private final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         private int size;
 
-        public Object answer() throws Throwable {
+        public Object answer() {
             byte[] buffer = (byte[]) getCurrentArguments()[1];
             int length = (Integer) getCurrentArguments()[2];
             baos.write(buffer, 0, length);

@@ -30,7 +30,7 @@ import org.codehaus.plexus.PlexusTestCase;
  */
 public abstract class CommandExecutorTestCase extends PlexusTestCase {
     public void testErrorInCommandExecuted() throws Exception {
-        CommandExecutor exec = (CommandExecutor) lookup(CommandExecutor.ROLE);
+        CommandExecutor exec = lookup(CommandExecutor.ROLE);
 
         Repository repository = getTestRepository();
 
@@ -62,14 +62,14 @@ public abstract class CommandExecutorTestCase extends PlexusTestCase {
         try {
             Streams streams = exec.executeCommand("fail", true);
             // expect no exception, and stderr has something.
-            assertTrue(streams.getErr().length() > 0);
+            assertFalse(streams.getErr().isEmpty());
         } finally {
             exec.disconnect();
         }
     }
 
     public void testExecuteSuccessfulCommand() throws Exception {
-        CommandExecutor exec = (CommandExecutor) lookup(CommandExecutor.ROLE);
+        CommandExecutor exec = lookup(CommandExecutor.ROLE);
 
         Repository repository = getTestRepository();
 

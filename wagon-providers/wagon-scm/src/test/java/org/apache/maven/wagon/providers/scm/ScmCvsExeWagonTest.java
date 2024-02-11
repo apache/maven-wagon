@@ -42,17 +42,17 @@ public class ScmCvsExeWagonTest extends AbstractScmCvsWagonTest {
     }
 
     @Override
-    public void testWagonGetFileList() throws Exception {
+    public void testWagonGetFileList() {
         // cvs rls is rare
     }
 
     @Override
-    public void testWagonResourceExists() throws Exception {
+    public void testWagonResourceExists() {
         // cvs rls is rare
     }
 
     @Override
-    public void testWagonResourceNotExists() throws Exception {
+    public void testWagonResourceNotExists() {
         // cvs rls is rare
     }
 

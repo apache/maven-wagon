@@ -98,7 +98,7 @@ public class KnownHostsProviderTestCase extends PlexusTestCase {
         super.setUp();
         source = new Repository("test", "scp://" + TestData.getUserName() + "@" + TestData.getHostname() + "/tmp/foo");
 
-        wagon = (SshWagon) lookup(Wagon.ROLE, "scp");
+        wagon = lookup(Wagon.ROLE, "scp");
         wagon.setInteractive(false);
 
         this.okHostsProvider = new SingleKnownHostProvider(TestData.getHostname(), CORRECT_KEY);

@@ -31,10 +31,9 @@ import static org.junit.Assert.assertEquals;
  */
 public class PermissionModeUtilsTest {
     /**
-     * @throws Exception on error
      */
     @Test
-    public void testNumeric() throws Exception {
+    public void testNumeric() {
         final String[][] tests = {
             {"0", "777"},
             {"0000", "777"},

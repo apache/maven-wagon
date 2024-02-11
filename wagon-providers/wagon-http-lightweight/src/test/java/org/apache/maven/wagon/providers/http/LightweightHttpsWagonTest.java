@@ -43,9 +43,4 @@ public class LightweightHttpsWagonTest extends LightweightHttpWagonTest {
         server.addConnector(serverConnector);
         return serverConnector;
     }
-
-    @Override
-    protected boolean assertOnTransferProgress() {
-        return false;
-    }
 }

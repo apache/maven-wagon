@@ -19,7 +19,6 @@
 package org.apache.maven.wagon.providers.scm;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.codehaus.plexus.util.FileUtils;
 
@@ -51,7 +50,7 @@ public abstract class AbstractScmCvsWagonTest extends AbstractScmWagonTest {
         return "cvs";
     }
 
-    protected String getTestRepositoryUrl() throws IOException {
+    protected String getTestRepositoryUrl() {
         return repository;
     }
 }

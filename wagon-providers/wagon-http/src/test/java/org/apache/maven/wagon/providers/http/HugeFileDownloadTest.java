@@ -18,7 +18,6 @@
  */
 package org.apache.maven.wagon.providers.http;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -53,8 +52,9 @@ public class HugeFileDownloadTest extends PlexusTestCase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HugeFileDownloadTest.class);
 
-    private static long HUGE_FILE_SIZE = Integer.valueOf(Integer.MAX_VALUE).longValue()
-            + Integer.valueOf(Integer.MAX_VALUE).longValue();
+    private static final long HUGE_FILE_SIZE =
+            Integer.valueOf(Integer.MAX_VALUE).longValue()
+                    + Integer.valueOf(Integer.MAX_VALUE).longValue();
 
     private Server server;
     private ServerConnector connector;
@@ -73,8 +73,7 @@ public class HugeFileDownloadTest extends PlexusTestCase {
         root.setResourceBase(new File(getBasedir(), "target").getAbsolutePath());
         ServletHolder servletHolder = new ServletHolder(new HttpServlet() {
             @Override
-            protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-                    throws ServletException, IOException {
+            protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
                 FileInputStream fis = new FileInputStream(hugeFile);
 
                 resp.addHeader("Content-Length", String.valueOf(hugeFile.length()));
@@ -122,8 +121,7 @@ public class HugeFileDownloadTest extends PlexusTestCase {
         root.setResourceBase(new File(getBasedir(), "target").getAbsolutePath());
         ServletHolder servletHolder = new ServletHolder(new HttpServlet() {
             @Override
-            protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-                    throws ServletException, IOException {
+            protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
                 FileInputStream fis = new FileInputStream(hugeFile);
 
                 IOUtil.copy(fis, resp.getOutputStream());
@@ -157,7 +155,7 @@ public class HugeFileDownloadTest extends PlexusTestCase {
     }
 
     protected Wagon getWagon() throws Exception {
-        Wagon wagon = (Wagon) lookup(Wagon.ROLE, "http");
+        Wagon wagon = lookup(Wagon.ROLE, "http");
 
         Debug debug = new Debug();
 

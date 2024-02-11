@@ -19,10 +19,9 @@
 package org.apache.maven.wagon;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 
 import org.apache.maven.wagon.observers.ChecksumObserver;
@@ -66,7 +65,7 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
         OutputStream stream = null;
 
         try {
-            stream = new FileOutputStream(destFile);
+            stream = Files.newOutputStream(destFile.toPath());
             wagon.getToStream("fubar.txt", stream);
             fail("File was found when it shouldn't have been");
             stream.close();
@@ -125,13 +124,9 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
 
         connectWagon(wagon);
 
-        OutputStream stream = new LazyFileOutputStream(destFile);
-
-        try {
+        try (OutputStream stream = new LazyFileOutputStream(destFile)) {
             boolean result = wagon.getIfNewerToStream(this.resource, stream, timestamp);
             assertEquals(expectedResult, result);
-        } finally {
-            stream.close();
         }
 
         disconnectWagon(wagon);
@@ -153,7 +148,7 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
             destFile.deleteOnExit();
             OutputStream stream = null;
             try {
-                stream = new FileOutputStream(destFile);
+                stream = Files.newOutputStream(destFile.toPath());
                 wagon.getIfNewerToStream("fubar.txt", stream, 0);
                 fail("File was found when it shouldn't have been");
                 stream.close();
@@ -218,7 +213,7 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
         InputStream stream = null;
 
         try {
-            stream = new FileInputStream(sourceFile);
+            stream = Files.newInputStream(sourceFile.toPath());
             wagon.putFromStream(stream, resource, sourceFile.length(), sourceFile.lastModified());
             stream.close();
             stream = null;
@@ -249,7 +244,7 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
         OutputStream stream = null;
 
         try {
-            stream = new FileOutputStream(destFile);
+            stream = Files.newOutputStream(destFile.toPath());
             wagon.getToStream(this.resource, stream);
             stream.close();
             stream = null;

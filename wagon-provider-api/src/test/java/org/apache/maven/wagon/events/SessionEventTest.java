@@ -60,7 +60,7 @@ public class SessionEventTest {
         assertEquals(exception, event.getException());
 
         event.setException(null);
-        assertEquals(null, event.getException());
+        assertNull(event.getException());
 
         event.setException(exception);
         assertEquals(exception, event.getException());

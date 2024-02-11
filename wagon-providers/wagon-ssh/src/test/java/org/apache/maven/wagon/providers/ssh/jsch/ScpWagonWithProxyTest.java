@@ -18,7 +18,6 @@
  */
 package org.apache.maven.wagon.providers.ssh.jsch;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -48,8 +47,7 @@ public class ScpWagonWithProxyTest extends PlexusTestCase {
         handled = false;
         Handler handler = new AbstractHandler() {
             public void handle(
-                    String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-                    throws IOException, ServletException {
+                    String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) {
                 assertEquals("CONNECT", request.getMethod());
 
                 handled = true;
@@ -70,7 +68,7 @@ public class ScpWagonWithProxyTest extends PlexusTestCase {
         proxyInfo.setType("http");
         proxyInfo.setNonProxyHosts(null);
 
-        Wagon wagon = (Wagon) lookup(Wagon.ROLE, "scp");
+        Wagon wagon = lookup(Wagon.ROLE, "scp");
         try {
             wagon.connect(new Repository("id", "scp://localhost/tmp"), proxyInfo);
             fail();
@@ -140,12 +138,12 @@ public class ScpWagonWithProxyTest extends PlexusTestCase {
                         }
 
                         handled = true;
-                    } catch (IOException e) {
+                    } catch (IOException ignored) {
                     } finally {
                         if (sock != null) {
                             try {
                                 sock.close();
-                            } catch (IOException e) {
+                            } catch (IOException ignored) {
                             }
                         }
                     }
@@ -154,7 +152,7 @@ public class ScpWagonWithProxyTest extends PlexusTestCase {
                 if (ssock != null) {
                     try {
                         ssock.close();
-                    } catch (IOException e) {
+                    } catch (IOException ignored) {
                     }
                 }
             }

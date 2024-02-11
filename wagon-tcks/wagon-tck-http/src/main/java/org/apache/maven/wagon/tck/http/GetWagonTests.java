@@ -43,8 +43,7 @@ import org.codehaus.plexus.component.configurator.ComponentConfigurationExceptio
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
+import static junit.framework.Assert.*;
 import static org.apache.maven.wagon.tck.http.Assertions.NO_RESPONSE_STATUS_CODE;
 import static org.apache.maven.wagon.tck.http.Assertions.assertFileContentsFromResource;
 import static org.apache.maven.wagon.tck.http.Assertions.assertWagonExceptionMessage;
@@ -100,9 +99,7 @@ public class GetWagonTests extends HttpWagonTests {
     }
 
     @Test
-    public void inifiniteLatencyTimeout()
-            throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+    public void inifiniteLatencyTimeout() {
         if (!isSupported()) {
             return;
         }
@@ -155,7 +152,7 @@ public class GetWagonTests extends HttpWagonTests {
         logger.info("Interrupting thread.");
         t.interrupt();
 
-        assertTrue("TransferFailedException should have been thrown.", holder.getValue() != null);
+        assertNotNull("TransferFailedException should have been thrown.", holder.getValue());
         assertWagonExceptionMessage(holder.getValue(), NO_RESPONSE_STATUS_CODE, getBaseUrl() + "infinite/", "", null);
     }
 
@@ -235,7 +232,7 @@ public class GetWagonTests extends HttpWagonTests {
     @Test
     public void infinitePermanentMove()
             throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+                    ResourceDoesNotExistException, AuthorizationException {
         String myPath = "moved.txt";
         String targetPath = "/base.txt";
 
@@ -280,7 +277,7 @@ public class GetWagonTests extends HttpWagonTests {
     @SuppressWarnings("checkstyle:methodname")
     public void permanentMove_TooManyRedirects_limit20()
             throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+                    ResourceDoesNotExistException, AuthorizationException {
         String myPath = "moved.txt";
         String targetPath = "/base.txt";
 

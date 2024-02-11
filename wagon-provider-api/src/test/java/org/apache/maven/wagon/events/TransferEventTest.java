@@ -82,7 +82,7 @@ public class TransferEventTest {
 
         event.setResource(null);
 
-        assertEquals(null, event.getResource());
+        assertNull(event.getResource());
 
         res.setName("/foo/baa");
 

@@ -23,7 +23,6 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.params.HttpParams;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.OutputData;
-import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.proxy.ProxyInfo;
@@ -201,6 +200,6 @@ public class HttpClientWagonTest {
 
     private static final class TestWagon extends WebDavWagon {
         @Override
-        public void fillOutputData(OutputData outputData) throws TransferFailedException {}
+        public void fillOutputData(OutputData outputData) {}
     }
 }

@@ -92,12 +92,7 @@ public class TestPublickeyAuthenticator implements PublickeyAuthenticator {
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("PublickeyAuthenticatorRequest");
-            sb.append("{username='").append(username).append('\'');
-            sb.append(", publicKey=").append(publicKey);
-            sb.append('}');
-            return sb.toString();
+            return "PublickeyAuthenticatorRequest" + "{username='" + username + '\'' + ", publicKey=" + publicKey + '}';
         }
     }
 

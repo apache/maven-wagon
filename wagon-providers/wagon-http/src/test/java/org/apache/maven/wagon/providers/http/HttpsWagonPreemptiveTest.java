@@ -54,22 +54,7 @@ public class HttpsWagonPreemptiveTest extends HttpWagonTest {
     }
 
     @Override
-    protected boolean supportPreemptiveAuthenticationPut() {
-        return true;
-    }
-
-    @Override
     protected boolean supportPreemptiveAuthenticationGet() {
         return true;
-    }
-
-    @Override
-    protected boolean supportProxyPreemptiveAuthentication() {
-        return true;
-    }
-
-    @Override
-    protected boolean assertOnTransferProgress() {
-        return false;
     }
 }

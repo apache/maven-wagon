@@ -237,12 +237,7 @@ public abstract class HttpWagonTests {
 
     protected String getBaseUrl() {
         if (baseUrl == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(isSsl() ? "https" : "http");
-            sb.append("://" + ServerFixture.SERVER_HOST + ":");
-            sb.append(getPort());
-
-            baseUrl = sb.toString();
+            baseUrl = (isSsl() ? "https" : "http") + "://" + ServerFixture.SERVER_HOST + ":" + getPort();
         }
 
         return baseUrl;

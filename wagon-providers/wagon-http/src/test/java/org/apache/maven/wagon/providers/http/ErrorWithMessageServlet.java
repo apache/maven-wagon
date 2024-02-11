@@ -37,7 +37,6 @@ package org.apache.maven.wagon.providers.http;
  * under the License.
  */
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -54,7 +53,7 @@ public class ErrorWithMessageServlet extends HttpServlet {
 
     public static final String MESSAGE = "it sucks!";
 
-    public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (request.getPathInfo().endsWith("/401")) {
             response.sendError(401, MESSAGE);
         } else if (request.getPathInfo().endsWith("/403")) {

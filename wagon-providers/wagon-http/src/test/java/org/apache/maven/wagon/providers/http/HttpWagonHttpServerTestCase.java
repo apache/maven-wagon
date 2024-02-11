@@ -46,7 +46,7 @@ public abstract class HttpWagonHttpServerTestCase extends PlexusTestCase {
     }
 
     protected Wagon getWagon() throws Exception {
-        return (Wagon) lookup(HttpWagon.ROLE);
+        return lookup(HttpWagon.ROLE);
     }
 
     protected void startServer() throws Exception {

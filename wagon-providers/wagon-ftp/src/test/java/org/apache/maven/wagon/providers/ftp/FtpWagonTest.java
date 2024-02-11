@@ -108,7 +108,7 @@ public class FtpWagonTest extends StreamingWagonTestCase {
         getRepositoryDirectory().mkdirs();
     }
 
-    protected void tearDownWagonTestingFixtures() throws Exception {
+    protected void tearDownWagonTestingFixtures() {
         server.stop();
         server = null;
     }

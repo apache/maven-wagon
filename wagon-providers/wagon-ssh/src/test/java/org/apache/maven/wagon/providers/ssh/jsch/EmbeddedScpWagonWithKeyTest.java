@@ -19,7 +19,6 @@
 package org.apache.maven.wagon.providers.ssh.jsch;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
@@ -38,9 +37,9 @@ public class EmbeddedScpWagonWithKeyTest extends AbstractEmbeddedScpWagonWithKey
         ScpWagon scpWagon = (ScpWagon) super.getWagon();
         scpWagon.setInteractive(false);
         scpWagon.setKnownHostsProvider(new KnownHostsProvider() {
-            public void storeKnownHosts(String contents) throws IOException {}
+            public void storeKnownHosts(String contents) {}
 
-            public void addKnownHost(KnownHostEntry knownHost) throws IOException {}
+            public void addKnownHost(KnownHostEntry knownHost) {}
 
             public void setHostKeyChecking(String hostKeyChecking) {}
 

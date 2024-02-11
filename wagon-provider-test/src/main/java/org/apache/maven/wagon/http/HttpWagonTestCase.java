@@ -31,13 +31,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.nio.file.Files;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPOutputStream;
@@ -68,7 +63,6 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
@@ -129,7 +123,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         return connector.getLocalPort();
     }
 
-    protected ServletContextHandler createContext(Server server, File repositoryDirectory) throws IOException {
+    protected ServletContextHandler createContext(Server server, File repositoryDirectory) {
         ServletContextHandler root = new ServletContextHandler(ServletContextHandler.SESSIONS);
         root.setResourceBase(repositoryDirectory.getAbsolutePath());
         ServletHolder servletHolder = new ServletHolder(new DefaultServlet());
@@ -338,8 +332,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
 
             AbstractHandler handler = new AbstractHandler() {
                 public void handle(
-                        String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-                        throws IOException, ServletException {
+                        String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) {
                     if (called.get()) {
                         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                         baseRequest.setHandled(true);
@@ -524,11 +517,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         proxyInfo.setPassword("secret");
         AuthorizingProxyHandler handler = new AuthorizingProxyHandler();
 
-        ProxyInfoProvider proxyInfoProvider = new ProxyInfoProvider() {
-            public ProxyInfo getProxyInfo(String protocol) {
-                return proxyInfo;
-            }
-        };
+        ProxyInfoProvider proxyInfoProvider = protocol -> proxyInfo;
         runTestProxiedRequestWithProvider(proxyInfoProvider, handler);
 
         assertTrue(handler.headers.containsKey("Proxy-Authorization"));
@@ -803,7 +792,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
 
         if (!success) {
-            fail("expected " + expectedResponseCodes + ", got " + handlerRequestResponses);
+            fail("expected " + Arrays.toString(expectedResponseCodes) + ", got " + handlerRequestResponses);
         }
     }
 
@@ -989,15 +978,15 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
      */
     @SuppressWarnings("checkstyle:visibilitymodifier")
     public static class RedirectHandler extends AbstractHandler {
-        String reason;
+        final String reason;
 
-        int retCode;
+        final int retCode;
 
-        String redirectUrl;
+        final String redirectUrl;
 
-        File repositoryDirectory;
+        final File repositoryDirectory;
 
-        public List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<>();
+        public final List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<>();
 
         RedirectHandler(String reason, int retCode, String redirectUrl, File repositoryDirectory) {
             this.reason = reason;
@@ -1344,7 +1333,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         File file = new File(parent, child);
         file.getParentFile().mkdirs();
         file.deleteOnExit();
-        OutputStream out = new FileOutputStream(file);
+        OutputStream out = Files.newOutputStream(file.toPath());
         try {
             out.write(child.getBytes());
         } finally {
@@ -1362,7 +1351,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         file = new File(parent, child + ext);
         file.deleteOnExit();
         String content;
-        out = new FileOutputStream(file);
+        out = Files.newOutputStream(file.toPath());
         if ("gzip".equals(compressionType)) {
             out = new GZIPOutputStream(out);
         }
@@ -1418,8 +1407,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
 
             AbstractHandler handler = new AbstractHandler() {
                 public void handle(
-                        String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-                        throws IOException, ServletException {
+                        String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) {
                     if (called.get()) {
                         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                         baseRequest.setHandled(true);
@@ -1672,8 +1660,8 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
             this.status = status;
         }
 
-        public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-                throws IOException, ServletException {
+        public void handle(
+                String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) {
             if (status != 0) {
                 response.setStatus(status);
                 baseRequest.setHandled(true);
@@ -1696,14 +1684,11 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("DeployedResource");
-            sb.append("{httpMethod='").append(httpMethod).append('\'');
-            sb.append(", requestUri='").append(requestUri).append('\'');
-            sb.append(", contentLength='").append(contentLength).append('\'');
-            sb.append(", transferEncoding='").append(transferEncoding).append('\'');
-            sb.append('}');
-            return sb.toString();
+            return "DeployedResource" + "{httpMethod='"
+                    + httpMethod + '\'' + ", requestUri='"
+                    + requestUri + '\'' + ", contentLength='"
+                    + contentLength + '\'' + ", transferEncoding='"
+                    + transferEncoding + '\'' + '}';
         }
     }
 
@@ -1714,18 +1699,18 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
     public static class PutHandler extends AbstractHandler {
         private final File resourceBase;
 
-        public List<DeployedResource> deployedResources = new ArrayList<>();
+        public final List<DeployedResource> deployedResources = new ArrayList<>();
 
         public int putCallNumber = 0;
 
-        public List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<>();
+        public final List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<>();
 
         public PutHandler(File repositoryDirectory) {
             this.resourceBase = repositoryDirectory;
         }
 
         public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-                throws IOException, ServletException {
+                throws IOException {
             if (baseRequest.isHandled() || !"PUT".equals(baseRequest.getMethod())) {
                 return;
             }
@@ -1738,7 +1723,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
             InputStream in = null;
             try {
                 in = request.getInputStream();
-                out = new FileOutputStream(file);
+                out = Files.newOutputStream(file.toPath());
                 IOUtil.copy(in, out);
                 out.close();
                 out = null;
@@ -1759,14 +1744,14 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
 
             response.setStatus(HttpServletResponse.SC_CREATED);
 
-            handlerRequestResponses.add(new HandlerRequestResponse(
-                    request.getMethod(), ((Response) response).getStatus(), request.getRequestURI()));
+            handlerRequestResponses.add(
+                    new HandlerRequestResponse(request.getMethod(), response.getStatus(), request.getRequestURI()));
         }
     }
 
     private static class AuthorizingProxyHandler extends TestHeaderHandler {
 
-        List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<>();
+        final List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<>();
 
         public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
                 throws IOException, ServletException {
@@ -1795,7 +1780,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
     private static class TestHeaderHandler extends AbstractHandler {
         public Map<String, String> headers = Collections.emptyMap();
 
-        public List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<>();
+        public final List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<>();
 
         TestHeaderHandler() {}
 
@@ -1805,11 +1790,11 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
             headers = new HashMap<>();
             for (Enumeration<String> e = baseRrequest.getHeaderNames(); e.hasMoreElements(); ) {
                 String name = e.nextElement();
-                Enumeration headerValues = baseRrequest.getHeaders(name);
+                Enumeration<String> headerValues = baseRrequest.getHeaders(name);
                 // as per HTTP spec http://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html
                 // multiple values for the same header key are concatenated separated by comma
                 // otherwise we wouldn't notice headers with same key added multiple times
-                StringBuffer combinedHeaderValue = new StringBuffer();
+                StringBuilder combinedHeaderValue = new StringBuilder();
                 for (int i = 0; headerValues.hasMoreElements(); i++) {
                     if (i > 0) {
                         combinedHeaderValue.append(",");
@@ -1824,7 +1809,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
             response.getWriter().print("Hello, World!");
 
             handlerRequestResponses.add(new HandlerRequestResponse(
-                    baseRrequest.getMethod(), ((Response) response).getStatus(), baseRrequest.getRequestURI()));
+                    baseRrequest.getMethod(), response.getStatus(), baseRrequest.getRequestURI()));
 
             baseRrequest.setHandled(true);
         }
@@ -1855,7 +1840,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
     @SuppressWarnings("checkstyle:visibilitymodifier")
     public static class TestSecurityHandler extends ConstraintSecurityHandler {
 
-        public List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<>();
+        public final List<HandlerRequestResponse> handlerRequestResponses = new ArrayList<>();
 
         @Override
         public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
@@ -1864,7 +1849,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
             super.handle(target, baseRequest, request, response);
 
             handlerRequestResponses.add(
-                    new HandlerRequestResponse(method, ((Response) response).getStatus(), request.getRequestURI()));
+                    new HandlerRequestResponse(method, response.getStatus(), request.getRequestURI()));
         }
     }
 
@@ -1873,11 +1858,11 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
      */
     @SuppressWarnings("checkstyle:visibilitymodifier")
     public static class HandlerRequestResponse {
-        public String method;
+        public final String method;
 
-        public int responseCode;
+        public final int responseCode;
 
-        public String requestUri;
+        public final String requestUri;
 
         private HandlerRequestResponse(String method, int responseCode, String requestUri) {
             this.method = method;
@@ -1887,13 +1872,10 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("HandlerRequestResponse");
-            sb.append("{method='").append(method).append('\'');
-            sb.append(", responseCode=").append(responseCode);
-            sb.append(", requestUri='").append(requestUri).append('\'');
-            sb.append('}');
-            return sb.toString();
+            return "HandlerRequestResponse" + "{method='"
+                    + method + '\'' + ", responseCode="
+                    + responseCode + ", requestUri='"
+                    + requestUri + '\'' + '}';
         }
     }
 
