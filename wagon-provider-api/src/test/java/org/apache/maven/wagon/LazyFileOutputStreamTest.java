@@ -20,17 +20,20 @@ package org.apache.maven.wagon;
 
 import java.io.File;
 
-import junit.framework.TestCase;
 import org.codehaus.plexus.util.FileUtils;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a>
  *
  */
-public class LazyFileOutputStreamTest extends TestCase {
+public class LazyFileOutputStreamTest {
 
+    @Test
     public void testFileCreation() throws Exception {
-        File file = File.createTempFile(getName(), null);
+        File file = File.createTempFile("testFileCreation", null);
 
         file.delete();
 

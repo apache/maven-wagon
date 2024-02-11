@@ -18,14 +18,17 @@
  */
 package org.apache.maven.wagon.providers.webdav;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author <a href="mailto:james@atlassian.com">James William Dumay</a>
  */
-public class PathNavigatorTest extends TestCase {
+public class PathNavigatorTest {
     private static final String TEST_PATH = "foo/bar/baz";
 
+    @Test
     public void testBackAndForward() {
         PathNavigator navigator = new PathNavigator(TEST_PATH);
 

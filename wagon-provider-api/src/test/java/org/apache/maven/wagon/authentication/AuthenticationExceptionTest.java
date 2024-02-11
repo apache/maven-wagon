@@ -37,13 +37,16 @@ package org.apache.maven.wagon.authentication;
  * under the License.
  */
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
  *
  */
-public class AuthenticationExceptionTest extends TestCase {
+public class AuthenticationExceptionTest {
+    @Test
     public void testAuthenticationExceptionTest() {
         AuthenticationException ae = new AuthenticationException("message");
 

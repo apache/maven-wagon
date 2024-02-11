@@ -18,23 +18,26 @@
  */
 package org.apache.maven.wagon.events;
 
-import junit.framework.TestCase;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.easymock.EasyMock;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public class TransferEventTest extends TestCase {
+public class TransferEventTest {
     /*
      * Class to test for void TransferEvent(Wagon, Repository, String, int,
      * int)
      */
+    @Test
     public void testTransferEventProperties() throws ConnectionException, AuthenticationException {
         final Wagon wagon = EasyMock.createMock(Wagon.class);
 
@@ -132,6 +135,7 @@ public class TransferEventTest extends TestCase {
         }
     }
 
+    @Test
     public void testConstantValueConflict() {
         final int[] values = {
             TransferEvent.TRANSFER_COMPLETED, TransferEvent.TRANSFER_ERROR,

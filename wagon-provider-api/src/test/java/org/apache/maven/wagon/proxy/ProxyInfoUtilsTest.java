@@ -18,28 +18,21 @@
  */
 package org.apache.maven.wagon.proxy;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author <a href="mailto:lafeuil@gmail.com">Thomas Champagne</a>
  */
-public class ProxyInfoUtilsTest extends TestCase {
-    public ProxyInfoUtilsTest(final String name) {
-        super(name);
-    }
-
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+public class ProxyInfoUtilsTest {
+    @Test
     public void testValidateNonProxyHostsWithNullProxy() {
         assertFalse("www.ibiblio.org", ProxyUtils.validateNonProxyHosts(null, "maven.apache.org"));
     }
 
+    @Test
     public void testValidateNonProxyHostsWithUniqueHost() {
 
         final ProxyInfo proxyInfo = new ProxyInfo();
@@ -63,6 +56,7 @@ public class ProxyInfoUtilsTest extends TestCase {
         assertFalse("NonProxyHosts = \"\"", ProxyUtils.validateNonProxyHosts(proxyInfo, "maven.apache.org"));
     }
 
+    @Test
     public void testValidateNonProxyHostsWithMultipleHost() {
 
         final ProxyInfo proxyInfo = new ProxyInfo();

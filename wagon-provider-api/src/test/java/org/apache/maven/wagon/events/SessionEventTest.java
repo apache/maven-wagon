@@ -18,22 +18,25 @@
  */
 package org.apache.maven.wagon.events;
 
-import junit.framework.TestCase;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.easymock.EasyMock;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public class SessionEventTest extends TestCase {
+public class SessionEventTest {
     /*
      * Class to test for void SESSIONEvent(Wagon, Repository, String, int,
      * int)
      */
+    @Test
     public void testSessionEventProperties() throws ConnectionException, AuthenticationException {
 
         final Wagon wagon = EasyMock.createMock(Wagon.class);
@@ -100,6 +103,7 @@ public class SessionEventTest extends TestCase {
         }
     }
 
+    @Test
     public void testConstantValueConflict() {
         final int[] values = {
             SessionEvent.SESSION_CLOSED, SessionEvent.SESSION_DISCONNECTED,

@@ -18,26 +18,29 @@
  */
 package org.apache.maven.wagon.events;
 
-import junit.framework.TestCase;
 import org.apache.maven.wagon.Wagon;
+import org.junit.Before;
+import org.junit.Test;
 
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.createNiceMock;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public class SessionEventSupportTest extends TestCase {
+public class SessionEventSupportTest {
 
     private SessionEventSupport eventSupport;
 
     private Wagon wagon;
 
-    /**
-     * @see junit.framework.TestCase#setUp()
-     */
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
 
         eventSupport = new SessionEventSupport();
 
@@ -45,6 +48,7 @@ public class SessionEventSupportTest extends TestCase {
         wagon = createNiceMock(Wagon.class);
     }
 
+    @Test
     public void testSessionListenerRegistration() {
         SessionListener mock1 = createMock(SessionListener.class);
 
@@ -73,6 +77,7 @@ public class SessionEventSupportTest extends TestCase {
         assertFalse(eventSupport.hasSessionListener(mock1));
     }
 
+    @Test
     public void testFireSessionDisconnected() {
         SessionListener mock1 = createMock(SessionListener.class);
 
@@ -94,6 +99,7 @@ public class SessionEventSupportTest extends TestCase {
         verify(mock1, mock2);
     }
 
+    @Test
     public void testFireSessionDisconneting() {
         SessionListener mock1 = createMock(SessionListener.class);
 
@@ -115,6 +121,7 @@ public class SessionEventSupportTest extends TestCase {
         verify(mock1, mock2);
     }
 
+    @Test
     public void testFireSessionLoggedIn() {
         SessionListener mock1 = createMock(SessionListener.class);
 
@@ -136,6 +143,7 @@ public class SessionEventSupportTest extends TestCase {
         verify(mock1, mock2);
     }
 
+    @Test
     public void testFireSessionLoggedOff() {
         SessionListener mock1 = createMock(SessionListener.class);
 
@@ -157,6 +165,7 @@ public class SessionEventSupportTest extends TestCase {
         verify(mock1, mock2);
     }
 
+    @Test
     public void testFireSessionOpened() {
         SessionListener mock1 = createMock(SessionListener.class);
 
@@ -178,6 +187,7 @@ public class SessionEventSupportTest extends TestCase {
         verify(mock1, mock2);
     }
 
+    @Test
     public void testFireSessionOpenning() {
         SessionListener mock1 = createMock(SessionListener.class);
 
@@ -199,6 +209,7 @@ public class SessionEventSupportTest extends TestCase {
         verify(mock1, mock2);
     }
 
+    @Test
     public void testFireSessionRefused() {
         SessionListener mock1 = createMock(SessionListener.class);
 
@@ -220,6 +231,7 @@ public class SessionEventSupportTest extends TestCase {
         verify(mock1, mock2);
     }
 
+    @Test
     public void testFireDebug() {
         SessionListener mock1 = createMock(SessionListener.class);
 

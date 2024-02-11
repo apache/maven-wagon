@@ -18,26 +18,17 @@
  */
 package org.apache.maven.wagon.authentication;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author <a href="mailto:jvanzyl@maven.org">Jason van Zyl</a>
  *
  * @todo test defaults
  */
-public class AuthenticationInfoTest extends TestCase {
-    public AuthenticationInfoTest(final String name) {
-        super(name);
-    }
-
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+public class AuthenticationInfoTest {
+    @Test
     public void testAuthenticationInfoProperties() {
         final AuthenticationInfo authenticationInfo = new AuthenticationInfo();
 

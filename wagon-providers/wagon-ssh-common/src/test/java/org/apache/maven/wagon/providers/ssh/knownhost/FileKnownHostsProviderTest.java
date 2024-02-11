@@ -20,16 +20,21 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
 
 import java.io.File;
 
-import junit.framework.TestCase;
 import org.codehaus.plexus.util.FileUtils;
+import org.junit.Before;
+import org.junit.Test;
 
-public class FileKnownHostsProviderTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class FileKnownHostsProviderTest {
     private File basedir = new File(System.getProperty("basedir", "."));
 
     private File testKnownHostsFile;
 
     private FileKnownHostsProvider provider;
 
+    @Before
     public void setUp() throws Exception {
         File readonlyKnownHostFile = new File(basedir, "src/test/resources/known_hosts");
         testKnownHostsFile = new File(basedir, "target/known_hosts");
@@ -40,6 +45,7 @@ public class FileKnownHostsProviderTest extends TestCase {
         provider = new FileKnownHostsProvider(testKnownHostsFile);
     }
 
+    @Test
     public void testStoreKnownHostsNoChange() throws Exception {
         long timestamp = this.testKnownHostsFile.lastModified();
         // file with the same contents, but with entries swapped
@@ -50,6 +56,7 @@ public class FileKnownHostsProviderTest extends TestCase {
         assertEquals("known_hosts file is rewritten", timestamp, testKnownHostsFile.lastModified());
     }
 
+    @Test
     public void testStoreKnownHostsWithChange() throws Exception {
         long timestamp = this.testKnownHostsFile.lastModified();
         File sameKnownHostFile = new File(basedir, "src/test/resources/known_hosts_same");

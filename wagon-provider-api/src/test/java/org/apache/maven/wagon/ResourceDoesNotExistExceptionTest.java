@@ -18,13 +18,16 @@
  */
 package org.apache.maven.wagon;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
  *
  */
-public class ResourceDoesNotExistExceptionTest extends TestCase {
+public class ResourceDoesNotExistExceptionTest {
+    @Test
     public void testResourceDoesNotExistExceptionTest() {
         ResourceDoesNotExistException ae = new ResourceDoesNotExistException("message");
 
