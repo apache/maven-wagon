@@ -32,7 +32,7 @@ under the License.
   <description>Wagon provider that gets and puts artifacts using a Source Control Management system</description>
 
   <properties>
-    <mavenScmVersion>1.11.1</mavenScmVersion>
+    <mavenScmVersion>1.13.0</mavenScmVersion>
   </properties>
 
   <dependencies>
