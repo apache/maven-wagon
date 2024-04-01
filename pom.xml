@@ -294,7 +294,7 @@ under the License.
       <dependency>
         <groupId>org.easymock</groupId>
         <artifactId>easymock</artifactId>
-        <version>3.6</version>
+        <version>5.2.0</version>
       </dependency>
 
       <dependency>
