@@ -16,12 +16,21 @@
 #
 version: 2
 updates:
-- package-ecosystem: maven
-  directory: "/"
-  schedule:
-    interval: daily
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "daily"
 
-- package-ecosystem: "github-actions"
-  directory: "/"
-  schedule:
-    interval: daily
+  - package-ecosystem: maven
+    directory: "/"
+    schedule:
+      interval: "daily"
+    target-branch: "wagon-1.x"
+    labels:
+      - "mvn3"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+
