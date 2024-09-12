@@ -54,7 +54,7 @@ under the License.
     <dependency>
       <groupId>org.apache.maven.scm</groupId>
       <artifactId>maven-scm-provider-cvsexe</artifactId>
-      <version>1.0</version>
+      <version>1.13.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
