@@ -409,23 +409,6 @@ under the License.
             <configuration>
               <failOnError>false</failOnError>
               <linksource>true</linksource>
-              <links>
-                <link>https://docs.oracle.com/javaee/1.4/api/</link>
-                <link>http://commons.apache.org/collections/apidocs-COLLECTIONS_3_0/</link>
-                <link>http://commons.apache.org/logging/apidocs/</link>
-                <link>http://commons.apache.org/pool/apidocs/</link>
-                <link>http://junit.sourceforge.net/javadoc/</link>
-                <link>http://logging.apache.org/log4j/1.2/apidocs/</link>
-                <link>http://jakarta.apache.org/regexp/apidocs/</link>
-                <link>http://velocity.apache.org/engine/releases/velocity-1.5/apidocs/</link>
-                <link>http://maven.apache.org/ref/current/maven-artifact/apidocs/</link>
-                <link>http://maven.apache.org/ref/current/maven-artifact-manager/apidocs/</link>
-                <link>http://maven.apache.org/ref/current/maven-model/apidocs/</link>
-                <link>http://maven.apache.org/ref/current/maven-plugin-api/apidocs/</link>
-                <link>http://maven.apache.org/ref/current/maven-project/apidocs/</link>
-                <link>http://maven.apache.org/ref/current/maven-reporting/maven-reporting-api/apidocs/</link>
-                <link>http://maven.apache.org/ref/current/maven-settings/apidocs/</link>
-              </links>
               <groups>
                 <group>
                   <title>API + Test</title>
