@@ -237,16 +237,6 @@ under the License.
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-ssh-common-test</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-ssh-common</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>4.13.2</version>
@@ -419,24 +409,12 @@ under the License.
                   <packages>org.apache.maven.wagon.providers.file*</packages>
                 </group>
                 <group>
-                  <title>FTP Provider</title>
-                  <packages>org.apache.maven.wagon.providers.ftp*</packages>
-                </group>
-                <group>
                   <title>HTTP Providers</title>
                   <packages>org.apache.maven.wagon.providers.http*:org.apache.maven.wagon.shared.http*</packages>
                 </group>
                 <group>
                   <title>SCM Provider</title>
                   <packages>org.apache.maven.wagon.providers.scm*</packages>
-                </group>
-                <group>
-                  <title>SSH Providers</title>
-                  <packages>org.apache.maven.wagon.providers.ssh*</packages>
-                </group>
-                <group>
-                  <title>WebDAV Provider</title>
-                  <packages>org.apache.maven.wagon.providers.webdav*:org.apache.jackrabbit.webdav*</packages>
                 </group>
                 <group>
                   <title>HTTP TCK</title>
