@@ -24,7 +24,6 @@ under the License.
     <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon-providers</artifactId>
     <version>4.0.0-M1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>wagon-http-lightweight</artifactId>
@@ -50,6 +49,10 @@ under the License.
       <artifactId>plexus-utils</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -62,6 +65,7 @@ under the License.
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

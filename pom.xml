@@ -126,67 +126,6 @@ under the License.
     </contributor>
   </contributors>
 
-  <mailingLists>
-    <mailingList>
-      <name>Maven Developer List</name>
-      <subscribe>dev-subscribe@maven.apache.org</subscribe>
-      <unsubscribe>dev-unsubscribe@maven.apache.org</unsubscribe>
-      <post>dev@maven.apache.org</post>
-      <archive>http://mail-archives.apache.org/mod_mbox/maven-dev</archive>
-      <otherArchives>
-        <otherArchive>http://www.mail-archive.com/dev@maven.apache.org/</otherArchive>
-        <otherArchive>http://maven.40175.n5.nabble.com/Maven-Developers-f142166.html</otherArchive>
-        <otherArchive>http://maven-dev.markmail.org/</otherArchive>
-      </otherArchives>
-    </mailingList>
-    <mailingList>
-      <name>Maven User List</name>
-      <subscribe>users-subscribe@maven.apache.org</subscribe>
-      <unsubscribe>users-unsubscribe@maven.apache.org</unsubscribe>
-      <post>users@maven.apache.org</post>
-      <archive>http://mail-archives.apache.org/mod_mbox/maven-users</archive>
-      <otherArchives>
-        <otherArchive>http://www.mail-archive.com/users@maven.apache.org/</otherArchive>
-        <otherArchive>http://maven.40175.n5.nabble.com/Maven-Users-f40176.html</otherArchive>
-        <otherArchive>http://maven-users.markmail.org/</otherArchive>
-      </otherArchives>
-    </mailingList>
-
-    <mailingList>
-      <name>LEGACY Wagon User List (deprecated)</name>
-      <subscribe>wagon-users-subscribe@maven.apache.org</subscribe>
-      <unsubscribe>wagon-users-unsubscribe@maven.apache.org</unsubscribe>
-      <post>wagon-users@maven.apache.org</post>
-      <archive>http://mail-archives.apache.org/mod_mbox/maven-wagon-users/</archive>
-      <otherArchives>
-        <otherArchive>http://www.mail-archive.com/wagon-users@maven.apache.org</otherArchive>
-        <otherArchive>http://maven.40175.n5.nabble.com/Wagon-Users-f326332.html</otherArchive>
-        <otherArchive>http://maven-wagon-users.markmail.org/</otherArchive>
-      </otherArchives>
-    </mailingList>
-    <mailingList>
-      <name>LEGACY Wagon Developer List (deprecated)</name>
-      <subscribe>wagon-dev-subscribe@maven.apache.org</subscribe>
-      <unsubscribe>wagon-dev-unsubscribe@maven.apache.org</unsubscribe>
-      <post>wagon-dev@maven.apache.org</post>
-      <archive>http://mail-archives.apache.org/mod_mbox/maven-wagon-dev/</archive>
-      <otherArchives>
-        <otherArchive>http://www.mail-archive.com/wagon-dev@maven.apache.org</otherArchive>
-        <otherArchive>http://maven.40175.n5.nabble.com/Wagon-Dev-f326406.html</otherArchive>
-        <otherArchive>http://maven-wagon-dev.markmail.org/</otherArchive>
-      </otherArchives>
-    </mailingList>
-    <mailingList>
-      <name>Wagon Commits List</name>
-      <subscribe>wagon-commits-subscribe@maven.apache.org</subscribe>
-      <unsubscribe>wagon-commits-unsubscribe@maven.apache.org</unsubscribe>
-      <archive>http://mail-archives.apache.org/mod_mbox/maven-wagon-commits/</archive>
-      <otherArchives>
-        <otherArchive>http://maven-wagon-commits.markmail.org/</otherArchive>
-      </otherArchives>
-    </mailingList>
-  </mailingLists>
-
   <modules>
     <module>wagon-provider-api</module>
     <module>wagon-providers</module>
@@ -221,6 +160,8 @@ under the License.
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
     <slf4jVersion>1.7.36</slf4jVersion>
     <maven.site.path>wagon-archives/wagon-LATEST</maven.site.path>
+    <version.plexus-utils>3.6.0</version.plexus-utils>
+    <version.sisu-maven-plugin>0.9.0.M3</version.sisu-maven-plugin>
     <project.build.outputTimestamp>2022-12-18T21:06:44Z</project.build.outputTimestamp>
   </properties>
 
@@ -261,12 +202,6 @@ under the License.
         <artifactId>plexus-container-default</artifactId>
         <version>2.1.1</version>
       </dependency>
-      <dependency>
-        <groupId>org.codehaus.plexus</groupId>
-        <artifactId>plexus-utils</artifactId>
-        <version>3.3.1</version>
-      </dependency>
-
       <!-- for slf4j -->
       <dependency>
         <groupId>org.slf4j</groupId>
@@ -347,31 +282,6 @@ under the License.
               <!-- for intellij -->
               <exclude>out/**</exclude>
             </excludes>
-          </configuration>
-        </plugin>
-        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-        <plugin>
-          <groupId>org.eclipse.m2e</groupId>
-          <artifactId>lifecycle-mapping</artifactId>
-          <version>1.0.0</version>
-          <configuration>
-            <lifecycleMappingMetadata>
-              <pluginExecutions>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>org.apache.rat</groupId>
-                    <artifactId>apache-rat-plugin</artifactId>
-                    <versionRange>[0.11,)</versionRange>
-                    <goals>
-                      <goal>check</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <ignore />
-                  </action>
-                </pluginExecution>
-              </pluginExecutions>
-            </lifecycleMappingMetadata>
           </configuration>
         </plugin>
         <plugin>

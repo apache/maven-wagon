@@ -24,7 +24,6 @@ under the License.
     <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon</artifactId>
     <version>4.0.0-M1-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>wagon-providers</artifactId>
@@ -52,23 +51,10 @@ under the License.
         <artifactId>httpclient</artifactId>
         <version>4.5.14</version>
       </dependency>
-      <!-- Overwrite transitive dependency version of HttpClient -->
-      <dependency>
-        <groupId>commons-codec</groupId>
-        <artifactId>commons-codec</artifactId>
-        <version>1.16.1</version>
-        <scope>runtime</scope>
-      </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpcore</artifactId>
         <version>4.4.16</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.sshd</groupId>
-        <artifactId>sshd-core</artifactId>
-        <version>0.8.0</version>
-        <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
