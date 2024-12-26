@@ -24,7 +24,6 @@ under the License.
     <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon-providers</artifactId>
     <version>3.5.4-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>wagon-ssh-external</artifactId>
@@ -52,6 +51,7 @@ under the License.
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
