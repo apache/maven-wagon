@@ -24,7 +24,6 @@ under the License.
     <groupId>org.apache.maven.wagon</groupId>
     <artifactId>wagon</artifactId>
     <version>3.5.4-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>wagon-provider-test</artifactId>
