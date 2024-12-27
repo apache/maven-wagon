@@ -85,9 +85,11 @@ public class SftpWagon extends AbstractJschWagon {
         try {
             String dir = ScpHelper.getResourceDirectory(resource.getName());
             String[] dirs = PathUtils.dirnames(dir);
+            // CHECKSTYLE_OFF: UnusedLocalVariable
             for (String d : dirs) {
                 channel.cd("..");
             }
+            // CHECKSTYLE_ON: UnusedLocalVariable
         } catch (SftpException e) {
             fireTransferDebug("Error returning to parent directory: " + e.getMessage());
         }
