@@ -39,7 +39,7 @@ Maven Wagon SCM Usage
  []
 
  and use URLs in the {{{/scm/scm-url-format.html}SCM format}}.
- 
+
  For non-subversion SCM, you can include the elements <<<scmVersionType>>> and <<<scmVersion>>> in your <<<settings.xml>>> file to
  specify a branch or tag to use. The value of <<<scmVersionType>>> must be one of <<<branch>>> or <<<tag>>>.
  There is no default value for <<<scmVersionType>>> so you <MUST> specify it with <<<scmVersion>>> in order
@@ -50,9 +50,6 @@ Deploying your Maven site to SCM
 
  There are some <<shortcomings>> to simply using Wagon SCM provider with site plugin:
 
- * generated site may have inconsistent newlines (see {{{https://issues.apache.org/jira/browse/MSITE-121}MSITE-121}}),
- preventing SCM check-in,
-
  * deploying site to SCM will require obsolete pages deletion, which is not done,
 
  * site plugin way make one commit per file.
@@ -62,10 +59,8 @@ Deploying your Maven site to SCM
  <<Prefer {{{http://maven.apache.org/plugins/maven-scm-publish-plugin/}maven-scm-publish-plugin}} to
  publish your site to SCM>>
 
- <<Note for Maven 3 users:>> The site plugin behaves differently, require these
- be added as dependencies instead of extensions. See
- {{{/plugins/maven-site-plugin/examples/adding-deploy-protocol.html}
- Adding a Protocol to Deploy the Site}}.
+ The site plugin behaves differently, require these be added as dependencies instead of extensions. See
+ {{{/plugins/maven-site-plugin/examples/adding-deploy-protocol.html} Adding a Protocol to Deploy the Site}}.
 
 * Deploying your Maven site to Subversion
 
@@ -205,16 +200,3 @@ Deploying your Maven site to SCM
     </configuration>
   </server>
 ------
-
-
-Using a SCM-based remote repository in Maven 2
-
-
-* Using a Subversion-based remote repository in Maven 2
-
- Not tested yet
-
-
-* Using a CVS-based remote repository in Maven 2
-
- Not tested yet

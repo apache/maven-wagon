@@ -30,14 +30,14 @@ Maven Wagon SCM
 
  This component is an implementation of Wagon provider for SCM (Source Control Management) systems,
  using {{{/scm/}Maven SCM}}.
- 
+
  It enables Maven to use remote repositories stored in SCM systems (Subversion, CVS, ...)
  and to store Maven sites in SCMs.
 
 Features
 
  * Deploy files and directories to several SCM using Maven SCM (only tested with CVS and SVN)
- 
+
  * Get files from several SCM using Maven SCM (only tested with CVS and SVN)
 
 
@@ -49,6 +49,5 @@ Known issues
 
    * CVS: when keywords are expanded
 
- * Generated site may have inconsistent newlines (see {{{https://issues.apache.org/jira/browse/MSITE-121}MSITE-121}}),
- preventing SCM check-in: <<prefer {{{/plugins/maven-scm-publish-plugin/}maven-scm-publish-plugin}} to
- publish your site to SCM>>
+
+See {{{/plugins/maven-scm-publish-plugin/}maven-scm-publish-plugin}} to publish your site to SCM.
