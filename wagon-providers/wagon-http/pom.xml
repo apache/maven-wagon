@@ -143,6 +143,7 @@ under the License.
                   <shadedPattern>org.apache.maven.wagon.providers.http.wagon.shared</shadedPattern>
                 </relocation>
               </relocations>
+              <dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml</dependencyReducedPomLocation>
             </configuration>
           </execution>
         </executions>
