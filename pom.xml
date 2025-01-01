@@ -158,7 +158,7 @@ under the License.
 
   <properties>
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
-    <slf4jVersion>1.7.36</slf4jVersion>
+    <slf4jVersion>2.0.0</slf4jVersion>
     <maven.site.path>wagon-archives/wagon-LATEST</maven.site.path>
     <version.plexus-utils>3.6.0</version.plexus-utils>
     <version.sisu-maven-plugin>0.9.0.M3</version.sisu-maven-plugin>
