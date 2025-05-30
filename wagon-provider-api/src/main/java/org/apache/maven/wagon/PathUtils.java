@@ -109,7 +109,7 @@ public final class PathUtils {
 
     /**
      * Return the host name (Removes protocol and path from the URL) E.g: for input
-     * <code>http://www.codehause.org</code> this method will return <code>www.apache.org</code>
+     * <code>http://www.apache.org</code> this method will return <code>www.apache.org</code>
      *
      * @param url the url
      * @return the host name
@@ -188,7 +188,7 @@ public final class PathUtils {
      * Return the protocol name.
      * <br/>
      * E.g: for input
-     * <code>http://www.codehause.org</code> this method will return <code>http</code>
+     * <code>http://www.apache.org</code> this method will return <code>http</code>
      *
      * @param url the url
      * @return the host name
