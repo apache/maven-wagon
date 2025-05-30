@@ -397,7 +397,10 @@ public final class PathUtils {
         return null;
     }
 
-    // TODO: move to plexus-utils or use something appropriate from there
+    /**
+     * @deprecated use {@link java.nio.file.Path#relativize(java.nio.file.Path)} instead
+     */
+    @Deprecated
     public static String toRelative(File basedir, String absolutePath) {
         String relative;
 
