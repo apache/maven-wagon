@@ -38,11 +38,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.execchain.RedirectExec;
 import org.apache.http.impl.execchain.RetryExec;
-import org.apache.maven.wagon.InputData;
-import org.apache.maven.wagon.repository.Repository;
-import org.apache.maven.wagon.resource.Resource;
-import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -54,26 +49,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class AbstractHttpClientWagonTest {
-    @Ignore("This test is validating nothing and require internet connection which we should avoid so ignore it")
-    public void test() throws Exception {
-        AbstractHttpClientWagon wagon = new AbstractHttpClientWagon() {};
-
-        Repository repository = new Repository("central", "http://repo.maven.apache.org/maven2");
-
-        wagon.connect(repository);
-
-        Resource resource = new Resource();
-
-        resource.setName("junit/junit/maven-metadata.xml");
-
-        InputData inputData = new InputData();
-
-        inputData.setResource(resource);
-
-        wagon.fillInputData(inputData);
-
-        wagon.disconnect();
-    }
 
     @Test
     public void retryableConfigurationDefaultTest() throws Exception {
