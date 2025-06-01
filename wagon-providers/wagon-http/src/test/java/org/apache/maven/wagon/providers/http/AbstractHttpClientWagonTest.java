@@ -80,7 +80,7 @@ public class AbstractHttpClientWagonTest {
             public void run() {
                 final HttpRequestRetryHandler handler = getCurrentHandler();
                 assertNotNull(handler);
-                assertTrue(handler instanceof DefaultHttpRequestRetryHandler.class);
+                assertTrue(handler instanceof DefaultHttpRequestRetryHandler);
                 final DefaultHttpRequestRetryHandler impl = DefaultHttpRequestRetryHandler.class.cast(handler);
                 assertEquals(3, impl.getRetryCount());
                 assertFalse(impl.isRequestSentRetryEnabled());
