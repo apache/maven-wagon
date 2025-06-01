@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.lang.reflect.Field;
 import java.net.ConnectException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.UnknownHostException;
