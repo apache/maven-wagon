@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.lang.reflect.Field;
 import java.net.ConnectException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.UnknownHostException;
@@ -123,7 +122,7 @@ public class AbstractHttpClientWagonTest {
                     final Set<?> exceptions = Set.class.cast(nonRetriableClasses.get(handler));
                     assertEquals(1, exceptions.size());
                     assertTrue(exceptions.contains(IOException.class));
-                } catch (final Exception e) {
+                } catch (NoSuchFieldException | IllegalAccessException e) {
                     fail(e.getMessage());
                 }
             }
@@ -166,11 +165,7 @@ public class AbstractHttpClientWagonTest {
         final String[] paths = classpath.split(File.pathSeparator);
         final Collection<URL> urls = new ArrayList<>(paths.length);
         for (final String path : paths) {
-            try {
-                urls.add(new File(path).toURI().toURL());
-            } catch (final MalformedURLException e) {
-                fail(e.getMessage());
-            }
+            urls.add(new File(path).toURI().toURL());
         }
         final URLClassLoader loader = new URLClassLoader(urls.toArray(new URL[paths.length]), new ClassLoader() {
             @Override
