@@ -120,13 +120,7 @@ public class RepositoryTest extends TestCase {
                 "fff::1",
                 -1);
         assertRepository(
-                "http://user:password@[fff::1]:7891",
-                "http://[fff::1]:7891",
-                "/",
-                "user",
-                "password",
-                "fff::1",
-                7891);
+                "http://user:password@[fff::1]:7891", "http://[fff::1]:7891", "/", "user", "password", "fff::1", 7891);
 
         assertRepository(
                 "http://user:password@[fff:000::222:1111]:7891/oo/rest/users",
