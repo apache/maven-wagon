@@ -22,7 +22,12 @@ import java.io.File;
 import java.util.StringTokenizer;
 
 /**
- * Various path (URL) manipulation routines
+ * Various path (URL) manipulation routines. Standard JDK methods in
+ * java.net.URI and java.nio.file.Path should be used instead.
+ * It's not always a direct one-to-one replacement. For instance,
+ * a PathUtils method might return an empty string in a case where the
+ * corresponding JDK method returns null. However, all logic in this
+ * class has been present in the JDK since Java 1.4.
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
@@ -113,7 +118,9 @@ public final class PathUtils {
      *
      * @param url the url
      * @return the host name
+     * @deprecated replace with {@code new URI(url).getHost()}
      */
+    @Deprecated
     public static String host(final String url) {
         if (url == null || url.length() == 0) {
             return "localhost";
@@ -192,7 +199,9 @@ public final class PathUtils {
      *
      * @param url the url
      * @return the host name
+     * @deprecated replace with {@code new URI(url).getScheme()}
      */
+    @Deprecated
     public static String protocol(final String url) {
         final int pos = url.indexOf(":");
 
@@ -205,7 +214,9 @@ public final class PathUtils {
     /**
      * @param url
      * @return the port or {@link WagonConstants#UNKNOWN_PORT} if not existent
+     * @deprecated replace with {@code new URI(url).getPort()}
      */
+    @Deprecated
     public static int port(String url) {
 
         final String protocol = PathUtils.protocol(url);
@@ -260,8 +271,9 @@ public final class PathUtils {
      *
      * @param url the repository URL
      * @return the basedir of the repository
-     * @todo need to URL decode for spaces?
+     * @deprecated replace with {@code new URI(url).getPath()}
      */
+    @Deprecated
     public static String basedir(String url) {
         String protocol = PathUtils.protocol(url);
 
@@ -369,6 +381,10 @@ public final class PathUtils {
         return decoded;
     }
 
+    /**
+     * @deprecated replace with {@code new URI(url).getUserInfo()}
+     */
+    @Deprecated
     public static String user(String url) {
         String host = authorization(url);
         int index = host.indexOf('@');
@@ -384,6 +400,10 @@ public final class PathUtils {
         return null;
     }
 
+    /**
+     * @deprecated do not store passwords in URLs
+     */
+    @Deprecated
     public static String password(String url) {
         String host = authorization(url);
         int index = host.indexOf('@');
