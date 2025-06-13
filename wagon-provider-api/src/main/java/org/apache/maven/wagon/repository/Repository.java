@@ -19,9 +19,10 @@
 package org.apache.maven.wagon.repository;
 
 import java.io.Serializable;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
-import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.WagonConstants;
 import org.codehaus.plexus.util.StringUtils;
 
@@ -118,35 +119,39 @@ public class Repository implements Serializable {
 
     public void setUrl(String url) {
         this.url = url;
-
-        // TODO [BP]: refactor out the PathUtils URL stuff into a class like java.net.URL, so you only parse once
-        //  can't use URL class as is because it won't recognise our protocols, though perhaps we could attempt to
-        //  register handlers for scp, etc?
-
-        this.protocol = PathUtils.protocol(url);
-
-        this.host = PathUtils.host(url);
-
-        this.port = PathUtils.port(url);
-
-        this.basedir = PathUtils.basedir(url);
-
-        String username = PathUtils.user(url);
-        this.username = username;
-
-        if (username != null) {
-            String password = PathUtils.password(url);
-
-            if (password != null) {
-                this.password = password;
-
-                username += ":" + password;
+        try {
+            URI uri = new URI(url);
+            this.protocol = uri.getScheme();
+            this.host = uri.getHost();
+            this.port = uri.getPort();
+            String path = uri.getPath();
+            if (path.isEmpty()) {
+                path = "/";
             }
+            this.basedir = path;
 
-            username += "@";
+            String username = uri.getUserInfo();
+            this.username = username;
+            if (username != null) {
+                int index = username.indexOf(':');
+                if (index >= 0) {
+                    this.password = username.substring(index + 1);
+                }
 
-            int index = url.indexOf(username);
-            this.url = url.substring(0, index) + url.substring(index + username.length());
+                // strip username out of URL
+                URI withoutUserName = new URI(
+                        uri.getScheme(),
+                        null,
+                        uri.getHost(),
+                        uri.getPort(),
+                        uri.getPath(),
+                        uri.getQuery(),
+                        uri.getFragment());
+
+                this.url = withoutUserName.toString();
+            }
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException(e);
         }
     }
 
