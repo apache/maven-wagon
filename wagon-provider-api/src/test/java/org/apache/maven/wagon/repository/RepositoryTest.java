@@ -96,36 +96,36 @@ public class RepositoryTest extends TestCase {
 
     public void testIPv6() {
         assertRepository(
-                "http://user:password@[fff:::1]:7891/oo/rest/users",
-                "http://[fff:::1]:7891/oo/rest/users",
+                "http://user:password@[fff::1]:7891/oo/rest/users",
+                "http://[fff::1]:7891/oo/rest/users",
                 "/oo/rest/users",
                 "user",
                 "password",
-                "fff:::1",
+                "fff::1",
                 7891);
         assertRepository(
-                "http://[fff:::1]:7891/oo/rest/users",
-                "http://[fff:::1]:7891/oo/rest/users",
+                "http://[fff::1]:7891/oo/rest/users",
+                "http://[fff::1]:7891/oo/rest/users",
                 "/oo/rest/users",
                 null,
                 null,
-                "fff:::1",
+                "fff::1",
                 7891);
         assertRepository(
-                "http://user:password@[fff:::1]/oo/rest/users",
-                "http://[fff:::1]/oo/rest/users",
+                "http://user:password@[fff::1]/oo/rest/users",
+                "http://[fff::1]/oo/rest/users",
                 "/oo/rest/users",
                 "user",
                 "password",
-                "fff:::1",
+                "fff::1",
                 -1);
         assertRepository(
-                "http://user:password@[fff:::1]:7891",
-                "http://[fff:::1]:7891",
+                "http://user:password@[fff::1]:7891",
+                "http://[fff::1]:7891",
                 "/",
                 "user",
                 "password",
-                "fff:::1",
+                "fff::1",
                 7891);
 
         assertRepository(
