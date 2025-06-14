@@ -22,16 +22,17 @@ import java.io.File;
 import java.util.StringTokenizer;
 
 /**
- * Various path (URL) manipulation routines. Standard JDK methods in
- * java.net.URI and java.nio.file.Path should be used instead.
- * It's not always a direct one-to-one replacement. For instance,
- * a PathUtils method might return an empty string in a case where the
- * corresponding JDK method returns null. However, all logic in this
- * class has been present in the JDK since Java 1.4.
+ * Various path (URL) manipulation routines.
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- *
+ * @deprecated Standard JDK methods in
+ *    java.net.URI and java.nio.file.Path should be used instead.
+ *    This is not always a direct one-to-one replacement. For instance,
+ *    a PathUtils method might return an empty string in a case where the
+ *    corresponding JDK method returns null. However, all logic in this
+ *    class has been present in the JDK since Java 1.4.
  */
+@Deprecated
 public final class PathUtils {
     private PathUtils() {}
 
