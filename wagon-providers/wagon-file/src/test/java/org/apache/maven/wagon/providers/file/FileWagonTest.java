@@ -45,16 +45,14 @@ public class FileWagonTest extends StreamingWagonTestCase {
     }
 
     /**
-     * This test is introduced to allow for null file wagons.
-     * Which is used heavily in the maven component ITs.
+     * This test is introduced to allow for null file wagons
+     * which are used heavily in the maven component ITs.
      *
      * @throws ConnectionException
      * @throws AuthenticationException
      */
     public void testNullFileWagon() throws ConnectionException, AuthenticationException {
         Wagon wagon = new FileWagon();
-        Resource resource = new Resource();
-        resource.setContentLength(100000);
         Repository repository = new Repository();
         wagon.connect(repository);
         wagon.disconnect();

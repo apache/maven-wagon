@@ -69,8 +69,6 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
             stream = new FileOutputStream(destFile);
             wagon.getToStream("fubar.txt", stream);
             fail("File was found when it shouldn't have been");
-            stream.close();
-            stream = null;
         } catch (ResourceDoesNotExistException e) {
             // expected
             assertTrue(true);
