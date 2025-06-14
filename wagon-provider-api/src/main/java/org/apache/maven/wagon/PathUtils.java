@@ -37,9 +37,9 @@ public final class PathUtils {
 
     /**
      * Returns the directory path portion of a file specification string.
-     * Matches the equally named unix command.
      *
-     * @return The directory portion excluding the ending file separator.
+     * @return the directory portion excluding the ending file separator
+     * @deprecated use {@code Paths.get(path).getParent().toString}
      */
     public static String dirname(final String path) {
         final int i = path.lastIndexOf("/");
@@ -50,13 +50,16 @@ public final class PathUtils {
     /**
      * Returns the filename portion of a file specification string.
      *
-     * @return The filename string with extension.
+     * @return the filename string with extension
+     * @deprecated use {@code Paths.get(path).getFileName().toString}
      */
+    @Deprecated
     public static String filename(final String path) {
         final int i = path.lastIndexOf("/");
         return ((i >= 0) ? path.substring(i + 1) : path);
     }
 
+    @Deprecated
     public static String[] dirnames(final String path) {
         final String dirname = PathUtils.dirname(path);
         return split(dirname, "/", -1);
