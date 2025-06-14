@@ -683,7 +683,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
             // WAGON-250
             list = wagon.getFileList("");
             assertNotNull("file list should not be null.", list);
-            assertTrue("file list should contain items (actually contains '" + list + "').", !list.isEmpty());
+            assertFalse("file list should contain items (actually contains '" + list + "').", list.isEmpty());
             assertTrue(list.contains("file-list/"));
             assertFalse(list.contains("file-list"));
             assertFalse(list.contains("."));

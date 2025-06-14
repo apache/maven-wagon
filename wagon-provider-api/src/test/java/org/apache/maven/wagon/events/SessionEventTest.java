@@ -57,7 +57,7 @@ public class SessionEventTest extends TestCase {
         assertEquals(exception, event.getException());
 
         event.setException(null);
-        assertEquals(null, event.getException());
+        assertNull(event.getException());
 
         event.setException(exception);
         assertEquals(exception, event.getException());

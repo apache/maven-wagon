@@ -48,6 +48,7 @@ import static junit.framework.Assert.fail;
 import static org.apache.maven.wagon.tck.http.Assertions.NO_RESPONSE_STATUS_CODE;
 import static org.apache.maven.wagon.tck.http.Assertions.assertFileContentsFromResource;
 import static org.apache.maven.wagon.tck.http.Assertions.assertWagonExceptionMessage;
+import static org.junit.Assert.assertNotNull;
 
 /**
  *
@@ -155,7 +156,7 @@ public class GetWagonTests extends HttpWagonTests {
         logger.info("Interrupting thread.");
         t.interrupt();
 
-        assertTrue("TransferFailedException should have been thrown.", holder.getValue() != null);
+        assertNotNull("TransferFailedException should have been thrown.", holder.getValue());
         assertWagonExceptionMessage(holder.getValue(), NO_RESPONSE_STATUS_CODE, getBaseUrl() + "infinite/", "", null);
     }
 
