@@ -144,9 +144,7 @@ public class WebDavWagon extends AbstractHttpClientWagon {
         } catch (HttpException e) {
             throw new IOException(e.getMessage(), e);
         } finally {
-            if (method != null) {
-                method.releaseConnection();
-            }
+            method.releaseConnection();
         }
     }
 
