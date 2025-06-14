@@ -18,6 +18,7 @@
  */
 package org.apache.maven.wagon.http;
 
+import java.util.Arrays;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -803,7 +804,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
 
         if (!success) {
-            fail("expected " + expectedResponseCodes + ", got " + handlerRequestResponses);
+            fail("expected " + Arrays.toString(expectedResponseCodes) + ", got " + handlerRequestResponses);
         }
     }
 
