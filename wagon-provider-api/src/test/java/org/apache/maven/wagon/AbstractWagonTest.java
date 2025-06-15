@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import junit.framework.TestCase;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
@@ -37,7 +39,6 @@ import org.apache.maven.wagon.proxy.ProxyInfoProvider;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.easymock.IAnswer;
 
@@ -454,7 +455,7 @@ public class AbstractWagonTest extends TestCase {
         File tempFile = File.createTempFile("wagon", "tmp");
         tempFile.deleteOnExit();
         String content = "content";
-        FileUtils.fileWrite(tempFile.getAbsolutePath(), content);
+        Files.write(tempFile.toPath().toAbsolutePath(), content.getBytes(StandardCharsets.UTF_8));
 
         Resource resource = new Resource("resource");
 
