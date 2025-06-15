@@ -236,7 +236,8 @@ public abstract class AbstractWagon implements Wagon {
         } catch (IOException e) {
             // not essential to have a canonical file
         }
-        if (!destinationDirectory.mkdirs()) {
+        destinationDirectory.mkdirs();
+        if (!destinationDirectory.exists()) {
             throw new TransferFailedException(
                     "Specified destination directory cannot be created: " + destinationDirectory);
         }
