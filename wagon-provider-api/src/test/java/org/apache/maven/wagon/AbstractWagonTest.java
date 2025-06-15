@@ -23,9 +23,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+
 import junit.framework.TestCase;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
