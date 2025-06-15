@@ -360,7 +360,11 @@ public class StreamWagonTest extends TestCase {
 
         wagon.connect(repository);
         try {
-            wagon.putFromStream(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)), "resource", content.length(), lastModified);
+            wagon.putFromStream(
+                    new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)),
+                    "resource",
+                    content.length(),
+                    lastModified);
             assertEquals(content, out.toString());
         } finally {
             wagon.disconnect();
