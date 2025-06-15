@@ -228,17 +228,17 @@ public abstract class AbstractWagon implements Wagon {
 
     protected void createParentDirectories(File destination) throws TransferFailedException {
         File destinationDirectory = destination.getParentFile();
+        if (destinationDirectory == null) {
+            return;
+        }
         try {
             destinationDirectory = destinationDirectory.getCanonicalFile();
         } catch (IOException e) {
             // not essential to have a canonical file
         }
-        if (destinationDirectory != null && !destinationDirectory.exists()) {
-            destinationDirectory.mkdirs();
-            if (!destinationDirectory.exists()) {
-                throw new TransferFailedException(
-                        "Specified destination directory cannot be created: " + destinationDirectory);
-            }
+        if (!destinationDirectory.mkdirs()) {
+            throw new TransferFailedException(
+                    "Specified destination directory cannot be created: " + destinationDirectory);
         }
     }
 
