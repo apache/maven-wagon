@@ -49,11 +49,6 @@ public class StreamWagonTest extends TestCase {
 
     private Repository repository = new Repository("id", "url");
 
-    public void testCreateParentDirectories() throws TransferFailedException {
-        TestWagon wagon = new TestWagon();
-        wagon.createParentDirectories(new File("foo")); // file has no parent
-    }
-
     public void testNullInputStream() throws Exception {
         StreamingWagon wagon = new TestWagon() {
             public void fillInputData(InputData inputData) {

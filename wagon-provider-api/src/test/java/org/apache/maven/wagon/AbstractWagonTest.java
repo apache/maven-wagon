@@ -98,6 +98,11 @@ public class AbstractWagonTest extends TestCase {
         wagon.addTransferListener(transferListener);
     }
 
+    // https://github.com/apache/maven-wagon/issues/178
+    public void testCreateParentDirectories() throws TransferFailedException {
+        wagon.createParentDirectories(new File("foo")); // file has no parent
+    }
+
     public void testCalculationOfTransferBufferSize() {
         // 1 KiB -> Default buffer size (4 KiB)
         assertEquals(4096, wagon.getBufferCapacityForTransfer(1024L));
