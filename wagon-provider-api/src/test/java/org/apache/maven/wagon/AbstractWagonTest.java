@@ -21,8 +21,6 @@ package org.apache.maven.wagon;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 import junit.framework.TestCase;
 import org.apache.maven.wagon.authentication.AuthenticationException;
@@ -38,7 +36,6 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.util.IOUtil;
 import org.easymock.IAnswer;
 
 import static org.easymock.EasyMock.*;
@@ -376,28 +373,6 @@ public class AbstractWagonTest extends TestCase {
         wagon.put(source, artifact);
 
         verify(transferListener);
-    }
-
-    public void testStreamShutdown() {
-        IOUtil.close((InputStream) null);
-
-        IOUtil.close((OutputStream) null);
-
-        InputStreamMock inputStream = new InputStreamMock();
-
-        assertFalse(inputStream.isClosed());
-
-        IOUtil.close(inputStream);
-
-        assertTrue(inputStream.isClosed());
-
-        OutputStreamMock outputStream = new OutputStreamMock();
-
-        assertFalse(outputStream.isClosed());
-
-        IOUtil.close(outputStream);
-
-        assertTrue(outputStream.isClosed());
     }
 
     public void testRepositoryPermissionsOverride() throws ConnectionException, AuthenticationException {
