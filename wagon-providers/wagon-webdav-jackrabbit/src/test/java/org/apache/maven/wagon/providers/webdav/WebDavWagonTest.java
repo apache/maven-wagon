@@ -267,7 +267,7 @@ public class WebDavWagonTest extends HttpWagonTestCase {
 
         /////////////////////////////////////////////////////////////////////////////
         try {
-            list = wagon.getFileList(dirName + "/test-dir-bogus");
+            wagon.getFileList(dirName + "/test-dir-bogus");
             fail("Exception expected");
         } catch (ResourceDoesNotExistException e) {
 
