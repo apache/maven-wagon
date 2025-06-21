@@ -24,7 +24,6 @@ import junit.framework.TestCase;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- *
  */
 public class PathUtilsTest extends TestCase {
     public void testFilenameResolving() {
@@ -43,7 +42,19 @@ public class PathUtilsTest extends TestCase {
         assertEquals("dir1/dir2", PathUtils.dirname("dir1/dir2/filename"));
     }
 
-    public void testDirSpliting() {
+    // A characterization test that demonstrates the existing behavior does not
+    // match the Unix dirname function when a trailing slash is present.
+    public void testDirnameDoesNotStripTrailingSlash() {
+        assertEquals("dir1/dir2/filename", PathUtils.dirname("dir1/dir2/filename/"));
+    }
+
+    // A characterization test that demonstrates the existing behavior does not
+    // match the Unix dirname function when a trailing slash is present.
+    public void testFilenameDoesNotStripTrailingSlash() {
+        assertEquals("", PathUtils.filename("dir1/dir2/filename/"));
+    }
+
+    public void testDirSplitting() {
         final String path = "a/b/c";
 
         final String[] dirs = PathUtils.dirnames(path);
