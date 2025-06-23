@@ -353,7 +353,7 @@ public class AbstractWagonTest extends TestCase {
 
             fail("Transfer error was expected during deploy");
         } catch (TransferFailedException expected) {
-            assertNotNull(e.getMessage());
+            assertNotNull(expected.getMessage());
         }
 
         verify(transferListener);
