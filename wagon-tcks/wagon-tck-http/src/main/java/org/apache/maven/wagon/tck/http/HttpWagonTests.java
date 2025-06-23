@@ -34,6 +34,7 @@ import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.repository.exception.ComponentLifecycleException;
+import org.codehaus.plexus.util.FileUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -43,6 +44,9 @@ import org.slf4j.LoggerFactory;
 
 import static org.apache.maven.wagon.tck.http.util.TestUtil.getResource;
 
+/**
+ *
+ */
 public abstract class HttpWagonTests {
 
     private ServerFixture serverFixture;
@@ -54,6 +58,8 @@ public abstract class HttpWagonTests {
     private static WagonTestCaseConfigurator configurator;
 
     private String baseUrl;
+
+    private static final Set<File> TMP_FILES = new HashSet<>();
 
     private Repository repo;
 
@@ -117,6 +123,16 @@ public abstract class HttpWagonTests {
 
     @AfterClass
     public static void afterAll() {
+        for (File f : TMP_FILES) {
+            if (f.exists()) {
+                try {
+                    FileUtils.forceDelete(f);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
         if (container != null) {
             try {
                 container.release(configurator);
@@ -246,6 +262,10 @@ public abstract class HttpWagonTests {
 
     protected static WagonTestCaseConfigurator getConfigurator() {
         return configurator;
+    }
+
+    protected static Set<File> getTmpfiles() {
+        return TMP_FILES;
     }
 
     protected Repository getRepo() {
