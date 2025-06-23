@@ -46,7 +46,7 @@ public abstract class WagonException extends Exception {
     /**
      * Constructs a new WagonException with the specified detail message and cause.
      *
-     * @param message - the detail message (which is saved for later retrieval by the getMessage() method).
+     * @param message the detail message (which is saved for later retrieval by the getMessage() method).
      */
     public WagonException(final String message) {
         super(message);
@@ -59,20 +59,6 @@ public abstract class WagonException extends Exception {
      * @return the cause of this exception or null if the cause is nonexistent or unknown.
      */
     public Throwable getCause() {
-        //        try
-        //        {
-        //           Class clazz = getClass().getSuperclass();
-        //
-        //           Method method = clazz.getMethod( "gatCause" , null );
-        //
-        //           Throwable retValue = (Throwable) method.invoke( this, null );
-        //         return retValue;
-        //        }
-        //        catch( Exception e)
-        //        {
-        //
-        //        }
-
         return cause;
     }
 
@@ -87,19 +73,6 @@ public abstract class WagonException extends Exception {
      * @return a reference to this Throwable instance.
      */
     public Throwable initCause(final Throwable cause) {
-        //        try
-        //        {
-        //           Class clazz = getClass().getSuperclass();
-        //           Class[] parameterTypes = new Class[1];
-        //           parameterTypes[0] = Throwable.class;
-        //           Method method = clazz.getMethod( "initCause" , parameterTypes);
-        //           Object[] params = { cause };
-        //           method.invoke( this, params );
-        //        }
-        //        catch( Exception e)
-        //        {
-        //
-        //        }
         this.cause = cause;
         return this;
     }

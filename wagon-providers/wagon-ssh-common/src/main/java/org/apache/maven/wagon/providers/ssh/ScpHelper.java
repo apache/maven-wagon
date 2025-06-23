@@ -216,8 +216,6 @@ public class ScpHelper {
         wagon.put(zipFile, getPath(destDir, zipFile.getName()));
 
         try {
-            // executor.executeCommand(
-            //    "cd " + path + "; unzip -q -o " + zipFile.getName() + "; rm -f " + zipFile.getName() );
             executor.executeCommand("cd \"" + path + "\"; unzip -q -o \"" + zipFile.getName() + "\"; rm -f \""
                     + zipFile.getName() + "\"");
 
@@ -226,12 +224,10 @@ public class ScpHelper {
             RepositoryPermissions permissions = repository.getPermissions();
 
             if (permissions != null && permissions.getGroup() != null) {
-                // executor.executeCommand( "chgrp -Rf " + permissions.getGroup() + " " + path );
                 executor.executeCommand("chgrp -Rf " + permissions.getGroup() + " \"" + path + "\"");
             }
 
             if (permissions != null && permissions.getFileMode() != null) {
-                // executor.executeCommand( "chmod -Rf " + permissions.getFileMode() + " " + path );
                 executor.executeCommand("chmod -Rf " + permissions.getFileMode() + " \"" + path + "\"");
             }
         } catch (CommandExecutionException e) {
@@ -243,7 +239,6 @@ public class ScpHelper {
             throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
         try {
             String path = getPath(repository.getBasedir(), destinationDirectory);
-            // Streams streams = executor.executeCommand( "ls -FlA " + path, false );
             Streams streams = executor.executeCommand("ls -FlA \"" + path + "\"", false);
 
             return new LSParser().parseFiles(streams.getOut());
@@ -262,7 +257,6 @@ public class ScpHelper {
             throws TransferFailedException, AuthorizationException {
         try {
             String path = getPath(repository.getBasedir(), resourceName);
-            // executor.executeCommand( "ls " + path, false );
             executor.executeCommand("ls \"" + path + "\"");
 
             // Parsing of output not really needed.  As a failed ls results in a
@@ -286,7 +280,6 @@ public class ScpHelper {
             }
         }
 
-        // String mkdirCmd = "mkdir -p " + path;
         String mkdirCmd = "mkdir -p \"" + path + "\"";
 
         if (umaskCmd != null) {

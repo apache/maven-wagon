@@ -107,8 +107,6 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         repositoryDirectory.mkdirs();
 
         server = new Server();
-        // connector = new ServerConnector( server, new HttpConnectionFactory( new HttpConfiguration() ) );
-        // server.addConnector( connector );
         connector = addConnector(server);
 
         PutHandler putHandler = new PutHandler(repositoryDirectory);

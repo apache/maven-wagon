@@ -80,34 +80,16 @@ public class ShellCommand implements Command {
         CommandLineUtils.StringStreamConsumer stdout = new CommandLineUtils.StringStreamConsumer();
         try {
 
-            // hackhish defaut commandline tools not support ; or && so write a file with the script
+            // hackish default commandline tools do not support ; or && so write a file with the script
             // and "/bin/sh -e " + tmpFile.getPath();
             FileUtils.fileWrite(tmpFile, commandLine);
 
             Commandline cl = new Commandline();
             cl.setExecutable("/bin/sh");
-            // cl.createArg().setValue( "-e" );
-            // cl.createArg().setValue( tmpFile.getPath() );
             cl.createArg().setFile(tmpFile);
 
             exitValue = CommandLineUtils.executeCommandLine(cl, stdout, stderr);
             System.out.println("exit value " + exitValue);
-            /*
-            if ( exitValue == 0 )
-            {
-                out.write( stdout.getOutput().getBytes() );
-                out.write( '\n' );
-                out.flush();
-
-            }
-            else
-            {
-                out.write( stderr.getOutput().getBytes() );
-                out.write( '\n' );
-                out.flush();
-
-            }*/
-
         } catch (Exception e) {
             exitValue = ERROR;
             e.printStackTrace();
@@ -125,11 +107,6 @@ public class ShellCommand implements Command {
                 callback.onExit(exitValue, stdout.getOutput());
             }
         }
-        /*
-        out.write( exitValue );
-        out.write( '\n' );
-
-        */
         out.flush();
     }
 

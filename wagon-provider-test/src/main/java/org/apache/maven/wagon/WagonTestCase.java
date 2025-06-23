@@ -346,9 +346,6 @@ public abstract class WagonTestCase extends PlexusTestCase {
         resource = new Resource(this.resource);
         resource.setContentLength(getExpectedContentLengthOnGet(expectedSize));
         resource.setLastModified(getExpectedLastModifiedOnGet(testRepository, resource));
-        // TODO: transfer skipped event?
-        // mockTransferListener.transferSkipped( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED,
-        // TransferEvent.REQUEST_GET, destFile ) );
 
         mockTransferListener.debug(anyString());
         expectLastCall().anyTimes();
