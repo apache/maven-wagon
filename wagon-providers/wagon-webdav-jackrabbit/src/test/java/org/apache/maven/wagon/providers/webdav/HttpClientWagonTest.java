@@ -31,11 +31,9 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.shared.http.HttpConfiguration;
 import org.apache.maven.wagon.shared.http.HttpMethodConfiguration;
-import org.junit.Ignore;
 
 public class HttpClientWagonTest extends TestCase {
 
-    @Ignore("not sure how to test this")
     public void testSetPreemptiveAuthParamViaConfig() {
         HttpMethodConfiguration methodConfig = new HttpMethodConfiguration();
         methodConfig.setUsePreemptive(true);
@@ -51,29 +49,7 @@ public class HttpClientWagonTest extends TestCase {
 
         HttpParams params = method.getParams();
         assertNotNull(params);
-        // assertTrue( params.isParameterTrue( HttpClientParams.PREEMPTIVE_AUTHENTICATION ) );
     }
-
-    //    @Ignore("not sure how to test this")
-    //    public void testSetMaxRedirectsParamViaConfig()
-    //    {
-    //        HttpMethodConfiguration methodConfig = new HttpMethodConfiguration();
-    //        int maxRedirects = 2;
-    //        methodConfig.addParam( HttpClientParams.MAX_REDIRECTS, "%i," + maxRedirects );
-    //
-    //        HttpConfiguration config = new HttpConfiguration();
-    //        config.setAll( methodConfig );
-    //
-    //        TestWagon wagon = new TestWagon();
-    //        wagon.setHttpConfiguration( config );
-    //
-    //        HttpHead method = new HttpHead();
-    //        wagon.setParameters( method );
-    //
-    //        HttpParams params = method.getParams();
-    //        assertNotNull( params );
-    //        assertEquals( maxRedirects, params.getIntParameter( HttpClientParams.MAX_REDIRECTS, -1 ) );
-    //    }
 
     public void testDefaultHeadersUsedByDefault() {
         HttpConfiguration config = new HttpConfiguration();
@@ -120,7 +96,6 @@ public class HttpClientWagonTest extends TestCase {
         assertNull(header);
     }
 
-    @Ignore("not sure how to test this")
     public void testNTCredentialsWithUsernameNull() throws AuthenticationException, ConnectionException {
         TestWagon wagon = new TestWagon();
 
@@ -131,12 +106,8 @@ public class HttpClientWagonTest extends TestCase {
 
         assertNull(wagon.getAuthenticationInfo().getUserName());
         assertNull(wagon.getAuthenticationInfo().getPassword());
-
-        // assertFalse( wagon.getHttpClient()..getState().getCredentials( new AuthScope( null, 0 ) ) instanceof
-        // NTCredentials );
     }
 
-    @Ignore("not sure how to test this")
     public void testNTCredentialsNoNTDomain() throws AuthenticationException, ConnectionException {
         TestWagon wagon = new TestWagon();
 
@@ -155,12 +126,8 @@ public class HttpClientWagonTest extends TestCase {
 
         assertEquals(myUsernameNoNTDomain, wagon.getAuthenticationInfo().getUserName());
         assertEquals(myPassword, wagon.getAuthenticationInfo().getPassword());
-
-        // assertFalse( wagon.getClient().getState().getCredentials( new AuthScope( null, 0 ) ) instanceof NTCredentials
-        // );
     }
 
-    @Ignore("not sure how to test this")
     public void testNTCredentialsWithNTDomain() throws AuthenticationException, ConnectionException {
         TestWagon wagon = new TestWagon();
 
@@ -181,14 +148,6 @@ public class HttpClientWagonTest extends TestCase {
 
         assertEquals(myNTDomainAndUser, wagon.getAuthenticationInfo().getUserName());
         assertEquals(myPassword, wagon.getAuthenticationInfo().getPassword());
-
-        //        Credentials credentials = wagon.getClient().getState().getCredentials( new AuthScope( null, 0 ) );
-        //        assertTrue( credentials instanceof NTCredentials );
-        //
-        //        NTCredentials ntCredentials = (NTCredentials) credentials;
-        //        assertEquals( myNTDomain, ntCredentials.getDomain() );
-        //        assertEquals( myUsername, ntCredentials.getUserName() );
-        //        assertEquals( myPassword, ntCredentials.getPassword() );
     }
 
     private static final class TestWagon extends WebDavWagon {

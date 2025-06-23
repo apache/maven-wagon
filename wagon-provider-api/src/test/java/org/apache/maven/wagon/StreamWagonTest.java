@@ -18,8 +18,12 @@
  */
 package org.apache.maven.wagon;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 
 import junit.framework.TestCase;
@@ -30,8 +34,6 @@ import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.util.StringInputStream;
-import org.codehaus.plexus.util.StringOutputStream;
 
 import static org.easymock.EasyMock.*;
 
@@ -66,7 +68,7 @@ public class StreamWagonTest extends TestCase {
         wagon.connect(repository);
         wagon.addTransferListener(listener);
         try {
-            wagon.getToStream("resource", new StringOutputStream());
+            wagon.getToStream("resource", new ByteArrayOutputStream());
             fail();
         } catch (TransferFailedException e) {
             assertTrue(true);
@@ -94,7 +96,7 @@ public class StreamWagonTest extends TestCase {
         wagon.connect(repository);
         wagon.addTransferListener(listener);
         try {
-            wagon.putFromStream(new StringInputStream(""), "resource");
+            wagon.putFromStream(new ByteArrayInputStream(new byte[0]), "resource");
             fail();
         } catch (TransferFailedException e) {
             assertTrue(true);
@@ -131,7 +133,7 @@ public class StreamWagonTest extends TestCase {
         wagon.connect(repository);
         wagon.addTransferListener(listener);
         try {
-            wagon.putFromStream(new StringInputStream(""), "resource");
+            wagon.putFromStream(new ByteArrayInputStream(new byte[0]), "resource");
             fail();
         } catch (TransferFailedException e) {
             assertTrue(true);
@@ -187,7 +189,7 @@ public class StreamWagonTest extends TestCase {
         wagon.connect(repository);
         wagon.addTransferListener(listener);
         try {
-            wagon.getToStream("resource", new StringOutputStream());
+            wagon.getToStream("resource", new ByteArrayOutputStream());
             fail();
         } finally {
             wagon.disconnect();
@@ -220,7 +222,7 @@ public class StreamWagonTest extends TestCase {
                     ResourceDoesNotExistException, AuthorizationException {
         StreamingWagon wagon = new TestWagon() {
             public void fillInputData(InputData inputData) {
-                inputData.setInputStream(new StringInputStream(""));
+                inputData.setInputStream(new ByteArrayInputStream(new byte[0]));
                 inputData.getResource().setLastModified(resourceTime);
             }
         };
@@ -243,14 +245,14 @@ public class StreamWagonTest extends TestCase {
                 new SimpleDateFormat("yyyy-MM-dd").parse("2008-01-01").getTime();
         StreamingWagon wagon = new TestWagon() {
             public void fillInputData(InputData inputData) {
-                inputData.setInputStream(new StringInputStream(content));
+                inputData.setInputStream(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)));
                 inputData.getResource().setLastModified(comparisonTime);
             }
         };
 
         wagon.connect(repository);
         try {
-            StringOutputStream out = new StringOutputStream();
+            OutputStream out = new ByteArrayOutputStream();
             wagon.getToStream("resource", out);
             assertEquals(content, out.toString());
         } finally {
@@ -264,7 +266,7 @@ public class StreamWagonTest extends TestCase {
                 new SimpleDateFormat("yyyy-MM-dd").parse("2008-01-01").getTime();
         StreamingWagon wagon = new TestWagon() {
             public void fillInputData(InputData inputData) {
-                inputData.setInputStream(new StringInputStream(content));
+                inputData.setInputStream(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)));
                 inputData.getResource().setLastModified(comparisonTime);
             }
         };
@@ -307,14 +309,14 @@ public class StreamWagonTest extends TestCase {
                     ResourceDoesNotExistException, AuthorizationException {
         StreamingWagon wagon = new TestWagon() {
             public void fillInputData(InputData inputData) {
-                inputData.setInputStream(new StringInputStream(""));
+                inputData.setInputStream(new ByteArrayInputStream(new byte[0]));
                 inputData.getResource().setLastModified(resourceTime);
             }
         };
 
         wagon.connect(repository);
         try {
-            return wagon.getIfNewerToStream("resource", new StringOutputStream(), comparisonTime);
+            return wagon.getIfNewerToStream("resource", new ByteArrayOutputStream(), comparisonTime);
         } finally {
             wagon.disconnect();
         }
@@ -323,7 +325,7 @@ public class StreamWagonTest extends TestCase {
     public void testPutFromStream() throws Exception {
         final String content = "the content to return";
 
-        final StringOutputStream out = new StringOutputStream();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
         StreamingWagon wagon = new TestWagon() {
             public void fillOutputData(OutputData outputData) {
                 assertEquals("resource", outputData.getResource().getName());
@@ -335,7 +337,7 @@ public class StreamWagonTest extends TestCase {
 
         wagon.connect(repository);
         try {
-            wagon.putFromStream(new StringInputStream(content), "resource");
+            wagon.putFromStream(new ByteArrayInputStream(content.getBytes()), "resource");
             assertEquals(content, out.toString());
         } finally {
             wagon.disconnect();
@@ -346,7 +348,7 @@ public class StreamWagonTest extends TestCase {
         final String content = "the content to return";
         final long lastModified = System.currentTimeMillis();
 
-        final StringOutputStream out = new StringOutputStream();
+        OutputStream out = new ByteArrayOutputStream();
         StreamingWagon wagon = new TestWagon() {
             public void fillOutputData(OutputData outputData) {
                 assertEquals("resource", outputData.getResource().getName());
@@ -358,7 +360,11 @@ public class StreamWagonTest extends TestCase {
 
         wagon.connect(repository);
         try {
-            wagon.putFromStream(new StringInputStream(content), "resource", content.length(), lastModified);
+            wagon.putFromStream(
+                    new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)),
+                    "resource",
+                    content.length(),
+                    lastModified);
             assertEquals(content, out.toString());
         } finally {
             wagon.disconnect();
@@ -372,7 +378,7 @@ public class StreamWagonTest extends TestCase {
         FileUtils.fileWrite(tempFile.getAbsolutePath(), content);
         tempFile.deleteOnExit();
 
-        final StringOutputStream out = new StringOutputStream();
+        OutputStream out = new ByteArrayOutputStream();
         Wagon wagon = new TestWagon() {
             public void fillOutputData(OutputData outputData) {
                 assertEquals("resource", outputData.getResource().getName());
