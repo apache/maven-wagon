@@ -104,7 +104,7 @@ public class TransferEventTest extends TestCase {
 
             fail("Exception expected");
         } catch (IllegalArgumentException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         }
 
         event.setEventType(TransferEvent.TRANSFER_COMPLETED);
@@ -128,7 +128,7 @@ public class TransferEventTest extends TestCase {
 
             fail("Exception expected");
         } catch (IllegalArgumentException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         }
     }
 

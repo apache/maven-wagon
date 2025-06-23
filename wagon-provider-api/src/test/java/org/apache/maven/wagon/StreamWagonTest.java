@@ -71,7 +71,7 @@ public class StreamWagonTest extends TestCase {
             wagon.getToStream("resource", new ByteArrayOutputStream());
             fail();
         } catch (TransferFailedException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         } finally {
             wagon.disconnect();
         }
@@ -99,7 +99,7 @@ public class StreamWagonTest extends TestCase {
             wagon.putFromStream(new ByteArrayInputStream(new byte[0]), "resource");
             fail();
         } catch (TransferFailedException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         } finally {
             wagon.disconnect();
         }
@@ -112,7 +112,7 @@ public class StreamWagonTest extends TestCase {
             runTestTransferError(new TransferFailedException(""));
             fail();
         } catch (TransferFailedException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         }
     }
 
@@ -136,7 +136,7 @@ public class StreamWagonTest extends TestCase {
             wagon.putFromStream(new ByteArrayInputStream(new byte[0]), "resource");
             fail();
         } catch (TransferFailedException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         } finally {
             wagon.disconnect();
             verify(listener);
@@ -148,7 +148,7 @@ public class StreamWagonTest extends TestCase {
             runTestTransferError(new ResourceDoesNotExistException(""));
             fail();
         } catch (ResourceDoesNotExistException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         }
     }
 
@@ -157,7 +157,7 @@ public class StreamWagonTest extends TestCase {
             runTestTransferError(new AuthorizationException(""));
             fail();
         } catch (AuthorizationException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         }
     }
 
@@ -410,7 +410,7 @@ public class StreamWagonTest extends TestCase {
             wagon.put(tempFile, "resource");
             fail();
         } catch (TransferFailedException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         } finally {
             wagon.disconnect();
         }

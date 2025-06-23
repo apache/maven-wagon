@@ -232,7 +232,7 @@ public class AbstractWagonTest extends TestCase {
             runTestSessionConnectionRefusedEvent(exception);
             fail();
         } catch (ConnectionException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         }
     }
 
@@ -243,7 +243,7 @@ public class AbstractWagonTest extends TestCase {
             runTestSessionConnectionRefusedEvent(exception);
             fail();
         } catch (AuthenticationException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         }
     }
 
@@ -305,7 +305,7 @@ public class AbstractWagonTest extends TestCase {
             wagon.disconnect();
             fail();
         } catch (ConnectionException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         } finally {
             verify(sessionListener);
         }
@@ -353,7 +353,7 @@ public class AbstractWagonTest extends TestCase {
 
             fail("Transfer error was expected during deploy");
         } catch (TransferFailedException expected) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         }
 
         verify(transferListener);
@@ -426,7 +426,7 @@ public class AbstractWagonTest extends TestCase {
             wagon.connect(null);
             fail();
         } catch (NullPointerException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         }
     }
 
