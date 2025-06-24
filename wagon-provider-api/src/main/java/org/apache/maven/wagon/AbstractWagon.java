@@ -307,12 +307,12 @@ public abstract class AbstractWagon implements Wagon {
             }
             throw e;
         } finally {
-          if (output != null) {
-              try {
-                output.close();
-              } catch (IOException e) {
-              }
-          }
+            if (output != null) {
+                try {
+                    output.close();
+                } catch (IOException e) {
+                }
+            }
         }
 
         fireGetCompleted(resource, destination);
@@ -340,10 +340,10 @@ public abstract class AbstractWagon implements Wagon {
             throw new TransferFailedException(msg, e);
         } finally {
             if (closeInput) {
-              try {
-                input.close();
-              } catch (IOException ignored) {
-              }
+                try {
+                    input.close();
+                } catch (IOException ignored) {
+                }
             }
 
             cleanupGetTransfer(resource);
@@ -397,10 +397,10 @@ public abstract class AbstractWagon implements Wagon {
             throw new TransferFailedException("Failure transferring " + source, e);
         } finally {
             if (input != null) {
-              try {
-                input.close();
-              } catch (IOException ignored) {
-              }
+                try {
+                    input.close();
+                } catch (IOException ignored) {
+                }
             }
         }
     }
@@ -431,10 +431,10 @@ public abstract class AbstractWagon implements Wagon {
             throw new TransferFailedException(msg, e);
         } finally {
             if (closeOutput && output != null) {
-              try {
-                output.close();
-              } catch (IOException ignored) {
-              }
+                try {
+                    output.close();
+                } catch (IOException ignored) {
+                }
             }
 
             cleanupPutTransfer(resource);
