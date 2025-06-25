@@ -22,11 +22,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
-import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
 import org.codehaus.plexus.util.cli.Commandline;
 
@@ -80,9 +80,9 @@ public class ShellCommand implements Command {
         CommandLineUtils.StringStreamConsumer stdout = new CommandLineUtils.StringStreamConsumer();
         try {
 
-            // hackhish defaut commandline tools not support ; or && so write a file with the script
+            // hackish default commandline tools not support ; or && so write a file with the script
             // and "/bin/sh -e " + tmpFile.getPath();
-            FileUtils.fileWrite(tmpFile, commandLine);
+            Files.write(tmpFile.toPath(), commandLine.getBytes());
 
             Commandline cl = new Commandline();
             cl.setExecutable("/bin/sh");

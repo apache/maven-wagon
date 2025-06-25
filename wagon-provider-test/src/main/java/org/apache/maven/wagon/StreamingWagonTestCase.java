@@ -23,12 +23,14 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 
 import org.apache.maven.wagon.observers.ChecksumObserver;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.util.IOUtil;
+
+import static org.junit.Assert.assertArrayEquals;
 
 /**
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
@@ -63,10 +65,7 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
 
         destFile.deleteOnExit();
 
-        OutputStream stream = null;
-
-        try {
-            stream = new FileOutputStream(destFile);
+        try (OutputStream stream = new FileOutputStream(destFile)) {
             wagon.getToStream("fubar.txt", stream);
             fail("File was found when it shouldn't have been");
         } catch (ResourceDoesNotExistException e) {
@@ -76,8 +75,6 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
             wagon.removeTransferListener(checksumObserver);
 
             wagon.disconnect();
-
-            IOUtil.close(stream);
 
             tearDownWagonTestingFixtures();
         }
@@ -149,13 +146,10 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
             wagon.connect(testRepository, getAuthInfo());
             destFile = FileTestUtils.createUniqueFile(getName(), getName());
             destFile.deleteOnExit();
-            OutputStream stream = null;
-            try {
-                stream = new FileOutputStream(destFile);
+
+            try (OutputStream stream = new FileOutputStream(destFile)) {
                 wagon.getIfNewerToStream("fubar.txt", stream, 0);
                 fail("File was found when it shouldn't have been");
-                stream.close();
-                stream = null;
             } catch (ResourceDoesNotExistException e) {
                 // expected
                 assertTrue(true);
@@ -163,8 +157,6 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
                 wagon.removeTransferListener(checksumObserver);
 
                 wagon.disconnect();
-
-                IOUtil.close(stream);
 
                 tearDownWagonTestingFixtures();
             }
@@ -188,22 +180,22 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
 
         assertEquals("compare checksums", "6b144b7285ffd6b0bc8300da162120b9", checksumObserver.getActualChecksum());
 
-        // Now compare the conents of the artifact that was placed in
+        // Now compare the contents of the artifact that was placed in
         // the repository with the contents of the artifact that was
         // retrieved from the repository.
 
-        String sourceContent = FileUtils.fileRead(sourceFile);
+        byte[] sourceContent = Files.readAllBytes(sourceFile.toPath());
 
-        String destContent = FileUtils.fileRead(destFile);
+        byte[] destContent = Files.readAllBytes(destFile.toPath());
 
-        assertEquals(sourceContent, destContent);
+        assertArrayEquals(sourceContent, destContent);
     }
 
     private int putStream() throws Exception {
         String content = "test-resource.txt\n";
         sourceFile = new File(FileTestUtils.getTestOutputDir(), "test-resource");
         sourceFile.getParentFile().mkdirs();
-        FileUtils.fileWrite(sourceFile.getAbsolutePath(), content);
+        Files.write(sourceFile.toPath().toAbsolutePath(), content.getBytes(StandardCharsets.UTF_8));
 
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
@@ -213,17 +205,10 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
 
         connectWagon(wagon);
 
-        InputStream stream = null;
-
-        try {
-            stream = new FileInputStream(sourceFile);
+        try (InputStream stream = new FileInputStream(sourceFile)) {
             wagon.putFromStream(stream, resource, sourceFile.length(), sourceFile.lastModified());
-            stream.close();
-            stream = null;
         } catch (Exception e) {
             logger.error("error while putting resources to the FTP Server", e);
-        } finally {
-            IOUtil.close(stream);
         }
 
         disconnectWagon(wagon);
@@ -244,17 +229,10 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
 
         connectWagon(wagon);
 
-        OutputStream stream = null;
-
-        try {
-            stream = new FileOutputStream(destFile);
+        try (OutputStream stream = new FileOutputStream(destFile)) {
             wagon.getToStream(this.resource, stream);
-            stream.close();
-            stream = null;
         } catch (Exception e) {
             logger.error("error while reading resources from the FTP Server", e);
-        } finally {
-            IOUtil.close(stream);
         }
 
         disconnectWagon(wagon);

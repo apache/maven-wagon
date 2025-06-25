@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 
 import junit.framework.TestCase;
@@ -33,7 +34,6 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.FileUtils;
 
 import static org.easymock.EasyMock.*;
 
@@ -277,7 +277,8 @@ public class StreamWagonTest extends TestCase {
         wagon.connect(repository);
         try {
             wagon.get("resource", tempFile);
-            assertEquals(content, FileUtils.fileRead(tempFile));
+            String actual = new String(Files.readAllBytes(tempFile.toPath()));
+            assertEquals(content, actual);
         } finally {
             wagon.disconnect();
             tempFile.delete();
@@ -375,7 +376,7 @@ public class StreamWagonTest extends TestCase {
         final String content = "the content to return";
 
         final File tempFile = File.createTempFile("wagon", "tmp");
-        FileUtils.fileWrite(tempFile.getAbsolutePath(), content);
+        Files.write(tempFile.toPath().toAbsolutePath(), content.getBytes());
         tempFile.deleteOnExit();
 
         OutputStream out = new ByteArrayOutputStream();
