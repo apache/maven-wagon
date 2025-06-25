@@ -41,7 +41,6 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 
 /**
@@ -123,20 +122,12 @@ public class ScpHelper {
     }
 
     public static void createZip(List<String> files, File zipName, File basedir) throws IOException {
-        ZipOutputStream zos = null;
-        try {
-            zos = new ZipOutputStream(new FileOutputStream(zipName));
-
+        try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipName))) {
             for (String file : files) {
                 file = file.replace('\\', '/');
 
                 writeZipEntry(zos, new File(basedir, file), file);
             }
-
-            zos.close();
-            zos = null;
-        } finally {
-            IOUtil.close(zos);
         }
     }
 
