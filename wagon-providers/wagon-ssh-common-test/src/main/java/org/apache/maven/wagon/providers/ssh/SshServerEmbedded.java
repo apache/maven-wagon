@@ -92,9 +92,6 @@ public class SshServerEmbedded {
 
         sshd.setUserAuthFactories(Arrays.asList(new UserAuthPublicKey.Factory(), new UserAuthPassword.Factory()));
 
-        // ResourceKeyPairProvider resourceKeyPairProvider =
-        //    new ResourceKeyPairProvider( sshKeysResources.toArray( new String[sshKeysResources.size()] ) );
-
         File path = new File("target/keys");
         path.mkdirs();
         path = new File(path, "simple.key");

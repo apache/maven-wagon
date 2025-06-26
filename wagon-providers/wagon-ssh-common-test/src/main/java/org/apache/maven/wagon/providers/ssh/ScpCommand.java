@@ -110,9 +110,6 @@ public class ScpCommand implements Command, Runnable, FileSystemAware {
                             optD = true;
                             break;
                         default:
-                            //                            error = new IOException("Unsupported option: " +
-                            // args[i].charAt(j));
-                            //                            return;
                     }
                 }
             } else if (i == args.length - 1) {

@@ -131,8 +131,6 @@ public class Debug implements SessionListener, TransferListener {
     public void transferProgress(final TransferEvent transferEvent, byte[] buffer, int length) {
 
         out.print("#");
-        // String data = new String( transferEvent.getData(),0, transferEvent.getDataLength());
-        // out.println(data);
         transfer += length;
     }
 

@@ -34,7 +34,6 @@ import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.repository.exception.ComponentLifecycleException;
-import org.codehaus.plexus.util.FileUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -44,9 +43,6 @@ import org.slf4j.LoggerFactory;
 
 import static org.apache.maven.wagon.tck.http.util.TestUtil.getResource;
 
-/**
- *
- */
 public abstract class HttpWagonTests {
 
     private ServerFixture serverFixture;
@@ -58,8 +54,6 @@ public abstract class HttpWagonTests {
     private static WagonTestCaseConfigurator configurator;
 
     private String baseUrl;
-
-    private static final Set<File> TMP_FILES = new HashSet<>();
 
     private Repository repo;
 
@@ -86,8 +80,6 @@ public abstract class HttpWagonTests {
         System.setProperty("javax.net.ssl.trustStorePassword", ServerFixture.SERVER_SSL_KEYSTORE_PASSWORD);
 
         container = new DefaultPlexusContainer();
-        // container.initialize();
-        // container.start();
 
         configurator = (WagonTestCaseConfigurator) container.lookup(WagonTestCaseConfigurator.class.getName());
     }
@@ -123,16 +115,6 @@ public abstract class HttpWagonTests {
 
     @AfterClass
     public static void afterAll() {
-        for (File f : TMP_FILES) {
-            if (f.exists()) {
-                try {
-                    FileUtils.forceDelete(f);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
         if (container != null) {
             try {
                 container.release(configurator);
@@ -231,10 +213,6 @@ public abstract class HttpWagonTests {
         return serverFixture.getHttpPort();
     }
 
-    protected int getPortPropertyValue() {
-        return Integer.parseInt(System.getProperty("test.port", "-1"));
-    }
-
     protected String getBaseUrl() {
         if (baseUrl == null) {
             StringBuilder sb = new StringBuilder();
@@ -258,17 +236,5 @@ public abstract class HttpWagonTests {
 
     protected Wagon getWagon() {
         return wagon;
-    }
-
-    protected static WagonTestCaseConfigurator getConfigurator() {
-        return configurator;
-    }
-
-    protected static Set<File> getTmpfiles() {
-        return TMP_FILES;
-    }
-
-    protected Repository getRepo() {
-        return repo;
     }
 }
