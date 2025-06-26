@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
@@ -33,14 +34,10 @@ import org.codehaus.plexus.util.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.codehaus.plexus.util.FileUtils.fileRead;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-/**
- *
- */
 public final class Assertions {
 
     public static final int NO_RESPONSE_STATUS_CODE = -1;
@@ -51,7 +48,7 @@ public final class Assertions {
             final String resourceBase, final String resourceName, final File output, final String whyWouldItFail)
             throws IOException {
         String content = readResource(resourceBase, resourceName);
-        String test = fileRead(output);
+        String test = new String(Files.readAllBytes(output.toPath()));
 
         assertEquals(whyWouldItFail, content, test);
     }

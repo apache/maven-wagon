@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 
 import junit.framework.TestCase;
@@ -33,7 +34,6 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.FileUtils;
 
 import static org.easymock.EasyMock.*;
 
@@ -71,7 +71,7 @@ public class StreamWagonTest extends TestCase {
             wagon.getToStream("resource", new ByteArrayOutputStream());
             fail();
         } catch (TransferFailedException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         } finally {
             wagon.disconnect();
         }
@@ -99,7 +99,7 @@ public class StreamWagonTest extends TestCase {
             wagon.putFromStream(new ByteArrayInputStream(new byte[0]), "resource");
             fail();
         } catch (TransferFailedException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         } finally {
             wagon.disconnect();
         }
@@ -112,7 +112,7 @@ public class StreamWagonTest extends TestCase {
             runTestTransferError(new TransferFailedException(""));
             fail();
         } catch (TransferFailedException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         }
     }
 
@@ -136,7 +136,7 @@ public class StreamWagonTest extends TestCase {
             wagon.putFromStream(new ByteArrayInputStream(new byte[0]), "resource");
             fail();
         } catch (TransferFailedException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         } finally {
             wagon.disconnect();
             verify(listener);
@@ -148,7 +148,7 @@ public class StreamWagonTest extends TestCase {
             runTestTransferError(new ResourceDoesNotExistException(""));
             fail();
         } catch (ResourceDoesNotExistException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         }
     }
 
@@ -157,7 +157,7 @@ public class StreamWagonTest extends TestCase {
             runTestTransferError(new AuthorizationException(""));
             fail();
         } catch (AuthorizationException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         }
     }
 
@@ -277,7 +277,8 @@ public class StreamWagonTest extends TestCase {
         wagon.connect(repository);
         try {
             wagon.get("resource", tempFile);
-            assertEquals(content, FileUtils.fileRead(tempFile));
+            String actual = new String(Files.readAllBytes(tempFile.toPath()));
+            assertEquals(content, actual);
         } finally {
             wagon.disconnect();
             tempFile.delete();
@@ -375,7 +376,7 @@ public class StreamWagonTest extends TestCase {
         final String content = "the content to return";
 
         final File tempFile = File.createTempFile("wagon", "tmp");
-        FileUtils.fileWrite(tempFile.getAbsolutePath(), content);
+        Files.write(tempFile.toPath().toAbsolutePath(), content.getBytes());
         tempFile.deleteOnExit();
 
         OutputStream out = new ByteArrayOutputStream();
@@ -410,7 +411,7 @@ public class StreamWagonTest extends TestCase {
             wagon.put(tempFile, "resource");
             fail();
         } catch (TransferFailedException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         } finally {
             wagon.disconnect();
         }

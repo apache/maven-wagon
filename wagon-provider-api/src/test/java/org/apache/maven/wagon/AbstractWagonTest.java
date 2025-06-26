@@ -21,6 +21,8 @@ package org.apache.maven.wagon;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 import junit.framework.TestCase;
 import org.apache.maven.wagon.authentication.AuthenticationException;
@@ -35,7 +37,6 @@ import org.apache.maven.wagon.proxy.ProxyInfoProvider;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.FileUtils;
 import org.easymock.IAnswer;
 
 import static org.easymock.EasyMock.*;
@@ -232,7 +233,7 @@ public class AbstractWagonTest extends TestCase {
             runTestSessionConnectionRefusedEvent(exception);
             fail();
         } catch (ConnectionException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         }
     }
 
@@ -243,7 +244,7 @@ public class AbstractWagonTest extends TestCase {
             runTestSessionConnectionRefusedEvent(exception);
             fail();
         } catch (AuthenticationException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         }
     }
 
@@ -305,7 +306,7 @@ public class AbstractWagonTest extends TestCase {
             wagon.disconnect();
             fail();
         } catch (ConnectionException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         } finally {
             verify(sessionListener);
         }
@@ -353,7 +354,7 @@ public class AbstractWagonTest extends TestCase {
 
             fail("Transfer error was expected during deploy");
         } catch (TransferFailedException expected) {
-            assertTrue(true);
+            assertNotNull(expected.getMessage());
         }
 
         verify(transferListener);
@@ -426,7 +427,7 @@ public class AbstractWagonTest extends TestCase {
             wagon.connect(null);
             fail();
         } catch (NullPointerException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         }
     }
 
@@ -434,7 +435,7 @@ public class AbstractWagonTest extends TestCase {
         File tempFile = File.createTempFile("wagon", "tmp");
         tempFile.deleteOnExit();
         String content = "content";
-        FileUtils.fileWrite(tempFile.getAbsolutePath(), content);
+        Files.write(tempFile.toPath().toAbsolutePath(), content.getBytes(StandardCharsets.UTF_8));
 
         Resource resource = new Resource("resource");
 

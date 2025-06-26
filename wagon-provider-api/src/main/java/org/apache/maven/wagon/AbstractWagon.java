@@ -45,7 +45,6 @@ import org.apache.maven.wagon.proxy.ProxyUtils;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.IOUtil;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -308,7 +307,12 @@ public abstract class AbstractWagon implements Wagon {
             }
             throw e;
         } finally {
-            IOUtil.close(output);
+            if (output != null) {
+                try {
+                    output.close();
+                } catch (IOException e) {
+                }
+            }
         }
 
         fireGetCompleted(resource, destination);
@@ -328,12 +332,6 @@ public abstract class AbstractWagon implements Wagon {
             transfer(resource, input, output, TransferEvent.REQUEST_GET, maxSize);
 
             finishGetTransfer(resource, input, output);
-
-            if (closeInput) {
-                input.close();
-                input = null;
-            }
-
         } catch (IOException e) {
             fireTransferError(resource, e, TransferEvent.REQUEST_GET);
 
@@ -342,7 +340,10 @@ public abstract class AbstractWagon implements Wagon {
             throw new TransferFailedException(msg, e);
         } finally {
             if (closeInput) {
-                IOUtil.close(input);
+                try {
+                    input.close();
+                } catch (IOException ignored) {
+                }
             }
 
             cleanupGetTransfer(resource);
@@ -395,7 +396,12 @@ public abstract class AbstractWagon implements Wagon {
 
             throw new TransferFailedException("Failure transferring " + source, e);
         } finally {
-            IOUtil.close(input);
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException ignored) {
+                }
+            }
         }
     }
 
@@ -424,8 +430,11 @@ public abstract class AbstractWagon implements Wagon {
 
             throw new TransferFailedException(msg, e);
         } finally {
-            if (closeOutput) {
-                IOUtil.close(output);
+            if (closeOutput && output != null) {
+                try {
+                    output.close();
+                } catch (IOException ignored) {
+                }
             }
 
             cleanupPutTransfer(resource);
@@ -801,7 +810,12 @@ public abstract class AbstractWagon implements Wagon {
 
             throw new TransferFailedException("Failed to post-process the source file", e);
         } finally {
-            IOUtil.close(input);
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException ignored) {
+                }
+            }
         }
     }
 

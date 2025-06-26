@@ -19,9 +19,10 @@
 package org.apache.maven.wagon;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 import junit.framework.TestCase;
-import org.codehaus.plexus.util.FileUtils;
 
 /**
  * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a>
@@ -42,13 +43,13 @@ public class LazyFileOutputStreamTest extends TestCase {
 
         String expected = "michal";
 
-        stream.write(expected.getBytes());
+        stream.write(expected.getBytes(StandardCharsets.UTF_8));
 
         stream.close();
 
         assertTrue(file.exists());
 
-        String actual = FileUtils.fileRead(file);
+        String actual = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
 
         assertEquals(expected, actual);
     }

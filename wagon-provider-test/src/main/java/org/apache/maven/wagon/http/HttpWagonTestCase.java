@@ -31,6 +31,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -78,6 +80,8 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.security.Password;
+
+import static org.junit.Assert.assertArrayEquals;
 
 /**
  *
@@ -431,63 +435,13 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
 
             wagon.disconnect();
 
-            String destContent = FileUtils.fileRead(destFile);
+            String destContent = new String(Files.readAllBytes(destFile.toPath()));
 
             assertEquals(sourceContent, destContent);
         } finally {
             server.stop();
         }
     }
-
-    /* This test cannot be enabled because we cannot tell GzipFilter to compress with deflate only
-    public void testDeflateGet()
-            throws Exception
-        {
-            Server server = new Server( );
-
-            String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
-            ServletContextHandler root = new ServletContextHandler( ServletContextHandler.SESSIONS );
-            root.setResourceBase( localRepositoryPath );
-            ServletHolder servletHolder = new ServletHolder( new DefaultServlet() );
-            root.addServlet( servletHolder, "/*" );
-            FilterHolder filterHolder = new FilterHolder( new GzipFilter() );
-            root.addFilter( filterHolder, "/deflate/*", EnumSet.of( DispatcherType.REQUEST ) );
-            addConnector( server );
-            server.setHandler( root );
-            server.start();
-
-            try
-            {
-                Wagon wagon = getWagon();
-
-                Repository testRepository = new Repository( "id", getRepositoryUrl( server ) );
-
-                File sourceFile = new File( localRepositoryPath + "/deflate" );
-
-                sourceFile.deleteOnExit();
-
-                String resName = "deflate-res.txt";
-                String sourceContent = writeTestFile( sourceFile, resName, null );
-
-                wagon.connect( testRepository );
-
-                File destFile = FileTestUtils.createUniqueFile( getName(), getName() );
-
-                destFile.deleteOnExit();
-
-                wagon.get( "deflate/" + resName, destFile );
-
-                wagon.disconnect();
-
-                String destContent = FileUtils.fileRead( destFile );
-
-                assertEquals( sourceContent, destContent );
-            }
-            finally
-            {
-                server.stop();
-            }
-        }*/
 
     public void testProxiedRequest() throws Exception {
         ProxyInfo proxyInfo = createProxyInfo();
@@ -583,7 +537,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
             wagon.getToStream("resource", fileOutputStream);
             fileOutputStream.flush();
             fileOutputStream.close();
-            String found = FileUtils.fileRead(tmpResult);
+            String found = new String(Files.readAllBytes(tmpResult.toPath()));
             assertEquals("found:'" + found + "'", "Hello, World!", found);
 
             checkHandlerResult(redirectHandler.handlerRequestResponses, HttpServletResponse.SC_SEE_OTHER);
@@ -638,7 +592,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
 
         try {
             wagon.get("resource", tmpResult);
-            String found = FileUtils.fileRead(tmpResult);
+            String found = new String(Files.readAllBytes(tmpResult.toPath()));
             assertEquals("found:'" + found + "'", "Hello, World!", found);
 
             checkHandlerResult(redirectHandler.handlerRequestResponses, HttpServletResponse.SC_SEE_OTHER);
@@ -704,11 +658,13 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
             File tempFile = File.createTempFile("wagon", "tmp");
             tempFile.deleteOnExit();
             String content = "put top secret";
-            FileUtils.fileWrite(tempFile.getAbsolutePath(), content);
+            Files.write(tempFile.toPath().toAbsolutePath(), content.getBytes(StandardCharsets.UTF_8));
 
             try (FileInputStream fileInputStream = new FileInputStream(tempFile)) {
                 wagon.putFromStream(fileInputStream, "test-secured-put-resource", content.length(), -1);
-                assertEquals(content, FileUtils.fileRead(sourceFile.getAbsolutePath()));
+                String actual =
+                        new String(Files.readAllBytes(sourceFile.toPath().toAbsolutePath()), StandardCharsets.UTF_8);
+                assertEquals(content, actual);
 
                 checkRequestResponseForRedirectPutWithFullUrl(redirectHandler, putHandler);
             } finally {
@@ -764,11 +720,13 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
             File tempFile = File.createTempFile("wagon", "tmp");
             tempFile.deleteOnExit();
             String content = "put top secret";
-            FileUtils.fileWrite(tempFile.getAbsolutePath(), content);
+            Files.write(tempFile.toPath().toAbsolutePath(), content.getBytes(StandardCharsets.UTF_8));
 
             try (FileInputStream fileInputStream = new FileInputStream(tempFile)) {
                 wagon.putFromStream(fileInputStream, "test-secured-put-resource", content.length(), -1);
-                assertEquals(content, FileUtils.fileRead(sourceFile.getAbsolutePath()));
+                assertEquals(
+                        content,
+                        new String(Files.readAllBytes(sourceFile.toPath().toAbsolutePath()), StandardCharsets.UTF_8));
 
                 checkRequestResponseForRedirectPutWithRelativeUrl(redirectHandler, putHandler);
             } finally {
@@ -855,12 +813,13 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
 
             File tempFile = File.createTempFile("wagon", "tmp");
             tempFile.deleteOnExit();
-            String content = "put top secret";
-            FileUtils.fileWrite(tempFile.getAbsolutePath(), content);
+            byte[] content = "put top secret".getBytes(StandardCharsets.UTF_8);
+            Files.write(tempFile.toPath().toAbsolutePath(), content);
 
             try {
                 wagon.put(tempFile, "test-secured-put-resource");
-                assertEquals(content, FileUtils.fileRead(sourceFile.getAbsolutePath()));
+                assertArrayEquals(
+                        content, Files.readAllBytes(sourceFile.toPath().toAbsolutePath()));
 
                 checkRequestResponseForRedirectPutWithFullUrl(redirectHandler, putHandler);
             } finally {
@@ -909,12 +868,13 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
 
             File tempFile = File.createTempFile("wagon", "tmp");
             tempFile.deleteOnExit();
-            String content = "put top secret";
-            FileUtils.fileWrite(tempFile.getAbsolutePath(), content);
+            byte[] content = "put top secret".getBytes(StandardCharsets.UTF_8);
+            Files.write(tempFile.toPath().toAbsolutePath(), content);
 
             try {
                 wagon.put(tempFile, "test-secured-put-resource");
-                assertEquals(content, FileUtils.fileRead(sourceFile.getAbsolutePath()));
+                assertArrayEquals(
+                        content, Files.readAllBytes(sourceFile.toPath().toAbsolutePath()));
 
                 checkRequestResponseForRedirectPutWithRelativeUrl(redirectHandler, putHandler);
             } finally {
@@ -960,7 +920,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
             File tempFile = File.createTempFile("wagon", "tmp");
             tempFile.deleteOnExit();
             String content = "put top secret";
-            FileUtils.fileWrite(tempFile.getAbsolutePath(), content);
+            Files.write(tempFile.toPath().toAbsolutePath(), content.getBytes(StandardCharsets.UTF_8));
 
             try (FileInputStream fileInputStream = new FileInputStream(tempFile)) {
                 wagon.putFromStream(fileInputStream, "test-secured-put-resource", content.length(), -1);
@@ -1054,7 +1014,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
 
             String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
             File sourceFile = new File(localRepositoryPath, "test-proxied-resource");
-            FileUtils.fileWrite(sourceFile.getAbsolutePath(), "content");
+            Files.write(sourceFile.toPath().toAbsolutePath(), "content".getBytes(StandardCharsets.UTF_8));
 
             wagon.connect(testRepository, proxyInfo);
 
@@ -1108,7 +1068,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
 
             String localRepositoryPath = FileTestUtils.getTestOutputDir().toString();
             File sourceFile = new File(localRepositoryPath, "test-proxied-resource");
-            FileUtils.fileWrite(sourceFile.getAbsolutePath(), "content");
+            Files.write(sourceFile.toPath().toAbsolutePath(), "content".getBytes(StandardCharsets.UTF_8));
 
             wagon.connect(testRepository, proxyInfoProvider);
 
@@ -1174,7 +1134,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
             Repository testRepository = new Repository("id", getRepositoryUrl(server));
 
             File sourceFile = new File(localRepositoryPath, "test-secured-resource");
-            FileUtils.fileWrite(sourceFile.getAbsolutePath(), "top secret");
+            Files.write(sourceFile.toPath().toAbsolutePath(), "top secret".getBytes(StandardCharsets.UTF_8));
 
             wagon.connect(testRepository, authInfo);
 
@@ -1186,12 +1146,10 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
                 wagon.disconnect();
             }
 
-            FileInputStream in = new FileInputStream(file);
-
-            assertEquals("top secret", IOUtil.toString(in));
+            assertEquals("top secret", new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8));
 
             /*
-             * We need to wait a bit for all Jetty workers/threads to complete their work. Otherwise
+             * We need to wait a bit for all Jetty workers/threads to complete their work. Otherwise,
              * we may suffer from race conditions where handlerRequestResponses list is not completely
              * populated and its premature iteration in testPreemptiveAuthenticationGet will lead to
              * a test failure.
@@ -1227,7 +1185,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
             Repository testRepository = new Repository("id", getRepositoryUrl(server));
 
             File sourceFile = new File(localRepositoryPath, "test-secured-resource");
-            FileUtils.fileWrite(sourceFile.getAbsolutePath(), "top secret");
+            Files.write(sourceFile.toPath().toAbsolutePath(), "top secret".getBytes(StandardCharsets.US_ASCII));
 
             wagon.connect(testRepository, authInfo);
 
@@ -1241,7 +1199,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
             assertEquals("top secret", out.toString("US-ASCII"));
 
             /*
-             * We need to wait a bit for all Jetty workers/threads to complete their work. Otherwise
+             * We need to wait a bit for all Jetty workers/threads to complete their work. Otherwise,
              * we may suffer from race conditions where handlerRequestResponses list is not completely
              * populated and its premature iteration in testPreemptiveAuthenticationGet will lead to
              * a test failure.
@@ -1296,7 +1254,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
             Repository testRepository = new Repository("id", getRepositoryUrl(server));
 
             File sourceFile = new File(localRepositoryPath, "test-secured-resource-exists");
-            FileUtils.fileWrite(sourceFile.getAbsolutePath(), "top secret");
+            Files.write(sourceFile.toPath().toAbsolutePath(), "top secret".getBytes(StandardCharsets.US_ASCII));
 
             wagon.connect(testRepository, authInfo);
 
@@ -1437,7 +1395,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
 
             File tempFile = File.createTempFile("wagon", "tmp");
             tempFile.deleteOnExit();
-            FileUtils.fileWrite(tempFile.getAbsolutePath(), "content");
+            Files.write(tempFile.toPath().toAbsolutePath(), "content".getBytes(StandardCharsets.US_ASCII));
 
             try {
                 wagon.put(tempFile, "resource");
@@ -1465,7 +1423,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
 
         File tempFile = File.createTempFile("wagon", "tmp");
         tempFile.deleteOnExit();
-        FileUtils.fileWrite(tempFile.getAbsolutePath(), "content");
+        Files.write(tempFile.toPath().toAbsolutePath(), "content".getBytes(StandardCharsets.US_ASCII));
 
         String baseUrl = getRepositoryUrl(server);
         String resourceName = "resource";
@@ -1542,7 +1500,8 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
 
                 File tempFile = File.createTempFile("wagon", "tmp");
                 tempFile.deleteOnExit();
-                FileUtils.fileWrite(tempFile.getAbsolutePath(), "put top secret");
+                byte[] content = "put top secret".getBytes(StandardCharsets.US_ASCII);
+                Files.write(tempFile.toPath().toAbsolutePath(), content);
 
                 try {
                     wagon.put(tempFile, "test-secured-put-resource");
@@ -1550,7 +1509,8 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
                     tempFile.delete();
                 }
 
-                assertEquals("put top secret", FileUtils.fileRead(sourceFile.getAbsolutePath()));
+                assertArrayEquals(
+                        content, Files.readAllBytes(sourceFile.toPath().toAbsolutePath()));
             }
         } finally {
             wagon.disconnect();
@@ -1607,16 +1567,17 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
 
                 File tempFile = File.createTempFile("wagon", "tmp");
                 tempFile.deleteOnExit();
-                String content = "put top secret";
-                FileUtils.fileWrite(tempFile.getAbsolutePath(), content);
+                byte[] content = "put top secret".getBytes(StandardCharsets.UTF_8);
+                Files.write(tempFile.toPath().toAbsolutePath(), content);
 
                 try (FileInputStream fileInputStream = new FileInputStream(tempFile)) {
-                    wagon.putFromStream(fileInputStream, "test-secured-put-resource", content.length(), -1);
+                    wagon.putFromStream(fileInputStream, "test-secured-put-resource", content.length, -1);
                 } finally {
                     tempFile.delete();
                 }
 
-                assertEquals(content, FileUtils.fileRead(sourceFile.getAbsolutePath()));
+                assertArrayEquals(
+                        content, Files.readAllBytes(sourceFile.toPath().toAbsolutePath()));
             }
         } finally {
             wagon.disconnect();

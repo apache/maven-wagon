@@ -20,10 +20,10 @@ package org.apache.maven.wagon;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.LinkedList;
 
 import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.codehaus.plexus.util.FileUtils;
 
 /**
  * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a>
@@ -43,7 +43,9 @@ public final class WagonUtils {
 
             wagon.get(resource, file);
 
-            return FileUtils.fileRead(file);
+            byte[] content = Files.readAllBytes(file.toPath());
+            // TODO this method should take a character set
+            return new String(content);
         } finally {
             if (file != null) {
                 boolean deleted = file.delete();
