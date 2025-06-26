@@ -64,14 +64,14 @@ public class ChecksumObserverTest extends TestCase {
             wagon.get("resource", testFile);
             fail();
         } catch (TransferFailedException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         }
 
         try {
             wagon.get("resource", testFile);
             fail();
         } catch (TransferFailedException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         }
 
         testFile.delete();

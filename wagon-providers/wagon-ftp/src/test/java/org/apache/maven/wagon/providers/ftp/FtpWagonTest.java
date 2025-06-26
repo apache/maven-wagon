@@ -145,7 +145,7 @@ public class FtpWagonTest extends StreamingWagonTestCase {
             getWagon().connect(new Repository("id", getTestRepositoryUrl()), authenticationInfo);
             fail();
         } catch (AuthenticationException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         }
     }
 
