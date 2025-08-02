@@ -162,7 +162,7 @@ Deploying your Maven site to SCM
   <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
-        <version>${maven-site-plugin.version}</version>
+        <version>${mavenSitePluginVersion}</version>
         <dependencies>
             <dependency>
                 <groupId>org.apache.maven.doxia</groupId>
