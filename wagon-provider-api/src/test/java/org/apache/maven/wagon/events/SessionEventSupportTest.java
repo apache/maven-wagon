@@ -21,7 +21,10 @@ package org.apache.maven.wagon.events;
 import junit.framework.TestCase;
 import org.apache.maven.wagon.Wagon;
 
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.createNiceMock;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
