@@ -39,7 +39,15 @@ import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.easymock.IAnswer;
 
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.anyInt;
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.anyString;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.getCurrentArguments;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -289,8 +297,6 @@ public class AbstractWagonTest extends TestCase {
     }
 
     public void testSessionCloseRefusedEventConnectionException() throws Exception {
-        Repository repository = new Repository();
-
         sessionListener.sessionDisconnecting(anyObject(SessionEvent.class));
         sessionListener.sessionError(anyObject(SessionEvent.class));
         replay(sessionListener);
