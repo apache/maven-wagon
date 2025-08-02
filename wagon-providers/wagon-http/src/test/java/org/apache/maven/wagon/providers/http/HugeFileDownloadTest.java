@@ -53,8 +53,9 @@ public class HugeFileDownloadTest extends PlexusTestCase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HugeFileDownloadTest.class);
 
-    private static long HUGE_FILE_SIZE = Integer.valueOf(Integer.MAX_VALUE).longValue()
-            + Integer.valueOf(Integer.MAX_VALUE).longValue();
+    private static final long HUGE_FILE_SIZE =
+            Integer.valueOf(Integer.MAX_VALUE).longValue()
+                    + Integer.valueOf(Integer.MAX_VALUE).longValue();
 
     private Server server;
     private ServerConnector connector;
@@ -174,7 +175,7 @@ public class HugeFileDownloadTest extends PlexusTestCase {
         final OpenOption[] options = {StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW, StandardOpenOption.SPARSE
         };
 
-        try (final SeekableByteChannel channel = Files.newByteChannel(hugeFile.toPath(), options)) {
+        try (SeekableByteChannel channel = Files.newByteChannel(hugeFile.toPath(), options)) {
             channel.position(HUGE_FILE_SIZE);
             channel.write(buf);
         }
