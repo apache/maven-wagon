@@ -162,6 +162,8 @@ under the License.
     <maven.site.path>wagon-archives/wagon-LATEST</maven.site.path>
     <version.plexus-utils>3.6.0</version.plexus-utils>
     <version.sisu-maven-plugin>0.9.0.M3</version.sisu-maven-plugin>
+    <!-- because doxia parser doesn't like the real one -->
+    <mavenSitePluginVersion>${version.maven-site-plugin}</mavenSitePluginVersion>
     <project.build.outputTimestamp>2022-12-18T21:06:44Z</project.build.outputTimestamp>
   </properties>
 
