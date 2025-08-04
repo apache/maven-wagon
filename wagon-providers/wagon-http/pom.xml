@@ -94,6 +94,11 @@ under the License.
       <artifactId>org.eclipse.sisu.inject</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-testing</artifactId>
+      <scope>test</scope>
+    </dependency>
 
     <!-- used for the TCK -->
     <dependency>

@@ -208,6 +208,19 @@ under the License.
       </dependency>
 
       <dependency>
+        <groupId>org.codehaus.plexus</groupId>
+        <artifactId>plexus-testing</artifactId>
+        <version>1.4.0</version>
+<!--        <version>1.5.1-SNAPSHOT</version>-->
+      </dependency>
+
+      <dependency>
+        <groupId>javax.inject</groupId>
+        <artifactId>javax.inject</artifactId>
+        <version>1</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>jcl-over-slf4j</artifactId>
         <version>${slf4jVersion}</version>
@@ -279,6 +292,12 @@ under the License.
         </plugin>
       </plugins>
     </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.sisu</groupId>
+        <artifactId>sisu-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
   </build>
 
   <profiles>
