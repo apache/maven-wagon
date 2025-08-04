@@ -23,7 +23,6 @@ package org.apache.maven.wagon;
  *
  */
 public interface CommandExecutor extends Wagon {
-    String ROLE = CommandExecutor.class.getName();
 
     void executeCommand(String command) throws CommandExecutionException;
 

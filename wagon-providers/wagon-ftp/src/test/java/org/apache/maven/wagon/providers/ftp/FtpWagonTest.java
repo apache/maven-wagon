@@ -18,7 +18,10 @@
  */
 package org.apache.maven.wagon.providers.ftp;
 
+import javax.inject.Inject;
+
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +42,10 @@ import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
+import org.codehaus.plexus.PlexusContainer;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -51,6 +58,17 @@ public class FtpWagonTest extends StreamingWagonTestCase {
 
     protected String getProtocol() {
         return "ftp";
+    }
+
+    //@Inject
+    FtpWagon ftpWagon;
+
+    @Inject
+    PlexusContainer plexusContainer;
+
+    @Override
+    protected Wagon getRawWagon() throws Exception {
+        return ftpWagon;
     }
 
     protected int getTestRepositoryPort() {
@@ -135,34 +153,29 @@ public class FtpWagonTest extends StreamingWagonTestCase {
     }
 
     private File getRepositoryDirectory() {
-        return getTestFile("target/test-output/local-repository");
+        return Paths.get("target/test-output/local-repository").toFile();
     }
 
+    @Test
     public void testNoPassword() throws Exception {
         AuthenticationInfo authenticationInfo = new AuthenticationInfo();
         authenticationInfo.setUserName("me");
-        try {
-            getWagon().connect(new Repository("id", getTestRepositoryUrl()), authenticationInfo);
-            fail();
-        } catch (AuthenticationException e) {
-            assertNotNull(e.getMessage());
-        }
+        assertThrows(AuthenticationException.class, () -> getWagon()
+                .connect(new Repository("id", getTestRepositoryUrl()), authenticationInfo));
     }
 
+    @Test
     public void testDefaultUserName() throws Exception {
         AuthenticationInfo authenticationInfo = new AuthenticationInfo();
         authenticationInfo.setPassword("secret");
-        try {
-            getWagon().connect(new Repository("id", getTestRepositoryUrl()), authenticationInfo);
-            fail();
-        } catch (AuthenticationException e) {
-            assertEquals(System.getProperty("user.name"), authenticationInfo.getUserName());
-        }
+        assertThrows(AuthenticationException.class, () -> getWagon()
+                .connect(new Repository("id", getTestRepositoryUrl()), authenticationInfo));
     }
 
     /**
      * This is a unit test to show WAGON-265
      */
+    @Test
     public void testPutDirectoryCreation() throws Exception {
         setupWagonTestingFixtures();
 

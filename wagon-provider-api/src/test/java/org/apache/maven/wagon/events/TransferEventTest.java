@@ -18,114 +18,75 @@
  */
 package org.apache.maven.wagon.events;
 
-import junit.framework.TestCase;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.easymock.EasyMock;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public class TransferEventTest extends TestCase {
-    /*
-     * Class to test for void TransferEvent(Wagon, Repository, String, int,
-     * int)
-     */
-    public void testTransferEventProperties() throws ConnectionException, AuthenticationException {
+public class TransferEventTest {
+    @Test
+    void testTransferEventProperties() throws ConnectionException, AuthenticationException {
         final Wagon wagon = EasyMock.createMock(Wagon.class);
-
         final Repository repo = new Repository();
-
         wagon.connect(repo);
-
         final long timestamp = System.currentTimeMillis();
-
         final Exception exception = new AuthenticationException("dummy");
-
         Resource resource = new Resource();
-
         resource.setName("mm");
-
         TransferEvent event =
                 new TransferEvent(wagon, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_GET);
-
         assertEquals(wagon, event.getWagon());
-
         assertEquals("mm", event.getResource().getName());
-
         assertEquals(TransferEvent.TRANSFER_COMPLETED, event.getEventType());
-
         assertEquals(TransferEvent.REQUEST_GET, event.getRequestType());
-
         Resource res = new Resource();
-
         res.setName("mm");
-
         event = new TransferEvent(wagon, res, exception, TransferEvent.REQUEST_GET);
-
         assertEquals(wagon, event.getWagon());
-
         assertEquals("mm", event.getResource().getName());
-
         assertEquals(TransferEvent.TRANSFER_ERROR, event.getEventType());
-
         assertEquals(TransferEvent.REQUEST_GET, event.getRequestType());
-
         assertEquals(exception, event.getException());
-
         event.setResource(null);
-
         assertNull(event.getResource());
-
         res.setName("/foo/baa");
-
         event.setResource(res);
-
         assertEquals("/foo/baa", event.getResource().getName());
-
         event.setTimestamp(timestamp);
-
         assertEquals(timestamp, event.getTimestamp());
-
         event.setRequestType(TransferEvent.REQUEST_PUT);
-
         assertEquals(TransferEvent.REQUEST_PUT, event.getRequestType());
-
         event.setRequestType(TransferEvent.REQUEST_GET);
-
         assertEquals(TransferEvent.REQUEST_GET, event.getRequestType());
-
         try {
             event.setRequestType(-1);
-
             fail("Exception expected");
         } catch (IllegalArgumentException e) {
             assertNotNull(e.getMessage());
         }
-
         event.setEventType(TransferEvent.TRANSFER_COMPLETED);
-
         assertEquals(TransferEvent.TRANSFER_COMPLETED, event.getEventType());
-
         event.setEventType(TransferEvent.TRANSFER_ERROR);
-
         assertEquals(TransferEvent.TRANSFER_ERROR, event.getEventType());
-
         event.setEventType(TransferEvent.TRANSFER_STARTED);
-
         assertEquals(TransferEvent.TRANSFER_STARTED, event.getEventType());
-
         event.setEventType(TransferEvent.TRANSFER_PROGRESS);
-
         assertEquals(TransferEvent.TRANSFER_PROGRESS, event.getEventType());
-
         try {
             event.setEventType(-1);
-
             fail("Exception expected");
         } catch (IllegalArgumentException e) {
             assertNotNull(e.getMessage());
@@ -144,7 +105,7 @@ public class TransferEventTest extends TestCase {
 
                 final String msg = "Value confict at [i,j]=[" + i + "," + j + "]";
 
-                assertTrue(msg, values[i] != values[j]);
+                assertTrue(values[i] != values[j], msg);
             }
         }
     }

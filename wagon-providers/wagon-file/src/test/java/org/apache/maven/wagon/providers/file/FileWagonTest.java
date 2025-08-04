@@ -18,8 +18,11 @@
  */
 package org.apache.maven.wagon.providers.file;
 
+import javax.inject.Inject;
+
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.FileTestUtils;
@@ -28,12 +31,27 @@ import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
+import org.codehaus.plexus.testing.PlexusTest;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
+@PlexusTest
 public class FileWagonTest extends StreamingWagonTestCase {
+
+    @Inject
+    private FileWagon fileWagon;
+
+    @Override
+    protected Wagon getRawWagon() throws Exception {
+        return fileWagon;
+    }
+
     protected String getProtocol() {
         return "file";
     }
@@ -51,6 +69,7 @@ public class FileWagonTest extends StreamingWagonTestCase {
      * @throws ConnectionException
      * @throws AuthenticationException
      */
+    @Test
     public void testNullFileWagon() throws ConnectionException, AuthenticationException {
         Wagon wagon = new FileWagon();
         Repository repository = new Repository();
@@ -62,8 +81,9 @@ public class FileWagonTest extends StreamingWagonTestCase {
         return new File(repository.getBasedir(), resource.getName()).lastModified();
     }
 
+    @Test
     public void testResourceExists() throws Exception {
-        String url = new File(getBasedir()).toPath().toUri().toASCIIString();
+        String url = Paths.get(".").toUri().toASCIIString();
 
         Wagon wagon = new FileWagon();
         Repository repository = new Repository("someID", url);

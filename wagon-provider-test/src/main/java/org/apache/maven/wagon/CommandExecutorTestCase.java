@@ -18,9 +18,15 @@
  */
 package org.apache.maven.wagon;
 
+import javax.inject.Inject;
+
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.repository.Repository;
-import org.codehaus.plexus.PlexusTestCase;
+import org.codehaus.plexus.testing.PlexusTest;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Base class for command executor tests.
@@ -28,9 +34,13 @@ import org.codehaus.plexus.PlexusTestCase;
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  *
  */
-public abstract class CommandExecutorTestCase extends PlexusTestCase {
+@PlexusTest
+public abstract class CommandExecutorTestCase {
+    @Inject
+    CommandExecutor exec;
+
+    @Test
     public void testErrorInCommandExecuted() throws Exception {
-        CommandExecutor exec = (CommandExecutor) lookup(CommandExecutor.ROLE);
 
         Repository repository = getTestRepository();
 
@@ -40,17 +50,18 @@ public abstract class CommandExecutorTestCase extends PlexusTestCase {
         exec.connect(repository, authenticationInfo);
 
         try {
-            exec.executeCommand("fail");
-            fail("Command should have failed");
-        } catch (CommandExecutionException e) {
+
+            CommandExecutionException e = assertThrows(CommandExecutionException.class, () -> {
+                exec.executeCommand("fail");
+            });
             assertTrue(e.getMessage().trim().endsWith("fail: command not found"));
         } finally {
             exec.disconnect();
         }
     }
 
+    @Test
     public void testIgnoreFailuresInCommandExecuted() throws Exception {
-        CommandExecutor exec = (CommandExecutor) lookup(CommandExecutor.ROLE);
 
         Repository repository = getTestRepository();
 
@@ -68,8 +79,8 @@ public abstract class CommandExecutorTestCase extends PlexusTestCase {
         }
     }
 
+    @Test
     public void testExecuteSuccessfulCommand() throws Exception {
-        CommandExecutor exec = (CommandExecutor) lookup(CommandExecutor.ROLE);
 
         Repository repository = getTestRepository();
 
