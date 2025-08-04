@@ -18,157 +18,115 @@
  */
 package org.apache.maven.wagon.events;
 
-import junit.framework.TestCase;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.resource.Resource;
 import org.easymock.EasyMock;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  */
-public class TransferEventSupportTest extends TestCase {
+public class TransferEventSupportTest {
     private TransferEventSupport eventSupport;
-
     private Wagon wagon;
 
-    /**
-     * @see junit.framework.TestCase#setUp()
-     */
-    protected void setUp() throws Exception {
-        super.setUp();
-
+    @BeforeEach
+    void setUp() {
         eventSupport = new TransferEventSupport();
-
-        // TODO: actually test it gets called?
         wagon = EasyMock.createNiceMock(Wagon.class);
     }
 
-    public void testTransferListenerRegistration() {
+    @Test
+    void testTransferListenerRegistration() {
         TransferListener mock1 = createMock(TransferListener.class);
         eventSupport.addTransferListener(mock1);
-
         assertTrue(eventSupport.hasTransferListener(mock1));
         TransferListener mock2 = createMock(TransferListener.class);
-
         assertFalse(eventSupport.hasTransferListener(mock2));
-
         eventSupport.addTransferListener(mock2);
-
         assertTrue(eventSupport.hasTransferListener(mock1));
         assertTrue(eventSupport.hasTransferListener(mock2));
-
         eventSupport.removeTransferListener(mock2);
-
         assertTrue(eventSupport.hasTransferListener(mock1));
         assertFalse(eventSupport.hasTransferListener(mock2));
-
         eventSupport.removeTransferListener(mock1);
         assertFalse(eventSupport.hasTransferListener(mock1));
     }
 
-    public void testFireTransferStarted() {
+    @Test
+    void testFireTransferStarted() {
         TransferListener mock1 = createMock(TransferListener.class);
         eventSupport.addTransferListener(mock1);
-
         TransferListener mock2 = createMock(TransferListener.class);
         eventSupport.addTransferListener(mock2);
-
         final TransferEvent event = getEvent(wagon);
-
         mock1.transferStarted(event);
         mock2.transferStarted(event);
-
         replay(mock1, mock2);
-
         eventSupport.fireTransferStarted(event);
-
         verify(mock1, mock2);
     }
 
-    public void testFireTransferProgress() {
+    @Test
+    void testFireTransferProgress() {
         TransferListener mock1 = createMock(TransferListener.class);
-
         eventSupport.addTransferListener(mock1);
-
         TransferListener mock2 = createMock(TransferListener.class);
-
         eventSupport.addTransferListener(mock2);
-
         final TransferEvent event = getEvent(wagon);
         final byte[] buffer = "content".getBytes();
-
         mock1.transferProgress(event, buffer, 0);
         mock2.transferProgress(event, buffer, 0);
-
         replay(mock1, mock2);
-
         eventSupport.fireTransferProgress(event, buffer, 0);
-
         verify(mock1, mock2);
     }
 
-    public void testFireTransferCompleted() {
+    @Test
+    void testFireTransferCompleted() {
         TransferListener mock1 = createMock(TransferListener.class);
-
         eventSupport.addTransferListener(mock1);
-
         TransferListener mock2 = createMock(TransferListener.class);
-
         eventSupport.addTransferListener(mock2);
-
         final TransferEvent event = getEvent(wagon);
-
         mock1.transferCompleted(event);
         mock2.transferCompleted(event);
-
         replay(mock1, mock2);
-
         eventSupport.fireTransferCompleted(event);
-
         verify(mock1, mock2);
     }
 
-    public void testFireTransferError() {
+    @Test
+    void testFireTransferError() {
         TransferListener mock1 = createMock(TransferListener.class);
-
         eventSupport.addTransferListener(mock1);
-
         TransferListener mock2 = createMock(TransferListener.class);
-
         eventSupport.addTransferListener(mock2);
-
         final TransferEvent event = getEvent(wagon);
-
         mock1.transferError(event);
         mock2.transferError(event);
-
         replay(mock1, mock2);
-
         eventSupport.fireTransferError(event);
-
         verify(mock1, mock2);
     }
 
-    public void testFireDebug() {
+    @Test
+    void testFireDebug() {
         TransferListener mock1 = createMock(TransferListener.class);
-
         eventSupport.addTransferListener(mock1);
-
         TransferListener mock2 = createMock(TransferListener.class);
-
         eventSupport.addTransferListener(mock2);
-
         mock1.debug("mm");
         mock2.debug("mm");
-
         replay(mock1, mock2);
-
         eventSupport.fireDebug("mm");
-
         verify(mock1, mock2);
     }
 

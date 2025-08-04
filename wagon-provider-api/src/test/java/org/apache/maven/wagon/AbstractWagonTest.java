@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
-import junit.framework.TestCase;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.authorization.AuthorizationException;
@@ -38,6 +37,8 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.easymock.IAnswer;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.easymock.EasyMock.anyInt;
 import static org.easymock.EasyMock.anyObject;
@@ -48,11 +49,18 @@ import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.getCurrentArguments;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  */
-public class AbstractWagonTest extends TestCase {
+public class AbstractWagonTest {
     private static class TestWagon extends AbstractWagon {
         protected void closeConnection() throws ConnectionException {}
 
@@ -84,48 +92,34 @@ public class AbstractWagonTest extends TestCase {
 
     private TransferListener transferListener = null;
 
+    @BeforeEach
     protected void setUp() throws Exception {
-        super.setUp();
-
         basedir = System.getProperty("basedir");
-
         destination = new File(basedir, "target/folder/subfolder");
-
         source = new File(basedir, "pom.xml");
-
         wagon = new WagonMock();
-
         sessionListener = createMock(SessionListener.class);
-
         wagon.addSessionListener(sessionListener);
-
         transferListener = createMock(TransferListener.class);
-
         wagon.addTransferListener(transferListener);
     }
 
     // https://github.com/apache/maven-wagon/issues/178
+    @Test
     public void testCreateParentDirectories() throws TransferFailedException {
         wagon.createParentDirectories(new File("foo")); // file has no parent
     }
 
+    @Test
     public void testCalculationOfTransferBufferSize() {
-        // 1 KiB -> Default buffer size (4 KiB)
         assertEquals(4096, wagon.getBufferCapacityForTransfer(1024L));
-
-        // 1 MiB -> Twice the default buffer size (8 KiB)
         assertEquals(4096 * 2, wagon.getBufferCapacityForTransfer(1024L * 1024));
-
-        // 100 MiB -> Maximum buffer size (512 KiB)
         assertEquals(4096 * 128, wagon.getBufferCapacityForTransfer(1024L * 1024 * 100));
-
-        // 1 GiB -> Maximum buffer size (512 KiB)
         assertEquals(4096 * 128, wagon.getBufferCapacityForTransfer(1024L * 1024 * 1024));
-
-        // 100 GiB -> Maximum buffer size (512 KiB)
         assertEquals(4096 * 128, wagon.getBufferCapacityForTransfer(1024L * 1024 * 1024 * 100));
     }
 
+    @Test
     public void testSessionListenerRegistration() {
         assertTrue(wagon.hasSessionListener(sessionListener));
 
@@ -134,6 +128,7 @@ public class AbstractWagonTest extends TestCase {
         assertFalse(wagon.hasSessionListener(sessionListener));
     }
 
+    @Test
     public void testTransferListenerRegistration() {
         assertTrue(wagon.hasTransferListener(transferListener));
 
@@ -142,6 +137,7 @@ public class AbstractWagonTest extends TestCase {
         assertFalse(wagon.hasTransferListener(transferListener));
     }
 
+    @Test
     public void testNoProxyConfiguration() throws ConnectionException, AuthenticationException {
         Repository repository = new Repository();
         wagon.connect(repository);
@@ -153,6 +149,7 @@ public class AbstractWagonTest extends TestCase {
         assertNull(wagon.getProxyInfo("http", "localhost"));
     }
 
+    @Test
     public void testNullProxyConfiguration() throws ConnectionException, AuthenticationException {
         Repository repository = new Repository();
         wagon.connect(repository, (ProxyInfo) null);
@@ -180,6 +177,7 @@ public class AbstractWagonTest extends TestCase {
         assertNull(wagon.getProxyInfo("http", "localhost"));
     }
 
+    @Test
     public void testLegacyProxyConfiguration() throws ConnectionException, AuthenticationException {
         ProxyInfo proxyInfo = new ProxyInfo();
         proxyInfo.setType("http");
@@ -193,6 +191,7 @@ public class AbstractWagonTest extends TestCase {
         assertNull(wagon.getProxyInfo("ftp", "www.example.com"));
     }
 
+    @Test
     public void testProxyConfiguration() throws ConnectionException, AuthenticationException {
         final ProxyInfo httpProxyInfo = new ProxyInfo();
         httpProxyInfo.setType("http");
@@ -220,6 +219,7 @@ public class AbstractWagonTest extends TestCase {
         assertNull(wagon.getProxyInfo("ftp", "www.example.com"));
     }
 
+    @Test
     public void testSessionOpenEvents() throws Exception {
         Repository repository = new Repository();
 
@@ -234,17 +234,16 @@ public class AbstractWagonTest extends TestCase {
         assertEquals(repository, wagon.getRepository());
     }
 
+    @Test
     public void testSessionConnectionRefusedEventConnectionException() throws Exception {
-        final WagonException exception = new ConnectionException("");
+        WagonException exception = new ConnectionException("");
 
-        try {
-            runTestSessionConnectionRefusedEvent(exception);
-            fail();
-        } catch (ConnectionException e) {
-            assertNotNull(e.getMessage());
-        }
+        ConnectionException e =
+                assertThrows(ConnectionException.class, () -> runTestSessionConnectionRefusedEvent(exception));
+        assertNotNull(e.getMessage());
     }
 
+    @Test
     public void testSessionConnectionRefusedEventAuthenticationException() throws Exception {
         final WagonException exception = new AuthenticationException("");
 
@@ -286,6 +285,7 @@ public class AbstractWagonTest extends TestCase {
         }
     }
 
+    @Test
     public void testSessionCloseEvents() throws Exception {
         sessionListener.sessionDisconnecting(anyObject(SessionEvent.class));
         sessionListener.sessionDisconnected(anyObject(SessionEvent.class));
@@ -296,6 +296,7 @@ public class AbstractWagonTest extends TestCase {
         verify(sessionListener);
     }
 
+    @Test
     public void testSessionCloseRefusedEventConnectionException() throws Exception {
         sessionListener.sessionDisconnecting(anyObject(SessionEvent.class));
         sessionListener.sessionError(anyObject(SessionEvent.class));
@@ -308,16 +309,12 @@ public class AbstractWagonTest extends TestCase {
         };
         wagon.addSessionListener(sessionListener);
 
-        try {
-            wagon.disconnect();
-            fail();
-        } catch (ConnectionException e) {
-            assertNotNull(e.getMessage());
-        } finally {
-            verify(sessionListener);
-        }
+        ConnectionException e = assertThrows(ConnectionException.class, () -> wagon.disconnect());
+        assertNotNull(e.getMessage());
+        verify(sessionListener);
     }
 
+    @Test
     public void testGetTransferEvents() throws Exception {
         transferListener.debug("fetch debug message");
         transferListener.transferInitiated(anyObject(TransferEvent.class));
@@ -339,6 +336,7 @@ public class AbstractWagonTest extends TestCase {
         verify(transferListener);
     }
 
+    @Test
     public void testGetError() throws Exception {
         transferListener.transferInitiated(anyObject(TransferEvent.class));
         transferListener.transferStarted(anyObject(TransferEvent.class));
@@ -366,6 +364,7 @@ public class AbstractWagonTest extends TestCase {
         verify(transferListener);
     }
 
+    @Test
     public void testPutTransferEvents()
             throws ConnectionException, AuthenticationException, ResourceDoesNotExistException, TransferFailedException,
                     AuthorizationException {
@@ -387,6 +386,7 @@ public class AbstractWagonTest extends TestCase {
         verify(transferListener);
     }
 
+    @Test
     public void testRepositoryPermissionsOverride() throws ConnectionException, AuthenticationException {
         Repository repository = new Repository();
 
@@ -404,6 +404,7 @@ public class AbstractWagonTest extends TestCase {
         assertEquals("644", repository.getPermissions().getFileMode());
     }
 
+    @Test
     public void testRepositoryUserName() throws ConnectionException, AuthenticationException {
         Repository repository = new Repository("id", "http://bporter:password@www.example.com/path/to/resource");
 
@@ -417,6 +418,7 @@ public class AbstractWagonTest extends TestCase {
         assertEquals("pass", authenticationInfo.getPassword());
     }
 
+    @Test
     public void testRepositoryUserNameNotGivenInCredentials() throws ConnectionException, AuthenticationException {
         Repository repository = new Repository("id", "http://bporter:password@www.example.com/path/to/resource");
 
@@ -428,6 +430,7 @@ public class AbstractWagonTest extends TestCase {
         assertEquals("password", authenticationInfo.getPassword());
     }
 
+    @Test
     public void testConnectNullRepository() throws ConnectionException, AuthenticationException {
         try {
             wagon.connect(null);
@@ -437,6 +440,7 @@ public class AbstractWagonTest extends TestCase {
         }
     }
 
+    @Test
     public void testPostProcessListeners() throws TransferFailedException, IOException {
         File tempFile = File.createTempFile("wagon", "tmp");
         tempFile.deleteOnExit();

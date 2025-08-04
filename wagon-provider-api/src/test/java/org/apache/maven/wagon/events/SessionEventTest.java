@@ -18,23 +18,26 @@
  */
 package org.apache.maven.wagon.events;
 
-import junit.framework.TestCase;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.easymock.EasyMock;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public class SessionEventTest extends TestCase {
-    /*
-     * Class to test for void SESSIONEvent(Wagon, Repository, String, int,
-     * int)
-     */
-    public void testSessionEventProperties() throws ConnectionException, AuthenticationException {
+public class SessionEventTest {
+    @Test
+    void testSessionEventProperties() throws ConnectionException, AuthenticationException {
 
         final Wagon wagon = EasyMock.createMock(Wagon.class);
         final Repository repo = new Repository();
@@ -100,6 +103,7 @@ public class SessionEventTest extends TestCase {
         }
     }
 
+    @Test
     public void testConstantValueConflict() {
         final int[] values = {
             SessionEvent.SESSION_CLOSED, SessionEvent.SESSION_DISCONNECTED,
@@ -113,7 +117,7 @@ public class SessionEventTest extends TestCase {
             for (int j = i + 1; j < values.length; j++) {
 
                 final String msg = "Value confict at [i,j]=[" + i + "," + j + "]";
-                assertTrue(msg, values[i] != values[j]);
+                assertTrue(values[i] != values[j], msg);
             }
         }
     }
