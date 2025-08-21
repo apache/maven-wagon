@@ -18,7 +18,9 @@
  */
 package org.apache.maven.wagon;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Unit test for PermissionModeUtils class
@@ -27,10 +29,8 @@ import junit.framework.TestCase;
  * @see PermissionModeUtils
  * @since Sep 3, 2005
  */
-public class PermissionModeUtilsTest extends TestCase {
-    /**
-     * @throws Exception on error
-     */
+public class PermissionModeUtilsTest {
+    @Test
     public void testNumeric() throws Exception {
         final String[][] tests = {
             {"0", "777"},
@@ -47,13 +47,11 @@ public class PermissionModeUtilsTest extends TestCase {
 
         for (String[] test : tests) {
             String umask = null;
-
             try {
                 umask = PermissionModeUtils.getUserMaskFor(test[0]);
             } catch (IllegalArgumentException e) {
                 // nothing to do
             }
-
             assertEquals(test[1], umask);
         }
     }
