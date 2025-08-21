@@ -23,7 +23,9 @@ import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.resource.Resource;
 import org.easymock.EasyMock;
 
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>

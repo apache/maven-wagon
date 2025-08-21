@@ -33,7 +33,10 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringInputStream;
 import org.codehaus.plexus.util.StringOutputStream;
 
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 
 public class StreamWagonTest extends TestCase {
     private static class TestWagon extends StreamWagon {
