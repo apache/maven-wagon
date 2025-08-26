@@ -34,10 +34,10 @@ import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.repository.exception.ComponentLifecycleException;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,14 +63,14 @@ public abstract class HttpWagonTests {
     protected static final Logger logger = LoggerFactory.getLogger(HttpWagonTests.class);
     // CHECKSTYLE_ON: ConstantName
 
-    @Before
+    @BeforeEach
     public void beforeEach() throws Exception {
         serverFixture = new ServerFixture(isSsl());
         serverFixture.start();
-        wagon = (Wagon) container.lookup(Wagon.ROLE, configurator.getWagonHint());
+        wagon = (Wagon) container.lookup(Wagon.class, configurator.getWagonHint());
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeAll() throws Exception {
         File keystore = getResource(ServerFixture.SERVER_SSL_KEYSTORE_RESOURCE_PATH);
 
@@ -84,7 +84,7 @@ public abstract class HttpWagonTests {
         configurator = (WagonTestCaseConfigurator) container.lookup(WagonTestCaseConfigurator.class.getName());
     }
 
-    @After
+    @AfterEach
     public void afterEach() {
         try {
             wagon.disconnect();
@@ -113,7 +113,7 @@ public abstract class HttpWagonTests {
         }
     }
 
-    @AfterClass
+    @AfterAll
     public static void afterAll() {
         if (container != null) {
             try {
@@ -172,12 +172,12 @@ public abstract class HttpWagonTests {
     }
 
     protected boolean initTest(final AuthenticationInfo auth, final ProxyInfo proxy)
-            throws ComponentConfigurationException, ConnectionException, AuthenticationException {
+            throws ConnectionException, AuthenticationException, ComponentConfigurationException {
         return initTest(getBaseUrl(), auth, proxy);
     }
 
     protected boolean initTest(final String baseUrl, final AuthenticationInfo auth, final ProxyInfo proxy)
-            throws ComponentConfigurationException, ConnectionException, AuthenticationException {
+            throws ConnectionException, AuthenticationException, ComponentConfigurationException {
         StackTraceElement[] elements = new Throwable().getStackTrace();
         String testCaseId = null;
         String lastMethodName = null;

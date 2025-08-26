@@ -40,15 +40,16 @@ import org.apache.maven.wagon.tck.http.fixture.ServerFixture;
 import org.apache.maven.wagon.tck.http.fixture.ServletExceptionServlet;
 import org.apache.maven.wagon.tck.http.util.ValueHolder;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
 import static org.apache.maven.wagon.tck.http.Assertions.NO_RESPONSE_STATUS_CODE;
 import static org.apache.maven.wagon.tck.http.Assertions.assertFileContentsFromResource;
 import static org.apache.maven.wagon.tck.http.Assertions.assertWagonExceptionMessage;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  *
@@ -58,17 +59,13 @@ public class GetWagonTests extends HttpWagonTests {
     private static final int ONE_MINUTE = 60000;
 
     @Test
-    public void basic()
-            throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+    public void basic() throws Exception {
         testSuccessfulGet("base.txt");
     }
 
     @Test
-    @Ignore("FIX ME!")
-    public void proxied()
-            throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+    @Disabled("FIX ME!")
+    public void proxied() throws Exception {
         getServerFixture().addFilter("*", new ProxyConnectionVerifierFilter());
 
         ProxyInfo info = newProxyInfo();
@@ -84,62 +81,54 @@ public class GetWagonTests extends HttpWagonTests {
     }
 
     @Test
-    public void highLatencyHighTimeout()
-            throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+    public void highLatencyHighTimeout() throws Exception {
         getServerFixture().addServlet("/slow/*", new LatencyServlet(TWO_SECONDS));
         testSuccessfulGet("slow/large.txt", "large.txt");
     }
 
     @Test
-    public void highLatencyLowTimeout()
-            throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+    public void highLatencyLowTimeout() throws Exception {
         Servlet servlet = new LatencyServlet(TWO_SECONDS);
         getServerFixture().addServlet("/slow/*", servlet);
         testSuccessfulGet("slow/large.txt", "large.txt");
     }
 
     @Test
-    public void inifiniteLatencyTimeout()
-            throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+    public void inifiniteLatencyTimeout() throws Exception {
         if (!isSupported()) {
             return;
         }
 
         final ValueHolder<TransferFailedException> holder = new ValueHolder<>(null);
 
-        Runnable r = new Runnable() {
-            public void run() {
-                Servlet servlet = new LatencyServlet(-1);
-                addNotificationTarget(servlet);
+        Runnable r = () -> {
+            Servlet servlet = new LatencyServlet(-1);
+            addNotificationTarget(servlet);
 
-                getServerFixture().addServlet("/infinite/*", servlet);
-                try {
-                    if (!initTest(null, null)) {
-                        return;
-                    }
-
-                    if (getWagon() instanceof StreamWagon) {
-                        logger.info("Connection timeout is: " + getWagon().getTimeout());
-                    }
-
-                    File target = newTempFile();
-                    getWagon().get("infinite/", target);
-
-                    fail("Should have failed to transfer due to transaction timeout.");
-                } catch (ConnectionException
-                        | AuthenticationException
-                        | ResourceDoesNotExistException
-                        | AuthorizationException
-                        | ComponentConfigurationException
-                        | IOException e) {
-                    throw new IllegalStateException(e);
-                } catch (TransferFailedException e) {
-                    // expected
-                    holder.setValue(e);
+            getServerFixture().addServlet("/infinite/*", servlet);
+            try {
+                if (!initTest(null, null)) {
+                    return;
                 }
+
+                if (getWagon() instanceof StreamWagon) {
+                    logger.info("Connection timeout is: " + getWagon().getTimeout());
+                }
+
+                File target = newTempFile();
+                getWagon().get("infinite/", target);
+
+                fail("Should have failed to transfer due to transaction timeout.");
+            } catch (ConnectionException
+                    | AuthenticationException
+                    | ResourceDoesNotExistException
+                    | AuthorizationException
+                    | IOException
+                    | ComponentConfigurationException e) {
+                throw new IllegalStateException(e);
+            } catch (TransferFailedException e) {
+                // expected
+                holder.setValue(e);
             }
         };
 
@@ -156,14 +145,13 @@ public class GetWagonTests extends HttpWagonTests {
         logger.info("Interrupting thread.");
         t.interrupt();
 
-        assertNotNull("TransferFailedException should have been thrown.", holder.getValue());
+        assertNotNull(holder.getValue(), "TransferFailedException should have been thrown.");
         assertWagonExceptionMessage(holder.getValue(), NO_RESPONSE_STATUS_CODE, getBaseUrl() + "infinite/", "", null);
     }
 
     @Test
     public void nonExistentHost()
-            throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    ResourceDoesNotExistException, AuthorizationException {
+            throws ConnectionException, AuthenticationException, IOException, ComponentConfigurationException {
         // we use a invalid localhost URL since some Internet Service Providers lately
         // use funny 'search-DNS' which don't handle explicitly marked testing DNS properly.
         // According to RFC-2606 .test, .invalid TLDs etc should work, but in practice it doesn't :(
@@ -172,19 +160,14 @@ public class GetWagonTests extends HttpWagonTests {
         }
 
         File target = newTempFile();
-        try {
-            getWagon().get("base.txt", target);
-            fail("Expected error related to host lookup failure.");
-        } catch (TransferFailedException e) {
-            // expected
-            assertWagonExceptionMessage(e, NO_RESPONSE_STATUS_CODE, "http://localhost:65520/base.txt", null, null);
-        }
+
+        TransferFailedException e =
+                assertThrows(TransferFailedException.class, () -> getWagon().get("base.txt", target));
+        assertWagonExceptionMessage(e, NO_RESPONSE_STATUS_CODE, "http://localhost:65520/base.txt", null, null);
     }
 
     @Test
-    public void oneLevelPermanentMove()
-            throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+    public void oneLevelPermanentMove() throws Exception {
         getServerFixture()
                 .addServlet(
                         "/moved.txt", new RedirectionServlet(HttpServletResponse.SC_MOVED_PERMANENTLY, "/base.txt"));
@@ -193,9 +176,7 @@ public class GetWagonTests extends HttpWagonTests {
     }
 
     @Test
-    public void oneLevelTemporaryMove()
-            throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+    public void oneLevelTemporaryMove() throws Exception {
         getServerFixture()
                 .addServlet(
                         "/moved.txt", new RedirectionServlet(HttpServletResponse.SC_MOVED_TEMPORARILY, "/base.txt"));
@@ -204,9 +185,7 @@ public class GetWagonTests extends HttpWagonTests {
     }
 
     @Test
-    public void sixLevelPermanentMove()
-            throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+    public void sixLevelPermanentMove() throws Exception {
         String myPath = "moved.txt";
         String targetPath = "/base.txt";
 
@@ -219,9 +198,7 @@ public class GetWagonTests extends HttpWagonTests {
     }
 
     @Test
-    public void sixLevelTemporaryMove()
-            throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+    public void sixLevelTemporaryMove() throws Exception {
         String myPath = "moved.txt";
         String targetPath = "/base.txt";
 
@@ -234,9 +211,7 @@ public class GetWagonTests extends HttpWagonTests {
     }
 
     @Test
-    public void infinitePermanentMove()
-            throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+    public void infinitePermanentMove() {
         String myPath = "moved.txt";
         String targetPath = "/base.txt";
 
@@ -245,18 +220,11 @@ public class GetWagonTests extends HttpWagonTests {
                         "/" + myPath,
                         new RedirectionServlet(HttpServletResponse.SC_MOVED_PERMANENTLY, myPath, targetPath, -1));
 
-        try {
-            testSuccessfulGet(myPath);
-            fail("Expected failure as a result of too many redirects.");
-        } catch (TransferFailedException e) {
-            // expected
-        }
+        assertThrows(TransferFailedException.class, () -> testSuccessfulGet(myPath));
     }
 
     @Test
-    public void infiniteTemporaryMove()
-            throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    ResourceDoesNotExistException, AuthorizationException {
+    public void infiniteTemporaryMove() {
         String myPath = "moved.txt";
         String targetPath = "/base.txt";
 
@@ -265,12 +233,7 @@ public class GetWagonTests extends HttpWagonTests {
                         "/" + myPath,
                         new RedirectionServlet(HttpServletResponse.SC_MOVED_TEMPORARILY, myPath, targetPath, -1));
 
-        try {
-            testSuccessfulGet(myPath);
-            fail("Expected failure as a result of too many redirects.");
-        } catch (TransferFailedException e) {
-            // expected
-        }
+        assertThrows(TransferFailedException.class, () -> testSuccessfulGet(myPath));
     }
 
     /**
@@ -279,9 +242,7 @@ public class GetWagonTests extends HttpWagonTests {
      */
     @Test
     @SuppressWarnings("checkstyle:methodname")
-    public void permanentMove_TooManyRedirects_limit20()
-            throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+    public void permanentMove_TooManyRedirects_limit20() {
         String myPath = "moved.txt";
         String targetPath = "/base.txt";
 
@@ -290,12 +251,7 @@ public class GetWagonTests extends HttpWagonTests {
                         "/" + myPath,
                         new RedirectionServlet(HttpServletResponse.SC_MOVED_PERMANENTLY, myPath, targetPath, -1));
 
-        try {
-            testSuccessfulGet(myPath);
-            fail("Expected failure as a result of too many redirects.");
-        } catch (TransferFailedException e) {
-            // expected
-        }
+        assertThrows(TransferFailedException.class, () -> testSuccessfulGet(myPath));
     }
 
     /**
@@ -304,9 +260,7 @@ public class GetWagonTests extends HttpWagonTests {
      */
     @Test
     @SuppressWarnings("checkstyle:methodname")
-    public void temporaryMove_TooManyRedirects_limit20()
-            throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    ResourceDoesNotExistException, AuthorizationException {
+    public void temporaryMove_TooManyRedirects_limit20() {
         String myPath = "moved.txt";
         String targetPath = "/base.txt";
 
@@ -315,49 +269,31 @@ public class GetWagonTests extends HttpWagonTests {
                         "/" + myPath,
                         new RedirectionServlet(HttpServletResponse.SC_MOVED_TEMPORARILY, myPath, targetPath, -1));
 
-        try {
-            testSuccessfulGet(myPath);
-            fail("Expected failure as a result of too many redirects.");
-        } catch (TransferFailedException e) {
-            // expected
-        }
+        assertThrows(TransferFailedException.class, () -> testSuccessfulGet(myPath));
     }
 
     @Test
-    public void missing()
-            throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    TransferFailedException, AuthorizationException {
+    public void missing() throws Exception {
         if (!initTest(null, null)) {
             return;
         }
 
         File target = newTempFile();
-        try {
-            getWagon().get("404.txt", target);
-            fail("should have received a 404, meaning the resource doesn't exist.");
-        } catch (ResourceDoesNotExistException e) {
-            // expected
-        }
+        assertThrows(ResourceDoesNotExistException.class, () -> getWagon().get("404.txt", target));
     }
 
     @Test
-    public void error()
-            throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    AuthorizationException, ResourceDoesNotExistException {
+    public void error() throws Exception {
         testErrorHandling(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
     @Test
-    public void proxyTimeout()
-            throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    AuthorizationException, ResourceDoesNotExistException {
+    public void proxyTimeout() throws Exception {
         testErrorHandling(HttpServletResponse.SC_GATEWAY_TIMEOUT);
     }
 
     @Test
-    public void forbidden()
-            throws ConnectionException, ComponentConfigurationException, IOException, ResourceDoesNotExistException,
-                    TransferFailedException {
+    public void forbidden() throws Exception {
         AuthenticationInfo info = new AuthenticationInfo();
         info.setUserName("user");
         info.setPassword("password");
@@ -371,9 +307,7 @@ public class GetWagonTests extends HttpWagonTests {
     }
 
     @Test
-    public void successfulAuthentication()
-            throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+    public void successfulAuthentication() throws Exception {
         AuthenticationInfo info = new AuthenticationInfo();
         info.setUserName("user");
         info.setPassword("password");
@@ -392,9 +326,7 @@ public class GetWagonTests extends HttpWagonTests {
     }
 
     @Test
-    public void unsuccessfulAuthentication()
-            throws ConnectionException, ComponentConfigurationException, IOException, TransferFailedException,
-                    ResourceDoesNotExistException {
+    public void unsuccessfulAuthentication() throws Exception {
         AuthenticationInfo info = new AuthenticationInfo();
         info.setUserName("user");
         info.setPassword("password");
@@ -404,9 +336,7 @@ public class GetWagonTests extends HttpWagonTests {
         testAuthFailure("protected/base.txt", info);
     }
 
-    protected void testAuthFailure(final String path, final AuthenticationInfo info)
-            throws ConnectionException, ComponentConfigurationException, IOException, TransferFailedException,
-                    ResourceDoesNotExistException {
+    protected void testAuthFailure(final String path, final AuthenticationInfo info) throws Exception {
         boolean authFailure = false;
         try {
             if (!initTest(info, null)) {
@@ -425,18 +355,14 @@ public class GetWagonTests extends HttpWagonTests {
             authFailure = true;
         }
 
-        assertTrue("Authentication/Authorization should have failed.", authFailure);
+        assertTrue(authFailure, "Authentication/Authorization should have failed.");
     }
 
-    protected void testSuccessfulGet(final String path)
-            throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+    protected void testSuccessfulGet(final String path) throws Exception {
         testSuccessfulGet(path, "base.txt");
     }
 
-    protected void testSuccessfulGet(final String path, final String checkPath)
-            throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+    protected void testSuccessfulGet(final String path, final String checkPath) throws Exception {
         if (!initTest(null, null)) {
             return;
         }
@@ -452,9 +378,7 @@ public class GetWagonTests extends HttpWagonTests {
                 ServerFixture.SERVER_ROOT_RESOURCE_PATH, checkPath, target, "Downloaded file doesn't match original.");
     }
 
-    protected void testErrorHandling(final int code)
-            throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
-                    AuthorizationException, ResourceDoesNotExistException {
+    protected void testErrorHandling(final int code) throws Exception {
         if (code == HttpServletResponse.SC_INTERNAL_SERVER_ERROR) {
             getServerFixture().addServlet("/" + code + ".txt", new ServletExceptionServlet("Expected " + code));
         } else {
@@ -464,13 +388,7 @@ public class GetWagonTests extends HttpWagonTests {
         if (!initTest(null, null)) {
             return;
         }
-
         File target = newTempFile();
-        try {
-            getWagon().get(code + ".txt", target);
-            fail("should have received a " + code + " error code, meaning the resource doesn't exist.");
-        } catch (TransferFailedException e) {
-            // expected
-        }
+        assertThrows(TransferFailedException.class, () -> getWagon().get(code + ".txt", target));
     }
 }

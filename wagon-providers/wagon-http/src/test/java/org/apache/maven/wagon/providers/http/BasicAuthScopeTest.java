@@ -20,7 +20,6 @@ package org.apache.maven.wagon.providers.http;
 
 import org.apache.http.auth.AuthScope;
 import org.apache.maven.wagon.shared.http.BasicAuthScope;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
