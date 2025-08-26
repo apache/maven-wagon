@@ -27,12 +27,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  */
 public class ResourceDoesNotExistExceptionTest {
+
     @Test
     void testResourceDoesNotExistExceptionTest() {
         ResourceDoesNotExistException ae = new ResourceDoesNotExistException("message");
+
         assertEquals("message", ae.getMessage());
+
         ae = new ResourceDoesNotExistException("full-message", new Throwable("cause"));
+
         assertEquals("full-message", ae.getMessage());
+
         assertEquals("cause", ae.getCause().getMessage());
     }
 }

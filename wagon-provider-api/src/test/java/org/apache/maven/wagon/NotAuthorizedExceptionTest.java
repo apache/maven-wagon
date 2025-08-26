@@ -32,6 +32,7 @@ public class NotAuthorizedExceptionTest {
     void testNotAuthorizedExceptionTest() {
         AuthorizationException ae = new AuthorizationException("message");
         assertEquals("message", ae.getMessage());
+
         ae = new AuthorizationException("full-message", new Throwable("cause"));
         assertEquals("full-message", ae.getMessage());
         assertEquals("cause", ae.getCause().getMessage());

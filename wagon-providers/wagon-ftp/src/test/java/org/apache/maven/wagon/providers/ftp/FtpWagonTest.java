@@ -18,9 +18,8 @@
  */
 package org.apache.maven.wagon.providers.ftp;
 
-import javax.inject.Inject;
-
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +41,6 @@ import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.PlexusContainer;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -60,15 +58,9 @@ public class FtpWagonTest extends StreamingWagonTestCase {
         return "ftp";
     }
 
-    //@Inject
-    FtpWagon ftpWagon;
-
-    @Inject
-    PlexusContainer plexusContainer;
-
     @Override
     protected Wagon getRawWagon() throws Exception {
-        return ftpWagon;
+        return new FtpWagon(true, StandardCharsets.ISO_8859_1.name());
     }
 
     protected int getTestRepositoryPort() {
