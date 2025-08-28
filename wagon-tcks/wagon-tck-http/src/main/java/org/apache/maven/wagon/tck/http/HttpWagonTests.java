@@ -67,7 +67,7 @@ public abstract class HttpWagonTests {
     public void beforeEach() throws Exception {
         serverFixture = new ServerFixture(isSsl());
         serverFixture.start();
-        wagon = (Wagon) container.lookup(Wagon.class, configurator.getWagonHint());
+        wagon = container.lookup(Wagon.class);
     }
 
     @BeforeAll
@@ -81,7 +81,7 @@ public abstract class HttpWagonTests {
 
         container = new DefaultPlexusContainer();
 
-        configurator = (WagonTestCaseConfigurator) container.lookup(WagonTestCaseConfigurator.class.getName());
+        configurator = new WagonTestCaseConfigurator();
     }
 
     @AfterEach

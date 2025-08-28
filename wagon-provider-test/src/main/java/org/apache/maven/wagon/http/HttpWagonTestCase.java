@@ -223,7 +223,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         server.stop();
 
         assertNotNull(
-                "default User-Agent header of wagon provider should be present", handler.headers.get("User-Agent"));
+                handler.headers.get("User-Agent"), "default User-Agent header of wagon provider should be present");
     }
 
     @Test
@@ -550,7 +550,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
             fileOutputStream.flush();
             fileOutputStream.close();
             String found = new String(Files.readAllBytes(tmpResult.toPath()));
-            assertEquals("found:'" + found + "'", "Hello, World!", found);
+            assertEquals("Hello, World!", found, "found:'" + found + "'");
 
             checkHandlerResult(redirectHandler.handlerRequestResponses, HttpServletResponse.SC_SEE_OTHER);
             checkHandlerResult(handler.handlerRequestResponses, HttpServletResponse.SC_OK);
@@ -606,7 +606,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         try {
             wagon.get("resource", tmpResult);
             String found = new String(Files.readAllBytes(tmpResult.toPath()));
-            assertEquals("found:'" + found + "'", "Hello, World!", found);
+            assertEquals("Hello, World!", found, "found:'" + found + "'");
 
             checkHandlerResult(redirectHandler.handlerRequestResponses, HttpServletResponse.SC_SEE_OTHER);
             checkHandlerResult(handler.handlerRequestResponses, HttpServletResponse.SC_OK);
@@ -674,7 +674,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
             String content = "put top secret";
             Files.write(tempFile.toPath().toAbsolutePath(), content.getBytes(StandardCharsets.UTF_8));
 
-            try (FileInputStream fileInputStream = new FileInputStream(tempFile)) {
+            try (InputStream fileInputStream = Files.newInputStream(tempFile.toPath())) {
                 wagon.putFromStream(fileInputStream, "test-secured-put-resource", content.length(), -1);
                 String actual =
                         new String(Files.readAllBytes(sourceFile.toPath().toAbsolutePath()), StandardCharsets.UTF_8);
@@ -737,7 +737,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
             String content = "put top secret";
             Files.write(tempFile.toPath().toAbsolutePath(), content.getBytes(StandardCharsets.UTF_8));
 
-            try (FileInputStream fileInputStream = new FileInputStream(tempFile)) {
+            try (InputStream fileInputStream = Files.newInputStream(tempFile.toPath())) {
                 wagon.putFromStream(fileInputStream, "test-secured-put-resource", content.length(), -1);
                 assertEquals(
                         content,
@@ -940,7 +940,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
             String content = "put top secret";
             Files.write(tempFile.toPath().toAbsolutePath(), content.getBytes(StandardCharsets.UTF_8));
 
-            try (FileInputStream fileInputStream = new FileInputStream(tempFile)) {
+            try (InputStream fileInputStream = Files.newInputStream(tempFile.toPath())) {
                 wagon.putFromStream(fileInputStream, "test-secured-put-resource", content.length(), -1);
                 // This does not behave as expected because LightweightWagon does buffering by default
                 if (wagon.getClass().getName().contains("Lightweight")) {
@@ -1447,7 +1447,6 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         authInfo.setUserName("user");
         authInfo.setPassword("admin");
         assertThrows(AuthorizationException.class, () -> runTestSecuredPut(authInfo));
-        fail();
     }
 
     @Test
@@ -1862,9 +1861,9 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
                             ? " Not Found"
                             : (" " + forReasonPhrase);
                     assertEquals(
-                            assertMessageForBadMessage,
                             "resource missing at " + forUrl + ", status: 404" + reasonPhrase,
-                            e.getMessage());
+                            e.getMessage(),
+                            assertMessageForBadMessage);
                     break;
 
                 case HttpServletResponse.SC_UNAUTHORIZED:
@@ -1874,9 +1873,9 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
                             ? " Unauthorized"
                             : (" " + forReasonPhrase);
                     assertEquals(
-                            assertMessageForBadMessage,
                             "authentication failed for " + forUrl + ", status: 401" + reasonPhrase,
-                            e.getMessage());
+                            e.getMessage(),
+                            assertMessageForBadMessage);
                     break;
 
                 case HttpServletResponse.SC_PROXY_AUTHENTICATION_REQUIRED:
@@ -1885,9 +1884,9 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
                             ? " Proxy Authentication Required"
                             : (" " + forReasonPhrase);
                     assertEquals(
-                            assertMessageForBadMessage,
                             "proxy authentication failed for " + forUrl + ", status: 407" + reasonPhrase,
-                            e.getMessage());
+                            e.getMessage(),
+                            assertMessageForBadMessage);
                     break;
 
                 case HttpServletResponse.SC_FORBIDDEN:
@@ -1896,9 +1895,9 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
                             ? " Forbidden"
                             : (" " + forReasonPhrase);
                     assertEquals(
-                            assertMessageForBadMessage,
                             "authorization failed for " + forUrl + ", status: 403" + reasonPhrase,
-                            e.getMessage());
+                            e.getMessage(),
+                            assertMessageForBadMessage);
                     break;
 
                 default:
@@ -1908,9 +1907,9 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
                             "expected status code for transfer failures should be >= 400");
                     reasonPhrase = forReasonPhrase == null ? "" : " " + forReasonPhrase;
                     assertEquals(
-                            assertMessageForBadMessage,
                             "transfer failed for " + forUrl + ", status: " + forStatusCode + reasonPhrase,
-                            e.getMessage());
+                            e.getMessage(),
+                            assertMessageForBadMessage);
                     break;
             }
         } catch (AssertionError assertionError) {

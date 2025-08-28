@@ -28,6 +28,7 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.shared.http.HttpConfiguration;
 import org.apache.maven.wagon.shared.http.HttpMethodConfiguration;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -38,6 +39,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * User: jdumay Date: 24/01/2008 Time: 17:17:34
  */
 public class HttpWagonTimeoutTest extends HttpWagonHttpServerTestCase {
+
+    @BeforeEach
     protected void setUp() throws Exception {
         super.setUp();
         ServletHolder servlets = new ServletHolder(new WaitForeverServlet());

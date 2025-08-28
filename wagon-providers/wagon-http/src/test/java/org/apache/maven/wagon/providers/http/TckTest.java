@@ -24,7 +24,7 @@ import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
 
 /**
- * This test will run the TCK suite on wagon-http-lightweight
+ * This test will run the TCK suite on wagon-http
  */
 @Suite
 @SelectClasses({GetWagonTests.class, HttpsGetWagonTests.class})
