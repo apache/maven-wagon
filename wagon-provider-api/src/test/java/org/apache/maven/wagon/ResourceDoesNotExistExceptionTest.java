@@ -18,14 +18,18 @@
  */
 package org.apache.maven.wagon;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
  *
  */
-public class ResourceDoesNotExistExceptionTest extends TestCase {
-    public void testResourceDoesNotExistExceptionTest() {
+public class ResourceDoesNotExistExceptionTest {
+
+    @Test
+    void testResourceDoesNotExistExceptionTest() {
         ResourceDoesNotExistException ae = new ResourceDoesNotExistException("message");
 
         assertEquals("message", ae.getMessage());

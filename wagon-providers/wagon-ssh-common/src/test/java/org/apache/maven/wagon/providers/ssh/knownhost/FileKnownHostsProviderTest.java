@@ -22,18 +22,19 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
-import junit.framework.TestCase;
 import org.codehaus.plexus.util.FileUtils;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertNotEquals;
-
-public class FileKnownHostsProviderTest extends TestCase {
+public class FileKnownHostsProviderTest {
     private File basedir = new File(System.getProperty("basedir", "."));
 
     private File testKnownHostsFile;
 
     private FileKnownHostsProvider provider;
 
+    @BeforeEach
     public void setUp() throws Exception {
         File readonlyKnownHostFile = new File(basedir, "src/test/resources/known_hosts");
         testKnownHostsFile = new File(basedir, "target/known_hosts");
@@ -44,6 +45,7 @@ public class FileKnownHostsProviderTest extends TestCase {
         provider = new FileKnownHostsProvider(testKnownHostsFile);
     }
 
+    @Test
     public void testStoreKnownHostsNoChange() throws Exception {
         long timestamp = this.testKnownHostsFile.lastModified();
         // file with the same contents, but with entries swapped
@@ -51,9 +53,10 @@ public class FileKnownHostsProviderTest extends TestCase {
         String contents = new String(Files.readAllBytes(sameKnownHostFile.toPath()), StandardCharsets.US_ASCII);
 
         provider.storeKnownHosts(contents);
-        assertEquals("known_hosts file is rewritten", timestamp, testKnownHostsFile.lastModified());
+        Assertions.assertEquals(timestamp, testKnownHostsFile.lastModified(), "known_hosts file is rewritten");
     }
 
+    @Test
     public void testStoreKnownHostsWithChange() throws Exception {
         long timestamp = this.testKnownHostsFile.lastModified();
         File sameKnownHostFile = new File(basedir, "src/test/resources/known_hosts_same");
@@ -61,6 +64,6 @@ public class FileKnownHostsProviderTest extends TestCase {
         contents += "1 2 3";
 
         provider.storeKnownHosts(contents);
-        assertNotEquals("known_hosts file is not rewritten", timestamp, testKnownHostsFile.lastModified());
+        Assertions.assertNotEquals(timestamp, testKnownHostsFile.lastModified(), "known_hosts file is not rewritten");
     }
 }
