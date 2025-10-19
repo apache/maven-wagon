@@ -21,7 +21,7 @@ package org.apache.maven.wagon.providers.ssh;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.sshd.server.PasswordAuthenticator;
+import org.apache.sshd.server.auth.password.PasswordAuthenticator;
 import org.apache.sshd.server.session.ServerSession;
 import org.codehaus.plexus.util.StringUtils;
 
