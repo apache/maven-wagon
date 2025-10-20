@@ -29,10 +29,10 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.DSAPublicKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
-import org.apache.mina.util.Base64;
-import org.apache.sshd.server.PublickeyAuthenticator;
+import org.apache.sshd.server.auth.pubkey.PublickeyAuthenticator;
 import org.apache.sshd.server.session.ServerSession;
 import org.codehaus.plexus.util.IOUtil;
 
@@ -111,7 +111,7 @@ public class TestPublickeyAuthenticator implements PublickeyAuthenticator {
 
         for (String part : keyLine.split(" ")) {
             if (part.startsWith("AAAA")) {
-                bytes = Base64.decodeBase64(part.getBytes());
+                bytes = Base64.getDecoder().decode(part.getBytes());
                 break;
             }
         }
