@@ -23,9 +23,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.apache.sshd.server.Command;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
+import org.apache.sshd.server.channel.ChannelSession;
+import org.apache.sshd.server.command.Command;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
 import org.codehaus.plexus.util.cli.Commandline;
@@ -72,7 +73,7 @@ public class ShellCommand implements Command {
         this.callback = callback;
     }
 
-    public void start(Environment env) throws IOException {
+    public void start(ChannelSession channel, Environment env) throws IOException {
         File tmpFile = File.createTempFile("wagon", "test-sh");
         tmpFile.deleteOnExit();
         int exitValue = 0;
@@ -133,7 +134,7 @@ public class ShellCommand implements Command {
         out.flush();
     }
 
-    public void destroy() {}
+    public void destroy(ChannelSession channel) throws Exception {}
 
     private void deleteQuietly(File f) {
 

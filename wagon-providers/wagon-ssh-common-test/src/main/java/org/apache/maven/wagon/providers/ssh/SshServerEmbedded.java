@@ -21,26 +21,14 @@ package org.apache.maven.wagon.providers.ssh;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import org.apache.mina.core.session.IoSession;
-import org.apache.sshd.SshServer;
-import org.apache.sshd.common.Session;
-import org.apache.sshd.common.session.AbstractSession;
-import org.apache.sshd.server.Command;
-import org.apache.sshd.server.CommandFactory;
-import org.apache.sshd.server.FileSystemFactory;
-import org.apache.sshd.server.FileSystemView;
-import org.apache.sshd.server.PasswordAuthenticator;
-import org.apache.sshd.server.SshFile;
-import org.apache.sshd.server.auth.UserAuthPassword;
-import org.apache.sshd.server.auth.UserAuthPublicKey;
-import org.apache.sshd.server.filesystem.NativeSshFile;
-import org.apache.sshd.server.keyprovider.PEMGeneratorHostKeyProvider;
-import org.apache.sshd.server.session.SessionFactory;
+import org.apache.sshd.common.file.nativefs.NativeFileSystemFactory;
+import org.apache.sshd.scp.server.ScpCommandFactory;
+import org.apache.sshd.server.SshServer;
+import org.apache.sshd.server.auth.password.PasswordAuthenticator;
+import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.server.shell.ProcessShellFactory;
-import org.codehaus.plexus.util.FileUtils;
 
 /**
  * @author Olivier Lamy
@@ -84,82 +72,39 @@ public class SshServerEmbedded {
     public int start() throws IOException {
         sshd.setPort(0);
 
-        sshd.setUserAuthFactories(Arrays.asList(new UserAuthPublicKey.Factory(), new UserAuthPassword.Factory()));
-
         sshd.setPublickeyAuthenticator(this.publickeyAuthenticator);
 
         sshd.setPasswordAuthenticator(this.passwordAuthenticator);
-
-        sshd.setUserAuthFactories(Arrays.asList(new UserAuthPublicKey.Factory(), new UserAuthPassword.Factory()));
-
-        // ResourceKeyPairProvider resourceKeyPairProvider =
-        //    new ResourceKeyPairProvider( sshKeysResources.toArray( new String[sshKeysResources.size()] ) );
 
         File path = new File("target/keys");
         path.mkdirs();
         path = new File(path, "simple.key");
         path.delete();
 
-        PEMGeneratorHostKeyProvider provider = new PEMGeneratorHostKeyProvider();
+        SimpleGeneratorHostKeyProvider provider = new SimpleGeneratorHostKeyProvider(path.toPath());
         provider.setAlgorithm("RSA");
         provider.setKeySize(1024);
-        provider.setPath(path.getPath());
 
         sshd.setKeyPairProvider(provider);
-        SessionFactory sessionFactory = new SessionFactory() {
-            @Override
-            protected AbstractSession doCreateSession(IoSession ioSession) throws Exception {
-                return super.doCreateSession(ioSession);
-            }
-        };
-        sshd.setSessionFactory(sessionFactory);
 
         // sshd.setFileSystemFactory(  );
 
-        final ProcessShellFactory processShellFactory = new ProcessShellFactory(new String[] {"/bin/sh", "-i", "-l"});
+        final ProcessShellFactory processShellFactory = new ProcessShellFactory("/bin/sh", "-i", "-l");
         sshd.setShellFactory(processShellFactory);
 
-        CommandFactory delegateCommandFactory = new CommandFactory() {
-            public Command createCommand(String command) {
-                return new ShellCommand(command);
-            }
-        };
-
-        ScpCommandFactory commandFactory = new ScpCommandFactory(delegateCommandFactory);
+        ScpCommandFactory commandFactory = new ScpCommandFactory.Builder()
+                .withDelegate((channel, command) -> new ShellCommand(command))
+                .build();
         sshd.setCommandFactory(commandFactory);
 
-        FileSystemFactory fileSystemFactory = new FileSystemFactory() {
-            public FileSystemView createFileSystemView(Session session) throws IOException {
-                return new FileSystemView() {
-                    public SshFile getFile(String file) {
-                        file = file.replace("\\", "");
-                        file = file.replace("\"", "");
-                        File f = new File(FileUtils.normalize(file));
-
-                        return new SshServerEmbedded.TestSshFile(
-                                f.getAbsolutePath(), f, System.getProperty("user.name"));
-                    }
-
-                    public SshFile getFile(SshFile baseDir, String file) {
-                        file = file.replace("\\", "");
-                        file = file.replace("\"", "");
-                        File f = new File(FileUtils.normalize(file));
-                        return new SshServerEmbedded.TestSshFile(
-                                f.getAbsolutePath(), f, System.getProperty("user.name"));
-                    }
-                };
-            }
-        };
-        sshd.setNioWorkers(0);
-        // sshd.setScheduledExecutorService(  );
-        sshd.setFileSystemFactory(fileSystemFactory);
+        sshd.setFileSystemFactory(new NativeFileSystemFactory());
         sshd.start();
         this.port = sshd.getPort();
         return this.port;
     }
 
-    public void stop() throws InterruptedException {
-        sshd.stop(Boolean.getBoolean("sshd.stopImmediatly"));
+    public void stop() throws IOException {
+        sshd.stop();
     }
 
     public int getPort() {
@@ -168,14 +113,5 @@ public class SshServerEmbedded {
 
     public PasswordAuthenticator getPasswordAuthenticator() {
         return passwordAuthenticator;
-    }
-    /**
-     *
-     */
-    public static class TestSshFile extends NativeSshFile {
-        public TestSshFile(String fileName, File file, String userName) {
-
-            super(FileUtils.normalize(fileName), file, userName);
-        }
     }
 }
