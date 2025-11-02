@@ -41,7 +41,6 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.util.StringUtils;
 
 /**
  * Scp helper for general algorithms on ssh server.
@@ -60,7 +59,7 @@ public class ScpHelper {
 
     public static String getResourceDirectory(String resourceName) {
         String dir = PathUtils.dirname(resourceName);
-        dir = StringUtils.replace(dir, "\\", "/");
+        dir = dir == null || dir.isEmpty() ? dir : dir.replace("\\", "/");
         return dir;
     }
 
@@ -75,7 +74,7 @@ public class ScpHelper {
     }
 
     public static Resource getResource(String resourceName) {
-        String r = StringUtils.replace(resourceName, "\\", "/");
+        String r = resourceName == null || resourceName.isEmpty() ? resourceName : resourceName.replace("\\", "/");
         return new Resource(r);
     }
 
@@ -171,7 +170,7 @@ public class ScpHelper {
 
         String basedir = repository.getBasedir();
 
-        String destDir = StringUtils.replace(destinationDirectory, "\\", "/");
+        String destDir = destinationDirectory == null || destinationDirectory.isEmpty() ? destinationDirectory : destinationDirectory.replace("\\", "/");
 
         String path = getPath(basedir, destDir);
         try {

@@ -59,7 +59,6 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.StringUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
@@ -1590,7 +1589,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
 
         // ensure we didn't use chunked transfer which doesn't work on ngnix
         for (DeployedResource deployedResource : putHandler.deployedResources) {
-            if (StringUtils.equalsIgnoreCase("chunked", deployedResource.transferEncoding)) {
+            if ( "chunked".equalsIgnoreCase(deployedResource.transferEncoding)) {
                 fail("deployedResource use chunked: " + deployedResource);
             }
         }

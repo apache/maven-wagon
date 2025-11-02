@@ -20,10 +20,10 @@ package org.apache.maven.wagon.providers.ssh;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.sshd.server.PasswordAuthenticator;
 import org.apache.sshd.server.session.ServerSession;
-import org.codehaus.plexus.util.StringUtils;
 
 /**
  * @author Olivier Lamy
@@ -33,8 +33,8 @@ public class TestPasswordAuthenticator implements PasswordAuthenticator {
 
     public boolean authenticate(String username, String password, ServerSession session) {
         requests.add(new PasswordAuthenticatorRequest(username, password));
-        return StringUtils.equals(username, TestData.getUserName())
-                && StringUtils.equals(password, TestData.getUserPassword());
+        return Objects.equals(username, TestData.getUserName())
+                && Objects.equals(password, TestData.getUserPassword());
     }
 
     /**

@@ -27,7 +27,6 @@ import java.util.Set;
 
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringOutputStream;
-import org.codehaus.plexus.util.StringUtils;
 
 /**
  * Provides known hosts from a file
@@ -63,7 +62,7 @@ public class StreamKnownHostsProvider extends AbstractKnownHostsProvider {
         do {
             line = br.readLine();
             if (line != null) {
-                String tokens[] = StringUtils.split(line);
+                String tokens[] = line.split("\\s+");
                 if (tokens.length == 3) {
                     hosts.add(new KnownHostEntry(tokens[0], tokens[1], tokens[2]));
                 }

@@ -39,7 +39,6 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.providers.ssh.ScpHelper;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.cli.CommandLineException;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
 import org.codehaus.plexus.util.cli.Commandline;
@@ -244,7 +243,7 @@ public class ScpExternalWagon extends AbstractWagon implements CommandExecutor {
         String resourceName = normalizeResource(resource);
         String remoteFile = getRepository().getBasedir() + "/" + resourceName;
 
-        remoteFile = StringUtils.replace(remoteFile, " ", "\\ ");
+        remoteFile = remoteFile == null || remoteFile.isEmpty() ? remoteFile : remoteFile.replace(" ", "\\ ");
 
         String qualifiedRemoteFile = this.buildRemoteHost() + ":" + remoteFile;
         if (put) {
@@ -285,7 +284,7 @@ public class ScpExternalWagon extends AbstractWagon implements CommandExecutor {
     }
 
     private String normalizeResource(Resource resource) {
-        return StringUtils.replace(resource.getName(), "\\", "/");
+        return resource.getName() == null || resource.getName().isEmpty() ? resource.getName() : resource.getName().replace("\\", "/");
     }
 
     public void put(File source, String destination)
@@ -300,11 +299,11 @@ public class ScpExternalWagon extends AbstractWagon implements CommandExecutor {
 
         String basedir = getRepository().getBasedir();
 
-        String resourceName = StringUtils.replace(destination, "\\", "/");
+        String resourceName = destination == null || destination.isEmpty() ? destination : destination.replace("\\", "/");
 
         String dir = PathUtils.dirname(resourceName);
 
-        dir = StringUtils.replace(dir, "\\", "/");
+        dir = dir == null || dir.isEmpty() ? dir : dir.replace("\\", "/");
 
         String umaskCmd = null;
         if (getRepository().getPermissions() != null) {
@@ -360,7 +359,7 @@ public class ScpExternalWagon extends AbstractWagon implements CommandExecutor {
 
     public void get(String resourceName, File destination)
             throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
-        String path = StringUtils.replace(resourceName, "\\", "/");
+        String path = resourceName == null || resourceName.isEmpty() ? resourceName : resourceName.replace("\\", "/");
 
         Resource resource = new Resource(path);
 
