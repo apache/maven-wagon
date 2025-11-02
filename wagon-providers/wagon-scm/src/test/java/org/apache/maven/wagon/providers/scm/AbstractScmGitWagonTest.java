@@ -37,7 +37,7 @@ public abstract class AbstractScmGitWagonTest extends AbstractScmWagonTest {
 
         File testRepo = getTestFile("target/test-classes/test-repo-git-test");
 
-        FileUtils.deleteDirectory(testRepo);
+        org.apache.commons.io.FileUtils.deleteDirectory(testRepo);
 
         FileUtils.copyDirectoryStructure(origRepo, testRepo);
 

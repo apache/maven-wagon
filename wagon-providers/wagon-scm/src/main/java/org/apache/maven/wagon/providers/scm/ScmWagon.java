@@ -467,7 +467,7 @@ public class ScmWagon extends AbstractWagon {
             throw new TransferFailedException("Failed to add directory " + createdDirs.get(0) + " to working copy", e);
         } finally {
             if (!added && createdDirs.size() != 0) {
-                FileUtils.deleteDirectory(createdDirs.get(0));
+                org.apache.commons.io.FileUtils.deleteDirectory(createdDirs.get(0));
             }
         }
 
@@ -697,7 +697,7 @@ public class ScmWagon extends AbstractWagon {
 
     private void deleteCheckoutDirectory() throws IOException {
         haveRecursiveCO = false;
-        FileUtils.deleteDirectory(checkoutDirectory);
+        org.apache.commons.io.FileUtils.deleteDirectory(checkoutDirectory);
     }
 
     private boolean checkoutDirExists(ScmProvider scmProvider) {

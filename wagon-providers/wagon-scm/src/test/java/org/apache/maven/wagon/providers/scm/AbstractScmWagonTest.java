@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.scm.manager.plexus.DefaultScmManager;
 import org.apache.maven.scm.provider.ScmProvider;
 import org.apache.maven.wagon.FileTestUtils;
@@ -33,7 +34,6 @@ import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.FileUtils;
 
 /**
  * Test for {@link ScmWagon}. You need a subclass for each SCM provider you want to test.

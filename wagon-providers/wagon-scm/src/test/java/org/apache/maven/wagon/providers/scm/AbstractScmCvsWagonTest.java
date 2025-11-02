@@ -40,7 +40,7 @@ public abstract class AbstractScmCvsWagonTest extends AbstractScmWagonTest {
 
         File testRepo = getTestFile("target/test-classes/test-repo-cvs-test");
 
-        FileUtils.deleteDirectory(testRepo);
+        org.apache.commons.io.FileUtils.deleteDirectory(testRepo);
 
         FileUtils.copyDirectoryStructure(origRepo, testRepo);
 

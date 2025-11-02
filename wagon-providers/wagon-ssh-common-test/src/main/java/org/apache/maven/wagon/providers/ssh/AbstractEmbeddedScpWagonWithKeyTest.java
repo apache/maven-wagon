@@ -93,14 +93,14 @@ public abstract class AbstractEmbeddedScpWagonWithKeyTest extends StreamingWagon
         String dir = "foo   test";
         File spaceDirectory = new File(TestData.getRepoPath(), dir);
         if (spaceDirectory.exists()) {
-            FileUtils.deleteDirectory(spaceDirectory);
+            org.apache.commons.io.FileUtils.deleteDirectory(spaceDirectory);
         }
         spaceDirectory.mkdirs();
 
         String subDir = "foo bar";
         File sub = new File(spaceDirectory, subDir);
         if (sub.exists()) {
-            FileUtils.deleteDirectory(sub);
+            org.apache.commons.io.FileUtils.deleteDirectory(sub);
         }
         sub.mkdirs();
 
@@ -126,7 +126,7 @@ public abstract class AbstractEmbeddedScpWagonWithKeyTest extends StreamingWagon
 
         File sourceWithSpace = new File("target/directory with spaces");
         if (sourceWithSpace.exists()) {
-            FileUtils.deleteDirectory(sourceWithSpace);
+            org.apache.commons.io.FileUtils.deleteDirectory(sourceWithSpace);
         }
         File resources = new File("src/test/resources");
 
