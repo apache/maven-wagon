@@ -21,6 +21,10 @@ package org.apache.maven.wagon;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.plexus.PlexusTestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Base class for command executor tests.
@@ -29,6 +33,7 @@ import org.codehaus.plexus.PlexusTestCase;
  *
  */
 public abstract class CommandExecutorTestCase extends PlexusTestCase {
+    @Test
     public void testErrorInCommandExecuted() throws Exception {
         CommandExecutor exec = (CommandExecutor) lookup(CommandExecutor.ROLE);
 
@@ -49,6 +54,7 @@ public abstract class CommandExecutorTestCase extends PlexusTestCase {
         }
     }
 
+    @Test
     public void testIgnoreFailuresInCommandExecuted() throws Exception {
         CommandExecutor exec = (CommandExecutor) lookup(CommandExecutor.ROLE);
 
@@ -68,6 +74,7 @@ public abstract class CommandExecutorTestCase extends PlexusTestCase {
         }
     }
 
+    @Test
     public void testExecuteSuccessfulCommand() throws Exception {
         CommandExecutor exec = (CommandExecutor) lookup(CommandExecutor.ROLE);
 

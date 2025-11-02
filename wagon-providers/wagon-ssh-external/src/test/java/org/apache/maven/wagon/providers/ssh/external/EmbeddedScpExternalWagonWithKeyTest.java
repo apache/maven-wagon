@@ -27,6 +27,7 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.providers.ssh.AbstractEmbeddedScpWagonWithKeyTest;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
 import org.codehaus.plexus.util.cli.Commandline;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -86,6 +87,7 @@ public class EmbeddedScpExternalWagonWithKeyTest extends AbstractEmbeddedScpWago
         }
     }
 
+    @Test
     public void testFailedGetToStream() throws Exception {
         // ignore this test as it need a stream wagon
     }

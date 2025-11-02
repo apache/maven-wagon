@@ -22,14 +22,20 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.getName;
 
 /**
  * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a>
  *
  */
-public class LazyFileOutputStreamTest extends TestCase {
+public class LazyFileOutputStreamTest {
 
+    @Test
     public void testFileCreation() throws Exception {
         File file = File.createTempFile(getName(), null);
 

@@ -18,14 +18,19 @@
  */
 package org.apache.maven.wagon.providers.webdav;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author <a href="mailto:james@atlassian.com">James William Dumay</a>
  */
-public class PathNavigatorTest extends TestCase {
+public class PathNavigatorTest {
     private static final String TEST_PATH = "foo/bar/baz";
 
+    @Test
     public void testBackAndForward() {
         PathNavigator navigator = new PathNavigator(TEST_PATH);
 

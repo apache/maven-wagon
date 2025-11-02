@@ -21,6 +21,7 @@ package org.apache.maven.wagon.providers.scm;
 import java.io.File;
 
 import org.codehaus.plexus.util.FileUtils;
+import org.junit.jupiter.api.BeforeEach;
 
 /**
  * Test for ScmWagon using SVN as underlying SCM
@@ -31,7 +32,8 @@ import org.codehaus.plexus.util.FileUtils;
 public abstract class AbstractScmSvnWagonTest extends AbstractScmWagonTest {
     private String repository;
 
-    protected void setUp() throws Exception {
+    @BeforeEach
+    public void setUp() throws Exception {
         super.setUp();
 
         // copy the repo for the test

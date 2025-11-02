@@ -18,28 +18,34 @@
  */
 package org.apache.maven.wagon.proxy;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author <a href="mailto:lafeuil@gmail.com">Thomas Champagne</a>
  */
-public class ProxyInfoUtilsTest extends TestCase {
+public class ProxyInfoUtilsTest {
     public ProxyInfoUtilsTest(final String name) {
-        super(name);
     }
 
+    @BeforeEach
     public void setUp() throws Exception {
-        super.setUp();
     }
 
+    @AfterEach
     public void tearDown() throws Exception {
-        super.tearDown();
     }
 
+    @Test
     public void testValidateNonProxyHostsWithNullProxy() {
-        assertFalse("www.ibiblio.org", ProxyUtils.validateNonProxyHosts(null, "maven.apache.org"));
+        assertFalse(ProxyUtils.validateNonProxyHosts(null, "maven.apache.org"), "www.ibiblio.org");
     }
 
+    @Test
     public void testValidateNonProxyHostsWithUniqueHost() {
 
         final ProxyInfo proxyInfo = new ProxyInfo();
@@ -50,19 +56,20 @@ public class ProxyInfoUtilsTest extends TestCase {
         proxyInfo.setType("SOCKSv4");
         proxyInfo.setNonProxyHosts("*.apache.org");
 
-        assertTrue("maven.apache.org", ProxyUtils.validateNonProxyHosts(proxyInfo, "maven.apache.org"));
+        assertTrue(ProxyUtils.validateNonProxyHosts(proxyInfo, "maven.apache.org"), "maven.apache.org");
 
-        assertFalse("www.ibiblio.org", ProxyUtils.validateNonProxyHosts(proxyInfo, "www.ibiblio.org"));
+        assertFalse(ProxyUtils.validateNonProxyHosts(proxyInfo, "www.ibiblio.org"), "www.ibiblio.org");
 
-        assertFalse("null", ProxyUtils.validateNonProxyHosts(proxyInfo, null));
+        assertFalse(ProxyUtils.validateNonProxyHosts(proxyInfo, null), "null");
 
         proxyInfo.setNonProxyHosts(null);
-        assertFalse("NonProxyHosts = null", ProxyUtils.validateNonProxyHosts(proxyInfo, "maven.apache.org"));
+        assertFalse(ProxyUtils.validateNonProxyHosts(proxyInfo, "maven.apache.org"), "NonProxyHosts = null");
 
         proxyInfo.setNonProxyHosts("");
-        assertFalse("NonProxyHosts = \"\"", ProxyUtils.validateNonProxyHosts(proxyInfo, "maven.apache.org"));
+        assertFalse(ProxyUtils.validateNonProxyHosts(proxyInfo, "maven.apache.org"), "NonProxyHosts = \"\"");
     }
 
+    @Test
     public void testValidateNonProxyHostsWithMultipleHost() {
 
         final ProxyInfo proxyInfo = new ProxyInfo();
@@ -73,9 +80,9 @@ public class ProxyInfoUtilsTest extends TestCase {
         proxyInfo.setType("SOCKSv4");
         proxyInfo.setNonProxyHosts("*.apache.org|*.codehaus.org");
 
-        assertTrue("maven.apache.org", ProxyUtils.validateNonProxyHosts(proxyInfo, "maven.apache.org"));
-        assertTrue("wiki.codehaus.org", ProxyUtils.validateNonProxyHosts(proxyInfo, "wiki.codehaus.org"));
+        assertTrue(ProxyUtils.validateNonProxyHosts(proxyInfo, "maven.apache.org"), "maven.apache.org");
+        assertTrue(ProxyUtils.validateNonProxyHosts(proxyInfo, "wiki.codehaus.org"), "wiki.codehaus.org");
 
-        assertFalse("www.ibiblio.org", ProxyUtils.validateNonProxyHosts(proxyInfo, "www.ibiblio.org"));
+        assertFalse(ProxyUtils.validateNonProxyHosts(proxyInfo, "www.ibiblio.org"), "www.ibiblio.org");
     }
 }

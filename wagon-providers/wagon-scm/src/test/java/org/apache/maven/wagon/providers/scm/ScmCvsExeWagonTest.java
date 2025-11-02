@@ -20,6 +20,10 @@ package org.apache.maven.wagon.providers.scm;
 
 import org.apache.maven.scm.provider.ScmProvider;
 import org.apache.maven.scm.provider.cvslib.cvsexe.CvsExeScmProvider;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.getName;
 
 /**
  * Test for ScmWagon using CVS Exe as underlying SCM
@@ -29,8 +33,8 @@ import org.apache.maven.scm.provider.cvslib.cvsexe.CvsExeScmProvider;
  */
 public class ScmCvsExeWagonTest extends AbstractScmCvsWagonTest {
 
-    @Override
-    protected void setUp() throws Exception {
+    @BeforeEach
+    public void setUp() throws Exception {
         assumeHaveCvsBinary();
         if (!testSkipped) {
             super.setUp();
@@ -41,17 +45,20 @@ public class ScmCvsExeWagonTest extends AbstractScmCvsWagonTest {
         return new CvsExeScmProvider();
     }
 
-    @Override
+    
+    @Test
     public void testWagonGetFileList() throws Exception {
         // cvs rls is rare
     }
 
-    @Override
+    
+    @Test
     public void testWagonResourceExists() throws Exception {
         // cvs rls is rare
     }
 
-    @Override
+    
+    @Test
     public void testWagonResourceNotExists() throws Exception {
         // cvs rls is rare
     }

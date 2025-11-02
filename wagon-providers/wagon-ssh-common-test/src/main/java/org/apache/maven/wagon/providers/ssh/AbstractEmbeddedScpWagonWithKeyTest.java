@@ -28,6 +28,13 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -37,8 +44,8 @@ public abstract class AbstractEmbeddedScpWagonWithKeyTest extends StreamingWagon
 
     SshServerEmbedded sshServerEmbedded;
 
-    @Override
-    protected void setUp() throws Exception {
+    @BeforeEach
+    public void setUp() throws Exception {
         super.setUp();
 
         String sshKeyResource = "ssh-keys/id_rsa.pub";
@@ -79,6 +86,7 @@ public abstract class AbstractEmbeddedScpWagonWithKeyTest extends StreamingWagon
         return new File(repository.getBasedir(), resource.getName()).lastModified();
     }
 
+    @Test
     public void testConnect() throws Exception {
         getWagon().connect(new Repository("foo", getTestRepositoryUrl()), getAuthInfo());
         assertTrue(true);
@@ -89,6 +97,7 @@ public abstract class AbstractEmbeddedScpWagonWithKeyTest extends StreamingWagon
         return false;
     }
 
+    @Test
     public void testWithSpaces() throws Exception {
         String dir = "foo   test";
         File spaceDirectory = new File(TestData.getRepoPath(), dir);

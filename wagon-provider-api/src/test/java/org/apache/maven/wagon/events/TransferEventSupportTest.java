@@ -18,28 +18,31 @@
  */
 package org.apache.maven.wagon.events;
 
-import junit.framework.TestCase;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.resource.Resource;
 import org.easymock.EasyMock;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  */
-public class TransferEventSupportTest extends TestCase {
+public class TransferEventSupportTest {
     private TransferEventSupport eventSupport;
 
     private Wagon wagon;
 
     /**
-     * @see junit.framework.TestCase#setUp()
+     * @see 
      */
-    protected void setUp() throws Exception {
-        super.setUp();
+    @BeforeEach
+    public void setUp() throws Exception {
 
         eventSupport = new TransferEventSupport();
 
@@ -47,6 +50,7 @@ public class TransferEventSupportTest extends TestCase {
         wagon = EasyMock.createNiceMock(Wagon.class);
     }
 
+    @Test
     public void testTransferListenerRegistration() {
         TransferListener mock1 = createMock(TransferListener.class);
         eventSupport.addTransferListener(mock1);
@@ -70,6 +74,7 @@ public class TransferEventSupportTest extends TestCase {
         assertFalse(eventSupport.hasTransferListener(mock1));
     }
 
+    @Test
     public void testFireTransferStarted() {
         TransferListener mock1 = createMock(TransferListener.class);
         eventSupport.addTransferListener(mock1);
@@ -89,6 +94,7 @@ public class TransferEventSupportTest extends TestCase {
         verify(mock1, mock2);
     }
 
+    @Test
     public void testFireTransferProgress() {
         TransferListener mock1 = createMock(TransferListener.class);
 
@@ -111,6 +117,7 @@ public class TransferEventSupportTest extends TestCase {
         verify(mock1, mock2);
     }
 
+    @Test
     public void testFireTransferCompleted() {
         TransferListener mock1 = createMock(TransferListener.class);
 
@@ -132,6 +139,7 @@ public class TransferEventSupportTest extends TestCase {
         verify(mock1, mock2);
     }
 
+    @Test
     public void testFireTransferError() {
         TransferListener mock1 = createMock(TransferListener.class);
 
@@ -153,6 +161,7 @@ public class TransferEventSupportTest extends TestCase {
         verify(mock1, mock2);
     }
 
+    @Test
     public void testFireDebug() {
         TransferListener mock1 = createMock(TransferListener.class);
 

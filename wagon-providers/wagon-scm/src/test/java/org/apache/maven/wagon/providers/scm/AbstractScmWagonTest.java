@@ -34,6 +34,8 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link ScmWagon}. You need a subclass for each SCM provider you want to test.
@@ -43,7 +45,8 @@ import org.codehaus.plexus.util.FileUtils;
  */
 public abstract class AbstractScmWagonTest extends WagonTestCase {
 
-    @Override
+    
+    @Test
     public void testWagonPutDirectory() throws Exception {
         super.testWagonPutDirectory();
         // repeat the test on a non-empty repo
@@ -56,7 +59,8 @@ public abstract class AbstractScmWagonTest extends WagonTestCase {
 
     private String providerClassName;
 
-    protected void setUp() throws Exception {
+    @BeforeEach
+    public void setUp() throws Exception {
         super.setUp();
 
         FileUtils.deleteDirectory(getCheckoutDirectory());

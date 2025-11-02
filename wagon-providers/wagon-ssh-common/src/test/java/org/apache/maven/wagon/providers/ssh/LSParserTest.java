@@ -20,10 +20,15 @@ package org.apache.maven.wagon.providers.ssh;
 
 import java.util.List;
 
-import junit.framework.TestCase;
 import org.apache.maven.wagon.TransferFailedException;
+import org.junit.jupiter.api.Test;
 
-public class LSParserTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class LSParserTest {
+    @Test
     public void testParseLinux() throws TransferFailedException {
         String rawLS = "total 32\n" + "drwxr-xr-x  5 joakim joakim 4096 2006-12-11 10:30 .\n"
                 + "drwxr-xr-x 14 joakim joakim 4096 2006-12-11 10:30 ..\n"
@@ -43,6 +48,7 @@ public class LSParserTest extends TestCase {
         assertTrue(files.contains("spaced out"));
     }
 
+    @Test
     public void testParseOSX() throws TransferFailedException {
         String rawLS = "total 32\n" + "drwxr-xr-x   5  joakim  joakim   238 Dec 11 10:30 .\n"
                 + "drwxr-xr-x  14  joakim  joakim   518 Dec 11 10:30 ..\n"
@@ -62,6 +68,7 @@ public class LSParserTest extends TestCase {
         assertTrue(files.contains("spaced out"));
     }
 
+    @Test
     public void testParseOSXFrLocale() throws TransferFailedException {
         String rawLS = "total 40\n" + "-rw-r--r--  1 olamy  staff  11 21 sep 00:34 .index.txt\n"
                 + "-rw-r--r--  1 olamy  staff  19 21 sep 00:34 more-resources.dat\n"
@@ -77,6 +84,7 @@ public class LSParserTest extends TestCase {
         assertTrue(files.contains(".index.txt"));
     }
 
+    @Test
     public void testParseCygwin() throws TransferFailedException {
         String rawLS = "total 32\n" + "drwxr-xr-x+  5 joakim None    0 Dec 11 10:30 .\n"
                 + "drwxr-xr-x+ 14 joakim None    0 Dec 11 10:30 ..\n"
@@ -101,6 +109,7 @@ public class LSParserTest extends TestCase {
      * Just adding a real-world example of the ls to see if it is a problem.
      *   - Joakime
      */
+    @Test
     public void testParsePeopleApacheStaging() throws TransferFailedException {
         String rawLS = "total 6\n"
                 + "drwxr-xr-x  3 snicoll  snicoll  512 Feb  7 11:04 .\n"
