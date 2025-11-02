@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.codehaus.plexus.util.FileUtils;
+import org.junit.jupiter.api.BeforeEach;
 
 /**
  * Test for ScmWagon using CVS as underlying SCM
@@ -32,8 +33,8 @@ import org.codehaus.plexus.util.FileUtils;
 public abstract class AbstractScmCvsWagonTest extends AbstractScmWagonTest {
     private String repository;
 
-    @Override
-    protected void setUp() throws Exception {
+    @BeforeEach
+    public void setUp() throws Exception {
         super.setUp();
 
         File origRepo = getTestFile("target/test-classes/test-repo-cvs");

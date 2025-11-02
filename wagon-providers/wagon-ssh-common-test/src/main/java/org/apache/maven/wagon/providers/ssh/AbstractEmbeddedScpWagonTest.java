@@ -25,6 +25,9 @@ import org.apache.maven.wagon.StreamingWagonTestCase;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
+import org.junit.jupiter.api.BeforeEach;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -34,8 +37,8 @@ public abstract class AbstractEmbeddedScpWagonTest extends StreamingWagonTestCas
 
     SshServerEmbedded sshServer;
 
-    @Override
-    protected void setUp() throws Exception {
+    @BeforeEach
+    public void setUp() throws Exception {
         super.setUp();
 
         String sshKeyResource = "ssh-keys/id_rsa";

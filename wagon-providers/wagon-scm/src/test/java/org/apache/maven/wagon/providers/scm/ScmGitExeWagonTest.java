@@ -19,6 +19,7 @@
 package org.apache.maven.wagon.providers.scm;
 
 import org.apache.maven.scm.provider.ScmProvider;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test for ScmWagon using Git Exe as underlying SCM
@@ -29,7 +30,8 @@ public class ScmGitExeWagonTest extends AbstractScmGitWagonTest {
         return new UserSafeGitExeScmProvider();
     }
 
-    @Override
+    
+    @Test
     public void testWagonGetFileList() throws Exception {
         // remote list unsupported
         // When a command is unsupported, SCM throws NoSuchCommandScmException.
@@ -39,17 +41,20 @@ public class ScmGitExeWagonTest extends AbstractScmGitWagonTest {
         // and skip the test using org.junit.Assume
     }
 
-    @Override
+    
+    @Test
     public void testWagonGetFileListWhenDirectoryDoesNotExist() throws Exception {
         // remote list unsupported
     }
 
-    @Override
+    
+    @Test
     public void testWagonResourceExists() throws Exception {
         // remote list unsupported
     }
 
-    @Override
+    
+    @Test
     public void testWagonResourceNotExists() throws Exception {
         // remote list unsupported
     }

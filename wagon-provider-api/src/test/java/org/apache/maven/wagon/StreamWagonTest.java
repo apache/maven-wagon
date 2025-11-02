@@ -27,20 +27,25 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 
-import junit.framework.TestCase;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
+import org.junit.jupiter.api.Test;
 
 import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class StreamWagonTest extends TestCase {
+public class StreamWagonTest {
     private static class TestWagon extends StreamWagon {
         public void closeConnection() throws ConnectionException {}
 
@@ -54,6 +59,7 @@ public class StreamWagonTest extends TestCase {
 
     private Repository repository = new Repository("id", "url");
 
+    @Test
     public void testNullInputStream() throws Exception {
         StreamingWagon wagon = new TestWagon() {
             public void fillInputData(InputData inputData) {
@@ -82,6 +88,7 @@ public class StreamWagonTest extends TestCase {
         verify(listener);
     }
 
+    @Test
     public void testNullOutputStream() throws Exception {
         StreamingWagon wagon = new TestWagon() {
             public void fillOutputData(OutputData inputData) {
@@ -110,6 +117,7 @@ public class StreamWagonTest extends TestCase {
         verify(listener);
     }
 
+    @Test
     public void testTransferFailedExceptionOnInput() throws Exception {
         try {
             runTestTransferError(new TransferFailedException(""));
@@ -119,6 +127,7 @@ public class StreamWagonTest extends TestCase {
         }
     }
 
+    @Test
     public void testTransferFailedExceptionOnOutput() throws Exception {
         StreamingWagon wagon = new TestWagon() {
             public void fillOutputData(OutputData inputData) throws TransferFailedException {
@@ -146,6 +155,7 @@ public class StreamWagonTest extends TestCase {
         }
     }
 
+    @Test
     public void testResourceDoesNotExistException() throws Exception {
         try {
             runTestTransferError(new ResourceDoesNotExistException(""));
@@ -155,6 +165,7 @@ public class StreamWagonTest extends TestCase {
         }
     }
 
+    @Test
     public void testAuthorizationException() throws Exception {
         try {
             runTestTransferError(new AuthorizationException(""));
@@ -200,6 +211,7 @@ public class StreamWagonTest extends TestCase {
         }
     }
 
+    @Test
     public void testGetIfNewerWithNewerResource() throws Exception {
         long resourceTime = System.currentTimeMillis();
         long comparisonTime =
@@ -207,6 +219,7 @@ public class StreamWagonTest extends TestCase {
         assertTrue(runTestGetIfNewer(resourceTime, comparisonTime));
     }
 
+    @Test
     public void testGetIfNewerWithOlderResource() throws Exception {
         long comparisonTime = System.currentTimeMillis();
         long resourceTime =
@@ -214,6 +227,7 @@ public class StreamWagonTest extends TestCase {
         assertFalse(runTestGetIfNewer(resourceTime, comparisonTime));
     }
 
+    @Test
     public void testGetIfNewerWithSameTimeResource() throws Exception {
         long resourceTime =
                 new SimpleDateFormat("yyyy-MM-dd").parse("2008-01-01").getTime();
@@ -242,6 +256,7 @@ public class StreamWagonTest extends TestCase {
         }
     }
 
+    @Test
     public void testGetToStream() throws Exception {
         final String content = "the content to return";
         final long comparisonTime =
@@ -263,6 +278,7 @@ public class StreamWagonTest extends TestCase {
         }
     }
 
+    @Test
     public void testGet() throws Exception {
         final String content = "the content to return";
         final long comparisonTime =
@@ -288,6 +304,7 @@ public class StreamWagonTest extends TestCase {
         }
     }
 
+    @Test
     public void testGetIfNewerToStreamWithNewerResource() throws Exception {
         long resourceTime = System.currentTimeMillis();
         long comparisonTime =
@@ -295,6 +312,7 @@ public class StreamWagonTest extends TestCase {
         assertTrue(runTestGetIfNewerToStream(resourceTime, comparisonTime));
     }
 
+    @Test
     public void testGetIfNewerToStreamWithOlderResource() throws Exception {
         long comparisonTime = System.currentTimeMillis();
         long resourceTime =
@@ -302,6 +320,7 @@ public class StreamWagonTest extends TestCase {
         assertFalse(runTestGetIfNewerToStream(resourceTime, comparisonTime));
     }
 
+    @Test
     public void testGetIfNewerToStreamWithSameTimeResource() throws Exception {
         long resourceTime =
                 new SimpleDateFormat("yyyy-MM-dd").parse("2008-01-01").getTime();
@@ -326,6 +345,7 @@ public class StreamWagonTest extends TestCase {
         }
     }
 
+    @Test
     public void testPutFromStream() throws Exception {
         final String content = "the content to return";
 
@@ -348,6 +368,7 @@ public class StreamWagonTest extends TestCase {
         }
     }
 
+    @Test
     public void testPutFromStreamWithResourceInformation() throws Exception {
         final String content = "the content to return";
         final long lastModified = System.currentTimeMillis();
@@ -375,6 +396,7 @@ public class StreamWagonTest extends TestCase {
         }
     }
 
+    @Test
     public void testPut() throws Exception {
         final String content = "the content to return";
 
@@ -402,6 +424,7 @@ public class StreamWagonTest extends TestCase {
         }
     }
 
+    @Test
     public void testPutFileDoesntExist() throws Exception {
         final File tempFile = File.createTempFile("wagon", "tmp");
         tempFile.delete();

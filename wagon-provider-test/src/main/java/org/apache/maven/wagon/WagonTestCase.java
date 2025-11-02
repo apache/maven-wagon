@@ -41,7 +41,10 @@ import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.util.FileUtils;
 import org.easymock.IAnswer;
-import org.junit.Assume;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +58,14 @@ import static org.easymock.EasyMock.getCurrentArguments;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.reset;
 import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.getName;
 
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
@@ -109,7 +119,8 @@ public abstract class WagonTestCase extends PlexusTestCase {
     // Constructors
     // ----------------------------------------------------------------------
 
-    protected void setUp() throws Exception {
+    @BeforeEach
+    public void setUp() throws Exception {
         checksumObserver = new ChecksumObserver();
 
         mockTransferListener = createMock(TransferListener.class);
@@ -228,6 +239,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
     //
     // ----------------------------------------------------------------------
 
+    @Test
     public void testWagon() throws Exception {
         setupWagonTestingFixtures();
 
@@ -238,6 +250,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
         tearDownWagonTestingFixtures();
     }
 
+    @Test
     public void testWagonGetIfNewerIsNewer() throws Exception {
         if (supportsGetIfNewer()) {
             setupWagonTestingFixtures();
@@ -253,7 +266,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
     @Override
     protected void runTest() throws Throwable {
         if (!testSkipped) {
-            super.runTest();
+            Assertions.runTest();
         }
     }
 
@@ -261,6 +274,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
         return true;
     }
 
+    @Test
     public void testWagonGetIfNewerIsSame() throws Exception {
         if (supportsGetIfNewer()) {
             setupWagonTestingFixtures();
@@ -270,6 +284,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
         }
     }
 
+    @Test
     public void testWagonGetIfNewerIsOlder() throws Exception {
         if (supportsGetIfNewer()) {
             setupWagonTestingFixtures();
@@ -319,9 +334,9 @@ public abstract class WagonTestCase extends PlexusTestCase {
         if (expectedResult) {
             verifyMock(progressAnswer, expectedSize);
 
-            assertNotNull("check checksum is not null", checksumObserver.getActualChecksum());
+            assertNotNull(checksumObserver.getActualChecksum(), "check checksum is not null");
 
-            assertEquals("compare checksums", TEST_CKSUM, checksumObserver.getActualChecksum());
+            assertEquals(TEST_CKSUM, checksumObserver.getActualChecksum(), "compare checksums");
 
             // Now compare the contents of the artifact that was placed in
             // the repository with the contents of the artifact that was
@@ -335,7 +350,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
 
             reset(mockTransferListener);
 
-            assertNull("check checksum is null", checksumObserver.getActualChecksum());
+            assertNull(checksumObserver.getActualChecksum(), "check checksum is null");
 
             assertFalse(destFile.exists());
         }
@@ -355,6 +370,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
         replay(mockTransferListener);
     }
 
+    @Test
     public void testWagonPutDirectory() throws Exception {
         setupWagonTestingFixtures();
 
@@ -400,6 +416,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
      * @throws Exception
      * @since 1.0-beta-2
      */
+    @Test
     public void testWagonPutDirectoryDeepDestination() throws Exception {
         setupWagonTestingFixtures();
 
@@ -444,6 +461,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
      * @throws Exception
      * @since 1.0-beta-1
      */
+    @Test
     public void testWagonPutDirectoryWhenDirectoryAlreadyExists() throws Exception {
 
         final String dirName = "directory-copy-existing";
@@ -494,6 +512,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
      * @throws Exception
      * @since 1.0-beta-1
      */
+    @Test
     public void testWagonPutDirectoryForDot() throws Exception {
         final String resourceToCreate = "test-resource-1.txt";
 
@@ -585,6 +604,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
         Files.write(dir.toPath().toAbsolutePath(), child.getBytes());
     }
 
+    @Test
     public void testFailedGet() throws Exception {
         setupWagonTestingFixtures();
 
@@ -617,6 +637,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
         }
     }
 
+    @Test
     public void testFailedGetIfNewer() throws Exception {
         if (supportsGetIfNewer()) {
             setupWagonTestingFixtures();
@@ -649,6 +670,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
      * @throws Exception
      * @since 1.0-beta-2
      */
+    @Test
     public void testWagonGetFileList() throws Exception {
         setupWagonTestingFixtures();
 
@@ -670,19 +692,19 @@ public abstract class WagonTestCase extends PlexusTestCase {
 
         try {
             List<String> list = wagon.getFileList(dirName);
-            assertNotNull("file list should not be null.", list);
+            assertNotNull(list, "file list should not be null.");
             assertTrue(
-                    "file list should contain more items (actually contains '" + list + "').",
-                    list.size() >= filenames.length);
+                    list.size() >= filenames.length,
+                    "file list should contain more items (actually contains '" + list + "').");
 
             for (String filename : filenames) {
-                assertTrue("Filename '" + filename + "' should be in list.", list.contains(filename));
+                assertTrue(list.contains(filename), "Filename '" + filename + "' should be in list.");
             }
 
             // WAGON-250
             list = wagon.getFileList("");
-            assertNotNull("file list should not be null.", list);
-            assertFalse("file list should contain items (actually contains '" + list + "').", list.isEmpty());
+            assertNotNull(list, "file list should not be null.");
+            assertFalse(list.isEmpty(), "file list should contain items (actually contains '" + list + "').");
             assertTrue(list.contains("file-list/"));
             assertFalse(list.contains("file-list"));
             assertFalse(list.contains("."));
@@ -691,7 +713,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
             assertFalse(list.contains("../"));
         } catch (UnsupportedOperationException e) {
             // Some providers don't support this
-            Assume.assumeFalse(false);
+            Assumptions.assumeFalse(false);
         } finally {
             wagon.disconnect();
 
@@ -705,6 +727,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
      * @throws Exception
      * @since 1.0-beta-2
      */
+    @Test
     public void testWagonGetFileListWhenDirectoryDoesNotExist() throws Exception {
         setupWagonTestingFixtures();
 
@@ -723,7 +746,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
             // expected
         } catch (UnsupportedOperationException e) {
             // Some providers don't support this
-            Assume.assumeFalse(false);
+            Assumptions.assumeFalse(false);
         } finally {
             wagon.disconnect();
 
@@ -737,6 +760,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
      * @throws Exception
      * @since 1.0-beta-2
      */
+    @Test
     public void testWagonResourceExists() throws Exception {
         setupWagonTestingFixtures();
 
@@ -748,7 +772,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
 
         wagon.connect(testRepository, getAuthInfo());
 
-        assertTrue(sourceFile.getName() + " does not exist", wagon.resourceExists(sourceFile.getName()));
+        assertTrue(wagon.resourceExists(sourceFile.getName()), sourceFile.getName() + " does not exist");
 
         wagon.disconnect();
 
@@ -761,6 +785,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
      * @throws Exception
      * @since 1.0-beta-2
      */
+    @Test
     public void testWagonResourceNotExists() throws Exception {
         setupWagonTestingFixtures();
 
@@ -945,17 +970,17 @@ public abstract class WagonTestCase extends PlexusTestCase {
 
         int expectedSize = putFile();
 
-        assertNotNull("check checksum is not null", checksumObserver.getActualChecksum());
+        assertNotNull(checksumObserver.getActualChecksum(), "check checksum is not null");
 
-        assertEquals("compare checksums", TEST_CKSUM, checksumObserver.getActualChecksum());
+        assertEquals(TEST_CKSUM, checksumObserver.getActualChecksum(), "compare checksums");
 
         checksumObserver = new ChecksumObserver();
 
         getFile(expectedSize);
 
-        assertNotNull("check checksum is not null", checksumObserver.getActualChecksum());
+        assertNotNull(checksumObserver.getActualChecksum(), "check checksum is not null");
 
-        assertEquals("compare checksums", TEST_CKSUM, checksumObserver.getActualChecksum());
+        assertEquals(TEST_CKSUM, checksumObserver.getActualChecksum(), "compare checksums");
 
         // Now compare the contents of the artifact that was placed in
         // the repository with the contents of the artifact that was

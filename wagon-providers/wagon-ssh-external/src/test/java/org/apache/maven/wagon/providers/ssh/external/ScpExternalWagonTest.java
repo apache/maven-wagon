@@ -26,6 +26,10 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.providers.ssh.TestData;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -70,6 +74,7 @@ public class ScpExternalWagonTest extends WagonTestCase {
         return authInfo;
     }
 
+    @Test
     public void testIsPuTTY() throws Exception {
         ScpExternalWagon wagon = (ScpExternalWagon) getWagon();
 

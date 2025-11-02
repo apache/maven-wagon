@@ -24,6 +24,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.junit.jupiter.api.BeforeEach;
 
 /**
  * User: jdumay Date: 24/01/2008 Time: 18:15:53
@@ -35,7 +36,8 @@ public abstract class HttpWagonHttpServerTestCase extends PlexusTestCase {
 
     protected ServletContextHandler context;
 
-    protected void setUp() throws Exception {
+    @BeforeEach
+    public void setUp() throws Exception {
         super.setUp();
         server = new Server(0);
 

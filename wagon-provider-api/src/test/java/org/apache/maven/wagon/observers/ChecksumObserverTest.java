@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
-import junit.framework.TestCase;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.Wagon;
@@ -32,12 +31,19 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class ChecksumObserverTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+
+public class ChecksumObserverTest {
     private Wagon wagon;
 
+    @BeforeEach
     public void setUp() throws Exception {
-        super.setUp();
 
         wagon = new WagonMock(true);
 
@@ -45,12 +51,12 @@ public class ChecksumObserverTest extends TestCase {
         wagon.connect(repository);
     }
 
+    @AfterEach
     public void tearDown() throws Exception {
         wagon.disconnect();
-
-        super.tearDown();
     }
 
+    @Test
     public void testSubsequentTransfersAfterTransferError()
             throws NoSuchAlgorithmException, ResourceDoesNotExistException, AuthorizationException, IOException {
         TransferListener listener = new ChecksumObserver();
@@ -77,6 +83,7 @@ public class ChecksumObserverTest extends TestCase {
         testFile.delete();
     }
 
+    @Test
     public void testChecksum() throws NoSuchAlgorithmException {
         ChecksumObserver listener = new ChecksumObserver("SHA-1");
 

@@ -42,6 +42,13 @@ import org.apache.maven.wagon.shared.http.HttpMethodConfiguration;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /*
  * WebDAV Wagon Test
@@ -81,12 +88,13 @@ public class WebDavWagonTest extends HttpWagonTestCase {
     private void assertURL(String userUrl, String expectedUrl) {
         Repository repo = new Repository("test-geturl", userUrl);
         String actualUrl = (new WebDavWagon()).getURL(repo);
-        assertEquals("WebDavWagon.getURL(" + userUrl + ")", expectedUrl, actualUrl);
+        assertEquals(expectedUrl, actualUrl, "WebDavWagon.getURL(" + userUrl + ")");
     }
 
     /**
      * Tests the maven 2.0.x way to define a webdav URL without SSL.
      */
+    @Test
     public void testGetURLDavHttp() {
         assertURL("dav:http://localhost:9080/dav/", "http://localhost:9080/dav/");
     }
@@ -94,6 +102,7 @@ public class WebDavWagonTest extends HttpWagonTestCase {
     /**
      * Tests the maven 2.0.x way to define a webdav URL with SSL.
      */
+    @Test
     public void testGetURLDavHttps() {
         assertURL("dav:https://localhost:9443/dav/", "https://localhost:9443/dav/");
     }
@@ -101,6 +110,7 @@ public class WebDavWagonTest extends HttpWagonTestCase {
     /**
      * Tests the URI spec way of defining a webdav URL without SSL.
      */
+    @Test
     public void testGetURLDavUri() {
         assertURL("dav://localhost:9080/dav/", "http://localhost:9080/dav/");
     }
@@ -108,6 +118,7 @@ public class WebDavWagonTest extends HttpWagonTestCase {
     /**
      * Tests the URI spec way of defining a webdav URL with SSL.
      */
+    @Test
     public void testGetURLDavUriWithSsl() {
         assertURL("davs://localhost:9443/dav/", "https://localhost:9443/dav/");
     }
@@ -115,6 +126,7 @@ public class WebDavWagonTest extends HttpWagonTestCase {
     /**
      * Tests the URI spec way of defining a webdav URL without SSL.
      */
+    @Test
     public void testGetURLDavPlusHttp() {
         assertURL(
                 "dav+https://localhost:" + getTestRepositoryPort() + "/dav/",
@@ -124,10 +136,12 @@ public class WebDavWagonTest extends HttpWagonTestCase {
     /**
      * Tests the URI spec way of defining a webdav URL with SSL.
      */
+    @Test
     public void testGetURLDavPlusHttps() {
         assertURL("dav+https://localhost:9443/dav/", "https://localhost:9443/dav/");
     }
 
+    @Test
     public void testMkdirs() throws Exception {
         setupWagonTestingFixtures();
 
@@ -172,6 +186,7 @@ public class WebDavWagonTest extends HttpWagonTestCase {
         }
     }
 
+    @Test
     public void testMkdirsWithNoBasedir() throws Exception {
         // WAGON-244
         setupWagonTestingFixtures();
@@ -218,6 +233,7 @@ public class WebDavWagonTest extends HttpWagonTestCase {
      *
      * @throws Exception
      */
+    @Test
     public void testWagonWebDavGetFileList() throws Exception {
         setupWagonTestingFixtures();
 
@@ -244,26 +260,26 @@ public class WebDavWagonTest extends HttpWagonTestCase {
 
         List<String> list = wagon.getFileList(dirName);
 
-        assertNotNull("file list should not be null.", list);
-        assertEquals("file list should contain 6 items", 6, list.size());
+        assertNotNull(list, "file list should not be null.");
+        assertEquals(6, list.size(), "file list should contain 6 items");
 
         for (int i = 0; i < filenames.length; i++) {
-            assertTrue("Filename '" + filenames[i] + "' should be in list.", list.contains(filenames[i]));
+            assertTrue(list.contains(filenames[i]), "Filename '" + filenames[i] + "' should be in list.");
         }
 
         for (int i = 0; i < dirnames.length; i++) {
-            assertTrue("Directory '" + dirnames[i] + "' should be in list.", list.contains(dirnames[i] + "/"));
+            assertTrue(list.contains(dirnames[i] + "/"), "Directory '" + dirnames[i] + "' should be in list.");
         }
 
         ///////////////////////////////////////////////////////////////////////////
         list = wagon.getFileList("");
-        assertNotNull("file list should not be null.", list);
-        assertEquals("file list should contain 1 items", 1, list.size());
+        assertNotNull(list, "file list should not be null.");
+        assertEquals(1, list.size(), "file list should contain 1 items");
 
         ///////////////////////////////////////////////////////////////////////////
         list = wagon.getFileList(dirName + "/test-dir1");
-        assertNotNull("file list should not be null.", list);
-        assertEquals("file list should contain 0 items", 0, list.size());
+        assertNotNull(list, "file list should not be null.");
+        assertEquals(0, list.size(), "file list should contain 0 items");
 
         /////////////////////////////////////////////////////////////////////////////
         try {
@@ -278,6 +294,7 @@ public class WebDavWagonTest extends HttpWagonTestCase {
         tearDownWagonTestingFixtures();
     }
 
+    @Test
     public void testWagonFailsOnPutFailureByDefault() throws Exception {
         setupWagonTestingFixtures();
 
@@ -325,6 +342,7 @@ public class WebDavWagonTest extends HttpWagonTestCase {
         }
     }
 
+    @Test
     public void testWagonContinuesOnPutFailureIfPropertySet() throws Exception {
         setupWagonTestingFixtures();
 
@@ -366,40 +384,42 @@ public class WebDavWagonTest extends HttpWagonTestCase {
         return true;
     }
 
-    protected void testPreemptiveAuthenticationGet(TestSecurityHandler sh, boolean preemptive) {
+    @Test
+    public void testPreemptiveAuthenticationGet(TestSecurityHandler sh, boolean preemptive) {
         if (preemptive) {
             assertEquals(
-                    "testPreemptiveAuthenticationGet preemptive=true: expected 1 request, got "
-                            + sh.handlerRequestResponses,
                     1,
-                    sh.handlerRequestResponses.size());
+                    sh.handlerRequestResponses.size(),
+                    "testPreemptiveAuthenticationGet preemptive=true: expected 1 request, got "
+                            + sh.handlerRequestResponses);
             assertEquals(HttpServletResponse.SC_OK, sh.handlerRequestResponses.get(0).responseCode);
         } else {
             assertEquals(
-                    "testPreemptiveAuthenticationGet preemptive=false: expected 2 requests (401,200), got "
-                            + sh.handlerRequestResponses,
                     2,
-                    sh.handlerRequestResponses.size());
+                    sh.handlerRequestResponses.size(),
+                    "testPreemptiveAuthenticationGet preemptive=false: expected 2 requests (401,200), got "
+                            + sh.handlerRequestResponses);
             assertEquals(HttpServletResponse.SC_UNAUTHORIZED, sh.handlerRequestResponses.get(0).responseCode);
             assertEquals(HttpServletResponse.SC_OK, sh.handlerRequestResponses.get(1).responseCode);
         }
     }
 
-    protected void testPreemptiveAuthenticationPut(TestSecurityHandler sh, boolean preemptive) {
+    @Test
+    public void testPreemptiveAuthenticationPut(TestSecurityHandler sh, boolean preemptive) {
         if (preemptive) {
             assertEquals(
-                    "testPreemptiveAuthenticationPut preemptive=true: expected 2 requests (200,201), got "
-                            + sh.handlerRequestResponses,
                     2,
-                    sh.handlerRequestResponses.size());
+                    sh.handlerRequestResponses.size(),
+                    "testPreemptiveAuthenticationPut preemptive=true: expected 2 requests (200,201), got "
+                            + sh.handlerRequestResponses);
             assertEquals(HttpServletResponse.SC_OK, sh.handlerRequestResponses.get(0).responseCode);
             assertEquals(HttpServletResponse.SC_CREATED, sh.handlerRequestResponses.get(1).responseCode);
         } else {
             assertEquals(
-                    "testPreemptiveAuthenticationPut preemptive=false: expected 3 requests (401,200,201), got "
-                            + sh.handlerRequestResponses,
                     3,
-                    sh.handlerRequestResponses.size());
+                    sh.handlerRequestResponses.size(),
+                    "testPreemptiveAuthenticationPut preemptive=false: expected 3 requests (401,200,201), got "
+                            + sh.handlerRequestResponses);
             assertEquals(HttpServletResponse.SC_UNAUTHORIZED, sh.handlerRequestResponses.get(0).responseCode);
             assertEquals(HttpServletResponse.SC_OK, sh.handlerRequestResponses.get(1).responseCode);
             assertEquals(HttpServletResponse.SC_CREATED, sh.handlerRequestResponses.get(2).responseCode);
@@ -409,20 +429,21 @@ public class WebDavWagonTest extends HttpWagonTestCase {
     /* This method cannot be reasonable used to represend GET and PUT for WebDAV, it would contain too much
      * duplicate code. Leave as-is, but don't use it.
      */
-    protected void testPreemptiveAuthentication(TestSecurityHandler sh, boolean preemptive) {
+    @Test
+    public void testPreemptiveAuthentication(TestSecurityHandler sh, boolean preemptive) {
         if (preemptive) {
             assertEquals(
-                    "testPreemptiveAuthentication preemptive=false: expected 2 requests (200,.), got "
-                            + sh.handlerRequestResponses,
                     2,
-                    sh.handlerRequestResponses.size());
+                    sh.handlerRequestResponses.size(),
+                    "testPreemptiveAuthentication preemptive=false: expected 2 requests (200,.), got "
+                            + sh.handlerRequestResponses);
             assertEquals(HttpServletResponse.SC_OK, sh.handlerRequestResponses.get(0).responseCode);
         } else {
             assertEquals(
-                    "testPreemptiveAuthentication preemptive=false: expected 3 requests (401,200,200), got "
-                            + sh.handlerRequestResponses,
                     3,
-                    sh.handlerRequestResponses.size());
+                    sh.handlerRequestResponses.size(),
+                    "testPreemptiveAuthentication preemptive=false: expected 3 requests (401,200,200), got "
+                            + sh.handlerRequestResponses);
             assertEquals(HttpServletResponse.SC_UNAUTHORIZED, sh.handlerRequestResponses.get(0).responseCode);
             assertEquals(HttpServletResponse.SC_OK, sh.handlerRequestResponses.get(1).responseCode);
             assertEquals(HttpServletResponse.SC_OK, sh.handlerRequestResponses.get(2).responseCode);
@@ -432,38 +453,38 @@ public class WebDavWagonTest extends HttpWagonTestCase {
     @Override
     protected void checkRequestResponseForRedirectPutWithFullUrl(
             RedirectHandler redirectHandler, PutHandler putHandler) {
-        assertEquals("found:" + putHandler.handlerRequestResponses, 1, putHandler.handlerRequestResponses.size());
+        assertEquals(1, putHandler.handlerRequestResponses.size(), "found:" + putHandler.handlerRequestResponses);
         assertEquals(
-                "found:" + putHandler.handlerRequestResponses,
                 HttpServletResponse.SC_CREATED,
-                putHandler.handlerRequestResponses.get(0).responseCode);
+                putHandler.handlerRequestResponses.get(0).responseCode,
+                "found:" + putHandler.handlerRequestResponses);
         assertEquals(
-                "found:" + redirectHandler.handlerRequestResponses, 2, redirectHandler.handlerRequestResponses.size());
+                2, redirectHandler.handlerRequestResponses.size(), "found:" + redirectHandler.handlerRequestResponses);
         assertEquals(
-                "found:" + redirectHandler.handlerRequestResponses,
                 HttpServletResponse.SC_SEE_OTHER,
-                redirectHandler.handlerRequestResponses.get(0).responseCode);
+                redirectHandler.handlerRequestResponses.get(0).responseCode,
+                "found:" + redirectHandler.handlerRequestResponses);
     }
 
     @Override
     protected void checkRequestResponseForRedirectPutWithRelativeUrl(
             RedirectHandler redirectHandler, PutHandler putHandler) {
-        assertEquals("found:" + putHandler.handlerRequestResponses, 0, putHandler.handlerRequestResponses.size());
+        assertEquals(0, putHandler.handlerRequestResponses.size(), "found:" + putHandler.handlerRequestResponses);
 
         assertEquals(
-                "found:" + redirectHandler.handlerRequestResponses, 4, redirectHandler.handlerRequestResponses.size());
+                4, redirectHandler.handlerRequestResponses.size(), "found:" + redirectHandler.handlerRequestResponses);
         assertEquals(
-                "found:" + redirectHandler.handlerRequestResponses,
                 HttpServletResponse.SC_SEE_OTHER,
-                redirectHandler.handlerRequestResponses.get(0).responseCode);
+                redirectHandler.handlerRequestResponses.get(0).responseCode,
+                "found:" + redirectHandler.handlerRequestResponses);
         assertEquals(
-                "found:" + redirectHandler.handlerRequestResponses,
                 HttpServletResponse.SC_OK,
-                redirectHandler.handlerRequestResponses.get(1).responseCode);
+                redirectHandler.handlerRequestResponses.get(1).responseCode,
+                "found:" + redirectHandler.handlerRequestResponses);
         assertEquals(
-                "found:" + redirectHandler.handlerRequestResponses,
                 HttpServletResponse.SC_SEE_OTHER,
-                redirectHandler.handlerRequestResponses.get(2).responseCode);
+                redirectHandler.handlerRequestResponses.get(2).responseCode,
+                "found:" + redirectHandler.handlerRequestResponses);
     }
 
     @Override

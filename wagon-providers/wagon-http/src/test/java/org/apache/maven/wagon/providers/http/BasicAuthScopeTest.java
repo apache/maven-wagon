@@ -20,8 +20,8 @@ package org.apache.maven.wagon.providers.http;
 
 import org.apache.http.auth.AuthScope;
 import org.apache.maven.wagon.shared.http.BasicAuthScope;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class BasicAuthScopeTest {
 
@@ -34,9 +34,9 @@ public class BasicAuthScopeTest {
         BasicAuthScope scope = new BasicAuthScope();
 
         AuthScope authScope = scope.getScope("original.host.com", 3456);
-        Assert.assertEquals("original.host.com", authScope.getHost());
-        Assert.assertEquals(3456, authScope.getPort());
-        Assert.assertEquals(AuthScope.ANY_REALM, authScope.getRealm());
+        Assertions.assertEquals("original.host.com", authScope.getHost());
+        Assertions.assertEquals(3456, authScope.getPort());
+        Assertions.assertEquals(AuthScope.ANY_REALM, authScope.getRealm());
     }
 
     /**
@@ -49,9 +49,9 @@ public class BasicAuthScopeTest {
         scope.setPort("1234");
         scope.setRealm("override-realm");
         AuthScope authScope = scope.getScope("original.host.com", 3456);
-        Assert.assertEquals("override.host.com", authScope.getHost());
-        Assert.assertEquals(1234, authScope.getPort());
-        Assert.assertEquals("override-realm", authScope.getRealm());
+        Assertions.assertEquals("override.host.com", authScope.getHost());
+        Assertions.assertEquals(1234, authScope.getPort());
+        Assertions.assertEquals("override-realm", authScope.getRealm());
     }
 
     /**
@@ -64,9 +64,9 @@ public class BasicAuthScopeTest {
         scope.setPort("ANY");
         scope.setRealm("ANY");
         AuthScope authScope = scope.getScope("original.host.com", 3456);
-        Assert.assertEquals(AuthScope.ANY_HOST, authScope.getHost());
-        Assert.assertEquals(AuthScope.ANY_PORT, authScope.getPort());
-        Assert.assertEquals(AuthScope.ANY_REALM, authScope.getRealm());
+        Assertions.assertEquals(AuthScope.ANY_HOST, authScope.getHost());
+        Assertions.assertEquals(AuthScope.ANY_PORT, authScope.getPort());
+        Assertions.assertEquals(AuthScope.ANY_REALM, authScope.getRealm());
     }
 
     /**
@@ -77,9 +77,9 @@ public class BasicAuthScopeTest {
         BasicAuthScope scope = new BasicAuthScope();
         scope.setRealm("override-realm");
         AuthScope authScope = scope.getScope("original.host.com", 3456);
-        Assert.assertEquals("original.host.com", authScope.getHost());
-        Assert.assertEquals(3456, authScope.getPort());
-        Assert.assertEquals("override-realm", authScope.getRealm());
+        Assertions.assertEquals("original.host.com", authScope.getHost());
+        Assertions.assertEquals(3456, authScope.getPort());
+        Assertions.assertEquals("override-realm", authScope.getRealm());
     }
 
     /**
@@ -89,6 +89,6 @@ public class BasicAuthScopeTest {
     public void testGetScopeOriginalPortIsNegativeOne() {
         BasicAuthScope scope = new BasicAuthScope();
         AuthScope authScope = scope.getScope("original.host.com", -1);
-        Assert.assertEquals(AuthScope.ANY_PORT, authScope.getPort());
+        Assertions.assertEquals(AuthScope.ANY_PORT, authScope.getPort());
     }
 }

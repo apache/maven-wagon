@@ -80,8 +80,15 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.security.Password;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.getName;
 
 /**
  *
@@ -143,6 +150,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         server.stop();
     }
 
+    @Test
     public void testHttpHeaders() throws Exception {
         Properties headers = new Properties();
         headers.setProperty("User-Agent", "Maven-Wagon/1.0");
@@ -171,6 +179,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
     /**
      * test set of User-Agent as it's done by aether wagon connector with using setHttpHeaders
      */
+    @Test
     public void testHttpHeadersWithCommonMethods() throws Exception {
         Properties properties = new Properties();
         properties.setProperty("User-Agent", "Maven-Wagon/1.0");
@@ -198,6 +207,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         assertEquals("Maven-Wagon/1.0", handler.headers.get("User-Agent"));
     }
 
+    @Test
     public void testUserAgentHeaderIsPresentByDefault() throws Exception {
         StreamingWagon wagon = (StreamingWagon) getWagon();
         Server server = new Server();
@@ -211,9 +221,10 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         server.stop();
 
         assertNotNull(
-                "default User-Agent header of wagon provider should be present", handler.headers.get("User-Agent"));
+                handler.headers.get("User-Agent"), "default User-Agent header of wagon provider should be present");
     }
 
+    @Test
     public void testUserAgentHeaderIsPresentOnlyOnceIfSetMultipleTimes() throws Exception {
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
@@ -255,6 +266,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         return getProtocol() + "://localhost:" + localPort;
     }
 
+    @Test
     public void testGetForbidden() throws Exception {
         try {
             runTestGet(HttpServletResponse.SC_FORBIDDEN);
@@ -264,6 +276,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testGet404() throws Exception {
         try {
             runTestGet(HttpServletResponse.SC_NOT_FOUND);
@@ -273,6 +286,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testGet500() throws Exception {
         try {
             runTestGet(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -307,6 +321,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testResourceExistsForbidden() throws Exception {
         try {
             runTestResourceExists(HttpServletResponse.SC_FORBIDDEN);
@@ -316,6 +331,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testResourceExists404() throws Exception {
         try {
             assertFalse(runTestResourceExists(HttpServletResponse.SC_NOT_FOUND));
@@ -324,6 +340,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testResourceExists500() throws Exception {
         try {
             runTestResourceExists(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -333,6 +350,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testResourceExists429() throws Exception {
         try {
 
@@ -400,6 +418,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         return getTestFile("target/test-output/http-repository");
     }
 
+    @Test
     public void testGzipGet() throws Exception {
         Server server = new Server();
 
@@ -443,6 +462,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testProxiedRequest() throws Exception {
         ProxyInfo proxyInfo = createProxyInfo();
         TestHeaderHandler handler = new TestHeaderHandler();
@@ -450,6 +470,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         runTestProxiedRequest(proxyInfo, handler);
     }
 
+    @Test
     public void testProxiedRequestWithAuthentication() throws Exception {
         ProxyInfo proxyInfo = createProxyInfo();
         proxyInfo.setUserName("user");
@@ -470,6 +491,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testProxiedRequestWithAuthenticationWithProvider() throws Exception {
         final ProxyInfo proxyInfo = createProxyInfo();
         proxyInfo.setUserName("user");
@@ -495,6 +517,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testRedirectGetToStream() throws Exception {
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
@@ -538,7 +561,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
             fileOutputStream.flush();
             fileOutputStream.close();
             String found = new String(Files.readAllBytes(tmpResult.toPath()));
-            assertEquals("found:'" + found + "'", "Hello, World!", found);
+            assertEquals("Hello, World!", found, "found:'" + found + "'");
 
             checkHandlerResult(redirectHandler.handlerRequestResponses, HttpServletResponse.SC_SEE_OTHER);
             checkHandlerResult(handler.handlerRequestResponses, HttpServletResponse.SC_OK);
@@ -552,6 +575,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testRedirectGet() throws Exception {
         StreamingWagon wagon = (StreamingWagon) getWagon();
 
@@ -593,7 +617,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         try {
             wagon.get("resource", tmpResult);
             String found = new String(Files.readAllBytes(tmpResult.toPath()));
-            assertEquals("found:'" + found + "'", "Hello, World!", found);
+            assertEquals("Hello, World!", found, "found:'" + found + "'");
 
             checkHandlerResult(redirectHandler.handlerRequestResponses, HttpServletResponse.SC_SEE_OTHER);
             checkHandlerResult(handler.handlerRequestResponses, HttpServletResponse.SC_OK);
@@ -607,6 +631,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testRedirectPutFromStreamWithFullUrl() throws Exception {
         Server realServer = new Server();
 
@@ -684,6 +709,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         checkHandlerResult(putHandler.handlerRequestResponses, HttpServletResponse.SC_CREATED);
     }
 
+    @Test
     public void testRedirectPutFromStreamRelativeUrl() throws Exception {
         Server realServer = new Server();
         addConnector(realServer);
@@ -763,6 +789,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testRedirectPutFileWithFullUrl() throws Exception {
         Server realServer = new Server();
 
@@ -833,6 +860,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testRedirectPutFileRelativeUrl() throws Exception {
         Server realServer = new Server();
         addConnector(realServer);
@@ -888,6 +916,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testRedirectPutFailureNonRepeatableStream() throws Exception {
         File repositoryDirectory = getRepositoryDirectory();
         FileUtils.deleteDirectory(repositoryDirectory);
@@ -1094,6 +1123,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         return proxyInfo;
     }
 
+    @Test
     public void testSecuredGetUnauthorized() throws Exception {
         try {
             runTestSecuredGet(null);
@@ -1103,6 +1133,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testSecuredGetWrongPassword() throws Exception {
         try {
             AuthenticationInfo authInfo = new AuthenticationInfo();
@@ -1115,6 +1146,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testSecuredGet() throws Exception {
         AuthenticationInfo authInfo = new AuthenticationInfo();
         authInfo.setUserName("user");
@@ -1166,6 +1198,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testSecuredGetToStream() throws Exception {
         AuthenticationInfo authInfo = new AuthenticationInfo();
         authInfo.setUserName("user");
@@ -1215,6 +1248,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testSecuredResourceExistsUnauthorized() throws Exception {
         try {
             runTestSecuredResourceExists(null);
@@ -1224,6 +1258,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testSecuredResourceExistsWrongPassword() throws Exception {
         try {
             AuthenticationInfo authInfo = new AuthenticationInfo();
@@ -1235,6 +1270,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testSecuredResourceExists() throws Exception {
         AuthenticationInfo authInfo = new AuthenticationInfo();
         authInfo.setUserName("user");
@@ -1337,6 +1373,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         return content;
     }
 
+    @Test
     public void testPutForbidden() throws Exception {
         try {
             runTestPut(HttpServletResponse.SC_FORBIDDEN);
@@ -1346,6 +1383,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testPut404() throws Exception {
         try {
             runTestPut(HttpServletResponse.SC_NOT_FOUND);
@@ -1355,6 +1393,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testPut500() throws Exception {
         try {
             runTestPut(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -1364,6 +1403,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testPut429() throws Exception {
 
         try {
@@ -1444,6 +1484,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testSecuredPutUnauthorized() throws Exception {
         try {
             runTestSecuredPut(null);
@@ -1453,6 +1494,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testSecuredPutWrongPassword() throws Exception {
         try {
             AuthenticationInfo authInfo = new AuthenticationInfo();
@@ -1465,6 +1507,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testSecuredPut() throws Exception {
         AuthenticationInfo authInfo = new AuthenticationInfo();
         authInfo.setUserName("user");
@@ -1520,6 +1563,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         testPreemptiveAuthenticationPut(sh, supportPreemptiveAuthenticationPut());
     }
 
+    @Test
     public void testNonSecuredPutFromStream() throws Exception {
         AuthenticationInfo authInfo = new AuthenticationInfo();
         authInfo.setUserName("user");
@@ -1527,6 +1571,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         runTestSecuredPutFromStream(authInfo, 1, false);
     }
 
+    @Test
     public void testSecuredPutFromStream() throws Exception {
         AuthenticationInfo authInfo = new AuthenticationInfo();
         authInfo.setUserName("user");
@@ -1602,23 +1647,26 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
 
     protected abstract boolean supportProxyPreemptiveAuthentication();
 
-    protected void testPreemptiveAuthenticationGet(TestSecurityHandler sh, boolean preemptive) {
+    @Test
+    public void testPreemptiveAuthenticationGet(TestSecurityHandler sh, boolean preemptive) {
         testPreemptiveAuthentication(sh, preemptive, HttpServletResponse.SC_OK);
     }
 
-    protected void testPreemptiveAuthenticationPut(TestSecurityHandler sh, boolean preemptive) {
+    @Test
+    public void testPreemptiveAuthenticationPut(TestSecurityHandler sh, boolean preemptive) {
         testPreemptiveAuthentication(sh, preemptive, HttpServletResponse.SC_CREATED);
     }
 
-    protected void testPreemptiveAuthentication(TestSecurityHandler sh, boolean preemptive, int statusCode) {
+    @Test
+    public void testPreemptiveAuthentication(TestSecurityHandler sh, boolean preemptive, int statusCode) {
 
         if (preemptive) {
             assertEquals(
-                    "not 1 security handler use " + sh.handlerRequestResponses, 1, sh.handlerRequestResponses.size());
+                    1, sh.handlerRequestResponses.size(), "not 1 security handler use " + sh.handlerRequestResponses);
             assertEquals(statusCode, sh.handlerRequestResponses.get(0).responseCode);
         } else {
             assertEquals(
-                    "not 2 security handler use " + sh.handlerRequestResponses, 2, sh.handlerRequestResponses.size());
+                    2, sh.handlerRequestResponses.size(), "not 2 security handler use " + sh.handlerRequestResponses);
             assertEquals(HttpServletResponse.SC_UNAUTHORIZED, sh.handlerRequestResponses.get(0).responseCode);
             assertEquals(statusCode, sh.handlerRequestResponses.get(1).responseCode);
         }
@@ -1872,7 +1920,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         // TODO: handle AuthenticationException for Wagon.connect() calls
         assertNotNull(e);
         try {
-            assertTrue("only verify instances of WagonException", e instanceof WagonException);
+            assertTrue(e instanceof WagonException, "only verify instances of WagonException");
 
             String reasonPhrase;
             String assertMessageForBadMessage = "exception message not described properly";
@@ -1880,70 +1928,70 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
                 case HttpServletResponse.SC_NOT_FOUND:
                     // TODO: add test for 410: Gone?
                     assertTrue(
-                            "404 not found response should throw ResourceDoesNotExistException",
-                            e instanceof ResourceDoesNotExistException);
+                            e instanceof ResourceDoesNotExistException,
+                            "404 not found response should throw ResourceDoesNotExistException");
                     reasonPhrase = (forReasonPhrase == null || forReasonPhrase.isEmpty())
                             ? " Not Found"
                             : (" " + forReasonPhrase);
                     assertEquals(
-                            assertMessageForBadMessage,
                             "resource missing at " + forUrl + ", status: 404" + reasonPhrase,
-                            e.getMessage());
+                            e.getMessage(),
+                            assertMessageForBadMessage);
                     break;
 
                 case HttpServletResponse.SC_UNAUTHORIZED:
                     // FIXME assumes Wagon.get()/put() returning 401 instead of Wagon.connect()
                     assertTrue(
+                            e instanceof AuthorizationException,
                             "401 Unauthorized should throw AuthorizationException since "
                                     + " AuthenticationException is not explicitly declared as thrown from wagon "
-                                    + "methods",
-                            e instanceof AuthorizationException);
+                                    + "methods");
                     reasonPhrase = (forReasonPhrase == null || forReasonPhrase.isEmpty())
                             ? " Unauthorized"
                             : (" " + forReasonPhrase);
                     assertEquals(
-                            assertMessageForBadMessage,
                             "authentication failed for " + forUrl + ", status: 401" + reasonPhrase,
-                            e.getMessage());
+                            e.getMessage(),
+                            assertMessageForBadMessage);
                     break;
 
                 case HttpServletResponse.SC_PROXY_AUTHENTICATION_REQUIRED:
                     assertTrue(
-                            "407 Proxy authentication required should throw AuthorizationException",
-                            e instanceof AuthorizationException);
+                            e instanceof AuthorizationException,
+                            "407 Proxy authentication required should throw AuthorizationException");
                     reasonPhrase = (forReasonPhrase == null || forReasonPhrase.isEmpty())
                             ? " Proxy Authentication Required"
                             : (" " + forReasonPhrase);
                     assertEquals(
-                            assertMessageForBadMessage,
                             "proxy authentication failed for " + forUrl + ", status: 407" + reasonPhrase,
-                            e.getMessage());
+                            e.getMessage(),
+                            assertMessageForBadMessage);
                     break;
 
                 case HttpServletResponse.SC_FORBIDDEN:
                     assertTrue(
-                            "403 Forbidden should throw AuthorizationException", e instanceof AuthorizationException);
+                            e instanceof AuthorizationException, "403 Forbidden should throw AuthorizationException");
                     reasonPhrase = (forReasonPhrase == null || forReasonPhrase.isEmpty())
                             ? " Forbidden"
                             : (" " + forReasonPhrase);
                     assertEquals(
-                            assertMessageForBadMessage,
                             "authorization failed for " + forUrl + ", status: 403" + reasonPhrase,
-                            e.getMessage());
+                            e.getMessage(),
+                            assertMessageForBadMessage);
                     break;
 
                 default:
                     assertTrue(
-                            "transfer failures should at least be wrapped in a TransferFailedException",
-                            e instanceof TransferFailedException);
+                            e instanceof TransferFailedException,
+                            "transfer failures should at least be wrapped in a TransferFailedException");
                     assertTrue(
-                            "expected status code for transfer failures should be >= 400",
-                            forStatusCode >= HttpServletResponse.SC_BAD_REQUEST);
+                            forStatusCode >= HttpServletResponse.SC_BAD_REQUEST,
+                            "expected status code for transfer failures should be >= 400");
                     reasonPhrase = forReasonPhrase == null ? "" : " " + forReasonPhrase;
                     assertEquals(
-                            assertMessageForBadMessage,
                             "transfer failed for " + forUrl + ", status: " + forStatusCode + reasonPhrase,
-                            e.getMessage());
+                            e.getMessage(),
+                            assertMessageForBadMessage);
                     break;
             }
         } catch (AssertionError assertionError) {

@@ -43,8 +43,11 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Olivier Lamy
@@ -60,6 +63,7 @@ public class HugeFileDownloadTest extends PlexusTestCase {
     private Server server;
     private ServerConnector connector;
 
+    @Test
     public void testDownloadHugeFileWithContentLength() throws Exception {
         final File hugeFile = new File(getBasedir(), "target/hugefile.txt");
         if (!hugeFile.exists() || hugeFile.length() < HUGE_FILE_SIZE) {
@@ -109,6 +113,7 @@ public class HugeFileDownloadTest extends PlexusTestCase {
         }
     }
 
+    @Test
     public void testDownloadHugeFileWithChunked() throws Exception {
         final File hugeFile = new File(getBasedir(), "target/hugefile.txt");
         if (!hugeFile.exists() || hugeFile.length() < HUGE_FILE_SIZE) {

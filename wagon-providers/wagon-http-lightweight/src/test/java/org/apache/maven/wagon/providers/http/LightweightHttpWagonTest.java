@@ -31,6 +31,10 @@ import org.apache.maven.wagon.WagonException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.http.HttpWagonTestCase;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
@@ -72,89 +76,89 @@ public class LightweightHttpWagonTest extends HttpWagonTestCase {
 
         assertNotNull(e);
         try {
-            assertTrue("only verify instances of WagonException", e instanceof WagonException);
+            assertTrue(e instanceof WagonException, "only verify instances of WagonException");
 
             String assertMessageForBadMessage = "exception message not described properly: ";
             switch (forStatusCode) {
                 case HttpServletResponse.SC_GONE:
                 case HttpServletResponse.SC_NOT_FOUND:
                     assertTrue(
-                            "404 or 410 should throw ResourceDoesNotExistException",
-                            e instanceof ResourceDoesNotExistException);
+                            e instanceof ResourceDoesNotExistException,
+                            "404 or 410 should throw ResourceDoesNotExistException");
 
                     if (e.getCause() != null) {
                         assertTrue(
-                                "ResourceDoesNotExistException should have the expected cause",
-                                e.getCause() instanceof FileNotFoundException);
+                                e.getCause() instanceof FileNotFoundException,
+                                "ResourceDoesNotExistException should have the expected cause");
                         // the status code and reason phrase cannot always be learned due to implementation limitations
                         // which means the message may not include them
-                        assertEquals(assertMessageForBadMessage, "resource missing at " + forUrl, e.getMessage());
+                        assertEquals("resource missing at " + forUrl, e.getMessage(), assertMessageForBadMessage);
                     } else {
                         assertEquals(
-                                assertMessageForBadMessage,
                                 "resource missing at " + forUrl + ", status: " + forStatusCode + " " + forReasonPhrase,
-                                e.getMessage());
+                                e.getMessage(),
+                                assertMessageForBadMessage);
                     }
 
                     break;
 
                 case HttpServletResponse.SC_FORBIDDEN:
-                    assertTrue("403 Forbidden throws AuthorizationException", e instanceof AuthorizationException);
+                    assertTrue(e instanceof AuthorizationException, "403 Forbidden throws AuthorizationException");
 
                     assertEquals(
-                            assertMessageForBadMessage,
                             "authorization failed for " + forUrl + ", status: 403"
                                     + ((forReasonPhrase == null || forReasonPhrase.isEmpty())
                                             ? " Forbidden"
                                             : (" " + forReasonPhrase)),
-                            e.getMessage());
+                            e.getMessage(),
+                            assertMessageForBadMessage);
                     break;
 
                 case HttpServletResponse.SC_UNAUTHORIZED:
-                    assertTrue("401 Unauthorized throws AuthorizationException", e instanceof AuthorizationException);
+                    assertTrue(e instanceof AuthorizationException, "401 Unauthorized throws AuthorizationException");
 
                     assertEquals(
-                            assertMessageForBadMessage,
                             "authentication failed for " + forUrl + ", status: 401"
                                     + ((forReasonPhrase == null || forReasonPhrase.isEmpty())
                                             ? " Unauthorized"
                                             : (" " + forReasonPhrase)),
-                            e.getMessage());
+                            e.getMessage(),
+                            assertMessageForBadMessage);
                     break;
 
                 default:
                     assertTrue(
-                            "general exception must be TransferFailedException", e instanceof TransferFailedException);
+                            e instanceof TransferFailedException, "general exception must be TransferFailedException");
                     assertTrue(
+                            forStatusCode >= HttpServletResponse.SC_BAD_REQUEST,
                             "expected status code for transfer failures should be >= 400, but none of "
-                                    + " the already handled codes",
-                            forStatusCode >= HttpServletResponse.SC_BAD_REQUEST);
+                                    + " the already handled codes");
 
                     if (e.getCause() != null) {
                         assertTrue(
-                                "TransferFailedException should have the original cause for diagnosis",
-                                e.getCause() instanceof IOException);
+                                e.getCause() instanceof IOException,
+                                "TransferFailedException should have the original cause for diagnosis");
                     }
 
                     // the status code and reason phrase cannot always be learned due to implementation limitations
                     // so the message may not include them, but the implementation should use a consistent format
                     assertTrue(
-                            "message should always include url",
-                            e.getMessage().startsWith("transfer failed for " + forUrl));
+                            e.getMessage().startsWith("transfer failed for " + forUrl),
+                            "message should always include url");
 
                     if (e.getMessage().length() > ("transfer failed for " + forUrl).length()) {
                         assertTrue(
-                                "message should include url and status code",
                                 e.getMessage()
-                                        .startsWith("transfer failed for " + forUrl + ", status: " + forStatusCode));
+                                        .startsWith("transfer failed for " + forUrl + ", status: " + forStatusCode),
+                                "message should include url and status code");
                     }
 
                     if (e.getMessage().length()
                             > ("transfer failed for " + forUrl + ", status: " + forStatusCode).length()) {
                         assertEquals(
-                                "message should include url and status code and reason phrase",
                                 "transfer failed for " + forUrl + ", status: " + forStatusCode + " " + forReasonPhrase,
-                                e.getMessage());
+                                e.getMessage(),
+                                "message should include url and status code and reason phrase");
                     }
 
                     break;

@@ -40,10 +40,16 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ScpWagonWithProxyTest extends PlexusTestCase {
     private boolean handled;
 
+    @Test
     public void testHttpProxy() throws Exception {
         handled = false;
         Handler handler = new AbstractHandler() {
@@ -82,6 +88,7 @@ public class ScpWagonWithProxyTest extends PlexusTestCase {
         }
     }
 
+    @Test
     public void testSocksProxy() throws Exception {
         handled = false;
 

@@ -18,7 +18,6 @@
  */
 package org.apache.maven.wagon.providers.webdav;
 
-import junit.framework.TestCase;
 import org.apache.http.Header;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.params.HttpParams;
@@ -31,9 +30,15 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.shared.http.HttpConfiguration;
 import org.apache.maven.wagon.shared.http.HttpMethodConfiguration;
+import org.junit.jupiter.api.Test;
 
-public class HttpClientWagonTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+public class HttpClientWagonTest {
+
+    @Test
     public void testSetPreemptiveAuthParamViaConfig() {
         HttpMethodConfiguration methodConfig = new HttpMethodConfiguration();
         methodConfig.setUsePreemptive(true);
@@ -51,6 +56,7 @@ public class HttpClientWagonTest extends TestCase {
         assertNotNull(params);
     }
 
+    @Test
     public void testDefaultHeadersUsedByDefault() {
         HttpConfiguration config = new HttpConfiguration();
         config.setAll(new HttpMethodConfiguration());
@@ -75,6 +81,7 @@ public class HttpClientWagonTest extends TestCase {
         assertEquals("no-cache", header.getValue());
     }
 
+    @Test
     public void testTurnOffDefaultHeaders() {
         HttpConfiguration config = new HttpConfiguration();
         config.setAll(new HttpMethodConfiguration().setUseDefaultHeaders(false));
@@ -96,6 +103,7 @@ public class HttpClientWagonTest extends TestCase {
         assertNull(header);
     }
 
+    @Test
     public void testNTCredentialsWithUsernameNull() throws AuthenticationException, ConnectionException {
         TestWagon wagon = new TestWagon();
 
@@ -108,6 +116,7 @@ public class HttpClientWagonTest extends TestCase {
         assertNull(wagon.getAuthenticationInfo().getPassword());
     }
 
+    @Test
     public void testNTCredentialsNoNTDomain() throws AuthenticationException, ConnectionException {
         TestWagon wagon = new TestWagon();
 
@@ -128,6 +137,7 @@ public class HttpClientWagonTest extends TestCase {
         assertEquals(myPassword, wagon.getAuthenticationInfo().getPassword());
     }
 
+    @Test
     public void testNTCredentialsWithNTDomain() throws AuthenticationException, ConnectionException {
         TestWagon wagon = new TestWagon();
 

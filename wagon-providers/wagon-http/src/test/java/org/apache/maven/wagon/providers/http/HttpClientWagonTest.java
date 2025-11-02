@@ -18,7 +18,6 @@
  */
 package org.apache.maven.wagon.providers.http;
 
-import junit.framework.TestCase;
 import org.apache.http.Header;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpHead;
@@ -28,9 +27,15 @@ import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;
 import org.apache.maven.wagon.shared.http.ConfigurationUtils;
 import org.apache.maven.wagon.shared.http.HttpConfiguration;
 import org.apache.maven.wagon.shared.http.HttpMethodConfiguration;
+import org.junit.jupiter.api.Test;
 
-public class HttpClientWagonTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+public class HttpClientWagonTest {
+
+    @Test
     public void testSetMaxRedirectsParamViaConfig() {
         HttpMethodConfiguration methodConfig = new HttpMethodConfiguration();
         int maxRedirects = 2;
@@ -47,6 +52,7 @@ public class HttpClientWagonTest extends TestCase {
         assertEquals(2, requestConfig.getMaxRedirects());
     }
 
+    @Test
     public void testDefaultHeadersUsedByDefault() {
         HttpConfiguration config = new HttpConfiguration();
         config.setAll(new HttpMethodConfiguration());
@@ -71,6 +77,7 @@ public class HttpClientWagonTest extends TestCase {
         assertEquals("no-cache", header.getValue());
     }
 
+    @Test
     public void testTurnOffDefaultHeaders() {
         HttpConfiguration config = new HttpConfiguration();
         config.setAll(new HttpMethodConfiguration().setUseDefaultHeaders(false));

@@ -26,6 +26,10 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.providers.ssh.TestData;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -54,6 +58,7 @@ public class ScpWagonWithSshPrivateKeySearchTest extends StreamingWagonTestCase 
         return new File(repository.getBasedir(), resource.getName()).lastModified();
     }
 
+    @Test
     public void testMissingPrivateKey() throws Exception {
         File file = File.createTempFile("wagon", "tmp");
         file.delete();
@@ -69,6 +74,7 @@ public class ScpWagonWithSshPrivateKeySearchTest extends StreamingWagonTestCase 
         }
     }
 
+    @Test
     public void testBadPrivateKey() throws Exception {
         File file = File.createTempFile("wagon", "tmp");
         file.deleteOnExit();

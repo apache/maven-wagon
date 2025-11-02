@@ -40,15 +40,15 @@ import org.apache.maven.wagon.tck.http.fixture.ServerFixture;
 import org.apache.maven.wagon.tck.http.fixture.ServletExceptionServlet;
 import org.apache.maven.wagon.tck.http.util.ValueHolder;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.apache.maven.wagon.tck.http.Assertions.NO_RESPONSE_STATUS_CODE;
 import static org.apache.maven.wagon.tck.http.Assertions.assertFileContentsFromResource;
 import static org.apache.maven.wagon.tck.http.Assertions.assertWagonExceptionMessage;
-import static org.junit.Assert.assertNotNull;
 
 /**
  *
@@ -65,7 +65,7 @@ public class GetWagonTests extends HttpWagonTests {
     }
 
     @Test
-    @Ignore("FIX ME!")
+    @Disabled("FIX ME!")
     public void proxied()
             throws ConnectionException, AuthenticationException, ComponentConfigurationException, IOException,
                     TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
@@ -156,7 +156,7 @@ public class GetWagonTests extends HttpWagonTests {
         logger.info("Interrupting thread.");
         t.interrupt();
 
-        assertNotNull("TransferFailedException should have been thrown.", holder.getValue());
+        assertNotNull(holder.getValue(), "TransferFailedException should have been thrown.");
         assertWagonExceptionMessage(holder.getValue(), NO_RESPONSE_STATUS_CODE, getBaseUrl() + "infinite/", "", null);
     }
 
@@ -425,7 +425,7 @@ public class GetWagonTests extends HttpWagonTests {
             authFailure = true;
         }
 
-        assertTrue("Authentication/Authorization should have failed.", authFailure);
+        assertTrue(authFailure, "Authentication/Authorization should have failed.");
     }
 
     protected void testSuccessfulGet(final String path)

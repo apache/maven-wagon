@@ -27,6 +27,12 @@ import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.getName;
 
 /**
  * User: jdumay Date: 24/01/2008 Time: 17:17:34
@@ -34,7 +40,8 @@ import org.eclipse.jetty.servlet.ServletHolder;
 public class HttpWagonErrorTest extends HttpWagonHttpServerTestCase {
     private int serverPort;
 
-    protected void setUp() throws Exception {
+    @BeforeEach
+    public void setUp() throws Exception {
         super.setUp();
         ServletHolder servlets = new ServletHolder(new ErrorWithMessageServlet());
         context.addServlet(servlets, "/*");
@@ -42,6 +49,7 @@ public class HttpWagonErrorTest extends HttpWagonHttpServerTestCase {
         serverPort = getPort();
     }
 
+    @Test
     public void testGet401() throws Exception {
         Exception thrown = null;
 
@@ -73,6 +81,7 @@ public class HttpWagonErrorTest extends HttpWagonHttpServerTestCase {
                 thrown.getMessage());
     }
 
+    @Test
     public void testGet403() throws Exception {
         Exception thrown = null;
 
@@ -104,6 +113,7 @@ public class HttpWagonErrorTest extends HttpWagonHttpServerTestCase {
                 thrown.getMessage());
     }
 
+    @Test
     public void testGet404() throws Exception {
         Exception thrown = null;
 
@@ -135,6 +145,7 @@ public class HttpWagonErrorTest extends HttpWagonHttpServerTestCase {
                 thrown.getMessage());
     }
 
+    @Test
     public void testGet407() throws Exception {
         Exception thrown = null;
 
@@ -166,6 +177,7 @@ public class HttpWagonErrorTest extends HttpWagonHttpServerTestCase {
                 thrown.getMessage());
     }
 
+    @Test
     public void testGet500() throws Exception {
         Exception thrown = null;
 
