@@ -23,13 +23,14 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.http.Header;
-import org.apache.http.HttpHost;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.message.BasicHeader;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.core5.http.message.BasicHeader;
 import org.apache.maven.wagon.Wagon;
 
 /**
@@ -58,8 +59,8 @@ public class ConfigurationUtils {
     private static final String COERCE_PATTERN = "%(\\w+),(.+)";
 
     public static void copyConfig(HttpMethodConfiguration config, RequestConfig.Builder builder) {
-        builder.setConnectTimeout(config.getConnectionTimeout());
-        builder.setSocketTimeout(config.getReadTimeout());
+        builder.setConnectTimeout(config.getConnectionTimeout(), TimeUnit.MILLISECONDS);
+        builder.setResponseTimeout(config.getReadTimeout(), TimeUnit.MILLISECONDS);
 
         Properties params = config.getParams();
         if (params != null) {
@@ -74,11 +75,11 @@ public class ConfigurationUtils {
                 }
 
                 if (key.equals(SO_TIMEOUT)) {
-                    builder.setSocketTimeout(Integer.parseInt(value));
+                    builder.setResponseTimeout(Integer.parseInt(value), TimeUnit.MILLISECONDS);
                 } else if (key.equals(STALE_CONNECTION_CHECK)) {
                     builder.setStaleConnectionCheckEnabled(Boolean.valueOf(value));
                 } else if (key.equals(CONNECTION_TIMEOUT)) {
-                    builder.setConnectTimeout(Integer.parseInt(value));
+                    builder.setConnectTimeout(Integer.parseInt(value), TimeUnit.MILLISECONDS);
                 } else if (key.equals(USE_EXPECT_CONTINUE)) {
                     builder.setExpectContinueEnabled(Boolean.valueOf(value));
                 } else if (key.equals(DEFAULT_PROXY)) {
@@ -98,7 +99,7 @@ public class ConfigurationUtils {
                 } else if (key.equals(ALLOW_CIRCULAR_REDIRECTS)) {
                     builder.setCircularRedirectsAllowed(Boolean.valueOf(value));
                 } else if (key.equals(CONN_MANAGER_TIMEOUT)) {
-                    builder.setConnectionRequestTimeout(Integer.parseInt(value));
+                    builder.setConnectionRequestTimeout(Integer.parseInt(value), TimeUnit.MILLISECONDS);
                 } else if (key.equals(COOKIE_POLICY)) {
                     builder.setCookieSpec(value);
                 } else if (key.equals(MAX_REDIRECTS)) {

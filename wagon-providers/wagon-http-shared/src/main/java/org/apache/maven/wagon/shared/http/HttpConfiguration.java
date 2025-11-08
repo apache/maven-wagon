@@ -18,7 +18,7 @@
  */
 package org.apache.maven.wagon.shared.http;
 
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
 
 /**
  *

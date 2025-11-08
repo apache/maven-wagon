@@ -18,13 +18,13 @@
  */
 package org.apache.maven.wagon.shared.http;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.annotation.Contract;
-import org.apache.http.annotation.ThreadingBehavior;
-import org.apache.http.client.ServiceUnavailableRetryStrategy;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.Args;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.annotation.Contract;
+import org.apache.hc.core5.annotation.ThreadingBehavior;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.client5.http.ServiceUnavailableRetryStrategy;
+import org.apache.hc.core5.http.protocol.HttpContext;
+import org.apache.hc.core5.util.Args;
 
 /**
  * An implementation of the {@link ServiceUnavailableRetryStrategy} interface.
@@ -53,8 +53,8 @@ public class StandardServiceUnavailableRetryStrategy implements ServiceUnavailab
     }
 
     @Override
-    public boolean retryRequest(final HttpResponse response, final int executionCount, final HttpContext context) {
-        int statusCode = response.getStatusLine().getStatusCode();
+    public boolean retryRequest(final ClassicHttpResponse response, final int executionCount, final HttpContext context) {
+        int statusCode = response.getCode();
         boolean retryableStatusCode = statusCode == HttpStatus.SC_REQUEST_TIMEOUT
                 // Too Many Requests ("standard" rate-limiting)
                 || statusCode == AbstractHttpClientWagon.SC_TOO_MANY_REQUESTS

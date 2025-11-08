@@ -19,9 +19,9 @@
 package org.apache.maven.wagon.providers.http;
 
 import junit.framework.TestCase;
-import org.apache.http.Header;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpHead;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
 import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;

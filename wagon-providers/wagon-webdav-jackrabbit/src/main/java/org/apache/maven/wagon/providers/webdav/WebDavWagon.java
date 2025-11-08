@@ -24,10 +24,10 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.HttpException;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.HttpException;
+import org.apache.hc.core5.http.HttpStatus;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.MultiStatus;
@@ -140,11 +140,11 @@ public class WebDavWagon extends AbstractHttpClientWagon {
     private int doMkCol(String url) throws IOException {
         HttpMkcol method = new HttpMkcol(url);
         try (CloseableHttpResponse closeableHttpResponse = execute(method)) {
-            return closeableHttpResponse.getStatusLine().getStatusCode();
+            return closeableHttpResponse.getCode();
         } catch (HttpException e) {
             throw new IOException(e.getMessage(), e);
         } finally {
-            method.releaseConnection();
+            method.reset();
         }
     }
 
@@ -196,7 +196,7 @@ public class WebDavWagon extends AbstractHttpClientWagon {
         } finally {
             // TODO olamy: not sure we still need this!!
             if (method != null) {
-                method.releaseConnection();
+                method.reset();
             }
             if (closeableHttpResponse != null) {
                 closeableHttpResponse.close();
@@ -244,8 +244,8 @@ public class WebDavWagon extends AbstractHttpClientWagon {
                     return dirs;
                 }
 
-                int statusCode = closeableHttpResponse.getStatusLine().getStatusCode();
-                String reasonPhrase = closeableHttpResponse.getStatusLine().getReasonPhrase();
+                int statusCode = closeableHttpResponse.getCode();
+                String reasonPhrase = closeableHttpResponse.getReasonPhrase();
                 if (statusCode == HttpStatus.SC_NOT_FOUND || statusCode == HttpStatus.SC_GONE) {
                     EntityUtils.consumeQuietly(closeableHttpResponse.getEntity());
                     throw new ResourceDoesNotExistException(
@@ -261,7 +261,7 @@ public class WebDavWagon extends AbstractHttpClientWagon {
         } finally {
             // TODO olamy: not sure we still need this!!
             if (method != null) {
-                method.releaseConnection();
+                method.reset();
             }
             if (closeableHttpResponse != null) {
                 try {

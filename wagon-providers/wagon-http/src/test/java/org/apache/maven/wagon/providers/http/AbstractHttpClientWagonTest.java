@@ -32,11 +32,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 
-import org.apache.http.client.HttpRequestRetryHandler;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
-import org.apache.http.impl.execchain.RedirectExec;
-import org.apache.http.impl.execchain.RetryExec;
+import org.apache.hc.client5.http.HttpRequestRetryStrategy;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.DefaultHttpRequestRetryHandler;
+import org.apache.hc.client5.http.impl.classic.RedirectExec;
+import org.apache.hc.client5.http.impl.classic.RetryExec;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -52,7 +52,7 @@ public class AbstractHttpClientWagonTest {
         doTestHttpClient(new Runnable() {
             @Override
             public void run() {
-                final HttpRequestRetryHandler handler = getCurrentHandler();
+                final HttpRequestRetryStrategy handler = getCurrentHandler();
                 assertNotNull(handler);
                 assertTrue(handler instanceof DefaultHttpRequestRetryHandler);
                 final DefaultHttpRequestRetryHandler impl = DefaultHttpRequestRetryHandler.class.cast(handler);
@@ -70,7 +70,7 @@ public class AbstractHttpClientWagonTest {
                 System.setProperty("maven.wagon.http.retryHandler.class", "default");
                 System.setProperty("maven.wagon.http.retryHandler.count", "5");
 
-                final HttpRequestRetryHandler handler = getCurrentHandler();
+                final HttpRequestRetryStrategy handler = getCurrentHandler();
                 assertNotNull(handler);
                 assertTrue(handler instanceof DefaultHttpRequestRetryHandler);
                 final DefaultHttpRequestRetryHandler impl = DefaultHttpRequestRetryHandler.class.cast(handler);
@@ -88,7 +88,7 @@ public class AbstractHttpClientWagonTest {
                 System.setProperty("maven.wagon.http.retryHandler.class", "default");
                 System.setProperty("maven.wagon.http.retryHandler.requestSentEnabled", "true");
 
-                final HttpRequestRetryHandler handler = getCurrentHandler();
+                final HttpRequestRetryStrategy handler = getCurrentHandler();
                 assertNotNull(handler);
                 assertTrue(handler instanceof DefaultHttpRequestRetryHandler);
                 final DefaultHttpRequestRetryHandler impl = DefaultHttpRequestRetryHandler.class.cast(handler);
@@ -106,7 +106,7 @@ public class AbstractHttpClientWagonTest {
                 System.setProperty("maven.wagon.http.retryHandler.class", "default");
                 System.setProperty("maven.wagon.http.retryHandler.nonRetryableClasses", IOException.class.getName());
 
-                final HttpRequestRetryHandler handler = getCurrentHandler();
+                final HttpRequestRetryStrategy handler = getCurrentHandler();
                 assertNotNull(handler);
                 assertTrue(handler instanceof DefaultHttpRequestRetryHandler);
                 final DefaultHttpRequestRetryHandler impl = DefaultHttpRequestRetryHandler.class.cast(handler);
@@ -129,7 +129,7 @@ public class AbstractHttpClientWagonTest {
         });
     }
 
-    private HttpRequestRetryHandler getCurrentHandler() {
+    private HttpRequestRetryStrategy getCurrentHandler() {
         try {
             final Class<?> impl = Thread.currentThread()
                     .getContextClassLoader()
@@ -154,7 +154,7 @@ public class AbstractHttpClientWagonTest {
             if (!retryHandler.isAccessible()) {
                 retryHandler.setAccessible(true);
             }
-            return HttpRequestRetryHandler.class.cast(retryHandler.get(requestExecutorInstance));
+            return HttpRequestRetryStrategy.class.cast(retryHandler.get(requestExecutorInstance));
         } catch (final Exception e) {
             throw new IllegalStateException(e);
         }

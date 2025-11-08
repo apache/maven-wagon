@@ -29,9 +29,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -40,7 +40,7 @@ import org.w3c.dom.Document;
  * <code>XmlRequestEntity</code>...
  * @deprecated is it really use???
  */
-public class XmlRequestEntity extends HttpEntityEnclosingRequestBase {
+public class XmlRequestEntity extends HttpUriRequestBase {
 
     private static Logger log = LoggerFactory.getLogger(XmlRequestEntity.class);
 

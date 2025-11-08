@@ -19,20 +19,19 @@
 package org.apache.maven.wagon.shared.http;
 
 import java.net.URI;
-
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.ProtocolException;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.methods.RequestBuilder;
-import org.apache.http.impl.client.DefaultRedirectStrategy;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.Args;
+import org.apache.hc.client5.http.impl.DefaultRedirectStrategy;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.HttpEntityContainer;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.ProtocolException;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
+import org.apache.hc.client5.http.classic.methods.HttpPut;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
+import org.apache.hc.core5.http.protocol.HttpContext;
+import org.apache.hc.core5.util.Args;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon.WagonHttpEntity;
 import org.slf4j.Logger;
@@ -64,12 +63,12 @@ public class WagonRedirectStrategy extends DefaultRedirectStrategy {
     }
 
     @Override
-    public boolean isRedirected(final HttpRequest request, final HttpResponse response, final HttpContext context)
+    public boolean isRedirected(final ClassicHttpRequest request, final ClassicHttpResponse response, final HttpContext context)
             throws ProtocolException {
         Args.notNull(request, "HTTP request");
         Args.notNull(response, "HTTP response");
 
-        final int statusCode = response.getStatusLine().getStatusCode();
+        final int statusCode = response.getCode();
         final String method = request.getRequestLine().getMethod();
         switch (statusCode) {
             case HttpStatus.SC_MOVED_TEMPORARILY:
@@ -84,11 +83,11 @@ public class WagonRedirectStrategy extends DefaultRedirectStrategy {
     }
 
     @Override
-    public HttpUriRequest getRedirect(final HttpRequest request, final HttpResponse response, final HttpContext context)
+    public HttpUriRequest getRedirect(final ClassicHttpRequest request, final ClassicHttpResponse response, final HttpContext context)
             throws ProtocolException {
         final URI uri = getLocationURI(request, response, context);
-        if (request instanceof HttpEntityEnclosingRequest) {
-            HttpEntityEnclosingRequest encRequest = (HttpEntityEnclosingRequest) request;
+        if (request instanceof HttpEntityContainer) {
+            HttpEntityContainer encRequest = (HttpEntityContainer) request;
             if (encRequest.getEntity() instanceof AbstractHttpClientWagon.WagonHttpEntity) {
                 AbstractHttpClientWagon.WagonHttpEntity whe = (WagonHttpEntity) encRequest.getEntity();
                 if (whe.getWagon() instanceof AbstractHttpClientWagon) {
@@ -112,6 +111,6 @@ public class WagonRedirectStrategy extends DefaultRedirectStrategy {
             }
         }
 
-        return RequestBuilder.copy(request).setUri(uri).build();
+        return ClassicRequestBuilder.copy(request).setUri(uri).build();
     }
 }

@@ -18,8 +18,8 @@
  */
 package org.apache.maven.wagon.shared.http;
 
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.client5.http.auth.AuthScope;
 
 /**
  * @since 2.8
@@ -79,7 +79,7 @@ public class BasicAuthScope {
                 && "ANY".compareTo(getPort()) == 0 //
                 && getRealm() != null //
                 && "ANY".compareTo(getRealm()) == 0) {
-            return AuthScope.ANY;
+            return new AuthScope(null, -1);
         }
         String scopeHost = host;
         if (getHost() != null) {

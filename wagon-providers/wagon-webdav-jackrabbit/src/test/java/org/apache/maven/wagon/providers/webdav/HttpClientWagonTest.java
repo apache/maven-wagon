@@ -19,8 +19,9 @@
 package org.apache.maven.wagon.providers.webdav;
 
 import junit.framework.TestCase;
-import org.apache.http.Header;
-import org.apache.http.client.methods.HttpHead;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
+/* No generic migration for classes in the `org.apache.http.params` package exists, please migrate manually */
 import org.apache.http.params.HttpParams;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.OutputData;

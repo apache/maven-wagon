@@ -23,7 +23,7 @@ import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 
-import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.hc.core5.ssl.TrustStrategy;
 
 /**
  * Relaxed X509 certificate trust manager: can ignore invalid certificate date.
