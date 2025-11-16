@@ -34,7 +34,6 @@ import org.apache.maven.wagon.repository.Repository;
  *
  */
 public interface Wagon {
-    String ROLE = Wagon.class.getName();
 
     /**
      * default 60s approximately 1 minute

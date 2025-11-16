@@ -18,26 +18,18 @@
  */
 package org.apache.maven.wagon.repository;
 
-import junit.framework.TestCase;
 import org.apache.maven.wagon.WagonConstants;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author <a href="mailto:jvanzyl@maven.org">Jason van Zyl</a>
  *
  */
-public class RepositoryTest extends TestCase {
-    public RepositoryTest(final String name) {
-        super(name);
-    }
+public class RepositoryTest {
 
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testRepositoryProperties() throws Exception {
         Repository repository = new Repository();
 
@@ -94,6 +86,7 @@ public class RepositoryTest extends TestCase {
         assertEquals("http://www.ibiblio.org", repository.getUrl());
     }
 
+    @Test
     public void testIPv6() {
         assertRepository(
                 "http://user:password@[fff::1]:7891/oo/rest/users",

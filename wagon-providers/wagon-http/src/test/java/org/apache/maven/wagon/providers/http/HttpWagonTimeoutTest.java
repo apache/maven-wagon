@@ -19,20 +19,28 @@
 package org.apache.maven.wagon.providers.http;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.Random;
 
-import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.shared.http.HttpConfiguration;
 import org.apache.maven.wagon.shared.http.HttpMethodConfiguration;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * User: jdumay Date: 24/01/2008 Time: 17:17:34
  */
 public class HttpWagonTimeoutTest extends HttpWagonHttpServerTestCase {
+
+    @BeforeEach
     protected void setUp() throws Exception {
         super.setUp();
         ServletHolder servlets = new ServletHolder(new WaitForeverServlet());
@@ -40,6 +48,7 @@ public class HttpWagonTimeoutTest extends HttpWagonHttpServerTestCase {
         startServer();
     }
 
+    @Test
     public void testGetTimeout() throws Exception {
         Exception thrown = null;
 
@@ -52,7 +61,7 @@ public class HttpWagonTimeoutTest extends HttpWagonHttpServerTestCase {
 
             wagon.connect(testRepository);
 
-            File destFile = FileTestUtils.createUniqueFile(getName(), getName());
+            File destFile = Files.createTempFile("wagon", "test").toFile();
             destFile.deleteOnExit();
 
             wagon.get("/timeoutfile", destFile);
@@ -65,9 +74,10 @@ public class HttpWagonTimeoutTest extends HttpWagonHttpServerTestCase {
         }
 
         assertNotNull(thrown);
-        assertEquals(TransferFailedException.class, thrown.getClass());
+        assertInstanceOf(TransferFailedException.class, thrown);
     }
 
+    @Test
     public void testResourceExits() throws Exception {
         Exception thrown = null;
 
@@ -90,9 +100,10 @@ public class HttpWagonTimeoutTest extends HttpWagonHttpServerTestCase {
         }
 
         assertNotNull(thrown);
-        assertEquals(TransferFailedException.class, thrown.getClass());
+        assertInstanceOf(TransferFailedException.class, thrown);
     }
 
+    @Test
     public void testPutTimeout() throws Exception {
         Exception thrown = null;
 
@@ -118,9 +129,10 @@ public class HttpWagonTimeoutTest extends HttpWagonHttpServerTestCase {
         }
 
         assertNotNull(thrown);
-        assertEquals(TransferFailedException.class, thrown.getClass());
+        assertInstanceOf(TransferFailedException.class, thrown);
     }
 
+    @Test
     public void testConnectionTimeout() throws Exception {
         Exception thrown = null;
 
@@ -151,6 +163,6 @@ public class HttpWagonTimeoutTest extends HttpWagonHttpServerTestCase {
         }
 
         assertNotNull(thrown);
-        assertEquals(TransferFailedException.class, thrown.getClass());
+        assertInstanceOf(TransferFailedException.class, thrown);
     }
 }

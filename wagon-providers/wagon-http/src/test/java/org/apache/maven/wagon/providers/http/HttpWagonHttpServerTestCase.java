@@ -19,24 +19,26 @@
 package org.apache.maven.wagon.providers.http;
 
 import org.apache.maven.wagon.Wagon;
-import org.codehaus.plexus.PlexusTestCase;
+import org.codehaus.plexus.testing.PlexusTest;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.junit.jupiter.api.BeforeEach;
 
 /**
  * User: jdumay Date: 24/01/2008 Time: 18:15:53
  */
-public abstract class HttpWagonHttpServerTestCase extends PlexusTestCase {
+@PlexusTest
+public abstract class HttpWagonHttpServerTestCase {
     private Server server;
 
     protected ResourceHandler resourceHandler;
 
     protected ServletContextHandler context;
 
+    @BeforeEach
     protected void setUp() throws Exception {
-        super.setUp();
         server = new Server(0);
 
         context = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -46,7 +48,7 @@ public abstract class HttpWagonHttpServerTestCase extends PlexusTestCase {
     }
 
     protected Wagon getWagon() throws Exception {
-        return (Wagon) lookup(HttpWagon.ROLE);
+        return new HttpWagon();
     }
 
     protected void startServer() throws Exception {
