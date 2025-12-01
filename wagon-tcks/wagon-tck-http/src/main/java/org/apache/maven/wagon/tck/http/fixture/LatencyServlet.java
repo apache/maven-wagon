@@ -28,7 +28,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.codehaus.plexus.util.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,12 +70,10 @@ public class LatencyServlet extends HttpServlet {
         String realPath = getServletContext().getRealPath(path);
         File f = new File(realPath);
 
-        FileInputStream in = null;
         long total = 0;
         long start = System.currentTimeMillis();
-        try {
-            in = new FileInputStream(f);
-            OutputStream out = resp.getOutputStream();
+        try (FileInputStream in = new FileInputStream(f);
+                OutputStream out = resp.getOutputStream(); ) {
 
             logger.info("Starting high-latency transfer. This should take about "
                     + ((f.length() / BUFFER_SIZE * latencyMs / 1000) + (latencyMs / 1000)) + " seconds.");
@@ -89,21 +86,12 @@ public class LatencyServlet extends HttpServlet {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
                 logger.info("Writing bytes " + total + "-" + (total + read - 1) + " of " + f.length()
                         + ". Elapsed time so far: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
-
                 out.write(buf, 0, read);
-
                 total += read;
             }
-
-            in.close();
-            in = null;
-        } finally {
-            IOUtil.close(in);
         }
-
         logger.info("High-latency transfer done in " + (System.currentTimeMillis() - start) + "ms");
     }
 }

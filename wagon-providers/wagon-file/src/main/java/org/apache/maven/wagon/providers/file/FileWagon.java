@@ -18,6 +18,8 @@
  */
 package org.apache.maven.wagon.providers.file;
 
+import javax.inject.Named;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -45,8 +47,8 @@ import org.codehaus.plexus.util.FileUtils;
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
- * @plexus.component role="org.apache.maven.wagon.Wagon" role-hint="file" instantiation-strategy="per-lookup"
  */
+@Named("file")
 public class FileWagon extends StreamWagon {
     public void fillInputData(InputData inputData) throws TransferFailedException, ResourceDoesNotExistException {
         if (getRepository().getBasedir() == null) {

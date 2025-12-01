@@ -18,6 +18,8 @@
  */
 package org.apache.maven.wagon.providers.http;
 
+import java.io.File;
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -28,15 +30,13 @@ public class LightweightHttpsWagonTest extends LightweightHttpWagonTest {
     }
 
     protected ServerConnector addConnector(Server server) {
-        System.setProperty(
-                "javax.net.ssl.trustStore",
-                getTestFile("src/test/resources/ssl/keystore").getAbsolutePath());
+        System.setProperty("javax.net.ssl.trustStore", new File("src/test/resources/ssl/keystore").getAbsolutePath());
 
         SslContextFactory sslContextFactory = new SslContextFactory();
-        sslContextFactory.setKeyStorePath(getTestPath("src/test/resources/ssl/keystore"));
+        sslContextFactory.setKeyStorePath(new File("src/test/resources/ssl/keystore").getAbsolutePath());
         sslContextFactory.setKeyStorePassword("wagonhttp");
         sslContextFactory.setKeyManagerPassword("wagonhttp");
-        sslContextFactory.setTrustStorePath(getTestPath("src/test/resources/ssl/keystore"));
+        sslContextFactory.setTrustStorePath(new File("src/test/resources/ssl/keystore").getAbsolutePath());
         sslContextFactory.setTrustStorePassword("wagonhttp");
 
         ServerConnector serverConnector = new ServerConnector(server, sslContextFactory);

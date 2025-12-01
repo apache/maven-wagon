@@ -19,14 +19,20 @@
 package org.apache.maven.wagon.providers.http;
 
 import java.io.File;
+import java.nio.file.Files;
 
-import org.apache.maven.wagon.FileTestUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * User: jdumay Date: 24/01/2008 Time: 17:17:34
@@ -34,6 +40,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 public class HttpWagonErrorTest extends HttpWagonHttpServerTestCase {
     private int serverPort;
 
+    @BeforeEach
     protected void setUp() throws Exception {
         super.setUp();
         ServletHolder servlets = new ServletHolder(new ErrorWithMessageServlet());
@@ -42,6 +49,7 @@ public class HttpWagonErrorTest extends HttpWagonHttpServerTestCase {
         serverPort = getPort();
     }
 
+    @Test
     public void testGet401() throws Exception {
         Exception thrown = null;
 
@@ -53,7 +61,7 @@ public class HttpWagonErrorTest extends HttpWagonHttpServerTestCase {
 
             wagon.connect(testRepository);
 
-            File destFile = FileTestUtils.createUniqueFile(getName(), getName());
+            File destFile = Files.createTempFile("wagon", "test").toFile();
             destFile.deleteOnExit();
 
             wagon.get("401", destFile);
@@ -66,13 +74,14 @@ public class HttpWagonErrorTest extends HttpWagonHttpServerTestCase {
         }
 
         assertNotNull(thrown);
-        assertEquals(AuthorizationException.class, thrown.getClass());
+        assertInstanceOf(AuthorizationException.class, thrown);
         assertEquals(
                 "authentication failed for http://localhost:" + serverPort + "/401, status: 401 "
                         + ErrorWithMessageServlet.MESSAGE,
                 thrown.getMessage());
     }
 
+    @Test
     public void testGet403() throws Exception {
         Exception thrown = null;
 
@@ -84,7 +93,7 @@ public class HttpWagonErrorTest extends HttpWagonHttpServerTestCase {
 
             wagon.connect(testRepository);
 
-            File destFile = FileTestUtils.createUniqueFile(getName(), getName());
+            File destFile = Files.createTempFile("wagon", "test").toFile();
             destFile.deleteOnExit();
 
             wagon.get("403", destFile);
@@ -97,13 +106,14 @@ public class HttpWagonErrorTest extends HttpWagonHttpServerTestCase {
         }
 
         assertNotNull(thrown);
-        assertEquals(AuthorizationException.class, thrown.getClass());
+        assertInstanceOf(AuthorizationException.class, thrown);
         assertEquals(
                 "authorization failed for http://localhost:" + serverPort + "/403, status: 403 "
                         + ErrorWithMessageServlet.MESSAGE,
                 thrown.getMessage());
     }
 
+    @Test
     public void testGet404() throws Exception {
         Exception thrown = null;
 
@@ -115,7 +125,7 @@ public class HttpWagonErrorTest extends HttpWagonHttpServerTestCase {
 
             wagon.connect(testRepository);
 
-            File destFile = FileTestUtils.createUniqueFile(getName(), getName());
+            File destFile = Files.createTempFile("wagon", "test").toFile();
             destFile.deleteOnExit();
 
             wagon.get("404", destFile);
@@ -128,13 +138,14 @@ public class HttpWagonErrorTest extends HttpWagonHttpServerTestCase {
         }
 
         assertNotNull(thrown);
-        assertEquals(ResourceDoesNotExistException.class, thrown.getClass());
+        assertInstanceOf(ResourceDoesNotExistException.class, thrown);
         assertEquals(
                 "resource missing at http://localhost:" + serverPort + "/404, status: 404 "
                         + ErrorWithMessageServlet.MESSAGE,
                 thrown.getMessage());
     }
 
+    @Test
     public void testGet407() throws Exception {
         Exception thrown = null;
 
@@ -146,7 +157,7 @@ public class HttpWagonErrorTest extends HttpWagonHttpServerTestCase {
 
             wagon.connect(testRepository);
 
-            File destFile = FileTestUtils.createUniqueFile(getName(), getName());
+            File destFile = Files.createTempFile("wagon", "test").toFile();
             destFile.deleteOnExit();
 
             wagon.get("407", destFile);
@@ -159,13 +170,14 @@ public class HttpWagonErrorTest extends HttpWagonHttpServerTestCase {
         }
 
         assertNotNull(thrown);
-        assertEquals(AuthorizationException.class, thrown.getClass());
+        assertInstanceOf(AuthorizationException.class, thrown);
         assertEquals(
                 "proxy authentication failed for http://localhost:" + serverPort + "/407, status: 407 "
                         + ErrorWithMessageServlet.MESSAGE,
                 thrown.getMessage());
     }
 
+    @Test
     public void testGet500() throws Exception {
         Exception thrown = null;
 
@@ -177,7 +189,7 @@ public class HttpWagonErrorTest extends HttpWagonHttpServerTestCase {
 
             wagon.connect(testRepository);
 
-            File destFile = FileTestUtils.createUniqueFile(getName(), getName());
+            File destFile = Files.createTempFile("wagon", "test").toFile();
             destFile.deleteOnExit();
 
             wagon.get("500", destFile);
@@ -190,10 +202,10 @@ public class HttpWagonErrorTest extends HttpWagonHttpServerTestCase {
         }
 
         assertNotNull(thrown);
-        assertEquals(TransferFailedException.class, thrown.getClass());
+        assertInstanceOf(TransferFailedException.class, thrown);
         assertEquals(
+                thrown.getMessage(),
                 "transfer failed for http://localhost:" + serverPort + "/500, status: 500 "
-                        + ErrorWithMessageServlet.MESSAGE,
-                thrown.getMessage());
+                        + ErrorWithMessageServlet.MESSAGE);
     }
 }

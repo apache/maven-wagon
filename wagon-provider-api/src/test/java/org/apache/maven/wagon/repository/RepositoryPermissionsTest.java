@@ -18,26 +18,17 @@
  */
 package org.apache.maven.wagon.repository;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  *
  * @todo test defaults
  */
-public class RepositoryPermissionsTest extends TestCase {
-    public RepositoryPermissionsTest(final String name) {
-        super(name);
-    }
-
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+public class RepositoryPermissionsTest {
+    @Test
     public void testAuthenticationInfoProperties() {
         final RepositoryPermissions repositoryPermissions = new RepositoryPermissions();
 
