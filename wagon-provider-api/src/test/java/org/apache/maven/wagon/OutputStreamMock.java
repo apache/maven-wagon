@@ -31,6 +31,7 @@ public class OutputStreamMock extends OutputStream {
 
     private boolean forcedError = false;
 
+    @Override
     public void close() {
         closed = true;
     }
@@ -38,6 +39,7 @@ public class OutputStreamMock extends OutputStream {
     /**
      * @see java.io.OutputStream#write(int)
      */
+    @Override
     public void write(final int b) throws IOException {
         if (forcedError) {
             throw new IOException("Mock exception");

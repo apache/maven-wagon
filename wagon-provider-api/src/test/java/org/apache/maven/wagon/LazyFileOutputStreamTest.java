@@ -22,16 +22,21 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a>
  *
  */
-public class LazyFileOutputStreamTest extends TestCase {
+class LazyFileOutputStreamTest {
 
-    public void testFileCreation() throws Exception {
-        File file = File.createTempFile(getName(), null);
+    @Test
+    void fileCreation() throws Exception {
+        File file = File.createTempFile("LazyFileOutputStreamTest", null);
 
         file.delete();
 
@@ -49,8 +54,6 @@ public class LazyFileOutputStreamTest extends TestCase {
 
         assertTrue(file.exists());
 
-        String actual = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
-
-        assertEquals(expected, actual);
+        assertEquals(expected, new String(Files.readAllBytes(file.toPath())));
     }
 }

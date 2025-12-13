@@ -18,26 +18,18 @@
  */
 package org.apache.maven.wagon.proxy;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author <a href="mailto:jvanzyl@maven.org">Jason van Zyl</a>
  *
  */
-public class ProxyInfoTest extends TestCase {
-    public ProxyInfoTest(final String name) {
-        super(name);
-    }
+public class ProxyInfoTest {
 
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
-    public void testProxyInfoProperties() {
+    @Test
+    void proxyInfoProperties() {
 
         final ProxyInfo proxyInfo = new ProxyInfo();
 

@@ -74,6 +74,7 @@ public class Resource {
         this.contentLength = contentLength;
     }
 
+    @Override
     public String toString() {
         return name;
     }
@@ -82,15 +83,17 @@ public class Resource {
         return name + "[len = " + contentLength + "; mod = " + lastModified + "]";
     }
 
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (int) (contentLength ^ (contentLength >>> 32));
-        result = prime * result + (int) (lastModified ^ (lastModified >>> 32));
+        result = prime * result + Long.hashCode(contentLength);
+        result = prime * result + Long.hashCode(lastModified);
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         return result;
     }
 
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;

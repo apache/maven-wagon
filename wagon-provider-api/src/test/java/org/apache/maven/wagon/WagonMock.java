@@ -25,8 +25,6 @@ import java.io.OutputStream;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.maven.wagon.authorization.AuthorizationException;
-
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
  *
@@ -41,7 +39,8 @@ public class WagonMock extends StreamWagon {
         this.errorInputStream = errorInputStream;
     }
 
-    public void fillInputData(InputData inputData) throws TransferFailedException {
+    @Override
+    public void fillInputData(InputData inputData) {
 
         InputStream is;
 
@@ -61,7 +60,8 @@ public class WagonMock extends StreamWagon {
         inputData.setInputStream(is);
     }
 
-    public void fillOutputData(OutputData outputData) throws TransferFailedException {
+    @Override
+    public void fillOutputData(OutputData outputData) {
 
         OutputStream os;
 
@@ -78,24 +78,29 @@ public class WagonMock extends StreamWagon {
         outputData.setOutputStream(os);
     }
 
+    @Override
     public void openConnectionInternal() {}
 
+    @Override
     public void closeConnection() {}
 
+    @Override
     public void setTimeout(int timeoutValue) {
         timeout = timeoutValue;
     }
 
+    @Override
     public int getTimeout() {
         return timeout;
     }
 
-    public List<String> getFileList(String destinationDirectory)
-            throws TransferFailedException, AuthorizationException {
-        return Collections.<String>emptyList();
+    @Override
+    public List<String> getFileList(String destinationDirectory) {
+        return Collections.emptyList();
     }
 
-    public boolean resourceExists(String resourceName) throws AuthorizationException {
+    @Override
+    public boolean resourceExists(String resourceName) {
         return false;
     }
 }
