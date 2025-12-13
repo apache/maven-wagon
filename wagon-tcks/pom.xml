@@ -35,10 +35,4 @@ under the License.
     <module>wagon-tck-http</module>
   </modules>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.maven.wagon</groupId>
-      <artifactId>wagon-provider-api</artifactId>
-    </dependency>
-  </dependencies>
 </project>
