@@ -22,152 +22,168 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 
-import junit.framework.TestCase;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
+import org.junit.jupiter.api.Test;
 
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
-public class StreamWagonTest extends TestCase {
+class StreamWagonTest {
+
     private static class TestWagon extends StreamWagon {
-        public void closeConnection() throws ConnectionException {}
+        @Override
+        public void closeConnection() {}
 
+        @Override
         public void fillInputData(InputData inputData)
                 throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {}
 
+        @Override
         public void fillOutputData(OutputData outputData) throws TransferFailedException {}
 
-        protected void openConnectionInternal() throws ConnectionException, AuthenticationException {}
+        @Override
+        protected void openConnectionInternal() {}
     }
 
-    private Repository repository = new Repository("id", "url");
+    private final Repository repository = new Repository("id", "url");
 
-    public void testNullInputStream() throws Exception {
+    @Test
+    void nullInputStream() throws Exception {
+
         StreamingWagon wagon = new TestWagon() {
+            @Override
             public void fillInputData(InputData inputData) {
                 inputData.setInputStream(null);
             }
         };
 
-        TransferListener listener = createMock(TransferListener.class);
-        listener.transferInitiated(anyObject(TransferEvent.class));
+        TransferListener listener = mock(TransferListener.class);
+        listener.transferInitiated(any(TransferEvent.class));
+
         TransferEvent transferEvent = new TransferEvent(
                 wagon, new Resource("resource"), new TransferFailedException(""), TransferEvent.REQUEST_GET);
         listener.transferError(transferEvent);
-        replay(listener);
 
         wagon.connect(repository);
         wagon.addTransferListener(listener);
-        try {
-            wagon.getToStream("resource", new ByteArrayOutputStream());
+
+        try (OutputStream os = new ByteArrayOutputStream()) {
+            wagon.getToStream("resource", os);
             fail();
         } catch (TransferFailedException e) {
-            assertNotNull(e.getMessage());
+            assertNotNull(e);
+            assertEquals("url - Could not open input stream for resource: 'resource'", e.getMessage());
         } finally {
             wagon.disconnect();
         }
-
-        verify(listener);
+        verify(listener, times(1)).transferInitiated(any(TransferEvent.class));
+        verify(listener, never()).transferStarted(any(TransferEvent.class));
+        verify(listener, never()).transferCompleted(any(TransferEvent.class));
     }
 
-    public void testNullOutputStream() throws Exception {
+    @Test
+    void nullOutputStream() throws Exception {
+
         StreamingWagon wagon = new TestWagon() {
+            @Override
             public void fillOutputData(OutputData inputData) {
                 inputData.setOutputStream(null);
             }
         };
 
-        TransferListener listener = createMock(TransferListener.class);
-        listener.transferInitiated(anyObject(TransferEvent.class));
+        TransferListener listener = mock(TransferListener.class);
+        listener.transferInitiated(any(TransferEvent.class));
         TransferEvent transferEvent = new TransferEvent(
                 wagon, new Resource("resource"), new TransferFailedException(""), TransferEvent.REQUEST_PUT);
         listener.transferError(transferEvent);
-        replay(listener);
 
         wagon.connect(repository);
         wagon.addTransferListener(listener);
-        try {
-            wagon.putFromStream(new ByteArrayInputStream(new byte[0]), "resource");
+        try (InputStream is = new ByteArrayInputStream("".getBytes())) {
+            wagon.putFromStream(is, "resource");
             fail();
         } catch (TransferFailedException e) {
-            assertNotNull(e.getMessage());
+            assertEquals("url - Could not open output stream for resource: 'resource'", e.getMessage());
         } finally {
             wagon.disconnect();
         }
-
-        verify(listener);
+        verify(listener, times(1)).transferInitiated(any(TransferEvent.class));
+        verify(listener, never()).transferStarted(any(TransferEvent.class));
+        verify(listener, never()).transferCompleted(any(TransferEvent.class));
     }
 
-    public void testTransferFailedExceptionOnInput() throws Exception {
-        try {
-            runTestTransferError(new TransferFailedException(""));
-            fail();
-        } catch (TransferFailedException e) {
-            assertNotNull(e.getMessage());
-        }
+    @Test
+    void transferFailedExceptionOnInput() {
+        assertThrows(TransferFailedException.class, () -> runTestTransferError(new TransferFailedException("")));
     }
 
-    public void testTransferFailedExceptionOnOutput() throws Exception {
+    @Test
+    void transferFailedExceptionOnOutput() throws Exception {
+        TransferFailedException ex = new TransferFailedException("");
+
         StreamingWagon wagon = new TestWagon() {
+            @Override
             public void fillOutputData(OutputData inputData) throws TransferFailedException {
-                throw (TransferFailedException) new TransferFailedException("");
+                throw ex;
             }
         };
 
-        TransferListener listener = createMock(TransferListener.class);
-        listener.transferInitiated(anyObject(TransferEvent.class));
-        TransferEvent transferEvent = new TransferEvent(
-                wagon, new Resource("resource"), new TransferFailedException(""), TransferEvent.REQUEST_PUT);
+        TransferListener listener = mock(TransferListener.class);
+        listener.transferInitiated(any(TransferEvent.class));
+        TransferEvent transferEvent = new TransferEvent(wagon, new Resource("resource"), ex, TransferEvent.REQUEST_PUT);
         listener.transferError(transferEvent);
-        replay(listener);
 
         wagon.connect(repository);
         wagon.addTransferListener(listener);
-        try {
-            wagon.putFromStream(new ByteArrayInputStream(new byte[0]), "resource");
+
+        try (InputStream is = new ByteArrayInputStream("".getBytes())) {
+            wagon.putFromStream(is, "resource");
             fail();
         } catch (TransferFailedException e) {
-            assertNotNull(e.getMessage());
+            assertEquals(ex, e);
         } finally {
             wagon.disconnect();
-            verify(listener);
         }
+        verify(listener, times(2)).transferError(any(TransferEvent.class));
     }
 
-    public void testResourceDoesNotExistException() throws Exception {
-        try {
-            runTestTransferError(new ResourceDoesNotExistException(""));
-            fail();
-        } catch (ResourceDoesNotExistException e) {
-            assertNotNull(e.getMessage());
-        }
+    @Test
+    void resourceDoesNotExistException() {
+        assertThrows(
+                ResourceDoesNotExistException.class, () -> runTestTransferError(new ResourceDoesNotExistException("")));
     }
 
-    public void testAuthorizationException() throws Exception {
-        try {
-            runTestTransferError(new AuthorizationException(""));
-            fail();
-        } catch (AuthorizationException e) {
-            assertNotNull(e.getMessage());
-        }
+    @Test
+    void authorizationException() {
+        assertThrows(AuthorizationException.class, () -> runTestTransferError(new AuthorizationException("")));
     }
 
-    private void runTestTransferError(final WagonException exception)
+    private void runTestTransferError(WagonException exception)
             throws ConnectionException, AuthenticationException, ResourceDoesNotExistException, AuthorizationException,
                     TransferFailedException {
+
         StreamingWagon wagon = new TestWagon() {
+            @Override
             public void fillInputData(InputData inputData)
                     throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
                 if (exception instanceof TransferFailedException) {
@@ -182,12 +198,11 @@ public class StreamWagonTest extends TestCase {
             }
         };
 
-        TransferListener listener = createMock(TransferListener.class);
-        listener.transferInitiated(anyObject(TransferEvent.class));
+        TransferListener listener = mock(TransferListener.class);
+        listener.transferInitiated(any(TransferEvent.class));
         TransferEvent transferEvent =
                 new TransferEvent(wagon, new Resource("resource"), exception, TransferEvent.REQUEST_GET);
         listener.transferError(transferEvent);
-        replay(listener);
 
         wagon.connect(repository);
         wagon.addTransferListener(listener);
@@ -196,25 +211,28 @@ public class StreamWagonTest extends TestCase {
             fail();
         } finally {
             wagon.disconnect();
-            verify(listener);
         }
+        verify(listener, times(1)).transferInitiated(any(TransferEvent.class));
     }
 
-    public void testGetIfNewerWithNewerResource() throws Exception {
+    @Test
+    void getIfNewerWithNewerResource() throws Exception {
         long resourceTime = System.currentTimeMillis();
         long comparisonTime =
                 new SimpleDateFormat("yyyy-MM-dd").parse("2008-01-01").getTime();
         assertTrue(runTestGetIfNewer(resourceTime, comparisonTime));
     }
 
-    public void testGetIfNewerWithOlderResource() throws Exception {
+    @Test
+    void getIfNewerWithOlderResource() throws Exception {
         long comparisonTime = System.currentTimeMillis();
         long resourceTime =
                 new SimpleDateFormat("yyyy-MM-dd").parse("2008-01-01").getTime();
         assertFalse(runTestGetIfNewer(resourceTime, comparisonTime));
     }
 
-    public void testGetIfNewerWithSameTimeResource() throws Exception {
+    @Test
+    void getIfNewerWithSameTimeResource() throws Exception {
         long resourceTime =
                 new SimpleDateFormat("yyyy-MM-dd").parse("2008-01-01").getTime();
         assertFalse(runTestGetIfNewer(resourceTime, resourceTime));
@@ -224,8 +242,9 @@ public class StreamWagonTest extends TestCase {
             throws IOException, ConnectionException, AuthenticationException, TransferFailedException,
                     ResourceDoesNotExistException, AuthorizationException {
         StreamingWagon wagon = new TestWagon() {
+            @Override
             public void fillInputData(InputData inputData) {
-                inputData.setInputStream(new ByteArrayInputStream(new byte[0]));
+                inputData.setInputStream(new ByteArrayInputStream("".getBytes()));
                 inputData.getResource().setLastModified(resourceTime);
             }
         };
@@ -242,13 +261,15 @@ public class StreamWagonTest extends TestCase {
         }
     }
 
-    public void testGetToStream() throws Exception {
+    @Test
+    void getToStream() throws Exception {
         final String content = "the content to return";
         final long comparisonTime =
                 new SimpleDateFormat("yyyy-MM-dd").parse("2008-01-01").getTime();
         StreamingWagon wagon = new TestWagon() {
+            @Override
             public void fillInputData(InputData inputData) {
-                inputData.setInputStream(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)));
+                inputData.setInputStream(new ByteArrayInputStream(content.getBytes()));
                 inputData.getResource().setLastModified(comparisonTime);
             }
         };
@@ -263,13 +284,15 @@ public class StreamWagonTest extends TestCase {
         }
     }
 
-    public void testGet() throws Exception {
+    @Test
+    void get() throws Exception {
         final String content = "the content to return";
         final long comparisonTime =
                 new SimpleDateFormat("yyyy-MM-dd").parse("2008-01-01").getTime();
         StreamingWagon wagon = new TestWagon() {
+            @Override
             public void fillInputData(InputData inputData) {
-                inputData.setInputStream(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)));
+                inputData.setInputStream(new ByteArrayInputStream(content.getBytes()));
                 inputData.getResource().setLastModified(comparisonTime);
             }
         };
@@ -280,29 +303,31 @@ public class StreamWagonTest extends TestCase {
         wagon.connect(repository);
         try {
             wagon.get("resource", tempFile);
-            String actual = new String(Files.readAllBytes(tempFile.toPath()));
-            assertEquals(content, actual);
+            assertEquals(content, new String(Files.readAllBytes(tempFile.toPath())));
         } finally {
             wagon.disconnect();
             tempFile.delete();
         }
     }
 
-    public void testGetIfNewerToStreamWithNewerResource() throws Exception {
+    @Test
+    void getIfNewerToStreamWithNewerResource() throws Exception {
         long resourceTime = System.currentTimeMillis();
         long comparisonTime =
                 new SimpleDateFormat("yyyy-MM-dd").parse("2008-01-01").getTime();
         assertTrue(runTestGetIfNewerToStream(resourceTime, comparisonTime));
     }
 
-    public void testGetIfNewerToStreamWithOlderResource() throws Exception {
+    @Test
+    void getIfNewerToStreamWithOlderResource() throws Exception {
         long comparisonTime = System.currentTimeMillis();
         long resourceTime =
                 new SimpleDateFormat("yyyy-MM-dd").parse("2008-01-01").getTime();
         assertFalse(runTestGetIfNewerToStream(resourceTime, comparisonTime));
     }
 
-    public void testGetIfNewerToStreamWithSameTimeResource() throws Exception {
+    @Test
+    void getIfNewerToStreamWithSameTimeResource() throws Exception {
         long resourceTime =
                 new SimpleDateFormat("yyyy-MM-dd").parse("2008-01-01").getTime();
         assertFalse(runTestGetIfNewerToStream(resourceTime, resourceTime));
@@ -312,8 +337,9 @@ public class StreamWagonTest extends TestCase {
             throws IOException, ConnectionException, AuthenticationException, TransferFailedException,
                     ResourceDoesNotExistException, AuthorizationException {
         StreamingWagon wagon = new TestWagon() {
+            @Override
             public void fillInputData(InputData inputData) {
-                inputData.setInputStream(new ByteArrayInputStream(new byte[0]));
+                inputData.setInputStream(new ByteArrayInputStream("".getBytes()));
                 inputData.getResource().setLastModified(resourceTime);
             }
         };
@@ -326,11 +352,13 @@ public class StreamWagonTest extends TestCase {
         }
     }
 
-    public void testPutFromStream() throws Exception {
+    @Test
+    void putFromStream() throws Exception {
         final String content = "the content to return";
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        OutputStream out = new ByteArrayOutputStream();
         StreamingWagon wagon = new TestWagon() {
+            @Override
             public void fillOutputData(OutputData outputData) {
                 assertEquals("resource", outputData.getResource().getName());
                 assertEquals(-1, outputData.getResource().getContentLength());
@@ -348,12 +376,14 @@ public class StreamWagonTest extends TestCase {
         }
     }
 
-    public void testPutFromStreamWithResourceInformation() throws Exception {
+    @Test
+    void putFromStreamWithResourceInformation() throws Exception {
         final String content = "the content to return";
         final long lastModified = System.currentTimeMillis();
 
         OutputStream out = new ByteArrayOutputStream();
         StreamingWagon wagon = new TestWagon() {
+            @Override
             public void fillOutputData(OutputData outputData) {
                 assertEquals("resource", outputData.getResource().getName());
                 assertEquals(content.length(), outputData.getResource().getContentLength());
@@ -365,25 +395,24 @@ public class StreamWagonTest extends TestCase {
         wagon.connect(repository);
         try {
             wagon.putFromStream(
-                    new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)),
-                    "resource",
-                    content.length(),
-                    lastModified);
+                    new ByteArrayInputStream(content.getBytes()), "resource", content.length(), lastModified);
             assertEquals(content, out.toString());
         } finally {
             wagon.disconnect();
         }
     }
 
-    public void testPut() throws Exception {
-        final String content = "the content to return";
+    @Test
+    void put() throws Exception {
+        String content = "the content to return";
 
-        final File tempFile = File.createTempFile("wagon", "tmp");
-        Files.write(tempFile.toPath().toAbsolutePath(), content.getBytes());
+        File tempFile = File.createTempFile("wagon", "tmp");
+        Files.write(Paths.get(tempFile.getAbsolutePath()), content.getBytes());
         tempFile.deleteOnExit();
 
         OutputStream out = new ByteArrayOutputStream();
         Wagon wagon = new TestWagon() {
+            @Override
             public void fillOutputData(OutputData outputData) {
                 assertEquals("resource", outputData.getResource().getName());
                 assertEquals(content.length(), outputData.getResource().getContentLength());
@@ -402,7 +431,8 @@ public class StreamWagonTest extends TestCase {
         }
     }
 
-    public void testPutFileDoesntExist() throws Exception {
+    @Test
+    void putFileDoesntExist() throws Exception {
         final File tempFile = File.createTempFile("wagon", "tmp");
         tempFile.delete();
         assertFalse(tempFile.exists());
@@ -410,13 +440,8 @@ public class StreamWagonTest extends TestCase {
         Wagon wagon = new TestWagon();
 
         wagon.connect(repository);
-        try {
-            wagon.put(tempFile, "resource");
-            fail();
-        } catch (TransferFailedException e) {
-            assertNotNull(e.getMessage());
-        } finally {
-            wagon.disconnect();
-        }
+        assertThrows(TransferFailedException.class, () -> wagon.put(tempFile, "resource"));
+
+        wagon.disconnect();
     }
 }

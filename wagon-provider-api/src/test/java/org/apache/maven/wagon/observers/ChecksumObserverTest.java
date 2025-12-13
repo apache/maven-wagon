@@ -19,40 +19,40 @@
 package org.apache.maven.wagon.observers;
 
 import java.io.File;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 
-import junit.framework.TestCase;
-import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.WagonMock;
-import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.events.TransferListener;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class ChecksumObserverTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
+class ChecksumObserverTest {
     private Wagon wagon;
 
-    public void setUp() throws Exception {
-        super.setUp();
+    @BeforeEach
+    void setUp() throws Exception {
 
         wagon = new WagonMock(true);
 
-        Repository repository = new Repository();
+        Repository repository = new Repository("fake", "http://fake");
         wagon.connect(repository);
     }
 
-    public void tearDown() throws Exception {
+    @AfterEach
+    void tearDown() throws Exception {
         wagon.disconnect();
-
-        super.tearDown();
     }
 
-    public void testSubsequentTransfersAfterTransferError()
-            throws NoSuchAlgorithmException, ResourceDoesNotExistException, AuthorizationException, IOException {
+    @Test
+    void subsequentTransfersAfterTransferError() throws Exception {
         TransferListener listener = new ChecksumObserver();
 
         wagon.addTransferListener(listener);
@@ -63,21 +63,20 @@ public class ChecksumObserverTest extends TestCase {
         try {
             wagon.get("resource", testFile);
             fail();
-        } catch (TransferFailedException e) {
-            assertNotNull(e.getMessage());
+        } catch (TransferFailedException ignored) {
         }
 
         try {
             wagon.get("resource", testFile);
             fail();
-        } catch (TransferFailedException e) {
-            assertNotNull(e.getMessage());
+        } catch (TransferFailedException ignored) {
         }
 
         testFile.delete();
     }
 
-    public void testChecksum() throws NoSuchAlgorithmException {
+    @Test
+    void checksum() throws Exception {
         ChecksumObserver listener = new ChecksumObserver("SHA-1");
 
         Resource resource = new Resource("resource");

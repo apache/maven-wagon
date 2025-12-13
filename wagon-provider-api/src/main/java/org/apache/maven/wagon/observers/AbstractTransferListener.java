@@ -28,21 +28,27 @@ import org.apache.maven.wagon.events.TransferListener;
  *
  */
 public abstract class AbstractTransferListener implements TransferListener {
+    @Override
     public void transferInitiated(TransferEvent transferEvent) {}
 
     /**
      * @see org.apache.maven.wagon.events.TransferListener#transferStarted(org.apache.maven.wagon.events.TransferEvent)
      */
+    @Override
     public void transferStarted(TransferEvent transferEvent) {}
 
     /**
      * @see org.apache.maven.wagon.events.TransferListener#transferProgress(org.apache.maven.wagon.events.TransferEvent,byte[],int)
      */
+    @Override
     public void transferProgress(TransferEvent transferEvent, byte[] buffer, int length) {}
 
+    @Override
     public void transferCompleted(TransferEvent transferEvent) {}
 
+    @Override
     public void transferError(TransferEvent transferEvent) {}
 
+    @Override
     public void debug(String message) {}
 }

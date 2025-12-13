@@ -126,7 +126,7 @@ public final class PathUtils {
      */
     @Deprecated
     public static String host(final String url) {
-        if (url == null || url.length() == 0) {
+        if (url == null || url.isEmpty()) {
             return "localhost";
         }
         String authorization = authorization(url);

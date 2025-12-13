@@ -58,6 +58,7 @@ public abstract class WagonException extends Exception {
      *
      * @return the cause of this exception or null if the cause is nonexistent or unknown.
      */
+    @Override
     public Throwable getCause() {
         return cause;
     }
@@ -72,6 +73,7 @@ public abstract class WagonException extends Exception {
      *
      * @return a reference to this Throwable instance.
      */
+    @Override
     public Throwable initCause(final Throwable cause) {
         this.cause = cause;
         return this;

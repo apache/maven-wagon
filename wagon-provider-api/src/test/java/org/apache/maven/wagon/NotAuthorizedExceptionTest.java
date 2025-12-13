@@ -18,15 +18,18 @@
  */
 package org.apache.maven.wagon;
 
-import junit.framework.TestCase;
 import org.apache.maven.wagon.authorization.AuthorizationException;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
  *
  */
-public class NotAuthorizedExceptionTest extends TestCase {
-    public void testNotAuthorizedExceptionTest() {
+class NotAuthorizedExceptionTest {
+    @Test
+    void notAuthorizedExceptionTest() {
         AuthorizationException ae = new AuthorizationException("message");
 
         assertEquals("message", ae.getMessage());

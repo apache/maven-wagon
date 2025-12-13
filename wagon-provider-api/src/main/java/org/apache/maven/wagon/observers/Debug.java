@@ -30,7 +30,7 @@ import org.apache.maven.wagon.events.TransferListener;
  *
  */
 public class Debug implements SessionListener, TransferListener {
-    private PrintStream out;
+    private final PrintStream out;
 
     long timestamp;
 
@@ -47,6 +47,7 @@ public class Debug implements SessionListener, TransferListener {
     /**
      * @see SessionListener#sessionOpening(SessionEvent)
      */
+    @Override
     public void sessionOpening(final SessionEvent sessionEvent) {
         // out.println( .getUrl() + " - Session: Opening  ");
     }
@@ -54,6 +55,7 @@ public class Debug implements SessionListener, TransferListener {
     /**
      * @see SessionListener#sessionOpened(SessionEvent)
      */
+    @Override
     public void sessionOpened(final SessionEvent sessionEvent) {
         out.println(sessionEvent.getWagon().getRepository().getUrl() + " - Session: Opened  ");
     }
@@ -61,6 +63,7 @@ public class Debug implements SessionListener, TransferListener {
     /**
      * @see SessionListener#sessionDisconnecting(SessionEvent)
      */
+    @Override
     public void sessionDisconnecting(final SessionEvent sessionEvent) {
         out.println(sessionEvent.getWagon().getRepository().getUrl() + " - Session: Disconnecting  ");
     }
@@ -68,6 +71,7 @@ public class Debug implements SessionListener, TransferListener {
     /**
      * @see SessionListener#sessionDisconnected(SessionEvent)
      */
+    @Override
     public void sessionDisconnected(final SessionEvent sessionEvent) {
         out.println(sessionEvent.getWagon().getRepository().getUrl() + " - Session: Disconnected");
     }
@@ -75,6 +79,7 @@ public class Debug implements SessionListener, TransferListener {
     /**
      * @see SessionListener#sessionConnectionRefused(SessionEvent)
      */
+    @Override
     public void sessionConnectionRefused(final SessionEvent sessionEvent) {
         out.println(sessionEvent.getWagon().getRepository().getUrl() + " - Session: Connection refused");
     }
@@ -82,6 +87,7 @@ public class Debug implements SessionListener, TransferListener {
     /**
      * @see SessionListener#sessionLoggedIn(SessionEvent)
      */
+    @Override
     public void sessionLoggedIn(final SessionEvent sessionEvent) {
         out.println(sessionEvent.getWagon().getRepository().getUrl() + " - Session: Logged in");
     }
@@ -89,6 +95,7 @@ public class Debug implements SessionListener, TransferListener {
     /**
      * @see SessionListener#sessionLoggedOff(SessionEvent)
      */
+    @Override
     public void sessionLoggedOff(final SessionEvent sessionEvent) {
         out.println(sessionEvent.getWagon().getRepository().getUrl() + " - Session: Logged off");
     }
@@ -96,10 +103,12 @@ public class Debug implements SessionListener, TransferListener {
     /**
      * @see TransferListener#debug(String)
      */
+    @Override
     public void debug(final String message) {
         out.println(message);
     }
 
+    @Override
     public void transferInitiated(TransferEvent transferEvent) {
         // This space left intentionally blank
     }
@@ -107,6 +116,7 @@ public class Debug implements SessionListener, TransferListener {
     /**
      * @see TransferListener#transferStarted(TransferEvent)
      */
+    @Override
     public void transferStarted(final TransferEvent transferEvent) {
         timestamp = transferEvent.getTimestamp();
 
@@ -128,8 +138,8 @@ public class Debug implements SessionListener, TransferListener {
     /**
      * @see TransferListener#transferProgress(TransferEvent,byte[],int)
      */
+    @Override
     public void transferProgress(final TransferEvent transferEvent, byte[] buffer, int length) {
-
         out.print("#");
         transfer += length;
     }
@@ -137,6 +147,7 @@ public class Debug implements SessionListener, TransferListener {
     /**
      * @see TransferListener#transferCompleted(TransferEvent)
      */
+    @Override
     public void transferCompleted(final TransferEvent transferEvent) {
         final double duration = (double) (transferEvent.getTimestamp() - timestamp) / 1000;
 
@@ -150,6 +161,7 @@ public class Debug implements SessionListener, TransferListener {
     /**
      * @see TransferListener#transferError(TransferEvent)
      */
+    @Override
     public void transferError(final TransferEvent transferEvent) {
         out.println(" Transfer error: " + transferEvent.getException());
     }
@@ -157,6 +169,7 @@ public class Debug implements SessionListener, TransferListener {
     /**
      * @see SessionListener#sessionError(SessionEvent)
      */
+    @Override
     public void sessionError(final SessionEvent sessionEvent) {
         out.println(" Session error: " + sessionEvent.getException());
     }

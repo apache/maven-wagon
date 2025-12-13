@@ -35,7 +35,7 @@ import java.nio.channels.FileChannel;
  */
 public class LazyFileOutputStream extends OutputStream {
 
-    private File file;
+    private final File file;
 
     private FileOutputStream delegee;
 
@@ -47,16 +47,19 @@ public class LazyFileOutputStream extends OutputStream {
         this.file = file;
     }
 
+    @Override
     public void close() throws IOException {
         if (delegee != null) {
             delegee.close();
         }
     }
 
+    @Override
     public boolean equals(Object obj) {
         return delegee.equals(obj);
     }
 
+    @Override
     public void flush() throws IOException {
         if (delegee != null) {
             delegee.flush();
@@ -71,14 +74,17 @@ public class LazyFileOutputStream extends OutputStream {
         return delegee.getFD();
     }
 
+    @Override
     public int hashCode() {
         return delegee.hashCode();
     }
 
+    @Override
     public String toString() {
         return delegee.toString();
     }
 
+    @Override
     public void write(byte[] b) throws IOException {
         if (delegee == null) {
             initialize();
@@ -90,6 +96,7 @@ public class LazyFileOutputStream extends OutputStream {
     /**
      * @see java.io.OutputStream#write(byte[], int, int)
      */
+    @Override
     public void write(byte[] b, int off, int len) throws IOException {
         if (delegee == null) {
             initialize();
@@ -102,6 +109,7 @@ public class LazyFileOutputStream extends OutputStream {
      * @param b
      * @throws java.io.IOException
      */
+    @Override
     public void write(int b) throws IOException {
         if (delegee == null) {
             initialize();
