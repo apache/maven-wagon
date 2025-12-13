@@ -18,46 +18,45 @@
  */
 package org.apache.maven.wagon.events;
 
-import junit.framework.TestCase;
-import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.repository.Repository;
-import org.easymock.EasyMock;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public class SessionEventTest extends TestCase {
-    /*
-     * Class to test for void SESSIONEvent(Wagon, Repository, String, int,
-     * int)
-     */
-    public void testSessionEventProperties() throws ConnectionException, AuthenticationException {
+class SessionEventTest {
 
-        final Wagon wagon = EasyMock.createMock(Wagon.class);
-        final Repository repo = new Repository();
+    @Test
+    void sessionEventProperties() throws Exception {
+
+        Wagon wagon = Mockito.mock(Wagon.class);
+        Repository repo = new Repository("fake", "http://fake");
 
         wagon.connect(repo);
 
-        final long timestamp = System.currentTimeMillis();
-        final Exception exception = new AuthenticationException("dummy");
+        long timestamp = System.currentTimeMillis();
+        Exception exception = new AuthenticationException("dummy");
 
-        SessionEvent event = new SessionEvent(wagon, SessionEvent.SESSION_CLOSED);
+        SessionEvent event1 = new SessionEvent(wagon, SessionEvent.SESSION_CLOSED);
+        assertEquals(wagon, event1.getWagon());
+        assertEquals(SessionEvent.SESSION_CLOSED, event1.getEventType());
 
-        assertEquals(wagon, event.getWagon());
-
-        assertEquals(SessionEvent.SESSION_CLOSED, event.getEventType());
-
-        event = new SessionEvent(wagon, exception);
-
+        SessionEvent event = new SessionEvent(wagon, exception);
         assertEquals(wagon, event.getWagon());
         assertEquals(SessionEvent.SESSION_ERROR_OCCURRED, event.getEventType());
         assertEquals(exception, event.getException());
 
         event.setException(null);
-        assertEquals(null, event.getException());
+        assertNull(event.getException());
 
         event.setException(exception);
         assertEquals(exception, event.getException());
@@ -92,15 +91,11 @@ public class SessionEventTest extends TestCase {
         event.setEventType(SessionEvent.SESSION_CONNECTION_REFUSED);
         assertEquals(SessionEvent.SESSION_CONNECTION_REFUSED, event.getEventType());
 
-        try {
-            event.setEventType(-1);
-            fail("Exception expected");
-        } catch (IllegalArgumentException e) {
-            assertTrue(true);
-        }
+        assertThrows(IllegalArgumentException.class, () -> event.setEventType(-1));
     }
 
-    public void testConstantValueConflict() {
+    @Test
+    void constantValueConflict() {
         final int[] values = {
             SessionEvent.SESSION_CLOSED, SessionEvent.SESSION_DISCONNECTED,
             SessionEvent.SESSION_DISCONNECTING, SessionEvent.SESSION_ERROR_OCCURRED,
@@ -111,9 +106,7 @@ public class SessionEventTest extends TestCase {
 
         for (int i = 0; i < values.length; i++) {
             for (int j = i + 1; j < values.length; j++) {
-
-                final String msg = "Value confict at [i,j]=[" + i + "," + j + "]";
-                assertTrue(msg, values[i] != values[j]);
+                assertNotEquals(values[i], values[j], "Value conflict at [i,j]=[" + i + "," + j + "]");
             }
         }
     }

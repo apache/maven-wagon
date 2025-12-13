@@ -20,16 +20,17 @@ package org.apache.maven.wagon;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.LinkedList;
 
 import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.codehaus.plexus.util.FileUtils;
 
 /**
  * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a>
  *
  * @deprecated
  */
+@Deprecated
 public final class WagonUtils {
     private WagonUtils() {}
 
@@ -37,17 +38,13 @@ public final class WagonUtils {
             throws IOException, TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
 
         File file = null;
-
         try {
             file = File.createTempFile("wagon", "tmp");
-
             wagon.get(resource, file);
-
-            return FileUtils.fileRead(file);
+            return new String(Files.readAllBytes(file.toPath()));
         } finally {
             if (file != null) {
                 boolean deleted = file.delete();
-
                 if (!deleted) {
                     file.deleteOnExit();
                 }
@@ -58,8 +55,7 @@ public final class WagonUtils {
     public static void putDirectory(File dir, Wagon wagon, boolean includeBasdir)
             throws ResourceDoesNotExistException, TransferFailedException, AuthorizationException {
 
-        LinkedList queue = new LinkedList();
-
+        LinkedList<String> queue = new LinkedList<>();
         if (includeBasdir) {
             queue.add(dir.getName());
         } else {
@@ -67,18 +63,17 @@ public final class WagonUtils {
         }
 
         while (!queue.isEmpty()) {
-            String path = (String) queue.removeFirst();
+            String path = queue.removeFirst();
 
             File currentDir = new File(dir, path);
 
             File[] files = currentDir.listFiles();
 
-            for (int i = 0; i < files.length; i++) {
-                File file = files[i];
-
+            assert files != null;
+            for (File file : files) {
                 String resource;
 
-                if (path.length() > 0) {
+                if (!path.isEmpty()) {
                     resource = path + "/" + file.getName();
                 } else {
                     resource = file.getName();

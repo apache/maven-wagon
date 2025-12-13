@@ -43,12 +43,14 @@ public abstract class StreamWagon extends AbstractWagon implements StreamingWago
 
     public abstract void fillOutputData(OutputData outputData) throws TransferFailedException;
 
+    @Override
     public abstract void closeConnection() throws ConnectionException;
 
     // ----------------------------------------------------------------------
     //
     // ----------------------------------------------------------------------
 
+    @Override
     public void get(String resourceName, File destination)
             throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
         getIfNewer(resourceName, destination, 0);
@@ -63,6 +65,7 @@ public abstract class StreamWagon extends AbstractWagon implements StreamingWago
         }
     }
 
+    @Override
     public boolean getIfNewer(String resourceName, File destination, long timestamp)
             throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
         boolean retValue = false;
@@ -103,15 +106,7 @@ public abstract class StreamWagon extends AbstractWagon implements StreamingWago
 
         try {
             fillInputData(inputData);
-        } catch (TransferFailedException e) {
-            fireTransferError(resource, e, TransferEvent.REQUEST_GET);
-            cleanupGetTransfer(resource);
-            throw e;
-        } catch (ResourceDoesNotExistException e) {
-            fireTransferError(resource, e, TransferEvent.REQUEST_GET);
-            cleanupGetTransfer(resource);
-            throw e;
-        } catch (AuthorizationException e) {
+        } catch (TransferFailedException | ResourceDoesNotExistException | AuthorizationException e) {
             fireTransferError(resource, e, TransferEvent.REQUEST_GET);
             cleanupGetTransfer(resource);
             throw e;
@@ -125,6 +120,7 @@ public abstract class StreamWagon extends AbstractWagon implements StreamingWago
     }
 
     // source doesn't exist exception
+    @Override
     public void put(File source, String resourceName)
             throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
         Resource resource = new Resource(resourceName);
@@ -171,6 +167,7 @@ public abstract class StreamWagon extends AbstractWagon implements StreamingWago
         return outputData.getOutputStream();
     }
 
+    @Override
     public boolean getIfNewerToStream(String resourceName, OutputStream stream, long timestamp)
             throws ResourceDoesNotExistException, TransferFailedException, AuthorizationException {
         boolean retValue = false;
@@ -205,11 +202,14 @@ public abstract class StreamWagon extends AbstractWagon implements StreamingWago
         return retValue;
     }
 
+    @Override
     public void getToStream(String resourceName, OutputStream stream)
             throws ResourceDoesNotExistException, TransferFailedException, AuthorizationException {
         getIfNewerToStream(resourceName, stream, 0);
     }
 
+    @Deprecated
+    @Override
     public void putFromStream(InputStream stream, String destination)
             throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
         Resource resource = new Resource(destination);
@@ -219,6 +219,7 @@ public abstract class StreamWagon extends AbstractWagon implements StreamingWago
         putFromStream(stream, resource);
     }
 
+    @Override
     public void putFromStream(InputStream stream, String destination, long contentLength, long lastModified)
             throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
         Resource resource = new Resource(destination);

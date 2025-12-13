@@ -157,6 +157,7 @@ public class SessionEvent extends WagonEvent {
         this.exception = exception;
     }
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
 

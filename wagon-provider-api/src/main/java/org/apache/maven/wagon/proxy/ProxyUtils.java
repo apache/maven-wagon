@@ -35,7 +35,7 @@ public final class ProxyUtils {
      */
     public static boolean validateNonProxyHosts(ProxyInfo proxy, String targetHost) {
         if (targetHost == null) {
-            targetHost = new String();
+            targetHost = "";
         }
         if (proxy == null) {
             return false;

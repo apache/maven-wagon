@@ -184,6 +184,7 @@ public class TransferEvent extends WagonEvent {
         this.localFile = localFile;
     }
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
@@ -233,6 +234,7 @@ public class TransferEvent extends WagonEvent {
         return sb.toString();
     }
 
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
@@ -244,6 +246,7 @@ public class TransferEvent extends WagonEvent {
         return result;
     }
 
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
