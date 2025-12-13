@@ -38,7 +38,7 @@ public final class PermissionModeUtils {
         String ret = null;
 
         try {
-            int mode = Integer.valueOf(modeStr, 8).intValue();
+            int mode = Integer.valueOf(modeStr, 8);
 
             mode = mode % 8 + ((mode / 8) % 8) * 8 + ((mode / 64) % 8) * 64;
 

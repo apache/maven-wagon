@@ -23,7 +23,6 @@ import java.util.Properties;
 
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.WagonConstants;
-import org.codehaus.plexus.util.StringUtils;
 
 /**
  * This class is an abstraction of the location from/to resources
@@ -203,12 +202,14 @@ public class Repository implements Serializable {
         return name;
     }
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
         sb.append("Repository[");
 
-        if (StringUtils.isNotEmpty(getName())) {
+        String str = getName();
+        if (str != null && !str.isEmpty()) {
             sb.append(getName()).append("|");
         }
 
@@ -238,6 +239,7 @@ public class Repository implements Serializable {
         this.parameters = parameters;
     }
 
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
@@ -245,6 +247,7 @@ public class Repository implements Serializable {
         return result;
     }
 
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;

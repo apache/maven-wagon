@@ -46,6 +46,7 @@ public class ChecksumObserver implements TransferListener {
         digester = MessageDigest.getInstance(algorithm);
     }
 
+    @Override
     public void transferInitiated(TransferEvent transferEvent) {
         // This space left intentionally blank
     }
@@ -53,6 +54,7 @@ public class ChecksumObserver implements TransferListener {
     /**
      * @see org.apache.maven.wagon.events.TransferListener#transferStarted(org.apache.maven.wagon.events.TransferEvent)
      */
+    @Override
     public void transferStarted(TransferEvent transferEvent) {
         actualChecksum = null;
 
@@ -62,20 +64,24 @@ public class ChecksumObserver implements TransferListener {
     /**
      * @see org.apache.maven.wagon.events.TransferListener#transferProgress(org.apache.maven.wagon.events.TransferEvent, byte[], int)
      */
+    @Override
     public void transferProgress(TransferEvent transferEvent, byte[] buffer, int length) {
         digester.update(buffer, 0, length);
     }
 
+    @Override
     public void transferCompleted(TransferEvent transferEvent) {
         actualChecksum = encode(digester.digest());
     }
 
+    @Override
     public void transferError(TransferEvent transferEvent) {
         digester.reset();
 
         actualChecksum = null;
     }
 
+    @Override
     public void debug(String message) {
         // left intentionally blank
     }

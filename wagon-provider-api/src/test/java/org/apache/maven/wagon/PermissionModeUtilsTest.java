@@ -18,7 +18,9 @@
  */
 package org.apache.maven.wagon;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Unit test for PermissionModeUtils class
@@ -27,11 +29,11 @@ import junit.framework.TestCase;
  * @see PermissionModeUtils
  * @since Sep 3, 2005
  */
-public class PermissionModeUtilsTest extends TestCase {
+class PermissionModeUtilsTest {
     /**
-     * @throws Exception on error
      */
-    public void testNumeric() throws Exception {
+    @Test
+    void numeric() {
         final String[][] tests = {
             {"0", "777"},
             {"0000", "777"},

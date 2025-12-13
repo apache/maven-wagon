@@ -31,6 +31,7 @@ public class InputStreamMock extends InputStream {
 
     boolean forcedError = false;
 
+    @Override
     public void close() {
         closed = true;
     }
@@ -52,6 +53,7 @@ public class InputStreamMock extends InputStream {
     /**
      * @see java.io.InputStream#read()
      */
+    @Override
     public int read() throws IOException {
         if (forcedError) {
             throw new IOException("Mock exception");

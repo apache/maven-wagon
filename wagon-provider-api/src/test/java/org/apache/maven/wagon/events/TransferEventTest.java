@@ -18,121 +18,91 @@
  */
 package org.apache.maven.wagon.events;
 
-import junit.framework.TestCase;
-import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.easymock.EasyMock;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  *
  */
-public class TransferEventTest extends TestCase {
+class TransferEventTest {
     /*
-     * Class to test for void TransferEvent(Wagon, Repository, String, int,
-     * int)
+     * Class to test for void TransferEvent(Wagon, Repository, String, int, int)
      */
-    public void testTransferEventProperties() throws ConnectionException, AuthenticationException {
-        final Wagon wagon = EasyMock.createMock(Wagon.class);
-
-        final Repository repo = new Repository();
-
+    @Test
+    void transferEventProperties() throws Exception {
+        Wagon wagon = Mockito.mock(Wagon.class);
+        Repository repo = new Repository("fake", "http://fake");
         wagon.connect(repo);
 
-        final long timestamp = System.currentTimeMillis();
-
-        final Exception exception = new AuthenticationException("dummy");
-
         Resource resource = new Resource();
-
         resource.setName("mm");
 
-        TransferEvent event =
+        TransferEvent event1 =
                 new TransferEvent(wagon, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_GET);
 
-        assertEquals(wagon, event.getWagon());
-
-        assertEquals("mm", event.getResource().getName());
-
-        assertEquals(TransferEvent.TRANSFER_COMPLETED, event.getEventType());
-
-        assertEquals(TransferEvent.REQUEST_GET, event.getRequestType());
+        assertEquals(wagon, event1.getWagon());
+        assertEquals("mm", event1.getResource().getName());
+        assertEquals(TransferEvent.TRANSFER_COMPLETED, event1.getEventType());
+        assertEquals(TransferEvent.REQUEST_GET, event1.getRequestType());
 
         Resource res = new Resource();
-
         res.setName("mm");
+        Exception exception = new AuthenticationException("dummy");
 
-        event = new TransferEvent(wagon, res, exception, TransferEvent.REQUEST_GET);
+        TransferEvent event = new TransferEvent(wagon, res, exception, TransferEvent.REQUEST_GET);
 
         assertEquals(wagon, event.getWagon());
-
         assertEquals("mm", event.getResource().getName());
-
         assertEquals(TransferEvent.TRANSFER_ERROR, event.getEventType());
-
         assertEquals(TransferEvent.REQUEST_GET, event.getRequestType());
-
         assertEquals(exception, event.getException());
 
         event.setResource(null);
-
-        assertEquals(null, event.getResource());
+        assertNull(event.getResource());
 
         res.setName("/foo/baa");
-
         event.setResource(res);
-
         assertEquals("/foo/baa", event.getResource().getName());
 
+        long timestamp = System.currentTimeMillis();
         event.setTimestamp(timestamp);
-
         assertEquals(timestamp, event.getTimestamp());
 
         event.setRequestType(TransferEvent.REQUEST_PUT);
-
         assertEquals(TransferEvent.REQUEST_PUT, event.getRequestType());
 
         event.setRequestType(TransferEvent.REQUEST_GET);
-
         assertEquals(TransferEvent.REQUEST_GET, event.getRequestType());
 
-        try {
-            event.setRequestType(-1);
-
-            fail("Exception expected");
-        } catch (IllegalArgumentException e) {
-            assertTrue(true);
-        }
+        assertThrows(IllegalArgumentException.class, () -> event.setRequestType(-1));
 
         event.setEventType(TransferEvent.TRANSFER_COMPLETED);
-
         assertEquals(TransferEvent.TRANSFER_COMPLETED, event.getEventType());
 
         event.setEventType(TransferEvent.TRANSFER_ERROR);
-
         assertEquals(TransferEvent.TRANSFER_ERROR, event.getEventType());
 
         event.setEventType(TransferEvent.TRANSFER_STARTED);
-
         assertEquals(TransferEvent.TRANSFER_STARTED, event.getEventType());
 
         event.setEventType(TransferEvent.TRANSFER_PROGRESS);
-
         assertEquals(TransferEvent.TRANSFER_PROGRESS, event.getEventType());
 
-        try {
-            event.setEventType(-1);
-
-            fail("Exception expected");
-        } catch (IllegalArgumentException e) {
-            assertTrue(true);
-        }
+        assertThrows(IllegalArgumentException.class, () -> event.setEventType(-1));
     }
 
-    public void testConstantValueConflict() {
+    @Test
+    void constantValueConflict() {
         final int[] values = {
             TransferEvent.TRANSFER_COMPLETED, TransferEvent.TRANSFER_ERROR,
             TransferEvent.TRANSFER_STARTED, TransferEvent.TRANSFER_PROGRESS,
@@ -141,10 +111,7 @@ public class TransferEventTest extends TestCase {
 
         for (int i = 0; i < values.length; i++) {
             for (int j = i + 1; j < values.length; j++) {
-
-                final String msg = "Value confict at [i,j]=[" + i + "," + j + "]";
-
-                assertTrue(msg, values[i] != values[j]);
+                assertNotEquals(values[i], values[j], "Value conflict at [i,j]=[" + i + "," + j + "]");
             }
         }
     }

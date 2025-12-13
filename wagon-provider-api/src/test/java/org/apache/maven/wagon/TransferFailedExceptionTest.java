@@ -18,14 +18,17 @@
  */
 package org.apache.maven.wagon;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
  *
  */
-public class TransferFailedExceptionTest extends TestCase {
-    public void testTransferFailedExceptionTest() {
+class TransferFailedExceptionTest {
+    @Test
+    void transferFailedExceptionTest() {
         TransferFailedException ae = new TransferFailedException("message");
 
         assertEquals("message", ae.getMessage());

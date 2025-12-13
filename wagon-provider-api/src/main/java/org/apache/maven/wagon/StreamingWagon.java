@@ -69,6 +69,7 @@ public interface StreamingWagon extends Wagon {
      * @throws ResourceDoesNotExistException
      * @throws AuthorizationException
      */
+    @Deprecated
     void putFromStream(InputStream stream, String destination)
             throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException;
 
