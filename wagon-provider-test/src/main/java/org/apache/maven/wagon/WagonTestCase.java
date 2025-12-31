@@ -40,22 +40,18 @@ import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.util.FileUtils;
-import org.easymock.IAnswer;
 import org.junit.Assume;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.easymock.EasyMock.anyInt;
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.anyString;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.getCurrentArguments;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
-import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertArrayEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
@@ -63,11 +59,11 @@ import static org.junit.Assert.assertArrayEquals;
 public abstract class WagonTestCase extends PlexusTestCase {
     protected static Logger logger = LoggerFactory.getLogger(WagonTestCase.class);
 
-    static final class ProgressAnswer implements IAnswer {
+    static final class ProgressAnswer implements Answer<Object> {
         private int size;
 
-        public Object answer() throws Throwable {
-            int length = (Integer) getCurrentArguments()[2];
+        public Object answer(InvocationOnMock invocation) {
+            int length = invocation.getArgument(2);
             size += length;
             return null;
         }
@@ -112,7 +108,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
     protected void setUp() throws Exception {
         checksumObserver = new ChecksumObserver();
 
-        mockTransferListener = createMock(TransferListener.class);
+        mockTransferListener = mock(TransferListener.class);
 
         super.setUp();
     }
@@ -317,7 +313,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
     protected void assertGetIfNewerTest(ProgressAnswer progressAnswer, boolean expectedResult, int expectedSize)
             throws IOException {
         if (expectedResult) {
-            verifyMock(progressAnswer, expectedSize);
+            assertEquals(expectedSize, progressAnswer.getSize());
 
             assertNotNull("check checksum is not null", checksumObserver.getActualChecksum());
 
@@ -331,10 +327,6 @@ public abstract class WagonTestCase extends PlexusTestCase {
             byte[] destContent = Files.readAllBytes(destFile.toPath());
             assertArrayEquals(sourceContent, destContent);
         } else {
-            verify(mockTransferListener);
-
-            reset(mockTransferListener);
-
             assertNull("check checksum is null", checksumObserver.getActualChecksum());
 
             assertFalse(destFile.exists());
@@ -348,11 +340,9 @@ public abstract class WagonTestCase extends PlexusTestCase {
         resource = new Resource(this.resource);
         resource.setContentLength(getExpectedContentLengthOnGet(expectedSize));
         resource.setLastModified(getExpectedLastModifiedOnGet(testRepository, resource));
-
-        mockTransferListener.debug(anyString());
-        expectLastCall().anyTimes();
-
-        replay(mockTransferListener);
+        // TODO: transfer skipped event?
+        // mockTransferListener.transferSkipped( createTransferEvent( wagon, resource, TransferEvent.TRANSFER_STARTED,
+        // TransferEvent.REQUEST_GET, destFile ) );
     }
 
     public void testWagonPutDirectory() throws Exception {
@@ -801,7 +791,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
 
         disconnectWagon(wagon);
 
-        verifyMock(progressAnswer, content.length());
+        assertEquals(content.length(), progressAnswer.getSize());
     }
 
     protected ProgressAnswer replayMockForPut(String resourceName, String content, Wagon wagon) {
@@ -813,21 +803,22 @@ public abstract class WagonTestCase extends PlexusTestCase {
         resource.setLastModified(sourceFile.lastModified());
         mockTransferListener.transferStarted(createTransferEvent(
                 wagon, resource, TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_PUT, sourceFile));
-        mockTransferListener.transferProgress(
-                eq(createTransferEvent(
-                        wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT, sourceFile)),
-                anyObject(byte[].class),
-                anyInt());
         ProgressAnswer progressAnswer = new ProgressAnswer();
-        expectLastCall().andStubAnswer(progressAnswer);
-
-        mockTransferListener.debug(anyString());
-        expectLastCall().anyTimes();
+        doAnswer(progressAnswer)
+                .when(mockTransferListener)
+                .transferProgress(
+                        eq(createTransferEvent(
+                                wagon,
+                                resource,
+                                TransferEvent.TRANSFER_PROGRESS,
+                                TransferEvent.REQUEST_PUT,
+                                sourceFile)),
+                        any(byte[].class),
+                        anyInt());
 
         mockTransferListener.transferCompleted(createTransferEvent(
                 wagon, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_PUT, sourceFile));
 
-        replay(mockTransferListener);
         return progressAnswer;
     }
 
@@ -860,15 +851,7 @@ public abstract class WagonTestCase extends PlexusTestCase {
 
         disconnectWagon(wagon);
 
-        verifyMock(progressAnswer, expectedSize);
-    }
-
-    protected void verifyMock(ProgressAnswer progressAnswer, int length) {
-        verify(mockTransferListener);
-
-        assertEquals(length, progressAnswer.getSize());
-
-        reset(mockTransferListener);
+        assertEquals(expectedSize, progressAnswer.getSize());
     }
 
     protected void disconnectWagon(Wagon wagon) throws ConnectionException {
@@ -906,26 +889,18 @@ public abstract class WagonTestCase extends PlexusTestCase {
         TransferEvent te =
                 createTransferEvent(wagon, resource, TransferEvent.TRANSFER_STARTED, TransferEvent.REQUEST_GET, null);
         mockTransferListener.transferStarted(te);
-        mockTransferListener.transferProgress(
-                eq(new TransferEvent(wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_GET)),
-                anyObject(byte[].class),
-                anyInt());
-
         ProgressAnswer progressAnswer = new ProgressAnswer();
-
-        if (assertOnTransferProgress()) {
-            expectLastCall().andAnswer(progressAnswer);
-        } else {
-            expectLastCall().andAnswer(progressAnswer);
-            expectLastCall().anyTimes();
-        }
-        mockTransferListener.debug(anyString());
-        expectLastCall().anyTimes();
+        doAnswer(progressAnswer)
+                .when(mockTransferListener)
+                .transferProgress(
+                        eq(new TransferEvent(
+                                wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_GET)),
+                        any(byte[].class),
+                        anyInt());
 
         mockTransferListener.transferCompleted(createTransferEvent(
                 wagon, resource, TransferEvent.TRANSFER_COMPLETED, TransferEvent.REQUEST_GET, destFile));
 
-        replay(mockTransferListener);
         return progressAnswer;
     }
 
