@@ -96,7 +96,7 @@ class StreamWagonTest {
         } finally {
             wagon.disconnect();
         }
-        verify(listener, times(1)).transferInitiated(any(TransferEvent.class));
+        verify(listener).transferInitiated(any(TransferEvent.class));
         verify(listener, never()).transferStarted(any(TransferEvent.class));
         verify(listener, never()).transferCompleted(any(TransferEvent.class));
     }
@@ -127,7 +127,7 @@ class StreamWagonTest {
         } finally {
             wagon.disconnect();
         }
-        verify(listener, times(1)).transferInitiated(any(TransferEvent.class));
+        verify(listener).transferInitiated(any(TransferEvent.class));
         verify(listener, never()).transferStarted(any(TransferEvent.class));
         verify(listener, never()).transferCompleted(any(TransferEvent.class));
     }
@@ -212,7 +212,7 @@ class StreamWagonTest {
         } finally {
             wagon.disconnect();
         }
-        verify(listener, times(1)).transferInitiated(any(TransferEvent.class));
+        verify(listener).transferInitiated(any(TransferEvent.class));
     }
 
     @Test
