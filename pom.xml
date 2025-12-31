@@ -227,11 +227,6 @@ under the License.
         <artifactId>commons-io</artifactId>
         <version>2.21.0</version>
       </dependency>
-      <dependency>
-        <groupId>org.easymock</groupId>
-        <artifactId>easymock</artifactId>
-        <version>5.6.0</version>
-      </dependency>
 
       <dependency>
         <groupId>org.eclipse.jetty.aggregate</groupId>

@@ -230,7 +230,7 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
 
         disconnectWagon(wagon);
 
-        verifyMock(progressAnswer, content.length());
+        assertEquals(content.length(), progressAnswer.getSize());
         return content.length();
     }
 
@@ -261,6 +261,6 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
 
         disconnectWagon(wagon);
 
-        verifyMock(progressAnswer, expectedSize);
+        assertEquals(expectedSize, progressAnswer.getSize());
     }
 }
