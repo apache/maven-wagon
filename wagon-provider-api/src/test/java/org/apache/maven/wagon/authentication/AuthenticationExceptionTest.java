@@ -18,6 +18,10 @@
  */
 package org.apache.maven.wagon.authentication;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -37,22 +41,13 @@ package org.apache.maven.wagon.authentication;
  * under the License.
  */
 
-import junit.framework.TestCase;
-
-/**
- * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
- *
- */
-public class AuthenticationExceptionTest extends TestCase {
-    public void testAuthenticationExceptionTest() {
+public class AuthenticationExceptionTest {
+    @Test
+    void testAuthenticationExceptionTest() {
         AuthenticationException ae = new AuthenticationException("message");
-
         assertEquals("message", ae.getMessage());
-
         ae = new AuthenticationException("full-message", new Throwable("cause"));
-
         assertEquals("full-message", ae.getMessage());
-
         assertEquals("cause", ae.getCause().getMessage());
     }
 }

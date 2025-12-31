@@ -19,8 +19,6 @@
 package org.apache.maven.wagon;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -29,13 +27,18 @@ import java.text.SimpleDateFormat;
 
 import org.apache.maven.wagon.observers.ChecksumObserver;
 import org.apache.maven.wagon.resource.Resource;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  */
 public abstract class StreamingWagonTestCase extends WagonTestCase {
+    @Test
     public void testStreamingWagon() throws Exception {
         if (supportsGetIfNewer()) {
             setupWagonTestingFixtures();
@@ -48,6 +51,7 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
         }
     }
 
+    @Test
     public void testFailedGetToStream() throws Exception {
         setupWagonTestingFixtures();
 
@@ -65,12 +69,9 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
 
         destFile.deleteOnExit();
 
-        try (OutputStream stream = new FileOutputStream(destFile)) {
-            wagon.getToStream("fubar.txt", stream);
-            fail("File was found when it shouldn't have been");
-        } catch (ResourceDoesNotExistException e) {
-            // expected
-            assertTrue(true);
+        try (OutputStream stream = Files.newOutputStream(destFile.toPath())) {
+            assertThrows(ResourceDoesNotExistException.class, () -> wagon.getToStream("fubar.txt", stream));
+
         } finally {
             wagon.removeTransferListener(checksumObserver);
 
@@ -80,6 +81,7 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
         }
     }
 
+    @Test
     public void testWagonGetIfNewerToStreamIsNewer() throws Exception {
         if (supportsGetIfNewer()) {
             setupWagonTestingFixtures();
@@ -93,6 +95,7 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
         }
     }
 
+    @Test
     public void testWagonGetIfNewerToStreamIsOlder() throws Exception {
         if (supportsGetIfNewer()) {
             setupWagonTestingFixtures();
@@ -103,6 +106,7 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
         }
     }
 
+    @Test
     public void testWagonGetIfNewerToStreamIsSame() throws Exception {
         if (supportsGetIfNewer()) {
             setupWagonTestingFixtures();
@@ -120,13 +124,9 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
 
         connectWagon(wagon);
 
-        OutputStream stream = new LazyFileOutputStream(destFile);
-
-        try {
+        try (OutputStream stream = new LazyFileOutputStream(destFile)) {
             boolean result = wagon.getIfNewerToStream(this.resource, stream, timestamp);
             assertEquals(expectedResult, result);
-        } finally {
-            stream.close();
         }
 
         disconnectWagon(wagon);
@@ -136,6 +136,7 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
         tearDownWagonTestingFixtures();
     }
 
+    @Test
     public void testFailedGetIfNewerToStream() throws Exception {
         if (supportsGetIfNewer()) {
             setupWagonTestingFixtures();
@@ -147,12 +148,9 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
             destFile = FileTestUtils.createUniqueFile(getName(), getName());
             destFile.deleteOnExit();
 
-            try (OutputStream stream = new FileOutputStream(destFile)) {
-                wagon.getIfNewerToStream("fubar.txt", stream, 0);
-                fail("File was found when it shouldn't have been");
-            } catch (ResourceDoesNotExistException e) {
-                // expected
-                assertTrue(true);
+            try (OutputStream stream = Files.newOutputStream(destFile.toPath())) {
+                assertThrows(
+                        ResourceDoesNotExistException.class, () -> wagon.getIfNewerToStream("fubar.txt", stream, 0));
             } finally {
                 wagon.removeTransferListener(checksumObserver);
 
@@ -168,17 +166,17 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
 
         int expectedSize = putStream();
 
-        assertNotNull("check checksum is not null", checksumObserver.getActualChecksum());
+        assertNotNull(checksumObserver.getActualChecksum(), "check checksum is not null");
 
-        assertEquals("compare checksums", "6b144b7285ffd6b0bc8300da162120b9", checksumObserver.getActualChecksum());
+        assertEquals("6b144b7285ffd6b0bc8300da162120b9", checksumObserver.getActualChecksum(), "compare checksums");
 
         checksumObserver = new ChecksumObserver();
 
         getStream(expectedSize);
 
-        assertNotNull("check checksum is not null", checksumObserver.getActualChecksum());
+        assertNotNull(checksumObserver.getActualChecksum(), "check checksum is not null");
 
-        assertEquals("compare checksums", "6b144b7285ffd6b0bc8300da162120b9", checksumObserver.getActualChecksum());
+        assertEquals("6b144b7285ffd6b0bc8300da162120b9", checksumObserver.getActualChecksum(), "compare checksums");
 
         // Now compare the contents of the artifact that was placed in
         // the repository with the contents of the artifact that was
@@ -205,7 +203,7 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
 
         connectWagon(wagon);
 
-        try (InputStream stream = new FileInputStream(sourceFile)) {
+        try (InputStream stream = Files.newInputStream(sourceFile.toPath())) {
             wagon.putFromStream(stream, resource, sourceFile.length(), sourceFile.lastModified());
         } catch (Exception e) {
             logger.error("error while putting resources to the FTP Server", e);
@@ -229,7 +227,7 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
 
         connectWagon(wagon);
 
-        try (OutputStream stream = new FileOutputStream(destFile)) {
+        try (OutputStream stream = Files.newOutputStream(destFile.toPath())) {
             wagon.getToStream(this.resource, stream);
         } catch (Exception e) {
             logger.error("error while reading resources from the FTP Server", e);

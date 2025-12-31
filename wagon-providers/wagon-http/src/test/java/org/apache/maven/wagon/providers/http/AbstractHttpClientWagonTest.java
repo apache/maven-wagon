@@ -37,13 +37,13 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.execchain.RedirectExec;
 import org.apache.http.impl.execchain.RetryExec;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class AbstractHttpClientWagonTest {
 
@@ -100,31 +100,28 @@ public class AbstractHttpClientWagonTest {
 
     @Test
     public void retryableConfigurationExceptionsTest() throws Exception {
-        doTestHttpClient(new Runnable() {
-            @Override
-            public void run() {
-                System.setProperty("maven.wagon.http.retryHandler.class", "default");
-                System.setProperty("maven.wagon.http.retryHandler.nonRetryableClasses", IOException.class.getName());
+        doTestHttpClient((Runnable) () -> {
+            System.setProperty("maven.wagon.http.retryHandler.class", "default");
+            System.setProperty("maven.wagon.http.retryHandler.nonRetryableClasses", IOException.class.getName());
 
-                final HttpRequestRetryHandler handler = getCurrentHandler();
-                assertNotNull(handler);
-                assertTrue(handler instanceof DefaultHttpRequestRetryHandler);
-                final DefaultHttpRequestRetryHandler impl = DefaultHttpRequestRetryHandler.class.cast(handler);
-                assertEquals(3, impl.getRetryCount());
-                assertFalse(impl.isRequestSentRetryEnabled());
+            final HttpRequestRetryHandler handler = getCurrentHandler();
+            assertNotNull(handler);
+            assertTrue(handler instanceof DefaultHttpRequestRetryHandler);
+            final DefaultHttpRequestRetryHandler impl = DefaultHttpRequestRetryHandler.class.cast(handler);
+            assertEquals(3, impl.getRetryCount());
+            assertFalse(impl.isRequestSentRetryEnabled());
 
-                try {
-                    final Field nonRetriableClasses =
-                            handler.getClass().getSuperclass().getDeclaredField("nonRetriableClasses");
-                    if (!nonRetriableClasses.isAccessible()) {
-                        nonRetriableClasses.setAccessible(true);
-                    }
-                    final Set<?> exceptions = Set.class.cast(nonRetriableClasses.get(handler));
-                    assertEquals(1, exceptions.size());
-                    assertTrue(exceptions.contains(IOException.class));
-                } catch (NoSuchFieldException | IllegalAccessException e) {
-                    fail(e.getMessage());
+            try {
+                final Field nonRetriableClasses =
+                        handler.getClass().getSuperclass().getDeclaredField("nonRetriableClasses");
+                if (!nonRetriableClasses.isAccessible()) {
+                    nonRetriableClasses.setAccessible(true);
                 }
+                final Set<?> exceptions = Set.class.cast(nonRetriableClasses.get(handler));
+                assertEquals(1, exceptions.size());
+                assertTrue(exceptions.contains(IOException.class));
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                fail(e.getMessage());
             }
         });
     }

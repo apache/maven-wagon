@@ -18,6 +18,9 @@
  */
 package org.apache.maven.wagon.providers.ftp;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPHTTPClient;
 import org.apache.maven.wagon.proxy.ProxyInfo;
@@ -27,14 +30,17 @@ import org.slf4j.LoggerFactory;
 /**
  * FtpHttpWagon
  *
- *
- * @plexus.component role="org.apache.maven.wagon.Wagon"
- * role-hint="ftph"
- * instantiation-strategy="per-lookup"
  */
+@Singleton
+@Named("ftph")
 public class FtpHttpWagon extends FtpWagon {
 
     private static final Logger LOG = LoggerFactory.getLogger(FtpHttpWagon.class);
+
+    public FtpHttpWagon(
+            @Named("${passiveMode}") boolean passiveMode, @Named("${controlEncoding}") String controlEncoding) {
+        super(passiveMode, controlEncoding);
+    }
 
     @Override
     protected FTPClient createClient() {

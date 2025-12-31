@@ -20,230 +20,254 @@ package org.apache.maven.wagon;
 
 import java.io.File;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
  */
-public class PathUtilsTest extends TestCase {
+public class PathUtilsTest {
+    @Test
     public void testFilenameResolving() {
-        assertEquals("filename", PathUtils.filename("dir/filename"));
+        Assertions.assertEquals("filename", PathUtils.filename("dir/filename"));
 
-        assertEquals("filename", PathUtils.filename("filename"));
+        Assertions.assertEquals("filename", PathUtils.filename("filename"));
 
-        assertEquals("filename", PathUtils.filename("dir1/dir2/filename"));
+        Assertions.assertEquals("filename", PathUtils.filename("dir1/dir2/filename"));
     }
 
+    @Test
     public void testDirResolving() {
-        assertEquals("dir", PathUtils.dirname("dir/filename"));
+        Assertions.assertEquals("dir", PathUtils.dirname("dir/filename"));
 
-        assertEquals("", PathUtils.dirname("filename"));
+        Assertions.assertEquals("", PathUtils.dirname("filename"));
 
-        assertEquals("dir1/dir2", PathUtils.dirname("dir1/dir2/filename"));
+        Assertions.assertEquals("dir1/dir2", PathUtils.dirname("dir1/dir2/filename"));
     }
 
     // A characterization test that demonstrates the existing behavior does not
     // match the Unix dirname function when a trailing slash is present.
+    @Test
     public void testDirnameDoesNotStripTrailingSlash() {
-        assertEquals("dir1/dir2/filename", PathUtils.dirname("dir1/dir2/filename/"));
+        Assertions.assertEquals("dir1/dir2/filename", PathUtils.dirname("dir1/dir2/filename/"));
     }
 
     // A characterization test that demonstrates the existing behavior does not
     // match the Unix dirname function when a trailing slash is present.
+    @Test
     public void testFilenameDoesNotStripTrailingSlash() {
-        assertEquals("", PathUtils.filename("dir1/dir2/filename/"));
+        Assertions.assertEquals("", PathUtils.filename("dir1/dir2/filename/"));
     }
 
+    @Test
     public void testDirSplitting() {
         final String path = "a/b/c";
 
         final String[] dirs = PathUtils.dirnames(path);
 
-        assertNotNull(dirs);
+        Assertions.assertNotNull(dirs);
 
-        assertEquals(2, dirs.length);
+        Assertions.assertEquals(2, dirs.length);
 
-        assertEquals("a", dirs[0]);
+        Assertions.assertEquals("a", dirs[0]);
 
-        assertEquals("b", dirs[1]);
+        Assertions.assertEquals("b", dirs[1]);
     }
 
+    @Test
     public void testHostResolving() {
-        assertEquals("www.codehaus.org", PathUtils.host("http://www.codehaus.org"));
-        assertEquals("www.codehaus.org", PathUtils.host("HTTP://www.codehaus.org"));
+        Assertions.assertEquals("www.codehaus.org", PathUtils.host("http://www.codehaus.org"));
+        Assertions.assertEquals("www.codehaus.org", PathUtils.host("HTTP://www.codehaus.org"));
 
-        assertEquals("localhost", PathUtils.host(null));
-        assertEquals("localhost", PathUtils.host("file:///c:/temp"));
-        assertEquals("localhost", PathUtils.host("FILE:///c:/temp"));
+        Assertions.assertEquals("localhost", PathUtils.host(null));
+        Assertions.assertEquals("localhost", PathUtils.host("file:///c:/temp"));
+        Assertions.assertEquals("localhost", PathUtils.host("FILE:///c:/temp"));
     }
 
+    @Test
     public void testScmHostResolving() {
-        assertEquals("www.codehaus.org", PathUtils.host("scm:svn:http://www.codehaus.org"));
-        assertEquals("www.codehaus.org", PathUtils.host("SCM:SVN:HTTP://www.codehaus.org"));
-        assertEquals("www.codehaus.org", PathUtils.host("scm:svn:http://www.codehaus.org/repos/module"));
-        assertEquals("www.codehaus.org", PathUtils.host("SCM:SVN:HTTP://www.codehaus.org/repos/module"));
-        assertEquals("www.codehaus.org", PathUtils.host("scm:cvs:pserver:anoncvs@www.codehaus.org:/root"));
-        assertEquals("www.codehaus.org", PathUtils.host("SCM:CVS:pserver:anoncvs@www.codehaus.org:/root"));
+        Assertions.assertEquals("www.codehaus.org", PathUtils.host("scm:svn:http://www.codehaus.org"));
+        Assertions.assertEquals("www.codehaus.org", PathUtils.host("SCM:SVN:HTTP://www.codehaus.org"));
+        Assertions.assertEquals("www.codehaus.org", PathUtils.host("scm:svn:http://www.codehaus.org/repos/module"));
+        Assertions.assertEquals("www.codehaus.org", PathUtils.host("SCM:SVN:HTTP://www.codehaus.org/repos/module"));
+        Assertions.assertEquals("www.codehaus.org", PathUtils.host("scm:cvs:pserver:anoncvs@www.codehaus.org:/root"));
+        Assertions.assertEquals("www.codehaus.org", PathUtils.host("SCM:CVS:pserver:anoncvs@www.codehaus.org:/root"));
     }
 
+    @Test
     public void testProtocolResolving() {
-        assertEquals("http", PathUtils.protocol("http://www.codehause.org"));
-        assertEquals("HTTP", PathUtils.protocol("HTTP://www.codehause.org"));
-        assertEquals("file", PathUtils.protocol("file:///c:/temp"));
-        assertEquals("scm", PathUtils.protocol("scm:svn:http://localhost/repos/module"));
-        assertEquals("scm", PathUtils.protocol("scm:cvs:pserver:anoncvs@cvs.apache.org:/home/cvspublic"));
+        Assertions.assertEquals("http", PathUtils.protocol("http://www.codehause.org"));
+        Assertions.assertEquals("HTTP", PathUtils.protocol("HTTP://www.codehause.org"));
+        Assertions.assertEquals("file", PathUtils.protocol("file:///c:/temp"));
+        Assertions.assertEquals("scm", PathUtils.protocol("scm:svn:http://localhost/repos/module"));
+        Assertions.assertEquals("scm", PathUtils.protocol("scm:cvs:pserver:anoncvs@cvs.apache.org:/home/cvspublic"));
     }
 
+    @Test
     public void testUserInfo() {
         String urlWithUsername = "http://brett@www.codehaus.org";
-        assertEquals("brett", PathUtils.user(urlWithUsername));
-        assertNull(PathUtils.password(urlWithUsername));
-        assertEquals("www.codehaus.org", PathUtils.host(urlWithUsername));
-        assertEquals("/", PathUtils.basedir(urlWithUsername));
+        Assertions.assertEquals("brett", PathUtils.user(urlWithUsername));
+        Assertions.assertNull(PathUtils.password(urlWithUsername));
+        Assertions.assertEquals("www.codehaus.org", PathUtils.host(urlWithUsername));
+        Assertions.assertEquals("/", PathUtils.basedir(urlWithUsername));
 
         String urlWithUsernamePassword = "http://brett:porter@www.codehaus.org";
-        assertEquals("brett", PathUtils.user(urlWithUsernamePassword));
-        assertEquals("porter", PathUtils.password(urlWithUsernamePassword));
-        assertEquals("www.codehaus.org", PathUtils.host(urlWithUsernamePassword));
-        assertEquals("/", PathUtils.basedir(urlWithUsernamePassword));
+        Assertions.assertEquals("brett", PathUtils.user(urlWithUsernamePassword));
+        Assertions.assertEquals("porter", PathUtils.password(urlWithUsernamePassword));
+        Assertions.assertEquals("www.codehaus.org", PathUtils.host(urlWithUsernamePassword));
+        Assertions.assertEquals("/", PathUtils.basedir(urlWithUsernamePassword));
     }
 
+    @Test
     public void testSubversionUserInfo() {
         String urlWithUsername = "scm:svn:http://brett@www.codehaus.org";
-        assertEquals("brett", PathUtils.user(urlWithUsername));
-        assertNull(PathUtils.password(urlWithUsername));
-        assertEquals("www.codehaus.org", PathUtils.host(urlWithUsername));
-        assertEquals("/", PathUtils.basedir(urlWithUsername));
+        Assertions.assertEquals("brett", PathUtils.user(urlWithUsername));
+        Assertions.assertNull(PathUtils.password(urlWithUsername));
+        Assertions.assertEquals("www.codehaus.org", PathUtils.host(urlWithUsername));
+        Assertions.assertEquals("/", PathUtils.basedir(urlWithUsername));
 
         String urlWithUsernamePassword = "scm:svn:http://brett:porter@www.codehaus.org";
-        assertEquals("brett", PathUtils.user(urlWithUsernamePassword));
-        assertEquals("porter", PathUtils.password(urlWithUsernamePassword));
-        assertEquals("www.codehaus.org", PathUtils.host(urlWithUsernamePassword));
-        assertEquals("/", PathUtils.basedir(urlWithUsernamePassword));
+        Assertions.assertEquals("brett", PathUtils.user(urlWithUsernamePassword));
+        Assertions.assertEquals("porter", PathUtils.password(urlWithUsernamePassword));
+        Assertions.assertEquals("www.codehaus.org", PathUtils.host(urlWithUsernamePassword));
+        Assertions.assertEquals("/", PathUtils.basedir(urlWithUsernamePassword));
 
         String urlWithUpperCaseProtocol = "SCM:SVN:HTTP://brett@www.codehaus.org";
-        assertEquals("brett", PathUtils.user(urlWithUpperCaseProtocol));
-        assertNull(PathUtils.password(urlWithUpperCaseProtocol));
-        assertEquals("www.codehaus.org", PathUtils.host(urlWithUpperCaseProtocol));
-        assertEquals("/", PathUtils.basedir(urlWithUpperCaseProtocol));
+        Assertions.assertEquals("brett", PathUtils.user(urlWithUpperCaseProtocol));
+        Assertions.assertNull(PathUtils.password(urlWithUpperCaseProtocol));
+        Assertions.assertEquals("www.codehaus.org", PathUtils.host(urlWithUpperCaseProtocol));
+        Assertions.assertEquals("/", PathUtils.basedir(urlWithUpperCaseProtocol));
     }
 
+    @Test
     public void testCvsUserInfo() {
         String urlWithUsername = "scm:cvs:pserver:brett@www.codehaus.org";
-        assertEquals("brett", PathUtils.user(urlWithUsername));
-        assertNull(PathUtils.password(urlWithUsername));
-        assertEquals("www.codehaus.org", PathUtils.host(urlWithUsername));
-        assertEquals("/", PathUtils.basedir(urlWithUsername));
+        Assertions.assertEquals("brett", PathUtils.user(urlWithUsername));
+        Assertions.assertNull(PathUtils.password(urlWithUsername));
+        Assertions.assertEquals("www.codehaus.org", PathUtils.host(urlWithUsername));
+        Assertions.assertEquals("/", PathUtils.basedir(urlWithUsername));
 
         String urlWithUsernamePassword = "scm:cvs:pserver:brett:porter@www.codehaus.org";
-        assertEquals("brett", PathUtils.user(urlWithUsernamePassword));
-        assertEquals("porter", PathUtils.password(urlWithUsernamePassword));
-        assertEquals("www.codehaus.org", PathUtils.host(urlWithUsernamePassword));
-        assertEquals("/", PathUtils.basedir(urlWithUsernamePassword));
+        Assertions.assertEquals("brett", PathUtils.user(urlWithUsernamePassword));
+        Assertions.assertEquals("porter", PathUtils.password(urlWithUsernamePassword));
+        Assertions.assertEquals("www.codehaus.org", PathUtils.host(urlWithUsernamePassword));
+        Assertions.assertEquals("/", PathUtils.basedir(urlWithUsernamePassword));
 
         String urlWithUpperCaseProtocol = "SCM:CVS:pserver:brett@www.codehaus.org";
-        assertEquals("brett", PathUtils.user(urlWithUpperCaseProtocol));
-        assertNull(PathUtils.password(urlWithUpperCaseProtocol));
-        assertEquals("www.codehaus.org", PathUtils.host(urlWithUpperCaseProtocol));
-        assertEquals("/", PathUtils.basedir(urlWithUpperCaseProtocol));
+        Assertions.assertEquals("brett", PathUtils.user(urlWithUpperCaseProtocol));
+        Assertions.assertNull(PathUtils.password(urlWithUpperCaseProtocol));
+        Assertions.assertEquals("www.codehaus.org", PathUtils.host(urlWithUpperCaseProtocol));
+        Assertions.assertEquals("/", PathUtils.basedir(urlWithUpperCaseProtocol));
     }
 
+    @Test
     public void testFileBasedir() {
         // see http://www.mozilla.org/quality/networking/testing/filetests.html
 
         // strict forms
-        assertEquals("c:/temp", PathUtils.basedir("file:///c|/temp"));
-        assertEquals("localhost", PathUtils.host("file:///c|/temp"));
-        assertEquals("c:/temp", PathUtils.basedir("file://localhost/c|/temp"));
-        assertEquals("localhost", PathUtils.host("file://localhost/c|/temp"));
-        assertEquals("/temp", PathUtils.basedir("file:///temp"));
-        assertEquals("localhost", PathUtils.host("file:///temp"));
-        assertEquals("/temp", PathUtils.basedir("file://localhost/temp"));
-        assertEquals("localhost", PathUtils.host("file://localhost/temp"));
+        Assertions.assertEquals("c:/temp", PathUtils.basedir("file:///c|/temp"));
+        Assertions.assertEquals("localhost", PathUtils.host("file:///c|/temp"));
+        Assertions.assertEquals("c:/temp", PathUtils.basedir("file://localhost/c|/temp"));
+        Assertions.assertEquals("localhost", PathUtils.host("file://localhost/c|/temp"));
+        Assertions.assertEquals("/temp", PathUtils.basedir("file:///temp"));
+        Assertions.assertEquals("localhost", PathUtils.host("file:///temp"));
+        Assertions.assertEquals("/temp", PathUtils.basedir("file://localhost/temp"));
+        Assertions.assertEquals("localhost", PathUtils.host("file://localhost/temp"));
 
         // strict form, with : for drive separator
-        assertEquals("c:/temp", PathUtils.basedir("file:///c:/temp"));
-        assertEquals("localhost", PathUtils.host("file:///c:/temp"));
-        assertEquals("c:/temp", PathUtils.basedir("file://localhost/c:/temp"));
-        assertEquals("localhost", PathUtils.host("file://localhost/c:/temp"));
+        Assertions.assertEquals("c:/temp", PathUtils.basedir("file:///c:/temp"));
+        Assertions.assertEquals("localhost", PathUtils.host("file:///c:/temp"));
+        Assertions.assertEquals("c:/temp", PathUtils.basedir("file://localhost/c:/temp"));
+        Assertions.assertEquals("localhost", PathUtils.host("file://localhost/c:/temp"));
 
         // convenience forms
-        assertEquals("c:/temp", PathUtils.basedir("file://c:/temp"));
-        assertEquals("c:/temp", PathUtils.basedir("file://c|/temp"));
-        assertEquals("c:/temp", PathUtils.basedir("file:c:/temp"));
-        assertEquals("c:/temp", PathUtils.basedir("file:c|/temp"));
-        assertEquals("/temp", PathUtils.basedir("file:/temp"));
+        Assertions.assertEquals("c:/temp", PathUtils.basedir("file://c:/temp"));
+        Assertions.assertEquals("c:/temp", PathUtils.basedir("file://c|/temp"));
+        Assertions.assertEquals("c:/temp", PathUtils.basedir("file:c:/temp"));
+        Assertions.assertEquals("c:/temp", PathUtils.basedir("file:c|/temp"));
+        Assertions.assertEquals("/temp", PathUtils.basedir("file:/temp"));
 
         // URL decoding
-        assertEquals("c:/my docs", PathUtils.basedir("file:///c:/my docs"));
-        assertEquals("c:/my docs", PathUtils.basedir("file:///c:/my%20docs"));
-        assertEquals(
+        Assertions.assertEquals("c:/my docs", PathUtils.basedir("file:///c:/my docs"));
+        Assertions.assertEquals("c:/my docs", PathUtils.basedir("file:///c:/my%20docs"));
+        Assertions.assertEquals(
                 "c:/name #%20?{}[]<>.txt", PathUtils.basedir("file:///c:/name%20%23%2520%3F%7B%7D%5B%5D%3C%3E.txt"));
 
-        assertEquals("c:/temp", PathUtils.basedir("FILE:///c:/temp"));
-        assertEquals("localhost", PathUtils.host("FILE:///c:/temp"));
+        Assertions.assertEquals("c:/temp", PathUtils.basedir("FILE:///c:/temp"));
+        Assertions.assertEquals("localhost", PathUtils.host("FILE:///c:/temp"));
     }
 
+    @Test
     public void testEmptyBasedir() {
-        assertEquals("/", PathUtils.basedir("http://www.codehaus.org:80"));
-        assertEquals("/", PathUtils.basedir("http://www.codehaus.org"));
-        assertEquals("/", PathUtils.basedir("http://www.codehaus.org:80/"));
-        assertEquals("/", PathUtils.basedir("http://www.codehaus.org/"));
-        assertEquals("/", PathUtils.basedir("HTTP://www.codehaus.org/"));
+        Assertions.assertEquals("/", PathUtils.basedir("http://www.codehaus.org:80"));
+        Assertions.assertEquals("/", PathUtils.basedir("http://www.codehaus.org"));
+        Assertions.assertEquals("/", PathUtils.basedir("http://www.codehaus.org:80/"));
+        Assertions.assertEquals("/", PathUtils.basedir("http://www.codehaus.org/"));
+        Assertions.assertEquals("/", PathUtils.basedir("HTTP://www.codehaus.org/"));
     }
 
+    @Test
     public void testEmptyProtocol() {
-        assertEquals("", PathUtils.protocol("placeholder-only"));
-        assertEquals("", PathUtils.protocol("placeholder-only/module-a"));
+        Assertions.assertEquals("", PathUtils.protocol("placeholder-only"));
+        Assertions.assertEquals("", PathUtils.protocol("placeholder-only/module-a"));
 
-        assertEquals("placeholder-only", PathUtils.authorization("placeholder-only"));
-        assertEquals("placeholder-only", PathUtils.authorization("placeholder-only/module-a"));
+        Assertions.assertEquals("placeholder-only", PathUtils.authorization("placeholder-only"));
+        Assertions.assertEquals("placeholder-only", PathUtils.authorization("placeholder-only/module-a"));
 
-        assertEquals(-1, PathUtils.port("placeholder-only"));
-        assertEquals(-1, PathUtils.port("placeholder-only/module-a"));
+        Assertions.assertEquals(-1, PathUtils.port("placeholder-only"));
+        Assertions.assertEquals(-1, PathUtils.port("placeholder-only/module-a"));
 
-        assertEquals("/", PathUtils.basedir("placeholder-only"));
-        assertEquals("/module-a", PathUtils.basedir("placeholder-only/module-a"));
+        Assertions.assertEquals("/", PathUtils.basedir("placeholder-only"));
+        Assertions.assertEquals("/module-a", PathUtils.basedir("placeholder-only/module-a"));
     }
 
+    @Test
     public void testPortResolving() {
-        assertEquals(80, PathUtils.port("http://www.codehause.org:80/maven"));
-        assertEquals(80, PathUtils.port("HTTP://www.codehause.org:80/maven"));
-        assertEquals(WagonConstants.UNKNOWN_PORT, PathUtils.port("http://localhost/temp"));
+        Assertions.assertEquals(80, PathUtils.port("http://www.codehause.org:80/maven"));
+        Assertions.assertEquals(80, PathUtils.port("HTTP://www.codehause.org:80/maven"));
+        Assertions.assertEquals(WagonConstants.UNKNOWN_PORT, PathUtils.port("http://localhost/temp"));
 
-        assertEquals(10, PathUtils.port("ftp://localhost:10"));
-        assertEquals(10, PathUtils.port("FTP://localhost:10"));
+        Assertions.assertEquals(10, PathUtils.port("ftp://localhost:10"));
+        Assertions.assertEquals(10, PathUtils.port("FTP://localhost:10"));
     }
 
+    @Test
     public void testScmPortResolving() {
-        assertEquals(80, PathUtils.port("scm:svn:http://www.codehaus.org:80/maven"));
-        assertEquals(80, PathUtils.port("SCM:SVN:HTTP://www.codehaus.org:80/maven"));
-        assertEquals(WagonConstants.UNKNOWN_PORT, PathUtils.port("scm:cvs:pserver:anoncvs@localhost:/temp:module"));
+        Assertions.assertEquals(80, PathUtils.port("scm:svn:http://www.codehaus.org:80/maven"));
+        Assertions.assertEquals(80, PathUtils.port("SCM:SVN:HTTP://www.codehaus.org:80/maven"));
+        Assertions.assertEquals(
+                WagonConstants.UNKNOWN_PORT, PathUtils.port("scm:cvs:pserver:anoncvs@localhost:/temp:module"));
 
-        assertEquals(2402, PathUtils.port("scm:cvs:pserver:anoncvs@localhost:2402/temp:module"));
-        assertEquals(2402, PathUtils.port("SCM:CVS:pserver:anoncvs@localhost:2402/temp:module"));
+        Assertions.assertEquals(2402, PathUtils.port("scm:cvs:pserver:anoncvs@localhost:2402/temp:module"));
+        Assertions.assertEquals(2402, PathUtils.port("SCM:CVS:pserver:anoncvs@localhost:2402/temp:module"));
     }
 
+    @Test
     public void testScmBasedir() {
-        assertEquals("/maven", PathUtils.basedir("scm:svn:http://www.codehause.org/maven"));
-        assertEquals("/maven", PathUtils.basedir("SCM:SVN:HTTP://www.codehause.org/maven"));
-        assertEquals("/maven", PathUtils.basedir("scm:svn:http://www.codehause.org:80/maven"));
-        assertEquals("/maven", PathUtils.basedir("scm:cvs:pserver:anoncvs@www.codehause.org:80/maven"));
-        assertEquals("/maven", PathUtils.basedir("scm:cvs:pserver:anoncvs@www.codehause.org:/maven"));
-        assertEquals("/maven/module", PathUtils.basedir("scm:cvs:pserver:anoncvs@www.codehause.org:80/maven:module"));
-        assertEquals("/maven/module", PathUtils.basedir("scm:cvs:pserver:anoncvs@www.codehause.org:/maven:module"));
-        assertEquals("/maven/module", PathUtils.basedir("SCM:CVS:pserver:anoncvs@www.codehause.org:/maven:module"));
+        Assertions.assertEquals("/maven", PathUtils.basedir("scm:svn:http://www.codehause.org/maven"));
+        Assertions.assertEquals("/maven", PathUtils.basedir("SCM:SVN:HTTP://www.codehause.org/maven"));
+        Assertions.assertEquals("/maven", PathUtils.basedir("scm:svn:http://www.codehause.org:80/maven"));
+        Assertions.assertEquals("/maven", PathUtils.basedir("scm:cvs:pserver:anoncvs@www.codehause.org:80/maven"));
+        Assertions.assertEquals("/maven", PathUtils.basedir("scm:cvs:pserver:anoncvs@www.codehause.org:/maven"));
+        Assertions.assertEquals(
+                "/maven/module", PathUtils.basedir("scm:cvs:pserver:anoncvs@www.codehause.org:80/maven:module"));
+        Assertions.assertEquals(
+                "/maven/module", PathUtils.basedir("scm:cvs:pserver:anoncvs@www.codehause.org:/maven:module"));
+        Assertions.assertEquals(
+                "/maven/module", PathUtils.basedir("SCM:CVS:pserver:anoncvs@www.codehause.org:/maven:module"));
     }
 
+    @Test
     public void testPortBasedir() {
-        assertEquals("/maven", PathUtils.basedir("http://www.codehause.org:80/maven"));
-        assertEquals("/temp", PathUtils.basedir("http://localhost/temp"));
+        Assertions.assertEquals("/maven", PathUtils.basedir("http://www.codehause.org:80/maven"));
+        Assertions.assertEquals("/temp", PathUtils.basedir("http://localhost/temp"));
 
-        assertEquals("c:/temp", PathUtils.basedir("file://c:/temp"));
-        assertEquals("/", PathUtils.basedir("http://localhost:80/"));
-        assertEquals("/", PathUtils.basedir("http://localhost/"));
+        Assertions.assertEquals("c:/temp", PathUtils.basedir("file://c:/temp"));
+        Assertions.assertEquals("/", PathUtils.basedir("http://localhost:80/"));
+        Assertions.assertEquals("/", PathUtils.basedir("http://localhost/"));
     }
 
+    @Test
     public void testIpV4() {
         assertUrl("http://127.0.0.1", "http", null, null, "127.0.0.1", -1, "/");
         assertUrl("http://127.0.0.1:8080", "http", null, null, "127.0.0.1", 8080, "/");
@@ -279,6 +303,7 @@ public class PathUtilsTest extends TestCase {
                 "/oo/rest/users");
     }
 
+    @Test
     public void testIPv6() {
         assertUrl(
                 "http://user:password@[fff:::1]:7891/oo/rest/users",
@@ -373,39 +398,40 @@ public class PathUtilsTest extends TestCase {
 
     private void assertUrl(
             String url, String protocol, String user, String password, String host, int port, String basedir) {
-        assertEquals(protocol, PathUtils.protocol(url));
-        assertEquals(user, PathUtils.user(url));
-        assertEquals(password, PathUtils.password(url));
-        assertEquals(host, PathUtils.host(url));
-        assertEquals(port, PathUtils.port(url));
-        assertEquals(basedir, PathUtils.basedir(url));
+        Assertions.assertEquals(protocol, PathUtils.protocol(url));
+        Assertions.assertEquals(user, PathUtils.user(url));
+        Assertions.assertEquals(password, PathUtils.password(url));
+        Assertions.assertEquals(host, PathUtils.host(url));
+        Assertions.assertEquals(port, PathUtils.port(url));
+        Assertions.assertEquals(basedir, PathUtils.basedir(url));
     }
 
+    @Test
     public void testToRelative() {
-        assertEquals(
+        Assertions.assertEquals(
                 "dir",
                 PathUtils.toRelative(
                         new File("/home/user").getAbsoluteFile(), new File("/home/user/dir").getAbsolutePath()));
-        assertEquals(
+        Assertions.assertEquals(
                 "dir",
                 PathUtils.toRelative(
                         new File("C:/home/user").getAbsoluteFile(), new File("C:/home/user/dir").getAbsolutePath()));
 
-        assertEquals(
+        Assertions.assertEquals(
                 "dir/subdir",
                 PathUtils.toRelative(
                         new File("/home/user").getAbsoluteFile(), new File("/home/user/dir/subdir").getAbsolutePath()));
-        assertEquals(
+        Assertions.assertEquals(
                 "dir/subdir",
                 PathUtils.toRelative(
                         new File("C:/home/user").getAbsoluteFile(),
                         new File("C:/home/user/dir/subdir").getAbsolutePath()));
 
-        assertEquals(
+        Assertions.assertEquals(
                 ".",
                 PathUtils.toRelative(
                         new File("/home/user").getAbsoluteFile(), new File("/home/user").getAbsolutePath()));
-        assertEquals(
+        Assertions.assertEquals(
                 ".",
                 PathUtils.toRelative(
                         new File("C:/home/user").getAbsoluteFile(), new File("C:/home/user").getAbsolutePath()));

@@ -18,22 +18,20 @@
  */
 package org.apache.maven.wagon;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
  *
  */
-public class CannotConnectExceptionTest extends TestCase {
+public class CannotConnectExceptionTest {
+    @Test
     public void testCannotConnectExceptionTest() {
         ConnectionException ae = new ConnectionException("message");
-
-        assertEquals("message", ae.getMessage());
-
+        Assertions.assertEquals("message", ae.getMessage());
         ae = new ConnectionException("full-message", new Throwable("cause"));
-
-        assertEquals("full-message", ae.getMessage());
-
-        assertEquals("cause", ae.getCause().getMessage());
+        Assertions.assertEquals("full-message", ae.getMessage());
+        Assertions.assertEquals("cause", ae.getCause().getMessage());
     }
 }

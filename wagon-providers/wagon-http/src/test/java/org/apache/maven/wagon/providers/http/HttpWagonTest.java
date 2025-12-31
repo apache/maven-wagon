@@ -21,6 +21,7 @@ package org.apache.maven.wagon.providers.http;
 import java.util.Properties;
 
 import org.apache.maven.wagon.StreamingWagon;
+import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.http.HttpWagonTestCase;
 import org.apache.maven.wagon.shared.http.HttpConfiguration;
 import org.apache.maven.wagon.shared.http.HttpMethodConfiguration;
@@ -45,6 +46,11 @@ public class HttpWagonTest extends HttpWagonTestCase {
         methodConfiguration.setParams(params);
         config.setAll(methodConfiguration);
         ((HttpWagon) wagon).setHttpConfiguration(config);
+    }
+
+    @Override
+    protected Wagon getRawWagon() throws Exception {
+        return new HttpWagon();
     }
 
     @Override
