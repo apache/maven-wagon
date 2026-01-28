@@ -122,8 +122,15 @@ public class WebDavWagon extends AbstractHttpClientWagon {
         do {
             String url = baseUrl + "/" + navigator.getPath();
             status = doMkCol(url);
-            if (status == HttpStatus.SC_CREATED || status == HttpStatus.SC_METHOD_NOT_ALLOWED) {
+            // RFC 4918: Accept 201 Created, 200 OK (already exists), 405 Method Not Allowed (already exists)
+            if (status == HttpStatus.SC_CREATED
+                    || status == HttpStatus.SC_OK
+                    || status == HttpStatus.SC_METHOD_NOT_ALLOWED) {
                 break;
+            }
+            // RFC 4918: 409 Conflict means intermediate collection is missing, continue traversing backwards
+            if (status == HttpStatus.SC_CONFLICT) {
+                continue;
             }
         } while (navigator.backward());
 
@@ -131,7 +138,8 @@ public class WebDavWagon extends AbstractHttpClientWagon {
         while (navigator.forward()) {
             String url = baseUrl + "/" + navigator.getPath();
             status = doMkCol(url);
-            if (status != HttpStatus.SC_CREATED) {
+            // RFC 4918: Accept 201 Created or 200 OK (if collection already exists from another request)
+            if (status != HttpStatus.SC_CREATED && status != HttpStatus.SC_OK) {
                 throw new IOException("Unable to create collection: " + url + "; status code = " + status);
             }
         }
@@ -140,7 +148,21 @@ public class WebDavWagon extends AbstractHttpClientWagon {
     private int doMkCol(String url) throws IOException {
         HttpMkcol method = new HttpMkcol(url);
         try (CloseableHttpResponse closeableHttpResponse = execute(method)) {
-            return closeableHttpResponse.getStatusLine().getStatusCode();
+            int statusCode = closeableHttpResponse.getStatusLine().getStatusCode();
+
+            // RFC 4918: Handle redirects for MKCOL
+            // 3xx redirects should be followed to the new location
+            if (statusCode >= HttpStatus.SC_MULTIPLE_CHOICES && statusCode < HttpStatus.SC_BAD_REQUEST) {
+                org.apache.http.Header locationHeader = closeableHttpResponse.getFirstHeader("Location");
+                if (locationHeader != null) {
+                    String redirectUrl = locationHeader.getValue();
+                    // Recursive call to handle redirect - execute() will handle the redirect automatically
+                    // but we need to return the final status
+                    return doMkCol(redirectUrl);
+                }
+            }
+
+            return statusCode;
         } catch (HttpException e) {
             throw new IOException(e.getMessage(), e);
         } finally {
@@ -168,6 +190,29 @@ public class WebDavWagon extends AbstractHttpClientWagon {
                 String target = destinationDirectory + "/" + file.getName();
 
                 put(file, target);
+            }
+        }
+    }
+
+    protected boolean collectionExists(String url) throws IOException {
+        DavPropertyNameSet nameSet = new DavPropertyNameSet();
+        nameSet.add(DavPropertyName.create(DavConstants.PROPERTY_RESOURCETYPE));
+
+        CloseableHttpResponse closeableHttpResponse = null;
+        HttpPropfind method = null;
+        try {
+            method = new HttpPropfind(url, nameSet, DavConstants.DEPTH_0);
+            closeableHttpResponse = execute(method);
+            int statusCode = closeableHttpResponse.getStatusLine().getStatusCode();
+            return statusCode == HttpStatus.SC_OK || statusCode == HttpStatus.SC_MULTI_STATUS;
+        } catch (HttpException e) {
+            throw new IOException(e.getMessage(), e);
+        } finally {
+            if (method != null) {
+                method.releaseConnection();
+            }
+            if (closeableHttpResponse != null) {
+                closeableHttpResponse.close();
             }
         }
     }

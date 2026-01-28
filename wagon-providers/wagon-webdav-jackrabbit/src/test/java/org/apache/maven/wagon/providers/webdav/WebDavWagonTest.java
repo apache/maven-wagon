@@ -137,34 +137,35 @@ public class WebDavWagonTest extends HttpWagonTestCase {
         wagon.connect(testRepository, getAuthInfo());
 
         try {
-            File dir = getRepositoryDirectory();
-
-            // check basedir also doesn't exist and will need to be created
-            dir = new File(dir, testRepository.getBasedir());
-            assertFalse(dir.exists());
+            String repositoryUrl = testRepository.getUrl();
 
             // test leading /
-            assertFalse(new File(dir, "foo").exists());
+            String fooUrl = repositoryUrl + (repositoryUrl.endsWith("/") ? "" : "/") + "foo";
+            assertFalse("Collection should not exist before creation", wagon.collectionExists(fooUrl));
             wagon.mkdirs("/foo");
-            assertTrue(new File(dir, "foo").exists());
+            assertTrue("Collection should exist after creation", wagon.collectionExists(fooUrl));
 
             // test trailing /
-            assertFalse(new File(dir, "bar").exists());
+            String barUrl = repositoryUrl + (repositoryUrl.endsWith("/") ? "" : "/") + "bar";
+            assertFalse("Collection should not exist before creation", wagon.collectionExists(barUrl));
             wagon.mkdirs("bar/");
-            assertTrue(new File(dir, "bar").exists());
+            assertTrue("Collection should exist after creation", wagon.collectionExists(barUrl));
 
-            // test when already exists
+            // test when already exists (should not fail)
             wagon.mkdirs("bar");
+            assertTrue("Collection should still exist", wagon.collectionExists(barUrl));
 
             // test several parts
-            assertFalse(new File(dir, "1/2/3/4").exists());
+            String deepUrl = repositoryUrl + (repositoryUrl.endsWith("/") ? "" : "/") + "1/2/3/4";
+            assertFalse("Deep collection should not exist before creation", wagon.collectionExists(deepUrl));
             wagon.mkdirs("1/2/3/4");
-            assertTrue(new File(dir, "1/2/3/4").exists());
+            assertTrue("Deep collection should exist after creation", wagon.collectionExists(deepUrl));
 
             // test additional part and trailing /
-            assertFalse(new File(dir, "1/2/3/4/5").exists());
+            String deeperUrl = repositoryUrl + (repositoryUrl.endsWith("/") ? "" : "/") + "1/2/3/4/5";
+            assertFalse("Deeper collection should not exist before creation", wagon.collectionExists(deeperUrl));
             wagon.mkdirs("1/2/3/4/5/");
-            assertTrue(new File(dir, "1/2/3/4").exists());
+            assertTrue("Deeper collection should exist after creation", wagon.collectionExists(deeperUrl));
         } finally {
             wagon.disconnect();
 
@@ -186,16 +187,13 @@ public class WebDavWagonTest extends HttpWagonTestCase {
         wagon.connect(testRepository, getAuthInfo());
 
         try {
-            File dir = getRepositoryDirectory();
-
-            // check basedir also doesn't exist and will need to be created
-            dir = new File(dir, testRepository.getBasedir());
-            assertTrue(dir.exists());
+            String repositoryUrl = testRepository.getUrl();
 
             // test leading /
-            assertFalse(new File(dir, "foo").exists());
+            String fooUrl = repositoryUrl + (repositoryUrl.endsWith("/") ? "" : "/") + "foo";
+            assertFalse("Collection should not exist before creation", wagon.collectionExists(fooUrl));
             wagon.mkdirs("/foo");
-            assertTrue(new File(dir, "foo").exists());
+            assertTrue("Collection should exist after creation", wagon.collectionExists(fooUrl));
         } finally {
             wagon.disconnect();
 
