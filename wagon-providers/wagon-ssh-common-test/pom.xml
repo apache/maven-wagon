@@ -30,7 +30,7 @@ under the License.
   <name>Apache Maven Wagon :: Providers :: SSH Common Tests</name>
 
   <properties>
-    <sshdVersion>2.16.0</sshdVersion>
+    <sshdVersion>2.17.1</sshdVersion>
   </properties>
   <dependencies>
     <dependency>
