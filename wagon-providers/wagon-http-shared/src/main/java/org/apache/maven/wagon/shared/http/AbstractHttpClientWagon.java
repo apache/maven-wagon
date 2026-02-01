@@ -716,14 +716,14 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
 
                 // Check that we didn't run out of retries.
                 switch (statusCode) {
-                        // Success Codes
+                    // Success Codes
                     case HttpStatus.SC_OK: // 200
                     case HttpStatus.SC_CREATED: // 201
                     case HttpStatus.SC_ACCEPTED: // 202
                     case HttpStatus.SC_NO_CONTENT: // 204
                         break;
 
-                        // TODO Move 401/407 to AuthenticationException after WAGON-587
+                    // TODO Move 401/407 to AuthenticationException after WAGON-587
                     case HttpStatus.SC_FORBIDDEN:
                     case HttpStatus.SC_UNAUTHORIZED:
                     case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
@@ -748,7 +748,7 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
                         EntityUtils.consumeQuietly(response.getEntity());
                         put(backoff(wait, url), resource, source, httpEntity, url);
                         break;
-                        // add more entries here
+                    // add more entries here
                     default:
                         EntityUtils.consumeQuietly(response.getEntity());
                         TransferFailedException e = new TransferFailedException(formatTransferFailedMessage(
@@ -798,7 +798,7 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
                         result = true;
                         break;
 
-                        // TODO Move 401/407 to AuthenticationException after WAGON-587
+                    // TODO Move 401/407 to AuthenticationException after WAGON-587
                     case HttpStatus.SC_FORBIDDEN:
                     case HttpStatus.SC_UNAUTHORIZED:
                     case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
@@ -816,7 +816,7 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
                     case SC_TOO_MANY_REQUESTS:
                         return resourceExists(backoff(wait, resourceName), resourceName);
 
-                        // add more entries here
+                    // add more entries here
                     default:
                         throw new TransferFailedException(formatTransferFailedMessage(
                                 url,
@@ -1047,7 +1047,7 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
                     // return, leaving last modified set to original value so getIfNewer should return unmodified
                     return;
 
-                    // TODO Move 401/407 to AuthenticationException after WAGON-587
+                // TODO Move 401/407 to AuthenticationException after WAGON-587
                 case HttpStatus.SC_FORBIDDEN:
                 case HttpStatus.SC_UNAUTHORIZED:
                 case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
@@ -1073,7 +1073,7 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
                     fillInputData(backoff(wait, url), inputData);
                     break;
 
-                    // add more entries here
+                // add more entries here
                 default:
                     EntityUtils.consumeQuietly(response.getEntity());
                     cleanupGetTransfer(resource);
