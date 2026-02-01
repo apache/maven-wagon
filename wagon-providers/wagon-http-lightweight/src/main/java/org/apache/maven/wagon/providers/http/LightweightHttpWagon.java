@@ -232,14 +232,14 @@ public class LightweightHttpWagon extends StreamWagon {
             int statusCode = putConnection.getResponseCode();
 
             switch (statusCode) {
-                    // Success Codes
+                // Success Codes
                 case HttpURLConnection.HTTP_OK: // 200
                 case HttpURLConnection.HTTP_CREATED: // 201
                 case HttpURLConnection.HTTP_ACCEPTED: // 202
                 case HttpURLConnection.HTTP_NO_CONTENT: // 204
                     break;
 
-                    // TODO Move 401/407 to AuthenticationException after WAGON-587
+                // TODO Move 401/407 to AuthenticationException after WAGON-587
                 case HttpURLConnection.HTTP_FORBIDDEN:
                 case HttpURLConnection.HTTP_UNAUTHORIZED:
                 case HttpURLConnection.HTTP_PROXY_AUTH:
@@ -251,7 +251,7 @@ public class LightweightHttpWagon extends StreamWagon {
                     throw new ResourceDoesNotExistException(formatResourceDoesNotExistMessage(
                             buildUrl(resource), statusCode, reasonPhrase, getProxyInfo()));
 
-                    // add more entries here
+                // add more entries here
                 default:
                     throw new TransferFailedException(
                             formatTransferFailedMessage(buildUrl(resource), statusCode, reasonPhrase, getProxyInfo()));
@@ -347,7 +347,7 @@ public class LightweightHttpWagon extends StreamWagon {
                 case HttpURLConnection.HTTP_GONE:
                     return false;
 
-                    // TODO Move 401/407 to AuthenticationException after WAGON-587
+                // TODO Move 401/407 to AuthenticationException after WAGON-587
                 case HttpURLConnection.HTTP_FORBIDDEN:
                 case HttpURLConnection.HTTP_UNAUTHORIZED:
                 case HttpURLConnection.HTTP_PROXY_AUTH:
