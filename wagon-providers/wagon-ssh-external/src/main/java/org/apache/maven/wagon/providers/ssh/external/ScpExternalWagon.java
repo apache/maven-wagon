@@ -229,7 +229,18 @@ public class ScpExternalWagon extends AbstractWagon implements CommandExecutor {
         }
         Commandline cl = createBaseCommandLine(putty, scpExecutable, privateKey);
 
-        cl.setWorkingDirectory(localFile.getParentFile().getAbsolutePath());
+        File parentFile = localFile.getParentFile();
+        if (null == parentFile) {
+            try {
+                File abs = localFile.getAbsoluteFile();
+                parentFile = abs.getParentFile();
+            } catch (SecurityException e) {
+                fireTransferError(resource, e, put ? TransferEvent.REQUEST_PUT : TransferEvent.REQUEST_GET);
+
+                throw new TransferFailedException("Error accessing absolute path of " + localFile, e);
+            }
+        }
+        cl.setWorkingDirectory(parentFile.getAbsolutePath());
 
         int port =
                 repository.getPort() == WagonConstants.UNKNOWN_PORT ? ScpHelper.DEFAULT_SSH_PORT : repository.getPort();
