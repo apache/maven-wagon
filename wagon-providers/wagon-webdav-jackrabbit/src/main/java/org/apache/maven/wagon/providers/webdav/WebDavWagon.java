@@ -132,6 +132,9 @@ public class WebDavWagon extends AbstractHttpClientWagon {
             if (status == HttpStatus.SC_CONFLICT) {
                 continue;
             }
+            // Any other status is unexpected here: stop traversal and report an error
+            throw new IOException("Unexpected status code while creating collection: " + url
+                    + "; status code = " + status);
         } while (navigator.backward());
 
         // traverse forward creating missing directories
@@ -156,8 +159,8 @@ public class WebDavWagon extends AbstractHttpClientWagon {
                 org.apache.http.Header locationHeader = closeableHttpResponse.getFirstHeader("Location");
                 if (locationHeader != null) {
                     String redirectUrl = locationHeader.getValue();
-                    // Recursive call to handle redirect - execute() will handle the redirect automatically
-                    // but we need to return the final status
+                    // Follow the redirect by recursively invoking doMkCol on the new URL
+                    // and return the status code from the final resolved location
                     return doMkCol(redirectUrl);
                 }
             }
@@ -195,25 +198,10 @@ public class WebDavWagon extends AbstractHttpClientWagon {
     }
 
     protected boolean collectionExists(String url) throws IOException {
-        DavPropertyNameSet nameSet = new DavPropertyNameSet();
-        nameSet.add(DavPropertyName.create(DavConstants.PROPERTY_RESOURCETYPE));
-
-        CloseableHttpResponse closeableHttpResponse = null;
-        HttpPropfind method = null;
         try {
-            method = new HttpPropfind(url, nameSet, DavConstants.DEPTH_0);
-            closeableHttpResponse = execute(method);
-            int statusCode = closeableHttpResponse.getStatusLine().getStatusCode();
-            return statusCode == HttpStatus.SC_OK || statusCode == HttpStatus.SC_MULTI_STATUS;
-        } catch (HttpException e) {
+            return isDirectory(url);
+        } catch (DavException e) {
             throw new IOException(e.getMessage(), e);
-        } finally {
-            if (method != null) {
-                method.releaseConnection();
-            }
-            if (closeableHttpResponse != null) {
-                closeableHttpResponse.close();
-            }
         }
     }
 
