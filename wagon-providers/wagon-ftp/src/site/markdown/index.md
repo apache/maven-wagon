@@ -1,67 +1,48 @@
- ------
- Maven Wagon FTP
- ------
- Carlos Sanchez
- ------
- 2006-06-04
- ------
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
 
- ~~ Licensed to the Apache Software Foundation (ASF) under one
- ~~ or more contributor license agreements.  See the NOTICE file
- ~~ distributed with this work for additional information
- ~~ regarding copyright ownership.  The ASF licenses this file
- ~~ to you under the Apache License, Version 2.0 (the
- ~~ "License"); you may not use this file except in compliance
- ~~ with the License.  You may obtain a copy of the License at
- ~~
- ~~   http://www.apache.org/licenses/LICENSE-2.0
- ~~
- ~~ Unless required by applicable law or agreed to in writing,
- ~~ software distributed under the License is distributed on an
- ~~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- ~~ KIND, either express or implied.  See the License for the
- ~~ specific language governing permissions and limitations
- ~~ under the License.
+http://www.apache.org/licenses/LICENSE-2.0
 
- ~~ NOTE: For help with the syntax of this file, see:
- ~~ http://maven.apache.org/doxia/references/apt-format.html
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
 
-Deprecation Notice
+# Deprecation Notice
 
-  This Wagon provider is deprecated and will be removed in version 4.0.0.
+This Wagon provider is deprecated and will be removed in version 4.0.0.
 
-Maven Wagon FTP
+# Maven Wagon FTP
 
- This component is an implementation of Wagon provider for FTP access.
- It uses {{{http://jakarta.apache.org/commons/net/}commons-net}} as lower level layer.
+This component is an implementation of Wagon provider for FTP access. It uses [commons-net](http://jakarta.apache.org/commons/net/) as lower level layer.
 
- It enables Maven to use remote repositories stored in FTP servers. It doesn't allow deployment of directories.
+It enables Maven to use remote repositories stored in FTP servers. It doesn't allow deployment of directories.
 
+# Features
 
-Features
+- Get files from FTP Server
+- Deploy files to FTP server
+# Configuration
 
- * Get files from FTP Server
+- `passiveMode` default: **true**
+- `controlEncoding` default: **"ISO-8859-1"**, set from `org.apache.commons.net.ftp.FTP.DEFAULT_CONTROL_ENCODING`
+- `securityProtocol` default: **TLS**, FTPS security protocol, TLS or SSL
+- `implicit` default: **false**
+- `endpointChecking` default: **true**
+# Sample Configuration
 
- * Deploy files to FTP server
+## pom.xml
 
-Configuration
-
- * <<<passiveMode>>> default: <<true>>
-
- * <<<controlEncoding>>> default: <<"ISO-8859-1">>,
- set from <<<org.apache.commons.net.ftp.FTP.DEFAULT_CONTROL_ENCODING>>>
-
- * <<<securityProtocol>>> default: <<TLS>>, FTPS security protocol, TLS or SSL
-
- * <<<implicit>>> default: <<false>>
-
- * <<<endpointChecking>>> default: <<true>>
-
-Sample Configuration
-
-* pom.xml
-
----------------------------------------------
+```
 <project>
     ...
     <distributionManagement>
@@ -84,11 +65,11 @@ Sample Configuration
     </build>
     ...
 </project>
----------------------------------------------
+```
 
-* settings.xml
+## settings.xml
 
----------------------------------------------
+```
 <settings>
     ...
     <servers>
@@ -103,4 +84,4 @@ Sample Configuration
         </server>
     </servers>
 <settings>
----------------------------------------------
+```
