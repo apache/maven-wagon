@@ -1,49 +1,44 @@
- ------
- Maven Wagon HTTP lightweight
- ------
- Carlos Sanchez
- ------
- 2011-09-20
- ------
+---
+title: Maven Wagon HTTP lightweight
+author: 
+  - Carlos Sanchez
+date: 2011-09-20
+---
 
- ~~ Licensed to the Apache Software Foundation (ASF) under one
- ~~ or more contributor license agreements.  See the NOTICE file
- ~~ distributed with this work for additional information
- ~~ regarding copyright ownership.  The ASF licenses this file
- ~~ to you under the Apache License, Version 2.0 (the
- ~~ "License"); you may not use this file except in compliance
- ~~ with the License.  You may obtain a copy of the License at
- ~~
- ~~   http://www.apache.org/licenses/LICENSE-2.0
- ~~
- ~~ Unless required by applicable law or agreed to in writing,
- ~~ software distributed under the License is distributed on an
- ~~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- ~~ KIND, either express or implied.  See the License for the
- ~~ specific language governing permissions and limitations
- ~~ under the License.
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
 
- ~~ NOTE: For help with the syntax of this file, see:
- ~~ http://maven.apache.org/doxia/references/apt-format.html
+http://www.apache.org/licenses/LICENSE-2.0
 
-Deprecation Notice
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
 
-  This Wagon provider is deprecated and will be removed in version 4.0.0.
+# Deprecation Notice
 
-Maven Wagon HTTP lightweight
+This Wagon provider is deprecated and will be removed in version 4.0.0.
 
- This component is an implementation of Wagon provider for HTTP access.
- It uses standard JDK classes as lower lever layer.
+# Maven Wagon HTTP lightweight
 
- It enables Maven to use remote repositories stored in HTTP servers.
+This component is an implementation of Wagon provider for HTTP access. It uses standard JDK classes as lower lever layer.
 
+It enables Maven to use remote repositories stored in HTTP servers.
 
-Features
+# Features
 
- * Get files from HTTP/HTTPS Server
+- Get files from HTTP/HTTPS Server
+- Put files to HTTP/HTTPS Server
+# Known Limitation
 
- * Put files to HTTP/HTTPS Server
+The main limitation is that you can't download data that doesn't fit entirely into memory.
 
-Known Limitation
-
- The main limitation is that you can't download data that doesn't fit entirely into memory.
