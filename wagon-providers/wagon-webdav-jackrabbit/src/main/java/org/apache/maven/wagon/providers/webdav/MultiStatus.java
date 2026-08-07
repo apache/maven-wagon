@@ -136,10 +136,13 @@ final class MultiStatus {
                 href = hrefElement.getTextContent();
                 break;
             }
-            if (href != null) {
-                href = href.trim();
-                responses.put(href, new Response(href, isCollection(response)));
+            if (href == null || href.trim().isEmpty()) {
+                // dropping it would move the next response into its place, and the callers read
+                // meaning into that position
+                throw new IOException("Multi-Status response without a DAV:href");
             }
+            href = href.trim();
+            responses.put(href, new Response(href, isCollection(response)));
         }
         return new MultiStatus(Collections.unmodifiableList(new ArrayList<>(responses.values())));
     }
@@ -166,15 +169,13 @@ final class MultiStatus {
 
     /**
      * Reads the {@code status} child, whose text is a status line such as {@code HTTP/1.1 200 OK}.
-     * <p>
-     * RFC 4918 requires the element, and a {@code propstat} lacking one used to be skipped
-     * outright, which made every property of such a response invisible. It is read as successful
-     * here instead, so that a server omitting the status still gets its properties honoured.
+     * RFC 4918 requires the element, and a {@code propstat} lacking one reports no success for the
+     * properties it carries, so they are not read.
      */
     private static boolean isOkStatus(Element propstat) {
         List<Element> statusElements = childElements(propstat, "status");
         if (statusElements.isEmpty()) {
-            return true;
+            return false;
         }
         String[] tokens = statusElements.get(0).getTextContent().trim().split("\\s+");
         for (String token : tokens) {

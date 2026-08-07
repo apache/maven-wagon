@@ -138,10 +138,11 @@ public class MultiStatusTest {
     }
 
     /**
-     * RFC 4918 requires a status, but a server omitting one should still get its properties read.
+     * RFC 4918 requires a status; a propstat lacking one reports no success, so its properties
+     * must not be read.
      */
     @Test
-    public void testPropstatWithoutStatusIsRead() throws Exception {
+    public void testPropstatWithoutStatusIsIgnored() throws Exception {
         List<MultiStatus.Response> responses = parse("<?xml version=\"1.0\"?>"
                 + "<D:multistatus xmlns:D=\"DAV:\">"
                 + "  <D:response>"
@@ -152,7 +153,38 @@ public class MultiStatusTest {
                 + "  </D:response>"
                 + "</D:multistatus>");
 
-        assertTrue(responses.get(0).isCollection());
+        assertFalse(responses.get(0).isCollection());
+    }
+
+    /**
+     * Skipping a response with no href would move the next one into its place, and both callers
+     * read meaning into that position.
+     */
+    @Test
+    public void testResponseWithoutHrefIsRejected() {
+        try {
+            parse("<?xml version=\"1.0\"?>"
+                    + "<D:multistatus xmlns:D=\"DAV:\">"
+                    + "  <D:response><D:propstat><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response>"
+                    + "  <D:response><D:href>/repo/dir/child</D:href></D:response>"
+                    + "</D:multistatus>");
+            fail("expected an IOException");
+        } catch (IOException expected) {
+            assertTrue(expected.getMessage().contains("DAV:href"));
+        }
+    }
+
+    @Test
+    public void testResponseWithBlankHrefIsRejected() {
+        try {
+            parse("<?xml version=\"1.0\"?>"
+                    + "<D:multistatus xmlns:D=\"DAV:\">"
+                    + "  <D:response><D:href>   </D:href></D:response>"
+                    + "</D:multistatus>");
+            fail("expected an IOException");
+        } catch (IOException expected) {
+            assertTrue(expected.getMessage().contains("DAV:href"));
+        }
     }
 
     /**
