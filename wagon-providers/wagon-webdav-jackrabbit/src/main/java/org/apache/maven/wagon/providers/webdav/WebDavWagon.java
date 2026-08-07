@@ -28,16 +28,6 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
-import org.apache.jackrabbit.webdav.DavConstants;
-import org.apache.jackrabbit.webdav.DavException;
-import org.apache.jackrabbit.webdav.MultiStatus;
-import org.apache.jackrabbit.webdav.MultiStatusResponse;
-import org.apache.jackrabbit.webdav.client.methods.HttpMkcol;
-import org.apache.jackrabbit.webdav.client.methods.HttpPropfind;
-import org.apache.jackrabbit.webdav.property.DavProperty;
-import org.apache.jackrabbit.webdav.property.DavPropertyName;
-import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
-import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
@@ -46,8 +36,11 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;
 import org.codehaus.plexus.util.FileUtils;
-import org.w3c.dom.Node;
 
+import static org.apache.maven.wagon.providers.webdav.DavMethods.DEPTH_0;
+import static org.apache.maven.wagon.providers.webdav.DavMethods.DEPTH_1;
+import static org.apache.maven.wagon.providers.webdav.DavMethods.PROPERTY_DISPLAYNAME;
+import static org.apache.maven.wagon.providers.webdav.DavMethods.PROPERTY_RESOURCETYPE;
 import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatResourceDoesNotExistMessage;
 
 /**
@@ -65,6 +58,9 @@ import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatResource
  */
 public class WebDavWagon extends AbstractHttpClientWagon {
     protected static final String CONTINUE_ON_FAILURE_PROPERTY = "wagon.webdav.continueOnFailure";
+
+    /** {@code 207 Multi-Status}, not defined by {@link HttpStatus}. */
+    private static final int SC_MULTI_STATUS = 207;
 
     private final boolean continueOnFailure = Boolean.getBoolean(CONTINUE_ON_FAILURE_PROPERTY);
 
@@ -138,7 +134,7 @@ public class WebDavWagon extends AbstractHttpClientWagon {
     }
 
     private int doMkCol(String url) throws IOException {
-        HttpMkcol method = new HttpMkcol(url);
+        DavMethods.HttpMkcol method = new DavMethods.HttpMkcol(url);
         try (CloseableHttpResponse closeableHttpResponse = execute(method)) {
             return closeableHttpResponse.getStatusLine().getStatusCode();
         } catch (HttpException e) {
@@ -170,25 +166,18 @@ public class WebDavWagon extends AbstractHttpClientWagon {
         }
     }
 
-    private boolean isDirectory(String url) throws IOException, DavException {
-        DavPropertyNameSet nameSet = new DavPropertyNameSet();
-        nameSet.add(DavPropertyName.create(DavConstants.PROPERTY_RESOURCETYPE));
-
+    private boolean isDirectory(String url) throws IOException {
         CloseableHttpResponse closeableHttpResponse = null;
-        HttpPropfind method = null;
+        DavMethods.HttpPropfind method = null;
         try {
-            method = new HttpPropfind(url, nameSet, DavConstants.DEPTH_0);
+            method = new DavMethods.HttpPropfind(url, PROPERTY_RESOURCETYPE, DEPTH_0);
             closeableHttpResponse = execute(method);
 
-            if (method.succeeded(closeableHttpResponse)) {
-                MultiStatus multiStatus = method.getResponseBodyAsMultiStatus(closeableHttpResponse);
-                MultiStatusResponse response = multiStatus.getResponses()[0];
-                DavPropertySet propertySet = response.getProperties(HttpStatus.SC_OK);
-                DavProperty<?> property = propertySet.get(DavConstants.PROPERTY_RESOURCETYPE);
-                if (property != null) {
-                    Node node = (Node) property.getValue();
-                    return node.getLocalName().equals(DavConstants.XML_COLLECTION);
-                }
+            if (isMultiStatus(closeableHttpResponse)) {
+                List<MultiStatus.Response> responses = MultiStatus.parse(
+                                closeableHttpResponse.getEntity().getContent())
+                        .getResponses();
+                return !responses.isEmpty() && responses.get(0).isCollection();
             }
             return false;
         } catch (HttpException e) {
@@ -209,21 +198,19 @@ public class WebDavWagon extends AbstractHttpClientWagon {
         String repositoryUrl = repository.getUrl();
         String url = repositoryUrl + (repositoryUrl.endsWith("/") ? "" : "/") + destinationDirectory;
 
-        HttpPropfind method = null;
+        DavMethods.HttpPropfind method = null;
         CloseableHttpResponse closeableHttpResponse = null;
         try {
             if (isDirectory(url)) {
-                DavPropertyNameSet nameSet = new DavPropertyNameSet();
-                nameSet.add(DavPropertyName.create(DavConstants.PROPERTY_DISPLAYNAME));
-
-                method = new HttpPropfind(url, nameSet, DavConstants.DEPTH_1);
+                method = new DavMethods.HttpPropfind(url, PROPERTY_DISPLAYNAME, DEPTH_1);
                 closeableHttpResponse = execute(method);
-                if (method.succeeded(closeableHttpResponse)) {
+                if (isMultiStatus(closeableHttpResponse)) {
                     ArrayList<String> dirs = new ArrayList<>();
-                    MultiStatus multiStatus = method.getResponseBodyAsMultiStatus(closeableHttpResponse);
-                    for (int i = 0; i < multiStatus.getResponses().length; i++) {
-                        MultiStatusResponse response = multiStatus.getResponses()[i];
-                        String entryUrl = response.getHref();
+                    List<MultiStatus.Response> responses = MultiStatus.parse(
+                                    closeableHttpResponse.getEntity().getContent())
+                            .getResponses();
+                    for (int i = 0; i < responses.size(); i++) {
+                        String entryUrl = responses.get(i).getHref();
                         String fileName = PathUtils.filename(URLDecoder.decode(entryUrl));
                         if (entryUrl.endsWith("/")) {
                             if (i == 0) {
@@ -254,8 +241,6 @@ public class WebDavWagon extends AbstractHttpClientWagon {
             }
         } catch (HttpException e) {
             throw new TransferFailedException(e.getMessage(), e);
-        } catch (DavException e) {
-            throw new TransferFailedException(e.getMessage(), e);
         } catch (IOException e) {
             throw new TransferFailedException(e.getMessage(), e);
         } finally {
@@ -274,6 +259,13 @@ public class WebDavWagon extends AbstractHttpClientWagon {
         // FIXME WAGON-580; actually the exception is wrong here; we need an IllegalStateException here
         throw new ResourceDoesNotExistException(
                 "Destination path exists but is not a " + "WebDAV collection (directory): " + url);
+    }
+
+    /**
+     * A PROPFIND only carries a parseable body when the server answered {@code 207 Multi-Status}.
+     */
+    private static boolean isMultiStatus(CloseableHttpResponse response) {
+        return response.getStatusLine().getStatusCode() == SC_MULTI_STATUS && response.getEntity() != null;
     }
 
     public String getURL(Repository repository) {
