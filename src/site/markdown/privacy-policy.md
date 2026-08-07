@@ -1,3 +1,10 @@
+---
+title: Privacy Policy
+author: 
+  - Olivier Lamy
+date: 2012-06-18
+---
+
 <!--
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file

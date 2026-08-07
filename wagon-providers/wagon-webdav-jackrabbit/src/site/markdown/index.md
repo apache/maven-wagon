@@ -1,3 +1,10 @@
+---
+title: Maven Wagon WebDAV
+author: 
+  - Carlos Sanchez
+date: 2012-11-19
+---
+
 <!--
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file
