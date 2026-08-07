@@ -216,10 +216,22 @@ final class MultiStatus {
         // multistatus bodies come from a remote server, so no external entity resolution
         factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
         // the parser in use is not necessarily Xerces, and setFeature rejects features it does not
-        // know, so fall back to refusing external entities where the doctype cannot be banned
+        // know, so where the doctype cannot be banned outright, refuse external entities instead
         if (!setFeatureIfSupported(factory, DISALLOW_DOCTYPE_DECL, true)) {
-            setFeatureIfSupported(factory, EXTERNAL_GENERAL_ENTITIES, false);
-            setFeatureIfSupported(factory, EXTERNAL_PARAMETER_ENTITIES, false);
+            boolean generalEntities = setFeatureIfSupported(factory, EXTERNAL_GENERAL_ENTITIES, false);
+            boolean parameterEntities = setFeatureIfSupported(factory, EXTERNAL_PARAMETER_ENTITIES, false);
+            if (!generalEntities || !parameterEntities) {
+                // secure processing on its own bounds resource use, it does not stop a remote
+                // server reaching the entities it names, so refuse to parse at all
+                throw new ParserConfigurationException("XML parser supports neither " + DISALLOW_DOCTYPE_DECL
+                        + " nor the external entity features, and cannot be secured");
+            }
+            // neither of those governs the external DTD subset itself
+            try {
+                factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            } catch (IllegalArgumentException e) {
+                // property unrecognised; the entity features above still hold
+            }
         }
         factory.setXIncludeAware(false);
         factory.setExpandEntityReferences(false);
