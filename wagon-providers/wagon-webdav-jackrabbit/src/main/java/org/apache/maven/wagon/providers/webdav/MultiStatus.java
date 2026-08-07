@@ -46,9 +46,9 @@ import static org.apache.maven.wagon.providers.webdav.DavMethods.XML_COLLECTION;
  * The {@code 207 Multi-Status} body of a PROPFIND response, reduced to what this Wagon needs: the
  * href of each response, in document order, and whether that response describes a collection.
  * <p>
- * Responses keep their document order because {@code getFileList} relies on the first entry being
- * the requested collection itself, as mandated by
- * <a href="http://www.webdav.org/specs/rfc4918.html#rfc.section.9.1">RFC 4918 section 9.1</a>.
+ * Responses keep their document order because {@code getFileList} skips the first one, taking it to
+ * be the requested collection itself. RFC 4918 does not order responses; that a server lists the
+ * request URI first is an observed behaviour, and the assumption predates this class.
  *
  * @since 4.0.0
  */
@@ -199,15 +199,12 @@ final class MultiStatus {
 
     /**
      * Matches on local name within the {@code DAV:} namespace. Servers that emit the WebDAV
-     * elements without a namespace are tolerated, since some do.
+     * elements in no namespace at all are tolerated, since some do; Jackrabbit required
+     * {@code DAV:} exactly.
      */
     private static boolean isDavElement(Element element, String localName) {
-        String elementLocalName = element.getLocalName() != null ? element.getLocalName() : element.getNodeName();
-        int colon = elementLocalName.indexOf(':');
-        if (colon >= 0) {
-            elementLocalName = elementLocalName.substring(colon + 1);
-        }
-        if (!localName.equals(elementLocalName)) {
+        // the parser is namespace aware, so a parsed element always reports a local name
+        if (!localName.equals(element.getLocalName())) {
             return false;
         }
         String namespace = element.getNamespaceURI();
