@@ -348,7 +348,7 @@ under the License.
                 </group>
                 <group>
                   <title>WebDAV Provider</title>
-                  <packages>org.apache.maven.wagon.providers.webdav*:org.apache.jackrabbit.webdav*</packages>
+                  <packages>org.apache.maven.wagon.providers.webdav*</packages>
                 </group>
                 <group>
                   <title>HTTP TCK</title>
