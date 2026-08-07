@@ -112,22 +112,54 @@ public class MultiStatusTest {
         assertEquals("/repo/dir/b.jar", responses.get(2).getHref());
     }
 
+    /**
+     * An href must occur only once; should a server repeat one, the last wins and keeps the
+     * position of the first, as the Jackrabbit-backed code did.
+     */
     @Test
     public void testDuplicateHrefsCollapse() throws Exception {
         List<MultiStatus.Response> responses = parse("<?xml version=\"1.0\"?>"
                 + "<D:multistatus xmlns:D=\"DAV:\">"
-                + "  <D:response><D:href>/repo/dir/a.jar</D:href></D:response>"
-                + "  <D:response><D:href>/repo/dir/a.jar</D:href></D:response>"
+                + "  <D:response><D:href>/repo/dir/a</D:href></D:response>"
+                + "  <D:response><D:href>/repo/dir/b</D:href></D:response>"
+                + "  <D:response>"
+                + "    <D:href>/repo/dir/a</D:href>"
+                + "    <D:propstat>"
+                + "      <D:prop><D:resourcetype><D:collection/></D:resourcetype></D:prop>"
+                + "      <D:status>HTTP/1.1 200 OK</D:status>"
+                + "    </D:propstat>"
+                + "  </D:response>"
                 + "</D:multistatus>");
 
-        assertEquals(1, responses.size());
+        assertEquals(2, responses.size());
+        assertEquals("/repo/dir/a", responses.get(0).getHref());
+        assertTrue("the later duplicate wins", responses.get(0).isCollection());
+        assertEquals("/repo/dir/b", responses.get(1).getHref());
     }
 
     /**
-     * Some servers emit the WebDAV elements with a default namespace or a different prefix.
+     * RFC 4918 requires a status, but a server omitting one should still get its properties read.
      */
     @Test
-    public void testAlternatePrefixIsAccepted() throws Exception {
+    public void testPropstatWithoutStatusIsRead() throws Exception {
+        List<MultiStatus.Response> responses = parse("<?xml version=\"1.0\"?>"
+                + "<D:multistatus xmlns:D=\"DAV:\">"
+                + "  <D:response>"
+                + "    <D:href>/repo/dir/</D:href>"
+                + "    <D:propstat>"
+                + "      <D:prop><D:resourcetype><D:collection/></D:resourcetype></D:prop>"
+                + "    </D:propstat>"
+                + "  </D:response>"
+                + "</D:multistatus>");
+
+        assertTrue(responses.get(0).isCollection());
+    }
+
+    /**
+     * Some servers put the WebDAV elements in a default namespace rather than a prefixed one.
+     */
+    @Test
+    public void testDefaultNamespaceIsAccepted() throws Exception {
         List<MultiStatus.Response> responses = parse("<?xml version=\"1.0\"?>"
                 + "<multistatus xmlns=\"DAV:\">"
                 + "  <response>"
