@@ -1,3 +1,10 @@
+---
+title: Maven Wagon HTTP lightweight
+author: 
+  - Carlos Sanchez
+date: 2011-09-20
+---
+
 <!--
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file

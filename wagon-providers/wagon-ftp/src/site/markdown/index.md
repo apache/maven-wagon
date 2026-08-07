@@ -1,3 +1,10 @@
+---
+title: Maven Wagon FTP
+author: 
+  - Carlos Sanchez
+date: 2006-06-04
+---
+
 <!--
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file

@@ -1,3 +1,11 @@
+---
+title: Maven Wagon HTTP
+author: 
+  - Carlos Sanchez
+  - Olivier Lamy
+date: 2013-02-05
+---
+
 <!--
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file
