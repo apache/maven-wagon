@@ -24,6 +24,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -173,13 +174,8 @@ public class WebDavWagon extends AbstractHttpClientWagon {
             method = new DavMethods.HttpPropfind(url, PROPERTY_RESOURCETYPE, DEPTH_0);
             closeableHttpResponse = execute(method);
 
-            if (isMultiStatus(closeableHttpResponse)) {
-                List<MultiStatus.Response> responses = MultiStatus.parse(
-                                closeableHttpResponse.getEntity().getContent())
-                        .getResponses();
-                return !responses.isEmpty() && responses.get(0).isCollection();
-            }
-            return false;
+            List<MultiStatus.Response> responses = readMultiStatus(closeableHttpResponse);
+            return responses != null && !responses.isEmpty() && responses.get(0).isCollection();
         } catch (HttpException e) {
             throw new IOException(e.getMessage(), e);
         } finally {
@@ -204,11 +200,9 @@ public class WebDavWagon extends AbstractHttpClientWagon {
             if (isDirectory(url)) {
                 method = new DavMethods.HttpPropfind(url, PROPERTY_DISPLAYNAME, DEPTH_1);
                 closeableHttpResponse = execute(method);
-                if (isMultiStatus(closeableHttpResponse)) {
+                List<MultiStatus.Response> responses = readMultiStatus(closeableHttpResponse);
+                if (responses != null) {
                     ArrayList<String> dirs = new ArrayList<>();
-                    List<MultiStatus.Response> responses = MultiStatus.parse(
-                                    closeableHttpResponse.getEntity().getContent())
-                            .getResponses();
                     for (int i = 0; i < responses.size(); i++) {
                         String entryUrl = responses.get(i).getHref();
                         String fileName = PathUtils.filename(URLDecoder.decode(entryUrl));
@@ -262,10 +256,24 @@ public class WebDavWagon extends AbstractHttpClientWagon {
     }
 
     /**
-     * A PROPFIND only carries a parseable body when the server answered {@code 207 Multi-Status}.
+     * Reads the body of a PROPFIND response, which is only present when the server answered
+     * {@code 207 Multi-Status}.
+     *
+     * @return the responses, or {@code null} if the status was not {@code 207} and the caller
+     *     should inspect it itself
+     * @throws IOException if the server answered {@code 207} without a body, or with one that
+     *     cannot be parsed
      */
-    private static boolean isMultiStatus(CloseableHttpResponse response) {
-        return response.getStatusLine().getStatusCode() == SC_MULTI_STATUS && response.getEntity() != null;
+    private static List<MultiStatus.Response> readMultiStatus(CloseableHttpResponse response) throws IOException {
+        if (response.getStatusLine().getStatusCode() != SC_MULTI_STATUS) {
+            return null;
+        }
+        HttpEntity entity = response.getEntity();
+        if (entity == null) {
+            // a transport fault rather than a missing resource, so it must not be reported as one
+            throw new IOException("Multi-Status response has no body");
+        }
+        return MultiStatus.parse(entity.getContent()).getResponses();
     }
 
     public String getURL(Repository repository) {

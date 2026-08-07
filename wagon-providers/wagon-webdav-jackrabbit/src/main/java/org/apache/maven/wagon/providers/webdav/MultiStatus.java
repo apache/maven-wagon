@@ -36,6 +36,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import static org.apache.maven.wagon.providers.webdav.DavMethods.DAV_NAMESPACE;
 import static org.apache.maven.wagon.providers.webdav.DavMethods.PROPERTY_RESOURCETYPE;
@@ -52,6 +53,12 @@ import static org.apache.maven.wagon.providers.webdav.DavMethods.XML_COLLECTION;
  * @since 4.0.0
  */
 final class MultiStatus {
+
+    private static final String DISALLOW_DOCTYPE_DECL = "http://apache.org/xml/features/disallow-doctype-decl";
+
+    private static final String EXTERNAL_GENERAL_ENTITIES = "http://xml.org/sax/features/external-general-entities";
+
+    private static final String EXTERNAL_PARAMETER_ENTITIES = "http://xml.org/sax/features/external-parameter-entities";
 
     private final List<Response> responses;
 
@@ -94,13 +101,23 @@ final class MultiStatus {
      *
      * @param in the response body, never {@code null}
      * @return the parsed responses, possibly empty but never {@code null}
-     * @throws IOException if the body is not a well-formed multistatus document
+     * @throws IOException if the parser cannot be configured, or if the body is not a well-formed
+     *     multistatus document
      */
     static MultiStatus parse(InputStream in) throws IOException {
+        DocumentBuilder builder;
+        try {
+            builder = newDocumentBuilder();
+        } catch (ParserConfigurationException e) {
+            // a configuration problem is not the server's fault, so say so rather than blaming the
+            // response body
+            throw new IOException("XML parser configuration error: " + e.getMessage(), e);
+        }
+
         Document document;
         try {
-            document = newDocumentBuilder().parse(in);
-        } catch (ParserConfigurationException | SAXException e) {
+            document = builder.parse(in);
+        } catch (SAXException e) {
             throw new IOException("Cannot parse multistatus response: " + e.getMessage(), e);
         }
 
@@ -109,8 +126,9 @@ final class MultiStatus {
             throw new IOException("Expected a DAV:multistatus response body");
         }
 
-        // an href must occur only once per RFC 4918, so later duplicates are dropped rather than
-        // reported twice; a LinkedHashMap keeps the document order the callers depend on
+        // an href must occur only once per RFC 4918; should a server repeat one, the last wins and
+        // keeps the position of the first, which is what the Jackrabbit-backed code did. A
+        // LinkedHashMap also preserves the document order the callers depend on.
         Map<String, Response> responses = new LinkedHashMap<>();
         for (Element response : childElements(root, "response")) {
             String href = null;
@@ -148,8 +166,10 @@ final class MultiStatus {
 
     /**
      * Reads the {@code status} child, whose text is a status line such as {@code HTTP/1.1 200 OK}.
-     * A {@code propstat} without a status element is treated as successful, matching how lenient
-     * servers are read elsewhere.
+     * <p>
+     * RFC 4918 requires the element, and a {@code propstat} lacking one used to be skipped
+     * outright, which made every property of such a response invisible. It is read as successful
+     * here instead, so that a server omitting the status still gets its properties honoured.
      */
     private static boolean isOkStatus(Element propstat) {
         List<Element> statusElements = childElements(propstat, "status");
@@ -198,10 +218,29 @@ final class MultiStatus {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         // multistatus bodies come from a remote server, so no external entity resolution
         factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        // the parser in use is not necessarily Xerces, and setFeature rejects features it does not
+        // know, so fall back to refusing external entities where the doctype cannot be banned
+        if (!setFeatureIfSupported(factory, DISALLOW_DOCTYPE_DECL, true)) {
+            setFeatureIfSupported(factory, EXTERNAL_GENERAL_ENTITIES, false);
+            setFeatureIfSupported(factory, EXTERNAL_PARAMETER_ENTITIES, false);
+        }
         factory.setXIncludeAware(false);
         factory.setExpandEntityReferences(false);
         factory.setNamespaceAware(true);
-        return factory.newDocumentBuilder();
+
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        // without a handler the parser writes its own diagnostics to stderr; fatal errors still
+        // surface as an exception
+        builder.setErrorHandler(new DefaultHandler());
+        return builder;
+    }
+
+    private static boolean setFeatureIfSupported(DocumentBuilderFactory factory, String feature, boolean value) {
+        try {
+            factory.setFeature(feature, value);
+            return true;
+        } catch (ParserConfigurationException e) {
+            return false;
+        }
     }
 }
