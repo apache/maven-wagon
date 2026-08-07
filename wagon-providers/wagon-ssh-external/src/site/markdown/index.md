@@ -1,41 +1,37 @@
- ------
- Maven Wagon SSH External
- ------
- Carlos Sanchez
- ------
- 2006-04-16
- ------
+---
+title: Maven Wagon SSH External
+author: 
+  - Carlos Sanchez
+date: 2006-04-16
+---
 
- ~~ Licensed to the Apache Software Foundation (ASF) under one
- ~~ or more contributor license agreements.  See the NOTICE file
- ~~ distributed with this work for additional information
- ~~ regarding copyright ownership.  The ASF licenses this file
- ~~ to you under the Apache License, Version 2.0 (the
- ~~ "License"); you may not use this file except in compliance
- ~~ with the License.  You may obtain a copy of the License at
- ~~
- ~~   http://www.apache.org/licenses/LICENSE-2.0
- ~~
- ~~ Unless required by applicable law or agreed to in writing,
- ~~ software distributed under the License is distributed on an
- ~~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- ~~ KIND, either express or implied.  See the License for the
- ~~ specific language governing permissions and limitations
- ~~ under the License.
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
 
- ~~ NOTE: For help with the syntax of this file, see:
- ~~ http://maven.apache.org/doxia/references/apt-format.html
+http://www.apache.org/licenses/LICENSE-2.0
 
-Maven Wagon SSH External
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
 
- This component is an implementation of Wagon provider for SSH servers access.
- 
- It enables Maven to deploy artifacts and sites to SSH servers.
- it uses an external SSH program that has to be already installed in the system.
+# Maven Wagon SSH External
 
- Getting files from SSH servers is not fully tested.
+This component is an implementation of Wagon provider for SSH servers access.
 
+It enables Maven to deploy artifacts and sites to SSH servers. it uses an external SSH program that has to be already installed in the system.
 
-Features
+Getting files from SSH servers is not fully tested.
 
- * Deploy files and directories to SSH servers
+# Features
+
+- Deploy files and directories to SSH servers

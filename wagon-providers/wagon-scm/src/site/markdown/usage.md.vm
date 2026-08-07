@@ -1,72 +1,58 @@
- ------
- Maven Wagon SCM
- ------
- Carlos Sanchez
- ------
- 2011-09-22
- ------
+---
+title: Maven Wagon SCM
+author: 
+  - Carlos Sanchez
+date: 2011-09-22
+---
 
- ~~ Licensed to the Apache Software Foundation (ASF) under one
- ~~ or more contributor license agreements.  See the NOTICE file
- ~~ distributed with this work for additional information
- ~~ regarding copyright ownership.  The ASF licenses this file
- ~~ to you under the Apache License, Version 2.0 (the
- ~~ "License"); you may not use this file except in compliance
- ~~ with the License.  You may obtain a copy of the License at
- ~~
- ~~   http://www.apache.org/licenses/LICENSE-2.0
- ~~
- ~~ Unless required by applicable law or agreed to in writing,
- ~~ software distributed under the License is distributed on an
- ~~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- ~~ KIND, either express or implied.  See the License for the
- ~~ specific language governing permissions and limitations
- ~~ under the License.
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
 
- ~~ NOTE: For help with the syntax of this file, see:
- ~~ http://maven.apache.org/doxia/references/apt-format.html
+http://www.apache.org/licenses/LICENSE-2.0
 
-Maven Wagon SCM Usage
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
 
- You need to add some extensions to your pom:
+# Maven Wagon SCM Usage
 
- * <<<wagon-scm>>>,
+You need to add some extensions to your pom:
 
- * {{{/scm/maven-scm-managers/maven-scm-manager-plexus/index.html}<<<maven-scm-manager-plexus>>>}}
+- `wagon-scm`,
+- [`maven-scm-manager-plexus`](/scm/maven-scm-managers/maven-scm-manager-plexus/index.html)
+- and the [Maven SCM Provider](/scm/maven-scm-providers/index.html) for your SCM system,
 
- * and the {{{/scm/maven-scm-providers/index.html}Maven SCM Provider}} for your SCM system,
+and use URLs in the [SCM format](/scm/scm-url-format.html).
 
- []
+For non-subversion SCM, you can include the elements `scmVersionType` and `scmVersion` in your `settings.xml` file to specify a branch or tag to use. The value of `scmVersionType` must be one of `branch` or `tag`. There is no default value for `scmVersionType` so you _MUST_ specify it with `scmVersion` in order to have any effect.
 
- and use URLs in the {{{/scm/scm-url-format.html}SCM format}}.
+# Deploying your Maven site to SCM
 
- For non-subversion SCM, you can include the elements <<<scmVersionType>>> and <<<scmVersion>>> in your <<<settings.xml>>> file to
- specify a branch or tag to use. The value of <<<scmVersionType>>> must be one of <<<branch>>> or <<<tag>>>.
- There is no default value for <<<scmVersionType>>> so you <MUST> specify it with <<<scmVersion>>> in order
- to have any effect.
+There are some **shortcomings** to simply using Wagon SCM provider with site plugin:
 
+- deploying site to SCM will require obsolete pages deletion, which is not done,
+- site plugin way make one commit per file.
 
-Deploying your Maven site to SCM
+**Prefer [maven-scm-publish-plugin](http://maven.apache.org/plugins/maven-scm-publish-plugin/) to publish your site to SCM**
 
- There are some <<shortcomings>> to simply using Wagon SCM provider with site plugin:
+The site plugin behaves differently, require these be added as dependencies instead of extensions. See [ Adding a Protocol to Deploy the Site](/plugins/maven-site-plugin/examples/adding-deploy-protocol.html).
 
- * deploying site to SCM will require obsolete pages deletion, which is not done,
+Deploying your Maven site to Subversion
+---------------------------------------
 
- * site plugin way make one commit per file.
+Add the following extensions to your pom and use a wagon-scm url in the distributionManagement site url.
 
- []
-
- <<Prefer {{{http://maven.apache.org/plugins/maven-scm-publish-plugin/}maven-scm-publish-plugin}} to
- publish your site to SCM>>
-
- The site plugin behaves differently, require these be added as dependencies instead of extensions. See
- {{{/plugins/maven-site-plugin/examples/adding-deploy-protocol.html} Adding a Protocol to Deploy the Site}}.
-
-* Deploying your Maven site to Subversion
-
- Add the following extensions to your pom and use a wagon-scm url in the distributionManagement site url.
-
-------
+```
   <build>
     <extensions>
       <extension>
@@ -92,14 +78,14 @@ Deploying your Maven site to SCM
       <url>scm:svn:https://username@svn.apache.org/svn/root/module</url>
     </site>
   </distributionManagement>
-------
+```
 
+Deploying your Maven site to CVS
+--------------------------------
 
-* Deploying your Maven site to CVS
+Same as before, but changing svnexe to cvsexe and using a CVS svn url.
 
- Same as before, but changing svnexe to cvsexe and using a CVS svn url.
-
-------
+```
   <build>
     <extensions>
       <extension>
@@ -125,14 +111,14 @@ Deploying your Maven site to SCM
       <url>scm:cvs:ext:username@cvs.apache.org:/cvs/root:module</url>
     </site>
   </distributionManagement>
-------
+```
 
+Deploying your Maven site to GitHub's gh-pages
+----------------------------------------------
 
-* Deploying your Maven site to GitHub's gh-pages
+Same as before, but changing svnexe to gitexe and using a Git svn url.
 
- Same as before, but changing svnexe to gitexe and using a Git svn url.
-
-------
+```
   <build>
     <extensions>
       <extension>
@@ -186,11 +172,11 @@ Deploying your Maven site to SCM
             </dependency>
         </dependencies>
   </plugin>
-------
+```
 
- And in your settings.xml file:
+And in your settings.xml file:
 
-------
+```
   <server>
     <id>my.git.server</id>
     <username>git</username>
@@ -199,4 +185,5 @@ Deploying your Maven site to SCM
         <scmVersion>gh-pages</scmVersion>
     </configuration>
   </server>
-------
+```
+
