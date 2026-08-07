@@ -88,7 +88,7 @@ final class DavMethods {
                             + "<D:propfind xmlns:D=\"" + DAV_NAMESPACE + "\">"
                             + "<D:prop><D:" + propertyName + "/></D:prop>"
                             + "</D:propfind>",
-                    ContentType.create("text/xml", StandardCharsets.UTF_8)));
+                    ContentType.create("application/xml", StandardCharsets.UTF_8)));
         }
 
         @Override
