@@ -60,9 +60,6 @@ import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatResource
 public class WebDavWagon extends AbstractHttpClientWagon {
     protected static final String CONTINUE_ON_FAILURE_PROPERTY = "wagon.webdav.continueOnFailure";
 
-    /** {@code 207 Multi-Status}, not defined by {@link HttpStatus}. */
-    private static final int SC_MULTI_STATUS = 207;
-
     private final boolean continueOnFailure = Boolean.getBoolean(CONTINUE_ON_FAILURE_PROPERTY);
 
     /**
@@ -265,7 +262,7 @@ public class WebDavWagon extends AbstractHttpClientWagon {
      *     cannot be parsed
      */
     private static List<MultiStatus.Response> readMultiStatus(CloseableHttpResponse response) throws IOException {
-        if (response.getStatusLine().getStatusCode() != SC_MULTI_STATUS) {
+        if (response.getStatusLine().getStatusCode() != HttpStatus.SC_MULTI_STATUS) {
             return null;
         }
         HttpEntity entity = response.getEntity();
