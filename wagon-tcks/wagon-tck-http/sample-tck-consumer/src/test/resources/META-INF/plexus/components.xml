@@ -25,14 +25,7 @@ under the License.
       <implementation>org.apache.maven.wagon.tck.http.WagonTestCaseConfigurator</implementation>
       <configuration>
         <wagonHint>http</wagonHint>
-        <useCaseConfigs>
-          <highLatencyLowTimeout>
-            <unsupported/>
-          </highLatencyLowTimeout>
-          <inifiniteLatencyTimeout>
-            <unsupported/>
-          </inifiniteLatencyTimeout>
-        </useCaseConfigs>
+        <useCaseConfigsResource>META-INF/wagon-tck/http-use-cases.xml</useCaseConfigsResource>
       </configuration>
     </component>
   </components>
