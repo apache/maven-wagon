@@ -161,6 +161,7 @@ under the License.
     <slf4jVersion>1.7.36</slf4jVersion>
     <maven.site.path>wagon-archives/wagon-LATEST</maven.site.path>
     <version.plexus-utils>3.6.0</version.plexus-utils>
+    <guiceVersion>5.1.0</guiceVersion>
     <!-- because doxia parser doesn't like the real one -->
     <mavenSitePluginVersion>${version.maven-site-plugin}</mavenSitePluginVersion>
     <project.build.outputTimestamp>2022-12-18T21:06:44Z</project.build.outputTimestamp>
@@ -198,10 +199,17 @@ under the License.
         <artifactId>plexus-interactivity-api</artifactId>
         <version>1.5.1</version>
       </dependency>
+      <!--
+       | The Plexus shim: org.eclipse.sisu.plexus supplies PlexusContainer and PlexusTestCase,
+       | and understands both META-INF/plexus/components.xml and JSR-330 @Named beans.
+       | Its version is managed by maven-parent. Guice is "provided" in the sisu POM,
+       | so it has to be declared here explicitly.
+      -->
       <dependency>
-        <groupId>org.codehaus.plexus</groupId>
-        <artifactId>plexus-container-default</artifactId>
-        <version>2.1.1</version>
+        <groupId>com.google.inject</groupId>
+        <artifactId>guice</artifactId>
+        <version>${guiceVersion}</version>
+        <classifier>classes</classifier>
       </dependency>
       <!-- for slf4j -->
       <dependency>
