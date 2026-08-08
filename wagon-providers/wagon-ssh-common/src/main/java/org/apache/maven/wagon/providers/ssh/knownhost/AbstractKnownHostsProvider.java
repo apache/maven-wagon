@@ -32,7 +32,6 @@ public abstract class AbstractKnownHostsProvider implements KnownHostsProvider {
     /**
      * Valid values are ask, yes, no.
      *
-     * @plexus.configuration default-value="ask"
      */
     private String hostKeyChecking = "ask";
 

@@ -18,6 +18,11 @@
  */
 package org.apache.maven.wagon.providers.ssh.external;
 
+import javax.inject.Named;
+
+import org.apache.maven.wagon.CommandExecutor;
+import org.eclipse.sisu.Typed;
+
 /**
  * ScpExternalCommandExecutor - bridge class for plexus:descriptor
  *
@@ -26,10 +31,9 @@ package org.apache.maven.wagon.providers.ssh.external;
  *
  * @todo is this even needed anymore?
  *
- * @plexus.component role="org.apache.maven.wagon.CommandExecutor"
- *   role-hint="scpexe"
- *   instantiation-strategy="per-lookup"
  */
+@Named("scpexe")
+@Typed(CommandExecutor.class)
 public class ScpExternalCommandExecutor extends ScpExternalWagon {
 
     public ScpExternalCommandExecutor() {

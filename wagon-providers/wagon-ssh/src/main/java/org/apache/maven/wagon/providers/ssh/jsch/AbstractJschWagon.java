@@ -18,6 +18,9 @@
  */
 package org.apache.maven.wagon.providers.ssh.jsch;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -80,24 +83,16 @@ public abstract class AbstractJschWagon extends StreamWagon implements SshWagon,
 
     private String strictHostKeyChecking;
 
-    /**
-     * @plexus.requirement role-hint="file"
-     */
+    @Inject
+    @Named("file")
     private volatile KnownHostsProvider knownHostsProvider;
 
-    /**
-     * @plexus.requirement
-     */
+    @Inject
     private volatile InteractiveUserInfo interactiveUserInfo;
 
-    /**
-     * @plexus.configuration
-     */
     private volatile String preferredAuthentications;
 
-    /**
-     * @plexus.requirement
-     */
+    @Inject
     private volatile UIKeyboardInteractive uIKeyboardInteractive;
 
     private static final int SOCKS5_PROXY_PORT = 1080;

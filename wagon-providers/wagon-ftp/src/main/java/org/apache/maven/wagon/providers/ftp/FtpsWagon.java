@@ -18,6 +18,8 @@
  */
 package org.apache.maven.wagon.providers.ftp;
 
+import javax.inject.Named;
+
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPSClient;
 import org.slf4j.Logger;
@@ -27,26 +29,15 @@ import org.slf4j.LoggerFactory;
  * FtpsWagon
  *
  *
- * @plexus.component role="org.apache.maven.wagon.Wagon"
- * role-hint="ftps"
- * instantiation-strategy="per-lookup"
  */
+@Named("ftps")
 public class FtpsWagon extends FtpWagon {
     private static final Logger LOG = LoggerFactory.getLogger(FtpsWagon.class);
 
-    /**
-     * @plexus.configuration default-value="TLS"
-     */
     private String securityProtocol = "TLS";
 
-    /**
-     * @plexus.configuration default-value="false"
-     */
     private boolean implicit = false;
 
-    /**
-     * @plexus.configuration default-value="true"
-     */
     private boolean endpointChecking = true;
 
     @Override
