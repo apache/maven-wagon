@@ -18,6 +18,9 @@
  */
 package org.apache.maven.wagon.providers.http;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,9 +65,9 @@ import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatTransfer
  * LightweightHttpWagon, using JDK's HttpURLConnection.
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- * @plexus.component role="org.apache.maven.wagon.Wagon" role-hint="http" instantiation-strategy="per-lookup"
  * @see HttpURLConnection
  */
+@Named("http")
 public class LightweightHttpWagon extends StreamWagon {
     private boolean preemptiveAuthentication;
 
@@ -80,18 +83,12 @@ public class LightweightHttpWagon extends StreamWagon {
     /**
      * Whether to use any proxy cache or not.
      *
-     * @plexus.configuration default="false"
      */
     private boolean useCache;
 
-    /**
-     * @plexus.configuration
-     */
     private Properties httpHeaders;
 
-    /**
-     * @plexus.requirement
-     */
+    @Inject
     private volatile LightweightHttpWagonAuthenticator authenticator;
 
     /**

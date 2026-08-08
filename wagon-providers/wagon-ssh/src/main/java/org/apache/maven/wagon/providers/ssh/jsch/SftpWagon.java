@@ -18,6 +18,8 @@
  */
 package org.apache.maven.wagon.providers.ssh.jsch;
 
+import javax.inject.Named;
+
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -33,12 +35,14 @@ import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.providers.ssh.ScpHelper;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
+import org.eclipse.sisu.Typed;
 
 /**
  * SFTP protocol wagon.
@@ -48,10 +52,9 @@ import org.apache.maven.wagon.resource.Resource;
  * @todo [BP] add compression flag
  * @todo see if SftpProgressMonitor allows us to do streaming (without it, we can't do checksums as the input stream is lost)
  *
- * @plexus.component role="org.apache.maven.wagon.Wagon"
- *   role-hint="sftp"
- *   instantiation-strategy="per-lookup"
  */
+@Named("sftp")
+@Typed(Wagon.class)
 public class SftpWagon extends AbstractJschWagon {
     private static final String SFTP_CHANNEL = "sftp";
 

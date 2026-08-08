@@ -18,6 +18,8 @@
  */
 package org.apache.maven.wagon.providers.http;
 
+import javax.inject.Named;
+
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.proxy.ProxyInfo;
@@ -28,10 +30,8 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
  *
  *
- * @plexus.component role="org.apache.maven.wagon.Wagon"
- *   role-hint="https"
- *   instantiation-strategy="per-lookup"
  */
+@Named("https")
 public class LightweightHttpsWagon extends LightweightHttpWagon {
     private String previousHttpsProxyHost;
 

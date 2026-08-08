@@ -22,12 +22,20 @@ import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.providers.ssh.SshWagon;
 import org.apache.maven.wagon.providers.ssh.TestData;
 import org.apache.maven.wagon.repository.Repository;
+import org.codehaus.plexus.ContainerConfiguration;
+import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusTestCase;
 
 /**
  *
  */
 public class KnownHostsProviderTestCase extends PlexusTestCase {
+    @Override
+    protected void customizeContainerConfiguration(ContainerConfiguration configuration) {
+        // the providers are @Named beans now, so the container has to read META-INF/sisu
+        configuration.setClassPathScanning(PlexusConstants.SCANNING_INDEX);
+    }
+
     protected KnownHostsProvider okHostsProvider;
 
     protected KnownHostsProvider failHostsProvider;

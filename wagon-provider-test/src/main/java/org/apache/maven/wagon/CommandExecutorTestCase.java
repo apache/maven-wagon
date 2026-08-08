@@ -20,6 +20,8 @@ package org.apache.maven.wagon;
 
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.repository.Repository;
+import org.codehaus.plexus.ContainerConfiguration;
+import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusTestCase;
 
 /**
@@ -29,6 +31,12 @@ import org.codehaus.plexus.PlexusTestCase;
  *
  */
 public abstract class CommandExecutorTestCase extends PlexusTestCase {
+    @Override
+    protected void customizeContainerConfiguration(ContainerConfiguration configuration) {
+        // the providers are @Named beans now, so the container has to read META-INF/sisu
+        configuration.setClassPathScanning(PlexusConstants.SCANNING_INDEX);
+    }
+
     public void testErrorInCommandExecuted() throws Exception {
         CommandExecutor exec = (CommandExecutor) lookup(CommandExecutor.ROLE);
 

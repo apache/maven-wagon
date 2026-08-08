@@ -18,6 +18,10 @@
  */
 package org.apache.maven.wagon.providers.ssh.jsch.interactive;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 import com.jcraft.jsch.UIKeyboardInteractive;
 import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
@@ -32,12 +36,12 @@ import org.codehaus.plexus.components.interactivity.PrompterException;
  * @author <a href="mailto:juam at users.sourceforge.net">Juan F. Codagnone</a>
  * @since Sep 22, 2005
  *
- * @plexus.component role="com.jcraft.jsch.UIKeyboardInteractive"
  */
+@Named
+@Singleton
 public class PrompterUIKeyboardInteractive implements UIKeyboardInteractive {
-    /**
-     * @plexus.requirement role-hint="default"
-     */
+    @Inject
+    @Named("default")
     private volatile Prompter prompter;
 
     public PrompterUIKeyboardInteractive() {}

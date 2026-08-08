@@ -18,6 +18,9 @@
  */
 package org.apache.maven.wagon.providers.ssh.interactive;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import java.util.Arrays;
 
 import org.codehaus.plexus.components.interactivity.Prompter;
@@ -29,13 +32,11 @@ import org.codehaus.plexus.components.interactivity.PrompterException;
  * @author Juan F. Codagnone
  * @since Sep 12, 2005
  *
- * @plexus.component role="org.apache.maven.wagon.providers.ssh.interactive.InteractiveUserInfo"
- *    instantiation-strategy="per-lookup"
  */
+@Named
 public class ConsoleInteractiveUserInfo implements InteractiveUserInfo {
-    /**
-     * @plexus.requirement role-hint="default"
-     */
+    @Inject
+    @Named("default")
     private volatile Prompter prompter;
 
     public ConsoleInteractiveUserInfo() {}

@@ -18,14 +18,14 @@
  */
 package org.apache.maven.wagon.providers.ssh.knownhost;
 
+import javax.inject.Named;
+
 /**
  * Dummy <code>KnownHostsProvider</code>
  *
  * @author Juan F. Codagnone
  * @since Sep 12, 2005
  *
- * @plexus.component role="org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider"
- *    role-hint="null"
- *    instantiation-strategy="per-lookup"
  */
+@Named("null")
 public final class NullKnownHostProvider extends AbstractKnownHostsProvider {}

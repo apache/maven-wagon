@@ -516,7 +516,6 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
     private Closeable closeable;
 
     /**
-     * @plexus.configuration
      * @deprecated Use httpConfiguration instead.
      */
     private Properties httpHeaders;
