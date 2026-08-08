@@ -288,9 +288,17 @@ configured").
 By default the `AuthScope` for the target is built from the repository's own host and
 port with `AuthScope.ANY_REALM`, and a port of `-1` becomes `AuthScope.ANY_PORT`.
 [`BasicAuthScope`](./apidocs/org/apache/maven/wagon/shared/http/BasicAuthScope.html)
-lets you override any of `host`, `port` and `realm`; each accepts the literal string
-`ANY` to mean "match anything", and setting all three to `ANY` yields
-`AuthScope.ANY`.
+lets you override `host`, `port` and `realm`.
+
+`host` and `port` accept the literal string `ANY` to mean "match anything", and
+setting `host`, `port` and `realm` all to `ANY` yields `AuthScope.ANY`.
+
+`realm` does not work that way, and it is worth being explicit about it because the
+asymmetry is easy to trip over. Omitting `realm` gives you `AuthScope.ANY_REALM`,
+which is what "match any realm" means. Setting it to any value — *including* `ANY`,
+unless `host` and `port` are `ANY` too — matches that string verbatim, so
+`<realm>ANY</realm>` on its own produces a scope that only matches a server whose
+realm is literally `ANY`. Leave `realm` out unless you mean to pin it.
 
 This is the setting to reach for when credentials are not being sent because the
 server's realm or port does not match what Wagon derived from the URL — for instance
@@ -298,10 +306,6 @@ a repository fronted by a redirect to another host.
 
 The two scopes are held in fields named `basicAuth` (for the target) and `proxyAuth`
 (for the proxy), reachable through `setBasicAuthScope` and `setProxyBasicAuthScope`.
-The `BasicAuthScope` Javadoc refers to them as `/server/basicAuth` and
-`/server/proxyBasicAuth`; note that `proxyBasicAuth` matches neither the field name
-(`proxyAuth`) nor the setter name (`setProxyBasicAuthScope`), so if `<proxyBasicAuth>`
-does not take effect, try `<proxyAuth>` or `<proxyBasicAuthScope>`.
 
 ```xml
 <configuration>
@@ -309,6 +313,19 @@ does not take effect, try `<proxyAuth>` or `<proxyBasicAuthScope>`.
     <host>ANY</host>
     <port>ANY</port>
     <realm>ANY</realm>
+  </basicAuth>
+</configuration>
+```
+
+That is the all-`ANY` case, which short-circuits to `AuthScope.ANY` and so does match
+any realm. To widen only the host and port, omit `realm` rather than setting it to
+`ANY`:
+
+```xml
+<configuration>
+  <basicAuth>
+    <host>ANY</host>
+    <port>ANY</port>
   </basicAuth>
 </configuration>
 ```
