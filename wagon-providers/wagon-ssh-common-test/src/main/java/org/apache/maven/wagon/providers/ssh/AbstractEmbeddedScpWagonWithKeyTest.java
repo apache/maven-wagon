@@ -76,7 +76,10 @@ public abstract class AbstractEmbeddedScpWagonWithKeyTest extends StreamingWagon
     }
 
     protected long getExpectedLastModifiedOnGet(Repository repository, Resource resource) {
-        return new File(repository.getBasedir(), resource.getName()).lastModified();
+        // the scp protocol carries the modification time in whole seconds (the "T" header), so that is the
+        // precision the wagon reports back - truncate to match, the "remote" file here is a local file whose
+        // timestamp still has millisecond precision
+        return new File(repository.getBasedir(), resource.getName()).lastModified() / 1000L * 1000L;
     }
 
     public void testConnect() throws Exception {

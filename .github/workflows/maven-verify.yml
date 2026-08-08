@@ -28,3 +28,7 @@ jobs:
     with:
       install-subversion: true
       matrix-exclude: '[ {"jdk": "25"} ]'
+      # -Dssh-tests turns off the no-ssh-tests profiles, -Dssh-embedded=true then narrows the ssh providers down
+      # to the tests that run against the embedded Apache MINA sshd; the rest need a real sshd on localhost:22.
+      # Repeats the workflow's own default for maven-args, which this input replaces rather than extends.
+      maven-args: '-D"invoker.streamLogsOnFailures" -Dssh-tests -Dssh-embedded=true'
