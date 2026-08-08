@@ -45,6 +45,16 @@ under the License.
       <artifactId>maven-scm-manager-plexus</artifactId>
       <version>${mavenScmVersion}</version>
       <scope>runtime</scope>
+      <exclusions>
+        <!--
+         | Drags in plexus-container-default 1.0-alpha-9, which collides with the Plexus shim
+         | (two copies of PlexusContainer/PlexusTestCase on the test classpath).
+        -->
+        <exclusion>
+          <groupId>org.codehaus.plexus</groupId>
+          <artifactId>plexus-container-default</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
