@@ -29,22 +29,24 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Properties;
 
+import com.jcraft.jsch.AgentConnector;
+import com.jcraft.jsch.AgentIdentityRepository;
+import com.jcraft.jsch.AgentProxyException;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.HostKey;
 import com.jcraft.jsch.HostKeyRepository;
 import com.jcraft.jsch.IdentityRepository;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.PageantConnector;
 import com.jcraft.jsch.Proxy;
 import com.jcraft.jsch.ProxyHTTP;
 import com.jcraft.jsch.ProxySOCKS5;
+import com.jcraft.jsch.SSHAgentConnector;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
-import com.jcraft.jsch.agentproxy.AgentProxyException;
-import com.jcraft.jsch.agentproxy.Connector;
-import com.jcraft.jsch.agentproxy.ConnectorFactory;
-import com.jcraft.jsch.agentproxy.RemoteIdentityRepository;
+import com.jcraft.jsch.WindowsSSHAgentConnector;
 import org.apache.maven.wagon.CommandExecutionException;
 import org.apache.maven.wagon.CommandExecutor;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
@@ -125,21 +127,11 @@ public abstract class AbstractJschWagon extends StreamWagon implements SshWagon,
 
         // can only pick one method of authentication
         if (privateKey != null && privateKey.exists()) {
-            fireSessionDebug("Using private key: " + privateKey);
-            try {
-                sch.addIdentity(privateKey.getAbsolutePath(), authenticationInfo.getPassphrase());
-            } catch (JSchException e) {
-                throw new AuthenticationException("Cannot connect. Reason: " + e.getMessage(), e);
-            }
+            useIdentityFile(sch, privateKey);
         } else {
-            try {
-                Connector connector = ConnectorFactory.getDefault().createConnector();
-                if (connector != null) {
-                    IdentityRepository repo = new RemoteIdentityRepository(connector);
-                    sch.setIdentityRepository(repo);
-                }
-            } catch (AgentProxyException e) {
-                fireSessionDebug("Unable to connect to agent: " + e.toString());
+            IdentityRepository agent = agentIdentityRepository();
+            if (agent != null) {
+                sch.setIdentityRepository(agent);
             }
         }
 
@@ -249,6 +241,76 @@ public abstract class AbstractJschWagon extends StreamWagon implements SshWagon,
                 throw new AuthenticationException(
                         "Connection aborted - failed to write to known_hosts. Reason: " + e.getMessage(), e);
             }
+        }
+    }
+
+    private void useIdentityFile(JSch sch, File privateKey) throws AuthenticationException {
+        fireSessionDebug("Using private key: " + privateKey);
+
+        // getPrivateKey() substitutes an empty passphrase when the settings name none, which is
+        // indistinguishable from "this key is not encrypted". Handing that on rejects every encrypted key
+        // outright. Passing null instead lets an unencrypted key through and leaves an encrypted one to be
+        // unlocked when it is used, which is where the user can still be asked for the passphrase.
+        String passphrase = authenticationInfo.getPassphrase();
+        if (passphrase != null && passphrase.isEmpty()) {
+            passphrase = null;
+        }
+
+        try {
+            sch.addIdentity(privateKey.getAbsolutePath(), passphrase);
+        } catch (JSchException e) {
+            throw new AuthenticationException("Cannot connect. Reason: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * The identities held by a running SSH agent, or <code>null</code> when no agent can be reached or the
+     * one reached holds none, in which case the caller falls back to a key file.
+     * <p>
+     * Three kinds of agent are tried in turn: the OpenSSH agent named by <code>SSH_AUTH_SOCK</code>, the
+     * Win32 OpenSSH agent, and Pageant. Every one of them is optional and each has its own prerequisites --
+     * the first needs a Unix domain socket, which the JDK itself provides only from Java 16, and Pageant
+     * needs JNA, which is not a dependency of this provider. Each is therefore both constructed and used
+     * inside its own guard, so that a missing class is one skipped agent rather than a failure to load.
+     */
+    private IdentityRepository agentIdentityRepository() {
+        IdentityRepository repository = identitiesFrom(SSHAgentConnector::new);
+        if (repository == null) {
+            repository = identitiesFrom(WindowsSSHAgentConnector::new);
+        }
+        if (repository == null) {
+            repository = identitiesFrom(PageantConnector::new);
+        }
+        return repository;
+    }
+
+    /**
+     * Creates one kind of {@link AgentConnector}, in a way that must only be invoked from inside
+     * {@link #identitiesFrom}: the classes involved may be absent at runtime, so the first mention of one
+     * has to sit where a {@link LinkageError} is caught.
+     */
+    private interface AgentConnectorFactory {
+        AgentConnector create() throws AgentProxyException;
+    }
+
+    private IdentityRepository identitiesFrom(AgentConnectorFactory factory) {
+        try {
+            AgentConnector connector = factory.create();
+            if (!connector.isAvailable()) {
+                return null;
+            }
+
+            AgentIdentityRepository repository = new AgentIdentityRepository(connector);
+            if (repository.getIdentities().isEmpty()) {
+                fireSessionDebug(connector.getName() + " holds no identities");
+                return null;
+            }
+
+            fireSessionDebug("Using the identities held by " + connector.getName());
+            return repository;
+        } catch (AgentProxyException | RuntimeException | LinkageError e) {
+            fireSessionDebug("Unable to use an SSH agent: " + e);
+            return null;
         }
     }
 
