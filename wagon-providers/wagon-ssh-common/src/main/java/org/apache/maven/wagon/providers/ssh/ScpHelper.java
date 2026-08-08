@@ -23,6 +23,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -110,6 +112,41 @@ public class ScpHelper {
      */
     private static final String[] PRIVATE_KEY_NAMES = {"id_ed25519", "id_ecdsa", "id_rsa"};
 
+    /**
+     * The same names, with Ed25519 demoted to last. Used when this runtime cannot do Ed25519, so that a key
+     * it can actually use wins -- while still falling back to <code>id_ed25519</code> when that is the only
+     * key present, which is the right answer for wagon-ssh-external, where the host's own
+     * <code>scp</code> does the cryptography and the JVM's capabilities do not apply.
+     */
+    private static final String[] PRIVATE_KEY_NAMES_WITHOUT_ED25519 = {"id_ecdsa", "id_rsa", "id_ed25519"};
+
+    /**
+     * The names to look for, in order. Package-private so both orderings can be tested on any runtime.
+     */
+    static String[] preferredPrivateKeyNames(boolean ed25519Available) {
+        return ed25519Available ? PRIVATE_KEY_NAMES : PRIVATE_KEY_NAMES_WITHOUT_ED25519;
+    }
+
+    /**
+     * Whether this runtime can use an Ed25519 key. The JDK grew EdDSA in Java 15; before that a provider
+     * such as Bouncy Castle has to supply it, which JSch will use when it is on the class path.
+     */
+    private static boolean isEd25519Available() {
+        try {
+            KeyFactory.getInstance("Ed25519");
+            return true;
+        } catch (NoSuchAlgorithmException e) {
+            // not in this JDK; a provider may still supply it
+        }
+
+        try {
+            Class.forName("org.bouncycastle.jce.provider.BouncyCastleProvider");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
     private static File findPrivateKey() {
         String privateKeyDirectory = System.getProperty("wagon.privateKeyDirectory");
 
@@ -117,7 +154,7 @@ public class ScpHelper {
             privateKeyDirectory = System.getProperty("user.home");
         }
 
-        for (String name : PRIVATE_KEY_NAMES) {
+        for (String name : preferredPrivateKeyNames(isEd25519Available())) {
             File privateKey = new File(privateKeyDirectory, ".ssh/" + name);
             if (privateKey.exists()) {
                 return privateKey;
