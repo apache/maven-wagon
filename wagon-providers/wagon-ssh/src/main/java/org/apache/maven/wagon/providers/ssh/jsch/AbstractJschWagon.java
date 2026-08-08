@@ -125,13 +125,20 @@ public abstract class AbstractJschWagon extends StreamWagon implements SshWagon,
             throw new AuthenticationException(e.getMessage());
         }
 
-        // can only pick one method of authentication
-        if (privateKey != null && privateKey.exists()) {
+        // Can only pick one method of authentication, so pick them in order of how deliberate they are:
+        // a key named in the settings first, then the agent, and only then a key file that merely happened
+        // to be lying in ~/.ssh. Letting a found key file outrank the agent means an agent is never reached
+        // on a machine that has one of those files, which is most of them.
+        boolean privateKeyConfigured = authenticationInfo.getPrivateKey() != null;
+
+        if (privateKeyConfigured && privateKey != null && privateKey.exists()) {
             useIdentityFile(sch, privateKey);
         } else {
             IdentityRepository agent = agentIdentityRepository();
             if (agent != null) {
                 sch.setIdentityRepository(agent);
+            } else if (privateKey != null && privateKey.exists()) {
+                useIdentityFile(sch, privateKey);
             }
         }
 
