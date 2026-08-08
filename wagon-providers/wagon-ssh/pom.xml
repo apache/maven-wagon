@@ -162,6 +162,12 @@ under the License.
     <profile>
       <id>ssh-embedded</id>
       <activation>
+        <!-- the embedded server runs the commands it receives through /bin/sh, so keep windauze in charge on
+             Windows: surefire <excludes> from two active profiles override rather than merge, and this profile
+             is declared last -->
+        <os>
+          <family>!windows</family>
+        </os>
         <property>
           <name>ssh-embedded</name>
           <value>true</value>
@@ -172,7 +178,7 @@ under the License.
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
-              <!-- Tests that currently doesn't work with embedded ssh server -->
+              <!-- Tests that need an ssh server on localhost:22 and the developer's own account there -->
               <excludes>
                 <exclude>**/SftpWagonTest.*</exclude>
                 <exclude>**/SshCommandExecutorTest.*</exclude>

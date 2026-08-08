@@ -21,6 +21,7 @@ package org.apache.maven.wagon.providers.ssh;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.sshd.common.file.nativefs.NativeFileSystemFactory;
@@ -29,6 +30,7 @@ import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.auth.password.PasswordAuthenticator;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.server.shell.ProcessShellFactory;
+import org.apache.sshd.sftp.server.SftpSubsystemFactory;
 
 /**
  * @author Olivier Lamy
@@ -96,6 +98,10 @@ public class SshServerEmbedded {
                 .withDelegate((channel, command) -> new ShellCommand(command))
                 .build();
         sshd.setCommandFactory(commandFactory);
+
+        // OpenSSH 9 and later drive "scp" over the SFTP protocol rather than the legacy scp protocol, so the
+        // wagon-ssh-external tests, which shell out to the system scp, need the subsystem to be available
+        sshd.setSubsystemFactories(Collections.singletonList(new SftpSubsystemFactory()));
 
         sshd.setFileSystemFactory(new NativeFileSystemFactory());
         sshd.start();
