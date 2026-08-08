@@ -281,20 +281,22 @@ public abstract class AbstractJschWagon extends StreamWagon implements SshWagon,
      * inside its own guard, so that a missing class is one skipped agent rather than a failure to load.
      */
     private IdentityRepository agentIdentityRepository() {
-        IdentityRepository repository = identitiesFrom(SSHAgentConnector::new);
+        IdentityRepository repository = identitiesFrom(() -> new SSHAgentConnector());
         if (repository == null) {
-            repository = identitiesFrom(WindowsSSHAgentConnector::new);
+            repository = identitiesFrom(() -> new WindowsSSHAgentConnector());
         }
         if (repository == null) {
-            repository = identitiesFrom(PageantConnector::new);
+            repository = identitiesFrom(() -> new PageantConnector());
         }
         return repository;
     }
 
     /**
-     * Creates one kind of {@link AgentConnector}, in a way that must only be invoked from inside
-     * {@link #identitiesFrom}: the classes involved may be absent at runtime, so the first mention of one
-     * has to sit where a {@link LinkageError} is caught.
+     * Creates one kind of {@link AgentConnector}. The implementations must be written as lambda bodies
+     * rather than as {@code X::new} constructor references: a constructor reference resolves the class when
+     * the reference itself is evaluated, which happens at the call site and so outside the guard in
+     * {@link #identitiesFrom}, letting a {@link NoClassDefFoundError} escape it. A lambda body compiles to a
+     * synthetic method, so the class is not mentioned until that body runs, which is inside the guard.
      */
     private interface AgentConnectorFactory {
         AgentConnector create() throws AgentProxyException;
