@@ -393,6 +393,24 @@ A provider with no `WagonTestCaseConfigurator` configuration at all will fail to
 one up; the configurator component itself must be declared even if
 `<useCaseConfigs>` is empty.
 
+### Run the TCK classes, do not subclass them from your own package
+
+`HttpWagonTests.isSupported()` and `HttpWagonTests.initTest(...)` recover the use-case
+id by walking the current stack and taking the last method name seen before the first
+frame whose class name does not start with `getClass().getPackage().getName()` — the
+package of the *runtime* class. That works for `GetWagonTests` and
+`HttpsGetWagonTests`, which live in `org.apache.maven.wagon.tck.http` alongside the
+frame they are looking for.
+
+It does not work if you subclass a TCK test class from your own package. The very
+first frame examined is then already outside your package, the walk stops with no
+method name, and every test logs `Cannot run test: null` and is treated as
+unsupported — so the suite passes without having tested anything.
+
+Wire the TCK up the way `wagon-http` does: run the TCK classes as they are, through a
+`@Suite.SuiteClasses` aggregator, and express everything provider-specific through
+`<useCaseConfigs>` rather than through a subclass.
+
 ## Running the tests
 
 The full build:
