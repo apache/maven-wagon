@@ -18,17 +18,26 @@
  */
 package org.apache.maven.wagon.tck.http;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.classworlds.realm.ClassRealm;
+import org.codehaus.plexus.component.configurator.BasicComponentConfigurator;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.ComponentConfigurator;
-import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.configuration.PlexusConfiguration;
+import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
 import org.codehaus.plexus.context.Context;
 import org.codehaus.plexus.context.ContextException;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable;
+import org.codehaus.plexus.util.xml.Xpp3DomBuilder;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +47,15 @@ import org.slf4j.LoggerFactory;
 public class WagonTestCaseConfigurator implements Contextualizable {
     private static final String UNSUPPORTED_ELEMENT = "unsupported";
 
-    private PlexusConfiguration useCaseConfigs;
+    /**
+     * Classpath location of the per-use-case configuration, e.g.
+     * {@code META-INF/wagon-tck/http-use-cases.xml}. The Plexus shim cannot inject a nested XML tree into a
+     * {@link PlexusConfiguration} field, so the configuration lives in its own resource and is parsed on
+     * demand by {@link #getUseCaseConfigs()}.
+     */
+    private String useCaseConfigsResource;
+
+    private PlexusConfiguration useCaseConfigsDom;
 
     private ComponentConfigurator configurator;
 
@@ -49,6 +66,7 @@ public class WagonTestCaseConfigurator implements Contextualizable {
     private static Logger logger = LoggerFactory.getLogger(WagonTestCaseConfigurator.class);
 
     public boolean isSupported(final String useCaseId) {
+        PlexusConfiguration useCaseConfigs = getUseCaseConfigs();
         if (useCaseConfigs != null) {
             PlexusConfiguration config = useCaseConfigs.getChild(useCaseId, false);
 
@@ -63,6 +81,7 @@ public class WagonTestCaseConfigurator implements Contextualizable {
 
     public boolean configureWagonForTest(final Wagon wagon, final String useCaseId)
             throws ComponentConfigurationException {
+        PlexusConfiguration useCaseConfigs = getUseCaseConfigs();
         if (useCaseConfigs != null) {
             PlexusConfiguration config = useCaseConfigs.getChild(useCaseId, false);
 
@@ -87,19 +106,33 @@ public class WagonTestCaseConfigurator implements Contextualizable {
     public void contextualize(final Context context) throws ContextException {
         PlexusContainer container = (PlexusContainer) context.get(PlexusConstants.PLEXUS_KEY);
         this.realm = container.getContainerRealm();
-        try {
-            configurator = (ComponentConfigurator) container.lookup(ComponentConfigurator.ROLE);
-        } catch (ComponentLookupException e) {
-            throw new ContextException("Failed to lookup component configurator: " + e.getMessage(), e);
-        }
+        // The Plexus shim does not register a default ComponentConfigurator component, and the TCK only ever
+        // wants the basic one, so instantiate it directly rather than looking it up.
+        configurator = new BasicComponentConfigurator();
     }
 
     public PlexusConfiguration getUseCaseConfigs() {
-        return useCaseConfigs;
+        if (useCaseConfigsDom == null && useCaseConfigsResource != null) {
+            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            try (InputStream in = loader.getResourceAsStream(useCaseConfigsResource)) {
+                if (in == null) {
+                    throw new IllegalStateException(
+                            "TCK use-case configuration not found on the classpath: " + useCaseConfigsResource);
+                }
+
+                Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8);
+                useCaseConfigsDom = new XmlPlexusConfiguration(Xpp3DomBuilder.build(reader));
+            } catch (XmlPullParserException | IOException e) {
+                throw new IllegalStateException("Malformed TCK use-case configuration: " + useCaseConfigsResource, e);
+            }
+        }
+
+        return useCaseConfigsDom;
     }
 
-    public void setUseCaseConfigs(final PlexusConfiguration useCaseConfigs) {
-        this.useCaseConfigs = useCaseConfigs;
+    public void setUseCaseConfigsResource(final String useCaseConfigsResource) {
+        this.useCaseConfigsResource = useCaseConfigsResource;
+        this.useCaseConfigsDom = null;
     }
 
     public String getWagonHint() {
