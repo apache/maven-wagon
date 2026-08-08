@@ -102,6 +102,13 @@ public class ScpHelper {
         return privateKey;
     }
 
+    /**
+     * The key types <code>ssh-keygen</code> produces, most recent first. <code>id_dsa</code> is not among
+     * them: ssh-dss has been disabled by default in OpenSSH for years, so a DSA key is the one least likely
+     * to be accepted by the server we are about to reach.
+     */
+    private static final String[] PRIVATE_KEY_NAMES = {"id_ed25519", "id_ecdsa", "id_rsa"};
+
     private static File findPrivateKey() {
         String privateKeyDirectory = System.getProperty("wagon.privateKeyDirectory");
 
@@ -109,16 +116,14 @@ public class ScpHelper {
             privateKeyDirectory = System.getProperty("user.home");
         }
 
-        File privateKey = new File(privateKeyDirectory, ".ssh/id_dsa");
-
-        if (!privateKey.exists()) {
-            privateKey = new File(privateKeyDirectory, ".ssh/id_rsa");
-            if (!privateKey.exists()) {
-                privateKey = null;
+        for (String name : PRIVATE_KEY_NAMES) {
+            File privateKey = new File(privateKeyDirectory, ".ssh/" + name);
+            if (privateKey.exists()) {
+                return privateKey;
             }
         }
 
-        return privateKey;
+        return null;
     }
 
     public static void createZip(List<String> files, File zipName, File basedir) throws IOException {
