@@ -33,6 +33,12 @@ under the License.
       <item name="Download" href="download.html"/>
     </menu>
 
+    <menu name="Guides">
+      <item name="User Guide" href="user-guide.html"/>
+      <item name="Development and Testing Guide" href="developer-guide.html"/>
+      <item name="HTTP Configuration" href="http-configuration.html"/>
+    </menu>
+
     <menu ref="modules" />
     <menu ref="reports" />
   </body>
