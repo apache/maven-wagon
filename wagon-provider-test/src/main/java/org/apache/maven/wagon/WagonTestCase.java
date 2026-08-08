@@ -170,10 +170,6 @@ public abstract class WagonTestCase extends PlexusTestCase {
         }
     }
 
-    protected void customizeContext() throws Exception {
-        getContainer().addContextValue("test.repository", localRepositoryPath);
-    }
-
     protected void setupWagonTestingFixtures() throws Exception {}
 
     protected void tearDownWagonTestingFixtures() throws Exception {}
