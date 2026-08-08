@@ -22,6 +22,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Locale;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
@@ -53,6 +54,12 @@ import org.apache.maven.wagon.resource.Resource;
  */
 public class ScpWagon extends AbstractJschWagon {
     private static final char COPY_START_CHAR = 'C';
+
+    /** scp acknowledgement byte for a recoverable error, what OpenSSH sends for a missing file */
+    private static final int SCP_WARNING = 1;
+
+    /** scp acknowledgement byte for a fatal error */
+    private static final int SCP_ERROR = 2;
 
     private static final char ACK_SEPARATOR = ' ';
 
@@ -222,9 +229,13 @@ public class ScpWagon extends AbstractJschWagon {
             String line = readLine(in);
 
             if (exitCode != COPY_START_CHAR) {
-                if (exitCode == 1
-                        && (line.contains("No such file or directory")
-                                || line.indexOf("no such file or directory") != 1)) {
+                // OpenSSH reports a missing file with the scp "warning" code (1); other servers - Apache MINA
+                // sshd, which the tests run against - report it with the "fatal error" code (2), so fall back on
+                // the message for those
+                if (exitCode == SCP_WARNING
+                        || (exitCode == SCP_ERROR
+                                && line != null
+                                && line.toLowerCase(Locale.ROOT).contains("no such file or directory"))) {
                     throw new ResourceDoesNotExistException(line);
                 } else {
                     throw new IOException("Exit code: " + exitCode + " - " + line);

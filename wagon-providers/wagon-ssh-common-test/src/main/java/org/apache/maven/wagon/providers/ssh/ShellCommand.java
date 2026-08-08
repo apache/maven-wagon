@@ -126,12 +126,6 @@ public class ShellCommand implements Command {
                 callback.onExit(exitValue, stdout.getOutput());
             }
         }
-        /*
-        out.write( exitValue );
-        out.write( '\n' );
-
-        */
-        out.flush();
     }
 
     public void destroy(ChannelSession channel) throws Exception {}
