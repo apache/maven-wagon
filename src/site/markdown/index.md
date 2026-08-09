@@ -1,4 +1,9 @@
-<?xml version="1.0"?>
+---
+title: Introduction
+author: 
+  - Jason van Zyl
+  - Hervé Boutemy
+---
 
 <!--
 /*
@@ -19,37 +24,28 @@
  */
 -->
 
-<document xmlns="http://maven.apache.org/XDOC/2.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+# Maven Wagon
 
-  <properties>
-    <title>Introduction</title>
-    <author>Jason van Zyl</author>
-    <author email="hboutemy_AT_apache_DOT_org">Hervé Boutemy</author>
-  </properties>
+Maven Wagon is a transport abstraction that is used in Maven's artifact and repository handling code.
 
-  <body>
+Wagon defines a [unified API](./wagon-provider-api/), and it currently has the following providers:
 
-    <section name="Maven Wagon">
+- [File](./wagon-providers/wagon-file/)
 
-      <p>Maven Wagon is a transport abstraction that is used in Maven's artifact and
- repository handling code.</p>
+- [HTTP](./wagon-providers/wagon-http/)
 
-      <p>Wagon defines a <a href="./wagon-provider-api/">unified API</a>, and it currently has the following providers:</p>
-      <ul>
-       <li><a href="./wagon-providers/wagon-file/">File</a></li>
-       <li><a href="./wagon-providers/wagon-http/">HTTP</a></li>
-       <li><a href="./wagon-providers/wagon-http-lightweight/">HTTP lightweight</a></li>
-       <li><a href="./wagon-providers/wagon-ftp/">FTP</a></li>
-       <li><a href="./wagon-providers/wagon-ssh/">SSH/SCP</a></li>
-       <li><a href="./wagon-providers/wagon-webdav-jackrabbit/">WebDAV</a></li>
-       <li><a href="./wagon-providers/wagon-scm/">SCM</a> (in progress)</li>
-      </ul>
+- [HTTP lightweight](./wagon-providers/wagon-http-lightweight/)
 
-      <p>
-        <img src="images/wagon-deps.png" width="529" height="398" border="0" usemap="#Wagon_dependencies" alt="Wagon Dependencies"/>
-        <map name="Wagon_dependencies" id="Wagon_dependencies">
+- [FTP](./wagon-providers/wagon-ftp/)
+
+- [SSH/SCP](./wagon-providers/wagon-ssh/)
+
+- [WebDAV](./wagon-providers/wagon-webdav-jackrabbit/)
+
+- [SCM](./wagon-providers/wagon-scm/) (in progress)
+
+<img src="images/wagon-deps.png" width="529" height="398" border="0" usemap="#Wagon_dependencies" alt="Wagon Dependencies"/>
+<map name="Wagon_dependencies" id="Wagon_dependencies">
           <area shape="rect" coords="94,0,221,32"     alt="wagon-provider-api" href="./wagon-provider-api/" />
           <area shape="rect" coords="330,0,459,32"    alt="wagon-provider-test" href="./wagon-provider-test/" />
           <area shape="rect" coords="329,37,425,70"   alt="wagon-tck-http" href="./wagon-tcks/wagon-tck-http/" />
@@ -69,24 +65,17 @@
           <area shape="rect" coords="340,234,480,266" alt="Commons Net" href="http://commons.apache.org/net/" />
           <area shape="rect" coords="340,318,405,350" alt="jsch" href="http://www.jcraft.com/jsch/" />
           <area shape="rect" coords="340,358,493,391" alt="maven-scm-api" href="/scm/maven-scm-api/" />
-        </map>
-      </p>
+        </map> 
 
-    </section>
+# Deprecation Notice
 
-    <section name="Deprecation Notice">
+The following Wagon providers are deprecated and will be removed in version 4.0.0:
 
-        <p>The following Wagon providers are deprecated and will be removed in version 4.0.0:</p>
-          <ul>
-           <li><a href="./wagon-providers/wagon-http-lightweight/">HTTP lightweight</a></li>
-           <li><a href="./wagon-providers/wagon-ftp/">FTP</a></li>
-           <li><a href="./wagon-providers/wagon-ssh/">SSH/SCP</a></li>
-           <li><a href="./wagon-providers/wagon-webdav-jackrabbit/">WebDAV</a></li>
-          </ul>
+- [HTTP lightweight](./wagon-providers/wagon-http-lightweight/)
 
-      </section>
+- [FTP](./wagon-providers/wagon-ftp/)
 
+- [SSH/SCP](./wagon-providers/wagon-ssh/)
 
-  </body>
+- [WebDAV](./wagon-providers/wagon-webdav-jackrabbit/)
 
-</document>
