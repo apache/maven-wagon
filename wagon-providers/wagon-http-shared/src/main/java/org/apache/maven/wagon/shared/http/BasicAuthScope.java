@@ -18,8 +18,8 @@
  */
 package org.apache.maven.wagon.shared.http;
 
-import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.core5.http.HttpHost;
 
 /**
  * @since 2.8

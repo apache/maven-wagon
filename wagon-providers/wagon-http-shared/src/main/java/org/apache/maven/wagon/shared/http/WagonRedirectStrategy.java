@@ -19,17 +19,18 @@
 package org.apache.maven.wagon.shared.http;
 
 import java.net.URI;
-import org.apache.hc.client5.http.impl.DefaultRedirectStrategy;
-import org.apache.hc.core5.http.ClassicHttpRequest;
-import org.apache.hc.core5.http.ClassicHttpResponse;
-import org.apache.hc.core5.http.HttpEntityContainer;
-import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
-import org.apache.hc.core5.http.HttpStatus;
-import org.apache.hc.core5.http.ProtocolException;
+
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpHead;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
+import org.apache.hc.client5.http.impl.DefaultRedirectStrategy;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.HttpEntityContainer;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.ProtocolException;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.apache.hc.core5.util.Args;
 import org.apache.maven.wagon.events.TransferEvent;
@@ -63,7 +64,8 @@ public class WagonRedirectStrategy extends DefaultRedirectStrategy {
     }
 
     @Override
-    public boolean isRedirected(final ClassicHttpRequest request, final ClassicHttpResponse response, final HttpContext context)
+    public boolean isRedirected(
+            final ClassicHttpRequest request, final ClassicHttpResponse response, final HttpContext context)
             throws ProtocolException {
         Args.notNull(request, "HTTP request");
         Args.notNull(response, "HTTP response");
@@ -83,7 +85,8 @@ public class WagonRedirectStrategy extends DefaultRedirectStrategy {
     }
 
     @Override
-    public HttpUriRequest getRedirect(final ClassicHttpRequest request, final ClassicHttpResponse response, final HttpContext context)
+    public HttpUriRequest getRedirect(
+            final ClassicHttpRequest request, final ClassicHttpResponse response, final HttpContext context)
             throws ProtocolException {
         final URI uri = getLocationURI(request, response, context);
         if (request instanceof HttpEntityContainer) {

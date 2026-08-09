@@ -45,54 +45,54 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.hc.client5.http.HttpRequestRetryStrategy;
+import org.apache.hc.client5.http.ServiceUnavailableRetryStrategy;
 import org.apache.hc.client5.http.auth.AuthCache;
 import org.apache.hc.client5.http.auth.AuthSchemeFactory;
-import org.apache.hc.client5.http.auth.StandardAuthScheme;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.core5.http.Header;
-import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.HttpException;
-import org.apache.hc.core5.http.HttpHost;
-import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.ChallengeState;
 import org.apache.hc.client5.http.auth.Credentials;
 import org.apache.hc.client5.http.auth.CredentialsStore;
 import org.apache.hc.client5.http.auth.NTCredentials;
+import org.apache.hc.client5.http.auth.StandardAuthScheme;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
-import org.apache.hc.client5.http.ServiceUnavailableRetryStrategy;
-import org.apache.hc.client5.http.config.CookieSpecs;
-import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpHead;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
+import org.apache.hc.client5.http.config.CookieSpecs;
+import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.auth.BasicAuthCache;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
-import org.apache.hc.client5.http.io.HttpClientConnectionManager;
-import org.apache.hc.client5.http.protocol.HttpClientContext;
-import org.apache.hc.core5.http.config.Registry;
-import org.apache.hc.core5.http.config.RegistryBuilder;
-import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
-import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
-import org.apache.hc.client5.http.utils.DateUtils;
-import org.apache.hc.core5.http.HttpHeaders;
-import org.apache.hc.core5.ssl.SSLContextBuilder;
-import org.apache.hc.core5.ssl.SSLInitializationException;
-import org.apache.hc.core5.http.io.entity.AbstractHttpEntity;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.client5.http.impl.auth.BasicScheme;
 import org.apache.hc.client5.http.impl.auth.BasicSchemeFactory;
 import org.apache.hc.client5.http.impl.auth.DigestSchemeFactory;
 import org.apache.hc.client5.http.impl.auth.NTLMSchemeFactory;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.DefaultHttpRequestRetryHandler;
 import org.apache.hc.client5.http.impl.classic.DefaultServiceUnavailableRetryStrategy;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.StandardHttpRequestRetryHandler;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.client5.http.utils.DateUtils;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpException;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.config.Registry;
+import org.apache.hc.core5.http.config.RegistryBuilder;
+import org.apache.hc.core5.http.io.entity.AbstractHttpEntity;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.message.BasicHeader;
+import org.apache.hc.core5.ssl.SSLContextBuilder;
+import org.apache.hc.core5.ssl.SSLInitializationException;
 import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.PathUtils;
@@ -708,10 +708,7 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
             CloseableHttpResponse response = execute(putMethod);
             try {
                 fireTransferDebug(formatTransferDebugMessage(
-                        url,
-                        response.getCode(),
-                        response.getReasonPhrase(),
-                        getProxyInfo()));
+                        url, response.getCode(), response.getReasonPhrase(), getProxyInfo()));
                 int statusCode = response.getCode();
 
                 // Check that we didn't run out of retries.
@@ -730,19 +727,13 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
                         EntityUtils.consumeQuietly(response.getEntity());
                         fireSessionConnectionRefused();
                         throw new AuthorizationException(formatAuthorizationMessage(
-                                url,
-                                response.getCode(),
-                                response.getReasonPhrase(),
-                                getProxyInfo()));
+                                url, response.getCode(), response.getReasonPhrase(), getProxyInfo()));
 
                     case HttpStatus.SC_NOT_FOUND:
                     case HttpStatus.SC_GONE:
                         EntityUtils.consumeQuietly(response.getEntity());
                         throw new ResourceDoesNotExistException(formatResourceDoesNotExistMessage(
-                                url,
-                                response.getCode(),
-                                response.getReasonPhrase(),
-                                getProxyInfo()));
+                                url, response.getCode(), response.getReasonPhrase(), getProxyInfo()));
 
                     case SC_TOO_MANY_REQUESTS:
                         EntityUtils.consumeQuietly(response.getEntity());
@@ -752,10 +743,7 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
                     default:
                         EntityUtils.consumeQuietly(response.getEntity());
                         TransferFailedException e = new TransferFailedException(formatTransferFailedMessage(
-                                url,
-                                response.getCode(),
-                                response.getReasonPhrase(),
-                                getProxyInfo()));
+                                url, response.getCode(), response.getReasonPhrase(), getProxyInfo()));
                         fireTransferError(resource, e, TransferEvent.REQUEST_PUT);
                         throw e;
                 }
@@ -803,10 +791,7 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
                     case HttpStatus.SC_UNAUTHORIZED:
                     case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED:
                         throw new AuthorizationException(formatAuthorizationMessage(
-                                url,
-                                response.getCode(),
-                                response.getReasonPhrase(),
-                                getProxyInfo()));
+                                url, response.getCode(), response.getReasonPhrase(), getProxyInfo()));
 
                     case HttpStatus.SC_NOT_FOUND:
                     case HttpStatus.SC_GONE:
@@ -819,10 +804,7 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
                         // add more entries here
                     default:
                         throw new TransferFailedException(formatTransferFailedMessage(
-                                url,
-                                response.getCode(),
-                                response.getReasonPhrase(),
-                                getProxyInfo()));
+                                url, response.getCode(), response.getReasonPhrase(), getProxyInfo()));
                 }
 
                 return result;
@@ -1032,11 +1014,8 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
             CloseableHttpResponse response = execute(getMethod);
             closeable = response;
 
-            fireTransferDebug(formatTransferDebugMessage(
-                    url,
-                    response.getCode(),
-                    response.getReasonPhrase(),
-                    getProxyInfo()));
+            fireTransferDebug(
+                    formatTransferDebugMessage(url, response.getCode(), response.getReasonPhrase(), getProxyInfo()));
             int statusCode = response.getCode();
 
             switch (statusCode) {
@@ -1054,19 +1033,13 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
                     EntityUtils.consumeQuietly(response.getEntity());
                     fireSessionConnectionRefused();
                     throw new AuthorizationException(formatAuthorizationMessage(
-                            url,
-                            response.getCode(),
-                            response.getReasonPhrase(),
-                            getProxyInfo()));
+                            url, response.getCode(), response.getReasonPhrase(), getProxyInfo()));
 
                 case HttpStatus.SC_NOT_FOUND:
                 case HttpStatus.SC_GONE:
                     EntityUtils.consumeQuietly(response.getEntity());
                     throw new ResourceDoesNotExistException(formatResourceDoesNotExistMessage(
-                            url,
-                            response.getCode(),
-                            response.getReasonPhrase(),
-                            getProxyInfo()));
+                            url, response.getCode(), response.getReasonPhrase(), getProxyInfo()));
 
                 case SC_TOO_MANY_REQUESTS:
                     EntityUtils.consumeQuietly(response.getEntity());
@@ -1078,10 +1051,7 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
                     EntityUtils.consumeQuietly(response.getEntity());
                     cleanupGetTransfer(resource);
                     TransferFailedException e = new TransferFailedException(formatTransferFailedMessage(
-                            url,
-                            response.getCode(),
-                            response.getReasonPhrase(),
-                            getProxyInfo()));
+                            url, response.getCode(), response.getReasonPhrase(), getProxyInfo()));
                     fireTransferError(resource, e, TransferEvent.REQUEST_GET);
                     throw e;
             }

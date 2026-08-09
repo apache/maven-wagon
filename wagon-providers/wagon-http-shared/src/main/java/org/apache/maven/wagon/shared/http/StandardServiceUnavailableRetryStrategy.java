@@ -18,11 +18,11 @@
  */
 package org.apache.maven.wagon.shared.http;
 
-import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.client5.http.ServiceUnavailableRetryStrategy;
 import org.apache.hc.core5.annotation.Contract;
 import org.apache.hc.core5.annotation.ThreadingBehavior;
 import org.apache.hc.core5.http.ClassicHttpResponse;
-import org.apache.hc.client5.http.ServiceUnavailableRetryStrategy;
+import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.apache.hc.core5.util.Args;
 
@@ -53,7 +53,8 @@ public class StandardServiceUnavailableRetryStrategy implements ServiceUnavailab
     }
 
     @Override
-    public boolean retryRequest(final ClassicHttpResponse response, final int executionCount, final HttpContext context) {
+    public boolean retryRequest(
+            final ClassicHttpResponse response, final int executionCount, final HttpContext context) {
         int statusCode = response.getCode();
         boolean retryableStatusCode = statusCode == HttpStatus.SC_REQUEST_TIMEOUT
                 // Too Many Requests ("standard" rate-limiting)

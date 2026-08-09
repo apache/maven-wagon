@@ -27,9 +27,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpHost;
-import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.core5.http.message.BasicHeader;
 import org.apache.maven.wagon.Wagon;
 
