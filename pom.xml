@@ -161,7 +161,7 @@ under the License.
     <slf4jVersion>1.7.36</slf4jVersion>
     <maven.site.path>wagon-archives/wagon-LATEST</maven.site.path>
     <version.plexus-utils>3.6.0</version.plexus-utils>
-    <guiceVersion>5.1.0</guiceVersion>
+    <guiceVersion>6.0.0</guiceVersion>
     <!-- because doxia parser doesn't like the real one -->
     <mavenSitePluginVersion>${version.maven-site-plugin}</mavenSitePluginVersion>
     <project.build.outputTimestamp>2022-12-18T21:06:44Z</project.build.outputTimestamp>
