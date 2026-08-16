@@ -18,13 +18,17 @@
  */
 package org.apache.maven.wagon.providers.http;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 
 /**
  * @author <a href="mailto:nicolas.deloof@cloudbees.com">Nicolas De loof</a>
- * @plexus.component role="org.apache.maven.wagon.providers.http.LightweightHttpWagonAuthenticator"
  */
+@Named
+@Singleton
 public class LightweightHttpWagonAuthenticator extends Authenticator {
     ThreadLocal<LightweightHttpWagon> localWagon = new ThreadLocal<>();
 

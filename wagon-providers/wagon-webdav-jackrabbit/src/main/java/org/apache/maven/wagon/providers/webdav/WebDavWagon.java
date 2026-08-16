@@ -53,9 +53,6 @@ import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatResource
  * @author <a href="mailto:joakime@apache.org">Joakim Erdfelt</a>
  * @author <a href="mailto:carlos@apache.org">Carlos Sanchez</a>
  * @author <a href="mailto:james@atlassian.com">James William Dumay</a>
- * @plexus.component role="org.apache.maven.wagon.Wagon"
- * role-hint="dav"
- * instantiation-strategy="per-lookup"
  */
 public class WebDavWagon extends AbstractHttpClientWagon {
     protected static final String CONTINUE_ON_FAILURE_PROPERTY = "wagon.webdav.continueOnFailure";

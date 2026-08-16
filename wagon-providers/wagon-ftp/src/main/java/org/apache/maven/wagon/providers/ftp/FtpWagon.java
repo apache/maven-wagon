@@ -18,6 +18,8 @@
  */
 package org.apache.maven.wagon.providers.ftp;
 
+import javax.inject.Named;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -52,21 +54,13 @@ import org.apache.maven.wagon.resource.Resource;
  * FtpWagon
  *
  *
- * @plexus.component role="org.apache.maven.wagon.Wagon"
- * role-hint="ftp"
- * instantiation-strategy="per-lookup"
  */
+@Named("ftp")
 public class FtpWagon extends StreamWagon {
     private FTPClient ftp;
 
-    /**
-     * @plexus.configuration default-value="true"
-     */
     private boolean passiveMode = true;
 
-    /**
-     * @plexus.configuration default-value="ISO-8859-1"
-     */
     private String controlEncoding = FTP.DEFAULT_CONTROL_ENCODING;
 
     public boolean isPassiveMode() {
@@ -345,9 +339,6 @@ public class FtpWagon extends StreamWagon {
         }
     }
 
-    /**
-     *
-     */
     public class PrintCommandListener implements ProtocolCommandListener {
         private FtpWagon wagon;
 

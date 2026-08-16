@@ -18,6 +18,8 @@
  */
 package org.apache.maven.wagon.providers.ssh.knownhost;
 
+import javax.inject.Named;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,10 +35,8 @@ import org.codehaus.plexus.util.FileUtils;
  * @author Juan F. Codagnone
  * @since Sep 12, 2005
  *
- * @plexus.component role="org.apache.maven.wagon.providers.ssh.knownhost.KnownHostsProvider"
- *    role-hint="file"
- *    instantiation-strategy="per-lookup"
  */
+@Named("file")
 public class FileKnownHostsProvider extends StreamKnownHostsProvider {
     private final File file;
 

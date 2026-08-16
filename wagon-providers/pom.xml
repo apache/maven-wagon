@@ -65,37 +65,19 @@ under the License.
       <artifactId>wagon-provider-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
+      <version>1</version>
+    </dependency>
+    <!-- for @Typed, where a provider implements more roles than it is published under -->
+    <dependency>
+      <groupId>org.eclipse.sisu</groupId>
+      <artifactId>org.eclipse.sisu.inject</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.apache.maven.wagon</groupId>
       <artifactId>wagon-provider-test</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-  <build>
-    <pluginManagement>
-      <plugins>
-        <!-- required due to Javadoc based Plexus components -->
-        <plugin>
-          <groupId>org.codehaus.plexus</groupId>
-          <artifactId>plexus-component-metadata</artifactId>
-          <version>2.2.0</version>
-          <executions>
-            <execution>
-              <id>generate</id>
-              <goals>
-                <goal>generate-metadata</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-
-    <plugins>
-      <plugin>
-        <groupId>org.eclipse.sisu</groupId>
-        <artifactId>sisu-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
 </project>

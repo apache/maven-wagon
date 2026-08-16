@@ -26,9 +26,6 @@ import org.apache.maven.scm.provider.git.GitScmTestUtils;
 import org.apache.maven.scm.provider.git.gitexe.GitExeScmProvider;
 import org.apache.maven.scm.repository.ScmRepository;
 
-/**
- * @plexus.component role="org.apache.maven.scm.provider.ScmProvider" role-hint="git"
- */
 public class UserSafeGitExeScmProvider extends GitExeScmProvider {
 
     @Override

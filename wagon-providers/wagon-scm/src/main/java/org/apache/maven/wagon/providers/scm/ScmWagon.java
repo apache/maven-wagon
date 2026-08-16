@@ -18,6 +18,9 @@
  */
 package org.apache.maven.wagon.providers.scm;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -70,12 +73,10 @@ import org.codehaus.plexus.util.StringUtils;
  * @author <a href="carlos@apache.org">Carlos Sanchez</a>
  * @author Jason van Zyl
  *
- * @plexus.component role="org.apache.maven.wagon.Wagon" role-hint="scm" instantiation-strategy="per-lookup"
  */
+@Named("scm")
 public class ScmWagon extends AbstractWagon {
-    /**
-     * @plexus.requirement
-     */
+    @Inject
     private volatile ScmManager scmManager;
 
     /**
