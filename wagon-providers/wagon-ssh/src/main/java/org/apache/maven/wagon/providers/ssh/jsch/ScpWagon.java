@@ -18,6 +18,8 @@
  */
 package org.apache.maven.wagon.providers.ssh.jsch;
 
+import javax.inject.Named;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,10 +33,12 @@ import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
+import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.providers.ssh.ScpHelper;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
+import org.eclipse.sisu.Typed;
 
 /**
  * SCP protocol wagon.
@@ -48,10 +52,9 @@ import org.apache.maven.wagon.resource.Resource;
  *
  *
  * @todo [BP] add compression flag
- * @plexus.component role="org.apache.maven.wagon.Wagon"
- * role-hint="scp"
- * instantiation-strategy="per-lookup"
  */
+@Named("scp")
+@Typed(Wagon.class)
 public class ScpWagon extends AbstractJschWagon {
     private static final char COPY_START_CHAR = 'C';
 

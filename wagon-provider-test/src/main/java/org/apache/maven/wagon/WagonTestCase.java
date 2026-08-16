@@ -37,6 +37,8 @@ import org.apache.maven.wagon.observers.Debug;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
+import org.codehaus.plexus.ContainerConfiguration;
+import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.util.FileUtils;
 import org.junit.Assume;
@@ -55,6 +57,12 @@ import static org.mockito.Mockito.mock;
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
  */
 public abstract class WagonTestCase extends PlexusTestCase {
+    @Override
+    protected void customizeContainerConfiguration(ContainerConfiguration configuration) {
+        // the providers are @Named beans now, so the container has to read META-INF/sisu
+        configuration.setClassPathScanning(PlexusConstants.SCANNING_INDEX);
+    }
+
     protected static Logger logger = LoggerFactory.getLogger(WagonTestCase.class);
 
     static final class ProgressAnswer implements Answer<Object> {

@@ -30,7 +30,10 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.tck.http.fixture.ServerFixture;
+import org.codehaus.plexus.ContainerConfiguration;
+import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
+import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.repository.exception.ComponentLifecycleException;
@@ -85,9 +88,11 @@ public abstract class HttpWagonTests {
         System.setProperty("javax.net.ssl.trustStore", keystore.getAbsolutePath());
         System.setProperty("javax.net.ssl.trustStorePassword", ServerFixture.SERVER_SSL_KEYSTORE_PASSWORD);
 
-        container = new DefaultPlexusContainer();
-        // container.initialize();
-        // container.start();
+        ContainerConfiguration config = new DefaultContainerConfiguration();
+        // the providers are @Named beans now, so the container has to read META-INF/sisu
+        config.setClassPathScanning(PlexusConstants.SCANNING_INDEX);
+
+        container = new DefaultPlexusContainer(config);
 
         configurator = (WagonTestCaseConfigurator) container.lookup(WagonTestCaseConfigurator.class.getName());
     }

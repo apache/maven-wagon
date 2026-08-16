@@ -295,7 +295,13 @@ under the License.
         </plugin>
       </plugins>
     </pluginManagement>
-
+    <plugins>
+      <!-- indexes the @Named beans into META-INF/sisu; executions come from maven-parent -->
+      <plugin>
+        <groupId>org.eclipse.sisu</groupId>
+        <artifactId>sisu-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
   </build>
 
   <profiles>

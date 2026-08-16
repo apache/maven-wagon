@@ -32,6 +32,8 @@ import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
+import org.codehaus.plexus.ContainerConfiguration;
+import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusTestCase;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
@@ -42,6 +44,12 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
 public class ScpWagonWithProxyTest extends PlexusTestCase {
+    @Override
+    protected void customizeContainerConfiguration(ContainerConfiguration configuration) {
+        // the providers are @Named beans now, so the container has to read META-INF/sisu
+        configuration.setClassPathScanning(PlexusConstants.SCANNING_INDEX);
+    }
+
     private boolean handled;
 
     public void testHttpProxy() throws Exception {
