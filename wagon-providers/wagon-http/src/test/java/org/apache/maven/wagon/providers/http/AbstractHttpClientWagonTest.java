@@ -42,19 +42,19 @@ import org.apache.maven.wagon.InputData;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
 import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class AbstractHttpClientWagonTest {
-    @Ignore("This test is validating nothing and require internet connection which we should avoid so ignore it")
+    @Disabled("This test is validating nothing and require internet connection which we should avoid so ignore it")
     public void test() throws Exception {
         AbstractHttpClientWagon wagon = new AbstractHttpClientWagon() {};
 
