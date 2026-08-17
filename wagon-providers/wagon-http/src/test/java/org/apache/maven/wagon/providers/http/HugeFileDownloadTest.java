@@ -35,7 +35,6 @@ import java.nio.file.StandardOpenOption;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.observers.Debug;
 import org.apache.maven.wagon.repository.Repository;
-import org.codehaus.plexus.PlexusTestCase;
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -43,13 +42,16 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Olivier Lamy
  */
-public class HugeFileDownloadTest extends PlexusTestCase {
+public class HugeFileDownloadTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HugeFileDownloadTest.class);
 
@@ -57,9 +59,15 @@ public class HugeFileDownloadTest extends PlexusTestCase {
             Integer.valueOf(Integer.MAX_VALUE).longValue()
                     + Integer.valueOf(Integer.MAX_VALUE).longValue();
 
+    private static String getBasedir() {
+        String basedir = System.getProperty("basedir");
+        return basedir != null ? basedir : new File("").getAbsolutePath();
+    }
+
     private Server server;
     private ServerConnector connector;
 
+    @Test
     public void testDownloadHugeFileWithContentLength() throws Exception {
         final File hugeFile = new File(getBasedir(), "target/hugefile.txt");
         if (!hugeFile.exists() || hugeFile.length() < HUGE_FILE_SIZE) {
@@ -109,6 +117,7 @@ public class HugeFileDownloadTest extends PlexusTestCase {
         }
     }
 
+    @Test
     public void testDownloadHugeFileWithChunked() throws Exception {
         final File hugeFile = new File(getBasedir(), "target/hugefile.txt");
         if (!hugeFile.exists() || hugeFile.length() < HUGE_FILE_SIZE) {
@@ -158,7 +167,7 @@ public class HugeFileDownloadTest extends PlexusTestCase {
     }
 
     protected Wagon getWagon() throws Exception {
-        Wagon wagon = (Wagon) lookup(Wagon.ROLE, "http");
+        Wagon wagon = new HttpWagon();
 
         Debug debug = new Debug();
 
