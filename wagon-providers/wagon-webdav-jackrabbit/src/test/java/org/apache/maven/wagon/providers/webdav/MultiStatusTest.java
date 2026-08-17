@@ -23,12 +23,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests for parsing {@code 207 Multi-Status} PROPFIND responses.
@@ -133,7 +133,7 @@ public class MultiStatusTest {
 
         assertEquals(2, responses.size());
         assertEquals("/repo/dir/a", responses.get(0).getHref());
-        assertTrue("the later duplicate wins", responses.get(0).isCollection());
+        assertTrue(responses.get(0).isCollection(), "the later duplicate wins");
         assertEquals("/repo/dir/b", responses.get(1).getHref());
     }
 
