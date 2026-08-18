@@ -18,11 +18,19 @@
  */
 package org.apache.maven.wagon;
 
+import javax.inject.Inject;
+
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.plexus.ContainerConfiguration;
 import org.codehaus.plexus.PlexusConstants;
-import org.codehaus.plexus.PlexusTestCase;
+import org.codehaus.plexus.PlexusContainer;
+import org.codehaus.plexus.testing.PlexusTest;
+import org.codehaus.plexus.testing.PlexusTestConfiguration;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Base class for command executor tests.
@@ -30,15 +38,21 @@ import org.codehaus.plexus.PlexusTestCase;
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  *
  */
-public abstract class CommandExecutorTestCase extends PlexusTestCase {
+@PlexusTest
+public abstract class CommandExecutorTestCase implements PlexusTestConfiguration {
+
+    @Inject
+    private PlexusContainer container;
+
     @Override
-    protected void customizeContainerConfiguration(ContainerConfiguration configuration) {
+    public void customizeConfiguration(ContainerConfiguration configuration) {
         // the providers are @Named beans now, so the container has to read META-INF/sisu
         configuration.setClassPathScanning(PlexusConstants.SCANNING_INDEX);
     }
 
+    @Test
     public void testErrorInCommandExecuted() throws Exception {
-        CommandExecutor exec = (CommandExecutor) lookup(CommandExecutor.ROLE);
+        CommandExecutor exec = container.lookup(CommandExecutor.class);
 
         Repository repository = getTestRepository();
 
@@ -57,8 +71,9 @@ public abstract class CommandExecutorTestCase extends PlexusTestCase {
         }
     }
 
+    @Test
     public void testIgnoreFailuresInCommandExecuted() throws Exception {
-        CommandExecutor exec = (CommandExecutor) lookup(CommandExecutor.ROLE);
+        CommandExecutor exec = container.lookup(CommandExecutor.class);
 
         Repository repository = getTestRepository();
 
@@ -76,8 +91,9 @@ public abstract class CommandExecutorTestCase extends PlexusTestCase {
         }
     }
 
+    @Test
     public void testExecuteSuccessfulCommand() throws Exception {
-        CommandExecutor exec = (CommandExecutor) lookup(CommandExecutor.ROLE);
+        CommandExecutor exec = container.lookup(CommandExecutor.class);
 
         Repository repository = getTestRepository();
 

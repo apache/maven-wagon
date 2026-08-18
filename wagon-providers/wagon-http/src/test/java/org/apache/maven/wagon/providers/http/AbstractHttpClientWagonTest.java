@@ -45,10 +45,9 @@ import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -82,7 +81,7 @@ public class AbstractHttpClientWagonTest {
             public void run() {
                 final HttpRequestRetryHandler handler = getCurrentHandler();
                 assertNotNull(handler);
-                assertThat(handler, instanceOf(DefaultHttpRequestRetryHandler.class));
+                assertInstanceOf(DefaultHttpRequestRetryHandler.class, handler);
                 final DefaultHttpRequestRetryHandler impl = DefaultHttpRequestRetryHandler.class.cast(handler);
                 assertEquals(3, impl.getRetryCount());
                 assertFalse(impl.isRequestSentRetryEnabled());
@@ -100,7 +99,7 @@ public class AbstractHttpClientWagonTest {
 
                 final HttpRequestRetryHandler handler = getCurrentHandler();
                 assertNotNull(handler);
-                assertThat(handler, instanceOf(DefaultHttpRequestRetryHandler.class));
+                assertInstanceOf(DefaultHttpRequestRetryHandler.class, handler);
                 final DefaultHttpRequestRetryHandler impl = DefaultHttpRequestRetryHandler.class.cast(handler);
                 assertEquals(5, impl.getRetryCount());
                 assertFalse(impl.isRequestSentRetryEnabled());
@@ -118,7 +117,7 @@ public class AbstractHttpClientWagonTest {
 
                 final HttpRequestRetryHandler handler = getCurrentHandler();
                 assertNotNull(handler);
-                assertThat(handler, instanceOf(DefaultHttpRequestRetryHandler.class));
+                assertInstanceOf(DefaultHttpRequestRetryHandler.class, handler);
                 final DefaultHttpRequestRetryHandler impl = DefaultHttpRequestRetryHandler.class.cast(handler);
                 assertEquals(3, impl.getRetryCount());
                 assertTrue(impl.isRequestSentRetryEnabled());
@@ -136,7 +135,7 @@ public class AbstractHttpClientWagonTest {
 
                 final HttpRequestRetryHandler handler = getCurrentHandler();
                 assertNotNull(handler);
-                assertThat(handler, instanceOf(DefaultHttpRequestRetryHandler.class));
+                assertInstanceOf(DefaultHttpRequestRetryHandler.class, handler);
                 final DefaultHttpRequestRetryHandler impl = DefaultHttpRequestRetryHandler.class.cast(handler);
                 assertEquals(3, impl.getRetryCount());
                 assertFalse(impl.isRequestSentRetryEnabled());
