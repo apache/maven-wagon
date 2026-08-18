@@ -42,7 +42,7 @@ import org.apache.maven.wagon.resource.Resource;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -151,7 +151,7 @@ public class FtpWagonTest extends StreamingWagonTestCase {
             getWagon().connect(new Repository("id", getTestRepositoryUrl()), authenticationInfo);
             fail();
         } catch (AuthenticationException e) {
-            assertTrue(true);
+            assertNotNull(e.getMessage());
         }
     }
 

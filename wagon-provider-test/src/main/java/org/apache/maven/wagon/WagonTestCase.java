@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -56,6 +57,7 @@ import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -371,9 +373,9 @@ public abstract class WagonTestCase implements PlexusTestConfiguration {
             // the repository with the contents of the artifact that was
             // retrieved from the repository.
 
-            String sourceContent = FileUtils.fileRead(sourceFile);
-            String destContent = FileUtils.fileRead(destFile);
-            assertEquals(sourceContent, destContent);
+            byte[] sourceContent = Files.readAllBytes(sourceFile.toPath());
+            byte[] destContent = Files.readAllBytes(destFile.toPath());
+            assertArrayEquals(sourceContent, destContent);
         } else {
             assertNull(checksumObserver.getActualChecksum(), "check checksum is null");
 
@@ -624,7 +626,7 @@ public abstract class WagonTestCase implements PlexusTestConfiguration {
     private void writeTestFile(String child) throws IOException {
         File dir = new File(sourceFile, child);
         dir.getParentFile().mkdirs();
-        FileUtils.fileWrite(dir.getAbsolutePath(), child);
+        Files.write(dir.toPath().toAbsolutePath(), child.getBytes());
     }
 
     @Test
@@ -835,7 +837,7 @@ public abstract class WagonTestCase implements PlexusTestConfiguration {
     protected void putFile(String resourceName, String testFileName, String content) throws Exception {
         sourceFile = new File(FileTestUtils.getTestOutputDir(), testFileName);
         sourceFile.getParentFile().mkdirs();
-        FileUtils.fileWrite(sourceFile.getAbsolutePath(), content);
+        Files.write(sourceFile.toPath().toAbsolutePath(), content.getBytes());
 
         Wagon wagon = getWagon();
 
@@ -990,15 +992,13 @@ public abstract class WagonTestCase implements PlexusTestConfiguration {
 
         assertEquals(TEST_CKSUM, checksumObserver.getActualChecksum(), "compare checksums");
 
-        // Now compare the conents of the artifact that was placed in
+        // Now compare the contents of the artifact that was placed in
         // the repository with the contents of the artifact that was
         // retrieved from the repository.
 
-        String sourceContent = FileUtils.fileRead(sourceFile);
-
-        String destContent = FileUtils.fileRead(destFile);
-
-        assertEquals(sourceContent, destContent);
+        byte[] sourceContent = Files.readAllBytes(sourceFile.toPath());
+        byte[] destContent = Files.readAllBytes(destFile.toPath());
+        assertArrayEquals(sourceContent, destContent);
     }
 
     // ----------------------------------------------------------------------
