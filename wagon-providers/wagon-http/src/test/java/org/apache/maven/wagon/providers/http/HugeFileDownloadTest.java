@@ -55,9 +55,12 @@ public class HugeFileDownloadTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HugeFileDownloadTest.class);
 
-    private static final long HUGE_FILE_SIZE =
-            Integer.valueOf(Integer.MAX_VALUE).longValue()
-                    + Integer.valueOf(Integer.MAX_VALUE).longValue();
+    /**
+     * Just past the 2 GiB mark, which is what this test is about: a byte count held in an int
+     * overflows above Integer.MAX_VALUE. Twice that only doubles the transfer without widening
+     * the range of the check.
+     */
+    private static final long HUGE_FILE_SIZE = Integer.MAX_VALUE + 1024L;
 
     private static String getBasedir() {
         String basedir = System.getProperty("basedir");
