@@ -18,6 +18,8 @@
  */
 package org.apache.maven.wagon.providers.ssh.jsch;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,7 +36,8 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.codehaus.plexus.ContainerConfiguration;
 import org.codehaus.plexus.PlexusConstants;
-import org.codehaus.plexus.PlexusTestCase;
+import org.codehaus.plexus.testing.PlexusTest;
+import org.codehaus.plexus.testing.PlexusTestConfiguration;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -42,16 +45,29 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.junit.jupiter.api.Test;
 
-public class ScpWagonWithProxyTest extends PlexusTestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+@PlexusTest
+public class ScpWagonWithProxyTest implements PlexusTestConfiguration {
     @Override
-    protected void customizeContainerConfiguration(ContainerConfiguration configuration) {
+    public void customizeConfiguration(ContainerConfiguration configuration) {
         // the providers are @Named beans now, so the container has to read META-INF/sisu
         configuration.setClassPathScanning(PlexusConstants.SCANNING_INDEX);
     }
 
+    // injected by the container so the wagon keeps the collaborators AbstractJschWagon
+    // declares with @Inject; constructing it directly would leave them null
+    @Inject
+    @Named("scp")
+    private Wagon wagon;
+
     private boolean handled;
 
+    @Test
     public void testHttpProxy() throws Exception {
         handled = false;
         Handler handler = new AbstractHandler() {
@@ -78,7 +94,6 @@ public class ScpWagonWithProxyTest extends PlexusTestCase {
         proxyInfo.setType("http");
         proxyInfo.setNonProxyHosts(null);
 
-        Wagon wagon = (Wagon) lookup(Wagon.ROLE, "scp");
         try {
             wagon.connect(new Repository("id", "scp://localhost/tmp"), proxyInfo);
             fail();
@@ -90,6 +105,7 @@ public class ScpWagonWithProxyTest extends PlexusTestCase {
         }
     }
 
+    @Test
     public void testSocksProxy() throws Exception {
         handled = false;
 
@@ -106,7 +122,6 @@ public class ScpWagonWithProxyTest extends PlexusTestCase {
         proxyInfo.setType("socks_5");
         proxyInfo.setNonProxyHosts(null);
 
-        Wagon wagon = (Wagon) lookup(Wagon.ROLE, "scp");
         try {
             wagon.connect(new Repository("id", "scp://localhost/tmp"), proxyInfo);
             fail();
