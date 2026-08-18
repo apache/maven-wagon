@@ -310,7 +310,7 @@ reason phrase the way `HttpMessageUtils` formats them.
 
 ## The HTTP TCK
 
-`wagon-tcks/wagon-tck-http` is a separate, JUnit 4 suite that tests *behaviour* rather
+`wagon-tcks/wagon-tck-http` is a separate JUnit 5 suite that tests *behaviour* rather
 than mechanics: what a provider does about redirects, latency, timeouts, missing
 hosts and authentication. Unlike `wagon-provider-test`, a provider can declare
 individual use cases unsupported rather than failing them.
@@ -348,12 +348,14 @@ individual use cases unsupported rather than failing them.
 
 ### Wiring the TCK into a provider
 
-Add `wagon-tck-http` at test scope, declare a suite, and configure the
-`WagonTestCaseConfigurator` component. `wagon-http` does exactly this:
+Add `wagon-tck-http` and `junit-platform-suite` at test scope, declare a suite, and
+configure the `WagonTestCaseConfigurator` component. `junit-platform-suite` is what
+provides `@Suite`; without it the suite class compiles but selects nothing.
+`wagon-http` does exactly this:
 
 ```java
-@RunWith(Suite.class)
-@Suite.SuiteClasses({GetWagonTests.class, HttpsGetWagonTests.class})
+@Suite
+@SelectClasses({GetWagonTests.class, HttpsGetWagonTests.class})
 public class TckTest {
 }
 ```
@@ -408,7 +410,7 @@ method name, and every test logs `Cannot run test: null` and is treated as
 unsupported — so the suite passes without having tested anything.
 
 Wire the TCK up the way `wagon-http` does: run the TCK classes as they are, through a
-`@Suite.SuiteClasses` aggregator, and express everything provider-specific through
+`@SelectClasses` aggregator, and express everything provider-specific through
 `<useCaseConfigs>` rather than through a subclass.
 
 ## Running the tests
