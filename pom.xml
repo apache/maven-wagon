@@ -190,11 +190,6 @@ under the License.
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.13.2</version>
-      </dependency>
-      <dependency>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-testing</artifactId>
         <version>2.1.0</version>
@@ -205,7 +200,7 @@ under the License.
         <version>1.5.1</version>
       </dependency>
       <!--
-       | The Plexus shim: org.eclipse.sisu.plexus supplies PlexusContainer and PlexusTestCase,
+       | The Plexus shim: org.eclipse.sisu.plexus supplies PlexusContainer,
        | and understands both META-INF/plexus/components.xml and JSR-330 @Named beans.
        | Its version is managed by maven-parent. Guice is "provided" in the sisu POM,
        | so it has to be declared here explicitly.

@@ -22,7 +22,7 @@
   plexus-interactivity-api dropped its own META-INF/plexus/components.xml in 1.3 and only ships a sisu index, so
   plexus-container-default cannot see DefaultPrompter (which in any case now takes its collaborators through a
   constructor, which plexus-container-default cannot satisfy). Maven itself runs on sisu and is unaffected; only
-  the PlexusTestCase-based tests here need this descriptor.
+  the tests here need this descriptor.
 -->
 <component-set>
   <components>

@@ -48,7 +48,7 @@ under the License.
       <exclusions>
         <!--
          | Drags in plexus-container-default 1.0-alpha-9, which collides with the Plexus shim
-         | (two copies of PlexusContainer/PlexusTestCase on the test classpath).
+         | (two copies of PlexusContainer on the test classpath).
         -->
         <exclusion>
           <groupId>org.codehaus.plexus</groupId>
