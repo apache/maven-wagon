@@ -240,20 +240,21 @@ the project.
 
 `wagon-provider-test` contains abstract test cases that exercise a provider through
 the public API against a real endpoint that you set up. It is a `compile`-scope
-artifact that drags in JUnit 3-style `PlexusTestCase`, Mockito and Jetty; the
+artifact that drags in JUnit 5, `plexus-testing`, Mockito and Jetty; the
 `wagon-providers` parent POM already declares it at `test` scope for every provider
 module.
 
 ### `WagonTestCase`
 
-`WagonTestCase extends PlexusTestCase`. Two abstract methods:
+`WagonTestCase` is annotated `@PlexusTest` and implements `PlexusTestConfiguration`,
+which is what gives it a container. Two abstract methods:
 
 ```java
 protected abstract String getProtocol();          // the role hint, e.g. "file"
 protected abstract String getTestRepositoryUrl(); // where the tests should write
 ```
 
-`getWagon()` looks the provider up with `lookup(Wagon.ROLE, getProtocol())` and
+`getWagon()` looks the provider up with `container.lookup(Wagon.class, getProtocol())` and
 attaches an `observers.Debug` as both session and transfer listener, so a failing run
 prints a transcript.
 
