@@ -60,12 +60,6 @@ under the License.
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>
       <artifactId>wagon-provider-test</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>
