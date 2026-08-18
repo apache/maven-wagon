@@ -93,6 +93,23 @@ under the License.
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-testing</artifactId>
+      <version>2.1.0</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- ScpWagonTest and its siblings inherit JUnit 4 tests from the published WagonTestCase -->
+    <dependency>
+      <groupId>org.junit.vintage</groupId>
+      <artifactId>junit-vintage-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
