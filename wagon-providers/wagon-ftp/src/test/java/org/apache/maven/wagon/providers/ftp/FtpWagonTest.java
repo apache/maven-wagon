@@ -39,6 +39,11 @@ import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -138,6 +143,7 @@ public class FtpWagonTest extends StreamingWagonTestCase {
         return getTestFile("target/test-output/local-repository");
     }
 
+    @Test
     public void testNoPassword() throws Exception {
         AuthenticationInfo authenticationInfo = new AuthenticationInfo();
         authenticationInfo.setUserName("me");
@@ -149,6 +155,7 @@ public class FtpWagonTest extends StreamingWagonTestCase {
         }
     }
 
+    @Test
     public void testDefaultUserName() throws Exception {
         AuthenticationInfo authenticationInfo = new AuthenticationInfo();
         authenticationInfo.setPassword("secret");
@@ -163,6 +170,7 @@ public class FtpWagonTest extends StreamingWagonTestCase {
     /**
      * This is a unit test to show WAGON-265
      */
+    @Test
     public void testPutDirectoryCreation() throws Exception {
         setupWagonTestingFixtures();
 

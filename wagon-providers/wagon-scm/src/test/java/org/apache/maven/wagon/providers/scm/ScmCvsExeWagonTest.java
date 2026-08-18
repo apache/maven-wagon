@@ -20,6 +20,10 @@ package org.apache.maven.wagon.providers.scm;
 
 import org.apache.maven.scm.provider.ScmProvider;
 import org.apache.maven.scm.provider.cvslib.cvsexe.CvsExeScmProvider;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * Test for ScmWagon using CVS Exe as underlying SCM
@@ -29,29 +33,27 @@ import org.apache.maven.scm.provider.cvslib.cvsexe.CvsExeScmProvider;
  */
 public class ScmCvsExeWagonTest extends AbstractScmCvsWagonTest {
 
-    @Override
-    protected void setUp() throws Exception {
+    @BeforeEach
+    public void setUp() throws Exception {
         assumeHaveCvsBinary();
-        if (!testSkipped) {
-            super.setUp();
-        }
+        super.setUp();
     }
 
     protected ScmProvider getScmProvider() {
         return new CvsExeScmProvider();
     }
 
-    @Override
+    @Test
     public void testWagonGetFileList() throws Exception {
         // cvs rls is rare
     }
 
-    @Override
+    @Test
     public void testWagonResourceExists() throws Exception {
         // cvs rls is rare
     }
 
-    @Override
+    @Test
     public void testWagonResourceNotExists() throws Exception {
         // cvs rls is rare
     }
@@ -61,12 +63,9 @@ public class ScmCvsExeWagonTest extends AbstractScmCvsWagonTest {
         return false;
     }
 
-    /** Optionally set the testSkipped flag */
+    /** Aborts the test when cvs is not installed. */
     protected void assumeHaveCvsBinary() {
-        if (!isSystemCmd(CVS_COMMAND_LINE)) {
-            testSkipped = true;
-            System.err.println("'" + CVS_COMMAND_LINE + "' is not a system command. Ignored " + getName() + ".");
-        }
+        assumeTrue(isSystemCmd(CVS_COMMAND_LINE), "'" + CVS_COMMAND_LINE + "' is not a system command");
     }
 
     /** 'cvs' command line */
