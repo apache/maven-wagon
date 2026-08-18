@@ -28,7 +28,7 @@ import org.codehaus.plexus.components.interactivity.PrompterException;
  * {@code src/test/resources/META-INF/plexus/components.xml}.
  * <p>
  * {@code plexus-interactivity-api} stopped shipping a {@code META-INF/plexus/components.xml} in 1.3, so its
- * {@code DefaultPrompter} is invisible to the {@code plexus-container-default} that {@code PlexusTestCase} runs;
+ * {@code DefaultPrompter} is invisible to the {@code plexus-container-default} the tests run;
  * without a replacement every {@code lookup( Wagon.ROLE, "scp" )} fails because {@code ConsoleInteractiveUserInfo}
  * and {@code PrompterUIKeyboardInteractive} both require one.
  * <p>

@@ -48,7 +48,9 @@ under the License.
       <exclusions>
         <!--
          | Drags in plexus-container-default 1.0-alpha-9, which collides with the Plexus shim
-         | (two copies of PlexusContainer/PlexusTestCase on the test classpath).
+         | (two copies of PlexusContainer and PlexusTestCase on the test classpath, with the
+         | 2005 alpha-9 copy winning). It also drags in classworlds 1.1-alpha-2 and junit 4.13.2
+         | at runtime scope, which would leak JUnit into this provider's consumers.
         -->
         <exclusion>
           <groupId>org.codehaus.plexus</groupId>
