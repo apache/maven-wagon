@@ -28,6 +28,10 @@ import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
@@ -51,6 +55,7 @@ public class FileWagonTest extends StreamingWagonTestCase {
      * @throws ConnectionException
      * @throws AuthenticationException
      */
+    @Test
     public void testNullFileWagon() throws ConnectionException, AuthenticationException {
         Wagon wagon = new FileWagon();
         Resource resource = new Resource();
@@ -64,6 +69,7 @@ public class FileWagonTest extends StreamingWagonTestCase {
         return new File(repository.getBasedir(), resource.getName()).lastModified();
     }
 
+    @Test
     public void testResourceExists() throws Exception {
         String url = new File(getBasedir()).toPath().toUri().toASCIIString();
 

@@ -29,11 +29,18 @@ import org.apache.maven.wagon.observers.ChecksumObserver;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author <a href="mailto:brett@apache.org">Brett Porter</a>
  */
 public abstract class StreamingWagonTestCase extends WagonTestCase {
+    @Test
     public void testStreamingWagon() throws Exception {
         if (supportsGetIfNewer()) {
             setupWagonTestingFixtures();
@@ -46,6 +53,7 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
         }
     }
 
+    @Test
     public void testFailedGetToStream() throws Exception {
         setupWagonTestingFixtures();
 
@@ -85,6 +93,7 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
         }
     }
 
+    @Test
     public void testWagonGetIfNewerToStreamIsNewer() throws Exception {
         if (supportsGetIfNewer()) {
             setupWagonTestingFixtures();
@@ -98,6 +107,7 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
         }
     }
 
+    @Test
     public void testWagonGetIfNewerToStreamIsOlder() throws Exception {
         if (supportsGetIfNewer()) {
             setupWagonTestingFixtures();
@@ -108,6 +118,7 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
         }
     }
 
+    @Test
     public void testWagonGetIfNewerToStreamIsSame() throws Exception {
         if (supportsGetIfNewer()) {
             setupWagonTestingFixtures();
@@ -141,6 +152,7 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
         tearDownWagonTestingFixtures();
     }
 
+    @Test
     public void testFailedGetIfNewerToStream() throws Exception {
         if (supportsGetIfNewer()) {
             setupWagonTestingFixtures();
@@ -178,17 +190,17 @@ public abstract class StreamingWagonTestCase extends WagonTestCase {
 
         int expectedSize = putStream();
 
-        assertNotNull("check checksum is not null", checksumObserver.getActualChecksum());
+        assertNotNull(checksumObserver.getActualChecksum(), "check checksum is not null");
 
-        assertEquals("compare checksums", "6b144b7285ffd6b0bc8300da162120b9", checksumObserver.getActualChecksum());
+        assertEquals("6b144b7285ffd6b0bc8300da162120b9", checksumObserver.getActualChecksum(), "compare checksums");
 
         checksumObserver = new ChecksumObserver();
 
         getStream(expectedSize);
 
-        assertNotNull("check checksum is not null", checksumObserver.getActualChecksum());
+        assertNotNull(checksumObserver.getActualChecksum(), "check checksum is not null");
 
-        assertEquals("compare checksums", "6b144b7285ffd6b0bc8300da162120b9", checksumObserver.getActualChecksum());
+        assertEquals("6b144b7285ffd6b0bc8300da162120b9", checksumObserver.getActualChecksum(), "compare checksums");
 
         // Now compare the conents of the artifact that was placed in
         // the repository with the contents of the artifact that was
