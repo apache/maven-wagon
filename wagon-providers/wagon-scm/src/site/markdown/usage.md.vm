@@ -80,10 +80,10 @@ Add the following extensions to your pom and use a wagon-scm url in the distribu
   </distributionManagement>
 ```
 
-Deploying your Maven site to CVS
+Deploying your Maven site to Git
 --------------------------------
 
-Same as before, but changing svnexe to cvsexe and using a CVS svn url.
+Same as before, but changing svnexe to gitexe and using a Git url.
 
 ```
   <build>
@@ -100,15 +100,15 @@ Same as before, but changing svnexe to cvsexe and using a CVS svn url.
       </extension>
       <extension>
         <groupId>org.apache.maven.scm</groupId>
-        <artifactId>maven-scm-provider-cvsexe</artifactId>
+        <artifactId>maven-scm-provider-gitexe</artifactId>
         <version>${mavenScmVersion}</version>
       </extension>
     </extensions>
   </build>
   <distributionManagement>
     <site>
-      <id>my.cvs.server</id>
-      <url>scm:cvs:ext:username@cvs.apache.org:/cvs/root:module</url>
+      <id>my.git.server</id>
+      <url>scm:git:ssh://git@git.example.org/myuser/myproject.git</url>
     </site>
   </distributionManagement>
 ```
@@ -116,7 +116,7 @@ Same as before, but changing svnexe to cvsexe and using a CVS svn url.
 Deploying your Maven site to GitHub's gh-pages
 ----------------------------------------------
 
-Same as before, but changing svnexe to gitexe and using a Git svn url.
+Same as before, but changing svnexe to gitexe and using a Git url.
 
 ```
   <build>
