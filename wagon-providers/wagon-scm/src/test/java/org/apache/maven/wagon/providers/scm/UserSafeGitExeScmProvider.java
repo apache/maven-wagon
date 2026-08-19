@@ -18,6 +18,8 @@
  */
 package org.apache.maven.wagon.providers.scm;
 
+import java.io.IOException;
+
 import org.apache.maven.scm.ScmException;
 import org.apache.maven.scm.ScmFileSet;
 import org.apache.maven.scm.ScmVersion;
@@ -31,7 +33,11 @@ public class UserSafeGitExeScmProvider extends GitExeScmProvider {
     @Override
     public CheckInScmResult checkIn(ScmRepository repository, ScmFileSet fileSet, ScmVersion scmVersion, String message)
             throws ScmException {
-        GitScmTestUtils.setDefaultUser(fileSet.getBasedir());
+        try {
+            GitScmTestUtils.setDefaultGitConfig(fileSet.getBasedir());
+        } catch (IOException e) {
+            throw new ScmException("Cannot write the test git configuration", e);
+        }
 
         return super.checkIn(repository, fileSet, scmVersion, message);
     }
