@@ -28,9 +28,20 @@ updates:
     target-branch: "wagon-3.x"
     labels:
       - "mvn3"
+      - "dependencies"
+      - "java"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "daily"
 
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    target-branch: "wagon-3.x"
+    labels:
+      - "mvn3"
+      - "dependencies"
+      - "github_actions"
