@@ -202,7 +202,7 @@ under the License.
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-interactivity-api</artifactId>
-        <version>1.5.1</version>
+        <version>1.6.0</version>
       </dependency>
       <!--
        | The Plexus shim: org.eclipse.sisu.plexus supplies PlexusContainer,
