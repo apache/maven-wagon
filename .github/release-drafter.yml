@@ -17,3 +17,5 @@
 
 _extends: maven-gh-actions-shared
 tag-template: wagon-$RESOLVED_VERSION
+filter-by-commitish: false
+
