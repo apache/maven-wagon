@@ -88,6 +88,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  *
@@ -627,6 +628,142 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
             realServer.stop();
 
             tmpResult.delete();
+        }
+    }
+
+    /**
+     * Whether the provider under test keeps headers configured for a repository on that repository's origin when
+     * following redirects. Providers that cannot do so return {@code false} and skip the corresponding tests.
+     */
+    protected boolean supportsOriginScopedHeaders() {
+        return true;
+    }
+
+    @Test
+    public void testRedirectToOtherOriginDropsConfiguredHeaders() throws Exception {
+        assumeTrue(supportsOriginScopedHeaders());
+        StreamingWagon wagon = (StreamingWagon) getWagon();
+
+        Properties headers = new Properties();
+        headers.setProperty("X-Wagon-Test", "secret");
+        Method setHttpHeaders = wagon.getClass().getMethod("setHttpHeaders", Properties.class);
+        setHttpHeaders.invoke(wagon, headers);
+
+        Server realServer = new Server();
+        TestHeaderHandler handler = new TestHeaderHandler();
+        realServer.setHandler(handler);
+        addConnector(realServer);
+        realServer.start();
+
+        Server redirectServer = new Server();
+        addConnector(redirectServer);
+        TestHeaderHandler redirectHandler = new TestHeaderHandler();
+        // the redirecting server sits on another port and therefore is another origin than the real server
+        RedirectRecordingHandler recordingRedirect = new RedirectRecordingHandler(
+                redirectHandler, getRedirectProtocol() + "://localhost:" + getLocalPort(realServer));
+        redirectServer.setHandler(recordingRedirect);
+        redirectServer.start();
+
+        wagon.connect(new Repository("id", getRepositoryUrl(redirectServer)));
+
+        File tmpResult = File.createTempFile("foo", "get");
+        try {
+            wagon.get("resource", tmpResult);
+            assertEquals("Hello, World!", new String(Files.readAllBytes(tmpResult.toPath())));
+
+            assertEquals("secret", redirectHandler.headers.get("X-Wagon-Test"), "configured header on origin");
+            assertFalse(
+                    handler.headers.containsKey("X-Wagon-Test"),
+                    "configured header must not be sent to the redirect target on another origin");
+        } finally {
+            wagon.disconnect();
+            redirectServer.stop();
+            realServer.stop();
+            tmpResult.delete();
+        }
+    }
+
+    @Test
+    public void testRedirectWithinOriginKeepsConfiguredHeaders() throws Exception {
+        assumeTrue(supportsOriginScopedHeaders());
+        StreamingWagon wagon = (StreamingWagon) getWagon();
+
+        Properties headers = new Properties();
+        headers.setProperty("X-Wagon-Test", "secret");
+        Method setHttpHeaders = wagon.getClass().getMethod("setHttpHeaders", Properties.class);
+        setHttpHeaders.invoke(wagon, headers);
+
+        Server server = new Server();
+        addConnector(server);
+        TestHeaderHandler handler = new TestHeaderHandler();
+        // redirect to a different path on the same server: same origin
+        RedirectRecordingHandler redirecting = new RedirectRecordingHandler(handler, null);
+        server.setHandler(redirecting);
+        server.start();
+
+        wagon.connect(new Repository("id", getRepositoryUrl(server)));
+
+        File tmpResult = File.createTempFile("foo", "get");
+        try {
+            wagon.get("resource", tmpResult);
+            assertEquals("Hello, World!", new String(Files.readAllBytes(tmpResult.toPath())));
+
+            assertEquals(
+                    "secret",
+                    handler.headers.get("X-Wagon-Test"),
+                    "configured header must be kept on a redirect within the same origin");
+        } finally {
+            wagon.disconnect();
+            server.stop();
+            tmpResult.delete();
+        }
+    }
+
+    private String getRedirectProtocol() {
+        String protocol = getProtocol();
+        // protocol is wagon protocol but in fact dav is http(s)
+        if (protocol.equals("dav")) {
+            return "http";
+        }
+        if (protocol.equals("davs")) {
+            return "https";
+        }
+        return protocol;
+    }
+
+    /**
+     * Answers a request for {@code /resource} with a {@code 303 See Other} to {@code /redirected/resource}, either on
+     * the given other server or, when no base URL is given, on the same server, and delegates every other request to
+     * the given handler so that the headers of the redirected request can be inspected.
+     */
+    private static class RedirectRecordingHandler extends AbstractHandler {
+        private final AbstractHandler delegate;
+
+        private final String redirectBaseUrl;
+
+        RedirectRecordingHandler(AbstractHandler delegate, String redirectBaseUrl) {
+            this.delegate = delegate;
+            this.redirectBaseUrl = redirectBaseUrl;
+        }
+
+        public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
+                throws IOException, ServletException {
+            if (!request.getRequestURI().startsWith("/redirected")) {
+                delegate.handle(target, baseRequest, request, response);
+                if (redirectBaseUrl == null) {
+                    response.reset();
+                    response.setStatus(HttpServletResponse.SC_SEE_OTHER);
+                    response.setHeader("Location", "/redirected" + request.getRequestURI());
+                    baseRequest.setHandled(true);
+                    return;
+                }
+                response.reset();
+                response.setStatus(HttpServletResponse.SC_SEE_OTHER);
+                response.setHeader("Location", redirectBaseUrl + "/redirected" + request.getRequestURI());
+                baseRequest.setHandled(true);
+                return;
+            }
+            delegate.handle(target, baseRequest, request, response);
         }
     }
 
