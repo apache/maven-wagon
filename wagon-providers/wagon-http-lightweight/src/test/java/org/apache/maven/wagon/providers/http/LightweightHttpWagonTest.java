@@ -52,6 +52,15 @@ public class LightweightHttpWagonTest extends HttpWagonTestCase {
         ((LightweightHttpWagon) wagon).setHttpHeaders(headers);
     }
 
+    /**
+     * The lightweight provider relies on HttpURLConnection following redirects and cannot keep configured headers
+     * from being sent to another origin.
+     */
+    @Override
+    protected boolean supportsOriginScopedHeaders() {
+        return false;
+    }
+
     @Override
     protected boolean supportPreemptiveAuthenticationGet() {
         return false;

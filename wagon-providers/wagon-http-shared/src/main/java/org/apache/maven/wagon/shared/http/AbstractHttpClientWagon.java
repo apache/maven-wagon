@@ -37,10 +37,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
@@ -506,6 +508,7 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
                 .setServiceUnavailableRetryStrategy(createServiceUnavailableRetryStrategy())
                 .setDefaultAuthSchemeRegistry(createAuthSchemeRegistry())
                 .setRedirectStrategy(new WagonRedirectStrategy())
+                .addInterceptorLast(new OriginScopedHeadersInterceptor())
                 .build();
     }
 
@@ -869,6 +872,14 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
         localContext.setCredentialsProvider(credentialsProvider);
         localContext.setAuthCache(authCache);
         localContext.setRequestConfig(requestConfigBuilder.build());
+        if (ORIGIN_SCOPED_HEADERS) {
+            // configured headers stay with the repository they were configured for, see
+            // OriginScopedHeadersInterceptor: a redirect to another origin does not carry them
+            localContext.setAttribute(
+                    OriginScopedHeadersInterceptor.ORIGIN,
+                    new HttpHost(repo.getHost(), repo.getPort(), repo.getProtocol()));
+            localContext.setAttribute(OriginScopedHeadersInterceptor.HEADER_NAMES, configuredHeaderNames(config));
+        }
 
         if (config != null && config.isUsePreemptive()) {
             HttpHost targetHost = new HttpHost(repo.getHost(), repo.getPort(), repo.getProtocol());
@@ -897,6 +908,32 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
         }
 
         return httpClient.execute(httpMethod, localContext);
+    }
+
+    /**
+     * Whether headers configured for a repository are sent only to that repository's origin (the default). Set the
+     * system property {@code maven.wagon.http.originScopedHeaders} to {@code false} to send them on redirects to
+     * other hosts as well, as earlier versions did.
+     */
+    private static final boolean ORIGIN_SCOPED_HEADERS =
+            Boolean.parseBoolean(System.getProperty("maven.wagon.http.originScopedHeaders", "true"));
+
+    private Set<String> configuredHeaderNames(HttpMethodConfiguration config) {
+        Set<String> names = new HashSet<>();
+        if (httpHeaders != null) {
+            for (Object key : httpHeaders.keySet()) {
+                names.add(String.valueOf(key));
+            }
+        }
+        Header[] headers = config == null ? null : config.asRequestHeaders();
+        if (headers != null) {
+            for (Header header : headers) {
+                names.add(header.getName());
+            }
+        }
+        // the User-Agent identifies the client, not the repository, and is safe to keep on any host
+        names.remove(HTTP.USER_AGENT);
+        return names;
     }
 
     public void setHeaders(HttpUriRequest method) {
