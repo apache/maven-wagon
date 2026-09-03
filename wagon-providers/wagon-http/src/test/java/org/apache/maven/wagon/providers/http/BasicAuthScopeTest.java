@@ -84,6 +84,19 @@ public class BasicAuthScopeTest {
     }
 
     /**
+     * Test AuthScope override with realm="ANY" only, which should result in AuthScope.ANY_REALM.
+     */
+    @Test
+    public void testGetScopeRealmAnyOnly() {
+        BasicAuthScope scope = new BasicAuthScope();
+        scope.setRealm("ANY");
+        AuthScope authScope = scope.getScope("original.host.com", 3456);
+        assertEquals("original.host.com", authScope.getHost());
+        assertEquals(3456, authScope.getPort());
+        assertEquals(AuthScope.ANY_REALM, authScope.getRealm());
+    }
+
+    /**
      * Test AuthScope where original port is -1, which should result in ANY
      */
     @Test
