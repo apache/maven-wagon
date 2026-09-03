@@ -30,6 +30,7 @@ under the License.
   <name>Apache Maven Wagon :: Providers :: SSH Provider</name>
 
   <properties>
+    <wagon.automatic.module.name>org.apache.maven.wagon.providers.ssh</wagon.automatic.module.name>
     <sshd.stopImmediatly>false</sshd.stopImmediatly>
   </properties>
 

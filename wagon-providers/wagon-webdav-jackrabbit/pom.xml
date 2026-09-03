@@ -41,6 +41,10 @@ under the License.
     </contributor>
   </contributors>
 
+  <properties>
+    <wagon.automatic.module.name>org.apache.maven.wagon.providers.webdav</wagon.automatic.module.name>
+  </properties>
+
   <dependencies>
     <dependency>
       <!-- Workaround for QDOX-148, see also MNG-3686 -->

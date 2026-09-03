@@ -30,6 +30,10 @@ under the License.
   <name>Apache Maven Wagon :: Providers :: HTTP Provider</name>
   <description>Wagon provider that gets and puts artifacts through HTTP(S) using Apache HttpClient-4.x.</description>
 
+  <properties>
+    <wagon.automatic.module.name>org.apache.maven.wagon.providers.http</wagon.automatic.module.name>
+  </properties>
+
   <dependencies>
     <!-- TckTest aggregates the TCK suites, now through the JUnit Platform -->
     <dependency>
