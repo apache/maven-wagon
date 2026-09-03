@@ -67,15 +67,11 @@ public class BasicAuthScope {
      * them: {@code basicAuth} for the target host and {@code proxyAuth} for the proxy, settable
      * through {@code setBasicAuthScope} and {@code setProxyBasicAuthScope} respectively.
      * <p>
-     * A non-null {@link #getHost() host} or {@link #getPort() port} replaces the value passed
-     * in; the literal string {@code "ANY"} selects {@link AuthScope#ANY_HOST} or
-     * {@link AuthScope#ANY_PORT}. A passed-in port of {@code -1} also yields
-     * {@link AuthScope#ANY_PORT}. When host, port and realm are all {@code "ANY"},
+     * A non-null {@link #getHost() host}, {@link #getPort() port}, or {@link #getRealm() realm} replaces the value passed
+     * in; the literal string {@code "ANY"} selects {@link AuthScope#ANY_HOST}, {@link AuthScope#ANY_PORT}, or
+     * {@link AuthScope#ANY_REALM}. A passed-in port of {@code -1} also yields {@link AuthScope#ANY_PORT}. Leaving
+     * realm unset yields {@link AuthScope#ANY_REALM}. When host, port and realm are all {@code "ANY"},
      * {@link AuthScope#ANY} is returned.
-     * <p>
-     * {@link #getRealm() realm} does not follow that pattern. Leaving it unset yields
-     * {@link AuthScope#ANY_REALM}; any non-null value is used verbatim as the realm to match,
-     * including {@code "ANY"} itself unless host and port are {@code "ANY"} as well.
      *
      * @param host the host to scope credentials to, before any override is applied
      * @param port the port to scope credentials to, before any override is applied; -1 means
@@ -117,7 +113,7 @@ public class BasicAuthScope {
             if ("ANY".compareTo(getRealm()) != 0) {
                 scopeRealm = getRealm();
             } else {
-                scopeRealm = getRealm();
+                scopeRealm = AuthScope.ANY_REALM;
             }
         }
 
