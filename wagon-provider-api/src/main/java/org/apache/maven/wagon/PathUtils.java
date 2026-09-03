@@ -22,19 +22,25 @@ import java.io.File;
 import java.util.StringTokenizer;
 
 /**
- * Various path (URL) manipulation routines
+ * Various path (URL) manipulation routines.
  *
  * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
- *
+ * @deprecated Standard JDK methods in
+ *    java.net.URI and java.nio.file.Path should be used instead.
+ *    This is not always a direct one-to-one replacement. For instance,
+ *    a PathUtils method might return an empty string in a case where the
+ *    corresponding JDK method returns null. However, all logic in this
+ *    class has been present in the JDK since Java 1.4.
  */
+@Deprecated
 public final class PathUtils {
     private PathUtils() {}
 
     /**
      * Returns the directory path portion of a file specification string.
-     * Matches the equally named unix command.
      *
-     * @return The directory portion excluding the ending file separator.
+     * @return the directory portion excluding the ending file separator
+     * @deprecated use {@code Paths.get(path).getParent().toString}
      */
     public static String dirname(final String path) {
         final int i = path.lastIndexOf("/");
@@ -45,13 +51,16 @@ public final class PathUtils {
     /**
      * Returns the filename portion of a file specification string.
      *
-     * @return The filename string with extension.
+     * @return the filename string with extension
+     * @deprecated use {@code Paths.get(path).getFileName().toString}
      */
+    @Deprecated
     public static String filename(final String path) {
         final int i = path.lastIndexOf("/");
         return ((i >= 0) ? path.substring(i + 1) : path);
     }
 
+    @Deprecated
     public static String[] dirnames(final String path) {
         final String dirname = PathUtils.dirname(path);
         return split(dirname, "/", -1);
@@ -113,7 +122,9 @@ public final class PathUtils {
      *
      * @param url the url
      * @return the host name
+     * @deprecated replace with {@code new URI(url).getHost()}
      */
+    @Deprecated
     public static String host(final String url) {
         if (url == null || url.isEmpty()) {
             return "localhost";
@@ -192,7 +203,9 @@ public final class PathUtils {
      *
      * @param url the url
      * @return the host name
+     * @deprecated replace with {@code new URI(url).getScheme()}
      */
+    @Deprecated
     public static String protocol(final String url) {
         final int pos = url.indexOf(":");
 
@@ -205,7 +218,9 @@ public final class PathUtils {
     /**
      * @param url
      * @return the port or {@link WagonConstants#UNKNOWN_PORT} if not existent
+     * @deprecated replace with {@code new URI(url).getPort()}
      */
+    @Deprecated
     public static int port(String url) {
 
         final String protocol = PathUtils.protocol(url);
@@ -260,8 +275,9 @@ public final class PathUtils {
      *
      * @param url the repository URL
      * @return the basedir of the repository
-     * @todo need to URL decode for spaces?
+     * @deprecated replace with {@code new URI(url).getPath()}
      */
+    @Deprecated
     public static String basedir(String url) {
         String protocol = PathUtils.protocol(url);
 
@@ -369,6 +385,10 @@ public final class PathUtils {
         return decoded;
     }
 
+    /**
+     * @deprecated replace with {@code new URI(url).getUserInfo()}
+     */
+    @Deprecated
     public static String user(String url) {
         String host = authorization(url);
         int index = host.indexOf('@');
@@ -384,6 +404,10 @@ public final class PathUtils {
         return null;
     }
 
+    /**
+     * @deprecated do not store passwords in URLs
+     */
+    @Deprecated
     public static String password(String url) {
         String host = authorization(url);
         int index = host.indexOf('@');
@@ -397,7 +421,10 @@ public final class PathUtils {
         return null;
     }
 
-    // TODO: move to plexus-utils or use something appropriate from there
+    /**
+     * @deprecated use {@link java.nio.file.Path#relativize(java.nio.file.Path)} instead
+     */
+    @Deprecated
     public static String toRelative(File basedir, String absolutePath) {
         String relative;
 

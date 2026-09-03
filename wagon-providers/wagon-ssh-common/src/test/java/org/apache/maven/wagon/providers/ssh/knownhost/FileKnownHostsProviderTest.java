@@ -19,6 +19,8 @@
 package org.apache.maven.wagon.providers.ssh.knownhost;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 import org.codehaus.plexus.util.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +52,7 @@ public class FileKnownHostsProviderTest {
         long timestamp = this.testKnownHostsFile.lastModified();
         // file with the same contents, but with entries swapped
         File sameKnownHostFile = new File(basedir, "src/test/resources/known_hosts_same");
-        String contents = FileUtils.fileRead(sameKnownHostFile);
+        String contents = new String(Files.readAllBytes(sameKnownHostFile.toPath()), StandardCharsets.US_ASCII);
 
         provider.storeKnownHosts(contents);
         assertEquals(timestamp, testKnownHostsFile.lastModified(), "known_hosts file is rewritten");
@@ -60,7 +62,7 @@ public class FileKnownHostsProviderTest {
     public void testStoreKnownHostsWithChange() throws Exception {
         long timestamp = this.testKnownHostsFile.lastModified();
         File sameKnownHostFile = new File(basedir, "src/test/resources/known_hosts_same");
-        String contents = FileUtils.fileRead(sameKnownHostFile);
+        String contents = new String(Files.readAllBytes(sameKnownHostFile.toPath()), StandardCharsets.US_ASCII);
         contents += "1 2 3";
 
         provider.storeKnownHosts(contents);

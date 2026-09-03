@@ -47,8 +47,7 @@ It enables Maven to use remote repositories stored in FTP servers. It doesn't al
 - `endpointChecking` default: **true**
 # Sample Configuration
 
-pom.xml
--------
+## pom.xml
 
 ```
 <project>
@@ -75,8 +74,7 @@ pom.xml
 </project>
 ```
 
-settings.xml
-------------
+## settings.xml
 
 ```
 <settings>
@@ -94,4 +92,3 @@ settings.xml
     </servers>
 <settings>
 ```
-

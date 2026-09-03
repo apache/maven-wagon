@@ -51,14 +51,11 @@ Since version 3.2, the retry handler can be configured with system properties:
 - `maven.wagon.http.retryHandler.class` supports this set of values:
     - `default` will use an instance of [`DefaultHttpRequestRetryHandler`](https://hc.apache.org/httpcomponents-client-4.5.x/httpclient/apidocs/org/apache/http/impl/client/DefaultHttpRequestRetryHandler.html) respecting `requestSentEnabled`, `count` and `nonRetryableClasses`.
     - `standard` will use an instance of [`StandardHttpRequestRetryHandler`](https://hc.apache.org/httpcomponents-client-4.5.x/httpclient/apidocs/org/apache/http/impl/client/StandardHttpRequestRetryHandler.html) respecting `requestSentEnabled` and `count`.
-    - Any fully qualified name of a [`HttpRequestRetryHandler`](https://hc.apache.org/httpcomponents-client-4.5.x/httpclient/apidocs/org/apache/http/client/HttpRequestRetryHandler.html) implementation will be instantiated with its default constructor.<dl>
-<dt>Attention</dt>
-<dd>This will not work with the shaded version bundled with Maven.</dd>
-</dl>
-
+    - Any fully qualified name of a [`HttpRequestRetryHandler`](https://hc.apache.org/httpcomponents-client-4.5.x/httpclient/apidocs/org/apache/http/client/HttpRequestRetryHandler.html) implementation will be instantiated with its default constructor.<dl><dt>Attention</dt><dd>This will not work with the shaded version bundled with Maven.</dd></dl>
 - `maven.wagon.http.retryHandler.requestSentEnabled` = `requestSentEnabled` for `default` or `standard` implementations.
 - `maven.wagon.http.retryHandler.count` = number of retries for `default` or `standard` implementations.
 - `maven.wagon.http.retryHandler.nonRetryableClasses` = a comma-separated list of fully qualified class names bypassing the retries (only the `default` implementation). If not set, the default value from [`DefaultHttpRequestRetryHandler`](https://hc.apache.org/httpcomponents-client-4.5.x/httpclient/apidocs/org/apache/http/impl/client/DefaultHttpRequestRetryHandler.html) will be used.
+
 <dl>
 <dt>Attention</dt>
 <dd>Any retry handler can only react to exceptions when executing the request and receiving the response head. It will <i>not</i> salvage in-flight failures of ongoing response body streams.</dd>

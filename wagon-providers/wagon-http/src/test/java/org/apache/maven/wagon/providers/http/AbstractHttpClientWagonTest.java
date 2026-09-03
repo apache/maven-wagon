@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.lang.reflect.Field;
 import java.net.ConnectException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.UnknownHostException;
@@ -38,41 +37,15 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.execchain.RedirectExec;
 import org.apache.http.impl.execchain.RetryExec;
-import org.apache.maven.wagon.InputData;
-import org.apache.maven.wagon.repository.Repository;
-import org.apache.maven.wagon.resource.Resource;
-import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class AbstractHttpClientWagonTest {
-    @Disabled("This test is validating nothing and require internet connection which we should avoid so ignore it")
-    public void test() throws Exception {
-        AbstractHttpClientWagon wagon = new AbstractHttpClientWagon() {};
-
-        Repository repository = new Repository("central", "http://repo.maven.apache.org/maven2");
-
-        wagon.connect(repository);
-
-        Resource resource = new Resource();
-
-        resource.setName("junit/junit/maven-metadata.xml");
-
-        InputData inputData = new InputData();
-
-        inputData.setResource(resource);
-
-        wagon.fillInputData(inputData);
-
-        wagon.disconnect();
-    }
 
     @Test
     public void retryableConfigurationDefaultTest() throws Exception {
@@ -81,7 +54,7 @@ public class AbstractHttpClientWagonTest {
             public void run() {
                 final HttpRequestRetryHandler handler = getCurrentHandler();
                 assertNotNull(handler);
-                assertInstanceOf(DefaultHttpRequestRetryHandler.class, handler);
+                assertTrue(handler instanceof DefaultHttpRequestRetryHandler);
                 final DefaultHttpRequestRetryHandler impl = DefaultHttpRequestRetryHandler.class.cast(handler);
                 assertEquals(3, impl.getRetryCount());
                 assertFalse(impl.isRequestSentRetryEnabled());
@@ -99,7 +72,7 @@ public class AbstractHttpClientWagonTest {
 
                 final HttpRequestRetryHandler handler = getCurrentHandler();
                 assertNotNull(handler);
-                assertInstanceOf(DefaultHttpRequestRetryHandler.class, handler);
+                assertTrue(handler instanceof DefaultHttpRequestRetryHandler);
                 final DefaultHttpRequestRetryHandler impl = DefaultHttpRequestRetryHandler.class.cast(handler);
                 assertEquals(5, impl.getRetryCount());
                 assertFalse(impl.isRequestSentRetryEnabled());
@@ -117,7 +90,7 @@ public class AbstractHttpClientWagonTest {
 
                 final HttpRequestRetryHandler handler = getCurrentHandler();
                 assertNotNull(handler);
-                assertInstanceOf(DefaultHttpRequestRetryHandler.class, handler);
+                assertTrue(handler instanceof DefaultHttpRequestRetryHandler);
                 final DefaultHttpRequestRetryHandler impl = DefaultHttpRequestRetryHandler.class.cast(handler);
                 assertEquals(3, impl.getRetryCount());
                 assertTrue(impl.isRequestSentRetryEnabled());
@@ -135,7 +108,7 @@ public class AbstractHttpClientWagonTest {
 
                 final HttpRequestRetryHandler handler = getCurrentHandler();
                 assertNotNull(handler);
-                assertInstanceOf(DefaultHttpRequestRetryHandler.class, handler);
+                assertTrue(handler instanceof DefaultHttpRequestRetryHandler);
                 final DefaultHttpRequestRetryHandler impl = DefaultHttpRequestRetryHandler.class.cast(handler);
                 assertEquals(3, impl.getRetryCount());
                 assertFalse(impl.isRequestSentRetryEnabled());
@@ -149,7 +122,7 @@ public class AbstractHttpClientWagonTest {
                     final Set<?> exceptions = Set.class.cast(nonRetriableClasses.get(handler));
                     assertEquals(1, exceptions.size());
                     assertTrue(exceptions.contains(IOException.class));
-                } catch (final Exception e) {
+                } catch (NoSuchFieldException | IllegalAccessException e) {
                     fail(e.getMessage());
                 }
             }
@@ -192,11 +165,7 @@ public class AbstractHttpClientWagonTest {
         final String[] paths = classpath.split(File.pathSeparator);
         final Collection<URL> urls = new ArrayList<>(paths.length);
         for (final String path : paths) {
-            try {
-                urls.add(new File(path).toURI().toURL());
-            } catch (final MalformedURLException e) {
-                fail(e.getMessage());
-            }
+            urls.add(new File(path).toURI().toURL());
         }
         final URLClassLoader loader = new URLClassLoader(urls.toArray(new URL[paths.length]), new ClassLoader() {
             @Override

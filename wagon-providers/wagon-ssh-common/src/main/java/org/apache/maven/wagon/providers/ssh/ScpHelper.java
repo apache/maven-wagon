@@ -43,7 +43,6 @@ import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
 import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 
 /**
@@ -165,20 +164,12 @@ public class ScpHelper {
     }
 
     public static void createZip(List<String> files, File zipName, File basedir) throws IOException {
-        ZipOutputStream zos = null;
-        try {
-            zos = new ZipOutputStream(new FileOutputStream(zipName));
-
+        try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipName))) {
             for (String file : files) {
                 file = file.replace('\\', '/');
 
                 writeZipEntry(zos, new File(basedir, file), file);
             }
-
-            zos.close();
-            zos = null;
-        } finally {
-            IOUtil.close(zos);
         }
     }
 
@@ -258,8 +249,6 @@ public class ScpHelper {
         wagon.put(zipFile, getPath(destDir, zipFile.getName()));
 
         try {
-            // executor.executeCommand(
-            //    "cd " + path + "; unzip -q -o " + zipFile.getName() + "; rm -f " + zipFile.getName() );
             executor.executeCommand("cd \"" + path + "\"; unzip -q -o \"" + zipFile.getName() + "\"; rm -f \""
                     + zipFile.getName() + "\"");
 
@@ -268,12 +257,10 @@ public class ScpHelper {
             RepositoryPermissions permissions = repository.getPermissions();
 
             if (permissions != null && permissions.getGroup() != null) {
-                // executor.executeCommand( "chgrp -Rf " + permissions.getGroup() + " " + path );
                 executor.executeCommand("chgrp -Rf " + permissions.getGroup() + " \"" + path + "\"");
             }
 
             if (permissions != null && permissions.getFileMode() != null) {
-                // executor.executeCommand( "chmod -Rf " + permissions.getFileMode() + " " + path );
                 executor.executeCommand("chmod -Rf " + permissions.getFileMode() + " \"" + path + "\"");
             }
         } catch (CommandExecutionException e) {
@@ -285,7 +272,6 @@ public class ScpHelper {
             throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
         try {
             String path = getPath(repository.getBasedir(), destinationDirectory);
-            // Streams streams = executor.executeCommand( "ls -FlA " + path, false );
             Streams streams = executor.executeCommand("ls -FlA \"" + path + "\"", false);
 
             return new LSParser().parseFiles(streams.getOut());
@@ -304,11 +290,10 @@ public class ScpHelper {
             throws TransferFailedException, AuthorizationException {
         try {
             String path = getPath(repository.getBasedir(), resourceName);
-            // executor.executeCommand( "ls " + path, false );
             executor.executeCommand("ls \"" + path + "\"");
 
-            // Parsing of output not really needed.  As a failed ls results in a
-            // CommandExectionException on the 'ls' command.
+            // Parsing of output not really needed as a failed ls results in a
+            // CommandExecutionException on the 'ls' command.
 
             return true;
         } catch (CommandExecutionException e) {
@@ -328,7 +313,6 @@ public class ScpHelper {
             }
         }
 
-        // String mkdirCmd = "mkdir -p " + path;
         String mkdirCmd = "mkdir -p \"" + path + "\"";
 
         if (umaskCmd != null) {

@@ -58,7 +58,7 @@ under the License.
       <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
-      <!-- required for org.apache.httpcomponents:httpclient as replacement to commons-logging -->
+      <!-- required for org.apache.httpcomponents:httpclient -->
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
       <scope>runtime</scope>
@@ -78,8 +78,6 @@ under the License.
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpcore</artifactId>
     </dependency>
-
-    <!-- Test dependencies -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>

@@ -37,7 +37,6 @@ import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.repository.exception.ComponentLifecycleException;
-import org.codehaus.plexus.util.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -47,9 +46,6 @@ import org.slf4j.LoggerFactory;
 
 import static org.apache.maven.wagon.tck.http.util.TestUtil.getResource;
 
-/**
- *
- */
 public abstract class HttpWagonTests {
 
     private ServerFixture serverFixture;
@@ -61,8 +57,6 @@ public abstract class HttpWagonTests {
     private static WagonTestCaseConfigurator configurator;
 
     private String baseUrl;
-
-    private static final Set<File> TMP_FILES = new HashSet<>();
 
     private Repository repo;
 
@@ -128,16 +122,6 @@ public abstract class HttpWagonTests {
 
     @AfterAll
     public static void afterAll() {
-        for (File f : TMP_FILES) {
-            if (f.exists()) {
-                try {
-                    FileUtils.forceDelete(f);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
         if (container != null) {
             try {
                 container.release(configurator);
@@ -236,10 +220,6 @@ public abstract class HttpWagonTests {
         return serverFixture.getHttpPort();
     }
 
-    protected int getPortPropertyValue() {
-        return Integer.parseInt(System.getProperty("test.port", "-1"));
-    }
-
     protected String getBaseUrl() {
         if (baseUrl == null) {
             StringBuilder sb = new StringBuilder();
@@ -263,17 +243,5 @@ public abstract class HttpWagonTests {
 
     protected Wagon getWagon() {
         return wagon;
-    }
-
-    protected static WagonTestCaseConfigurator getConfigurator() {
-        return configurator;
-    }
-
-    protected static Set<File> getTmpfiles() {
-        return TMP_FILES;
-    }
-
-    protected Repository getRepo() {
-        return repo;
     }
 }

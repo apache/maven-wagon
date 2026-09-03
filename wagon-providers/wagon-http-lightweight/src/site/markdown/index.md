@@ -41,4 +41,3 @@ It enables Maven to use remote repositories stored in HTTP servers.
 # Known Limitation
 
 The main limitation is that you can't download data that doesn't fit entirely into memory.
-
