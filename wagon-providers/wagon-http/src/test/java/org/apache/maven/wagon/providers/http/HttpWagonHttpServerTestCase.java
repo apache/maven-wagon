@@ -46,8 +46,6 @@ public abstract class HttpWagonHttpServerTestCase {
         server = new Server(0);
 
         context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        resourceHandler = new ResourceHandler();
-        context.setHandler(resourceHandler);
         server.setHandler(context);
     }
 
