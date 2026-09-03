@@ -1,20 +1,25 @@
 # Design: replace JSch with Apache MINA SSHD in wagon-ssh
 
-Date: 2026-08-10
+Date: 2026-08-10 (updated 2026-09-04)
 Target: `org.apache.maven.wagon:wagon-ssh` 4.0.0-M1
-Status: approved design, implementation plan not yet written
+Status: approved design, baseline verified on master, implementation plan prepared
 
 ## Motivation
 
-`wagon-ssh` pins `com.jcraft:jsch:0.1.55` (last released 2018) and
-`com.jcraft:jsch.agentproxy:0.0.9`. Neither is maintained. JSch 0.1.55 does not
-implement `rsa-sha2-256`/`rsa-sha2-512` and cannot read OpenSSH-format ed25519
-keys, so it fails against the defaults of current OpenSSH servers.
+`wagon-ssh` originally pinned `com.jcraft:jsch:0.1.55` (last released 2018) and
+`com.jcraft:jsch.agentproxy:0.0.9`. Neither was maintained. JSch 0.1.55 lacked
+`rsa-sha2-256`/`rsa-sha2-512` and could not read OpenSSH-format ed25519 keys.
 
-Apache MINA SSHD 2.19.0 is already a dependency of the build:
-`wagon-ssh-common-test` runs the embedded test server on `sshd-core`,
-`sshd-scp` and `sshd-sftp`. Moving the client side onto SSHD adds no new
-third-party surface and puts both ends of the test on the same stack.
+As an intermediate milestone, `wagon-ssh` on `master` was migrated to the
+maintained fork `com.github.mwiede:jsch:2.28.6` (commit `e81e5db4`), removing
+`jsch.agentproxy` and restoring key compatibility without breaking existing APIs.
+
+However, the strategic direction for Wagon 4.x is to move entirely off 3rd-party
+JSch forks and standardize on **Apache MINA SSHD** (`org.apache.sshd`). Apache MINA
+SSHD 2.19.0 is already an established dependency in the build: `wagon-ssh-common-test`
+runs the embedded test server on `sshd-core`, `sshd-scp` and `sshd-sftp`. Moving the
+client side onto SSHD removes the external fork dependency, provides native ASF governance,
+and unifies both client and server on the same stack.
 
 ## Decisions taken
 
@@ -53,9 +58,7 @@ Outside this repo, exactly one file imports the package:
 `wagon-ssh` keeps its GAV. Dependency changes:
 
 Removed:
-- `com.jcraft:jsch:0.1.55`
-- `com.jcraft:jsch.agentproxy.connector-factory:0.0.9`
-- `com.jcraft:jsch.agentproxy.jsch:0.0.9`
+- `com.github.mwiede:jsch:2.28.6` (and any legacy `com.jcraft:jsch*` artifacts)
 
 Added:
 - `org.apache.sshd:sshd-core`
@@ -150,17 +153,44 @@ The safety net already exists — commit `d3ba3463` revived the embedded MINA
 server tests — but it is opt-in, so CI being green today does not mean those
 tests pass.
 
-1. Before touching anything, enable `ssh-embedded` and record the green
-   baseline. **If the embedded tests do not pass when un-excluded, fixing them
-   is a prerequisite, not part of this migration.**
-2. Migrate with those tests as the gate. `SftpWagonTest` and
-   `SshCommandExecutorTest` appear in every `<excludes>` block in
-   `wagon-ssh/pom.xml`; they must be un-excluded against the embedded server or
-   the sftp rewrite ships untested.
+### Running Embedded Tests
+In `wagon-ssh/pom.xml`, test execution is governed by two profiles:
+- `<id>no-ssh-tests</id>` is active by default (via `!ssh-tests`) and excludes all SSH/SCP/SFTP tests.
+- `<id>ssh-embedded</id>` is activated by `-Dssh-embedded=true` (on non-Windows).
+
+To run the embedded suite:
+```bash
+mvn test -pl wagon-providers/wagon-ssh -Dssh-embedded=true -Dssh-tests
+```
+
+### Baseline Recorded (2026-09-04)
+The current master baseline was verified on macOS against Apache MINA SSHD 2.19.0:
+- `EmbeddedScpWagonTest`: 20 / 20 passed.
+- `EmbeddedScpWagonWithKeyTest`: 22 / 22 passed.
+- Total: **42 / 42 passing with 0 failures, 0 errors** (18 seconds).
+
+### Identified Gap: SFTP Embedded Test Harness
+`SftpWagonTest` currently inherits from `StreamingWagonTestCase` and connects to
+`TestData.getTestRepositoryUrl(0)` (`localhost:22`), expecting an external SSH daemon.
+It does not run against the embedded test server.
+
+However, `SshServerEmbedded` in `wagon-ssh-common-test` already instantiates
+and registers the SFTP subsystem:
+```java
+sshd.setSubsystemFactories(Collections.singletonList(new SftpSubsystemFactory()));
+```
+Therefore, an `EmbeddedSftpWagonTest` (mirroring `EmbeddedScpWagonTest`) must be
+introduced in PR 1 to establish a reproducible, green embedded SFTP baseline before
+PR 3 rewrites `SftpWagon`.
+
+### Test Gates
+1. Before touching client code, verify the embedded baseline (SCP + SFTP).
+2. Migrate with those tests as the gate. `EmbeddedScpWagon*Test` and the new
+   `EmbeddedSftpWagonTest` must pass continuously.
 3. New tests: a SOCKS5 proxy test with a minimal SOCKS5 listener in
    `wagon-ssh-common-test`, mirroring the existing `ScpWagonWithProxyTest`
    shape; and an assertion on rsa-sha2 negotiation that would have failed on
-   JSch 0.1.55.
+   legacy JSch 0.1.55.
 4. Manual matrix before release: real OpenSSH 9.x, `~/.ssh/config` in play,
    ed25519 key, agent present and absent.
 
@@ -168,8 +198,10 @@ tests pass.
 
 Five PRs, each independently green:
 
-1. Hoist `sshdVersion` into the root `dependencyManagement`; un-exclude the
-   embedded tests; record the baseline. No behaviour change.
+1. Hoist `sshdVersion` (2.19.0) into the root `dependencyManagement`; add
+   `EmbeddedSftpWagonTest` against `SshServerEmbedded`; verify 100% green
+   embedded SCP & SFTP baseline with `-Dssh-embedded=true -Dssh-tests`.
+   No client behaviour change.
 2. `AbstractSshdWagon`, `ScpWagon` and `ScpCommandExecutor` on SSHD, with
    known_hosts and interaction rewired. Proxy and agent temporarily
    unsupported.
