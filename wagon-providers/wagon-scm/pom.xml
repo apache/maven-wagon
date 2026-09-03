@@ -31,6 +31,7 @@ under the License.
   <description>Wagon provider that gets and puts artifacts using a Source Control Management system</description>
 
   <properties>
+    <wagon.automatic.module.name>org.apache.maven.wagon.providers.scm</wagon.automatic.module.name>
     <mavenScmVersion>2.2.1</mavenScmVersion>
   </properties>
 

@@ -30,6 +30,10 @@ under the License.
   <name>Apache Maven Wagon :: Providers :: HTTP Shared Library</name>
   <description>Shared Library for wagon providers supporting HTTP.</description>
 
+  <properties>
+    <wagon.automatic.module.name>org.apache.maven.wagon.providers.http.shared</wagon.automatic.module.name>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>

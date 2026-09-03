@@ -30,6 +30,10 @@ under the License.
   <name>Apache Maven Wagon :: Provider Test</name>
   <description>Suite of tests for Wagon implementations</description>
 
+  <properties>
+    <wagon.automatic.module.name>org.apache.maven.wagon.provider.test</wagon.automatic.module.name>
+  </properties>
+
   <dependencies>
     <!-- WagonTestCase and CommandExecutorTestCase are published here and use @PlexusTest,
          so this is compile scope rather than test scope -->

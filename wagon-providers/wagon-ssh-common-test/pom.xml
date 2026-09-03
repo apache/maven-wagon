@@ -30,6 +30,7 @@ under the License.
   <name>Apache Maven Wagon :: Providers :: SSH Common Tests</name>
 
   <properties>
+    <wagon.automatic.module.name>org.apache.maven.wagon.providers.ssh.common.test</wagon.automatic.module.name>
     <sshdVersion>2.19.0</sshdVersion>
   </properties>
   <dependencies>

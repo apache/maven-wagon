@@ -31,6 +31,7 @@ under the License.
   <description>Wagon provider that gets and puts artifacts using SSH protocol with a preinstalled SSH client</description>
 
   <properties>
+    <wagon.automatic.module.name>org.apache.maven.wagon.providers.ssh.external</wagon.automatic.module.name>
     <sshd.stopImmediatly>false</sshd.stopImmediatly>
   </properties>
 
