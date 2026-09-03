@@ -55,16 +55,24 @@ public class ErrorWithMessageServlet extends HttpServlet {
     public static final String MESSAGE = "it sucks!";
 
     public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        int status = 0;
         if (request.getPathInfo().endsWith("/401")) {
-            response.sendError(401, MESSAGE);
+            status = 401;
         } else if (request.getPathInfo().endsWith("/403")) {
-            response.sendError(403, MESSAGE);
+            status = 403;
         } else if (request.getPathInfo().endsWith("/404")) {
-            response.sendError(404, MESSAGE);
+            status = 404;
         } else if (request.getPathInfo().endsWith("/407")) {
-            response.sendError(407, MESSAGE);
+            status = 407;
         } else if (request.getPathInfo().endsWith("/500")) {
-            response.sendError(500, MESSAGE);
+            status = 500;
+        }
+        if (status > 0) {
+            if (response instanceof org.eclipse.jetty.server.Response) {
+                ((org.eclipse.jetty.server.Response) response).setStatusWithReason(status, MESSAGE);
+            } else {
+                response.sendError(status, MESSAGE);
+            }
         }
     }
 }
