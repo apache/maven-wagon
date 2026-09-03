@@ -141,6 +141,8 @@ public class FtpWagon extends StreamWagon {
                 throw new AuthenticationException("Cannot login to remote system");
             }
 
+            afterLogin(ftp);
+
             fireSessionDebug("Remote system is " + ftp.getSystemName());
 
             // Set to binary mode.
@@ -159,6 +161,17 @@ public class FtpWagon extends StreamWagon {
 
     protected FTPClient createClient() {
         return new FTPClient();
+    }
+
+    /**
+     * Negotiates anything that can only be negotiated once the session is authenticated. Called after a successful
+     * login and before the session is configured for transfer. Does nothing for plain FTP.
+     *
+     * @param client the connected and authenticated client
+     * @throws IOException if the negotiation fails
+     */
+    protected void afterLogin(FTPClient client) throws IOException {
+        // nothing to do
     }
 
     @Override
