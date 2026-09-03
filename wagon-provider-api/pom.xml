@@ -30,6 +30,10 @@ under the License.
   <name>Apache Maven Wagon :: API</name>
   <description>Maven Wagon API that defines the contract between different Wagon implementations</description>
 
+  <properties>
+    <wagon.automatic.module.name>org.apache.maven.wagon.provider.api</wagon.automatic.module.name>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.junit.jupiter</groupId>

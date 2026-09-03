@@ -30,6 +30,10 @@ under the License.
   <name>Apache Maven Wagon :: Providers :: FTP Provider</name>
   <description>Wagon provider that gets and puts artifacts from and to remote server using FTP protocol</description>
 
+  <properties>
+    <wagon.automatic.module.name>org.apache.maven.wagon.providers.ftp</wagon.automatic.module.name>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>commons-net</groupId>
