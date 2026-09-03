@@ -242,9 +242,11 @@ under the License.
       </dependency>
 
       <dependency>
-        <groupId>org.eclipse.jetty.aggregate</groupId>
-        <artifactId>jetty-all</artifactId>
-        <version>9.2.30.v20200428</version>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-bom</artifactId>
+        <version>9.4.58.v20250814</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>javax.servlet</groupId>
