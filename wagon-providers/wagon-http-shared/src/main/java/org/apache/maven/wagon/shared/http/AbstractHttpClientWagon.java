@@ -687,19 +687,6 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
             fireTransferError(resource, e, TransferEvent.REQUEST_PUT);
         }
 
-        // preemptive for put
-        // TODO: is it a good idea, though? 'Expect-continue' handshake would serve much better
-
-        // FIXME Perform only when preemptive has been configured
-        Repository repo = getRepository();
-        HttpHost targetHost = new HttpHost(repo.getHost(), repo.getPort(), repo.getProtocol());
-        AuthScope targetScope = getBasicAuthScope().getScope(targetHost);
-
-        if (credentialsProvider.getCredentials(targetScope) != null) {
-            BasicScheme targetAuth = new BasicScheme(StandardCharsets.UTF_8);
-            authCache.put(targetHost, targetAuth);
-        }
-
         HttpPut putMethod = new HttpPut(url);
 
         firePutStarted(resource, source);
