@@ -34,13 +34,9 @@ This component is an implementation of Wagon provider for WebDAV server access. 
 
 It enables Maven to deploy artifacts and files to WebDAV enabled servers. Getting files from WebDAV servers is not fully tested.
 
-Features
---------
+## Features
 
 - Deploy files and directories to WebDAV enabled servers
-
-System Properties
------------------
+## System Properties
 
 Using `-Dwagon.webdav.continueOnFailure=true` will continue deploying other files even if one fail.
-

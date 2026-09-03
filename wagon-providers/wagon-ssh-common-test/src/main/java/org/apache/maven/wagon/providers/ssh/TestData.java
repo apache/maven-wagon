@@ -20,8 +20,8 @@ package org.apache.maven.wagon.providers.ssh;
 
 import java.io.File;
 import java.io.IOException;
-
-import org.codehaus.plexus.util.FileUtils;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * @author <a href="michal@codehaus.org">Michal Maczka</a>
@@ -62,7 +62,8 @@ public class TestData {
 
     public static String getHostKey() {
         try {
-            return FileUtils.fileRead(new File(System.getProperty("sshKeysPath"), "id_rsa.pub").getPath())
+            Path sshKeysPath = new File(System.getProperty("sshKeysPath"), "id_rsa.pub").toPath();
+            return new String(Files.readAllBytes(sshKeysPath))
                     .substring("ssh-rsa".length())
                     .trim();
         } catch (IOException e) {

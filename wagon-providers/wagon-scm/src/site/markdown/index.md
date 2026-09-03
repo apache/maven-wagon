@@ -39,4 +39,3 @@ It enables Maven to use remote repositories stored in SCM systems (Subversion, G
 - If the file is changed by the SCM, the checksum calculation may not work
     - SVN: when a file has properties `svn:eol-style` or `svn:keywords` set
 # See [maven-scm-publish-plugin](/plugins/maven-scm-publish-plugin/) to publish your site to SCM.
-
