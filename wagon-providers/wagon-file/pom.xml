@@ -30,6 +30,10 @@ under the License.
   <name>Apache Maven Wagon :: Providers :: File Provider</name>
   <description>Wagon provider that gets and puts artifacts using file system protocol</description>
 
+  <properties>
+    <wagon.automatic.module.name>org.apache.maven.wagon.providers.file</wagon.automatic.module.name>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
