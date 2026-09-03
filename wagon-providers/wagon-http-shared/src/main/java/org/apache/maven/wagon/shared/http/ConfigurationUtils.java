@@ -30,7 +30,6 @@ import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.message.BasicHeader;
-import org.apache.maven.wagon.Wagon;
 
 /**
  * Configuration helper class
@@ -58,8 +57,12 @@ public class ConfigurationUtils {
     private static final String COERCE_PATTERN = "%(\\w+),(.+)";
 
     public static void copyConfig(HttpMethodConfiguration config, RequestConfig.Builder builder) {
-        builder.setConnectTimeout(config.getConnectionTimeout());
-        builder.setSocketTimeout(config.getReadTimeout());
+        if (config.isConnectionTimeoutSet()) {
+            builder.setConnectTimeout(config.getConnectionTimeout());
+        }
+        if (config.isReadTimeoutSet()) {
+            builder.setSocketTimeout(config.getReadTimeout());
+        }
 
         Properties params = config.getParams();
         if (params != null) {
@@ -152,11 +155,11 @@ public class ConfigurationUtils {
         } else {
             HttpMethodConfiguration result = base.copy();
 
-            if (local.getConnectionTimeout() != Wagon.DEFAULT_CONNECTION_TIMEOUT) {
+            if (local.isConnectionTimeoutSet()) {
                 result.setConnectionTimeout(local.getConnectionTimeout());
             }
 
-            if (local.getReadTimeout() != Wagon.DEFAULT_READ_TIMEOUT) {
+            if (local.isReadTimeoutSet()) {
                 result.setReadTimeout(local.getReadTimeout());
             }
 
@@ -170,6 +173,10 @@ public class ConfigurationUtils {
 
             if (local.getUseDefaultHeaders() != null) {
                 result.setUseDefaultHeaders(local.isUseDefaultHeaders());
+            }
+
+            if (local.isUsePreemptiveSet()) {
+                result.setUsePreemptive(local.isUsePreemptive());
             }
 
             return result;
