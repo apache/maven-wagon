@@ -36,12 +36,11 @@ public class HttpMethodConfiguration {
 
     private Properties params = new Properties();
 
-    private int connectionTimeout = Wagon.DEFAULT_CONNECTION_TIMEOUT;
+    private Integer connectionTimeout;
 
-    private int readTimeout =
-            Integer.parseInt(System.getProperty("maven.wagon.rto", Integer.toString(Wagon.DEFAULT_READ_TIMEOUT)));
+    private Integer readTimeout;
 
-    private boolean usePreemptive = false;
+    private Boolean usePreemptive;
 
     public boolean isUseDefaultHeaders() {
         return useDefaultHeaders == null || useDefaultHeaders.booleanValue();
@@ -85,7 +84,7 @@ public class HttpMethodConfiguration {
     }
 
     public int getConnectionTimeout() {
-        return connectionTimeout;
+        return connectionTimeout != null ? connectionTimeout : Wagon.DEFAULT_CONNECTION_TIMEOUT;
     }
 
     public HttpMethodConfiguration setConnectionTimeout(int connectionTimeout) {
@@ -93,8 +92,14 @@ public class HttpMethodConfiguration {
         return this;
     }
 
+    public boolean isConnectionTimeoutSet() {
+        return connectionTimeout != null;
+    }
+
     public int getReadTimeout() {
-        return readTimeout;
+        return readTimeout != null
+                ? readTimeout
+                : Integer.parseInt(System.getProperty("maven.wagon.rto", Integer.toString(Wagon.DEFAULT_READ_TIMEOUT)));
     }
 
     public HttpMethodConfiguration setReadTimeout(int readTimeout) {
@@ -102,13 +107,25 @@ public class HttpMethodConfiguration {
         return this;
     }
 
+    public boolean isReadTimeoutSet() {
+        return readTimeout != null;
+    }
+
     public boolean isUsePreemptive() {
-        return usePreemptive;
+        return Boolean.TRUE.equals(usePreemptive);
     }
 
     public HttpMethodConfiguration setUsePreemptive(boolean usePreemptive) {
-        this.usePreemptive = usePreemptive;
+        this.usePreemptive = Boolean.valueOf(usePreemptive);
         return this;
+    }
+
+    public Boolean getUsePreemptive() {
+        return usePreemptive;
+    }
+
+    public boolean isUsePreemptiveSet() {
+        return usePreemptive != null;
     }
 
     public Header[] asRequestHeaders() {
@@ -133,8 +150,12 @@ public class HttpMethodConfiguration {
     HttpMethodConfiguration copy() {
         HttpMethodConfiguration copy = new HttpMethodConfiguration();
 
-        copy.setConnectionTimeout(getConnectionTimeout());
-        copy.setReadTimeout(getReadTimeout());
+        if (connectionTimeout != null) {
+            copy.setConnectionTimeout(connectionTimeout);
+        }
+        if (readTimeout != null) {
+            copy.setReadTimeout(readTimeout);
+        }
         if (getHeaders() != null) {
             copy.getHeaders().putAll(getHeaders());
         }
@@ -143,7 +164,13 @@ public class HttpMethodConfiguration {
             copy.getParams().putAll(getParams());
         }
 
-        copy.setUseDefaultHeaders(isUseDefaultHeaders());
+        if (useDefaultHeaders != null) {
+            copy.setUseDefaultHeaders(useDefaultHeaders);
+        }
+
+        if (usePreemptive != null) {
+            copy.setUsePreemptive(usePreemptive);
+        }
 
         return copy;
     }
