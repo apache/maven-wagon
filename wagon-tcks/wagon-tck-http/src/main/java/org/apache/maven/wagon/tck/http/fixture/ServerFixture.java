@@ -28,12 +28,13 @@ import java.net.URISyntaxException;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.HashLoginService;
+import org.eclipse.jetty.security.UserStore;
+import org.eclipse.jetty.security.authentication.BasicAuthenticator;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.server.session.AbstractSessionManager;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.FilterMapping;
@@ -69,6 +70,7 @@ public class ServerFixture {
     private final WebAppContext webappContext;
 
     private final HashLoginService loginService;
+    private final UserStore userStore;
 
     private final ConstraintSecurityHandler securityHandler;
 
@@ -111,9 +113,12 @@ public class ServerFixture {
         securityHandler = new ConstraintSecurityHandler();
 
         loginService = new HashLoginService("Test Server");
+        userStore = new UserStore();
+        loginService.setUserStore(userStore);
 
         securityHandler.setLoginService(loginService);
         securityHandler.setConstraintMappings(new ConstraintMapping[] {cm});
+        securityHandler.setAuthenticator(new BasicAuthenticator());
 
         webappContext = new WebAppContext();
         webappContext.setContextPath("/");
@@ -124,7 +129,7 @@ public class ServerFixture {
         webappContext.setHandler(securityHandler);
 
         SessionHandler sessionHandler = webappContext.getSessionHandler();
-        ((AbstractSessionManager) sessionHandler.getSessionManager()).setUsingCookies(false);
+        sessionHandler.setUsingCookies(false);
 
         HandlerCollection handlers = new HandlerCollection();
         handlers.setHandlers(new Handler[] {webappContext, new DefaultHandler()});
@@ -150,7 +155,7 @@ public class ServerFixture {
     }
 
     public void addUser(final String user, final String password) {
-        loginService.putUser(user, new Password(password), new String[] {"allowed"});
+        userStore.addUser(user, new Password(password), new String[] {"allowed"});
     }
 
     public Server getServer() {

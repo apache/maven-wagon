@@ -65,6 +65,7 @@ import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.security.SecurityHandler;
+import org.eclipse.jetty.security.UserStore;
 import org.eclipse.jetty.security.authentication.BasicAuthenticator;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConfiguration;
@@ -427,6 +428,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         root.setResourceBase(localRepositoryPath);
         ServletHolder servletHolder = new ServletHolder(new DefaultServlet());
         servletHolder.setInitParameter("gzip", "true");
+        servletHolder.setInitParameter("precompressed", "true");
         root.addServlet(servletHolder, "/*");
         addConnector(server);
         server.setHandler(root);
@@ -1475,6 +1477,11 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         OutputStream out = new FileOutputStream(file);
         try {
             out.write(child.getBytes());
+            // Pad uncompressed file so compressed.length() < uncompressed.length()
+            // (Jetty 9.4 ResourceService only serves precompressed files if compressed size is smaller)
+            for (int i = 0; i < 100; i++) {
+                out.write(child.getBytes());
+            }
         } finally {
             out.close();
         }
@@ -1982,7 +1989,9 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
 
         TestSecurityHandler sh = new TestSecurityHandler();
         HashLoginService hashLoginService = new HashLoginService("MyRealm");
-        hashLoginService.putUser("user", new Password("secret"), new String[] {"admin"});
+        UserStore userStore = new UserStore();
+        userStore.addUser("user", new Password("secret"), new String[] {"admin"});
+        hashLoginService.setUserStore(userStore);
         sh.setLoginService(hashLoginService);
         sh.setConstraintMappings(new ConstraintMapping[] {cm});
         sh.setAuthenticator(new BasicAuthenticator());
