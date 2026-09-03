@@ -19,14 +19,13 @@
 package org.apache.maven.wagon.providers.ssh.knownhost;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.StringOutputStream;
 import org.codehaus.plexus.util.StringUtils;
 
 /**
@@ -38,18 +37,17 @@ import org.codehaus.plexus.util.StringUtils;
 public class StreamKnownHostsProvider extends AbstractKnownHostsProvider {
 
     public StreamKnownHostsProvider(InputStream stream) throws IOException {
-        try {
-            StringOutputStream stringOutputStream = new StringOutputStream();
-            IOUtil.copy(stream, stringOutputStream);
+        try (InputStream in = stream) {
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            byte[] chunk = new byte[4096];
+            int read;
+            while ((read = in.read(chunk)) != -1) {
+                buffer.write(chunk, 0, read);
+            }
 
-            stream.close();
-            stream = null;
-
-            this.contents = stringOutputStream.toString();
+            this.contents = buffer.toString();
 
             this.knownHosts = this.loadKnownHosts(this.contents);
-        } finally {
-            IOUtil.close(stream);
         }
     }
 

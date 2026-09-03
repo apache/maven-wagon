@@ -34,6 +34,7 @@ import java.net.Proxy.Type;
 import java.net.SocketAddress;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -53,7 +54,6 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.resource.Resource;
 import org.apache.maven.wagon.shared.http.EncodingUtil;
-import org.codehaus.plexus.util.Base64;
 
 import static java.lang.Integer.parseInt;
 import static org.apache.maven.wagon.shared.http.HttpMessageUtils.UNKNOWN_STATUS_CODE;
@@ -201,7 +201,7 @@ public class LightweightHttpWagon extends StreamWagon {
     private void setAuthorization(HttpURLConnection urlConnection) {
         if (preemptiveAuthentication && authenticationInfo != null && authenticationInfo.getUserName() != null) {
             String credentials = authenticationInfo.getUserName() + ":" + authenticationInfo.getPassword();
-            String encoded = new String(Base64.encodeBase64(credentials.getBytes()));
+            String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
             urlConnection.setRequestProperty("Authorization", "Basic " + encoded);
         }
     }
