@@ -49,7 +49,7 @@ public class HttpWagonTest extends HttpWagonTestCase {
 
     @Override
     protected boolean supportPreemptiveAuthenticationPut() {
-        return true;
+        return false;
     }
 
     @Override
