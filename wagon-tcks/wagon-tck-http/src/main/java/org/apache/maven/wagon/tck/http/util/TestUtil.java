@@ -54,9 +54,6 @@ public final class TestUtil {
         }
 
         if (resource.getProtocol().startsWith("jar")) {
-            // File f = new File( path );
-            // f = File.createTempFile( f.getName() + ".", ".tmp" );
-
             String url = resource.toExternalForm();
             int startIdx = url.lastIndexOf(':') + 1;
             int endIdx = url.indexOf("!");
