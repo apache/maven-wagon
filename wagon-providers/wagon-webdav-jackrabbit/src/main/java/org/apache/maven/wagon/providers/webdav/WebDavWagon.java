@@ -105,30 +105,57 @@ public class WebDavWagon extends AbstractHttpClientWagon {
         // create relative path that will always have a leading and trailing slash
         String relpath = FileUtils.normalize(getPath(basedir, dir) + "/");
 
+        mkColPath(baseUrl, relpath);
+    }
+
+    /**
+     * Creates every missing collection along {@code relpath}, one at a time.
+     * <p>
+     * RFC 4918 section 9.3.1 gives MKCOL a small vocabulary, and only two of the answers mean "keep going".
+     * {@code 201 Created} is a collection we made, {@code 405 Method Not Allowed} one that was already there, and
+     * {@code 409 Conflict} says an ancestor is missing -- which is the only reason to step further back. Anything
+     * else, a {@code 403} or an authentication failure for instance, is reported where it happens rather than
+     * being mistaken for a missing parent.
+     *
+     * @param baseUrl scheme, host and port of the repository, without a trailing slash
+     * @param relpath repository-relative path with a leading and trailing slash
+     */
+    void mkColPath(String baseUrl, String relpath) throws IOException {
         PathNavigator navigator = new PathNavigator(relpath);
 
-        // traverse backwards until we hit a directory that already exists (OK/NOT_ALLOWED), or that we were able to
-        // create (CREATED), or until we get to the top of the path
-        int status = -1;
+        // step backwards while the server reports a missing ancestor, until one exists or we create one
+        int status;
         do {
             String url = baseUrl + "/" + navigator.getPath();
             status = doMkCol(url);
             if (status == HttpStatus.SC_CREATED || status == HttpStatus.SC_METHOD_NOT_ALLOWED) {
                 break;
             }
+            if (status != HttpStatus.SC_CONFLICT) {
+                throw new IOException(unableToCreate(url, status));
+            }
         } while (navigator.backward());
+
+        if (status != HttpStatus.SC_CREATED && status != HttpStatus.SC_METHOD_NOT_ALLOWED) {
+            throw new IOException(unableToCreate(baseUrl + "/" + navigator.getPath(), status));
+        }
 
         // traverse forward creating missing directories
         while (navigator.forward()) {
             String url = baseUrl + "/" + navigator.getPath();
             status = doMkCol(url);
-            if (status != HttpStatus.SC_CREATED) {
-                throw new IOException("Unable to create collection: " + url + "; status code = " + status);
+            // a collection that already exists is as good as one we just created
+            if (status != HttpStatus.SC_CREATED && status != HttpStatus.SC_METHOD_NOT_ALLOWED) {
+                throw new IOException(unableToCreate(url, status));
             }
         }
     }
 
-    private int doMkCol(String url) throws IOException {
+    private static String unableToCreate(String url, int status) {
+        return "Unable to create collection: " + url + "; status code = " + status;
+    }
+
+    int doMkCol(String url) throws IOException {
         DavMethods.HttpMkcol method = new DavMethods.HttpMkcol(url);
         try (CloseableHttpResponse closeableHttpResponse = execute(method)) {
             return closeableHttpResponse.getStatusLine().getStatusCode();
