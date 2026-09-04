@@ -20,10 +20,8 @@ package org.apache.maven.wagon.providers.http;
 
 import javax.inject.Named;
 
-import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;
-
 /**
- * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
+ * Publishes {@link HttpWagon} under the <code>https</code> protocol.
  */
-@Named("http")
-public class HttpWagon extends AbstractHttpClientWagon {}
+@Named("https")
+public class HttpsWagon extends HttpWagon {}
