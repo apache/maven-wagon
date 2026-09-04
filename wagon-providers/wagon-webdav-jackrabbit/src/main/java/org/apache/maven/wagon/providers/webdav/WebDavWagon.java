@@ -18,6 +18,8 @@
  */
 package org.apache.maven.wagon.providers.webdav;
 
+import javax.inject.Named;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -54,6 +56,7 @@ import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatResource
  * @author <a href="mailto:carlos@apache.org">Carlos Sanchez</a>
  * @author <a href="mailto:james@atlassian.com">James William Dumay</a>
  */
+@Named("dav")
 public class WebDavWagon extends AbstractHttpClientWagon {
     protected static final String CONTINUE_ON_FAILURE_PROPERTY = "wagon.webdav.continueOnFailure";
 
