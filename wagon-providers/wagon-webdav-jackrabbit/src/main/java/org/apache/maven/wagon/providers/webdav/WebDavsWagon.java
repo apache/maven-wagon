@@ -16,14 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.maven.wagon.providers.http;
+package org.apache.maven.wagon.providers.webdav;
 
 import javax.inject.Named;
 
-import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;
-
 /**
- * @author <a href="michal.maczka@dimatics.com">Michal Maczka</a>
+ * Publishes {@link WebDavWagon} under the <code>davs</code> protocol.
  */
-@Named("http")
-public class HttpWagon extends AbstractHttpClientWagon {}
+@Named("davs")
+public class WebDavsWagon extends WebDavWagon {}
