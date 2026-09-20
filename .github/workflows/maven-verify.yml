@@ -26,6 +26,10 @@ jobs:
     name: Verify
     uses: apache/maven-gh-actions-shared/.github/workflows/maven-verify.yml@v5
     with:
+      maven4-enabled: true
+      # no run-its profile here; Maven 4 refuses a profile that does not exist, Maven 3 only warned
+      ff-goal: verify
+      verify-goal: verify
       install-subversion: true
       matrix-exclude: '[ {"jdk": "25"} ]'
       # -Dssh-tests turns off the no-ssh-tests profiles, -Dssh-embedded=true then narrows the ssh providers down
