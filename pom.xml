@@ -265,6 +265,27 @@ under the License.
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>org.apache.rat</groupId>
+          <artifactId>apache-rat-plugin</artifactId>
+          <configuration>
+            <inputExcludes combine.children="append">
+
+              <exclude>.checkstyle</exclude>
+              <exclude>.gitattributes</exclude>
+              <exclude>**/*.odg</exclude>
+              <exclude>src/test/resources/**</exclude>
+              <exclude>src/main/resources/default-server-root/**</exclude>
+              <exclude>src/main/resources/ssh-keys/**</exclude>
+              <exclude>src/test/ssh-keys/**</exclude>
+              <!-- for CI -->
+              <exclude>.repository/**</exclude>
+              <!-- for intellij -->
+              <exclude>out/**</exclude>
+
+            </inputExcludes>
+          </configuration>
+        </plugin>
+        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
           <configuration>
@@ -290,25 +311,6 @@ under the License.
           <artifactId>maven-javadoc-plugin</artifactId>
           <configuration>
             <failOnError>false</failOnError>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.rat</groupId>
-          <artifactId>apache-rat-plugin</artifactId>
-          <configuration>
-            <excludes combine.children="append">
-              <exclude>.checkstyle</exclude>
-              <exclude>.gitattributes</exclude>
-              <exclude>**/*.odg</exclude>
-              <exclude>src/test/resources/**</exclude>
-              <exclude>src/main/resources/default-server-root/**</exclude>
-              <exclude>src/main/resources/ssh-keys/**</exclude>
-              <exclude>src/test/ssh-keys/**</exclude>
-              <!-- for CI -->
-              <exclude>.repository/**</exclude>
-              <!-- for intellij -->
-              <exclude>out/**</exclude>
-            </excludes>
           </configuration>
         </plugin>
       </plugins>
