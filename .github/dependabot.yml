@@ -20,6 +20,10 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    ignore:
+      # Mockito 5 requires Java 11; the build still runs on JDK 8
+      - dependency-name: "org.mockito:*"
+        versions: [">= 5.0.0"]
 
   - package-ecosystem: maven
     directory: "/"
@@ -30,6 +34,10 @@ updates:
       - "mvn3"
       - "dependencies"
       - "java"
+    ignore:
+      # Mockito 5 requires Java 11; the build still runs on JDK 8
+      - dependency-name: "org.mockito:*"
+        versions: [">= 5.0.0"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
