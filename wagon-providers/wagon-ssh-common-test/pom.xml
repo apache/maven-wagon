@@ -31,7 +31,7 @@ under the License.
 
   <properties>
     <wagon.automatic.module.name>org.apache.maven.wagon.providers.ssh.common.test</wagon.automatic.module.name>
-    <sshdVersion>2.19.0</sshdVersion>
+    <sshdVersion>2.20.0</sshdVersion>
   </properties>
   <dependencies>
     <!-- KnownHostsProviderTestCase is published here and uses @PlexusTest -->
