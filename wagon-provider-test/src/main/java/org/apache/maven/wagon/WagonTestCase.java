@@ -61,6 +61,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -286,6 +287,15 @@ public abstract class WagonTestCase implements PlexusTestConfiguration {
         fileRoundTripTesting();
 
         tearDownWagonTestingFixtures();
+    }
+
+    /**
+     * A wagon keeps its connection and listeners, so every lookup must return a new one. Plexus declared this as
+     * {@code per-lookup}; with JSR-330 it holds only as long as the wagon is not annotated {@code @Singleton}.
+     */
+    @Test
+    public void testWagonLookupReturnsNewInstance() throws Exception {
+        assertNotSame(container.lookup(Wagon.class, getProtocol()), container.lookup(Wagon.class, getProtocol()));
     }
 
     @Test
