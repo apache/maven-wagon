@@ -313,6 +313,14 @@ under the License.
             <failOnError>false</failOnError>
           </configuration>
         </plugin>
+        <plugin>
+          <groupId>org.apache.tooling</groupId>
+          <artifactId>atr-maven-plugin</artifactId>
+          <configuration>
+            <!-- override - the default is project.artifactId -->
+            <project>maven-wagon</project>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
