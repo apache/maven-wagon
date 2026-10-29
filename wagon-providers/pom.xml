@@ -77,10 +77,5 @@ under the License.
       <artifactId>org.eclipse.sisu.inject</artifactId>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>org.apache.maven.wagon</groupId>
-      <artifactId>wagon-provider-test</artifactId>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 </project>
