@@ -160,7 +160,7 @@ under the License.
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
     <slf4jVersion>1.7.36</slf4jVersion>
     <maven.site.path>wagon-archives/wagon-LATEST</maven.site.path>
-    <version.plexus-utils>3.6.0</version.plexus-utils>
+    <version.plexus-utils>3.6.1</version.plexus-utils>
     <guiceVersion>5.1.0</guiceVersion>
     <!-- because doxia parser doesn't like the real one -->
     <mavenSitePluginVersion>${version.maven-site-plugin}</mavenSitePluginVersion>
@@ -247,6 +247,37 @@ under the License.
         <version>9.4.58.v20250814</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <!-- test-only transitives of ftpserver, sshd-git and maven-scm-test with known advisories -->
+      <dependency>
+        <groupId>org.apache.mina</groupId>
+        <artifactId>mina-core</artifactId>
+        <version>2.2.10</version>
+      </dependency>
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcpg-jdk18on</artifactId>
+        <version>1.85</version>
+      </dependency>
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcpkix-jdk18on</artifactId>
+        <version>1.85</version>
+      </dependency>
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcprov-jdk18on</artifactId>
+        <version>1.85</version>
+      </dependency>
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcutil-jdk18on</artifactId>
+        <version>1.85</version>
+      </dependency>
+      <dependency>
+        <groupId>org.codehaus.plexus</groupId>
+        <artifactId>plexus-archiver</artifactId>
+        <version>4.8.0</version>
       </dependency>
       <dependency>
         <groupId>javax.servlet</groupId>
