@@ -233,7 +233,7 @@ public void setPassiveMode(boolean passiveMode) {
 Give the field its default as an initialiser. Configuration is applied to the instance
 after it is created, by the wagon configurator in Maven Resolver, so a plain field
 initialiser is the default and no annotation is involved. See the
-[HTTP Configuration guide](./http-configuration.html) for the largest example of this in
+[HTTP Configuration guide](https://maven.apache.org/guides/mini/guide-http-settings.html) for the largest example of this in
 the project.
 
 ## Testing with `wagon-provider-test`

@@ -32,7 +32,7 @@ Wagon defines a [unified API](./wagon-provider-api/), and it currently has the f
 
 - [File](./wagon-providers/wagon-file/)
 
-- [HTTP](./wagon-providers/wagon-http/)
+- [HTTP](./wagon-providers/wagon-http/) ([HTTP configuration guide](https://maven.apache.org/guides/mini/guide-http-settings.html))
 
 - [HTTP lightweight](./wagon-providers/wagon-http-lightweight/)
 
