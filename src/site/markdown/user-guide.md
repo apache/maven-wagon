@@ -237,7 +237,7 @@ with a key pair — in practice the SSH providers.
 
 Which authentication mechanisms are actually attempted, and how, is entirely up to
 the provider. For the HTTP providers see the
-[HTTP Configuration guide](./http-configuration.html).
+[HTTP Configuration guide](https://maven.apache.org/guides/mini/guide-http-settings.html).
 
 ## Proxies
 
