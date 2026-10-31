@@ -73,6 +73,18 @@ under the License.
           <groupId>org.codehaus.plexus</groupId>
           <artifactId>plexus-container-default</artifactId>
         </exclusion>
+        <!--
+         | Only GitScmTestUtils.setDefaultGitConfig is used, which needs no JUnit 4.
+         | Without these exclusions surefire sees JUnit 4 on the classpath and adds the vintage engine.
+        -->
+        <exclusion>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.hamcrest</groupId>
+          <artifactId>hamcrest-core</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
