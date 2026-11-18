@@ -45,7 +45,7 @@ public final class PathUtils {
     public static String dirname(final String path) {
         final int i = path.lastIndexOf("/");
 
-        return ((i >= 0) ? path.substring(0, i) : "");
+        return i >= 0 ? path.substring(0, i) : "";
     }
 
     /**
@@ -57,7 +57,7 @@ public final class PathUtils {
     @Deprecated
     public static String filename(final String path) {
         final int i = path.lastIndexOf("/");
-        return ((i >= 0) ? path.substring(i + 1) : path);
+        return i >= 0 ? path.substring(i + 1) : path;
     }
 
     @Deprecated
@@ -131,10 +131,10 @@ public final class PathUtils {
         }
         String authorization = authorization(url);
         int index = authorization.indexOf('@');
-        String host = (index >= 0) ? authorization.substring(index + 1) : authorization;
+        String host = index >= 0 ? authorization.substring(index + 1) : authorization;
         // In case we have IPv6 in the host portion of url
         // we have to remove brackets '[' and ']'
-        return ((host.charAt(0) == '[') && (host.charAt(host.length() - 1) == ']'))
+        return (host.charAt(0) == '[') && (host.charAt(host.length() - 1) == ']')
                 ? host.substring(1, host.length() - 1)
                 : host;
     }
@@ -179,7 +179,7 @@ public final class PathUtils {
 
         pos = host.indexOf('@');
 
-        pos = (pos > 0) ? endOfHostPosition(host, pos) : endOfHostPosition(host, 0);
+        pos = pos > 0 ? endOfHostPosition(host, pos) : endOfHostPosition(host, 0);
 
         if (pos > 0) {
             host = host.substring(0, pos);
@@ -191,7 +191,7 @@ public final class PathUtils {
         // if this is IPv6 then it will be in IPv6 Literal Addresses in URL's format
         // see: http://www.ietf.org/rfc/rfc2732.txt
         int endOfIPv6Pos = host.indexOf(']', pos);
-        return (endOfIPv6Pos > 0) ? endOfIPv6Pos + 1 : host.indexOf(":", pos);
+        return endOfIPv6Pos > 0 ? endOfIPv6Pos + 1 : host.indexOf(":", pos);
     }
 
     /**

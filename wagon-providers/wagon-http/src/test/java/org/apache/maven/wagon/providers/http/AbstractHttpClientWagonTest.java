@@ -167,7 +167,7 @@ public class AbstractHttpClientWagonTest {
         for (final String path : paths) {
             urls.add(new File(path).toURI().toURL());
         }
-        final URLClassLoader loader = new URLClassLoader(urls.toArray(new URL[paths.length]), new ClassLoader() {
+        final URLClassLoader loader = new URLClassLoader(urls.toArray(new URL[0]), new ClassLoader() {
             @Override
             protected Class<?> loadClass(final String name, final boolean resolve) throws ClassNotFoundException {
                 if (name.startsWith("org.apache.maven.wagon.shared.http")) {

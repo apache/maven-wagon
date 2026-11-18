@@ -116,7 +116,7 @@ public class LightweightHttpWagonTest extends HttpWagonTestCase {
 
                     assertEquals(
                             "authorization failed for " + forUrl + ", status: 403"
-                                    + ((forReasonPhrase == null || forReasonPhrase.isEmpty())
+                                    + (forReasonPhrase == null || forReasonPhrase.isEmpty()
                                             ? " Forbidden"
                                             : (" " + forReasonPhrase)),
                             e.getMessage(),
@@ -128,7 +128,7 @@ public class LightweightHttpWagonTest extends HttpWagonTestCase {
 
                     assertEquals(
                             "authentication failed for " + forUrl + ", status: 401"
-                                    + ((forReasonPhrase == null || forReasonPhrase.isEmpty())
+                                    + (forReasonPhrase == null || forReasonPhrase.isEmpty()
                                             ? " Unauthorized"
                                             : (" " + forReasonPhrase)),
                             e.getMessage(),

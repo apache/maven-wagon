@@ -181,7 +181,7 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
                     new TransferEvent(wagon, resource, TransferEvent.TRANSFER_PROGRESS, TransferEvent.REQUEST_PUT);
             transferEvent.setTimestamp(System.currentTimeMillis());
 
-            try (ReadableByteChannel input = (this.source != null)
+            try (ReadableByteChannel input = this.source != null
                     ? new RandomAccessFile(this.source, "r").getChannel()
                     : Channels.newChannel(stream)) {
                 ByteBuffer buffer = ByteBuffer.allocate(getBufferCapacityForTransfer(this.length));

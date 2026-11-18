@@ -89,7 +89,7 @@ public class Resource {
         int result = 1;
         result = prime * result + Long.hashCode(contentLength);
         result = prime * result + Long.hashCode(lastModified);
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + (name == null ? 0 : name.hashCode());
         return result;
     }
 

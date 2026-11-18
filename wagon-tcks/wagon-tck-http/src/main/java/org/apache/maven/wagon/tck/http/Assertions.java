@@ -106,7 +106,7 @@ public final class Assertions {
                     assertTrue(
                             e instanceof ResourceDoesNotExistException,
                             "404 not found response should throw ResourceDoesNotExistException");
-                    reasonPhrase = (forReasonPhrase == null || forReasonPhrase.isEmpty())
+                    reasonPhrase = forReasonPhrase == null || forReasonPhrase.isEmpty()
                             ? " Not Found"
                             : (" " + forReasonPhrase);
                     assertEquals(
@@ -122,7 +122,7 @@ public final class Assertions {
                             "401 Unauthorized should throw AuthorizationException since "
                                     + " AuthenticationException is not explicitly declared as thrown from wagon "
                                     + "methods");
-                    reasonPhrase = (forReasonPhrase == null || forReasonPhrase.isEmpty())
+                    reasonPhrase = forReasonPhrase == null || forReasonPhrase.isEmpty()
                             ? " Unauthorized"
                             : (" " + forReasonPhrase);
                     assertEquals(
@@ -135,7 +135,7 @@ public final class Assertions {
                     assertTrue(
                             e instanceof AuthorizationException,
                             "407 Proxy authentication required should throw AuthorizationException");
-                    reasonPhrase = (forReasonPhrase == null || forReasonPhrase.isEmpty())
+                    reasonPhrase = forReasonPhrase == null || forReasonPhrase.isEmpty()
                             ? " Proxy Authentication Required"
                             : (" " + forReasonPhrase);
                     assertEquals(
@@ -147,7 +147,7 @@ public final class Assertions {
                 case HttpServletResponse.SC_FORBIDDEN:
                     assertTrue(
                             e instanceof AuthorizationException, "403 Forbidden should throw AuthorizationException");
-                    reasonPhrase = (forReasonPhrase == null || forReasonPhrase.isEmpty())
+                    reasonPhrase = forReasonPhrase == null || forReasonPhrase.isEmpty()
                             ? " Forbidden"
                             : (" " + forReasonPhrase);
                     assertEquals(

@@ -48,7 +48,7 @@ import org.apache.maven.wagon.Streams;
  * @author <a href="mailto:joakim@erdfelt.com">Joakim Erdfelt</a>
  *
  */
-public class CommandExecutorStreamProcessor {
+public final class CommandExecutorStreamProcessor {
     private CommandExecutorStreamProcessor() {
         // shoo!
     }
