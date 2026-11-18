@@ -32,7 +32,11 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -57,7 +61,6 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.proxy.ProxyInfoProvider;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 import org.eclipse.jetty.http.HttpStatus;
@@ -115,7 +118,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         file.getParentFile().mkdirs();
 
         File repositoryDirectory = getRepositoryDirectory();
-        FileUtils.deleteDirectory(repositoryDirectory);
+        HttpWagonTestCase.deleteDirectory(repositoryDirectory.toPath());
         repositoryDirectory.mkdirs();
 
         server = new Server();
@@ -776,7 +779,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         addConnector(realServer);
 
         File repositoryDirectory = getRepositoryDirectory();
-        FileUtils.deleteDirectory(repositoryDirectory);
+        HttpWagonTestCase.deleteDirectory(repositoryDirectory.toPath());
         repositoryDirectory.mkdirs();
 
         PutHandler putHandler = new PutHandler(repositoryDirectory);
@@ -852,7 +855,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         Server realServer = new Server();
         addConnector(realServer);
         File repositoryDirectory = getRepositoryDirectory();
-        FileUtils.deleteDirectory(repositoryDirectory);
+        HttpWagonTestCase.deleteDirectory(repositoryDirectory.toPath());
         repositoryDirectory.mkdirs();
 
         PutHandler putHandler = new PutHandler(repositoryDirectory);
@@ -934,7 +937,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         addConnector(realServer);
 
         File repositoryDirectory = getRepositoryDirectory();
-        FileUtils.deleteDirectory(repositoryDirectory);
+        HttpWagonTestCase.deleteDirectory(repositoryDirectory.toPath());
         repositoryDirectory.mkdirs();
 
         PutHandler putHandler = new PutHandler(repositoryDirectory);
@@ -1003,7 +1006,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         Server realServer = new Server();
         addConnector(realServer);
         File repositoryDirectory = getRepositoryDirectory();
-        FileUtils.deleteDirectory(repositoryDirectory);
+        HttpWagonTestCase.deleteDirectory(repositoryDirectory.toPath());
         repositoryDirectory.mkdirs();
 
         PutHandler putHandler = new PutHandler(repositoryDirectory);
@@ -1057,7 +1060,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
     @Test
     public void testRedirectPutFailureNonRepeatableStream() throws Exception {
         File repositoryDirectory = getRepositoryDirectory();
-        FileUtils.deleteDirectory(repositoryDirectory);
+        HttpWagonTestCase.deleteDirectory(repositoryDirectory.toPath());
         repositoryDirectory.mkdirs();
 
         Server redirectServer = new Server();
@@ -2139,6 +2142,46 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         } catch (AssertionError assertionError) {
             logger.error("Exception which failed assertions: ", e);
             throw assertionError;
+        }
+    }
+
+    static void deleteDirectory(final Path directory) throws IOException {
+        if (!Files.exists(directory)) {
+            return;
+        }
+        final IOException[] failure = new IOException[1];
+        Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                try {
+                    Files.delete(file);
+                } catch (IOException e) {
+                    failure[0] = e;
+                }
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFileFailed(Path file, IOException exc) {
+                failure[0] = exc;
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
+                if (exc != null) {
+                    failure[0] = exc;
+                }
+                try {
+                    Files.delete(dir);
+                } catch (IOException e) {
+                    failure[0] = e;
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
+        if (failure[0] != null) {
+            throw failure[0];
         }
     }
 }
