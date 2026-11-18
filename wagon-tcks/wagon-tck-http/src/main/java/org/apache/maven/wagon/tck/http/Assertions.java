@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -89,7 +90,7 @@ public final class Assertions {
         // TODO: handle AuthenticationException for Wagon.connect() calls
         assertNotNull(e);
         try {
-            assertTrue(e instanceof WagonException, "only verify instances of WagonException");
+            assertInstanceOf(WagonException.class, e, "only verify instances of WagonException");
 
             String reasonPhrase;
             String assertMessageForBadMessage = "exception message not described properly";
@@ -103,8 +104,9 @@ public final class Assertions {
             switch (forStatusCode) {
                 case HttpServletResponse.SC_NOT_FOUND:
                     // TODO: add test for 410: Gone?
-                    assertTrue(
-                            e instanceof ResourceDoesNotExistException,
+                    assertInstanceOf(
+                            ResourceDoesNotExistException.class,
+                            e,
                             "404 not found response should throw ResourceDoesNotExistException");
                     reasonPhrase = forReasonPhrase == null || forReasonPhrase.isEmpty()
                             ? " Not Found"
@@ -117,8 +119,9 @@ public final class Assertions {
 
                 case HttpServletResponse.SC_UNAUTHORIZED:
                     // FIXME assumes Wagon.get()/put() returning 401 instead of Wagon.connect()
-                    assertTrue(
-                            e instanceof AuthorizationException,
+                    assertInstanceOf(
+                            AuthorizationException.class,
+                            e,
                             "401 Unauthorized should throw AuthorizationException since "
                                     + " AuthenticationException is not explicitly declared as thrown from wagon "
                                     + "methods");
@@ -132,8 +135,9 @@ public final class Assertions {
                     break;
 
                 case HttpServletResponse.SC_PROXY_AUTHENTICATION_REQUIRED:
-                    assertTrue(
-                            e instanceof AuthorizationException,
+                    assertInstanceOf(
+                            AuthorizationException.class,
+                            e,
                             "407 Proxy authentication required should throw AuthorizationException");
                     reasonPhrase = forReasonPhrase == null || forReasonPhrase.isEmpty()
                             ? " Proxy Authentication Required"
@@ -145,8 +149,8 @@ public final class Assertions {
                     break;
 
                 case HttpServletResponse.SC_FORBIDDEN:
-                    assertTrue(
-                            e instanceof AuthorizationException, "403 Forbidden should throw AuthorizationException");
+                    assertInstanceOf(
+                            AuthorizationException.class, e, "403 Forbidden should throw AuthorizationException");
                     reasonPhrase = forReasonPhrase == null || forReasonPhrase.isEmpty()
                             ? " Forbidden"
                             : (" " + forReasonPhrase);
@@ -157,8 +161,9 @@ public final class Assertions {
                     break;
 
                 default:
-                    assertTrue(
-                            e instanceof TransferFailedException,
+                    assertInstanceOf(
+                            TransferFailedException.class,
+                            e,
                             "transfer failures should at least be wrapped in a TransferFailedException");
 
                     // the status code and reason phrase cannot always be learned due to implementation limitations
