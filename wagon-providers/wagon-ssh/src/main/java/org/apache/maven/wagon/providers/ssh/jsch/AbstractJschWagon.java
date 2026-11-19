@@ -281,7 +281,7 @@ public abstract class AbstractJschWagon extends StreamWagon implements SshWagon,
             repository = identitiesFrom(() -> new WindowsSSHAgentConnector());
         }
         if (repository == null) {
-            repository = identitiesFrom(PageantConnector::new);
+            repository = identitiesFrom(() -> new PageantConnector());
         }
         return repository;
     }
