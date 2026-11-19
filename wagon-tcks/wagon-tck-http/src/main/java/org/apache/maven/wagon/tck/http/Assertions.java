@@ -20,6 +20,7 @@ package org.apache.maven.wagon.tck.http;
 
 import javax.servlet.http.HttpServletResponse;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,7 +31,6 @@ import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.WagonException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.proxy.ProxyInfo;
-import org.codehaus.plexus.util.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,9 +68,19 @@ public final class Assertions {
             return null;
         }
 
-        final String resource = IOUtil.toString(stream);
+        final String resource = toString(stream);
         stream.close();
         return resource;
+    }
+
+    private static String toString(InputStream in) throws IOException {
+        ByteArrayOutputStream result = new ByteArrayOutputStream();
+        byte[] buffer = new byte[16384];
+        int n;
+        while ((n = in.read(buffer)) != -1) {
+            result.write(buffer, 0, n);
+        }
+        return new String(result.toByteArray());
     }
 
     /**

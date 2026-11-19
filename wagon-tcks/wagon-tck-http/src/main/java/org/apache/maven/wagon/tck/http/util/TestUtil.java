@@ -18,6 +18,7 @@
  */
 package org.apache.maven.wagon.tck.http.util;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -31,7 +32,6 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import org.codehaus.plexus.util.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,7 +93,7 @@ public final class TestUtil {
                                 in = jf.getInputStream(je);
                                 out = new FileOutputStream(target);
 
-                                IOUtil.copy(in, out);
+                                copy(in, out);
 
                                 out.close();
                                 out = null;
@@ -101,8 +101,8 @@ public final class TestUtil {
                                 in.close();
                                 in = null;
                             } finally {
-                                IOUtil.close(in);
-                                IOUtil.close(out);
+                                closeQuietly(in);
+                                closeQuietly(out);
                             }
                         }
                     }
@@ -122,6 +122,24 @@ public final class TestUtil {
             return new File(base, path);
         } else {
             return new File(resource.toURI().normalize());
+        }
+    }
+
+    private static void copy(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[16384];
+        int n;
+        while ((n = in.read(buffer)) != -1) {
+            out.write(buffer, 0, n);
+        }
+    }
+
+    private static void closeQuietly(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException e) {
+                // ignore
+            }
         }
     }
 }

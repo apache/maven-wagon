@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -63,8 +64,6 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.proxy.ProxyInfoProvider;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.StringUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
@@ -1784,7 +1783,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
 
         // ensure we didn't use chunked transfer which doesn't work on ngnix
         for (DeployedResource deployedResource : putHandler.deployedResources) {
-            if (StringUtils.equalsIgnoreCase("chunked", deployedResource.transferEncoding)) {
+            if ("chunked".equalsIgnoreCase(deployedResource.transferEncoding)) {
                 fail("deployedResource use chunked: " + deployedResource);
             }
         }
@@ -1892,14 +1891,14 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
             try {
                 in = request.getInputStream();
                 out = new FileOutputStream(file);
-                IOUtil.copy(in, out);
+                copy(in, out);
                 out.close();
                 out = null;
                 in.close();
                 in = null;
             } finally {
-                IOUtil.close(in);
-                IOUtil.close(out);
+                closeQuietly(in);
+                closeQuietly(out);
             }
             putCallNumber++;
             DeployedResource deployedResource = new DeployedResource();
@@ -2191,6 +2190,24 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
         if (failure != null) {
             throw failure;
+        }
+    }
+
+    private static void copy(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[16384];
+        int n;
+        while ((n = in.read(buffer)) != -1) {
+            out.write(buffer, 0, n);
+        }
+    }
+
+    private static void closeQuietly(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException e) {
+                // ignore
+            }
         }
     }
 }
