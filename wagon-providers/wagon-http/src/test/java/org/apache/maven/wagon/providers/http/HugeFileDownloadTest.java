@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
@@ -35,7 +34,6 @@ import java.nio.file.StandardOpenOption;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.observers.Debug;
 import org.apache.maven.wagon.repository.Repository;
-import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
@@ -87,11 +85,8 @@ public class HugeFileDownloadTest {
             @Override
             protected void doGet(HttpServletRequest req, HttpServletResponse resp)
                     throws ServletException, IOException {
-                FileInputStream fis = new FileInputStream(hugeFile);
-
                 resp.addHeader("Content-Length", String.valueOf(hugeFile.length()));
-                IOUtil.copy(fis, resp.getOutputStream());
-                fis.close();
+                Files.copy(hugeFile.toPath(), resp.getOutputStream());
             }
         });
         root.addServlet(servletHolder, "/*");
@@ -137,10 +132,7 @@ public class HugeFileDownloadTest {
             @Override
             protected void doGet(HttpServletRequest req, HttpServletResponse resp)
                     throws ServletException, IOException {
-                FileInputStream fis = new FileInputStream(hugeFile);
-
-                IOUtil.copy(fis, resp.getOutputStream());
-                fis.close();
+                Files.copy(hugeFile.toPath(), resp.getOutputStream());
             }
         });
         root.addServlet(servletHolder, "/*");
