@@ -18,15 +18,17 @@
  */
 package org.apache.maven.wagon.providers.ssh.external;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.wagon.Streams;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.providers.ssh.AbstractEmbeddedScpWagonWithKeyTest;
-import org.codehaus.plexus.util.cli.CommandLineUtils;
-import org.codehaus.plexus.util.cli.Commandline;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -64,16 +66,14 @@ public class EmbeddedScpExternalWagonWithKeyTest extends AbstractEmbeddedScpWago
             FileUtils.copyDirectory(new File("src/test/ssh-keys"), sshKeysTarget);
             // ssh keys need to 700 permissions
             // to prevent WARNING: UNPROTECTED PRIVATE KEY FILE!
-            Commandline commandline = new Commandline("chmod");
-            commandline.createArg().setValue("-R");
-            commandline.createArg().setValue("700");
-            commandline.createArg().setValue(sshKeysTarget.getCanonicalPath());
-            CommandLineUtils.StringStreamConsumer out = new CommandLineUtils.StringStreamConsumer();
-            CommandLineUtils.StringStreamConsumer err = new CommandLineUtils.StringStreamConsumer();
-            int exitCode = CommandLineUtils.executeCommandLine(commandline, out, err);
+            ProcessBuilder commandline = new ProcessBuilder("chmod", "-R", "700", sshKeysTarget.getCanonicalPath());
+            Process process = commandline.start();
+            String out = readAll(process.getInputStream());
+            String err = readAll(process.getErrorStream());
+            int exitCode = process.waitFor();
             Streams streams = new Streams();
-            streams.setOut(out.getOutput());
-            streams.setErr(err.getOutput());
+            streams.setOut(out);
+            streams.setErr(err);
             if (exitCode != 0) {
                 throw new RuntimeException("fail to chmod exit code " + exitCode + ", error" + streams.getErr()
                         + ", out " + streams.getOut());
@@ -90,5 +90,17 @@ public class EmbeddedScpExternalWagonWithKeyTest extends AbstractEmbeddedScpWago
     @Test
     public void testFailedGetToStream() throws Exception {
         // ignore this test as it need a stream wagon
+    }
+
+    private static String readAll(InputStream in) throws IOException {
+        try (InputStream stream = in) {
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            byte[] chunk = new byte[4096];
+            int read;
+            while ((read = stream.read(chunk)) != -1) {
+                buffer.write(chunk, 0, read);
+            }
+            return new String(buffer.toByteArray(), Charset.defaultCharset());
+        }
     }
 }

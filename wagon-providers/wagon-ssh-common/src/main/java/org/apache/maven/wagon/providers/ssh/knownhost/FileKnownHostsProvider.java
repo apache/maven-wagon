@@ -25,9 +25,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.Set;
-
-import org.codehaus.plexus.util.FileUtils;
 
 /**
  * Provides known hosts from a file
@@ -66,7 +66,7 @@ public class FileKnownHostsProvider extends StreamKnownHostsProvider {
 
         if (!this.knownHosts.equals(hosts)) {
             file.getParentFile().mkdirs();
-            FileUtils.fileWrite(file.getAbsolutePath(), contents);
+            Files.write(file.toPath(), contents.getBytes());
             this.knownHosts = hosts;
         }
     }
@@ -75,7 +75,7 @@ public class FileKnownHostsProvider extends StreamKnownHostsProvider {
         if (!this.knownHosts.contains(knownHostEntry)) {
             String knownHost = knownHostEntry.getHostName() + " " + knownHostEntry.getKeyType() + " "
                     + knownHostEntry.getKeyValue() + "\n";
-            FileUtils.fileAppend(file.getAbsolutePath(), knownHost);
+            Files.write(file.toPath(), knownHost.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         }
     }
 
