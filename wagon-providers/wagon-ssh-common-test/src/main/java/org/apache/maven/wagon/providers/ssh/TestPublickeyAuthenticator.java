@@ -20,6 +20,8 @@ package org.apache.maven.wagon.providers.ssh;
 
 import javax.crypto.Cipher;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.KeyFactory;
@@ -34,7 +36,6 @@ import java.util.List;
 
 import org.apache.sshd.server.auth.pubkey.PublickeyAuthenticator;
 import org.apache.sshd.server.session.ServerSession;
-import org.codehaus.plexus.util.IOUtil;
 
 /**
  * @author Olivier Lamy
@@ -52,21 +53,26 @@ public class TestPublickeyAuthenticator implements PublickeyAuthenticator {
         if (!keyAuthz) {
             return false;
         }
-        InputStream in = null;
-        try {
-            in = Thread.currentThread().getContextClassLoader().getResourceAsStream("ssh-keys/id_rsa.pub");
-            PublicKey publicKey = decodePublicKey(IOUtil.toString(in));
-            in.close();
-            in = null;
+        try (InputStream in =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("ssh-keys/id_rsa.pub")) {
+            PublicKey publicKey = decodePublicKey(readAll(in));
 
             publickeyAuthenticatorRequests.add(new PublickeyAuthenticatorRequest(username, key));
 
             return ((RSAPublicKey) publicKey).getModulus().equals(((RSAPublicKey) publicKey).getModulus());
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
-        } finally {
-            IOUtil.close(in);
         }
+    }
+
+    private static String readAll(InputStream in) throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        byte[] chunk = new byte[4096];
+        int read;
+        while ((read = in.read(chunk)) != -1) {
+            buffer.write(chunk, 0, read);
+        }
+        return new String(buffer.toByteArray());
     }
 
     public static byte[] decrypt(byte[] text, PrivateKey key) throws Exception {

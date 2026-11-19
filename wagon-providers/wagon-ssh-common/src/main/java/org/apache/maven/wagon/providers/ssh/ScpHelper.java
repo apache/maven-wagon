@@ -23,8 +23,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -42,8 +48,6 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.util.StringUtils;
 
 /**
  * Scp helper for general algorithms on ssh server.
@@ -62,7 +66,7 @@ public class ScpHelper {
 
     public static String getResourceDirectory(String resourceName) {
         String dir = PathUtils.dirname(resourceName);
-        dir = StringUtils.replace(dir, "\\", "/");
+        dir = dir.replace('\\', '/');
         return dir;
     }
 
@@ -77,7 +81,7 @@ public class ScpHelper {
     }
 
     public static Resource getResource(String resourceName) {
-        String r = StringUtils.replace(resourceName, "\\", "/");
+        String r = resourceName.replace('\\', '/');
         return new Resource(r);
     }
 
@@ -173,6 +177,30 @@ public class ScpHelper {
         }
     }
 
+    /**
+     * Lists every file below {@code directory}, relative to it and always using {@code '/'} as separator.
+     * This replaces {@code FileUtils.getFileNames(directory, "**\/**", "", false)}.
+     */
+    private static List<String> getFileNames(final File directory) throws IOException {
+        final List<String> fileNames = new ArrayList<>();
+        final Path base = directory.toPath();
+        Files.walkFileTree(base, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                StringBuilder name = new StringBuilder();
+                for (Path part : base.relativize(file)) {
+                    if (name.length() > 0) {
+                        name.append(PATH_SEPARATOR);
+                    }
+                    name.append(part.toString());
+                }
+                fileNames.add(name.toString());
+                return FileVisitResult.CONTINUE;
+            }
+        });
+        return fileNames;
+    }
+
     private static void writeZipEntry(ZipOutputStream jar, File source, String entryName) throws IOException {
         byte[] buffer = new byte[1024];
 
@@ -213,7 +241,7 @@ public class ScpHelper {
 
         String basedir = repository.getBasedir();
 
-        String destDir = StringUtils.replace(destinationDirectory, "\\", "/");
+        String destDir = destinationDirectory.replace('\\', '/');
 
         String path = getPath(basedir, destDir);
         try {
@@ -239,7 +267,7 @@ public class ScpHelper {
             zipFile = File.createTempFile("wagon", ".zip");
             zipFile.deleteOnExit();
 
-            List<String> files = FileUtils.getFileNames(sourceDirectory, "**/**", "", false);
+            List<String> files = getFileNames(sourceDirectory);
 
             createZip(files, zipFile, sourceDirectory);
         } catch (IOException e) {

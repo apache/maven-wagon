@@ -160,7 +160,6 @@ under the License.
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
     <slf4jVersion>1.7.36</slf4jVersion>
     <maven.site.path>wagon-archives/wagon-LATEST</maven.site.path>
-    <version.plexus-utils>3.6.1</version.plexus-utils>
     <guiceVersion>5.1.0</guiceVersion>
     <!-- because doxia parser doesn't like the real one -->
     <mavenSitePluginVersion>${version.maven-site-plugin}</mavenSitePluginVersion>
