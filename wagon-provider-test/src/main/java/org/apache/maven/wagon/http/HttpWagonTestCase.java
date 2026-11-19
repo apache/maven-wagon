@@ -32,19 +32,21 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileVisitResult;
+import java.nio.file.AccessDeniedException;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -119,7 +121,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         file.getParentFile().mkdirs();
 
         File repositoryDirectory = getRepositoryDirectory();
-        HttpWagonTestCase.deleteDirectory(repositoryDirectory.toPath());
+        deleteDirectory(repositoryDirectory.toPath());
         repositoryDirectory.mkdirs();
 
         server = new Server();
@@ -780,7 +782,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         addConnector(realServer);
 
         File repositoryDirectory = getRepositoryDirectory();
-        HttpWagonTestCase.deleteDirectory(repositoryDirectory.toPath());
+        deleteDirectory(repositoryDirectory.toPath());
         repositoryDirectory.mkdirs();
 
         PutHandler putHandler = new PutHandler(repositoryDirectory);
@@ -856,7 +858,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         Server realServer = new Server();
         addConnector(realServer);
         File repositoryDirectory = getRepositoryDirectory();
-        HttpWagonTestCase.deleteDirectory(repositoryDirectory.toPath());
+        deleteDirectory(repositoryDirectory.toPath());
         repositoryDirectory.mkdirs();
 
         PutHandler putHandler = new PutHandler(repositoryDirectory);
@@ -938,7 +940,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         addConnector(realServer);
 
         File repositoryDirectory = getRepositoryDirectory();
-        HttpWagonTestCase.deleteDirectory(repositoryDirectory.toPath());
+        deleteDirectory(repositoryDirectory.toPath());
         repositoryDirectory.mkdirs();
 
         PutHandler putHandler = new PutHandler(repositoryDirectory);
@@ -1007,7 +1009,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         Server realServer = new Server();
         addConnector(realServer);
         File repositoryDirectory = getRepositoryDirectory();
-        HttpWagonTestCase.deleteDirectory(repositoryDirectory.toPath());
+        deleteDirectory(repositoryDirectory.toPath());
         repositoryDirectory.mkdirs();
 
         PutHandler putHandler = new PutHandler(repositoryDirectory);
@@ -1061,7 +1063,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
     @Test
     public void testRedirectPutFailureNonRepeatableStream() throws Exception {
         File repositoryDirectory = getRepositoryDirectory();
-        HttpWagonTestCase.deleteDirectory(repositoryDirectory.toPath());
+        deleteDirectory(repositoryDirectory.toPath());
         repositoryDirectory.mkdirs();
 
         Server redirectServer = new Server();
@@ -2150,43 +2152,45 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         }
     }
 
+    private static final int DELETE_RETRIES = 10;
+
+    private static final long DELETE_RETRY_DELAY_MS = 100L;
+
     static void deleteDirectory(final Path directory) throws IOException {
         if (!Files.exists(directory)) {
             return;
         }
-        final IOException[] failure = new IOException[1];
-        Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+        List<Path> paths;
+        try (Stream<Path> walk = Files.walk(directory)) {
+            paths = walk.sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+        }
+        IOException failure = null;
+        for (Path path : paths) {
+            IOException last = null;
+            for (int attempt = 0; attempt < DELETE_RETRIES; attempt++) {
                 try {
-                    Files.delete(file);
+                    Files.deleteIfExists(path);
+                    last = null;
+                    break;
                 } catch (IOException e) {
-                    failure[0] = e;
+                    last = e;
+                    if (!(e instanceof DirectoryNotEmptyException) && !(e instanceof AccessDeniedException)) {
+                        break;
+                    }
+                    try {
+                        Thread.sleep(DELETE_RETRY_DELAY_MS);
+                    } catch (InterruptedException interrupted) {
+                        Thread.currentThread().interrupt();
+                        throw last;
+                    }
                 }
-                return FileVisitResult.CONTINUE;
             }
-
-            @Override
-            public FileVisitResult visitFileFailed(Path file, IOException exc) {
-                failure[0] = exc;
-                return FileVisitResult.CONTINUE;
+            if (last != null && failure == null) {
+                failure = last;
             }
-
-            @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
-                if (exc != null) {
-                    failure[0] = exc;
-                }
-                try {
-                    Files.delete(dir);
-                } catch (IOException e) {
-                    failure[0] = e;
-                }
-                return FileVisitResult.CONTINUE;
-            }
-        });
-        if (failure[0] != null) {
-            throw failure[0];
+        }
+        if (failure != null) {
+            throw failure;
         }
     }
 }
