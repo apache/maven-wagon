@@ -62,6 +62,7 @@ import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.cookie.StandardCookieSpec;
 import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy;
+import org.apache.hc.client5.http.impl.DefaultSchemePortResolver;
 import org.apache.hc.client5.http.impl.auth.BasicAuthCache;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.auth.BasicScheme;
@@ -72,6 +73,7 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.routing.DefaultRoutePlanner;
 import org.apache.hc.client5.http.io.HttpClientConnectionManager;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
@@ -484,7 +486,11 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
                 .setConnectionManager(httpClientConnectionManager) //
                 .setRetryStrategy(createRetryHandler())
                 .setDefaultAuthSchemeRegistry(createAuthSchemeRegistry())
-                .setRedirectStrategy(new WagonRedirectStrategy())
+                .replaceExecInterceptor(
+                        "REDIRECT",
+                        new WagonRedirectExec(
+                                new DefaultRoutePlanner(DefaultSchemePortResolver.INSTANCE),
+                                new WagonRedirectStrategy()))
                 .addRequestInterceptorLast(new OriginScopedHeadersInterceptor())
                 .build();
     }

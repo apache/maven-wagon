@@ -203,10 +203,8 @@ public class WebDavWagon extends AbstractHttpClientWagon {
         } catch (HttpException e) {
             throw new IOException(e.getMessage(), e);
         } finally {
-            // TODO olamy: not sure we still need this!!
-            if (method != null) {
-                method.reset();
-            }
+            // HttpClient 5 releases the connection when the response is closed;
+            // resetting the request here would abort the socket before the body is consumed.
             if (closeableHttpResponse != null) {
                 closeableHttpResponse.close();
             }
@@ -262,10 +260,6 @@ public class WebDavWagon extends AbstractHttpClientWagon {
         } catch (IOException e) {
             throw new TransferFailedException(e.getMessage(), e);
         } finally {
-            // TODO olamy: not sure we still need this!!
-            if (method != null) {
-                method.reset();
-            }
             if (closeableHttpResponse != null) {
                 try {
                     closeableHttpResponse.close();
