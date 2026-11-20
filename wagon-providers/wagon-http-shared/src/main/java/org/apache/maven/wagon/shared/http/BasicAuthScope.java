@@ -18,8 +18,8 @@
  */
 package org.apache.maven.wagon.shared.http;
 
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.core5.http.HttpHost;
 
 /**
  * @since 2.8
@@ -68,10 +68,9 @@ public class BasicAuthScope {
      * through {@code setBasicAuthScope} and {@code setProxyBasicAuthScope} respectively.
      * <p>
      * A non-null {@link #getHost() host}, {@link #getPort() port}, or {@link #getRealm() realm} replaces the value passed
-     * in; the literal string {@code "ANY"} selects {@link AuthScope#ANY_HOST}, {@link AuthScope#ANY_PORT}, or
-     * {@link AuthScope#ANY_REALM}. A passed-in port of {@code -1} also yields {@link AuthScope#ANY_PORT}. Leaving
-     * realm unset yields {@link AuthScope#ANY_REALM}. When host, port and realm are all {@code "ANY"},
-     * {@link AuthScope#ANY} is returned.
+     * in; the literal string {@code "ANY"} means no restriction on that component in HttpClient 5. A passed-in port of
+     * {@code -1} also means any port. When host, port and realm are all {@code "ANY"}, an unrestricted
+     * {@link AuthScope} is returned.
      *
      * @param host the host to scope credentials to, before any override is applied
      * @param port the port to scope credentials to, before any override is applied; -1 means
@@ -85,39 +84,34 @@ public class BasicAuthScope {
                 && "ANY".compareTo(getPort()) == 0 //
                 && getRealm() != null //
                 && "ANY".compareTo(getRealm()) == 0) {
-            return AuthScope.ANY;
+            return new AuthScope(null, -1);
         }
+        // HttpClient 5 has no ANY_HOST / ANY_PORT / ANY_REALM constants: null host and realm,
+        // and a negative port, express "any" in the 5.x AuthScope model.
         String scopeHost = host;
         if (getHost() != null) {
             if ("ANY".compareTo(getHost()) == 0) {
-                scopeHost = AuthScope.ANY_HOST;
+                scopeHost = null;
             } else {
                 scopeHost = getHost();
             }
         }
 
-        int scopePort = port > -1 ? port : AuthScope.ANY_PORT;
-        // -1 for server/port settings does this, but providing an override here
-        // in
-        // the BasicAuthScope config
+        int scopePort = port > -1 ? port : -1;
         if (getPort() != null) {
             if ("ANY".compareTo(getPort()) == 0) {
-                scopePort = AuthScope.ANY_PORT;
+                scopePort = -1;
             } else {
                 scopePort = Integer.parseInt(getPort());
             }
         }
 
-        String scopeRealm = AuthScope.ANY_REALM;
-        if (getRealm() != null) {
-            if ("ANY".compareTo(getRealm()) != 0) {
-                scopeRealm = getRealm();
-            } else {
-                scopeRealm = AuthScope.ANY_REALM;
-            }
+        String scopeRealm = null;
+        if (getRealm() != null && "ANY".compareTo(getRealm()) != 0) {
+            scopeRealm = getRealm();
         }
 
-        return new AuthScope(scopeHost, scopePort, scopeRealm);
+        return new AuthScope(null, scopeHost, scopePort, scopeRealm, null);
     }
 
     /**
