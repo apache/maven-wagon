@@ -122,6 +122,18 @@ import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatTransfer
  * @author <a href="mailto:james@atlassian.com">James William Dumay</a>
  */
 public abstract class AbstractHttpClientWagon extends StreamWagon {
+    private boolean isPutExpectContinueEnabled() {
+        if (httpConfiguration == null) {
+            return true;
+        }
+        HttpMethodConfiguration config = httpConfiguration.getMethodConfiguration(new HttpPut("/"));
+        if (config == null || config.getParams() == null) {
+            return true;
+        }
+        String value = config.getParams().getProperty("http.protocol.expect-continue");
+        return value == null || Boolean.parseBoolean(value);
+    }
+
     final class WagonHttpEntity extends AbstractHttpEntity {
         private final Resource resource;
 
@@ -143,10 +155,11 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
             if (source != null) {
                 this.source = source;
                 this.repeatable = true;
-            } else {
-                // HttpClient 5 only replays a request body on a redirect or an authentication
-                // challenge when the entity is repeatable. A caller-supplied stream cannot be
-                // rewound, so buffer it to a temporary file to preserve Wagon's 4.x behaviour.
+            } else if (isPutExpectContinueEnabled()) {
+                // With Expect: 100-continue the server may answer before the body is sent.
+                // HttpClient 5 only replays a repeatable entity on a redirect/401, so buffer
+                // the stream to preserve Wagon 4.x behaviour in that case. When expect-continue
+                // is disabled the old Wagon could not replay either, and the TCK expects failure.
                 try {
                     Path buffer = Files.createTempFile("wagon-http-put-", ".tmp");
                     Files.copy(stream, buffer, StandardCopyOption.REPLACE_EXISTING);
@@ -157,6 +170,9 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
                 } catch (IOException e) {
                     throw new TransferFailedException("Cannot buffer stream for HTTP PUT", e);
                 }
+            } else {
+                this.stream = stream;
+                this.repeatable = false;
             }
             this.resource = resource;
             this.length = resource == null ? -1 : resource.getContentLength();
