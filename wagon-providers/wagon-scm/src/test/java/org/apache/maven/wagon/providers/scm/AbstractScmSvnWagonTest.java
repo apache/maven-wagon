@@ -20,8 +20,10 @@ package org.apache.maven.wagon.providers.scm;
 
 import java.io.File;
 
-import org.codehaus.plexus.util.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
+
+import static org.apache.maven.wagon.FileTestUtils.copyDirectory;
+import static org.apache.maven.wagon.FileTestUtils.deleteDirectory;
 
 /**
  * Test for ScmWagon using SVN as underlying SCM
@@ -42,9 +44,9 @@ public abstract class AbstractScmSvnWagonTest extends AbstractScmWagonTest {
 
         File testRepo = getTestFile("target/test-classes/test-repo-svn-test");
 
-        FileUtils.deleteDirectory(testRepo);
+        deleteDirectory(testRepo.toPath());
 
-        FileUtils.copyDirectoryStructure(origRepo, testRepo);
+        copyDirectory(origRepo.toPath(), testRepo.toPath());
 
         repository = "scm:svn:" + testRepo.getAbsoluteFile().toPath().toUri().toASCIIString();
     }

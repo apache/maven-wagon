@@ -37,9 +37,10 @@ import org.apache.maven.wagon.WagonTestCase;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import static org.apache.maven.wagon.FileTestUtils.deleteDirectory;
 
 /**
  * Test for {@link ScmWagon}. You need a subclass for each SCM provider you want to test.
@@ -66,7 +67,7 @@ public abstract class AbstractScmWagonTest extends WagonTestCase {
     public void setUp() throws Exception {
         super.setUp();
 
-        FileUtils.deleteDirectory(getCheckoutDirectory());
+        deleteDirectory(getCheckoutDirectory().toPath());
 
         if (wagon == null) {
             wagon = (ScmWagon) super.getWagon();
@@ -147,12 +148,12 @@ public abstract class AbstractScmWagonTest extends WagonTestCase {
 
     protected void createDirectory(Wagon wagon, String resourceToCreate, String dirName) throws Exception {
         super.createDirectory(wagon, resourceToCreate, dirName);
-        FileUtils.deleteDirectory(getCheckoutDirectory());
+        deleteDirectory(getCheckoutDirectory().toPath());
     }
 
     protected void assertResourcesAreInRemoteSide(Wagon wagon, List<String> resourceNames)
             throws IOException, TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
-        FileUtils.deleteDirectory(getCheckoutDirectory());
+        deleteDirectory(getCheckoutDirectory().toPath());
         super.assertResourcesAreInRemoteSide(wagon, resourceNames);
     }
 }
