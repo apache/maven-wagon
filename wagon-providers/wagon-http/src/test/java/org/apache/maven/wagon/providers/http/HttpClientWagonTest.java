@@ -18,9 +18,9 @@
  */
 package org.apache.maven.wagon.providers.http;
 
-import org.apache.http.Header;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpHead;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.core5.http.Header;
 import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;
@@ -44,7 +44,7 @@ public class HttpClientWagonTest {
         HttpConfiguration config = new HttpConfiguration();
         config.setAll(methodConfig);
 
-        HttpHead method = new HttpHead();
+        HttpHead method = new HttpHead("/");
         RequestConfig.Builder builder = RequestConfig.custom();
         ConfigurationUtils.copyConfig(config.getMethodConfiguration(method), builder);
         RequestConfig requestConfig = builder.build();
@@ -60,7 +60,7 @@ public class HttpClientWagonTest {
         TestWagon wagon = new TestWagon();
         wagon.setHttpConfiguration(config);
 
-        HttpHead method = new HttpHead();
+        HttpHead method = new HttpHead("/");
         wagon.setHeaders(method);
 
         // these are the default headers.
@@ -85,7 +85,7 @@ public class HttpClientWagonTest {
         TestWagon wagon = new TestWagon();
         wagon.setHttpConfiguration(config);
 
-        HttpHead method = new HttpHead();
+        HttpHead method = new HttpHead("/");
         wagon.setHeaders(method);
 
         // these are the default headers.

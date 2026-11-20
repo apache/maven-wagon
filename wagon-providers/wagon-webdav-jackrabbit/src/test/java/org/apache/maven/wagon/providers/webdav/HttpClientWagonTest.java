@@ -18,9 +18,8 @@
  */
 package org.apache.maven.wagon.providers.webdav;
 
-import org.apache.http.Header;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.params.HttpParams;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
+import org.apache.hc.core5.http.Header;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.OutputData;
 import org.apache.maven.wagon.TransferFailedException;
@@ -35,6 +34,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HttpClientWagonTest {
 
@@ -49,11 +49,12 @@ public class HttpClientWagonTest {
         TestWagon wagon = new TestWagon();
         wagon.setHttpConfiguration(config);
 
-        HttpHead method = new HttpHead();
+        HttpHead method = new HttpHead("/");
         wagon.setHeaders(method);
 
-        HttpParams params = method.getParams();
-        assertNotNull(params);
+        // HttpClient 5 dropped org.apache.http.params; preemptive auth is now
+        // carried by HttpMethodConfiguration and applied by AbstractHttpClientWagon.
+        assertTrue(config.getMethodConfiguration(method).isUsePreemptive());
     }
 
     @Test
@@ -64,7 +65,7 @@ public class HttpClientWagonTest {
         TestWagon wagon = new TestWagon();
         wagon.setHttpConfiguration(config);
 
-        HttpHead method = new HttpHead();
+        HttpHead method = new HttpHead("/");
         wagon.setHeaders(method);
 
         // these are the default headers.
@@ -89,7 +90,7 @@ public class HttpClientWagonTest {
         TestWagon wagon = new TestWagon();
         wagon.setHttpConfiguration(config);
 
-        HttpHead method = new HttpHead();
+        HttpHead method = new HttpHead("/");
         wagon.setHeaders(method);
 
         // these are the default headers.
