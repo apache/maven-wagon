@@ -33,6 +33,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -128,6 +131,8 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
 
         private File source;
 
+        private Path bufferedStream;
+
         private long length = -1;
 
         private boolean repeatable;
@@ -139,8 +144,19 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
                 this.source = source;
                 this.repeatable = true;
             } else {
-                this.stream = stream;
-                this.repeatable = false;
+                // HttpClient 5 only replays a request body on a redirect or an authentication
+                // challenge when the entity is repeatable. A caller-supplied stream cannot be
+                // rewound, so buffer it to a temporary file to preserve Wagon's 4.x behaviour.
+                try {
+                    Path buffer = Files.createTempFile("wagon-http-put-", ".tmp");
+                    Files.copy(stream, buffer, StandardCopyOption.REPLACE_EXISTING);
+                    buffer.toFile().deleteOnExit();
+                    this.bufferedStream = buffer;
+                    this.source = buffer.toFile();
+                    this.repeatable = true;
+                } catch (IOException e) {
+                    throw new TransferFailedException("Cannot buffer stream for HTTP PUT", e);
+                }
             }
             this.resource = resource;
             this.length = resource == null ? -1 : resource.getContentLength();
@@ -177,6 +193,10 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
 
         @Override
         public void close() throws IOException {
+            if (bufferedStream != null) {
+                Files.deleteIfExists(bufferedStream);
+                bufferedStream = null;
+            }
             if (stream != null) {
                 stream.close();
             }
