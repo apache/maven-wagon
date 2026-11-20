@@ -18,7 +18,9 @@
  */
 package org.apache.maven.wagon.shared.http;
 
-import org.apache.http.client.config.RequestConfig;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.maven.wagon.Wagon;
 import org.junit.jupiter.api.Test;
 
@@ -31,8 +33,8 @@ public class ConfigurationUtilsTest {
     @Test
     public void testCopyConfigDoesNotOverwriteBuilderTimeoutsWhenUnset() {
         RequestConfig.Builder builder = RequestConfig.custom();
-        builder.setConnectTimeout(12345);
-        builder.setSocketTimeout(54321);
+        builder.setConnectTimeout(12345, TimeUnit.MILLISECONDS);
+        builder.setResponseTimeout(54321, TimeUnit.MILLISECONDS);
 
         HttpMethodConfiguration config = new HttpMethodConfiguration();
         assertFalse(config.isConnectionTimeoutSet());
@@ -41,15 +43,15 @@ public class ConfigurationUtilsTest {
         ConfigurationUtils.copyConfig(config, builder);
 
         RequestConfig requestConfig = builder.build();
-        assertEquals(12345, requestConfig.getConnectTimeout());
-        assertEquals(54321, requestConfig.getSocketTimeout());
+        assertEquals(12345, requestConfig.getConnectTimeout().toMilliseconds());
+        assertEquals(54321, requestConfig.getResponseTimeout().toMilliseconds());
     }
 
     @Test
     public void testCopyConfigOverwritesBuilderTimeoutsWhenSet() {
         RequestConfig.Builder builder = RequestConfig.custom();
-        builder.setConnectTimeout(12345);
-        builder.setSocketTimeout(54321);
+        builder.setConnectTimeout(12345, TimeUnit.MILLISECONDS);
+        builder.setResponseTimeout(54321, TimeUnit.MILLISECONDS);
 
         HttpMethodConfiguration config = new HttpMethodConfiguration();
         config.setConnectionTimeout(999);
@@ -60,8 +62,8 @@ public class ConfigurationUtilsTest {
         ConfigurationUtils.copyConfig(config, builder);
 
         RequestConfig requestConfig = builder.build();
-        assertEquals(999, requestConfig.getConnectTimeout());
-        assertEquals(888, requestConfig.getSocketTimeout());
+        assertEquals(999, requestConfig.getConnectTimeout().toMilliseconds());
+        assertEquals(888, requestConfig.getResponseTimeout().toMilliseconds());
     }
 
     @Test
