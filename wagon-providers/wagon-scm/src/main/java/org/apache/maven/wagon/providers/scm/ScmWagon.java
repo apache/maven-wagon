@@ -23,6 +23,12 @@ import javax.inject.Named;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,8 +62,6 @@ import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.util.StringUtils;
 
 /**
  * Wagon provider to get and put files from and to SCM systems, using Maven-SCM as underlying transport.
@@ -238,7 +242,7 @@ public class ScmWagon extends AbstractWagon {
      * take effect.</p>
      */
     private ScmVersion makeScmVersion() {
-        if (StringUtils.isBlank(scmVersion)) {
+        if (scmVersion == null || scmVersion.trim().isEmpty()) {
             return null;
         }
         if (scmVersion.length() > 0) {
@@ -348,15 +352,15 @@ public class ScmWagon extends AbstractWagon {
 
             File newCheckoutDirectory = new File(checkoutDirectory, relPath);
 
-            File scmFile = new File(newCheckoutDirectory, isDirectory ? "" : FileUtils.removePath(targetName, '/'));
+            File scmFile = new File(newCheckoutDirectory, isDirectory ? "" : removePath(targetName, '/'));
 
             boolean fileAlreadyInScm = scmFile.exists();
 
             if (!scmFile.equals(source)) {
                 if (isDirectory) {
-                    FileUtils.copyDirectoryStructure(source, scmFile);
+                    copyDirectoryStructure(source, scmFile);
                 } else {
-                    FileUtils.copyFile(source, scmFile);
+                    copyFile(source, scmFile);
                 }
             }
 
@@ -452,7 +456,7 @@ public class ScmWagon extends AbstractWagon {
         boolean added = false;
         try {
             mkdirsThrow(deepDir, createdDirs);
-            if (createdDirs.size() != 0) {
+            if (!createdDirs.isEmpty()) {
                 File topNewDir = createdDirs.get(0);
                 String relTopNewDir = topNewDir
                         .getPath()
@@ -467,8 +471,8 @@ public class ScmWagon extends AbstractWagon {
 
             throw new TransferFailedException("Failed to add directory " + createdDirs.get(0) + " to working copy", e);
         } finally {
-            if (!added && createdDirs.size() != 0) {
-                FileUtils.deleteDirectory(createdDirs.get(0));
+            if (!added && !createdDirs.isEmpty()) {
+                deleteDirectory(createdDirs.get(0));
             }
         }
 
@@ -643,7 +647,7 @@ public class ScmWagon extends AbstractWagon {
             }
 
             if (!scmFile.equals(destination)) {
-                FileUtils.copyFile(scmFile, destination);
+                copyFile(scmFile, destination);
             }
         } catch (ScmException e) {
             fireTransferError(resource, e, TransferEvent.REQUEST_GET);
@@ -698,7 +702,7 @@ public class ScmWagon extends AbstractWagon {
 
     private void deleteCheckoutDirectory() throws IOException {
         haveRecursiveCO = false;
-        FileUtils.deleteDirectory(checkoutDirectory);
+        deleteDirectory(checkoutDirectory);
     }
 
     private boolean checkoutDirExists(ScmProvider scmProvider) {
@@ -748,6 +752,86 @@ public class ScmWagon extends AbstractWagon {
     }
 
     private String getDirname(String resourceName) {
-        return FileUtils.getPath(resourceName, '/');
+        return getPath(resourceName, '/');
+    }
+
+    /** Returns everything after the last {@code separator}, or the whole string when there is none. */
+    private static String removePath(String path, char separator) {
+        int index = path.lastIndexOf(separator);
+        return index < 0 ? path : path.substring(index + 1);
+    }
+
+    /** Returns everything before the last {@code separator} (without it), or the empty string. */
+    private static String getPath(String path, char separator) {
+        int index = path.lastIndexOf(separator);
+        return index < 0 ? "" : path.substring(0, index);
+    }
+
+    /** JDK replacement for {@code FileUtils.copyFile}: creates parent dirs and copies file attributes. */
+    private static void copyFile(File source, File destination) throws IOException {
+        File parent = destination.getParentFile();
+        if (parent != null) {
+            Files.createDirectories(parent.toPath());
+        }
+        Files.copy(
+                source.toPath(),
+                destination.toPath(),
+                StandardCopyOption.REPLACE_EXISTING,
+                StandardCopyOption.COPY_ATTRIBUTES);
+    }
+
+    /** JDK replacement for {@code FileUtils.copyDirectoryStructure}. */
+    private static void copyDirectoryStructure(final File source, final File target) throws IOException {
+        final Path sourcePath = source.toPath();
+        Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                Files.createDirectories(target.toPath().resolve(sourcePath.relativize(dir)));
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.copy(
+                        file,
+                        target.toPath().resolve(sourcePath.relativize(file)),
+                        StandardCopyOption.REPLACE_EXISTING,
+                        StandardCopyOption.COPY_ATTRIBUTES);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+
+    /** JDK replacement for {@code FileUtils.deleteDirectory}. */
+    private static void deleteDirectory(File directory) throws IOException {
+        if (!directory.exists()) {
+            return;
+        }
+        Files.walkFileTree(directory.toPath(), new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                if (exc != null) {
+                    throw exc;
+                }
+                delete(dir);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+
+    private static void delete(Path path) throws IOException {
+        try {
+            Files.delete(path);
+        } catch (java.nio.file.AccessDeniedException e) {
+            // Git stores object files read-only on Windows; clear the flag and retry once.
+            path.toFile().setWritable(true);
+            Files.delete(path);
+        }
     }
 }

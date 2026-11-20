@@ -20,8 +20,10 @@ package org.apache.maven.wagon.providers.scm;
 
 import java.io.File;
 
-import org.codehaus.plexus.util.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
+
+import static org.apache.maven.wagon.FileTestUtils.copyDirectory;
+import static org.apache.maven.wagon.FileTestUtils.deleteDirectory;
 
 /**
  * Test for ScmWagon using Git as underlying SCM
@@ -39,9 +41,9 @@ public abstract class AbstractScmGitWagonTest extends AbstractScmWagonTest {
 
         File testRepo = getTestFile("target/test-classes/test-repo-git-test");
 
-        FileUtils.deleteDirectory(testRepo);
+        deleteDirectory(testRepo.toPath());
 
-        FileUtils.copyDirectoryStructure(origRepo, testRepo);
+        copyDirectory(origRepo.toPath(), testRepo.toPath());
 
         repository = "scm:git:" + testRepo.getAbsoluteFile().toPath().toUri().toASCIIString();
     }

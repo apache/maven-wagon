@@ -19,6 +19,7 @@
 package org.apache.maven.wagon.providers.ssh;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 
@@ -27,10 +28,13 @@ import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import static org.apache.maven.wagon.FileTestUtils.copyDirectory;
+import static org.apache.maven.wagon.FileTestUtils.copyFileToDirectory;
+import static org.apache.maven.wagon.FileTestUtils.deleteDirectory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -101,23 +105,23 @@ public abstract class AbstractEmbeddedScpWagonWithKeyTest extends StreamingWagon
     }
 
     @Test
-    public void testWithSpaces() throws Exception {
+    public void testWithSpaces(@TempDir Path tempDir) throws Exception {
         String dir = "foo   test";
         File spaceDirectory = new File(TestData.getRepoPath(), dir);
         if (spaceDirectory.exists()) {
-            FileUtils.deleteDirectory(spaceDirectory);
+            deleteDirectory(spaceDirectory.toPath());
         }
         spaceDirectory.mkdirs();
 
         String subDir = "foo bar";
         File sub = new File(spaceDirectory, subDir);
         if (sub.exists()) {
-            FileUtils.deleteDirectory(sub);
+            deleteDirectory(sub.toPath());
         }
         sub.mkdirs();
 
         File dummy = new File("src/test/resources/dummy.txt");
-        FileUtils.copyFileToDirectory(dummy, sub);
+        copyFileToDirectory(dummy.toPath(), sub.toPath());
 
         String url = getTestRepositoryUrl() + "/" + dir;
         Repository repo = new Repository("foo", url);
@@ -136,15 +140,12 @@ public abstract class AbstractEmbeddedScpWagonWithKeyTest extends StreamingWagon
         assertTrue(files.contains("dummy.txt"));
         assertTrue(files.contains("newdummy.txt"));
 
-        File sourceWithSpace = new File("target/directory with spaces");
-        if (sourceWithSpace.exists()) {
-            FileUtils.deleteDirectory(sourceWithSpace);
-        }
+        Path sourceWithSpace = tempDir.resolve("directory with spaces");
         File resources = new File("src/test/resources");
 
-        FileUtils.copyDirectory(resources, sourceWithSpace);
+        copyDirectory(resources.toPath(), sourceWithSpace);
 
-        wagon.putDirectory(sourceWithSpace, "target with spaces");
+        wagon.putDirectory(sourceWithSpace.toFile(), "target with spaces");
 
         files = wagon.getFileList("target with spaces");
 
