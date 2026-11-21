@@ -2171,6 +2171,8 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
                     break;
                 } catch (IOException e) {
                     // Windows reports a locked file as FileSystemException, not AccessDeniedException.
+                    // A collection releases handles still held by unreferenced streams on JDK 8.
+                    System.gc();
                     last = e;
                     try {
                         Thread.sleep(DELETE_RETRY_DELAY_MS);
