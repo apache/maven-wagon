@@ -33,8 +33,6 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.AccessDeniedException;
-import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -2172,10 +2170,8 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
                     last = null;
                     break;
                 } catch (IOException e) {
+                    // Windows reports a locked file as FileSystemException, not AccessDeniedException.
                     last = e;
-                    if (!(e instanceof DirectoryNotEmptyException) && !(e instanceof AccessDeniedException)) {
-                        break;
-                    }
                     try {
                         Thread.sleep(DELETE_RETRY_DELAY_MS);
                     } catch (InterruptedException interrupted) {
