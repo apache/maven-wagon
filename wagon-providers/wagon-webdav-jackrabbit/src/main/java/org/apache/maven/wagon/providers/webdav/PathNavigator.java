@@ -18,10 +18,9 @@
  */
 package org.apache.maven.wagon.providers.webdav;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
-
-import org.codehaus.plexus.util.StringUtils;
+import java.util.StringTokenizer;
 
 /**
  * @author <a href="mailto:james@atlassian.com">James William Dumay</a>
@@ -32,7 +31,14 @@ public class PathNavigator {
     private int currentPosition;
 
     public PathNavigator(String path) {
-        list = Arrays.asList(StringUtils.split(path, "/"));
+        // StringTokenizer preserves the previous helper's semantics: it drops empty tokens and
+        // treats each character of the delimiter string as a separator.
+        StringTokenizer tokenizer = new StringTokenizer(path, "/");
+        List<String> tokens = new ArrayList<>();
+        while (tokenizer.hasMoreTokens()) {
+            tokens.add(tokenizer.nextToken());
+        }
+        list = tokens;
         currentPosition = list.size();
     }
 

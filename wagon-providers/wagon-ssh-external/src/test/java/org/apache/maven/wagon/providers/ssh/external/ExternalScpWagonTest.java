@@ -23,7 +23,6 @@ import java.io.File;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.cli.Commandline;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,12 +69,12 @@ public class ExternalScpWagonTest {
         wagon.connect(new Repository("test", "scpexe://localhost/tmp"), new AuthenticationInfo());
         File bareFile = new File("test-relative-file.jar");
 
-        Commandline cl = wagon.buildCommandLine(new Resource("test-relative-file.jar"), bareFile, true);
+        ProcessBuilder cl = wagon.buildCommandLine(new Resource("test-relative-file.jar"), bareFile, true);
 
-        assertNotNull(cl.getWorkingDirectory());
+        assertNotNull(cl.directory());
         assertEquals(
                 bareFile.getAbsoluteFile().getParentFile().getAbsolutePath(),
-                cl.getWorkingDirectory().getAbsolutePath());
+                cl.directory().getAbsolutePath());
     }
 
     @Test
@@ -85,11 +84,10 @@ public class ExternalScpWagonTest {
         wagon.connect(new Repository("test", "scpexe://localhost/tmp"), new AuthenticationInfo());
         File fileWithParent = new File("target", "test-file.jar");
 
-        Commandline cl = wagon.buildCommandLine(new Resource("test-file.jar"), fileWithParent, true);
+        ProcessBuilder cl = wagon.buildCommandLine(new Resource("test-file.jar"), fileWithParent, true);
 
-        assertNotNull(cl.getWorkingDirectory());
+        assertNotNull(cl.directory());
         assertEquals(
-                fileWithParent.getParentFile().getAbsolutePath(),
-                cl.getWorkingDirectory().getAbsolutePath());
+                fileWithParent.getParentFile().getAbsolutePath(), cl.directory().getAbsolutePath());
     }
 }

@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -33,14 +34,18 @@ import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -57,9 +62,6 @@ import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.proxy.ProxyInfoProvider;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.StringUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
@@ -86,6 +88,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -115,7 +118,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         file.getParentFile().mkdirs();
 
         File repositoryDirectory = getRepositoryDirectory();
-        FileUtils.deleteDirectory(repositoryDirectory);
+        deleteDirectory(repositoryDirectory.toPath());
         repositoryDirectory.mkdirs();
 
         server = new Server();
@@ -776,7 +779,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         addConnector(realServer);
 
         File repositoryDirectory = getRepositoryDirectory();
-        FileUtils.deleteDirectory(repositoryDirectory);
+        deleteDirectory(repositoryDirectory.toPath());
         repositoryDirectory.mkdirs();
 
         PutHandler putHandler = new PutHandler(repositoryDirectory);
@@ -852,7 +855,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         Server realServer = new Server();
         addConnector(realServer);
         File repositoryDirectory = getRepositoryDirectory();
-        FileUtils.deleteDirectory(repositoryDirectory);
+        deleteDirectory(repositoryDirectory.toPath());
         repositoryDirectory.mkdirs();
 
         PutHandler putHandler = new PutHandler(repositoryDirectory);
@@ -934,7 +937,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         addConnector(realServer);
 
         File repositoryDirectory = getRepositoryDirectory();
-        FileUtils.deleteDirectory(repositoryDirectory);
+        deleteDirectory(repositoryDirectory.toPath());
         repositoryDirectory.mkdirs();
 
         PutHandler putHandler = new PutHandler(repositoryDirectory);
@@ -1003,7 +1006,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         Server realServer = new Server();
         addConnector(realServer);
         File repositoryDirectory = getRepositoryDirectory();
-        FileUtils.deleteDirectory(repositoryDirectory);
+        deleteDirectory(repositoryDirectory.toPath());
         repositoryDirectory.mkdirs();
 
         PutHandler putHandler = new PutHandler(repositoryDirectory);
@@ -1057,7 +1060,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
     @Test
     public void testRedirectPutFailureNonRepeatableStream() throws Exception {
         File repositoryDirectory = getRepositoryDirectory();
-        FileUtils.deleteDirectory(repositoryDirectory);
+        deleteDirectory(repositoryDirectory.toPath());
         repositoryDirectory.mkdirs();
 
         Server redirectServer = new Server();
@@ -1778,7 +1781,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
 
         // ensure we didn't use chunked transfer which doesn't work on ngnix
         for (DeployedResource deployedResource : putHandler.deployedResources) {
-            if (StringUtils.equalsIgnoreCase("chunked", deployedResource.transferEncoding)) {
+            if ("chunked".equalsIgnoreCase(deployedResource.transferEncoding)) {
                 fail("deployedResource use chunked: " + deployedResource);
             }
         }
@@ -1886,14 +1889,14 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
             try {
                 in = request.getInputStream();
                 out = new FileOutputStream(file);
-                IOUtil.copy(in, out);
+                copy(in, out);
                 out.close();
                 out = null;
                 in.close();
                 in = null;
             } finally {
-                IOUtil.close(in);
-                IOUtil.close(out);
+                closeQuietly(in);
+                closeQuietly(out);
             }
             putCallNumber++;
             DeployedResource deployedResource = new DeployedResource();
@@ -2021,7 +2024,7 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
      *
      */
     @SuppressWarnings("checkstyle:visibilitymodifier")
-    public static class HandlerRequestResponse {
+    public static final class HandlerRequestResponse {
         public String method;
 
         public int responseCode;
@@ -2062,17 +2065,18 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         // TODO: handle AuthenticationException for Wagon.connect() calls
         assertNotNull(e);
         try {
-            assertTrue(e instanceof WagonException, "only verify instances of WagonException");
+            assertInstanceOf(WagonException.class, e, "only verify instances of WagonException");
 
             String reasonPhrase;
             String assertMessageForBadMessage = "exception message not described properly";
             switch (forStatusCode) {
                 case HttpServletResponse.SC_NOT_FOUND:
                     // TODO: add test for 410: Gone?
-                    assertTrue(
-                            e instanceof ResourceDoesNotExistException,
+                    assertInstanceOf(
+                            ResourceDoesNotExistException.class,
+                            e,
                             "404 not found response should throw ResourceDoesNotExistException");
-                    reasonPhrase = (forReasonPhrase == null || forReasonPhrase.isEmpty())
+                    reasonPhrase = forReasonPhrase == null || forReasonPhrase.isEmpty()
                             ? " Not Found"
                             : (" " + forReasonPhrase);
                     assertEquals(
@@ -2083,12 +2087,13 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
 
                 case HttpServletResponse.SC_UNAUTHORIZED:
                     // FIXME assumes Wagon.get()/put() returning 401 instead of Wagon.connect()
-                    assertTrue(
-                            e instanceof AuthorizationException,
+                    assertInstanceOf(
+                            AuthorizationException.class,
+                            e,
                             "401 Unauthorized should throw AuthorizationException since "
                                     + " AuthenticationException is not explicitly declared as thrown from wagon "
                                     + "methods");
-                    reasonPhrase = (forReasonPhrase == null || forReasonPhrase.isEmpty())
+                    reasonPhrase = forReasonPhrase == null || forReasonPhrase.isEmpty()
                             ? " Unauthorized"
                             : (" " + forReasonPhrase);
                     assertEquals(
@@ -2098,10 +2103,11 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
                     break;
 
                 case HttpServletResponse.SC_PROXY_AUTHENTICATION_REQUIRED:
-                    assertTrue(
-                            e instanceof AuthorizationException,
+                    assertInstanceOf(
+                            AuthorizationException.class,
+                            e,
                             "407 Proxy authentication required should throw AuthorizationException");
-                    reasonPhrase = (forReasonPhrase == null || forReasonPhrase.isEmpty())
+                    reasonPhrase = forReasonPhrase == null || forReasonPhrase.isEmpty()
                             ? " Proxy Authentication Required"
                             : (" " + forReasonPhrase);
                     assertEquals(
@@ -2111,9 +2117,9 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
                     break;
 
                 case HttpServletResponse.SC_FORBIDDEN:
-                    assertTrue(
-                            e instanceof AuthorizationException, "403 Forbidden should throw AuthorizationException");
-                    reasonPhrase = (forReasonPhrase == null || forReasonPhrase.isEmpty())
+                    assertInstanceOf(
+                            AuthorizationException.class, e, "403 Forbidden should throw AuthorizationException");
+                    reasonPhrase = forReasonPhrase == null || forReasonPhrase.isEmpty()
                             ? " Forbidden"
                             : (" " + forReasonPhrase);
                     assertEquals(
@@ -2123,8 +2129,9 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
                     break;
 
                 default:
-                    assertTrue(
-                            e instanceof TransferFailedException,
+                    assertInstanceOf(
+                            TransferFailedException.class,
+                            e,
                             "transfer failures should at least be wrapped in a TransferFailedException");
                     assertTrue(
                             forStatusCode >= HttpServletResponse.SC_BAD_REQUEST,
@@ -2139,6 +2146,66 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
         } catch (AssertionError assertionError) {
             logger.error("Exception which failed assertions: ", e);
             throw assertionError;
+        }
+    }
+
+    private static final int DELETE_RETRIES = 10;
+
+    private static final long DELETE_RETRY_DELAY_MS = 100L;
+
+    static void deleteDirectory(final Path directory) throws IOException {
+        if (!Files.exists(directory)) {
+            return;
+        }
+        List<Path> paths;
+        try (Stream<Path> walk = Files.walk(directory)) {
+            paths = walk.sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+        }
+        IOException failure = null;
+        for (Path path : paths) {
+            IOException last = null;
+            for (int attempt = 0; attempt < DELETE_RETRIES; attempt++) {
+                try {
+                    Files.deleteIfExists(path);
+                    last = null;
+                    break;
+                } catch (IOException e) {
+                    // Windows reports a locked file as FileSystemException, not AccessDeniedException.
+                    // A collection releases handles still held by unreferenced streams on JDK 8.
+                    System.gc();
+                    last = e;
+                    try {
+                        Thread.sleep(DELETE_RETRY_DELAY_MS);
+                    } catch (InterruptedException interrupted) {
+                        Thread.currentThread().interrupt();
+                        throw last;
+                    }
+                }
+            }
+            if (last != null && failure == null) {
+                failure = last;
+            }
+        }
+        if (failure != null) {
+            throw failure;
+        }
+    }
+
+    private static void copy(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[16384];
+        int n;
+        while ((n = in.read(buffer)) != -1) {
+            out.write(buffer, 0, n);
+        }
+    }
+
+    private static void closeQuietly(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException e) {
+                // ignore
+            }
         }
     }
 }

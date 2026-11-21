@@ -28,6 +28,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +42,6 @@ import org.apache.maven.wagon.StreamWagon;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.FileUtils;
 
 /**
  * Wagon Provider for Local File System
@@ -139,7 +140,7 @@ public class FileWagon extends StreamWagon {
              * HP-UX if destinationDirectory is "."
              * http://www.nabble.com/With-maven-2.0.2-site%3Adeploy-doesn%27t-work-t934716.html for details. Using
              * path.getCanonicalFile() ensures that the path is fully resolved before an attempt to create it. TODO:
-             * consider moving this to FileUtils.mkdirs()
+             * consider moving this to a reusable directory-creation helper.
              */
             File realFile = path.getCanonicalFile();
             realFile.mkdirs();
@@ -161,9 +162,72 @@ public class FileWagon extends StreamWagon {
         }
 
         try {
-            FileUtils.copyDirectoryStructure(sourceDirectory, path);
+            copyDirectoryStructure(sourceDirectory, path, path);
         } catch (IOException e) {
             throw new TransferFailedException("Error copying directory structure", e);
+        }
+    }
+
+    /**
+     * Recursively copies the contents of {@code sourceDirectory} into {@code destinationDirectory}. Empty directories
+     * are included, existing files are overwritten and the destination directory itself is never copied into. This
+     * is a JDK-only implementation that replaces the former dependency-based copy.
+     *
+     * @param sourceDirectory the directory to copy from
+     * @param destinationDirectory the directory to copy into
+     * @param rootDestinationDirectory the root destination, skipped if it appears below the source
+     * @throws IOException if the source cannot be read or the destination cannot be written
+     */
+    private static void copyDirectoryStructure(
+            File sourceDirectory, File destinationDirectory, File rootDestinationDirectory) throws IOException {
+        if (sourceDirectory == null) {
+            throw new IOException("source directory can't be null.");
+        }
+        if (destinationDirectory == null) {
+            throw new IOException("destination directory can't be null.");
+        }
+        if (sourceDirectory.equals(destinationDirectory)) {
+            throw new IOException("source and destination are the same directory.");
+        }
+        if (!sourceDirectory.exists()) {
+            throw new IOException("Source directory doesn't exists (" + sourceDirectory.getAbsolutePath() + ").");
+        }
+
+        File[] files = sourceDirectory.listFiles();
+        if (files == null) {
+            throw new IOException("Could not list directory " + sourceDirectory.getAbsolutePath());
+        }
+
+        String sourcePath = sourceDirectory.getAbsolutePath();
+
+        for (File file : files) {
+            if (file.equals(rootDestinationDirectory)) {
+                // We don't copy the destination directory into itself
+                continue;
+            }
+
+            String dest = file.getAbsolutePath().substring(sourcePath.length() + 1);
+            File destination = new File(destinationDirectory, dest);
+
+            if (file.isFile()) {
+                if (file.getCanonicalFile().equals(destination.getCanonicalFile())) {
+                    continue;
+                }
+                Files.createDirectories(destination.getParentFile().toPath());
+                Files.copy(
+                        file.toPath(),
+                        destination.toPath(),
+                        StandardCopyOption.REPLACE_EXISTING,
+                        StandardCopyOption.COPY_ATTRIBUTES);
+            } else if (file.isDirectory()) {
+                if (!destination.exists() && !destination.mkdirs()) {
+                    throw new IOException(
+                            "Could not create destination directory '" + destination.getAbsolutePath() + "'.");
+                }
+                copyDirectoryStructure(file, destination, rootDestinationDirectory);
+            } else {
+                throw new IOException("Unknown file type: " + file.getAbsolutePath());
+            }
         }
     }
 

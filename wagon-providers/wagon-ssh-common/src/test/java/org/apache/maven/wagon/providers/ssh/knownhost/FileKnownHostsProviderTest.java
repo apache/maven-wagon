@@ -21,8 +21,8 @@ package org.apache.maven.wagon.providers.ssh.knownhost;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
-import org.codehaus.plexus.util.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -41,7 +41,11 @@ public class FileKnownHostsProviderTest {
         File readonlyKnownHostFile = new File(basedir, "src/test/resources/known_hosts");
         testKnownHostsFile = new File(basedir, "target/known_hosts");
         testKnownHostsFile.delete();
-        FileUtils.copyFile(readonlyKnownHostFile, testKnownHostsFile);
+        Files.copy(
+                readonlyKnownHostFile.toPath(),
+                testKnownHostsFile.toPath(),
+                StandardCopyOption.REPLACE_EXISTING,
+                StandardCopyOption.COPY_ATTRIBUTES);
         testKnownHostsFile.setLastModified(testKnownHostsFile.lastModified() - 60 * 1000);
 
         provider = new FileKnownHostsProvider(testKnownHostsFile);

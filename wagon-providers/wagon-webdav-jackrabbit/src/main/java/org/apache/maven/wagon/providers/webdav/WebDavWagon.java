@@ -38,7 +38,6 @@ import org.apache.maven.wagon.WagonConstants;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.shared.http.AbstractHttpClientWagon;
-import org.codehaus.plexus.util.FileUtils;
 
 import static org.apache.maven.wagon.providers.webdav.DavMethods.DEPTH_0;
 import static org.apache.maven.wagon.providers.webdav.DavMethods.DEPTH_1;
@@ -106,9 +105,54 @@ public class WebDavWagon extends AbstractHttpClientWagon {
         }
 
         // create relative path that will always have a leading and trailing slash
-        String relpath = FileUtils.normalize(getPath(basedir, dir) + "/");
+        String relpath = normalize(getPath(basedir, dir) + "/");
 
         mkColPath(baseUrl, relpath);
+    }
+
+    /**
+     * Normalizes a forward-slash path: repeated slashes are collapsed, {@code /./} segments are removed and
+     * {@code /../} segments resolve against their parent. A path that tries to go above its root normalizes to
+     * {@code null}. This mirrors the behavior of the previously used dependency-based helper.
+     *
+     * @param path the path to normalize
+     * @return the normalized path, or {@code null} if the path escapes its root
+     */
+    private static String normalize(String path) {
+        String normalized = path;
+
+        // Resolve occurrences of "//" in the normalized path
+        while (true) {
+            int index = normalized.indexOf("//");
+            if (index < 0) {
+                break;
+            }
+            normalized = normalized.substring(0, index) + normalized.substring(index + 1);
+        }
+
+        // Resolve occurrences of "/./" in the normalized path
+        while (true) {
+            int index = normalized.indexOf("/./");
+            if (index < 0) {
+                break;
+            }
+            normalized = normalized.substring(0, index) + normalized.substring(index + 2);
+        }
+
+        // Resolve occurrences of "/../" in the normalized path
+        while (true) {
+            int index = normalized.indexOf("/../");
+            if (index < 0) {
+                break;
+            }
+            if (index == 0) {
+                return null; // Trying to go outside our context
+            }
+            int index2 = normalized.lastIndexOf('/', index - 1);
+            normalized = normalized.substring(0, index2) + normalized.substring(index + 3);
+        }
+
+        return normalized;
     }
 
     /**

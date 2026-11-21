@@ -29,8 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-
-import org.codehaus.plexus.util.Base64;
+import java.util.Base64;
 
 /**
  *
@@ -60,7 +59,7 @@ public class ProxyAuthenticationFilter implements Filter {
             return;
         } else {
             String data = header.substring("BASIC ".length());
-            data = new String(Base64.decodeBase64(data.getBytes(StandardCharsets.US_ASCII)));
+            data = new String(Base64.getMimeDecoder().decode(data.getBytes(StandardCharsets.US_ASCII)));
             String[] creds = data.split(":");
 
             if (!creds[0].equals(username) || !creds[1].equals(password)) {

@@ -23,12 +23,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.codehaus.plexus.util.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,9 +101,19 @@ public class LatencyServlet extends HttpServlet {
             in.close();
             in = null;
         } finally {
-            IOUtil.close(in);
+            closeQuietly(in);
         }
 
         logger.info("High-latency transfer done in " + (System.currentTimeMillis() - start) + "ms");
+    }
+
+    private static void closeQuietly(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException e) {
+                // ignore
+            }
+        }
     }
 }

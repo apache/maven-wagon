@@ -64,9 +64,9 @@ public class KnownHostEntry {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((hostName == null) ? 0 : hostName.hashCode());
-        result = prime * result + ((keyType == null) ? 0 : keyType.hashCode());
-        result = prime * result + ((keyValue == null) ? 0 : keyValue.hashCode());
+        result = prime * result + (hostName == null ? 0 : hostName.hashCode());
+        result = prime * result + (keyType == null ? 0 : keyType.hashCode());
+        result = prime * result + (keyValue == null ? 0 : keyValue.hashCode());
         return result;
     }
 

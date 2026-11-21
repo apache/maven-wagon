@@ -87,7 +87,7 @@ public class WebDavWagonTest extends HttpWagonTestCase {
 
     private void assertURL(String userUrl, String expectedUrl) {
         Repository repo = new Repository("test-geturl", userUrl);
-        String actualUrl = (new WebDavWagon()).getURL(repo);
+        String actualUrl = new WebDavWagon().getURL(repo);
         assertEquals(expectedUrl, actualUrl, "WebDavWagon.getURL(" + userUrl + ")");
     }
 
@@ -487,7 +487,7 @@ public class WebDavWagonTest extends HttpWagonTestCase {
     @Override
     protected void verifyWagonExceptionMessage(Exception e, int forStatusCode, String forUrl, String forReasonPhrase) {
         Repository repo = new Repository("test-geturl", forUrl);
-        String expectedMessageUrl = (new WebDavWagon()).getURL(repo);
+        String expectedMessageUrl = new WebDavWagon().getURL(repo);
         super.verifyWagonExceptionMessage(e, forStatusCode, expectedMessageUrl, forReasonPhrase);
     }
 }
