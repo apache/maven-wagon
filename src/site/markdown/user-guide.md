@@ -60,7 +60,7 @@ the `Wagon` component with hint `https`.
 | Module | Role hints (URL schemes) | Implementation |
 | --- | --- | --- |
 | [wagon-file](./wagon-providers/wagon-file/) | `file` | `FileWagon` |
-| [wagon-http](./wagon-providers/wagon-http/) | `http`, `https` | `HttpWagon` (Apache HttpClient 4.5.x) |
+| [wagon-http](./wagon-providers/wagon-http/) | `http`, `https` | `HttpWagon` (Apache HttpClient 5.x) |
 | [wagon-http-lightweight](./wagon-providers/wagon-http-lightweight/) | `http`, `https` | `LightweightHttpWagon`, `LightweightHttpsWagon` (`java.net.HttpURLConnection`) |
 | [wagon-ftp](./wagon-providers/wagon-ftp/) | `ftp`, `ftps`, `ftph` | `FtpWagon`, `FtpsWagon`, `FtpHttpWagon` (Commons Net) |
 | [wagon-ssh](./wagon-providers/wagon-ssh/) | `scp`, `sftp` | `ScpWagon`, `SftpWagon` (JSch) |

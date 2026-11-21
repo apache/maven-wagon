@@ -18,18 +18,17 @@
  */
 package org.apache.maven.wagon.shared.http;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.http.Header;
-import org.apache.http.HttpHost;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.message.BasicHeader;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.message.BasicHeader;
 
 /**
  * Configuration helper class
@@ -58,10 +57,10 @@ public class ConfigurationUtils {
 
     public static void copyConfig(HttpMethodConfiguration config, RequestConfig.Builder builder) {
         if (config.isConnectionTimeoutSet()) {
-            builder.setConnectTimeout(config.getConnectionTimeout());
+            builder.setConnectTimeout(config.getConnectionTimeout(), TimeUnit.MILLISECONDS);
         }
         if (config.isReadTimeoutSet()) {
-            builder.setSocketTimeout(config.getReadTimeout());
+            builder.setResponseTimeout(config.getReadTimeout(), TimeUnit.MILLISECONDS);
         }
 
         Properties params = config.getParams();
@@ -77,21 +76,22 @@ public class ConfigurationUtils {
                 }
 
                 if (key.equals(SO_TIMEOUT)) {
-                    builder.setSocketTimeout(Integer.parseInt(value));
+                    builder.setResponseTimeout(Integer.parseInt(value), TimeUnit.MILLISECONDS);
                 } else if (key.equals(STALE_CONNECTION_CHECK)) {
-                    builder.setStaleConnectionCheckEnabled(Boolean.valueOf(value));
+                    // HttpClient 5 removed stale connection checking from RequestConfig.
                 } else if (key.equals(CONNECTION_TIMEOUT)) {
-                    builder.setConnectTimeout(Integer.parseInt(value));
+                    builder.setConnectTimeout(Integer.parseInt(value), TimeUnit.MILLISECONDS);
                 } else if (key.equals(USE_EXPECT_CONTINUE)) {
                     builder.setExpectContinueEnabled(Boolean.valueOf(value));
                 } else if (key.equals(DEFAULT_PROXY)) {
-                    builder.setProxy(HttpHost.create(value));
-                } else if (key.equals(LOCAL_ADDRESS)) {
                     try {
-                        builder.setLocalAddress(InetAddress.getByName(value));
-                    } catch (UnknownHostException ignore) {
-                        // ignore
+                        builder.setProxy(HttpHost.create(value));
+                    } catch (java.net.URISyntaxException e) {
+                        throw new IllegalArgumentException("Invalid default proxy: " + value, e);
                     }
+                } else if (key.equals(LOCAL_ADDRESS)) {
+                    // A local bind address is a connection-manager concern in HttpClient 5,
+                    // not a per-request setting, so this legacy parameter is ignored.
                 } else if (key.equals(PROXY_AUTH_PREF)) {
                     builder.setProxyPreferredAuthSchemes(Arrays.asList(value.split(",")));
                 } else if (key.equals(TARGET_AUTH_PREF)) {
@@ -101,7 +101,7 @@ public class ConfigurationUtils {
                 } else if (key.equals(ALLOW_CIRCULAR_REDIRECTS)) {
                     builder.setCircularRedirectsAllowed(Boolean.valueOf(value));
                 } else if (key.equals(CONN_MANAGER_TIMEOUT)) {
-                    builder.setConnectionRequestTimeout(Integer.parseInt(value));
+                    builder.setConnectionRequestTimeout(Integer.parseInt(value), TimeUnit.MILLISECONDS);
                 } else if (key.equals(COOKIE_POLICY)) {
                     builder.setCookieSpec(value);
                 } else if (key.equals(MAX_REDIRECTS)) {
@@ -109,11 +109,11 @@ public class ConfigurationUtils {
                 } else if (key.equals(HANDLE_REDIRECTS)) {
                     builder.setRedirectsEnabled(Boolean.valueOf(value));
                 } else if (key.equals(REJECT_RELATIVE_REDIRECT)) {
-                    builder.setRelativeRedirectsAllowed(!Boolean.valueOf(value));
+                    // HttpClient 5 does not expose relative-redirect control on RequestConfig.
                 } else if (key.equals(HANDLE_CONTENT_COMPRESSION)) {
                     builder.setContentCompressionEnabled(Boolean.valueOf(value));
                 } else if (key.equals(HANDLE_URI_NORMALIZATION)) {
-                    builder.setNormalizeUri(Boolean.valueOf(value));
+                    // HttpClient 5 always normalizes request URIs; no builder option exists.
                 }
             }
         }
