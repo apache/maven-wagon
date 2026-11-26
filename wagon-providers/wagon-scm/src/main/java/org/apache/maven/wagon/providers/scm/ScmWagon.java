@@ -23,6 +23,7 @@ import javax.inject.Named;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,6 +32,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
 
@@ -780,26 +782,40 @@ public class ScmWagon extends AbstractWagon {
                 StandardCopyOption.COPY_ATTRIBUTES);
     }
 
-    /** JDK replacement for {@code FileUtils.copyDirectoryStructure}. */
-    private static void copyDirectoryStructure(final File source, final File target) throws IOException {
+    /**
+     * JDK replacement for {@code FileUtils.copyDirectoryStructure}. Like the original it follows symbolic links to
+     * directories, throws if source and target are the same directory, and silently skips the target when it lies
+     * inside the source instead of copying it into itself.
+     */
+    static void copyDirectoryStructure(final File source, final File target) throws IOException {
         final Path sourcePath = source.toPath();
-        Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                Files.createDirectories(target.toPath().resolve(sourcePath.relativize(dir)));
-                return FileVisitResult.CONTINUE;
-            }
+        final Path targetPath = target.toPath();
+        final Path absoluteSource = sourcePath.toAbsolutePath().normalize();
+        final Path absoluteTarget = targetPath.toAbsolutePath().normalize();
+        if (absoluteSource.equals(absoluteTarget)) {
+            throw new IOException("source and destination are the same directory.");
+        }
+        Files.walkFileTree(
+                sourcePath, EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE, new SimpleFileVisitor<Path>() {
+                    @Override
+                    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                        if (dir.toAbsolutePath().normalize().equals(absoluteTarget)) {
+                            return FileVisitResult.SKIP_SUBTREE;
+                        }
+                        Files.createDirectories(targetPath.resolve(sourcePath.relativize(dir)));
+                        return FileVisitResult.CONTINUE;
+                    }
 
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                Files.copy(
-                        file,
-                        target.toPath().resolve(sourcePath.relativize(file)),
-                        StandardCopyOption.REPLACE_EXISTING,
-                        StandardCopyOption.COPY_ATTRIBUTES);
-                return FileVisitResult.CONTINUE;
-            }
-        });
+                    @Override
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                        Files.copy(
+                                file,
+                                targetPath.resolve(sourcePath.relativize(file)),
+                                StandardCopyOption.REPLACE_EXISTING,
+                                StandardCopyOption.COPY_ATTRIBUTES);
+                        return FileVisitResult.CONTINUE;
+                    }
+                });
     }
 
     /** JDK replacement for {@code FileUtils.deleteDirectory}. */
