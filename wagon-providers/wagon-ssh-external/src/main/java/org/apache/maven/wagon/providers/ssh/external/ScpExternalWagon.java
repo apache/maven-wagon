@@ -22,8 +22,13 @@ import javax.inject.Named;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.StringTokenizer;
 
 import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.CommandExecutionException;
@@ -42,10 +47,6 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.providers.ssh.ScpHelper;
 import org.apache.maven.wagon.repository.RepositoryPermissions;
 import org.apache.maven.wagon.resource.Resource;
-import org.codehaus.plexus.util.StringUtils;
-import org.codehaus.plexus.util.cli.CommandLineException;
-import org.codehaus.plexus.util.cli.CommandLineUtils;
-import org.codehaus.plexus.util.cli.Commandline;
 import org.eclipse.sisu.Typed;
 
 /**
@@ -143,46 +144,49 @@ public class ScpExternalWagon extends AbstractWagon implements CommandExecutor {
         } catch (FileNotFoundException e) {
             throw new CommandExecutionException(e.getMessage(), e);
         }
-        Commandline cl = createBaseCommandLine(putty, sshExecutable, privateKey);
+        ProcessBuilder cl = createBaseCommandLine(putty, sshExecutable, privateKey);
 
         int port =
                 repository.getPort() == WagonConstants.UNKNOWN_PORT ? ScpHelper.DEFAULT_SSH_PORT : repository.getPort();
         if (port != ScpHelper.DEFAULT_SSH_PORT) {
             if (putty) {
-                cl.createArg().setLine("-P " + port);
+                addLine(cl, "-P " + port);
             } else {
-                cl.createArg().setLine("-p " + port);
+                addLine(cl, "-p " + port);
             }
         }
 
         if (sshArgs != null) {
-            cl.createArg().setLine(sshArgs);
+            addLine(cl, sshArgs);
         }
 
         String remoteHost = this.buildRemoteHost();
 
-        cl.createArg().setValue(remoteHost);
+        cl.command().add(remoteHost);
 
-        cl.createArg().setValue(command);
+        cl.command().add(command);
 
-        fireSessionDebug("Executing command: " + cl.toString());
+        fireSessionDebug("Executing command: " + describe(cl));
 
         try {
-            CommandLineUtils.StringStreamConsumer out = new CommandLineUtils.StringStreamConsumer();
-            CommandLineUtils.StringStreamConsumer err = new CommandLineUtils.StringStreamConsumer();
-            int exitCode = CommandLineUtils.executeCommandLine(cl, out, err);
+            StringBuilder out = new StringBuilder();
+            StringBuilder err = new StringBuilder();
+            int exitCode = execute(cl, out, err);
             Streams streams = new Streams();
-            streams.setOut(out.getOutput());
-            streams.setErr(err.getOutput());
+            streams.setOut(out.toString());
+            streams.setErr(err.toString());
             fireSessionDebug(streams.getOut());
             fireSessionDebug(streams.getErr());
             if (exitCode != 0) {
                 if (!ignoreFailures || exitCode == SSH_FATAL_EXIT_CODE) {
-                    throw new CommandExecutionException("Exit code " + exitCode + " - " + err.getOutput());
+                    throw new CommandExecutionException("Exit code " + exitCode + " - " + err);
                 }
             }
             return streams;
-        } catch (CommandLineException e) {
+        } catch (IOException e) {
+            throw new CommandExecutionException("Error executing command line", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new CommandExecutionException("Error executing command line", e);
         }
     }
@@ -192,33 +196,31 @@ public class ScpExternalWagon extends AbstractWagon implements CommandExecutor {
         return exe.contains("plink") || exe.contains("klink");
     }
 
-    private Commandline createBaseCommandLine(boolean putty, String executable, File privateKey) {
-        Commandline cl = new Commandline();
-
-        cl.setExecutable(executable);
+    private ProcessBuilder createBaseCommandLine(boolean putty, String executable, File privateKey) {
+        ProcessBuilder cl = new ProcessBuilder(executable);
 
         if (privateKey != null) {
-            cl.createArg().setValue("-i");
-            cl.createArg().setFile(privateKey);
+            cl.command().add("-i");
+            cl.command().add(privateKey.getPath());
         }
 
         String password = authenticationInfo.getPassword();
         if (putty && password != null) {
-            cl.createArg().setValue("-pw");
-            cl.createArg().setValue(password);
+            cl.command().add("-pw");
+            cl.command().add(password);
         }
 
         // should check interactive flag, but scpexe never works in interactive mode right now due to i/o streams
         if (putty) {
-            cl.createArg().setValue("-batch");
+            cl.command().add("-batch");
         } else {
-            cl.createArg().setValue("-o");
-            cl.createArg().setValue("BatchMode yes");
+            cl.command().add("-o");
+            cl.command().add("BatchMode yes");
         }
         return cl;
     }
 
-    Commandline buildCommandLine(Resource resource, File localFile, boolean put)
+    ProcessBuilder buildCommandLine(Resource resource, File localFile, boolean put)
             throws TransferFailedException, AuthorizationException {
         boolean putty = isPuTTYSCP();
 
@@ -230,7 +232,7 @@ public class ScpExternalWagon extends AbstractWagon implements CommandExecutor {
 
             throw new AuthorizationException(e.getMessage());
         }
-        Commandline cl = createBaseCommandLine(putty, scpExecutable, privateKey);
+        ProcessBuilder cl = createBaseCommandLine(putty, scpExecutable, privateKey);
 
         File parentFile = localFile.getParentFile();
         if (parentFile == null) {
@@ -244,31 +246,31 @@ public class ScpExternalWagon extends AbstractWagon implements CommandExecutor {
             }
         }
         if (parentFile != null) {
-            cl.setWorkingDirectory(parentFile.getAbsolutePath());
+            cl.directory(parentFile);
         }
 
         int port =
                 repository.getPort() == WagonConstants.UNKNOWN_PORT ? ScpHelper.DEFAULT_SSH_PORT : repository.getPort();
         if (port != ScpHelper.DEFAULT_SSH_PORT) {
-            cl.createArg().setLine("-P " + port);
+            addLine(cl, "-P " + port);
         }
 
         if (scpArgs != null) {
-            cl.createArg().setLine(scpArgs);
+            addLine(cl, scpArgs);
         }
 
         String resourceName = normalizeResource(resource);
         String remoteFile = getRepository().getBasedir() + "/" + resourceName;
 
-        remoteFile = StringUtils.replace(remoteFile, " ", "\\ ");
+        remoteFile = remoteFile.replace(" ", "\\ ");
 
         String qualifiedRemoteFile = this.buildRemoteHost() + ":" + remoteFile;
         if (put) {
-            cl.createArg().setValue(localFile.getName());
-            cl.createArg().setValue(qualifiedRemoteFile);
+            cl.command().add(localFile.getName());
+            cl.command().add(qualifiedRemoteFile);
         } else {
-            cl.createArg().setValue(qualifiedRemoteFile);
-            cl.createArg().setValue(localFile.getName());
+            cl.command().add(qualifiedRemoteFile);
+            cl.command().add(localFile.getName());
         }
 
         return cl;
@@ -276,29 +278,147 @@ public class ScpExternalWagon extends AbstractWagon implements CommandExecutor {
 
     private void executeScpCommand(Resource resource, File localFile, boolean put)
             throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
-        Commandline cl = buildCommandLine(resource, localFile, put);
+        ProcessBuilder cl = buildCommandLine(resource, localFile, put);
 
-        fireSessionDebug("Executing command: " + cl.toString());
+        fireSessionDebug("Executing command: " + describe(cl));
 
         try {
-            CommandLineUtils.StringStreamConsumer err = new CommandLineUtils.StringStreamConsumer();
-            int exitCode = CommandLineUtils.executeCommandLine(cl, null, err);
+            StringBuilder err = new StringBuilder();
+            int exitCode = execute(cl, null, err);
             if (exitCode != 0) {
-                if (!put && err.getOutput().trim().toLowerCase(Locale.ENGLISH).contains("no such file or directory")) {
-                    throw new ResourceDoesNotExistException(err.getOutput());
+                String errOutput = err.toString();
+                if (!put && errOutput.trim().toLowerCase(Locale.ENGLISH).contains("no such file or directory")) {
+                    throw new ResourceDoesNotExistException(errOutput);
                 } else {
                     TransferFailedException e =
-                            new TransferFailedException("Exit code: " + exitCode + " - " + err.getOutput());
+                            new TransferFailedException("Exit code: " + exitCode + " - " + errOutput);
 
                     fireTransferError(resource, e, put ? TransferEvent.REQUEST_PUT : TransferEvent.REQUEST_GET);
 
                     throw e;
                 }
             }
-        } catch (CommandLineException e) {
+        } catch (IOException e) {
             fireTransferError(resource, e, put ? TransferEvent.REQUEST_PUT : TransferEvent.REQUEST_GET);
 
             throw new TransferFailedException("Error executing command line", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            fireTransferError(resource, e, put ? TransferEvent.REQUEST_PUT : TransferEvent.REQUEST_GET);
+
+            throw new TransferFailedException("Error executing command line", e);
+        }
+    }
+
+    /** Renders the command line for logging, masking the argument that follows {@code -pw}. */
+    private static String describe(ProcessBuilder commandLine) {
+        List<String> command = commandLine.command();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < command.size(); i++) {
+            if (i > 0) {
+                sb.append(' ');
+            }
+            sb.append(i > 0 && "-pw".equals(command.get(i - 1)) ? "*****" : command.get(i));
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Splits a config string exactly as {@code CommandLineUtils.translateCommandline} did for
+     * {@code Commandline.Argument.setLine}: spaces separate arguments, quotes group them, and backslashes
+     * are ordinary characters. The resulting arguments are appended to the command line.
+     */
+    static void addLine(ProcessBuilder commandLine, String line) {
+        if (line == null || line.isEmpty()) {
+            return;
+        }
+        List<String> tokens = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        int state = 0; // 0 = normal, 1 = inside single quotes, 2 = inside double quotes
+        StringTokenizer tokenizer = new StringTokenizer(line, "'\" ", true);
+        while (tokenizer.hasMoreTokens()) {
+            String token = tokenizer.nextToken();
+            switch (state) {
+                case 1:
+                    if ("'".equals(token)) {
+                        state = 0;
+                    } else {
+                        current.append(token);
+                    }
+                    break;
+                case 2:
+                    if ("\"".equals(token)) {
+                        state = 0;
+                    } else {
+                        current.append(token);
+                    }
+                    break;
+                default:
+                    if ("'".equals(token)) {
+                        state = 1;
+                    } else if ("\"".equals(token)) {
+                        state = 2;
+                    } else if (" ".equals(token)) {
+                        if (current.length() > 0) {
+                            tokens.add(current.toString());
+                            current.setLength(0);
+                        }
+                    } else {
+                        current.append(token);
+                    }
+                    break;
+            }
+        }
+        if (current.length() > 0) {
+            tokens.add(current.toString());
+        }
+        commandLine.command().addAll(tokens);
+    }
+
+    /**
+     * Replaces {@code CommandLineUtils.executeCommandLine}. Both streams are always drained on separate
+     * threads so that a chatty child process cannot block on a full pipe; a {@code null} target discards it.
+     */
+    private static int execute(ProcessBuilder commandLine, StringBuilder out, StringBuilder err)
+            throws IOException, InterruptedException {
+        Process process = commandLine.start();
+        Thread outThread = new StreamConsumer(process.getInputStream(), out).startPump();
+        Thread errThread = new StreamConsumer(process.getErrorStream(), err).startPump();
+        int exitCode = process.waitFor();
+        outThread.join();
+        errThread.join();
+        return exitCode;
+    }
+
+    private static final class StreamConsumer implements Runnable {
+        private final InputStream stream;
+
+        private final StringBuilder target;
+
+        StreamConsumer(InputStream stream, StringBuilder target) {
+            this.stream = stream;
+            this.target = target;
+        }
+
+        Thread startPump() {
+            Thread thread = new Thread(this);
+            thread.start();
+            return thread;
+        }
+
+        @Override
+        public void run() {
+            try (InputStream in = stream) {
+                byte[] buffer = new byte[4096];
+                int read;
+                while ((read = in.read(buffer)) != -1) {
+                    if (target != null) {
+                        target.append(new String(buffer, 0, read, Charset.defaultCharset()));
+                    }
+                }
+            } catch (IOException e) {
+                // ignore
+            }
         }
     }
 
@@ -308,7 +428,7 @@ public class ScpExternalWagon extends AbstractWagon implements CommandExecutor {
     }
 
     private String normalizeResource(Resource resource) {
-        return StringUtils.replace(resource.getName(), "\\", "/");
+        return resource.getName().replace('\\', '/');
     }
 
     public void put(File source, String destination)
@@ -323,11 +443,11 @@ public class ScpExternalWagon extends AbstractWagon implements CommandExecutor {
 
         String basedir = getRepository().getBasedir();
 
-        String resourceName = StringUtils.replace(destination, "\\", "/");
+        String resourceName = destination.replace('\\', '/');
 
         String dir = PathUtils.dirname(resourceName);
 
-        dir = StringUtils.replace(dir, "\\", "/");
+        dir = dir.replace('\\', '/');
 
         String umaskCmd = null;
         if (getRepository().getPermissions() != null) {
@@ -383,7 +503,7 @@ public class ScpExternalWagon extends AbstractWagon implements CommandExecutor {
 
     public void get(String resourceName, File destination)
             throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
-        String path = StringUtils.replace(resourceName, "\\", "/");
+        String path = resourceName.replace('\\', '/');
 
         Resource resource = new Resource(path);
 

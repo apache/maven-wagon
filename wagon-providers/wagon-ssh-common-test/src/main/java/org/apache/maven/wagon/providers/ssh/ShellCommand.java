@@ -22,14 +22,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
 import org.apache.sshd.server.channel.ChannelSession;
 import org.apache.sshd.server.command.Command;
-import org.codehaus.plexus.util.cli.CommandLineUtils;
-import org.codehaus.plexus.util.cli.Commandline;
 
 /**
  * @author Olivier Lamy
@@ -77,18 +76,19 @@ public class ShellCommand implements Command {
         File tmpFile = File.createTempFile("wagon", "test-sh");
         tmpFile.deleteOnExit();
         int exitValue = 0;
-        CommandLineUtils.StringStreamConsumer stderr = new CommandLineUtils.StringStreamConsumer();
-        CommandLineUtils.StringStreamConsumer stdout = new CommandLineUtils.StringStreamConsumer();
+        StringConsumer stderr = new StringConsumer();
+        StringConsumer stdout = new StringConsumer();
         try {
             // hackish default commandline tools do not support ; or && so write a file with the script
             // and "/bin/sh -e " + tmpFile.getPath();
             Files.write(tmpFile.toPath(), commandLine.getBytes());
 
-            Commandline cl = new Commandline();
-            cl.setExecutable("/bin/sh");
-            cl.createArg().setFile(tmpFile);
-
-            exitValue = CommandLineUtils.executeCommandLine(cl, stdout, stderr);
+            Process process = new ProcessBuilder("/bin/sh", tmpFile.getPath()).start();
+            Thread outPump = stdout.pump(process.getInputStream());
+            Thread errPump = stderr.pump(process.getErrorStream());
+            exitValue = process.waitFor();
+            outPump.join();
+            errPump.join();
             System.out.println("exit value " + exitValue);
         } catch (Exception e) {
             exitValue = ERROR;
@@ -117,6 +117,37 @@ public class ShellCommand implements Command {
             f.delete();
         } catch (Exception e) {
             // ignore
+        }
+    }
+
+    /**
+     * Drains a process stream into a string, the way {@code CommandLineUtils.StringStreamConsumer} did.
+     * A separate thread per stream avoids filling the pipe buffer and deadlocking the child process.
+     */
+    private static final class StringConsumer {
+        private final StringBuilder output = new StringBuilder();
+
+        Thread pump(final InputStream stream) {
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try (InputStream in = stream) {
+                        byte[] buffer = new byte[4096];
+                        int read;
+                        while ((read = in.read(buffer)) != -1) {
+                            output.append(new String(buffer, 0, read, Charset.defaultCharset()));
+                        }
+                    } catch (IOException e) {
+                        // ignore
+                    }
+                }
+            });
+            thread.start();
+            return thread;
+        }
+
+        String getOutput() {
+            return output.toString();
         }
     }
 }

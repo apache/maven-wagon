@@ -45,14 +45,14 @@ under the License.
       <scope>compile</scope>
     </dependency>
     <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-xml</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
       <classifier>classes</classifier>
       <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-utils</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.wagon</groupId>
@@ -89,7 +89,6 @@ under the License.
     <dependency>
       <groupId>org.apache.mina</groupId>
       <artifactId>mina-core</artifactId>
-      <version>2.2.10</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

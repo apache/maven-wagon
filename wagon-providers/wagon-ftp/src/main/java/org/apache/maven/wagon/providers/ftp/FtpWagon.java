@@ -417,11 +417,11 @@ public class FtpWagon extends StreamWagon {
             String filename = PathUtils.filename(resource.getName());
             int status = ftp.stat(filename);
 
-            return ((status == FTPReply.FILE_STATUS)
+            return (status == FTPReply.FILE_STATUS)
                     || (status == FTPReply.DIRECTORY_STATUS)
                     || (status == FTPReply.FILE_STATUS_OK) // not in the RFC but used by some FTP servers
                     || (status == FTPReply.COMMAND_OK) // not in the RFC but used by some FTP servers
-                    || (status == FTPReply.SYSTEM_STATUS));
+                    || (status == FTPReply.SYSTEM_STATUS);
         } catch (IOException e) {
             throw new TransferFailedException("Error transferring file via FTP", e);
         } catch (ResourceDoesNotExistException e) {

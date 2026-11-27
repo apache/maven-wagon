@@ -32,6 +32,7 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.http.HttpWagonTestCase;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -85,19 +86,21 @@ public class LightweightHttpWagonTest extends HttpWagonTestCase {
 
         assertNotNull(e);
         try {
-            assertTrue(e instanceof WagonException, "only verify instances of WagonException");
+            assertInstanceOf(WagonException.class, e, "only verify instances of WagonException");
 
             String assertMessageForBadMessage = "exception message not described properly: ";
             switch (forStatusCode) {
                 case HttpServletResponse.SC_GONE:
                 case HttpServletResponse.SC_NOT_FOUND:
-                    assertTrue(
-                            e instanceof ResourceDoesNotExistException,
+                    assertInstanceOf(
+                            ResourceDoesNotExistException.class,
+                            e,
                             "404 or 410 should throw ResourceDoesNotExistException");
 
                     if (e.getCause() != null) {
-                        assertTrue(
-                                e.getCause() instanceof FileNotFoundException,
+                        assertInstanceOf(
+                                FileNotFoundException.class,
+                                e.getCause(),
                                 "ResourceDoesNotExistException should have the expected cause");
                         // the status code and reason phrase cannot always be learned due to implementation limitations
                         // which means the message may not include them
@@ -112,11 +115,11 @@ public class LightweightHttpWagonTest extends HttpWagonTestCase {
                     break;
 
                 case HttpServletResponse.SC_FORBIDDEN:
-                    assertTrue(e instanceof AuthorizationException, "403 Forbidden throws AuthorizationException");
+                    assertInstanceOf(AuthorizationException.class, e, "403 Forbidden throws AuthorizationException");
 
                     assertEquals(
                             "authorization failed for " + forUrl + ", status: 403"
-                                    + ((forReasonPhrase == null || forReasonPhrase.isEmpty())
+                                    + (forReasonPhrase == null || forReasonPhrase.isEmpty()
                                             ? " Forbidden"
                                             : (" " + forReasonPhrase)),
                             e.getMessage(),
@@ -124,11 +127,11 @@ public class LightweightHttpWagonTest extends HttpWagonTestCase {
                     break;
 
                 case HttpServletResponse.SC_UNAUTHORIZED:
-                    assertTrue(e instanceof AuthorizationException, "401 Unauthorized throws AuthorizationException");
+                    assertInstanceOf(AuthorizationException.class, e, "401 Unauthorized throws AuthorizationException");
 
                     assertEquals(
                             "authentication failed for " + forUrl + ", status: 401"
-                                    + ((forReasonPhrase == null || forReasonPhrase.isEmpty())
+                                    + (forReasonPhrase == null || forReasonPhrase.isEmpty()
                                             ? " Unauthorized"
                                             : (" " + forReasonPhrase)),
                             e.getMessage(),
@@ -136,16 +139,17 @@ public class LightweightHttpWagonTest extends HttpWagonTestCase {
                     break;
 
                 default:
-                    assertTrue(
-                            e instanceof TransferFailedException, "general exception must be TransferFailedException");
+                    assertInstanceOf(
+                            TransferFailedException.class, e, "general exception must be TransferFailedException");
                     assertTrue(
                             forStatusCode >= HttpServletResponse.SC_BAD_REQUEST,
                             "expected status code for transfer failures should be >= 400, but none of "
                                     + " the already handled codes");
 
                     if (e.getCause() != null) {
-                        assertTrue(
-                                e.getCause() instanceof IOException,
+                        assertInstanceOf(
+                                IOException.class,
+                                e.getCause(),
                                 "TransferFailedException should have the original cause for diagnosis");
                     }
 

@@ -28,8 +28,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
-import org.codehaus.plexus.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +49,7 @@ public class AuthSnoopFilter implements Filter {
         if (authHeader != null) {
             logger.info("Authorization: " + authHeader);
             String data = authHeader.substring("BASIC ".length());
-            String decoded = new String(Base64.decodeBase64(data.getBytes(StandardCharsets.US_ASCII)));
+            String decoded = new String(Base64.getMimeDecoder().decode(data.getBytes(StandardCharsets.US_ASCII)));
             logger.info(decoded);
             String[] creds = decoded.split(":");
 
