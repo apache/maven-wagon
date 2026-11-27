@@ -56,6 +56,8 @@ Since version 3.2, the retry handler can be configured with system properties:
 - `maven.wagon.http.retryHandler.count` = number of retries for `default` or `standard` implementations.
 - `maven.wagon.http.retryHandler.nonRetryableClasses` = a comma-separated list of fully qualified class names bypassing the retries (only the `default` implementation). If not set, the default value from [`DefaultHttpRequestRetryHandler`](https://hc.apache.org/httpcomponents-client-5.6.x/current/httpclient5/apidocs/org/apache/hc/client5/http/impl/classic/DefaultHttpRequestRetryHandler.html) will be used.
 
+The `maven.wagon.http.serviceUnavailableRetryStrategy.*` properties supported before the move to Apache HttpComponents 5 have no effect any more; a warning is logged when one is set.
+
 <dl>
 <dt>Attention</dt>
 <dd>Any retry handler can only react to exceptions when executing the request and receiving the response head. It will <i>not</i> salvage in-flight failures of ongoing response body streams.</dd>

@@ -111,6 +111,7 @@ import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 import org.apache.maven.wagon.resource.Resource;
+import org.slf4j.LoggerFactory;
 
 import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatAuthorizationMessage;
 import static org.apache.maven.wagon.shared.http.HttpMessageUtils.formatResourceDoesNotExistMessage;
@@ -491,6 +492,21 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
     // NOTE: HttpClient 5 has no ServiceUnavailableRetryStrategy. The wagon properties
     // maven.wagon.http.serviceUnavailableRetryStrategy.* therefore no longer have an effect
     // on this provider. This is an unavoidable functional break of the 4.x -> 5.x migration.
+
+    static {
+        for (String name : new String[] {
+            "maven.wagon.http.serviceUnavailableRetryStrategy.class",
+            "maven.wagon.http.serviceUnavailableRetryStrategy.retryInterval",
+            "maven.wagon.http.serviceUnavailableRetryStrategy.maxRetries"
+        }) {
+            if (System.getProperty(name) != null) {
+                LoggerFactory.getLogger(AbstractHttpClientWagon.class)
+                        .warn(
+                                "System property {} is ignored: HttpClient 5 has no service unavailable retry strategy",
+                                name);
+            }
+        }
+    }
 
     private static Registry<AuthSchemeFactory> createAuthSchemeRegistry() {
         return RegistryBuilder.<AuthSchemeFactory>create()
