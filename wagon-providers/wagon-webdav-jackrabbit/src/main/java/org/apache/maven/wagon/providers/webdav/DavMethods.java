@@ -18,12 +18,12 @@
  */
 package org.apache.maven.wagon.providers.webdav;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 
 /**
  * The handful of WebDAV requests this Wagon issues.
@@ -62,14 +62,9 @@ final class DavMethods {
      * MKCOL request, creating a single collection. The parent collection must already exist, so
      * callers deploying a nested path have to walk it from the top down.
      */
-    static final class HttpMkcol extends HttpRequestBase {
+    static final class HttpMkcol extends HttpUriRequestBase {
         HttpMkcol(String uri) {
-            setURI(java.net.URI.create(uri));
-        }
-
-        @Override
-        public String getMethod() {
-            return "MKCOL";
+            super("MKCOL", URI.create(uri));
         }
     }
 
@@ -79,9 +74,9 @@ final class DavMethods {
      * The response is a {@code 207 Multi-Status} document; hand it to
      * {@link MultiStatus#parse} to read it.
      */
-    static final class HttpPropfind extends HttpEntityEnclosingRequestBase {
+    static final class HttpPropfind extends HttpUriRequestBase {
         HttpPropfind(String uri, String propertyName, int depth) {
-            setURI(java.net.URI.create(uri));
+            super("PROPFIND", URI.create(uri));
             setHeader("Depth", String.valueOf(depth));
             setEntity(new StringEntity(
                     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
@@ -89,11 +84,6 @@ final class DavMethods {
                             + "<D:prop><D:" + propertyName + "/></D:prop>"
                             + "</D:propfind>",
                     ContentType.create("application/xml", StandardCharsets.UTF_8)));
-        }
-
-        @Override
-        public String getMethod() {
-            return "PROPFIND";
         }
     }
 }

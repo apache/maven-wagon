@@ -18,7 +18,7 @@
  */
 package org.apache.maven.wagon.providers.http;
 
-import org.apache.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.maven.wagon.shared.http.BasicAuthScope;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +37,7 @@ public class BasicAuthScopeTest {
         AuthScope authScope = scope.getScope("original.host.com", 3456);
         assertEquals("original.host.com", authScope.getHost());
         assertEquals(3456, authScope.getPort());
-        assertEquals(AuthScope.ANY_REALM, authScope.getRealm());
+        assertEquals(null, authScope.getRealm());
     }
 
     /**
@@ -65,9 +65,9 @@ public class BasicAuthScopeTest {
         scope.setPort("ANY");
         scope.setRealm("ANY");
         AuthScope authScope = scope.getScope("original.host.com", 3456);
-        assertEquals(AuthScope.ANY_HOST, authScope.getHost());
-        assertEquals(AuthScope.ANY_PORT, authScope.getPort());
-        assertEquals(AuthScope.ANY_REALM, authScope.getRealm());
+        assertEquals(null, authScope.getHost());
+        assertEquals(-1, authScope.getPort());
+        assertEquals(null, authScope.getRealm());
     }
 
     /**
@@ -84,7 +84,7 @@ public class BasicAuthScopeTest {
     }
 
     /**
-     * Test AuthScope override with realm="ANY" only, which should result in AuthScope.ANY_REALM.
+     * Test AuthScope override with realm="ANY" only, which should result in null.
      */
     @Test
     public void testGetScopeRealmAnyOnly() {
@@ -93,7 +93,7 @@ public class BasicAuthScopeTest {
         AuthScope authScope = scope.getScope("original.host.com", 3456);
         assertEquals("original.host.com", authScope.getHost());
         assertEquals(3456, authScope.getPort());
-        assertEquals(AuthScope.ANY_REALM, authScope.getRealm());
+        assertEquals(null, authScope.getRealm());
     }
 
     /**
@@ -103,6 +103,6 @@ public class BasicAuthScopeTest {
     public void testGetScopeOriginalPortIsNegativeOne() {
         BasicAuthScope scope = new BasicAuthScope();
         AuthScope authScope = scope.getScope("original.host.com", -1);
-        assertEquals(AuthScope.ANY_PORT, authScope.getPort());
+        assertEquals(-1, authScope.getPort());
     }
 }

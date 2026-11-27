@@ -18,16 +18,24 @@
  */
 package org.apache.maven.wagon.shared.http;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpCoreContext;
+import org.apache.hc.client5.http.HttpRoute;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.EntityDetails;
+import org.apache.hc.core5.http.HttpException;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.HttpRequest;
+import org.apache.hc.core5.http.HttpRequestInterceptor;
+import org.apache.hc.core5.http.message.HeaderGroup;
+import org.apache.hc.core5.http.protocol.HttpContext;
+import org.apache.hc.core5.net.URIAuthority;
 
 /**
  * Removes the headers configured for a repository from requests that are not sent to that repository's origin.
@@ -51,7 +59,8 @@ public class OriginScopedHeadersInterceptor implements HttpRequestInterceptor {
     public static final String HEADER_NAMES = OriginScopedHeadersInterceptor.class.getName() + ".headerNames";
 
     @Override
-    public void process(HttpRequest request, HttpContext context) {
+    public void process(HttpRequest request, EntityDetails entity, HttpContext context)
+            throws HttpException, IOException {
         if (context == null) {
             return;
         }
@@ -60,15 +69,43 @@ public class OriginScopedHeadersInterceptor implements HttpRequestInterceptor {
             return;
         }
         Object origin = context.getAttribute(ORIGIN);
-        Object target = context.getAttribute(HttpCoreContext.HTTP_TARGET_HOST);
-        if (origin instanceof HttpHost
-                && target instanceof HttpHost
-                && isSameOrigin((HttpHost) origin, (HttpHost) target)) {
+        HttpHost target = targetHost(request, context);
+        if (origin instanceof HttpHost && target != null && isSameOrigin((HttpHost) origin, target)) {
             return;
         }
-        for (String headerName : headerNames) {
-            request.removeHeaders(headerName);
+        if (request instanceof HeaderGroup) {
+            HeaderGroup headers = (HeaderGroup) request;
+            for (String headerName : headerNames) {
+                headers.removeHeaders(headerName);
+            }
         }
+    }
+
+    /**
+     * HttpClient 5 no longer publishes the target host as a context attribute. The route set by the client is
+     * authoritative; an absolute request URI is used as a fallback for callers that invoke the interceptor directly.
+     */
+    private static HttpHost targetHost(HttpRequest request, HttpContext context) {
+        // ProtocolExec sets the scheme and authority on the outgoing request before the
+        // request interceptors run; that is the authoritative target in HttpClient 5.
+        URIAuthority authority = request.getAuthority();
+        if (authority != null && authority.getHostName() != null) {
+            String scheme = request.getScheme() != null ? request.getScheme() : "http";
+            return new HttpHost(scheme, authority.getHostName(), authority.getPort());
+        }
+        Object route = context.getAttribute(HttpClientContext.HTTP_ROUTE);
+        if (route instanceof HttpRoute) {
+            return ((HttpRoute) route).getTargetHost();
+        }
+        try {
+            URI uri = request.getUri();
+            if (uri != null && uri.isAbsolute() && uri.getHost() != null) {
+                return new HttpHost(uri.getScheme(), uri.getHost(), uri.getPort());
+            }
+        } catch (URISyntaxException e) {
+            // an unknown target means the headers must be dropped
+        }
+        return null;
     }
 
     private static Set<String> headerNames(Object attribute) {
