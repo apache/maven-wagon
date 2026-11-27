@@ -158,8 +158,9 @@ public abstract class AbstractHttpClientWagon extends StreamWagon {
             } else if (isPutExpectContinueEnabled()) {
                 // With Expect: 100-continue the server may answer before the body is sent.
                 // HttpClient 5 only replays a repeatable entity on a redirect/401, so buffer
-                // the stream to preserve Wagon 4.x behaviour in that case. When expect-continue
-                // is disabled the old Wagon could not replay either, and the TCK expects failure.
+                // the stream to preserve the HttpClient 4 based wagon behaviour in that case. When
+                // expect-continue is disabled the old Wagon could not replay either, and the TCK
+                // expects failure.
                 try {
                     Path buffer = Files.createTempFile("wagon-http-put-", ".tmp");
                     Files.copy(stream, buffer, StandardCopyOption.REPLACE_EXISTING);

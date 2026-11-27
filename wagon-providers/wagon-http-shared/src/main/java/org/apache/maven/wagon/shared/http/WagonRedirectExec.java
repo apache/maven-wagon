@@ -32,8 +32,8 @@ import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.Method;
 
 /**
- * HttpClient 5 follows RFC 9110 and converts a PUT into a GET on a 303 response. Wagon 4.x
- * replayed the PUT (and its body) at the redirect location, which is what the TCK and existing
+ * HttpClient 5 follows RFC 9110 and converts a PUT into a GET on a 303 response. The HttpClient 4 based
+ * wagon replayed the PUT (and its body) at the redirect location, which is what the TCK and existing
  * users expect. Wrap the stock redirect handler and present such responses as 307 so the method
  * and the repeatable entity are preserved.
  */
