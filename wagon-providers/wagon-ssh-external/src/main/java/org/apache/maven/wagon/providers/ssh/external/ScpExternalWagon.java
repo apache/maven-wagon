@@ -166,7 +166,7 @@ public class ScpExternalWagon extends AbstractWagon implements CommandExecutor {
 
         cl.command().add(command);
 
-        fireSessionDebug("Executing command: " + cl.toString());
+        fireSessionDebug("Executing command: " + describe(cl));
 
         try {
             StringBuilder out = new StringBuilder();
@@ -280,7 +280,7 @@ public class ScpExternalWagon extends AbstractWagon implements CommandExecutor {
             throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
         ProcessBuilder cl = buildCommandLine(resource, localFile, put);
 
-        fireSessionDebug("Executing command: " + cl.toString());
+        fireSessionDebug("Executing command: " + describe(cl));
 
         try {
             StringBuilder err = new StringBuilder();
@@ -310,12 +310,25 @@ public class ScpExternalWagon extends AbstractWagon implements CommandExecutor {
         }
     }
 
+    /** Renders the command line for logging, masking the argument that follows {@code -pw}. */
+    private static String describe(ProcessBuilder commandLine) {
+        List<String> command = commandLine.command();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < command.size(); i++) {
+            if (i > 0) {
+                sb.append(' ');
+            }
+            sb.append(i > 0 && "-pw".equals(command.get(i - 1)) ? "*****" : command.get(i));
+        }
+        return sb.toString();
+    }
+
     /**
      * Splits a config string exactly as {@code CommandLineUtils.translateCommandline} did for
      * {@code Commandline.Argument.setLine}: spaces separate arguments, quotes group them, and backslashes
      * are ordinary characters. The resulting arguments are appended to the command line.
      */
-    private static void addLine(ProcessBuilder commandLine, String line) {
+    static void addLine(ProcessBuilder commandLine, String line) {
         if (line == null || line.isEmpty()) {
             return;
         }
