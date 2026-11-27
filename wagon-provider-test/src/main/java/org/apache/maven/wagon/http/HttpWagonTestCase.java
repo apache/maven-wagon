@@ -1188,7 +1188,9 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
             try {
                 wagon.getToStream("test-proxied-resource", new ByteArrayOutputStream());
 
-                assertTrue(handler.headers.containsKey("Proxy-Connection"));
+                // HttpClient 5 no longer sends the deprecated Proxy-Connection header.
+                // Assert that the request actually reached the proxy instead.
+                assertFalse(handler.handlerRequestResponses.isEmpty());
             } finally {
                 System.setProperty("http.proxyHost", "");
                 System.setProperty("http.proxyPort", "");
@@ -1242,7 +1244,9 @@ public abstract class HttpWagonTestCase extends StreamingWagonTestCase {
             try {
                 wagon.getToStream("test-proxied-resource", new ByteArrayOutputStream());
 
-                assertTrue(handler.headers.containsKey("Proxy-Connection"));
+                // HttpClient 5 no longer sends the deprecated Proxy-Connection header.
+                // Assert that the request actually reached the proxy instead.
+                assertFalse(handler.handlerRequestResponses.isEmpty());
             } finally {
                 System.setProperty("http.proxyHost", "");
                 System.setProperty("http.proxyPort", "");

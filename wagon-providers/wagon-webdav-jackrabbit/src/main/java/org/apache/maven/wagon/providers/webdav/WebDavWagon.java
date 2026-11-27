@@ -26,11 +26,11 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpException;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpException;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.maven.wagon.PathUtils;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
@@ -161,11 +161,11 @@ public class WebDavWagon extends AbstractHttpClientWagon {
     int doMkCol(String url) throws IOException {
         DavMethods.HttpMkcol method = new DavMethods.HttpMkcol(url);
         try (CloseableHttpResponse closeableHttpResponse = execute(method)) {
-            return closeableHttpResponse.getStatusLine().getStatusCode();
+            return closeableHttpResponse.getCode();
         } catch (HttpException e) {
             throw new IOException(e.getMessage(), e);
         } finally {
-            method.releaseConnection();
+            method.reset();
         }
     }
 
@@ -203,10 +203,8 @@ public class WebDavWagon extends AbstractHttpClientWagon {
         } catch (HttpException e) {
             throw new IOException(e.getMessage(), e);
         } finally {
-            // TODO olamy: not sure we still need this!!
-            if (method != null) {
-                method.releaseConnection();
-            }
+            // HttpClient 5 releases the connection when the response is closed;
+            // resetting the request here would abort the socket before the body is consumed.
             if (closeableHttpResponse != null) {
                 closeableHttpResponse.close();
             }
@@ -249,8 +247,8 @@ public class WebDavWagon extends AbstractHttpClientWagon {
                     return dirs;
                 }
 
-                int statusCode = closeableHttpResponse.getStatusLine().getStatusCode();
-                String reasonPhrase = closeableHttpResponse.getStatusLine().getReasonPhrase();
+                int statusCode = closeableHttpResponse.getCode();
+                String reasonPhrase = closeableHttpResponse.getReasonPhrase();
                 if (statusCode == HttpStatus.SC_NOT_FOUND || statusCode == HttpStatus.SC_GONE) {
                     EntityUtils.consumeQuietly(closeableHttpResponse.getEntity());
                     throw new ResourceDoesNotExistException(
@@ -262,10 +260,6 @@ public class WebDavWagon extends AbstractHttpClientWagon {
         } catch (IOException e) {
             throw new TransferFailedException(e.getMessage(), e);
         } finally {
-            // TODO olamy: not sure we still need this!!
-            if (method != null) {
-                method.releaseConnection();
-            }
             if (closeableHttpResponse != null) {
                 try {
                     closeableHttpResponse.close();
@@ -289,7 +283,7 @@ public class WebDavWagon extends AbstractHttpClientWagon {
      *     cannot be parsed
      */
     private static List<MultiStatus.Response> readMultiStatus(CloseableHttpResponse response) throws IOException {
-        if (response.getStatusLine().getStatusCode() != HttpStatus.SC_MULTI_STATUS) {
+        if (response.getCode() != HttpStatus.SC_MULTI_STATUS) {
             return null;
         }
         HttpEntity entity = response.getEntity();

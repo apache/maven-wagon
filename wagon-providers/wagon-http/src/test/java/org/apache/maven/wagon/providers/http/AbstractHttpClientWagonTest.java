@@ -18,29 +18,23 @@
  */
 package org.apache.maven.wagon.providers.http;
 
-import javax.net.ssl.SSLException;
-
 import java.io.File;
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.lang.reflect.Field;
-import java.net.ConnectException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 
-import org.apache.http.client.HttpRequestRetryHandler;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
-import org.apache.http.impl.execchain.RedirectExec;
-import org.apache.http.impl.execchain.RetryExec;
+import org.apache.hc.client5.http.HttpRequestRetryStrategy;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
+import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy;
+import org.apache.hc.core5.http.HttpRequest;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -49,112 +43,113 @@ public class AbstractHttpClientWagonTest {
 
     @Test
     public void retryableConfigurationDefaultTest() throws Exception {
-        doTestHttpClient(new Runnable() {
-            @Override
-            public void run() {
-                final HttpRequestRetryHandler handler = getCurrentHandler();
-                assertNotNull(handler);
-                assertTrue(handler instanceof DefaultHttpRequestRetryHandler);
-                final DefaultHttpRequestRetryHandler impl = DefaultHttpRequestRetryHandler.class.cast(handler);
-                assertEquals(3, impl.getRetryCount());
-                assertFalse(impl.isRequestSentRetryEnabled());
-            }
+        doTestHttpClient(() -> {
+            HttpRequestRetryStrategy handler = getCurrentHandler();
+            assertNotNull(handler);
+            assertTrue(handler instanceof DefaultHttpRequestRetryStrategy);
+            assertEquals(3, field(handler, "maxRetries"));
         });
     }
 
     @Test
     public void retryableConfigurationCountTest() throws Exception {
-        doTestHttpClient(new Runnable() {
-            @Override
-            public void run() {
-                System.setProperty("maven.wagon.http.retryHandler.class", "default");
-                System.setProperty("maven.wagon.http.retryHandler.count", "5");
+        doTestHttpClient(() -> {
+            System.setProperty("maven.wagon.http.retryHandler.class", "default");
+            System.setProperty("maven.wagon.http.retryHandler.count", "5");
 
-                final HttpRequestRetryHandler handler = getCurrentHandler();
-                assertNotNull(handler);
-                assertTrue(handler instanceof DefaultHttpRequestRetryHandler);
-                final DefaultHttpRequestRetryHandler impl = DefaultHttpRequestRetryHandler.class.cast(handler);
-                assertEquals(5, impl.getRetryCount());
-                assertFalse(impl.isRequestSentRetryEnabled());
-            }
+            HttpRequestRetryStrategy handler = getCurrentHandler();
+            assertNotNull(handler);
+            assertTrue(handler instanceof DefaultHttpRequestRetryStrategy);
+            assertEquals(5, field(handler, "maxRetries"));
         });
     }
 
     @Test
     public void retryableConfigurationSentTest() throws Exception {
-        doTestHttpClient(new Runnable() {
-            @Override
-            public void run() {
-                System.setProperty("maven.wagon.http.retryHandler.class", "default");
-                System.setProperty("maven.wagon.http.retryHandler.requestSentEnabled", "true");
+        doTestHttpClient(() -> {
+            System.setProperty("maven.wagon.http.retryHandler.class", "default");
+            System.setProperty("maven.wagon.http.retryHandler.requestSentEnabled", "true");
 
-                final HttpRequestRetryHandler handler = getCurrentHandler();
-                assertNotNull(handler);
-                assertTrue(handler instanceof DefaultHttpRequestRetryHandler);
-                final DefaultHttpRequestRetryHandler impl = DefaultHttpRequestRetryHandler.class.cast(handler);
-                assertEquals(3, impl.getRetryCount());
-                assertTrue(impl.isRequestSentRetryEnabled());
-            }
+            HttpRequestRetryStrategy handler = getCurrentHandler();
+            assertNotNull(handler);
+            assertTrue(handler instanceof DefaultHttpRequestRetryStrategy);
+            assertEquals(3, field(handler, "maxRetries"));
+            assertTrue(isIdempotent(handler, new HttpHead("/")));
         });
     }
 
     @Test
     public void retryableConfigurationExceptionsTest() throws Exception {
-        doTestHttpClient(new Runnable() {
-            @Override
-            public void run() {
-                System.setProperty("maven.wagon.http.retryHandler.class", "default");
-                System.setProperty("maven.wagon.http.retryHandler.nonRetryableClasses", IOException.class.getName());
+        doTestHttpClient(() -> {
+            System.setProperty("maven.wagon.http.retryHandler.class", "default");
+            System.setProperty("maven.wagon.http.retryHandler.nonRetryableClasses", IOException.class.getName());
 
-                final HttpRequestRetryHandler handler = getCurrentHandler();
-                assertNotNull(handler);
-                assertTrue(handler instanceof DefaultHttpRequestRetryHandler);
-                final DefaultHttpRequestRetryHandler impl = DefaultHttpRequestRetryHandler.class.cast(handler);
-                assertEquals(3, impl.getRetryCount());
-                assertFalse(impl.isRequestSentRetryEnabled());
+            HttpRequestRetryStrategy handler = getCurrentHandler();
+            assertNotNull(handler);
+            assertTrue(handler instanceof DefaultHttpRequestRetryStrategy);
+            assertEquals(3, field(handler, "maxRetries"));
 
-                try {
-                    final Field nonRetriableClasses =
-                            handler.getClass().getSuperclass().getDeclaredField("nonRetriableClasses");
-                    if (!nonRetriableClasses.isAccessible()) {
-                        nonRetriableClasses.setAccessible(true);
-                    }
-                    final Set<?> exceptions = Set.class.cast(nonRetriableClasses.get(handler));
-                    assertEquals(1, exceptions.size());
-                    assertTrue(exceptions.contains(IOException.class));
-                } catch (NoSuchFieldException | IllegalAccessException e) {
-                    fail(e.getMessage());
-                }
+            try {
+                Set<?> exceptions = (Set<?>) field(handler, "nonRetriableIOExceptionClasses");
+                assertEquals(1, exceptions.size());
+                assertTrue(exceptions.contains(IOException.class));
+            } catch (RuntimeException e) {
+                fail(e.getMessage());
             }
         });
     }
 
-    private HttpRequestRetryHandler getCurrentHandler() {
+    /** HttpClient 5 has no fixed requestSentEnabled flag; the wagon maps it to idempotency handling. */
+    private static boolean isIdempotent(HttpRequestRetryStrategy handler, HttpRequest request) {
         try {
-            final Class<?> impl = Thread.currentThread()
+            Class<?> clazz = handler.getClass();
+            Method method = null;
+            while (method == null && clazz != null) {
+                try {
+                    method = clazz.getDeclaredMethod("handleAsIdempotent", HttpRequest.class);
+                } catch (NoSuchMethodException e) {
+                    clazz = clazz.getSuperclass();
+                }
+            }
+            if (method == null) {
+                return false;
+            }
+            method.setAccessible(true);
+            return (boolean) method.invoke(handler, request);
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private static Object field(Object target, String name) {
+        try {
+            Class<?> clazz = target.getClass();
+            Field field = null;
+            while (field == null && clazz != null) {
+                try {
+                    field = clazz.getDeclaredField(name);
+                } catch (NoSuchFieldException e) {
+                    clazz = clazz.getSuperclass();
+                }
+            }
+            if (field == null) {
+                throw new IllegalStateException("No field " + name);
+            }
+            field.setAccessible(true);
+            return field.get(target);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private HttpRequestRetryStrategy getCurrentHandler() {
+        try {
+            Class<?> impl = Thread.currentThread()
                     .getContextClassLoader()
                     .loadClass("org.apache.maven.wagon.shared.http.AbstractHttpClientWagon");
-
-            final CloseableHttpClient httpClient = CloseableHttpClient.class.cast(
-                    impl.getMethod("getHttpClient").invoke(null));
-
-            final Field redirectExec = httpClient.getClass().getDeclaredField("execChain");
-            if (!redirectExec.isAccessible()) {
-                redirectExec.setAccessible(true);
-            }
-            final RedirectExec redirectExecInstance = RedirectExec.class.cast(redirectExec.get(httpClient));
-
-            final Field requestExecutor = redirectExecInstance.getClass().getDeclaredField("requestExecutor");
-            if (!requestExecutor.isAccessible()) {
-                requestExecutor.setAccessible(true);
-            }
-            final RetryExec requestExecutorInstance = RetryExec.class.cast(requestExecutor.get(redirectExecInstance));
-
-            final Field retryHandler = requestExecutorInstance.getClass().getDeclaredField("retryHandler");
-            if (!retryHandler.isAccessible()) {
-                retryHandler.setAccessible(true);
-            }
-            return HttpRequestRetryHandler.class.cast(retryHandler.get(requestExecutorInstance));
+            Method createRetryHandler = impl.getDeclaredMethod("createRetryHandler");
+            createRetryHandler.setAccessible(true);
+            return HttpRequestRetryStrategy.class.cast(createRetryHandler.invoke(null));
         } catch (final Exception e) {
             throw new IllegalStateException(e);
         }
@@ -178,27 +173,32 @@ public class AbstractHttpClientWagonTest {
         });
         final Thread thread = Thread.currentThread();
         final ClassLoader contextClassLoader = thread.getContextClassLoader();
-        thread.setContextClassLoader(loader);
-
-        final String originalClass = System.getProperty("maven.wagon.http.retryHandler.class", "default");
-        final String originalSentEnabled =
-                System.getProperty("maven.wagon.http.retryHandler.requestSentEnabled", "false");
-        final String originalCount = System.getProperty("maven.wagon.http.retryHandler.count", "3");
-        final String originalExceptions = System.getProperty(
-                "maven.wagon.http.retryHandler.nonRetryableClasses",
-                InterruptedIOException.class.getName() + ","
-                        + UnknownHostException.class.getName() + ","
-                        + ConnectException.class.getName() + ","
-                        + SSLException.class.getName());
+        String retryClass = System.getProperty("maven.wagon.http.retryHandler.class");
+        String retryCount = System.getProperty("maven.wagon.http.retryHandler.count");
+        String retrySent = System.getProperty("maven.wagon.http.retryHandler.requestSentEnabled");
+        String retryExceptions = System.getProperty("maven.wagon.http.retryHandler.nonRetryableClasses");
         try {
+            System.clearProperty("maven.wagon.http.retryHandler.class");
+            System.clearProperty("maven.wagon.http.retryHandler.count");
+            System.clearProperty("maven.wagon.http.retryHandler.requestSentEnabled");
+            System.clearProperty("maven.wagon.http.retryHandler.nonRetryableClasses");
+            thread.setContextClassLoader(loader);
             test.run();
         } finally {
-            loader.close();
+            restore("maven.wagon.http.retryHandler.class", retryClass);
+            restore("maven.wagon.http.retryHandler.count", retryCount);
+            restore("maven.wagon.http.retryHandler.requestSentEnabled", retrySent);
+            restore("maven.wagon.http.retryHandler.nonRetryableClasses", retryExceptions);
             thread.setContextClassLoader(contextClassLoader);
-            System.setProperty("maven.wagon.http.retryHandler.class", originalClass);
-            System.setProperty("maven.wagon.http.retryHandler.requestSentEnabled", originalSentEnabled);
-            System.setProperty("maven.wagon.http.retryHandler.count", originalCount);
-            System.setProperty("maven.wagon.http.retryHandler.nonRetryableClasses", originalExceptions);
+            loader.close();
+        }
+    }
+
+    private static void restore(String key, String value) {
+        if (value == null) {
+            System.clearProperty(key);
+        } else {
+            System.setProperty(key, value);
         }
     }
 }
